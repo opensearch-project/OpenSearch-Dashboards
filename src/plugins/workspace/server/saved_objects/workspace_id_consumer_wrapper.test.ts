@@ -38,8 +38,15 @@ describe('WorkspaceIdConsumerWrapper', () => {
   describe('create', () => {
     beforeEach(() => {
       mockedClient.create.mockClear();
+      mockedWorkspaceClient.get.mockClear();
+      mockedWorkspaceClient.list.mockClear();
     });
     it(`Should add workspaces parameters when create`, async () => {
+      mockedWorkspaceClient.get.mockImplementationOnce((requestContext, id) => {
+        return {
+          success: true,
+        };
+      });
       await wrapperClient.create('dashboard', {
         name: 'foo',
       });
@@ -68,13 +75,54 @@ describe('WorkspaceIdConsumerWrapper', () => {
 
       expect(mockedClient.create.mock.calls[0][2]?.hasOwnProperty('workspaces')).toEqual(false);
     });
+
+    it(`Should throw error when passing in invalid workspaces`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+
+      mockedWorkspaceClient.list.mockResolvedValueOnce({
+        success: true,
+        result: {
+          workspaces: [
+            {
+              id: 'foo',
+            },
+          ],
+        },
+      });
+
+      expect(
+        mockedWrapperClient.create(
+          'dashboard',
+          {
+            name: 'foo',
+          },
+          { workspaces: ['zoo', 'noo'] }
+        )
+      ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
+      expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
+      expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
+    });
   });
 
   describe('bulkCreate', () => {
     beforeEach(() => {
       mockedClient.bulkCreate.mockClear();
+      mockedWorkspaceClient.get.mockClear();
+      mockedWorkspaceClient.list.mockClear();
     });
     it(`Should add workspaces parameters when bulk create`, async () => {
+      mockedWorkspaceClient.get.mockImplementationOnce((requestContext, id) => {
+        return {
+          success: true,
+        };
+      });
       await wrapperClient.bulkCreate([
         getSavedObject({
           id: 'foo',
@@ -87,6 +135,23 @@ describe('WorkspaceIdConsumerWrapper', () => {
           workspaces: ['foo'],
         }
       );
+    });
+
+    it(`Should throw error when passing in invalid workspaces`, async () => {
+      mockedWorkspaceClient.get.mockImplementationOnce((requestContext, id) => {
+        return {
+          success: false,
+        };
+      });
+      expect(
+        wrapperClient.bulkCreate([
+          getSavedObject({
+            id: 'foo',
+          }),
+        ])
+      ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
+      expect(mockedWorkspaceClient.get).toBeCalledTimes(1);
+      expect(mockedWorkspaceClient.list).toBeCalledTimes(0);
     });
   });
 
@@ -174,7 +239,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
           type: ['dashboard', 'visualization'],
           workspaces: ['foo', 'not-exist'],
         })
-      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces]`);
+      ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
       expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
       expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
     });
