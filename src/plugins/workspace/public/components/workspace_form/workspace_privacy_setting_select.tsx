@@ -42,6 +42,7 @@ export const WorkspacePrivacySettingSelect = ({
           options={options}
           valueOfSelected={selectedPrivacyType}
           onChange={(value) => onSelectedPrivacyTypeChange(value)}
+          data-test-subj="workspacePrivacySettingSelector"
         />
       </EuiFormRow>
       <EuiText size="xs" color="subdued" style={{ paddingLeft: '2px' }}>
