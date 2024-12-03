@@ -18,12 +18,37 @@ jest.mock('./use_index_pattern', () => ({
   useIndexPattern: jest.fn(),
 }));
 
+const mockQuery = {
+  query: 'test query',
+  language: 'test language',
+};
+
+const mockDefaultQuery = {
+  query: 'default query',
+  language: 'default language',
+};
+
 const mockSavedSearch = {
   id: 'test-saved-search',
   title: 'Test Saved Search',
   searchSource: {
     setField: jest.fn(),
-    getField: jest.fn(),
+    getField: jest.fn().mockReturnValue(mockQuery),
+    fetch: jest.fn(),
+    getSearchRequestBody: jest.fn().mockResolvedValue({}),
+    getOwnField: jest.fn(),
+    getDataFrame: jest.fn(() => ({ name: 'test-pattern' })),
+  },
+  getFullPath: jest.fn(),
+  getOpenSearchType: jest.fn(),
+};
+
+const mockSavedSearchEmptyQuery = {
+  id: 'test-saved-search',
+  title: 'Test Saved Search',
+  searchSource: {
+    setField: jest.fn(),
+    getField: jest.fn().mockReturnValue(undefined),
     fetch: jest.fn(),
     getSearchRequestBody: jest.fn().mockResolvedValue({}),
     getOwnField: jest.fn(),
@@ -110,6 +135,48 @@ describe('useSearch', () => {
     });
   });
 
+  it('should initialize with uninitialized state when dataset type config search on page load is disabled', async () => {
+    const services = createMockServices();
+    (services.uiSettings.get as jest.Mock).mockReturnValueOnce(true);
+    (services.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+      meta: { searchOnLoad: false },
+    });
+    (services.data.query.timefilter.timefilter.getRefreshInterval as jest.Mock).mockReturnValue({
+      pause: true,
+      value: 10,
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
+    expect(result.current.data$.getValue()).toEqual(
+      expect.objectContaining({ status: ResultStatus.UNINITIALIZED })
+    );
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+  });
+
+  it('should initialize with uninitialized state when dataset type config search on page load is enabled but the UI setting is disabled', async () => {
+    const services = createMockServices();
+    (services.uiSettings.get as jest.Mock).mockReturnValueOnce(false);
+    (services.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+      meta: { searchOnLoad: true },
+    });
+    (services.data.query.timefilter.timefilter.getRefreshInterval as jest.Mock).mockReturnValue({
+      pause: true,
+      value: 10,
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
+    expect(result.current.data$.getValue()).toEqual(
+      expect.objectContaining({ status: ResultStatus.UNINITIALIZED })
+    );
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+  });
+
   it('should update startTime when hook rerenders', async () => {
     const services = createMockServices();
 
@@ -140,7 +207,19 @@ describe('useSearch', () => {
     });
 
     act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
+    });
+
+    act(() => {
       result.current.data$.next({ status: ResultStatus.READY });
+    });
+
+    act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
     });
 
     expect(result.current.data$.getValue()).toEqual(
@@ -149,13 +228,7 @@ describe('useSearch', () => {
 
     act(() => {
       mockDatasetUpdates$.next({
-        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
-      });
-      mockDatasetUpdates$.next({
-        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
-      });
-      mockDatasetUpdates$.next({
-        dataset: { id: 'new-dataset-id2', title: 'New Dataset', type: 'INDEX_PATTERN' },
+        dataset: { id: 'different-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
       });
     });
 
@@ -164,7 +237,39 @@ describe('useSearch', () => {
     });
 
     expect(result.current.data$.getValue()).toEqual(
-      expect.objectContaining({ status: ResultStatus.LOADING })
+      expect.objectContaining({ status: ResultStatus.LOADING, rows: [] })
     );
+  });
+
+  it('should load saved search', async () => {
+    const services = createMockServices();
+    services.data.query.queryString.setQuery = jest.fn();
+
+    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    expect(services.data.query.queryString.setQuery).toBeCalledWith(mockQuery);
+  });
+
+  it('if no saved search, use get query', async () => {
+    const services = createMockServices();
+    services.getSavedSearchById = jest.fn().mockResolvedValue(mockSavedSearchEmptyQuery);
+    services.data.query.queryString.getQuery = jest.fn().mockReturnValue(mockDefaultQuery);
+    services.data.query.queryString.setQuery = jest.fn();
+
+    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    expect(services.data.query.queryString.setQuery).toBeCalledWith(mockDefaultQuery);
   });
 });

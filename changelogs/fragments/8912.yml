@@ -1,0 +1,2 @@
+fix:
+- Ensure query editor cursor is aligned with text ([#8912](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8912))

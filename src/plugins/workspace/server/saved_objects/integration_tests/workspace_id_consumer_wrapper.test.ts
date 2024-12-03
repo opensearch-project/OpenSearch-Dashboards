@@ -36,6 +36,8 @@ describe('workspace_id_consumer integration test', () => {
   let createdBarWorkspace: WorkspaceAttributes = {
     id: '',
   };
+  const deleteWorkspace = (workspaceId: string) =>
+    osdTestServer.request.delete(root, `/api/workspaces/${workspaceId}`);
   beforeAll(async () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -75,6 +77,10 @@ describe('workspace_id_consumer integration test', () => {
     }).then((resp) => resp.body.result);
   }, 30000);
   afterAll(async () => {
+    await Promise.all([
+      deleteWorkspace(createdFooWorkspace.id),
+      deleteWorkspace(createdBarWorkspace.id),
+    ]);
     await root.shutdown();
     await opensearchServer.stop();
   });
@@ -144,8 +150,33 @@ describe('workspace_id_consumer integration test', () => {
         `/api/saved_objects/${config.type}/${packageInfo.version}`
       );
 
-      // workspaces arrtibutes should not be append
+      // workspaces attributes should not be append
       expect(!getConfigResult.body.workspaces).toEqual(true);
+    });
+
+    it('should return error when create with a not existing workspace', async () => {
+      await clearFooAndBar();
+      const createResultWithNonExistRequestWorkspace = await osdTestServer.request
+        .post(root, `/w/not_exist_workspace_id/api/saved_objects/${dashboard.type}`)
+        .send({
+          attributes: dashboard.attributes,
+        })
+        .expect(400);
+
+      expect(createResultWithNonExistRequestWorkspace.body.message).toEqual(
+        'Exist invalid workspaces'
+      );
+
+      const createResultWithNonExistOptionsWorkspace = await osdTestServer.request
+        .post(root, `/api/saved_objects/${dashboard.type}`)
+        .send({
+          attributes: dashboard.attributes,
+          workspaces: ['not_exist_workspace_id'],
+        })
+        .expect(400);
+      expect(createResultWithNonExistOptionsWorkspace.body.message).toEqual(
+        'Exist invalid workspaces'
+      );
     });
 
     it('bulk create', async () => {
@@ -175,6 +206,37 @@ describe('workspace_id_consumer integration test', () => {
             id: item.id,
           })
         )
+      );
+    });
+
+    it('should return error when bulk create with a not existing workspace', async () => {
+      await clearFooAndBar();
+      const bulkCreateResultWithNonExistRequestWorkspace = await osdTestServer.request
+        .post(root, `/w/not_exist_workspace_id/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(400);
+
+      expect(bulkCreateResultWithNonExistRequestWorkspace.body.message).toEqual(
+        'Exist invalid workspaces'
+      );
+
+      const bulkCreateResultWithNonExistOptionsWorkspace = await osdTestServer.request
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=not_exist_workspace_id`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(400);
+
+      expect(bulkCreateResultWithNonExistOptionsWorkspace.body.message).toEqual(
+        'Exist invalid workspaces'
       );
     });
 
@@ -282,7 +344,7 @@ describe('workspace_id_consumer integration test', () => {
         .get(root, `/w/not_exist_workspace_id/api/saved_objects/_find?type=${dashboard.type}`)
         .expect(400);
 
-      expect(findResult.body.message).toEqual('Invalid workspaces');
+      expect(findResult.body.message).toEqual('Exist invalid workspaces');
     });
 
     it('import within workspace', async () => {
@@ -311,6 +373,154 @@ describe('workspace_id_consumer integration test', () => {
 
       expect(importWithWorkspacesResult.body.success).toEqual(true);
       expect(findResult.body.saved_objects[0].workspaces).toEqual([createdFooWorkspace.id]);
+    });
+
+    it('get', async () => {
+      await clearFooAndBar();
+      await osdTestServer.request.delete(
+        root,
+        `/api/saved_objects/${config.type}/${packageInfo.version}`
+      );
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(200);
+
+      const createResultBar = await osdTestServer.request
+        .post(root, `/w/${createdBarWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'bar',
+          },
+        ])
+        .expect(200);
+
+      await osdTestServer.request
+        .post(root, `/api/saved_objects/${config.type}/${packageInfo.version}`)
+        .send({
+          attributes: {
+            legacyConfig: 'foo',
+          },
+        })
+        .expect(200);
+
+      const getResultWithRequestWorkspace = await osdTestServer.request
+        .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dashboard.type}/foo`)
+        .expect(200);
+      expect(getResultWithRequestWorkspace.body.id).toEqual('foo');
+      expect(getResultWithRequestWorkspace.body.workspaces).toEqual([createdFooWorkspace.id]);
+
+      const getResultWithoutRequestWorkspace = await osdTestServer.request
+        .get(root, `/api/saved_objects/${dashboard.type}/bar`)
+        .expect(200);
+      expect(getResultWithoutRequestWorkspace.body.id).toEqual('bar');
+
+      const getGlobalResultWithinWorkspace = await osdTestServer.request
+        .get(
+          root,
+          `/w/${createdFooWorkspace.id}/api/saved_objects/${config.type}/${packageInfo.version}`
+        )
+        .expect(200);
+      expect(getGlobalResultWithinWorkspace.body.id).toEqual(packageInfo.version);
+
+      await osdTestServer.request
+        .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dashboard.type}/bar`)
+        .expect(403);
+
+      await Promise.all(
+        [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
+          deleteItem({
+            type: item.type,
+            id: item.id,
+          })
+        )
+      );
+      await osdTestServer.request.delete(
+        root,
+        `/api/saved_objects/${config.type}/${packageInfo.version}`
+      );
+    });
+
+    it('bulk get', async () => {
+      await clearFooAndBar();
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(200);
+
+      const createResultBar = await osdTestServer.request
+        .post(root, `/w/${createdBarWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'bar',
+          },
+        ])
+        .expect(200);
+
+      const payload = [
+        { id: 'foo', type: 'dashboard' },
+        { id: 'bar', type: 'dashboard' },
+      ];
+      const bulkGetResultWithWorkspace = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_get`)
+        .send(payload)
+        .expect(200);
+
+      expect(bulkGetResultWithWorkspace.body.saved_objects.length).toEqual(2);
+      expect(bulkGetResultWithWorkspace.body.saved_objects[0].id).toEqual('foo');
+      expect(bulkGetResultWithWorkspace.body.saved_objects[0].workspaces).toEqual([
+        createdFooWorkspace.id,
+      ]);
+      expect(bulkGetResultWithWorkspace.body.saved_objects[0]?.error).toBeUndefined();
+      expect(bulkGetResultWithWorkspace.body.saved_objects[1].id).toEqual('bar');
+      expect(bulkGetResultWithWorkspace.body.saved_objects[1].workspaces).toEqual([
+        createdBarWorkspace.id,
+      ]);
+      expect(bulkGetResultWithWorkspace.body.saved_objects[1]?.error).toMatchInlineSnapshot(`
+        Object {
+          "error": "Forbidden",
+          "message": "Saved object does not belong to the workspace",
+          "statusCode": 403,
+        }
+      `);
+
+      const bulkGetResultWithoutWorkspace = await osdTestServer.request
+        .post(root, `/api/saved_objects/_bulk_get`)
+        .send(payload)
+        .expect(200);
+
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects.length).toEqual(2);
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[0].id).toEqual('foo');
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[0].workspaces).toEqual([
+        createdFooWorkspace.id,
+      ]);
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[0]?.error).toBeUndefined();
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[1].id).toEqual('bar');
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[1].workspaces).toEqual([
+        createdBarWorkspace.id,
+      ]);
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[1]?.error).toBeUndefined();
+
+      await Promise.all(
+        [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
+          deleteItem({
+            type: item.type,
+            id: item.id,
+          })
+        )
+      );
     });
   });
 });
