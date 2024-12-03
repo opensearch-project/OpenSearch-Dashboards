@@ -174,6 +174,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
   // }
 
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
+  const [sampleQueries, setSampleQueries] = useState<any>([]);
 
   useEffect(() => {
     const fetchSavedQueries = async () => {
@@ -186,6 +187,39 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
     fetchSavedQueries();
   }, [setSavedQueries, query, savedQuery]);
 
+  useEffect(() => {
+    // Samples for the language
+    const newSampleQueries: any = [];
+    if (query?.language) {
+      const languageSampleQueries = queryString.getLanguageService()?.getLanguage(query.language)
+        ?.sampleQueries;
+      if (Array.isArray(languageSampleQueries)) {
+        newSampleQueries.push(...languageSampleQueries);
+      }
+    }
+
+    // Samples for the dataset type
+    if (query?.dataset?.type) {
+      const datasetType = queryString.getDatasetService()?.getType(query.dataset.type);
+      if (datasetType?.getSampleQueries) {
+        const sampleQueriesResponse = datasetType.getSampleQueries(query.dataset, query.language);
+        if (Array.isArray(sampleQueriesResponse)) {
+          setSampleQueries([...sampleQueriesResponse, ...newSampleQueries]);
+        } else if (sampleQueriesResponse instanceof Promise) {
+          sampleQueriesResponse
+            .then((datasetSampleQueries: any) => {
+              if (Array.isArray(datasetSampleQueries)) {
+                setSampleQueries([...datasetSampleQueries, ...newSampleQueries]);
+              }
+            })
+            .catch((error: any) => {
+              // noop
+            });
+        }
+      }
+    }
+  }, [queryString, query]);
+
   const tabs = useMemo(() => {
     const buildSampleQueryBlock = (sampleTitle: string, sampleQuery: string) => {
       return (
@@ -197,25 +231,6 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
         </>
       );
     };
-
-    const sampleQueries = [];
-
-    // Samples for the dataset type
-    if (query?.dataset?.type) {
-      const datasetSampleQueries = queryString
-        .getDatasetService()
-        ?.getType(query.dataset.type)
-        ?.getSampleQueries?.(query.dataset, query.language);
-      if (Array.isArray(datasetSampleQueries)) sampleQueries.push(...datasetSampleQueries);
-    }
-
-    // Samples for the language
-    if (query?.language) {
-      const languageSampleQueries = queryString.getLanguageService()?.getLanguage(query.language)
-        ?.sampleQueries;
-      if (Array.isArray(languageSampleQueries)) sampleQueries.push(...languageSampleQueries);
-    }
-
     return [
       ...(sampleQueries.length > 0
         ? [
@@ -229,7 +244,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
                   <EuiSpacer size="s" />
                   {sampleQueries
                     .slice(0, 5)
-                    .map((sampleQuery) =>
+                    .map((sampleQuery: any) =>
                       buildSampleQueryBlock(sampleQuery.title, sampleQuery.query)
                     )}
                 </EuiPanel>
@@ -256,37 +271,41 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
           ]
         : []),
     ];
-  }, [queryString, query, savedQueries]);
+  }, [savedQueries, sampleQueries]);
 
   return (
     <I18nProvider>
-      <EuiEmptyPrompt
-        iconType="editorCodeBlock"
-        iconColor="default"
-        data-test-subj="discoverNoResults"
-        title={
-          <EuiText size="s">
-            <h2>
-              {i18n.translate('discover.emptyPrompt.title', {
-                defaultMessage: 'No Results',
-              })}
-            </h2>
-          </EuiText>
-        }
-        body={
-          <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
-            <p>
-              {i18n.translate('discover.emptyPrompt.body', {
-                defaultMessage:
-                  'Try selecting a different data source, expanding your time range or modifying the query & filters.',
-              })}
-            </p>
-          </EuiText>
-        }
-      />
-      <div className="discoverNoResults-sampleContainer">
-        <EuiTabbedContent tabs={tabs} />
-      </div>
+      <>
+        <EuiEmptyPrompt
+          iconType="editorCodeBlock"
+          iconColor="default"
+          data-test-subj="discoverNoResults"
+          title={
+            <EuiText size="s">
+              <h2>
+                {i18n.translate('discover.emptyPrompt.title', {
+                  defaultMessage: 'No Results',
+                })}
+              </h2>
+            </EuiText>
+          }
+          body={
+            <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
+              <p>
+                {i18n.translate('discover.emptyPrompt.body', {
+                  defaultMessage:
+                    'Try selecting a different data source, expanding your time range or modifying the query & filters.',
+                })}
+              </p>
+            </EuiText>
+          }
+        />
+        {tabs.length && (
+          <div className="discoverNoResults-sampleContainer">
+            <EuiTabbedContent tabs={tabs} />
+          </div>
+        )}
+      </>
     </I18nProvider>
   );
 };

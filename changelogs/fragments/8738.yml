@@ -1,0 +1,2 @@
+fix:
+- [Workspace]Fix error message missed in workspace creator name input ([#8738](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8738))
