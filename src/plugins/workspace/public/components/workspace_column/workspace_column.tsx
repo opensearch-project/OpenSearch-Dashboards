@@ -32,7 +32,7 @@ export function WorkspaceColumn({ coreSetup, workspaces }: WorkspaceColumnProps)
     setShowBadgePopover(false);
   };
 
-  if (workspaceNames) {
+  if (workspaceNames?.length) {
     const displayedWorkspaces = workspaceNames.slice(0, 1);
     const remainingWorkspacesCount = workspaceNames.length - 1;
     return (

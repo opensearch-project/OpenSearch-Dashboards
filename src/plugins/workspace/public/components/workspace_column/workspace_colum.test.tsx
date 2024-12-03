@@ -102,7 +102,9 @@ describe('workspace column in saved objects page', () => {
       <div>
         <div
           class="euiText euiText--small"
-        />
+        >
+          —
+        </div>
       </div>
     `);
   });
