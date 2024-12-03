@@ -25,7 +25,12 @@ import {
 import { FormattedMessage } from 'react-intl';
 import { i18n } from '@osd/i18n';
 
-import { getDataSourcesList, fetchDataSourceConnections } from '../../utils';
+import {
+  getDataSourcesList,
+  getOpenSearchAndDataConnections,
+  fetchDirectQueryConnections,
+  updateFullFillRelatedConnections,
+} from '../../utils';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
@@ -88,42 +93,47 @@ const convertConnectionToOption = ({
   connection,
   selectedConnectionIds,
   logos,
+  isRelatedConnectionsLoaded,
 }: {
   connection: DataSourceConnection;
   selectedConnectionIds: string[];
   logos: Logos;
-}) => ({
-  label: connection.name,
-  key: connection.id,
-  description: connection.description,
-  append:
-    connection.relatedConnections && connection.relatedConnections.length > 0 ? (
+  isRelatedConnectionsLoaded: boolean;
+}) => {
+  return {
+    label: connection.name,
+    key: connection.id,
+    description: connection.description,
+    append: isRelatedConnectionsLoaded ? (
+      connection.relatedConnections && connection.relatedConnections.length > 0 ? (
+        <EuiBadge>
+          {i18n.translate('workspace.form.selectDataSource.optionBadge', {
+            defaultMessage: '+ {relatedConnections} related',
+            values: {
+              relatedConnections: connection.relatedConnections.length,
+            },
+          })}
+        </EuiBadge>
+      ) : undefined
+    ) : (
       <EuiBadge>
-        {i18n.translate('workspace.form.selectDataSource.optionBadge', {
-          defaultMessage: '+ {relatedConnections} related',
-          values: {
-            relatedConnections: connection.relatedConnections.length,
-          },
+        {i18n.translate('workspace.form.selectDataSource.loading', {
+          defaultMessage: 'Loading...',
         })}
       </EuiBadge>
-    ) : undefined,
-  disabled: connection.connectionType === DataSourceConnectionType.DirectQueryConnection,
-  checked:
-    connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
-    selectedConnectionIds.includes(connection.id)
-      ? ('on' as const)
-      : undefined,
-  prepend:
-    connection.connectionType === DataSourceConnectionType.DirectQueryConnection ? (
-      <>
-        <div style={{ width: 16 }} />
-        <ConnectionIcon connection={connection} logos={logos} />
-      </>
-    ) : (
-      <ConnectionIcon connection={connection} logos={logos} />
     ),
-  parentId: connection.parentId,
-});
+
+    disabled: connection.connectionType === DataSourceConnectionType.DirectQueryConnection,
+    checked:
+      connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
+      selectedConnectionIds.includes(connection.id)
+        ? ('on' as const)
+        : undefined,
+    prepend: <ConnectionIcon connection={connection} logos={logos} />,
+
+    parentId: connection.parentId,
+  };
+};
 
 const convertConnectionsToOptions = ({
   connections,
@@ -131,12 +141,14 @@ const convertConnectionsToOptions = ({
   selectedConnectionIds,
   excludedConnectionIds,
   logos,
+  isRelatedConnectionsLoaded,
 }: {
   connections: DataSourceConnection[];
   excludedConnectionIds: string[];
   showDirectQueryConnections: boolean;
   selectedConnectionIds: string[];
   logos: Logos;
+  isRelatedConnectionsLoaded: boolean;
 }) => {
   return connections
     .flatMap((connection) => {
@@ -154,18 +166,28 @@ const convertConnectionsToOptions = ({
         return [];
       }
 
-      if (showDirectQueryConnections) {
-        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-          return [];
+      if (connection.connectionType === DataSourceConnectionType.OpenSearchConnection) {
+        if (showDirectQueryConnections) {
+          if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
+            return [connection];
+          }
+          return [
+            connection,
+            ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
+          ];
         }
-        return [
-          connection,
-          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
-        ];
       }
+
       return [connection];
     })
-    .map((connection) => convertConnectionToOption({ connection, selectedConnectionIds, logos }));
+    .map((connection) =>
+      convertConnectionToOption({
+        connection,
+        selectedConnectionIds,
+        logos,
+        isRelatedConnectionsLoaded,
+      })
+    );
 };
 
 export interface AssociationDataSourceModalProps {
@@ -199,6 +221,7 @@ export const AssociationDataSourceModalContent = ({
 }: AssociationDataSourceModalProps) => {
   const [allConnections, setAllConnections] = useState<DataSourceConnection[]>([]);
   const [selectedConnectionIds, setSelectedConnectionIds] = useState<string[]>([]);
+  const [isRelatedConnectionsLoaded, setIsRelatedConnectionsLoaded] = useState(false);
   const [options, setOptions] = useState<DataSourceModalOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -230,27 +253,56 @@ export const AssociationDataSourceModalContent = ({
 
   useEffect(() => {
     setIsLoading(true);
+    setIsRelatedConnectionsLoaded(false);
     getDataSourcesList(savedObjects.client, ['*'])
-      .then((dataSourcesList) => fetchDataSourceConnections(dataSourcesList, http, notifications))
-      .then((connections) => {
-        setAllConnections(connections);
+      .then((dataSourcesList) => {
+        return getOpenSearchAndDataConnections(dataSourcesList, notifications).then(
+          ({ openSearchConnections, dataConnections }) => {
+            setAllConnections([...openSearchConnections, ...dataConnections]);
+            return { openSearchConnections, dataConnections, dataSourcesList };
+          }
+        );
+      })
+      .then(({ openSearchConnections, dataConnections, dataSourcesList }) => {
+        fetchDirectQueryConnections(dataSourcesList, http, notifications).then(
+          (directQueryConnections) => {
+            const updatedOpenSearchConnections = updateFullFillRelatedConnections(
+              openSearchConnections,
+              directQueryConnections
+            );
+
+            setAllConnections([...updatedOpenSearchConnections, ...dataConnections]);
+            setIsRelatedConnectionsLoaded(true); // related connections are completely loaded
+          }
+        );
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [savedObjects.client, http, notifications, mode]);
+  }, [savedObjects.client, notifications, http]);
 
   useEffect(() => {
-    setOptions(
-      convertConnectionsToOptions({
-        connections: allConnections,
-        excludedConnectionIds,
-        selectedConnectionIds,
-        showDirectQueryConnections: mode === AssociationDataSourceModalMode.DirectQueryConnections,
-        logos,
-      })
-    );
-  }, [allConnections, excludedConnectionIds, selectedConnectionIds, mode, logos]);
+    if (allConnections.length > 0) {
+      setOptions(
+        convertConnectionsToOptions({
+          connections: allConnections,
+          excludedConnectionIds,
+          selectedConnectionIds,
+          showDirectQueryConnections:
+            mode === AssociationDataSourceModalMode.DirectQueryConnections,
+          logos,
+          isRelatedConnectionsLoaded,
+        })
+      );
+    }
+  }, [
+    excludedConnectionIds,
+    selectedConnectionIds,
+    mode,
+    allConnections,
+    logos,
+    isRelatedConnectionsLoaded,
+  ]);
 
   return (
     <>

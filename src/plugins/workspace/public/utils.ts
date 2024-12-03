@@ -539,6 +539,60 @@ export const fetchDataSourceConnections = async (
   }
 };
 
+export const updateFullFillRelatedConnections = (
+  openSearchConnections: DataSourceConnection[],
+  directQueryConnections: DataSourceConnection[]
+): DataSourceConnection[] => {
+  return fulfillRelatedConnections(openSearchConnections, directQueryConnections);
+};
+
+export const fetchDirectQueryConnections = async (
+  dataSources: DataSource[],
+  http: HttpSetup | undefined,
+  notifications: NotificationsStart | undefined
+) => {
+  try {
+    const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
+      // Only data source saved object type needs to fetch data source connections, data connection type object not.
+      dataSources.filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE).map((ds) => ds.id),
+      http
+    );
+
+    return directQueryConnections.sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    notifications?.toasts.addDanger(
+      i18n.translate('workspace.detail.dataSources.error.message', {
+        defaultMessage: 'Cannot fetch direct query connections',
+      })
+    );
+    return [];
+  }
+};
+
+export const getOpenSearchAndDataConnections = async (
+  dataSources: DataSource[] | DataConnection[],
+  notifications: NotificationsStart | undefined
+): Promise<{
+  openSearchConnections: DataSourceConnection[];
+  dataConnections: DataSourceConnection[];
+}> => {
+  try {
+    const {
+      openSearchConnections,
+      dataConnections,
+    } = convertDataSourcesToOpenSearchAndDataConnections(dataSources);
+
+    return { openSearchConnections, dataConnections };
+  } catch (error) {
+    notifications?.toasts.addDanger(
+      i18n.translate('workspace.detail.dataSources.connections.error.message', {
+        defaultMessage: 'Cannot fetch OpenSearch connections and data connections ',
+      })
+    );
+    return { openSearchConnections: [], dataConnections: [] };
+  }
+};
+
 export const getUseCase = (workspace: WorkspaceObject, availableUseCases: WorkspaceUseCase[]) => {
   if (!workspace.features) {
     return;
