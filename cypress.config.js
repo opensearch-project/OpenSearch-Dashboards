@@ -23,6 +23,8 @@ module.exports = defineConfig({
     DATASOURCE_MANAGEMENT_ENABLED: false,
     ML_COMMONS_DASHBOARDS_ENABLED: true,
     WAIT_FOR_LOADER_BUFFER_MS: 0,
+    INDEX_CLUSTER_NAME: 'cypress-test-os',
+    INDEX_NAME: 'vis-builder',
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
