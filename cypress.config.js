@@ -25,6 +25,7 @@ module.exports = defineConfig({
     WAIT_FOR_LOADER_BUFFER_MS: 0,
     INDEX_CLUSTER_NAME: 'cypress-test-os',
     INDEX_NAME: 'vis-builder',
+    INDEX_PATTERN_NAME: 'cypress-test-os::vis-builder*',
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
