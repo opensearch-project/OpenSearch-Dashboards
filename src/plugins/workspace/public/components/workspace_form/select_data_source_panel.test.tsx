@@ -58,11 +58,11 @@ const dataSources = [
   },
 ];
 
+jest
+  .spyOn(utils, 'getOpenSearchAndDataConnections')
+  .mockReturnValue({ openSearchConnections: [...dataSourceConnectionsMock], dataConnections: [] });
+
 jest.spyOn(utils, 'getDataSourcesList').mockResolvedValue(dataSources);
-jest.spyOn(utils, 'getOpenSearchAndDataConnections').mockResolvedValue({
-  openSearchConnections: [...dataSourceConnectionsMock],
-  dataConnections: [],
-});
 
 jest
   .spyOn(utils, 'updateFullFillRelatedConnections')

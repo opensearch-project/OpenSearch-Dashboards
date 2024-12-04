@@ -169,6 +169,7 @@ const convertConnectionsToOptions = ({
       if (connection.connectionType === DataSourceConnectionType.OpenSearchConnection) {
         if (showDirectQueryConnections) {
           if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
+            // return [connection] for the case where the connnection has no direct connections for now, but it may have in the future
             return [connection];
           }
           return [
@@ -253,15 +254,13 @@ export const AssociationDataSourceModalContent = ({
 
   useEffect(() => {
     setIsLoading(true);
-    setIsRelatedConnectionsLoaded(false);
     getDataSourcesList(savedObjects.client, ['*'])
       .then((dataSourcesList) => {
-        return getOpenSearchAndDataConnections(dataSourcesList, notifications).then(
-          ({ openSearchConnections, dataConnections }) => {
-            setAllConnections([...openSearchConnections, ...dataConnections]);
-            return { openSearchConnections, dataConnections, dataSourcesList };
-          }
+        const { openSearchConnections, dataConnections } = getOpenSearchAndDataConnections(
+          dataSourcesList
         );
+        setAllConnections([...openSearchConnections, ...dataConnections]);
+        return { openSearchConnections, dataConnections, dataSourcesList };
       })
       .then(({ openSearchConnections, dataConnections, dataSourcesList }) => {
         fetchDirectQueryConnections(dataSourcesList, http, notifications).then(

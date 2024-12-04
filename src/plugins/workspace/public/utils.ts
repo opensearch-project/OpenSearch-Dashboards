@@ -569,28 +569,18 @@ export const fetchDirectQueryConnections = async (
   }
 };
 
-export const getOpenSearchAndDataConnections = async (
-  dataSources: DataSource[] | DataConnection[],
-  notifications: NotificationsStart | undefined
-): Promise<{
+export const getOpenSearchAndDataConnections = (
+  dataSources: DataSource[] | DataConnection[]
+): {
   openSearchConnections: DataSourceConnection[];
   dataConnections: DataSourceConnection[];
-}> => {
-  try {
-    const {
-      openSearchConnections,
-      dataConnections,
-    } = convertDataSourcesToOpenSearchAndDataConnections(dataSources);
+} => {
+  const {
+    openSearchConnections,
+    dataConnections,
+  } = convertDataSourcesToOpenSearchAndDataConnections(dataSources);
 
-    return { openSearchConnections, dataConnections };
-  } catch (error) {
-    notifications?.toasts.addDanger(
-      i18n.translate('workspace.detail.dataSources.connections.error.message', {
-        defaultMessage: 'Cannot fetch OpenSearch connections and data connections ',
-      })
-    );
-    return { openSearchConnections: [], dataConnections: [] };
-  }
+  return { openSearchConnections, dataConnections };
 };
 
 export const getUseCase = (workspace: WorkspaceObject, availableUseCases: WorkspaceUseCase[]) => {

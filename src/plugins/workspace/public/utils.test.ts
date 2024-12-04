@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus, ChromeNavLink, NavGroupType, PublicAppInfo } from '../../../core/public';
+import { AppNavLinkStatus, NavGroupType, PublicAppInfo } from '../../../core/public';
 import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,

@@ -6,7 +6,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 
-import { DataSourceConnectionType, DataSourceConnection } from '../../../common/types';
+import { DataSourceConnectionType } from '../../../common/types';
 import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import * as utilsExports from '../../utils';
 
@@ -16,6 +16,25 @@ import {
 } from './association_data_source_modal';
 import { AssociationDataSourceModalMode } from 'src/plugins/workspace/common/constants';
 
+const openSearchAndDataConnectionsMock = {
+  openSearchConnections: [
+    {
+      id: 'ds1',
+      name: 'Data Source 1',
+      type: 'OpenSearch',
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      relatedConnections: [],
+    },
+  ],
+  dataConnections: [
+    {
+      id: 'dqs1',
+      name: 'Data Connection 1',
+      connectionType: DataSourceConnectionType.DataConnection,
+      type: 'AWS Security Lake',
+    },
+  ],
+};
 const setupAssociationDataSourceModal = ({
   mode,
   excludedConnectionIds,
@@ -24,50 +43,27 @@ const setupAssociationDataSourceModal = ({
   const coreServices = coreMock.createStart();
   jest.spyOn(utilsExports, 'getDataSourcesList').mockResolvedValue([]);
 
-  jest.spyOn(utilsExports, 'getOpenSearchAndDataConnections').mockResolvedValue({
-    openSearchConnections: [
-      {
-        id: 'ds1',
-        name: 'Data Source 1',
-        type: 'OpenSearch',
-        connectionType: 0,
-        relatedConnections: [],
-      },
-    ],
-    dataConnections: [
-      {
-        id: 'dqs1',
-        name: 'Data Connection 1',
-        connectionType: DataSourceConnectionType.DataConnection,
-        type: 'AWS Security Lake',
-      },
-    ],
-  });
-
   jest
-    .spyOn(utilsExports, 'updateFullFillRelatedConnections')
-    .mockImplementationOnce(
-      (
-        openSearchConnections: DataSourceConnection[],
-        directQueryConnections: DataSourceConnection[]
-      ): DataSourceConnection[] => [
+    .spyOn(utilsExports, 'getOpenSearchAndDataConnections')
+    .mockReturnValue(openSearchAndDataConnectionsMock);
+
+  jest.spyOn(utilsExports, 'updateFullFillRelatedConnections').mockReturnValue([
+    {
+      id: 'ds1',
+      name: 'Data Source 1',
+      type: 'OpenSearch',
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      relatedConnections: [
         {
-          id: 'ds1',
-          name: 'Data Source 1',
-          type: 'OpenSearch',
-          connectionType: 0,
-          relatedConnections: [
-            {
-              id: 'ds1-dqc1',
-              name: 'dqc1',
-              type: 'Amazon S3',
-              connectionType: 1,
-              parentId: 'ds1',
-            },
-          ],
+          id: 'ds1-dqc1',
+          name: 'dqc1',
+          type: 'Amazon S3',
+          connectionType: DataSourceConnectionType.DirectQueryConnection,
+          parentId: 'ds1',
         },
-      ]
-    );
+      ],
+    },
+  ]);
 
   jest.spyOn(utilsExports, 'fetchDirectQueryConnections').mockResolvedValue([
     {
