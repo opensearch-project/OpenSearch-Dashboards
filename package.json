@@ -110,6 +110,7 @@
     "**/loader-utils": "^2.0.4",
     "**/lodash": "^4.17.21",
     "**/merge": "^2.1.1",
+    "**/micromatch": "^4.0.8",
     "**/minimatch": "^3.0.5",
     "**/minimist": "^1.2.5",
     "mocha/debug": "^3.2.7",
