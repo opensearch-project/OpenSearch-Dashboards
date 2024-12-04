@@ -18,12 +18,37 @@ jest.mock('./use_index_pattern', () => ({
   useIndexPattern: jest.fn(),
 }));
 
+const mockQuery = {
+  query: 'test query',
+  language: 'test language',
+};
+
+const mockDefaultQuery = {
+  query: 'default query',
+  language: 'default language',
+};
+
 const mockSavedSearch = {
   id: 'test-saved-search',
   title: 'Test Saved Search',
   searchSource: {
     setField: jest.fn(),
-    getField: jest.fn(),
+    getField: jest.fn().mockReturnValue(mockQuery),
+    fetch: jest.fn(),
+    getSearchRequestBody: jest.fn().mockResolvedValue({}),
+    getOwnField: jest.fn(),
+    getDataFrame: jest.fn(() => ({ name: 'test-pattern' })),
+  },
+  getFullPath: jest.fn(),
+  getOpenSearchType: jest.fn(),
+};
+
+const mockSavedSearchEmptyQuery = {
+  id: 'test-saved-search',
+  title: 'Test Saved Search',
+  searchSource: {
+    setField: jest.fn(),
+    getField: jest.fn().mockReturnValue(undefined),
     fetch: jest.fn(),
     getSearchRequestBody: jest.fn().mockResolvedValue({}),
     getOwnField: jest.fn(),
@@ -214,5 +239,37 @@ describe('useSearch', () => {
     expect(result.current.data$.getValue()).toEqual(
       expect.objectContaining({ status: ResultStatus.LOADING, rows: [] })
     );
+  });
+
+  it('should load saved search', async () => {
+    const services = createMockServices();
+    services.data.query.queryString.setQuery = jest.fn();
+
+    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    expect(services.data.query.queryString.setQuery).toBeCalledWith(mockQuery);
+  });
+
+  it('if no saved search, use get query', async () => {
+    const services = createMockServices();
+    services.getSavedSearchById = jest.fn().mockResolvedValue(mockSavedSearchEmptyQuery);
+    services.data.query.queryString.getQuery = jest.fn().mockReturnValue(mockDefaultQuery);
+    services.data.query.queryString.setQuery = jest.fn();
+
+    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    expect(services.data.query.queryString.setQuery).toBeCalledWith(mockDefaultQuery);
   });
 });
