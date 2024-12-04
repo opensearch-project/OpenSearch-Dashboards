@@ -1,2 +1,0 @@
-fix:
-- [Workspace]Clear the attribute of error objects ([#9003](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9003))
