@@ -14,6 +14,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useObservable } from 'react-use';
+import { WORKSPACE_COLLABORATORS_APP_ID } from 'src/plugins/workspace/common/constants';
 import {
   detailsName,
   detailsColorLabel,
@@ -156,7 +157,9 @@ export const WorkspaceDetailFormContent = ({
               defaultMessage="Manage who can view or edit workspace and assign workspace administrators on the {collaboratorsLink} page."
               values={{
                 collaboratorsLink: (
-                  <EuiLink onClick={() => application.navigateToApp('workspace_collaborators')}>
+                  <EuiLink
+                    onClick={() => application.navigateToApp(WORKSPACE_COLLABORATORS_APP_ID)}
+                  >
                     <FormattedMessage
                       id="workspace.form.details.panels.privacy.linkToCollaborators"
                       defaultMessage="Collaborators"
