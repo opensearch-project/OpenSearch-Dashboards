@@ -14,7 +14,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useObservable } from 'react-use';
-import { WORKSPACE_COLLABORATORS_APP_ID } from 'src/plugins/workspace/common/constants';
+import { WORKSPACE_COLLABORATORS_APP_ID } from '../../../common/constants';
 import {
   detailsName,
   detailsColorLabel,

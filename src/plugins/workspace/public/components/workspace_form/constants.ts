@@ -19,7 +19,7 @@ export enum WorkspacePermissionItemType {
 }
 
 export enum WorkspacePrivacyItemType {
-  PrivateToCollaborators = 'privat-to-collaborators',
+  PrivateToCollaborators = 'private-to-collaborators',
   AnyoneCanView = 'anyone-can-view',
   AnyoneCanEdit = 'anyone-can-edit',
 }
