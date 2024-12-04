@@ -22,6 +22,10 @@ Cypress.Commands.add('getElementsByTestIds', (testIds, options = {}) => {
   return cy.get(selectors.join(','), options);
 });
 
+Cypress.Commands.add('findElementByTestId', (testId, options = {}) => {
+  return cy.find(`[data-test-subj="${testId}"]`, options);
+});
+
 Cypress.Commands.add('localLogin', (username, password) => {
   miscUtils.visitPage('/app/home');
   loginPage.enterUserName(username);
