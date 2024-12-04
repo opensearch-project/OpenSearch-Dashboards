@@ -37,9 +37,9 @@ export class DataExplorerPage {
       .select(timeField);
   }
   /**
-   * Select a language in the Dataset Selector
+   * Select a language in the Dataset Selector for Index
    */
-  selectDatasetLanguage(datasetLanguage) {
+  selectIndexDatasetLanguage(datasetLanguage) {
     this.testRunner
       .get(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR)
       .select(datasetLanguage);
@@ -48,6 +48,16 @@ export class DataExplorerPage {
         this.selectDatasetTimeField("I don't want to use the time filter");
         break;
     }
+    this.testRunner.get(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
+  }
+
+  /**
+   * Select a language in the Dataset Selector for Index Pattern
+   */
+  selectIndexPatternDatasetLanguage(datasetLanguage) {
+    this.testRunner
+      .get(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR)
+      .select(datasetLanguage);
     this.testRunner.get(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
   }
 
@@ -69,6 +79,105 @@ export class DataExplorerPage {
       .contains(Cypress.env('INDEX_NAME'), { timeout: 10000 })
       .click();
     this.testRunner.get(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_NEXT_BUTTON).click();
-    this.selectDatasetLanguage(datasetLanguage);
+    this.selectIndexDatasetLanguage(datasetLanguage);
+  }
+
+  /**
+   * Select an index pattern dataset.
+   */
+  selectIndexPatternDataset(datasetLanguage) {
+    this.openDatasetExplorerWindow();
+    this.testRunner
+      .get(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_EXPLORER_WINDOW)
+      .contains('Index Patterns')
+      .click();
+    this.testRunner
+      .get(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_EXPLORER_WINDOW)
+      .contains(Cypress.env('INDEX_PATTERN_NAME'), { timeout: 10000 })
+      .click();
+    this.testRunner.get(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_NEXT_BUTTON).click();
+    this.selectIndexPatternDatasetLanguage(datasetLanguage);
+  }
+
+  /**
+   * set search Date range
+   */
+  setSearchDateRange(relativeNumber, relativeUnit) {
+    this.testRunner.get(DATA_EXPLORER_PAGE_ELEMENTS.SEARCH_DATE_PICKER_BUTTON).click();
+    this.testRunner.get(DATA_EXPLORER_PAGE_ELEMENTS.SEARCH_DATE_PICKER_RELATIVE_TAB).click();
+    this.testRunner
+      .get(DATA_EXPLORER_PAGE_ELEMENTS.SEARCH_DATE_RELATIVE_PICKER_INPUT)
+      .clear()
+      .type(relativeNumber);
+    this.testRunner
+      .get(DATA_EXPLORER_PAGE_ELEMENTS.SEARCH_DATE_RELATIVE_PICKER_UNIT_SELECTOR)
+      .select(relativeUnit);
+    this.testRunner.get(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_SUBMIT_BUTTON).click();
+  }
+
+  /**
+   * check for the first Table Field's Filter For and Filter Out button.
+   */
+  checkDocTableFirstFieldFilterForAndOutButton(isExists) {
+    const shouldText = isExists ? 'exist' : 'not.exist';
+    this.testRunner
+      .get(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
+      .get('tbody tr')
+      .first()
+      .within(() => {
+        this.testRunner
+          .get(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON)
+          .should(shouldText);
+        this.testRunner
+          .get(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON)
+          .should(shouldText);
+      });
+  }
+
+  /**
+   * Check the Doc Table first Field's Filter For button filters the correct value.
+   */
+  checkDocTableFirstFieldFilterForButtonFiltersCorrectField() {
+    this.testRunner
+      .get(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
+      .find('tbody tr')
+      .first()
+      .find(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_ROW_FIELD)
+      .then(($field) => {
+        const fieldText = $field.find('span').find('span').text();
+        $field.find(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON).click();
+        this.testRunner
+          .get(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_QUERY_EDITOR_FILTER_VALUE, { timeout: 10000 })
+          .should('have.text', fieldText);
+        this.testRunner
+          .get(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
+          .find('tbody tr')
+          .first()
+          .find(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_ROW_FIELD)
+          .find('span')
+          .find('span')
+          .should('have.text', fieldText);
+        this.testRunner
+          .get(DATA_EXPLORER_PAGE_ELEMENTS.DISCOVER_QUERY_HITS)
+          .should('have.text', '1');
+      });
+  }
+
+  /**
+   * Check the Doc Table first Field's Filter Out button filters the correct value.
+   */
+  checkDocTableFirstFieldFilterOutButtonFiltersCorrectField() {
+    this.testRunner
+      .get(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
+      .find('tbody tr')
+      .first()
+      .find(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_ROW_FIELD)
+      .then(($field) => {
+        const fieldText = $field.find('span').find('span').text();
+        $field.find(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON).click();
+        this.testRunner
+          .get(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_QUERY_EDITOR_FILTER_VALUE, { timeout: 10000 })
+          .should('have.text', fieldText);
+      });
   }
 }

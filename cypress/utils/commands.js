@@ -23,10 +23,11 @@ Cypress.Commands.add('getElementsByTestIds', (testIds, options = {}) => {
 });
 
 Cypress.Commands.add('localLogin', (username, password) => {
-  miscUtils.visitPage('/app/login');
+  miscUtils.visitPage('/app/home');
   loginPage.enterUserName(username);
   loginPage.enterPassword(password);
   loginPage.submit();
+  cy.url().should('contain', '/app/home');
 });
 
 Cypress.Commands.add('waitForLoader', () => {
