@@ -1,0 +1,2 @@
+security:
+- [CVE-2024-21538] Bump `cross-spawn` from 6.0.5 and 7.0.3 to 7.0.5 ([#8882](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8882))
