@@ -41,16 +41,26 @@ export async function listSampleDataSets(dataSourceId) {
   return await getServices().http.get(sampleDataUrl, { query });
 }
 
-const isWorkspaceEnabled = () => {
-  const workspaces = getServices().application.capabilities.workspaces;
-  return !!(workspaces && workspaces.enabled);
+const canUpdateUISetting = () => {
+  const {
+    application: { capabilities },
+    workspaces,
+  } = getServices();
+  if (
+    capabilities.workspaces &&
+    capabilities.workspaces.enabled &&
+    capabilities.workspaces.permissionEnabled
+  ) {
+    return !!workspaces?.currentWorkspace$.getValue()?.owner;
+  }
+  return true;
 };
 
 export async function installSampleDataSet(id, sampleDataDefaultIndex, dataSourceId) {
   const query = buildQuery(dataSourceId);
   await getServices().http.post(`${sampleDataUrl}/${id}`, { query });
 
-  if (!isWorkspaceEnabled() && getServices().uiSettings.isDefault('defaultIndex')) {
+  if (canUpdateUISetting() && getServices().uiSettings.isDefault('defaultIndex')) {
     getServices().uiSettings.set('defaultIndex', sampleDataDefaultIndex);
   }
 
@@ -64,7 +74,7 @@ export async function uninstallSampleDataSet(id, sampleDataDefaultIndex, dataSou
   const uiSettings = getServices().uiSettings;
 
   if (
-    !isWorkspaceEnabled() &&
+    canUpdateUISetting() &&
     !uiSettings.isDefault('defaultIndex') &&
     uiSettings.get('defaultIndex') === sampleDataDefaultIndex
   ) {
