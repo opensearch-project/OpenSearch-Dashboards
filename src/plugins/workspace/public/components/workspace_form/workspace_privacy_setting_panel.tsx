@@ -84,11 +84,7 @@ export const WorkspacePrivacySettingPanel = ({
         </EuiFlexGroup>
       </EuiCompressedFormRow>
       <EuiSpacer size="m" />
-      <EuiText size="s">
-        {i18n.translate('workspace.form.panels.privacy.jumpToCollaborators.description', {
-          defaultMessage: 'You can assign workspace administrators once the workspace is created.',
-        })}
-      </EuiText>
+      <EuiText size="s">{privacyType2CopyMap[privacyType].additionalDescription}</EuiText>
       <EuiSpacer size="m" />
       <EuiCheckbox
         id={htmlIdGenerator()()}

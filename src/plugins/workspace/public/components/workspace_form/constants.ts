@@ -123,6 +123,13 @@ export const privacyType2CopyMap = {
     description: i18n.translate('workspace.privacy.privateToCollaborators.description', {
       defaultMessage: 'Only collaborators can access the workspace.',
     }),
+    additionalDescription: i18n.translate(
+      'workspace.privacy.privateToCollaborators.additionalDescription',
+      {
+        defaultMessage:
+          'You can add collaborators who can view or edit workspace and assign workspace administrators once the workspace is created.',
+      }
+    ),
   },
   [WorkspacePrivacyItemType.AnyoneCanView]: {
     title: i18n.translate('workspace.privacy.anyoneCanView.title', {
@@ -131,6 +138,10 @@ export const privacyType2CopyMap = {
     description: i18n.translate('workspace.privacy.anyoneCanView.description', {
       defaultMessage: 'Anyone can view workspace assets.',
     }),
+    additionalDescription: i18n.translate('workspace.privacy.anyoneCanView.additionalDescription', {
+      defaultMessage:
+        'You can add collaborators who can edit workspace and assign workspace administrators once the workspace is created.',
+    }),
   },
   [WorkspacePrivacyItemType.AnyoneCanEdit]: {
     title: i18n.translate('workspace.privacy.anyoneCanEdit.title', {
@@ -138,6 +149,9 @@ export const privacyType2CopyMap = {
     }),
     description: i18n.translate('workspace.privacy.anyoneCanEdit.description', {
       defaultMessage: 'Anyone can view and edit workspace assets.',
+    }),
+    additionalDescription: i18n.translate('workspace.privacy.anyoneCanEdit.additionalDescription', {
+      defaultMessage: 'You can assign workspace administrators once the workspace is created.',
     }),
   },
 };
