@@ -24,14 +24,11 @@ module.exports = defineConfig({
     DATASOURCE_MANAGEMENT_ENABLED: false,
     ML_COMMONS_DASHBOARDS_ENABLED: true,
     WAIT_FOR_LOADER_BUFFER_MS: 0,
-    INDEX_CLUSTER_NAME: 'cypress-test-os',
-    INDEX_NAME: 'vis-builder',
-    INDEX_PATTERN_NAME: 'cypress-test-os::vis-builder*',
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
     specPattern: 'cypress/integration/**/*_spec.{js,jsx,ts,tsx}',
-    testIsolation: false,
+    testIsolation: true,
     setupNodeEvents,
   },
 });

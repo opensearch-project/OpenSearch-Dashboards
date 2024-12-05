@@ -4,14 +4,42 @@
  */
 
 import { DATA_EXPLORER_PAGE_ELEMENTS } from './elements.js';
+import { INDEX_CLUSTER_NAME, INDEX_NAME, INDEX_PATTERN_NAME } from './constants.js';
 
 /**
- * Click on the New Search button.
+ * Select a language in the Dataset Selector for Index
+ * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
  */
-Cypress.Commands.add('clickNewSearchButton', () => {
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.NEW_SEARCH_BUTTON, { timeout: 10000 })
-    .should('be.visible')
-    .click();
+function selectIndexDatasetLanguage(datasetLanguage) {
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR).select(
+    datasetLanguage
+  );
+  switch (datasetLanguage) {
+    case 'PPL':
+      cy.selectDatasetTimeField("I don't want to use the time filter");
+      break;
+  }
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
+}
+
+/**
+ * Select a language in the Dataset Selector for Index Pattern
+ * @param datasetLanguage Index supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
+ */
+function selectIndexPatternDatasetLanguage(datasetLanguage) {
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR).select(
+    datasetLanguage
+  );
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
+}
+
+/**
+ * Get on the New Search button.
+ */
+Cypress.Commands.add('getNewSearchButton', () => {
+  return cy
+    .getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.NEW_SEARCH_BUTTON, { timeout: 10000 })
+    .should('be.visible');
 });
 
 /**
@@ -24,6 +52,7 @@ Cypress.Commands.add('openDatasetExplorerWindow', () => {
 
 /**
  * Select a Time Field in the Dataset Selector
+ * @param timeField Timefield for Language specific Time field. PPL allows "birthdate", "timestamp" and "I don't want to use the time filter"
  */
 Cypress.Commands.add('selectDatasetTimeField', (timeField) => {
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_TIME_SELECTOR).select(
@@ -32,65 +61,45 @@ Cypress.Commands.add('selectDatasetTimeField', (timeField) => {
 });
 
 /**
- * Select a language in the Dataset Selector for Index
- */
-Cypress.Commands.add('selectIndexDatasetLanguage', (datasetLanguage) => {
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR).select(
-    datasetLanguage
-  );
-  switch (datasetLanguage) {
-    case 'PPL':
-      this.selectDatasetTimeField("I don't want to use the time filter");
-      break;
-  }
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
-});
-
-/**
- * Select a language in the Dataset Selector for Index Pattern
- */
-Cypress.Commands.add('selectIndexPatternDatasetLanguage', (datasetLanguage) => {
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR).select(
-    datasetLanguage
-  );
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
-});
-
-/**
  * Select an index dataset.
+ * @param datasetLanguage Index supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
  */
 Cypress.Commands.add('selectIndexDataset', (datasetLanguage) => {
-  this.openDatasetExplorerWindow();
+  cy.openDatasetExplorerWindow();
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_EXPLORER_WINDOW)
     .contains('Indexes')
     .click();
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_EXPLORER_WINDOW)
-    .contains(Cypress.env('INDEX_CLUSTER_NAME'), { timeout: 10000 })
+    .contains(INDEX_CLUSTER_NAME, { timeout: 10000 })
     .click();
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_EXPLORER_WINDOW)
-    .contains(Cypress.env('INDEX_NAME'), { timeout: 10000 })
+    .contains(INDEX_NAME, { timeout: 10000 })
     .click();
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_NEXT_BUTTON).click();
-  this.selectIndexDatasetLanguage(datasetLanguage);
+  selectIndexDatasetLanguage(datasetLanguage);
 });
 
 /**
  * Select an index pattern dataset.
+ * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
  */
 Cypress.Commands.add('selectIndexPatternDataset', (datasetLanguage) => {
-  this.openDatasetExplorerWindow();
+  cy.openDatasetExplorerWindow();
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_EXPLORER_WINDOW)
     .contains('Index Patterns')
     .click();
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_EXPLORER_WINDOW)
-    .contains(Cypress.env('INDEX_PATTERN_NAME'), { timeout: 10000 })
+    .contains(INDEX_PATTERN_NAME, { timeout: 10000 })
     .click();
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_NEXT_BUTTON).click();
-  this.selectIndexPatternDatasetLanguage(datasetLanguage);
+  selectIndexPatternDatasetLanguage(datasetLanguage);
 });
 
 /**
- * set search Date range
+ * Set search Date range
+ * @param relativeNumber Relative integer string to set date range
+ * @param relativeUnit Unit for number. Accepted Units: seconds/Minutes/Hours/Days/Weeks/Months/Years ago/from now
+ * @example setSearchRelativeDateRange('15', 'years ago')
  */
 Cypress.Commands.add('setSearchRelativeDateRange', (relativeNumber, relativeUnit) => {
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.SEARCH_DATE_PICKER_BUTTON).click();
@@ -105,7 +114,8 @@ Cypress.Commands.add('setSearchRelativeDateRange', (relativeNumber, relativeUnit
 });
 
 /**
- * check for the first Table Field's Filter For and Filter Out button.
+ * Check for the first Table Field's Filter For and Filter Out button.
+ * @param isExists Boolean determining if these button should exist
  */
 Cypress.Commands.add('checkDocTableFirstFieldFilterForAndOutButton', (isExists) => {
   const shouldText = isExists ? 'exist' : 'not.exist';
@@ -133,8 +143,8 @@ Cypress.Commands.add('checkDocTableFirstFieldFilterForButtonFiltersCorrectField'
     .then(($field) => {
       const fieldText = $field.find('span span').text();
       $field
-        .findElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON)
-        .trigger(click);
+        .find(`[data-test-subj="${DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON}"]`)
+        .click();
       cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_QUERY_EDITOR_FILTER_VALUE, {
         timeout: 10000,
       }).should('have.text', fieldText);
@@ -162,8 +172,8 @@ Cypress.Commands.add('checkDocTableFirstFieldFilterOutButtonFiltersCorrectField'
     .then(($field) => {
       const fieldText = $field.find('span span').text();
       $field
-        .findElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON)
-        .trigger(click);
+        .find(`[data-test-subj="${DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON}"]`)
+        .click();
       cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_QUERY_EDITOR_FILTER_VALUE, {
         timeout: 10000,
       }).should('have.text', fieldText);
