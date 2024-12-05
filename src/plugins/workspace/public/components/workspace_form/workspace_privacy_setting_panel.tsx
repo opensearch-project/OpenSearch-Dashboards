@@ -18,6 +18,10 @@ import {
 import { i18n } from '@osd/i18n';
 import { privacyType2CopyMap, WorkspacePrivacyItemType, workspacePrivacyTitle } from './constants';
 import './workspace_privacy_setting.scss';
+import {
+  generateRightSidebarScrollProps,
+  RightSidebarScrollField,
+} from '../workspace_creator/utils';
 
 export interface WorkspacePrivacySettingProps {
   privacyType: WorkspacePrivacyItemType;
@@ -44,7 +48,7 @@ export const WorkspacePrivacySettingPanel = ({
 
   return (
     <EuiPanel>
-      <EuiText size="s">
+      <EuiText size="s" {...generateRightSidebarScrollProps(RightSidebarScrollField.PrivacyType)}>
         <h2>
           {i18n.translate('workspace.form.panels.privacy.title', {
             defaultMessage: 'Set up privacy',

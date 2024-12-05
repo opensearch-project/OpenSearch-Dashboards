@@ -137,6 +137,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
               application={application}
               isSubmitting={props.isSubmitting}
               dataSourceEnabled={!!isDataSourceEnabled}
+              privacyType={privacyType}
             />
           </div>
         </div>

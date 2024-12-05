@@ -167,11 +167,11 @@ export const useWorkspaceForm = ({
     setName(resetValues?.name ?? '');
     setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
-    setPrivacyType(convertPermissionsToPrivacyType(resetValues?.permissionSettings ?? []));
+    setPermissionSettings(resetValues?.permissionSettings ?? []);
     setFeatureConfigs(resetValues?.features ?? []);
     setFormErrors({});
     setIsEditing(false);
-  }, [setPrivacyType]);
+  }, []);
 
   return {
     formId: formIdRef.current,
