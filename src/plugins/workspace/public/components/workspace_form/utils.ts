@@ -37,12 +37,12 @@ export const isValidFormTextInput = (input?: string) => {
   return typeof input === 'string' && regex.test(input);
 };
 
-export const EMPTY_PERMISSIONS = {
+export const EMPTY_PERMISSIONS: SavedObjectPermissions = {
   library_read: {},
   library_write: {},
   read: {},
   write: {},
-};
+} as const;
 
 export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   let numberOfErrors = 0;
