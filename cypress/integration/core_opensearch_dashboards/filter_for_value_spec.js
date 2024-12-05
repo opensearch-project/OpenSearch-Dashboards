@@ -11,22 +11,25 @@ describe('filter for value spec', () => {
   beforeEach(() => {
     cy.localLogin(Cypress.env('username'), Cypress.env('password'));
     miscUtils.visitPage('app/data-explorer/discover');
-    cy.clickNewSearchButton();
+    cy.getNewSearchButton().click();
   });
   describe('filter actions in table field', () => {
     describe('index pattern dataset', () => {
-      // filter actions should not exist for DQL
+      // filter actions should exist for DQL
       it('DQL', () => {
         cy.selectIndexPatternDataset('DQL');
         cy.setSearchRelativeDateRange('15', 'Years ago');
         cy.checkDocTableFirstFieldFilterForAndOutButton(true);
         cy.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
+        cy.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
       });
-      // filter actions should not exist for PPL
+      // filter actions should exist for Lucene
       it('Lucene', () => {
         cy.selectIndexPatternDataset('Lucene');
         cy.setSearchRelativeDateRange('15', 'Years ago');
         cy.checkDocTableFirstFieldFilterForAndOutButton(true);
+        cy.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
+        cy.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
       });
       // filter actions should not exist for SQL
       it('SQL', () => {

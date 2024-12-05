@@ -27,8 +27,9 @@ module.exports = defineConfig({
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
+    supportFile: 'cypress/support/e2e.{js,jsx,ts,tsx}',
     specPattern: 'cypress/integration/**/*_spec.{js,jsx,ts,tsx}',
-    testIsolation: false,
+    testIsolation: true,
     setupNodeEvents,
   },
 });
