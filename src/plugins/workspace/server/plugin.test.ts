@@ -5,7 +5,7 @@
 
 import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
 import { coreMock, httpServerMock, uiSettingsServiceMock } from '../../../core/server/mocks';
-import { WorkspacePlugin } from './plugin';
+import { WorkspacePlugin, WorkspacePluginDependencies } from './plugin';
 import {
   getACLAuditor,
   getClientCallAuditor,
@@ -14,8 +14,21 @@ import {
 } from '../../../core/server/utils';
 import * as serverUtils from '../../../core/server/utils/auth_info';
 import { SavedObjectsPermissionControl } from './permission_control/client';
+import { DataSourcePluginSetup } from '../../data_source/server';
+import { DataSourceError } from '../../data_source/common/data_sources';
 
 describe('Workspace server plugin', () => {
+  const mockDataSourcePluginSetup: DataSourcePluginSetup = {
+    createDataSourceError(err: any): DataSourceError {
+      return new DataSourceError({});
+    },
+    dataSourceEnabled: jest.fn(() => true),
+    registerCredentialProvider: jest.fn(),
+    registerCustomApiSchema(schema: any): void {
+      throw new Error('Function not implemented.');
+    },
+  };
+  const mockDeps: WorkspacePluginDependencies = { dataSource: mockDataSourcePluginSetup };
   afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -36,7 +49,7 @@ describe('Workspace server plugin', () => {
     });
 
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, mockDeps);
     expect(value).toMatchInlineSnapshot(`
       Object {
         "dashboards": Object {
@@ -82,7 +95,7 @@ describe('Workspace server plugin', () => {
       return fn;
     });
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, mockDeps);
     const toolKitMock = httpServerMock.createToolkit();
 
     const requestWithWorkspaceInUrl = httpServerMock.createOpenSearchDashboardsRequest({
@@ -140,7 +153,7 @@ describe('Workspace server plugin', () => {
     });
 
     it('catch error', async () => {
-      await workspacePlugin.setup(setupMock);
+      await workspacePlugin.setup(setupMock, mockDeps);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(
@@ -156,7 +169,7 @@ describe('Workspace server plugin', () => {
         .spyOn(serverUtils, 'getPrincipalsFromRequest')
         .mockImplementation(() => ({ users: [`dashboard-admin-user`] }));
 
-      await workspacePlugin.setup(setupMock);
+      await workspacePlugin.setup(setupMock, mockDeps);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(
@@ -176,7 +189,7 @@ describe('Workspace server plugin', () => {
         .spyOn(serverUtils, 'getPrincipalsFromRequest')
         .mockImplementation(() => ({ users: [`none-dashboard-admin-user`] }));
 
-      await workspacePlugin.setup(setupMock);
+      await workspacePlugin.setup(setupMock, mockDeps);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(
@@ -202,7 +215,7 @@ describe('Workspace server plugin', () => {
         },
       });
 
-      await workspacePlugin.setup(setupMock);
+      await workspacePlugin.setup(setupMock, mockDeps);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(
@@ -228,7 +241,7 @@ describe('Workspace server plugin', () => {
         },
       });
 
-      await workspacePlugin.setup(setupMock);
+      await workspacePlugin.setup(setupMock, mockDeps);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(
@@ -246,7 +259,7 @@ describe('Workspace server plugin', () => {
     it('uninstall security plugin and anyone will be OSD admin', async () => {
       jest.spyOn(serverUtils, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
 
-      await workspacePlugin.setup(setupMock);
+      await workspacePlugin.setup(setupMock, mockDeps);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(
@@ -267,7 +280,7 @@ describe('Workspace server plugin', () => {
         .spyOn(SavedObjectsPermissionControl.prototype, 'clearSavedObjectsCache')
         .mockImplementationOnce(() => {});
 
-      await workspacePlugin.setup(setupMock);
+      await workspacePlugin.setup(setupMock, mockDeps);
       const toolKitMock = httpServerMock.createToolkit();
 
       expect(setupMock.http.registerOnPreResponse).toHaveBeenCalled();
@@ -280,7 +293,7 @@ describe('Workspace server plugin', () => {
     describe('#ACL auditor', () => {
       it('should initialize 2 auditors when permission control is enabled', async () => {
         const coreSetupMock = coreMock.createSetup();
-        await workspacePlugin.setup(coreSetupMock);
+        await workspacePlugin.setup(coreSetupMock, mockDeps);
         const toolKitMock = httpServerMock.createToolkit();
 
         const postAuthFn = coreSetupMock.http.registerOnPostAuth.mock.calls[1][0];
@@ -293,7 +306,7 @@ describe('Workspace server plugin', () => {
 
       it('should clean up 2 auditors when permission control is enabled and non dashboard admin', async () => {
         const coreSetupMock = coreMock.createSetup();
-        await workspacePlugin.setup(coreSetupMock);
+        await workspacePlugin.setup(coreSetupMock, mockDeps);
         const toolKitMock = httpServerMock.createToolkit();
 
         const postAuthFn = coreSetupMock.http.registerOnPostAuth.mock.calls[1][0];
@@ -316,7 +329,7 @@ describe('Workspace server plugin', () => {
 
       it('should not checkout when request user is dashboard admin', async () => {
         const coreSetupMock = coreMock.createSetup();
-        await workspacePlugin.setup(coreSetupMock);
+        await workspacePlugin.setup(coreSetupMock, mockDeps);
         const toolKitMock = httpServerMock.createToolkit();
 
         const postAuthFn = coreSetupMock.http.registerOnPostAuth.mock.calls[1][0];
@@ -361,7 +374,7 @@ describe('Workspace server plugin', () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/foo',
       });
-      await workspacePlugin.setup(setupMock);
+      await workspacePlugin.setup(setupMock, mockDeps);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
@@ -372,7 +385,7 @@ describe('Workspace server plugin', () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/',
       });
-      await workspacePlugin.setup(setupMock);
+      await workspacePlugin.setup(setupMock, mockDeps);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
@@ -385,7 +398,7 @@ describe('Workspace server plugin', () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/',
       });
-      const workspaceSetup = await workspacePlugin.setup(setupMock);
+      const workspaceSetup = await workspacePlugin.setup(setupMock, mockDeps);
       const client = workspaceSetup.client;
       jest.spyOn(client, 'list').mockResolvedValue({
         success: true,
@@ -410,7 +423,7 @@ describe('Workspace server plugin', () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/',
       });
-      const workspaceSetup = await workspacePlugin.setup(setupMock);
+      const workspaceSetup = await workspacePlugin.setup(setupMock, mockDeps);
       const client = workspaceSetup.client;
       jest.spyOn(client, 'list').mockResolvedValue({
         success: true,
@@ -455,7 +468,7 @@ describe('Workspace server plugin', () => {
         {},
         {},
       ]);
-      const workspaceSetup = await workspacePlugin.setup(setupMock);
+      const workspaceSetup = await workspacePlugin.setup(setupMock, mockDeps);
       const client = workspaceSetup.client;
       jest.spyOn(client, 'list').mockResolvedValue({
         success: true,
@@ -491,7 +504,7 @@ describe('Workspace server plugin', () => {
     });
 
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, mockDeps);
     await workspacePlugin.start(startMock);
     expect(startMock.savedObjects.createSerializer).toBeCalledTimes(1);
   });

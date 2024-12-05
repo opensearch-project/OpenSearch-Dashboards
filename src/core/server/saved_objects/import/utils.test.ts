@@ -10,6 +10,7 @@ import {
   getUpdatedTSVBVisState,
   updateDataSourceNameInVegaSpec,
   updateDataSourceNameInTimeline,
+  findReferenceDataSourceForObject,
 } from './utils';
 import { parse } from 'hjson';
 import { isEqual } from 'lodash';
@@ -341,4 +342,105 @@ describe('getUpdatedTSVBVisState', () => {
       });
     }
   );
+});
+
+describe('findReferenceDataSourceForObject', () => {
+  const savedObjects: Array<SavedObject<{ title?: string }>> = [
+    {
+      id: '1',
+      references: [{ id: '5', type: 'data-source', name: '5' }],
+      type: 'index-pattern',
+      attributes: {},
+    },
+    {
+      id: '2',
+      references: [{ id: '3', type: 'non-data-source', name: '3' }],
+      type: 'index-pattern',
+      attributes: {},
+    },
+    {
+      id: '3',
+      references: [],
+      type: 'non-data-source',
+      attributes: {},
+    },
+    {
+      id: '4',
+      references: [{ id: '1', type: 'index-pattern', name: '1' }],
+      type: 'non-data-source',
+      attributes: {},
+    },
+    {
+      id: '6',
+      references: [{ id: '7', type: 'index-pattern', name: '7' }],
+      type: 'non-data-source',
+      attributes: {},
+    },
+  ];
+
+  const ObjectsMap = new Map(savedObjects.map((so) => [so.id, so]));
+
+  test('returns the data-source reference if it exists in the references', () => {
+    const result = findReferenceDataSourceForObject(savedObjects[0], ObjectsMap);
+    expect(result).toEqual({ id: '5', type: 'data-source', name: '5' });
+  });
+
+  test('returns null if there is no data-source reference and no nested references', () => {
+    expect(findReferenceDataSourceForObject(savedObjects[1], ObjectsMap)).toBeNull();
+  });
+
+  test('returns null if no references exist', () => {
+    expect(findReferenceDataSourceForObject(savedObjects[2], ObjectsMap)).toBeNull();
+  });
+
+  test('returns nested data-source reference if found', () => {
+    const result = findReferenceDataSourceForObject(savedObjects[3], ObjectsMap);
+    expect(result).toEqual({ id: '5', type: 'data-source', name: '5' });
+  });
+
+  test('returns null if the nested references have no data-source reference', () => {
+    expect(findReferenceDataSourceForObject(savedObjects[4], ObjectsMap)).toBeNull();
+  });
+
+  test('returns null if circular reference', () => {
+    const circularAssets: Array<SavedObject<{ title?: string }>> = [
+      {
+        id: '1',
+        references: [{ id: '2', type: 'non-data-source', name: '2' }],
+        type: 'non-data-source',
+        attributes: {},
+      },
+      {
+        id: '2',
+        references: [{ id: '3', type: 'non-data-source', name: '3' }],
+        type: 'non-data-source',
+        attributes: {},
+      },
+      {
+        id: '3',
+        references: [{ id: '1', type: 'non-data-source', name: '1' }],
+        type: 'non-data-source',
+        attributes: {},
+      },
+    ];
+    const circularAssetsMap = new Map(circularAssets.map((so) => [so.id, so]));
+
+    const result = findReferenceDataSourceForObject(circularAssets[0], circularAssetsMap);
+    expect(result).toBeNull();
+  });
+
+  test('returns null if circular reference is itself', () => {
+    const circularAssets: Array<SavedObject<{ title?: string }>> = [
+      {
+        id: '1',
+        references: [{ id: '1', type: 'non-data-source', name: '1' }],
+        type: 'non-data-source',
+        attributes: {},
+      },
+    ];
+    const circularAssetsMap = new Map(circularAssets.map((so) => [so.id, so]));
+
+    const result = findReferenceDataSourceForObject(circularAssets[0], circularAssetsMap);
+    expect(result).toBeNull();
+  });
 });
