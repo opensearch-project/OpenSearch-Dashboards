@@ -38,12 +38,16 @@ Cypress.Commands.add(
 );
 
 /**
- * Go to the local instance of OSD's home page and login.
+ * Go to the local instance of OSD's home page and login if needed.
  */
 Cypress.Commands.add('localLogin', (username, password) => {
   miscUtils.visitPage('/app/home');
-  loginPage.enterUserName(username);
-  loginPage.enterPassword(password);
-  loginPage.submit();
-  cy.url().should('contain', '/app/home');
+  cy.url().then(($url) => {
+    if ($url.includes('login')) {
+      loginPage.enterUserName(username);
+      loginPage.enterPassword(password);
+      loginPage.submit();
+    }
+    cy.url().should('contain', '/app/home');
+  });
 });
