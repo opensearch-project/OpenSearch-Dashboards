@@ -89,6 +89,7 @@
     "**/ajv": "^6.12.6",
     "**/ansi-html": "^0.0.8",
     "**/ansi-regex": "^5.0.1",
+    "**/body-parser": "^1.20.3",
     "!chromedriver/**/axios": "^0.21.4",
     "chromedriver/**/axios": "^0.27.2",
     "chromedriver/**/debug": "^4.3.1",
@@ -133,7 +134,10 @@
     "**/url-parse": "^1.5.8",
     "**/unset-value": "^2.0.1",
     "**/xml2js": "^0.6.2",
-    "**/@babel/traverse": "^7.23.2"
+    "**/@babel/traverse": "^7.23.2",
+    "fetch-mock/path-to-regexp": "^3.3.0",
+    "**/nise/path-to-regexp": "^1.9.0",
+    "**/express/path-to-regexp": "^0.1.10"
   },
   "workspaces": {
     "packages": [
