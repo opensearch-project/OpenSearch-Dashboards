@@ -4,6 +4,7 @@
  */
 
 import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
+import { DataExplorerPage } from '../../utils/dashboards/data_explorer/data_explorer_page.po';
 
 const miscUtils = new MiscUtils(cy);
 
@@ -17,42 +18,42 @@ describe('filter for value spec', () => {
     describe('index pattern dataset', () => {
       // filter actions should exist for DQL
       it('DQL', () => {
-        cy.selectIndexPatternDataset('DQL');
-        cy.setSearchRelativeDateRange('15', 'Years ago');
-        cy.checkDocTableFirstFieldFilterForAndOutButton(true);
-        cy.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
-        cy.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
+        DataExplorerPage.selectIndexPatternDataset('DQL');
+        DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(true);
+        DataExplorerPage.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
+        DataExplorerPage.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
       });
       // filter actions should exist for Lucene
       it('Lucene', () => {
-        cy.selectIndexPatternDataset('Lucene');
-        cy.setSearchRelativeDateRange('15', 'Years ago');
-        cy.checkDocTableFirstFieldFilterForAndOutButton(true);
-        cy.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
-        cy.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
+        DataExplorerPage.selectIndexPatternDataset('Lucene');
+        DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(true);
+        DataExplorerPage.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
+        DataExplorerPage.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
       });
       // filter actions should not exist for SQL
       it('SQL', () => {
-        cy.selectIndexPatternDataset('OpenSearch SQL');
-        cy.checkDocTableFirstFieldFilterForAndOutButton(false);
+        DataExplorerPage.selectIndexPatternDataset('OpenSearch SQL');
+        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
       });
       // filter actions should not exist for PPL
       it('PPL', () => {
-        cy.selectIndexPatternDataset('PPL');
-        cy.setSearchRelativeDateRange('15', 'Years ago');
-        cy.checkDocTableFirstFieldFilterForAndOutButton(false);
+        DataExplorerPage.selectIndexPatternDataset('PPL');
+        DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
       });
     });
     describe('index dataset', () => {
       // filter actions should not exist for SQL
       it('SQL', () => {
-        cy.selectIndexDataset('OpenSearch SQL');
-        cy.checkDocTableFirstFieldFilterForAndOutButton(false);
+        DataExplorerPage.selectIndexDataset('OpenSearch SQL');
+        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
       });
       // filter actions should not exist for PPL
       it('PPL', () => {
-        cy.selectIndexDataset('PPL');
-        cy.checkDocTableFirstFieldFilterForAndOutButton(false);
+        DataExplorerPage.selectIndexDataset('PPL');
+        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
       });
     });
   });
