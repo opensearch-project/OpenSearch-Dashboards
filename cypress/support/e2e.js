@@ -9,8 +9,11 @@ import '../utils/dashboards/data_explorer/commands.js';
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-// eslint-disable-next-line no-unused-vars
-Cypress.on('uncaught:exception', (_err) => {
-  // returning false here prevents Cypress from failing the test
-  return false;
+const scopedHistoryNavigationError =
+  /^[^(ScopedHistory instance has fell out of navigation scope)]/;
+Cypress.on('uncaught:exception', (err) => {
+  /* returning false here prevents Cypress from failing the test */
+  if (scopedHistoryNavigationError.test(err.message)) {
+    return false;
+  }
 });
