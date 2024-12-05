@@ -290,11 +290,6 @@ const validatePermissionSettings = (
     }
   }
   return {
-    ...(!permissionSettings.some(
-      (setting) => setting.modes && getPermissionModeId(setting.modes) === PermissionModeId.Owner
-    )
-      ? { overall: permissionSettingOwnerMissingError }
-      : {}),
     ...(Object.keys(permissionSettingsErrors).length > 0
       ? { fields: permissionSettingsErrors }
       : {}),
