@@ -97,7 +97,11 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" onClick={handleModalOpen}>
+          <EuiButtonEmpty
+            data-test-subj="workspaceCollaborators-privacySetting-edit"
+            size="xs"
+            onClick={handleModalOpen}
+          >
             {i18n.translate('workspace.form.collaborators.panels.privacy.edit', {
               defaultMessage: 'Edit',
             })}
@@ -135,6 +139,7 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
               onClick={handleChange}
               fill
               disabled={selectedPrivacyType === privacyType}
+              data-test-subj="workspaceCollaborators-privacySetting-save"
             >
               {i18n.translate('workspace.form.collaborators.panels.privacy.modal.save', {
                 defaultMessage: 'Save changes',

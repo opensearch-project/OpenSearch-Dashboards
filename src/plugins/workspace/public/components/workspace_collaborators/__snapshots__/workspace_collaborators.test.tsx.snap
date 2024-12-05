@@ -32,6 +32,7 @@ Object {
               >
                 <button
                   class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                  data-test-subj="workspaceCollaborators-privacySetting-edit"
                   type="button"
                 >
                   <span
@@ -806,6 +807,7 @@ Object {
             >
               <button
                 class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                data-test-subj="workspaceCollaborators-privacySetting-edit"
                 type="button"
               >
                 <span
