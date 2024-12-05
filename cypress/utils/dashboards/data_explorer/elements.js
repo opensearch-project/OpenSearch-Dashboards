@@ -23,4 +23,5 @@ export const DATA_EXPLORER_PAGE_ELEMENTS = {
   SEARCH_DATE_RELATIVE_PICKER_UNIT_SELECTOR: 'superDatePickerRelativeDateInputUnitSelector',
   QUERY_SUBMIT_BUTTON: 'querySubmitButton',
   GLOBAL_QUERY_EDITOR_FILTER_VALUE: 'globalFilterLabelValue',
+  GLOBAL_FILTER_BAR: 'globalFilterBar',
 };

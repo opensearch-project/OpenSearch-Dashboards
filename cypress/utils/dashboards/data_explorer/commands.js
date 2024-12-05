@@ -7,34 +7,7 @@ import { DATA_EXPLORER_PAGE_ELEMENTS } from './elements.js';
 import { INDEX_CLUSTER_NAME, INDEX_NAME, INDEX_PATTERN_NAME } from './constants.js';
 
 /**
- * Select a language in the Dataset Selector for Index
- * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
- */
-function selectIndexDatasetLanguage(datasetLanguage) {
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR).select(
-    datasetLanguage
-  );
-  switch (datasetLanguage) {
-    case 'PPL':
-      cy.selectDatasetTimeField("I don't want to use the time filter");
-      break;
-  }
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
-}
-
-/**
- * Select a language in the Dataset Selector for Index Pattern
- * @param datasetLanguage Index supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
- */
-function selectIndexPatternDatasetLanguage(datasetLanguage) {
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR).select(
-    datasetLanguage
-  );
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
-}
-
-/**
- * Get on the New Search button.
+ * Get the New Search button.
  */
 Cypress.Commands.add('getNewSearchButton', () => {
   return cy
@@ -61,6 +34,22 @@ Cypress.Commands.add('selectDatasetTimeField', (timeField) => {
 });
 
 /**
+ * Select a language in the Dataset Selector for Index
+ * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
+ */
+Cypress.Commands.add('selectIndexDatasetLanguage', (datasetLanguage) => {
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR).select(
+    datasetLanguage
+  );
+  switch (datasetLanguage) {
+    case 'PPL':
+      cy.selectDatasetTimeField("I don't want to use the time filter");
+      break;
+  }
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
+});
+
+/**
  * Select an index dataset.
  * @param datasetLanguage Index supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
  */
@@ -76,7 +65,18 @@ Cypress.Commands.add('selectIndexDataset', (datasetLanguage) => {
     .contains(INDEX_NAME, { timeout: 10000 })
     .click();
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_NEXT_BUTTON).click();
-  selectIndexDatasetLanguage(datasetLanguage);
+  cy.selectIndexDatasetLanguage(datasetLanguage);
+});
+
+/**
+ * Select a language in the Dataset Selector for Index Pattern
+ * @param datasetLanguage Index supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
+ */
+Cypress.Commands.add('selectIndexPatternDatasetLanguage', (datasetLanguage) => {
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_LANGUAGE_SELECTOR).select(
+    datasetLanguage
+  );
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON).click();
 });
 
 /**
@@ -92,7 +92,7 @@ Cypress.Commands.add('selectIndexPatternDataset', (datasetLanguage) => {
     .contains(INDEX_PATTERN_NAME, { timeout: 10000 })
     .click();
   cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_NEXT_BUTTON).click();
-  selectIndexPatternDatasetLanguage(datasetLanguage);
+  cy.selectIndexPatternDatasetLanguage(datasetLanguage);
 });
 
 /**
@@ -114,68 +114,96 @@ Cypress.Commands.add('setSearchRelativeDateRange', (relativeNumber, relativeUnit
 });
 
 /**
+ * Get specific row of DocTable.
+ * @param rowNumber Integer starts from 0 for the first row
+ */
+Cypress.Commands.add('getDocTableRow', (rowNumber) => {
+  return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE).get('tbody tr').eq(rowNumber);
+});
+
+/**
+ * Get specific field of DocTable.
+ * @param columnNumber Integer starts from 0 for the first column
+ * @param rowNumber Integer starts from 0 for the first row
+ */
+Cypress.Commands.add('getDocTableField', (columnNumber, rowNumber) => {
+  return cy
+    .getDocTableRow(rowNumber)
+    .findElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_ROW_FIELD)
+    .eq(columnNumber);
+});
+
+/**
+ * Check the filter pill text matches expectedFilterText.
+ * @param expectedFilterText expected text in filter pill.
+ */
+Cypress.Commands.add('checkFilterPillText', (expectedFilterText) => {
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_QUERY_EDITOR_FILTER_VALUE, {
+    timeout: 10000,
+  }).should('have.text', expectedFilterText);
+});
+
+/**
+ * Check the query hit text matches expectedQueryHitText.
+ * @param expectedQueryHitText expected text for query hits
+ */
+Cypress.Commands.add('checkQueryHitText', (expectedQueryHitText) => {
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DISCOVER_QUERY_HITS).should(
+    'have.text',
+    expectedQueryHitText
+  );
+});
+
+/**
  * Check for the first Table Field's Filter For and Filter Out button.
  * @param isExists Boolean determining if these button should exist
  */
 Cypress.Commands.add('checkDocTableFirstFieldFilterForAndOutButton', (isExists) => {
   const shouldText = isExists ? 'exist' : 'not.exist';
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
-    .get('tbody tr')
-    .first()
-    .within(() => {
-      cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON).should(
-        shouldText
-      );
-      cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON).should(
-        shouldText
-      );
-    });
+  cy.getDocTableField(0, 0).within(() => {
+    cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON).should(
+      shouldText
+    );
+    cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON).should(
+      shouldText
+    );
+  });
 });
 
 /**
  * Check the Doc Table first Field's Filter For button filters the correct value.
  */
 Cypress.Commands.add('checkDocTableFirstFieldFilterForButtonFiltersCorrectField', () => {
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
-    .find('tbody tr')
-    .first()
-    .findElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_ROW_FIELD)
-    .then(($field) => {
-      const fieldText = $field.find('span span').text();
-      $field
-        .find(`[data-test-subj="${DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON}"]`)
-        .click();
-      cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_QUERY_EDITOR_FILTER_VALUE, {
-        timeout: 10000,
-      }).should('have.text', fieldText);
-      cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
-        .find('tbody tr')
-        .first()
-        .findElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_ROW_FIELD)
-        .find('span span')
-        .should('have.text', fieldText);
-      cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DISCOVER_QUERY_HITS).should(
-        'have.text',
-        '1'
-      );
-    });
+  cy.getDocTableField(0, 0).then(($field) => {
+    const filterFieldText = $field.find('span span').text();
+    $field
+      .find(`[data-test-subj="${DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON}"]`)
+      .click();
+    cy.checkFilterPillText(filterFieldText);
+    cy.checkQueryHitText('1'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+    cy.getDocTableField(0, 0).find('span span').should('have.text', filterFieldText);
+  });
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_FILTER_BAR)
+    .find('[aria-label="Delete"]')
+    .click();
+  cy.checkQueryHitText('10,000');
 });
 
 /**
  * Check the Doc Table first Field's Filter Out button filters the correct value.
  */
 Cypress.Commands.add('checkDocTableFirstFieldFilterOutButtonFiltersCorrectField', () => {
-  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
-    .find('tbody tr')
-    .first()
-    .findElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_ROW_FIELD)
-    .then(($field) => {
-      const fieldText = $field.find('span span').text();
-      $field
-        .find(`[data-test-subj="${DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON}"]`)
-        .click();
-      cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_QUERY_EDITOR_FILTER_VALUE, {
-        timeout: 10000,
-      }).should('have.text', fieldText);
-    });
+  cy.getDocTableField(0, 0).then(($field) => {
+    const filterFieldText = $field.find('span span').text();
+    $field
+      .find(`[data-test-subj="${DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON}"]`)
+      .click();
+    cy.checkFilterPillText(filterFieldText);
+    cy.checkQueryHitText('9,999'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+    cy.getDocTableField(0, 0).find('span span').should('not.have.text', filterFieldText);
+  });
+  cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_FILTER_BAR)
+    .find('[aria-label="Delete"]')
+    .click();
+  cy.checkQueryHitText('10,000');
 });
