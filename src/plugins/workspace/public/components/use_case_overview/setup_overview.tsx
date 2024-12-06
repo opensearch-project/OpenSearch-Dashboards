@@ -15,6 +15,7 @@ import {
   ESSENTIAL_OVERVIEW_CONTENT_AREAS,
   ESSENTIAL_OVERVIEW_PAGE_ID,
   SECTIONS,
+  Section,
 } from '../../../../content_management/public';
 import { getStartedCards } from './get_started_cards';
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
@@ -35,6 +36,12 @@ const recentlyViewSectionRender = (contents: Content[]) => {
   );
 };
 
+export const getStartedSection: Section = {
+  id: SECTIONS.GET_STARTED,
+  order: 1000,
+  kind: 'card',
+};
+
 // Essential overview part
 export const setEssentialOverviewSection = (contentManagement: ContentManagementPluginSetup) => {
   contentManagement.registerPage({
@@ -53,11 +60,7 @@ export const setEssentialOverviewSection = (contentManagement: ContentManagement
         kind: 'custom',
         render: recentlyViewSectionRender,
       },
-      {
-        id: SECTIONS.GET_STARTED,
-        order: 1000,
-        kind: 'card',
-      },
+      getStartedSection,
     ],
   });
 };
@@ -107,11 +110,7 @@ export const setAnalyticsAllOverviewSection = (contentManagement: ContentManagem
         kind: 'custom',
         render: recentlyViewSectionRender,
       },
-      {
-        id: SECTIONS.GET_STARTED,
-        order: 1000,
-        kind: 'card',
-      },
+      getStartedSection,
     ],
   });
 };
