@@ -25,6 +25,7 @@ export const DATA_EXPLORER_PAGE_ELEMENTS = {
   QUERY_EDITOR_LANGUAGE_SELECTOR: 'queryEditorLanguageSelector',
   QUERY_EDITOR_LANGUAGE_OPTIONS: 'queryEditorLanguageOptions',
   QUERY_SUBMIT_BUTTON: 'querySubmitButton',
+  QUERY_EDITOR_MULTILINE: 'osdQueryEditor__multiLine',
   GLOBAL_QUERY_EDITOR_FILTER_VALUE: 'globalFilterLabelValue',
   GLOBAL_FILTER_BAR: 'globalFilterBar',
 };
