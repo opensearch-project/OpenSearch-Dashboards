@@ -76,7 +76,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   private buildQuery() {
     const query: Query = this.queryService.queryString.getQuery();
     const dataset = query.dataset;
+    // If the dataset has no time field, so time filter is not supported, time filter should not be included in the query
     if (!dataset || !dataset.timeFieldName) return query;
+
+    // If the time filter be disabled explicitly, time filter should not be included in the query
+    if (this.queryService.timefilter.timefilter.isDisabled()) {
+      return query;
+    }
+
     const [baseQuery, ...afterPipeParts] = query.query.split('|');
     const afterPipe = afterPipeParts.length > 0 ? ` | ${afterPipeParts.join('|').trim()}` : '';
     const timeFilter = this.getTimeFilter(dataset.timeFieldName);

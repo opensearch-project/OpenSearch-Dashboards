@@ -29,7 +29,7 @@
  */
 
 import { TimefilterService, TimeHistoryContract, TimefilterContract } from '.';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
 
@@ -56,6 +56,9 @@ const createSetupContractMock = () => {
     createFilter: jest.fn(),
     getRefreshIntervalDefaults: jest.fn(),
     getTimeDefaults: jest.fn(),
+    getDisabled$: jest.fn(() => new BehaviorSubject<boolean>(false)),
+    setDisabled: jest.fn(),
+    isDisabled: jest.fn(),
   };
 
   const historyMock: jest.Mocked<TimeHistoryContract> = {

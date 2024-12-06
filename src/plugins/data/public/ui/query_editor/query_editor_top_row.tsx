@@ -15,6 +15,7 @@ import {
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useObservable } from 'react-use';
 import {
   DatasetSelector,
   DatasetSelectorAppearance,
@@ -73,6 +74,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data } = opensearchDashboards.services;
+
+  const timeFilterDisabled = useObservable(data.query.timefilter.timefilter.getDisabled$());
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -309,6 +312,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     return (
       <EuiFlexItem className={wrapperClasses}>
         <EuiSuperDatePicker
+          isDisabled={timeFilterDisabled}
           start={props.dateRangeFrom}
           end={props.dateRangeTo}
           isPaused={props.isRefreshPaused}
