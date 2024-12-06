@@ -1,0 +1,2 @@
+fix:
+- [Workspace] [Bug] Check if workspaces exists when creating saved objects. ([#8739](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8739))
