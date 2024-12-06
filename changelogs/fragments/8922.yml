@@ -1,0 +1,2 @@
+fix:
+- Revert remove head 10 commit ([#8922](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8922))
