@@ -16,7 +16,7 @@ import {
   WorkspaceCreatorProps,
 } from './workspace_creator';
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
-import { DataSourceConnectionType } from '../../../common/types';
+import { DataSourceConnectionType, DataSourceConnection } from '../../../common/types';
 import * as utils from '../../utils';
 import * as workspaceUtilsExports from '../utils/workspace';
 
@@ -44,31 +44,31 @@ const PublicAPPInfoMap = new Map([
 
 const dataSourcesList = [
   {
-    id: 'id1',
-    title: 'ds1',
+    id: 'ds1',
+    title: 'Data Source 1',
     description: 'Description of data source 1',
     auth: '',
     dataSourceEngineType: '' as DataSourceEngineType,
     workspaces: [],
     // This is used for mocking saved object function
     get: () => {
-      return 'ds1';
+      return 'Data Source 1';
     },
   },
   {
-    id: 'id2',
-    title: 'ds2',
-    description: 'Description of data source 1',
+    id: 'ds2',
+    title: 'Data Source 2',
+    description: 'Description of data source 2',
     auth: '',
     dataSourceEngineType: '' as DataSourceEngineType,
     workspaces: [],
     get: () => {
-      return 'ds2';
+      return 'Data Source 2';
     },
   },
   {
-    id: 'id3',
-    title: 'dqs1',
+    id: 'ds3',
+    title: 'Data connection 1',
     description: 'Description of data connection 1',
     auth: '',
     dataSourceEngineType: '' as DataSourceEngineType,
@@ -81,35 +81,75 @@ const dataSourcesList = [
   },
 ];
 
+const directQueryConnectionsMock = [
+  {
+    id: 'ds1-dqc1',
+    name: 'dqc1',
+    parentId: 'ds1',
+    connectionType: DataSourceConnectionType.DirectQueryConnection,
+    type: 'Amazon S3',
+  },
+];
 const dataSourceConnectionsList = [
   {
-    id: 'id1',
-    name: 'ds1',
+    id: 'ds1',
+    name: 'Data Source 1',
     connectionType: DataSourceConnectionType.OpenSearchConnection,
     type: 'OpenSearch',
     relatedConnections: [],
   },
   {
-    id: 'id2',
-    name: 'ds2',
+    id: 'ds2',
+    name: 'Data Source 2',
     connectionType: DataSourceConnectionType.OpenSearchConnection,
     type: 'OpenSearch',
   },
+];
+
+const dataConnectionsList = [
   {
-    id: 'id3',
-    name: 'dqs1',
+    id: 'ds3',
+    name: 'Data connection 1',
     description: 'Description of data connection 1',
     connectionType: DataSourceConnectionType.DataConnection,
     type: 'AWS Security Lake',
   },
 ];
 
-const mockCoreStart = coreMock.createStart();
-jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passedDataSources) => {
-  return dataSourceConnectionsList.filter(({ id }) =>
-    passedDataSources.some((dataSource) => dataSource.id === id)
-  );
+jest.spyOn(utils, 'getOpenSearchAndDataConnections').mockReturnValue({
+  openSearchConnections: [...dataSourceConnectionsList],
+  dataConnections: [...dataConnectionsList],
 });
+
+jest.spyOn(utils, 'getDataSourcesList').mockResolvedValue(dataSourcesList);
+jest
+  .spyOn(utils, 'updateFullFillRelatedConnections')
+  .mockImplementationOnce(
+    (
+      openSearchConnections: DataSourceConnection[],
+      directQueryConnections: DataSourceConnection[]
+    ): DataSourceConnection[] => [
+      {
+        id: 'ds1',
+        name: 'Data Source 1',
+        type: 'OpenSearch',
+        connectionType: 0,
+        relatedConnections: [
+          {
+            id: 'ds1-dqc1',
+            name: 'dqc1',
+            type: 'Amazon S3',
+            connectionType: 1,
+            parentId: 'ds1',
+          },
+        ],
+      },
+    ]
+  );
+
+jest.spyOn(utils, 'fetchDirectQueryConnections').mockResolvedValue(directQueryConnectionsMock);
+
+const mockCoreStart = coreMock.createStart();
 
 const WorkspaceCreator = ({
   isDashboardAdmin = false,
@@ -382,7 +422,7 @@ describe('WorkspaceCreator', () => {
       }),
       expect.objectContaining({
         dataConnections: [],
-        dataSources: ['id1'],
+        dataSources: ['ds1'],
       })
     );
     await waitFor(() => {
@@ -431,7 +471,7 @@ describe('WorkspaceCreator', () => {
         name: 'test workspace name',
       }),
       expect.objectContaining({
-        dataConnections: ['id3'],
+        dataConnections: ['ds3'],
         dataSources: [],
       })
     );
