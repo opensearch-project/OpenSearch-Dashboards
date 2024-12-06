@@ -47,6 +47,8 @@ declare const datemath: {
 
   /**
    * Parses a string into a moment object. The string can be something like "now - 15m".
+   * @param options.roundUp - If true, rounds the parsed date to the end of the
+   * unit. Only works for string with "/" like "now/d".
    * @param options.forceNow If this optional parameter is supplied, "now" will be treated as this
    * date, rather than the real "now".
    */

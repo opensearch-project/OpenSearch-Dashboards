@@ -1,0 +1,2 @@
+fix:
+- Use roundUp when converting timestamp for PPL ([#8935](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8935))
