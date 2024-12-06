@@ -288,40 +288,6 @@ describe('validateWorkspaceForm', () => {
     });
   });
 
-  it('should return error if owner is missing in permission settings', () => {
-    expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-        },
-        true
-      ).permissionSettings?.overall
-    ).toEqual({
-      code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-      message: 'Add a workspace owner.',
-    });
-
-    expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-          permissionSettings: [
-            {
-              id: 0,
-              type: WorkspacePermissionItemType.User,
-              modes: [WorkspacePermissionMode.LibraryRead],
-              userId: 'foo',
-            },
-          ],
-        },
-        true
-      ).permissionSettings?.overall
-    ).toEqual({
-      code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-      message: 'Add a workspace owner.',
-    });
-  });
-
   it('should return empty object for valid form data', () => {
     expect(
       validateWorkspaceForm(

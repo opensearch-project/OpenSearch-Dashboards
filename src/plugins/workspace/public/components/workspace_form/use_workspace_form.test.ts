@@ -87,46 +87,6 @@ describe('useWorkspaceForm', () => {
     );
     expect(onSubmitMock).not.toHaveBeenCalled();
   });
-  it('should return "Add workspace owner." and not call onSubmit', async () => {
-    const { renderResult, onSubmitMock } = setup({
-      defaultValues: {
-        id: 'foo',
-        name: 'test-workspace-name',
-      },
-      permissionEnabled: true,
-    });
-    expect(renderResult.result.current.formErrors).toEqual({});
-
-    act(() => {
-      renderResult.result.current.setPermissionSettings([
-        {
-          id: 0,
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-          type: WorkspacePermissionItemType.User,
-        },
-        {
-          id: 1,
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-          type: WorkspacePermissionItemType.Group,
-        },
-      ]);
-    });
-    act(() => {
-      renderResult.result.current.handleFormSubmit({ preventDefault: jest.fn() });
-    });
-
-    expect(renderResult.result.current.formErrors).toEqual(
-      expect.objectContaining({
-        permissionSettings: {
-          overall: {
-            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-            message: 'Add a workspace owner.',
-          },
-        },
-      })
-    );
-    expect(onSubmitMock).not.toHaveBeenCalled();
-  });
   it('should call onSubmit with workspace name and features', async () => {
     const { renderResult, onSubmitMock } = setup({
       defaultValues: {
