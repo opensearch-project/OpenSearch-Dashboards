@@ -152,6 +152,7 @@ export const DatasetExplorer = ({
       <EuiModalBody>
         <div
           className="datasetExplorer"
+          data-test-subj="datasetExplorerWindow"
           style={{
             gridTemplateColumns: `repeat(${
               columnCount - 1
