@@ -48,5 +48,9 @@ describe('sidebar spec', () => {
     DataExplorerPage.getFieldBtnByName(fourthTestField).click();
     DataExplorerPage.getDocTableHeader(1).should('have.text', '_source');
     DataExplorerPage.getDocTableHeader(2).should('not.exist');
+
+    DataExplorerPage.clearQueryMultilineEditor();
+    DataExplorerPage.getQueryMultilineEditor().type('source = vis-builder* | where age > 40');
+    DataExplorerPage.getQuerySubmitBtn().click();
   });
 });

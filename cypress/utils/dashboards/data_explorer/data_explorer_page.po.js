@@ -89,6 +89,28 @@ export class DataExplorerPage {
   }
 
   /**
+   * Get query multiline editor element.
+   */
+  static getQueryMultilineEditor() {
+    return cy
+      .getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_EDITOR_MULTILINE)
+      .find('textarea');
+  }
+
+  static getQuerySubmitBtn() {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_SUBMIT_BUTTON);
+  }
+
+  static clearQueryMultilineEditor() {
+    DataExplorerPage.getQueryMultilineEditor()
+      .invoke('val')
+      .then(function ($content) {
+        const contentLen = $content.length;
+        DataExplorerPage.getQueryMultilineEditor().type('{del}'.repeat(contentLen));
+      });
+  }
+
+  /**
    * Set the query editor language
    * @param language Accepted values: 'DQL', 'Lucene', 'OpenSearch SQL', 'PPL'
    */
@@ -137,8 +159,6 @@ export class DataExplorerPage {
   static getFilterBar() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_FILTER_BAR);
   }
-
-  static getSidebarFieldByName() {}
 
   /**
    * Get sidebar add field button.
