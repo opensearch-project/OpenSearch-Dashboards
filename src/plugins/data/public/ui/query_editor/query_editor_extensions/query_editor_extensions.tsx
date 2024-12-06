@@ -14,6 +14,7 @@ interface QueryEditorExtensionsProps extends QueryEditorExtensionDependencies {
   configMap?: Record<string, QueryEditorExtensionConfig>;
   componentContainer: Element;
   bannerContainer: Element;
+  bottomPanelContainer: Element;
   queryControlsContainer: Element;
 }
 
@@ -22,6 +23,7 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
     configMap,
     componentContainer,
     bannerContainer,
+    bottomPanelContainer,
     queryControlsContainer,
     ...dependencies
   } = props;
@@ -62,6 +64,7 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
             dependencies={dependencies}
             componentContainer={extensionComponentContainer}
             bannerContainer={bannerContainer}
+            bottomPanelContainer={bottomPanelContainer}
             queryControlsContainer={extensionQueryControlsContainer}
           />
         );

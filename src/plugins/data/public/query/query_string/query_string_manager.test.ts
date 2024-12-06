@@ -44,7 +44,6 @@ describe('QueryStringManager', () => {
     storage = new DataStorage(window.localStorage, 'opensearchDashboards.');
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
-
     service = new QueryStringManager(
       storage,
       sessionStorage,
@@ -308,6 +307,38 @@ describe('QueryStringManager', () => {
       expect(result.language).toBe('ppl');
       expect(result.dataset).toEqual(currentDataset);
       expect(result.query).toBeDefined();
+    });
+
+    test('getInitialQueryByLanguage returns the initial query from the dataset config if present', () => {
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn(),
+        getInitialQueryString: jest.fn().mockImplementation(({ language }) => {
+          switch (language) {
+            case 'sql':
+              return 'default sql dataset query';
+            case 'ppl':
+              return 'default ppl dataset query';
+          }
+        }),
+      });
+
+      const sqlQuery = service.getInitialQueryByLanguage('sql');
+      expect(sqlQuery).toHaveProperty('query', 'default sql dataset query');
+
+      const pplQuery = service.getInitialQueryByLanguage('ppl');
+      expect(pplQuery).toHaveProperty('query', 'default ppl dataset query');
+    });
+
+    test('getInitialQueryByLanguage returns the initial query from the language config if dataset does not provide one', () => {
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn(),
+      });
+      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+        getQueryString: jest.fn().mockReturnValue('default-language-service-query'),
+      });
+
+      const sqlQuery = service.getInitialQueryByLanguage('sql');
+      expect(sqlQuery).toHaveProperty('query', 'default-language-service-query');
     });
   });
 });
