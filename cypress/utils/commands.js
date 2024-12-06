@@ -13,9 +13,27 @@ const loginPage = new LoginPage(cy);
 
 /**
  * Get DOM element by data-test-subj id.
+ * @param testId data-test-subj value.
+ * @param options cy.get() options. Default: {}
  */
 Cypress.Commands.add('getElementByTestId', (testId, options = {}) => {
   return cy.get(`[data-test-subj="${testId}"]`, options);
+});
+
+/**
+ * Get DOM element by partial data-test-subj id.
+ * @param testId data-test-subj value.
+ * @param options cy.get() options. Default: {}
+ * @comparisonType choose a partial data-test-subj comparison type. Accepted values: 'beginning', 'ending', 'substring'.
+ */
+Cypress.Commands.add('getElementByTestIdLike', (testId, comparisonType, options = {}) => {
+  const comparison = {
+    beginning: '^',
+    ending: '$',
+    substring: '*',
+  };
+  const chosenType = comparison[comparisonType] || '';
+  return cy.get(`[data-test-subj${chosenType}="${testId}"]`, options);
 });
 
 /**
