@@ -1,13 +1,16 @@
 # CHANGELOG
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Unreleased](https://github.com/opensearch-project/OpenSearch-Dashboards/compare/1.3.19...1.3)
+## [1.3.20 - 2024-12-06](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/1.3.20)
 
 ### 💥 Breaking Changes
 
 ### Deprecations
 
 ### 🛡   Security
+
+- [CVE-2024-45590] Bump body-parser from 1.19.0 to 1.20.3 ([#9007](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9007))
+- [CVE-2024-45296] Bump various version of path-to-regexp to required versions ([#9007](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9007))
 
 ### 📈 Features/Enhancements
 
