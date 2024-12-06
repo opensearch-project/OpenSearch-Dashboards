@@ -88,7 +88,7 @@ import { CoreStart } from '<%= importFromRoot('src/core/public') %>';
                                           defaultMessage="Last timestamp: {time}" values={{ time: timestamp ? timestamp
                                           : 'Unknown' }} />
                                       </p>
-                                      <EuiSmallButton type="primary" size="s" onClick={onClickHandler}>
+                                      <EuiSmallButton type="primary" onClick={onClickHandler}>
                                         <FormattedMessage id="<%= camelCase(name) %>.buttonText"
                                           defaultMessage="<%= hasServer ? 'Get data' : 'Click me' %>" />
                                       </EuiSmallButton>
