@@ -200,27 +200,24 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
   describe('bulkGet', () => {
     it('should throw forbidden error when user not permitted', async () => {
-      let error;
-      try {
-        await notPermittedSavedObjectedClient.bulkGet([
-          { type: 'dashboard', id: 'inner-workspace-dashboard-1' },
-        ]);
-      } catch (e) {
-        error = e;
-      }
-      expect(error).not.toBeUndefined();
-      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+      const result = await notPermittedSavedObjectedClient.bulkGet([
+        { type: 'dashboard', id: 'acl-controlled-dashboard-2' },
+      ]);
 
-      error = undefined;
-      try {
-        await notPermittedSavedObjectedClient.bulkGet([
-          { type: 'dashboard', id: 'acl-controlled-dashboard-2' },
-        ]);
-      } catch (e) {
-        error = e;
-      }
-      expect(error).not.toBeUndefined();
-      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+      expect(result.saved_objects).toEqual([
+        {
+          ...result.saved_objects[0],
+          id: 'acl-controlled-dashboard-2',
+          type: 'dashboard',
+          attributes: {},
+          error: {
+            error: 'Forbidden',
+            statusCode: 403,
+            message: 'Invalid saved objects permission',
+          },
+          workspaces: [],
+        },
+      ]);
     });
 
     it('should return consistent dashboard when user permitted', async () => {
