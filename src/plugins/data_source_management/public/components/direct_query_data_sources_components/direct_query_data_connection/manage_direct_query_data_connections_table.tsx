@@ -46,7 +46,7 @@ import {
 import { LoadingMask } from '../../loading_mask';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../../../constants';
-import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../constants';
+import { DatasourceTypeToDisplayName, DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../constants';
 import { DataConnectionType } from '../../../../../data_source/common';
 
 interface DirectQueryDataConnectionsProps extends RouteComponentProps {
@@ -150,8 +150,8 @@ export const ManageDirectQueryDataConnectionsTable = ({
                 title: dataConnection.name,
                 type:
                   {
-                    S3GLUE: 'Amazon S3',
-                    PROMETHEUS: 'Prometheus',
+                    S3GLUE: DatasourceTypeToDisplayName.S3GLUE,
+                    PROMETHEUS: DatasourceTypeToDisplayName.PROMETHEUS,
                   }[dataConnection.connector] || dataConnection.connector,
                 connectionType: dataConnection.connector,
                 description: dataConnection.description,
