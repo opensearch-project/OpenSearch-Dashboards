@@ -8,6 +8,7 @@ import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
 import { monaco } from '@osd/monaco';
+import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryStringContract } from '../../query';
 import { findCursorTokenIndex } from './cursor';
 import { GeneralErrorListener } from './general_error_listerner';
@@ -17,6 +18,8 @@ import { ParsingSubject } from './types';
 import { quotesRegex } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion } from '../../autocomplete';
+import { IDataPluginServices } from '../../types';
+import { Dataset, UI_SETTINGS } from '../../../common';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -46,9 +49,9 @@ export const getRawSuggestionData$ = (
     })
   );
 
-const fetchFromAPI = async (api: any, body: string) => {
+const fetchFromAPI = async (http: HttpSetup, body: string) => {
   try {
-    return await api.http.fetch({
+    return await http.fetch({
       method: 'POST',
       path: '/api/enhancements/search/sql',
       body,
@@ -63,7 +66,7 @@ const fetchFromAPI = async (api: any, body: string) => {
 export const fetchData = (
   tables: string[],
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
-  api: any,
+  http: HttpSetup,
   queryString: QueryStringContract
 ) => {
   return new Promise((resolve, reject) => {
@@ -72,14 +75,14 @@ export const fetchData = (
       ({ dataSourceId, title }) => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table, dataSourceId, title));
-          return fetchFromAPI(api, body);
+          return fetchFromAPI(http, body);
         });
         return Promise.all(requests);
       },
       () => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table));
-          return fetchFromAPI(api, body);
+          return fetchFromAPI(http, body);
         });
         return Promise.all(requests);
       }
@@ -93,30 +96,49 @@ export const fetchData = (
   });
 };
 
-// Specific fetch function for table schemas
-// TODO: remove this after using data set table schema fetcher
-export const fetchTableSchemas = (tables: string[], api: any, queryString: QueryStringContract) => {
-  return fetchData(
-    tables,
-    (table, dataSourceId, title) => ({
-      query: { query: `DESCRIBE TABLES LIKE ${table}`, format: 'jdbc' },
-      df: {
-        meta: {
-          queryConfig: {
-            dataSourceId: dataSourceId || undefined,
-            title: title || undefined,
-          },
+export const fetchColumnValues = async (
+  tables: string[],
+  column: string,
+  services: IDataPluginServices,
+  fieldInOsd: IndexPatternField | undefined,
+  dataset?: Dataset
+): Promise<string[]> => {
+  // default to true/false values for type boolean
+  if (fieldInOsd?.type === 'boolean') {
+    return ['true', 'false'];
+  }
+
+  const allowedType = ['string'];
+  // don't return values if ui settings prevent it or the field type isn't allowed
+  // todo: check if a field's aggretability means anything
+  if (
+    !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
+    !fieldInOsd ||
+    !allowedType.includes(fieldInOsd.type)
+  ) {
+    return [];
+  }
+  const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
+
+  return (
+    await fetchFromAPI(
+      services.http,
+      JSON.stringify({
+        query: {
+          query: `SELECT ${column} FROM ${tables[0]} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
+          language: 'SQL',
+          dataset,
+          format: 'jdbc',
         },
-      },
-    }),
-    api,
-    queryString
-  );
+      })
+    )
+  ).body.fields[0].values;
 };
 
 export const fetchFieldSuggestions = (
   indexPattern: IndexPattern,
-  modifyInsertText?: (input: string) => string
+  modifyInsertText?: (input: string) => string,
+  sortTextImportance?: string
 ) => {
   const filteredFields = indexPattern.fields.filter(
     (idxField: IndexPatternField) => !idxField?.subType
@@ -128,6 +150,7 @@ export const fetchFieldSuggestions = (
       type: monaco.languages.CompletionItemKind.Field,
       detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
       ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+      ...(sortTextImportance && { sortText: sortTextImportance }),
     };
   });
 
@@ -159,6 +182,7 @@ export const parseQuery = <
   getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);
+  // core.showDebugOutput = true;
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
@@ -188,6 +212,30 @@ export const parseQuery = <
     errors: errorListener.errors,
     suggestKeywords,
   };
+
+  // console.clear();
+  // console.log('cursorTokenIndex', cursorTokenIndex);
+  // console.log('Formatted Token Stream:');
+  // let index = 0;
+  // try {
+  //   while (true) {
+  //     const token = tokenStream.get(index);
+  //     if (!token) break;
+
+  //     const isCurrentToken = index === cursorTokenIndex;
+  //     const tokenInfo = `Token ${index}: ${token.text} (Type: ${token.type})`;
+
+  //     if (isCurrentToken) {
+  //       console.log(`%c${tokenInfo}`, 'background-color: red; font-weight: bold;');
+  //     } else {
+  //       console.log(tokenInfo);
+  //     }
+
+  //     index++;
+  //   }
+  // } catch (error) {
+  //   console.error('Error while iterating through token stream:', error);
+  // }
 
   return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
 };

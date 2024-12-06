@@ -4,12 +4,17 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { CursorPosition, OpenSearchSqlAutocompleteResult } from '../shared/types';
+import {
+  ColumnValuePredicate,
+  CursorPosition,
+  OpenSearchSqlAutocompleteResult,
+} from '../shared/types';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { fetchFieldSuggestions, parseQuery } from '../shared/utils';
+import { fetchColumnValues, fetchFieldSuggestions, parseQuery } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
+import { OpenSearchSQLParser } from './.generated/OpenSearchSQLParser';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -42,9 +47,87 @@ export const getSuggestions = async ({
 
     // Fetch columns and values
     if (suggestions.suggestColumns?.tables?.length) {
-      // NOTE:  currently the suggestions return the table present in the query, but since the
+      // NOTE:  currently 'suggestions' returns the table present in the query, but since the
       //        parameters already provide that, it may not be needed anymore
-      finalSuggestions.push(...fetchFieldSuggestions(indexPattern));
+      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '2'));
+    }
+
+    if (suggestions.suggestColumnValuePredicate) {
+      switch (suggestions.suggestColumnValuePredicate) {
+        case ColumnValuePredicate.COLUMN: {
+          finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '2'));
+          break;
+        }
+        case ColumnValuePredicate.OPERATOR: {
+          finalSuggestions.push({
+            text: '=',
+            insertText: '= ',
+            type: monaco.languages.CompletionItemKind.Operator,
+            detail: SuggestionItemDetailsTags.Operator,
+            sortText: '0',
+          });
+          break;
+        }
+        case ColumnValuePredicate.LPAREN: {
+          finalSuggestions.push({
+            text: '(',
+            insertText: '( ',
+            type: monaco.languages.CompletionItemKind.Operator,
+            detail: SuggestionItemDetailsTags.Operator,
+            sortText: '0',
+          });
+          break;
+        }
+        case ColumnValuePredicate.END_IN_TERM: {
+          finalSuggestions.push({
+            text: ',',
+            insertText: ', ',
+            type: monaco.languages.CompletionItemKind.Operator,
+            detail: SuggestionItemDetailsTags.Operator,
+            sortText: '0',
+          });
+          finalSuggestions.push({
+            text: ')',
+            insertText: ') ',
+            type: monaco.languages.CompletionItemKind.Operator,
+            detail: SuggestionItemDetailsTags.Operator,
+            sortText: '08',
+          });
+          break;
+        }
+        case ColumnValuePredicate.VALUE: {
+          if (suggestions.suggestValuesForColumn) {
+            // get dataset for connecting to the cluster currently engaged
+            const dataset = services.data.query.queryString.getQuery().dataset;
+
+            // take the column and push in values for that column
+            const values = await fetchColumnValues(
+              [indexPattern.title],
+              suggestions.suggestValuesForColumn,
+              services,
+              indexPattern.fields.find(
+                (field) => field.name === suggestions.suggestValuesForColumn
+              ),
+              dataset
+            );
+
+            let i = 0;
+            finalSuggestions.push(
+              ...values.map((val: any) => {
+                i++;
+                return {
+                  text: val.toString(),
+                  insertText: typeof val === 'string' ? `'${val}' ` : `${val} `,
+                  type: monaco.languages.CompletionItemKind.Value,
+                  detail: SuggestionItemDetailsTags.Value,
+                  sortText: i.toString().padStart(values.length.toString().length + 1, '0'),
+                };
+              })
+            );
+          }
+          break;
+        }
+      }
     }
 
     // Fill in aggregate functions
@@ -59,17 +142,32 @@ export const getSuggestions = async ({
       );
     }
 
+    if (suggestions.suggestViewsOrTables) {
+      finalSuggestions.push({
+        text: indexPattern.title,
+        type: monaco.languages.CompletionItemKind.Struct,
+        insertText: `${indexPattern.title} `,
+        detail: SuggestionItemDetailsTags.Table,
+      });
+    }
+
+    const suggestionImportance = new Map<number, string>();
+    suggestionImportance.set(OpenSearchSQLParser.STAR, '1');
+    suggestionImportance.set(OpenSearchSQLParser.IN, '09');
+
     // Fill in SQL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
         ...suggestions.suggestKeywords.map((sk) => ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
-          insertText: sk.value,
+          insertText: `${sk.value} `,
           detail: SuggestionItemDetailsTags.Keyword,
+          sortText: suggestionImportance.get(sk.id) ?? '9' + sk.value.toLowerCase(),
         }))
       );
     }
+
     return finalSuggestions;
   } catch (error) {
     // TODO: Handle errors appropriately, possibly logging or displaying a message to the user
@@ -81,7 +179,7 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
   query: string,
   cursor: CursorPosition
 ): OpenSearchSqlAutocompleteResult => {
-  return parseQuery({
+  const initialResult = parseQuery({
     Lexer: openSearchSqlAutocompleteData.Lexer,
     Parser: openSearchSqlAutocompleteData.Parser,
     tokenDictionary: openSearchSqlAutocompleteData.tokenDictionary,
@@ -92,4 +190,39 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
     query,
     cursor,
   });
+
+  if (!initialResult?.rerunAndCombine) {
+    return initialResult;
+  }
+
+  // rerun with no preferred rules and specified context to grab missing lexer tokens
+  const contextResult = parseQuery({
+    Lexer: openSearchSqlAutocompleteData.Lexer,
+    Parser: openSearchSqlAutocompleteData.Parser,
+    tokenDictionary: openSearchSqlAutocompleteData.tokenDictionary,
+    ignoredTokens: openSearchSqlAutocompleteData.ignoredTokens,
+    rulesToVisit: new Set(),
+    getParseTree: openSearchSqlAutocompleteData.getParseTree,
+    enrichAutocompleteResult: openSearchSqlAutocompleteData.enrichAutocompleteResult,
+    query,
+    cursor,
+  });
+
+  // only need to modify initial results if there are context keywords
+  if (contextResult?.suggestKeywords) {
+    if (!initialResult?.suggestKeywords) {
+      // set initial keywords to be context keywords
+      initialResult.suggestKeywords = contextResult.suggestKeywords;
+    } else {
+      // merge initial and context keywords
+      const combined = [...initialResult.suggestKeywords, ...contextResult.suggestKeywords];
+
+      // ES6 magic to filter out duplicate objects based on id field
+      initialResult.suggestKeywords = combined.filter(
+        (item, index, self) => index === self.findIndex((other) => other.id === item.id)
+      );
+    }
+  }
+
+  return initialResult;
 };
