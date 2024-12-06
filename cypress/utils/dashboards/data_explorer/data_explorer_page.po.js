@@ -57,12 +57,21 @@ export class DataExplorerPage {
   }
 
   /**
+   * Get specific DocTable column header.
+   * @param index Integer starts from 0 for the first column header.
+   */
+  static getDocTableHeader(index) {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_HEADER_FIELD).eq(index);
+  }
+
+  /**
    * Get specific row of DocTable.
    * @param rowNumber Integer starts from 0 for the first row
    */
   static getDocTableRow(rowNumber) {
     return cy
       .getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
+
       .get('tbody tr')
       .eq(rowNumber);
   }
@@ -75,7 +84,21 @@ export class DataExplorerPage {
   static getDocTableField(columnNumber, rowNumber) {
     return DataExplorerPage.getDocTableRow(rowNumber)
       .findElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_ROW_FIELD)
+
       .eq(columnNumber);
+  }
+
+  /**
+   * Set the query editor language
+   * @param language Accepted values: 'DQL', 'Lucene', 'OpenSearch SQL', 'PPL'
+   */
+  static setQueryEditorLanguage(language) {
+    cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_EDITOR_LANGUAGE_SELECTOR).click();
+
+    cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_EDITOR_LANGUAGE_OPTIONS)
+      .find('button')
+      .contains(language)
+      .click();
   }
 
   /**
@@ -113,6 +136,20 @@ export class DataExplorerPage {
    */
   static getFilterBar() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_FILTER_BAR);
+  }
+
+  static getSidebarFieldByName() {}
+
+  /**
+   * Get sidebar add field button.
+   * @param index Integer that starts at 0 for the first add button.
+   */
+  static getFieldBtnByIndex(index) {
+    return cy.getElementByTestIdLike('fieldToggle-', 'beginning').eq(index);
+  }
+
+  static getFieldBtnByName(name) {
+    return cy.getElementByTestId('fieldToggle-' + name);
   }
 
   /**
@@ -261,5 +298,11 @@ export class DataExplorerPage {
     });
     DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
     DataExplorerPage.checkQueryHitsText('10,000');
+  }
+
+  static checkTableHeadersByArray(arr) {
+    for (let i = 0; i < arr.length; i++) {
+      DataExplorerPage.getDocTableHeader(i + 1).should('have.text', arr[i]);
+    }
   }
 }
