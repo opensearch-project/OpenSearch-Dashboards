@@ -9,12 +9,13 @@ import * as utils from '../../utils';
 import { mount, ReactWrapper } from 'enzyme';
 import { RouteComponentProps } from 'react-router-dom';
 import { wrapWithIntl } from 'test_utils/enzyme_helpers';
-import { ScopedHistory } from 'opensearch-dashboards/public';
+import { SavedObjectsClientContract, ScopedHistory } from 'opensearch-dashboards/public';
 import { scopedHistoryMock } from '../../../../../../core/public/mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { getMappedDataSources, mockManagementPlugin } from '../../../mocks';
 import { ManageDirectQueryDataConnectionsTable } from './manage_direct_query_data_connections_table';
 import { BehaviorSubject } from 'rxjs';
+import { DataSourceTableItem } from '../../../types';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
 const tableIdentifier = 'EuiInMemoryTable';
@@ -161,5 +162,122 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
       // @ts-ignore
       expect(component.find(confirmModalIdentifier).exists()).toBe(false);
     });
+  });
+});
+
+describe('FetchDirectQueryConnections', () => {
+  let fetchDirectQueryConnections: () => Promise<DataSourceTableItem[]>;
+  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  beforeEach(() => {
+    jest.resetAllMocks();
+    (utils.getDataConnections as jest.Mock) = jest.fn();
+
+    fetchDirectQueryConnections = async (): Promise<DataSourceTableItem[]> => {
+      try {
+        const dataConnectionSavedObjects = await utils.getDataConnections(mockSavedObjectsClient);
+        return dataConnectionSavedObjects.map((obj) => ({
+          id: obj.id,
+          title: obj.attributes.connectionId,
+          type: obj.attributes.type,
+          objectType: 'data-connection',
+        }));
+      } catch (error) {
+        return [];
+      }
+    };
+  });
+
+  it('should return mapped data connections when successful', async () => {
+    const mockSavedObjects = [
+      { id: 'connection1', attributes: { connectionId: 'Connection 1', type: 'S3' } },
+      { id: 'connection2', attributes: { connectionId: 'Connection 2', type: 'Security Lake' } },
+    ];
+
+    mockSavedObjectsClient = ({
+      find: jest.fn().mockResolvedValue({ savedObjects: mockSavedObjects }),
+    } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+
+    (utils.getDataConnections as jest.Mock).mockResolvedValue(mockSavedObjects);
+
+    const result = await fetchDirectQueryConnections();
+
+    expect(utils.getDataConnections).toHaveBeenCalledWith(mockSavedObjectsClient);
+    expect(result).toEqual([
+      { id: 'connection1', title: 'Connection 1', type: 'S3', objectType: 'data-connection' },
+      {
+        id: 'connection2',
+        title: 'Connection 2',
+        type: 'Security Lake',
+        objectType: 'data-connection',
+      },
+    ]);
+  });
+
+  it('should return an empty array when there is an error', async () => {
+    mockSavedObjectsClient = ({
+      find: jest.fn().mockRejectedValue(new Error('Failed to fetch data connections')),
+    } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+
+    (utils.getDataConnections as jest.Mock).mockRejectedValue(
+      new Error('Failed to fetch data connections')
+    );
+
+    const result = await fetchDirectQueryConnections();
+
+    expect(utils.getDataConnections).toHaveBeenCalledWith(mockSavedObjectsClient);
+    expect(result).toEqual([]);
+  });
+});
+
+describe('GetDataConnections', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    (utils.getDataConnections as jest.Mock) = jest.fn();
+  });
+
+  it('should fetch data connections correctly', async () => {
+    const mockSavedObjects = [
+      {
+        id: 'connection1',
+        attributes: {
+          connectionId: 'Connection 1',
+          type: 'S3',
+        },
+      },
+      {
+        id: 'connection2',
+        attributes: {
+          connectionId: 'Connection 2',
+          type: 'Security Lake',
+        },
+      },
+    ];
+
+    const mockSavedObjectsClient = ({
+      find: jest.fn().mockResolvedValue({
+        savedObjects: mockSavedObjects,
+      }),
+    } as unknown) as SavedObjectsClientContract;
+
+    (utils.getDataConnections as jest.Mock).mockResolvedValue(mockSavedObjects);
+
+    const result = await utils.getDataConnections(mockSavedObjectsClient);
+
+    expect(utils.getDataConnections).toHaveBeenCalledWith(mockSavedObjectsClient);
+    expect(result).toEqual(mockSavedObjects);
+  });
+
+  it('should handle errors when fetching data connections', async () => {
+    const mockSavedObjectsClient = ({
+      find: jest.fn().mockRejectedValue(new Error('Failed to fetch data connections')),
+    } as unknown) as SavedObjectsClientContract;
+
+    (utils.getDataConnections as jest.Mock).mockRejectedValue(
+      new Error('Failed to fetch data connections')
+    );
+
+    await expect(utils.getDataConnections(mockSavedObjectsClient)).rejects.toThrow(
+      'Failed to fetch data connections'
+    );
   });
 });

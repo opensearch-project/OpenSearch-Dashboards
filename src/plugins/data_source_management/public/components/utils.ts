@@ -30,7 +30,7 @@ import { DataSourceGroupLabelOption } from './data_source_menu/types';
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { getManageDataSourceButton, getReloadButton } from './toast_button';
-import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from './constants';
+import { DatasourceTypeToDisplayName, DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from './constants';
 import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
@@ -51,8 +51,8 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
       title: dataConnection.name,
       type:
         {
-          S3GLUE: 'Amazon S3',
-          PROMETHEUS: 'Prometheus',
+          S3GLUE: DatasourceTypeToDisplayName.S3GLUE,
+          PROMETHEUS: DatasourceTypeToDisplayName.PROMETHEUS,
         }[dataConnection.connector] || dataConnection.connector,
       connectionType: DataSourceConnectionType.DirectQueryConnection,
       description: dataConnection.description,

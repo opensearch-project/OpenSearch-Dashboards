@@ -186,9 +186,18 @@ export const ManageDirectQueryDataConnectionsTable = ({
     };
 
     const fetchAllData = async () => {
-      const newData = await fetchOpenSearchConnections();
-      setData(newData.concat(await fetchDirectQueryConnections()));
-      setIsLoading(false);
+      try {
+        const [openSearchConnections, directQueryConnections] = await Promise.all([
+          fetchOpenSearchConnections(),
+          fetchDirectQueryConnections(),
+        ]);
+        setData([...openSearchConnections, ...directQueryConnections]);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log('Error fetching OpenSearch and Direct Query Connections', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchAllData();
