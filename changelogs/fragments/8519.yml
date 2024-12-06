@@ -1,0 +1,2 @@
+fix:
+- Adds badge when there are more than one workspaces and updates the icon ([#8519](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8519))
