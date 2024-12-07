@@ -16,6 +16,10 @@ import { getMappedDataSources, mockManagementPlugin } from '../../../mocks';
 import { ManageDirectQueryDataConnectionsTable } from './manage_direct_query_data_connections_table';
 import { BehaviorSubject } from 'rxjs';
 import { DataSourceTableItem } from '../../../types';
+import {
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+  DataConnectionType,
+} from '../../../../../data_source/common';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
 const tableIdentifier = 'EuiInMemoryTable';
@@ -163,6 +167,119 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
       expect(component.find(confirmModalIdentifier).exists()).toBe(false);
     });
   });
+
+  describe('fetch security lake and cloudwatch direct query connections', () => {
+    beforeEach(async () => {
+      spyOn(utils, 'getDataConnections').and.returnValue(
+        Promise.resolve([
+          {
+            type: 'data-connection',
+            id: 'connection1',
+            attributes: {
+              connectionId: 'Connection 1',
+              type: DataConnectionType.CloudWatch,
+            },
+          },
+          {
+            type: 'data-connection',
+            id: 'connection2',
+            attributes: {
+              connectionId: 'Connection 2',
+              type: DataConnectionType.SecurityLake,
+            },
+          },
+        ])
+      );
+
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+    });
+
+    it('should get security lake and cloudwatch correctly correctly', async () => {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      component.update();
+      const tableRows = component.find('EuiInMemoryTable').prop('items');
+      expect(tableRows).toContainEqual(
+        expect.objectContaining({
+          id: 'connection1',
+          title: 'Connection 1',
+          type: DataConnectionType.CloudWatch,
+        })
+      );
+      expect(tableRows).toContainEqual(
+        expect.objectContaining({
+          id: 'connection2',
+          title: 'Connection 2',
+          type: DataConnectionType.SecurityLake,
+        })
+      );
+    });
+
+    it('should render normally', () => {
+      expect(component).toMatchSnapshot();
+      expect(utils.getDataConnections).toHaveBeenCalled();
+    });
+
+    it('should handle errors correctly', async () => {
+      jest
+        .spyOn(utils, 'getDataConnections')
+        .mockImplementation(() => Promise.reject(new Error('Failed to fetch connections')));
+
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      component.update();
+
+      const tableRows = component.find('EuiInMemoryTable').prop('items');
+      expect(tableRows).toEqual(
+        expect.not.arrayContaining([
+          expect.objectContaining({ objectType: DATA_CONNECTION_SAVED_OBJECT_TYPE }),
+        ])
+      );
+    });
+    test('should render empty table', () => {
+      expect(component).toMatchSnapshot();
+    });
+  });
 });
 
 describe('FetchDirectQueryConnections', () => {
@@ -189,8 +306,14 @@ describe('FetchDirectQueryConnections', () => {
 
   it('should return mapped data connections when successful', async () => {
     const mockSavedObjects = [
-      { id: 'connection1', attributes: { connectionId: 'Connection 1', type: 'S3' } },
-      { id: 'connection2', attributes: { connectionId: 'Connection 2', type: 'Security Lake' } },
+      {
+        id: 'connection1',
+        attributes: { connectionId: 'Connection 1', type: DataConnectionType.CloudWatch },
+      },
+      {
+        id: 'connection2',
+        attributes: { connectionId: 'Connection 2', type: DataConnectionType.SecurityLake },
+      },
     ];
 
     mockSavedObjectsClient = ({
@@ -203,11 +326,16 @@ describe('FetchDirectQueryConnections', () => {
 
     expect(utils.getDataConnections).toHaveBeenCalledWith(mockSavedObjectsClient);
     expect(result).toEqual([
-      { id: 'connection1', title: 'Connection 1', type: 'S3', objectType: 'data-connection' },
+      {
+        id: 'connection1',
+        title: 'Connection 1',
+        type: DataConnectionType.CloudWatch,
+        objectType: 'data-connection',
+      },
       {
         id: 'connection2',
         title: 'Connection 2',
-        type: 'Security Lake',
+        type: DataConnectionType.SecurityLake,
         objectType: 'data-connection',
       },
     ]);
@@ -241,14 +369,14 @@ describe('GetDataConnections', () => {
         id: 'connection1',
         attributes: {
           connectionId: 'Connection 1',
-          type: 'S3',
+          type: DataConnectionType.CloudWatch,
         },
       },
       {
         id: 'connection2',
         attributes: {
           connectionId: 'Connection 2',
-          type: 'Security Lake',
+          type: DataConnectionType.SecurityLake,
         },
       },
     ];
