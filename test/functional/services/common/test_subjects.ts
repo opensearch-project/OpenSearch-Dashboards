@@ -29,7 +29,6 @@
  */
 
 import { testSubjSelector } from '@osd/test-subj-selector';
-import { map as mapAsync } from 'bluebird';
 import { ProvidedType } from '@osd/test/types/ftr';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -295,7 +294,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
     ): Promise<T[]> {
       return await retry.try(async () => {
         const elements = await this.findAll(selectorAll);
-        return await mapAsync(elements, mapFn);
+        return await Promise.all(elements.map((e) => mapFn(e)));
       });
     }
 

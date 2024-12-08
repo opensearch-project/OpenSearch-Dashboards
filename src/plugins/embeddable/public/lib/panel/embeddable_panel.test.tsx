@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { setTimeout } from 'timers/promises';
 
 import { findTestSubject } from 'test_utils/helpers';
 import { I18nProvider } from '@osd/i18n/react';
@@ -180,7 +180,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
 
   findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
-  await nextTick();
+  await setTimeout();
   component.update();
   expect(findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`).length).toBe(0);
 });
@@ -218,7 +218,7 @@ const renderInEditModeAndOpenContextMenu = async (
   );
 
   findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
+  await setTimeout();
   component.update();
 
   return { component };
@@ -330,23 +330,23 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
   findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
 
   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
-  await nextTick();
+  await setTimeout();
   component.update();
   expect(findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`).length).toBe(0);
 
   container.updateInput({ viewMode: ViewMode.EDIT });
-  await nextTick();
+  await setTimeout();
   component.update();
 
   // Need to close and re-open to refresh. It doesn't update automatically.
   findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
+  await setTimeout();
   findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
+  await setTimeout();
   expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
 
   container.updateInput({ viewMode: ViewMode.VIEW });
-  await nextTick();
+  await setTimeout();
   component.update();
 
   // TODO: Fix this.
@@ -392,7 +392,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
 
   await container.updateInput({ hidePanelTitles: true });
 
-  await nextTick();
+  await setTimeout();
   component.update();
 
   title = findTestSubject(component, `embeddablePanelHeading-HelloRobStark`);
@@ -400,7 +400,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
 
   await container.updateInput({ hidePanelTitles: false });
 
-  await nextTick();
+  await setTimeout();
   component.update();
 
   title = findTestSubject(component, `embeddablePanelHeading-HelloRobStark`);
@@ -445,7 +445,7 @@ test('Updates when hidePanelActions is toggled', async () => {
 
   container.updateInput({ hidePanelActions: true });
 
-  await nextTick();
+  await setTimeout();
   component.update();
 
   actionButton = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
@@ -453,7 +453,7 @@ test('Updates when hidePanelActions is toggled', async () => {
 
   container.updateInput({ hidePanelActions: false });
 
-  await nextTick();
+  await setTimeout();
   component.update();
 
   actionButton = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
