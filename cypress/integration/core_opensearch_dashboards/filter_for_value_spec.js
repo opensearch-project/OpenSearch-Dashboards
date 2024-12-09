@@ -47,12 +47,15 @@ describe('filter for value spec', () => {
     describe('index dataset', () => {
       // filter actions should not exist for SQL
       it('SQL', () => {
-        DataExplorerPage.selectIndexDataset('OpenSearch SQL');
+        DataExplorerPage.selectIndexDataset(
+          'OpenSearch SQL',
+          "I don't want to use the time filter"
+        );
         DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
       });
       // filter actions should not exist for PPL
       it('PPL', () => {
-        DataExplorerPage.selectIndexDataset('PPL');
+        DataExplorerPage.selectIndexDataset('PPL', "I don't want to use the time filter");
         DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
       });
     });
