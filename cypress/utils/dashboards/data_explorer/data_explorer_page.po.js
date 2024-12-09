@@ -71,7 +71,6 @@ export class DataExplorerPage {
   static getDocTableRow(rowNumber) {
     return cy
       .getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
-
       .get('tbody tr')
       .eq(rowNumber);
   }
@@ -84,7 +83,6 @@ export class DataExplorerPage {
   static getDocTableField(columnNumber, rowNumber) {
     return DataExplorerPage.getDocTableRow(rowNumber)
       .findElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_ROW_FIELD)
-
       .eq(columnNumber);
   }
 
@@ -101,13 +99,33 @@ export class DataExplorerPage {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_SUBMIT_BUTTON);
   }
 
-  static clearQueryMultilineEditor() {
+  /**
+   *
+   * @param expectedValues array of expected values. E.g. ['50', '57', '52']
+   * @param columnNumber column index beginning at 0
+   */
+  static checkDocTableColumnByArr(expectedValues, columnNumber) {
+    let currentRow = 0;
+    expectedValues.forEach((value) => {
+      DataExplorerPage.getDocTableField(columnNumber, currentRow).should('have.text', value);
+      currentRow++;
+    });
+  }
+
+  static clearQueryMultilineEditor(del = true) {
     DataExplorerPage.getQueryMultilineEditor()
       .invoke('val')
       .then(function ($content) {
         const contentLen = $content.length;
-        DataExplorerPage.getQueryMultilineEditor().type('{del}'.repeat(contentLen));
+        const deletionType = del ? '{del}' : '{backspace}';
+        DataExplorerPage.getQueryMultilineEditor().type(deletionType.repeat(contentLen));
       });
+  }
+
+  static sendQueryOnMultilineEditor(query, del = true) {
+    DataExplorerPage.clearQueryMultilineEditor(del);
+    DataExplorerPage.getQueryMultilineEditor().type(query);
+    DataExplorerPage.getQuerySubmitBtn().click();
   }
 
   /**
@@ -320,9 +338,9 @@ export class DataExplorerPage {
     DataExplorerPage.checkQueryHitsText('10,000');
   }
 
-  static checkTableHeadersByArray(arr) {
+  static checkTableHeadersByArray(arr, offset = 1) {
     for (let i = 0; i < arr.length; i++) {
-      DataExplorerPage.getDocTableHeader(i + 1).should('have.text', arr[i]);
+      DataExplorerPage.getDocTableHeader(i + offset).should('have.text', arr[i]);
     }
   }
 }

@@ -8,33 +8,38 @@ import { DataExplorerPage } from '../../utils/dashboards/data_explorer/data_expl
 
 const miscUtils = new MiscUtils(cy);
 
-describe('sidebar spec', () => {
-  before(() => {
+describe('sidebar: add fields', function () {
+  beforeEach(function () {
     cy.localLogin(Cypress.env('username'), Cypress.env('password'));
     miscUtils.visitPage('app/data-explorer/discover');
   });
 
-  it('add field: DQL', () => {
+  it('index pattern: DQL to PPL and SQL', function () {
+    DataExplorerPage.setQueryEditorLanguage('DQL');
     DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
 
     cy.intercept('/internal/search/opensearch-with-long-numerals').as('data');
     DataExplorerPage.selectIndexPatternDataset('DQL');
-    cy.wait('@data').then(() => {
+    cy.wait('@data').then(function () {
+      // Check default second column
       DataExplorerPage.getDocTableHeader(1).should('have.text', '_source');
     });
 
     const testFields = ['_id', 'age', 'birthdate', 'salary'];
 
+    // Select some fields
     testFields.forEach((field) => {
       DataExplorerPage.getFieldBtnByName(field).click();
     });
 
     DataExplorerPage.getDocTableHeader(1).should('not.have.text', '_source');
 
+    // Check table headers persistence between DQL and PPL
     DataExplorerPage.checkTableHeadersByArray(testFields);
     DataExplorerPage.setQueryEditorLanguage('PPL');
     DataExplorerPage.checkTableHeadersByArray(testFields);
 
+    // Remove some fields
     const firstTestField = testFields[0];
     const secondTestField = testFields[1];
     DataExplorerPage.getFieldBtnByName(firstTestField).click();
@@ -42,6 +47,7 @@ describe('sidebar spec', () => {
     DataExplorerPage.getDocTableHeader(1).should('not.have.text', firstTestField);
     DataExplorerPage.getDocTableHeader(2).should('not.have.text', secondTestField);
 
+    // Remove all fields
     const thirdTestField = testFields[2];
     const fourthTestField = testFields[3];
     DataExplorerPage.getFieldBtnByName(thirdTestField).click();
@@ -49,8 +55,181 @@ describe('sidebar spec', () => {
     DataExplorerPage.getDocTableHeader(1).should('have.text', '_source');
     DataExplorerPage.getDocTableHeader(2).should('not.exist');
 
-    DataExplorerPage.clearQueryMultilineEditor();
-    DataExplorerPage.getQueryMultilineEditor().type('source = vis-builder* | where age > 40');
-    DataExplorerPage.getQuerySubmitBtn().click();
+    // Select some fields
+    testFields.forEach((field) => {
+      DataExplorerPage.getFieldBtnByName(field).click();
+    });
+    // Check default column again
+    DataExplorerPage.getDocTableHeader(0).should('not.have.text', '_source');
+    // Check the columns match the selected fields
+    DataExplorerPage.checkTableHeadersByArray(testFields);
+
+    // Validate default hits
+    DataExplorerPage.checkQueryHitsText('10,000');
+
+    const expectedValues = ['50', '57', '52', '66', '46'];
+
+    // Send PPL query
+    cy.intercept('/api/enhancements/search/ppl').as('pplQuery');
+    DataExplorerPage.sendQueryOnMultilineEditor('source = vis-builder* | where age > 40');
+    cy.wait('@pplQuery').then(function () {
+      // Check table headers persistence after PPL query
+      DataExplorerPage.checkTableHeadersByArray(testFields);
+      // Check filter was correctly applied
+      DataExplorerPage.checkQueryHitsText('6,588');
+
+      // Validate the first 5 rows on the _id column
+      DataExplorerPage.checkDocTableColumnByArr(expectedValues, 2);
+    });
+
+    // Send SQL query
+    DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
+    cy.intercept('/api/enhancements/search/sql').as('sqlQuery');
+    DataExplorerPage.sendQueryOnMultilineEditor('SELECT * FROM vis-builder* WHERE age > 40', false);
+    cy.wait('@sqlQuery').then(function () {
+      // Check table headers persistence after SQL query
+      DataExplorerPage.checkTableHeadersByArray(testFields);
+
+      // Validate the first 5 rows on the _id column
+      DataExplorerPage.checkDocTableColumnByArr(expectedValues, 2);
+    });
+  });
+
+  it('index: SQL and PPL', function () {
+    cy.intercept('/api/enhancements/search/sql').as('sqlData');
+    DataExplorerPage.selectIndexDataset('OpenSearch SQL');
+    cy.wait('@sqlData').then(function () {
+      // Check default second column
+      DataExplorerPage.getDocTableHeader(0).should('have.text', '_source');
+    });
+
+    const testFields = ['_id', 'age', 'birthdate', 'salary'];
+
+    // Select some fields
+    testFields.forEach((field) => {
+      DataExplorerPage.getFieldBtnByName(field).click();
+    });
+
+    DataExplorerPage.getDocTableHeader(0).should('not.have.text', '_source');
+
+    // Check table headers persistence between DQL and PPL
+    DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+    DataExplorerPage.setQueryEditorLanguage('PPL');
+    DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+
+    // Remove some fields
+    const firstTestField = testFields[0];
+    const secondTestField = testFields[1];
+    DataExplorerPage.getFieldBtnByName(firstTestField).click();
+    DataExplorerPage.getFieldBtnByName(secondTestField).click();
+    DataExplorerPage.getDocTableHeader(0).should('not.have.text', firstTestField);
+    DataExplorerPage.getDocTableHeader(1).should('not.have.text', secondTestField);
+
+    // Remove all fields
+    const thirdTestField = testFields[2];
+    const fourthTestField = testFields[3];
+    DataExplorerPage.getFieldBtnByName(thirdTestField).click();
+    DataExplorerPage.getFieldBtnByName(fourthTestField).click();
+    DataExplorerPage.getDocTableHeader(0).should('have.text', '_source');
+    DataExplorerPage.getDocTableHeader(1).should('not.exist');
+
+    // Select some fields
+    testFields.forEach((field) => {
+      DataExplorerPage.getFieldBtnByName(field).click();
+    });
+    DataExplorerPage.getDocTableHeader(0).should('not.have.text', '_source');
+    DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+
+    const expectedValues = ['50', '57', '52', '66', '46'];
+
+    // Send PPL query
+    cy.intercept('/api/enhancements/search/ppl').as('pplQuery');
+    DataExplorerPage.sendQueryOnMultilineEditor('source = vis-builder* | where age > 40');
+    cy.wait('@pplQuery').then(function () {
+      // Check table headers persistence after PPL query
+      DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+      // Validate the first 5 rows on the _id column
+      DataExplorerPage.checkDocTableColumnByArr(expectedValues, 1);
+    });
+
+    // Send SQL query
+    DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
+    cy.intercept('/api/enhancements/search/sql').as('sqlQuery');
+    DataExplorerPage.sendQueryOnMultilineEditor('SELECT * FROM vis-builder* WHERE age > 40', false);
+    cy.wait('@sqlQuery').then(function () {
+      // Check table headers persistence after SQL query
+      DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+      // Validate the first 5 rows on the _id column
+      DataExplorerPage.checkDocTableColumnByArr(expectedValues, 1);
+    });
+  });
+
+  it('s3: SQL and PPL', function () {
+    cy.intercept('/api/enhancements/search/sql').as('sqlData');
+    DataExplorerPage.selectIndexDataset;
+    cy.wait('@sqlData').then(function () {
+      // Check default second column
+      DataExplorerPage.getDocTableHeader(0).should('have.text', '_source');
+    });
+
+    const testFields = ['_id', 'age', 'birthdate', 'salary'];
+
+    // Select some fields
+    testFields.forEach((field) => {
+      DataExplorerPage.getFieldBtnByName(field).click();
+    });
+
+    DataExplorerPage.getDocTableHeader(0).should('not.have.text', '_source');
+
+    // Check table headers persistence between DQL and PPL
+    DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+    DataExplorerPage.setQueryEditorLanguage('PPL');
+    DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+
+    // Remove some fields
+    const firstTestField = testFields[0];
+    const secondTestField = testFields[1];
+    DataExplorerPage.getFieldBtnByName(firstTestField).click();
+    DataExplorerPage.getFieldBtnByName(secondTestField).click();
+    DataExplorerPage.getDocTableHeader(0).should('not.have.text', firstTestField);
+    DataExplorerPage.getDocTableHeader(1).should('not.have.text', secondTestField);
+
+    // Remove all fields
+    const thirdTestField = testFields[2];
+    const fourthTestField = testFields[3];
+    DataExplorerPage.getFieldBtnByName(thirdTestField).click();
+    DataExplorerPage.getFieldBtnByName(fourthTestField).click();
+    DataExplorerPage.getDocTableHeader(0).should('have.text', '_source');
+    DataExplorerPage.getDocTableHeader(1).should('not.exist');
+
+    // Select some fields
+    testFields.forEach((field) => {
+      DataExplorerPage.getFieldBtnByName(field).click();
+    });
+    DataExplorerPage.getDocTableHeader(0).should('not.have.text', '_source');
+    DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+
+    const expectedValues = ['50', '57', '52', '66', '46'];
+
+    // Send PPL query
+    cy.intercept('/api/enhancements/search/ppl').as('pplQuery');
+    DataExplorerPage.sendQueryOnMultilineEditor('source = vis-builder* | where age > 40');
+    cy.wait('@pplQuery').then(function () {
+      // Check table headers persistence after PPL query
+      DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+      // Validate the first 5 rows on the _id column
+      DataExplorerPage.checkDocTableColumnByArr(expectedValues, 1);
+    });
+
+    // Send SQL query
+    DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
+    cy.intercept('/api/enhancements/search/sql').as('sqlQuery');
+    DataExplorerPage.sendQueryOnMultilineEditor('SELECT * FROM vis-builder* WHERE age > 40', false);
+    cy.wait('@sqlQuery').then(function () {
+      // Check table headers persistence after SQL query
+      DataExplorerPage.checkTableHeadersByArray(testFields, 0);
+      // Validate the first 5 rows on the _id column
+      DataExplorerPage.checkDocTableColumnByArr(expectedValues, 1);
+    });
   });
 });
