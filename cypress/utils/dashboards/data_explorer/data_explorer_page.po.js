@@ -103,7 +103,7 @@ export class DataExplorerPage {
   }
 
   /**
-   * 
+   *
    * @param expectedValues array of expected values. E.g. ['50', '57', '52']
    * @param columnNumber column index beginning at 0
    */
@@ -356,7 +356,7 @@ export class DataExplorerPage {
   }
 
   /**
-   * 
+   *
    * @param expectedHeaders array containing the expected header names
    * @param offset used to adjust the index of the table headers being checked. Set to 1 by default, which means the method starts checking headers from an index that is 1 higher than the current loop index (i + offset).
    */
