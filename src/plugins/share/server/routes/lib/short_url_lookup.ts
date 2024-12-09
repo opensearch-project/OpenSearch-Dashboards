@@ -64,7 +64,7 @@ export function shortUrlLookupProvider({ logger }: { logger: Logger }): ShortUrl
 
   return {
     async generateUrlId(url, { savedObjects }) {
-      const id = crypto.createHash('md5').update(url).digest('hex');
+      const id = crypto.createHash('sha256').update(url).digest('hex');
       const { isConflictError } = savedObjects.errors;
 
       try {
