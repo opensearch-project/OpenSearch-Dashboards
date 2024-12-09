@@ -392,8 +392,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
 
       const query =
-        savedSearchInstance.searchSource.getField('query') ||
-        data.query.queryString.getDefaultQuery();
+        savedSearchInstance.searchSource.getField('query') || data.query.queryString.getQuery();
 
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       if (isEnhancementsEnabled && query.dataset) {
@@ -432,7 +431,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
 
       filterManager.setAppFilters(actualFilters);
-      data.query.queryString.setQuery(savedQuery ? data.query.queryString.getQuery() : query);
+      data.query.queryString.setQuery(query);
       setSavedSearch(savedSearchInstance);
 
       if (savedSearchInstance?.id) {

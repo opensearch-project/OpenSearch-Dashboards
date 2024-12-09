@@ -8,7 +8,7 @@ import { IUiSettingsClient } from '../../../core/public';
 import { SavedObjectLoaderAugmentVis } from './saved_augment_vis';
 import { EmbeddableStart } from '../../embeddable/public';
 import { UiActionsStart } from '../../ui_actions/public';
-import { DataPublicPluginStart, IndexPatternsContract } from '../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../plugins/data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { CoreStart } from '../../../core/public';
 
@@ -25,10 +25,6 @@ export const [getEmbeddable, setEmbeddable] = createGetterSetter<EmbeddableStart
 export const [getQueryService, setQueryService] = createGetterSetter<
   DataPublicPluginStart['query']
 >('Query');
-
-export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
-  'IndexPatterns'
-);
 
 export const [getVisualizations, setVisualizations] = createGetterSetter<VisualizationsStart>(
   'visualizations'
