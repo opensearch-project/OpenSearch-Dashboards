@@ -95,12 +95,15 @@ export class DataExplorerPage {
       .find('textarea');
   }
 
+  /**
+   * Selects the query submit button over the query multiline editor.
+   */
   static getQuerySubmitBtn() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_SUBMIT_BUTTON);
   }
 
   /**
-   *
+   * 
    * @param expectedValues array of expected values. E.g. ['50', '57', '52']
    * @param columnNumber column index beginning at 0
    */
@@ -112,6 +115,12 @@ export class DataExplorerPage {
     });
   }
 
+  /**
+   * Clears the query multiline editor content.
+   * Default cy.clear() will not work.
+   * @param del true/false. true: Deletes character to the right of the cursor; false: Deletes character to the left of the cursor
+   * @see https://docs.cypress.io/api/commands/type#Arguments
+   */
   static clearQueryMultilineEditor(del = true) {
     DataExplorerPage.getQueryMultilineEditor()
       .invoke('val')
@@ -122,6 +131,11 @@ export class DataExplorerPage {
       });
   }
 
+  /**
+   * Sends a new query via the query multiline editor.
+   * @param del true/false. true: Deletes character to the right of the cursor; false: Deletes character to the left of the cursor
+   * @see https://docs.cypress.io/api/commands/type#Arguments
+   */
   static sendQueryOnMultilineEditor(query, del = true) {
     DataExplorerPage.clearQueryMultilineEditor(del);
     DataExplorerPage.getQueryMultilineEditor().type(query);
@@ -179,13 +193,16 @@ export class DataExplorerPage {
   }
 
   /**
-   * Get sidebar add field button.
+   * Get sidebar add field button by index.
    * @param index Integer that starts at 0 for the first add button.
    */
   static getFieldBtnByIndex(index) {
     return cy.getElementByTestIdLike('fieldToggle-', 'beginning').eq(index);
   }
 
+  /**
+   * Get sidebar add field button by name.
+   */
   static getFieldBtnByName(name) {
     return cy.getElementByTestId('fieldToggle-' + name);
   }
@@ -210,12 +227,12 @@ export class DataExplorerPage {
    * Select a language in the Dataset Selector for Index
    * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
    */
-  static selectIndexDatasetLanguage(datasetLanguage) {
+  static selectIndexDatasetLanguage(datasetLanguage, timeField) {
     DataExplorerPage.getDatasetLanguageSelector().select(datasetLanguage);
-    switch (datasetLanguage) {
-      case 'PPL':
-        DataExplorerPage.selectDatasetTimeField("I don't want to use the time filter");
-        break;
+    if (datasetLanguage === 'PPL') {
+      DataExplorerPage.selectDatasetTimeField("I don't want to use the time filter");
+    } else {
+      DataExplorerPage.selectDatasetTimeField(timeField);
     }
     DataExplorerPage.getDatasetSelectDataButton().click();
   }
@@ -224,7 +241,7 @@ export class DataExplorerPage {
    * Select an index dataset.
    * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
    */
-  static selectIndexDataset(datasetLanguage) {
+  static selectIndexDataset(datasetLanguage, timeField) {
     DataExplorerPage.openDatasetExplorerWindow();
     DataExplorerPage.getDatasetExplorerWindow().contains('Indexes').click();
     DataExplorerPage.getDatasetExplorerWindow()
@@ -232,7 +249,7 @@ export class DataExplorerPage {
       .click();
     DataExplorerPage.getDatasetExplorerWindow().contains(INDEX_NAME, { timeout: 10000 }).click();
     DataExplorerPage.getDatasetExplorerNextButton().click();
-    DataExplorerPage.selectIndexDatasetLanguage(datasetLanguage);
+    DataExplorerPage.selectIndexDatasetLanguage(datasetLanguage, timeField);
   }
 
   /**
@@ -338,9 +355,14 @@ export class DataExplorerPage {
     DataExplorerPage.checkQueryHitsText('10,000');
   }
 
-  static checkTableHeadersByArray(arr, offset = 1) {
-    for (let i = 0; i < arr.length; i++) {
-      DataExplorerPage.getDocTableHeader(i + offset).should('have.text', arr[i]);
+  /**
+   * 
+   * @param expectedHeaders array containing the expected header names
+   * @param offset used to adjust the index of the table headers being checked. Set to 1 by default, which means the method starts checking headers from an index that is 1 higher than the current loop index (i + offset).
+   */
+  static checkTableHeadersByArray(expectedHeaders, offset = 1) {
+    for (let i = 0; i < expectedHeaders.length; i++) {
+      DataExplorerPage.getDocTableHeader(i + offset).should('have.text', expectedHeaders[i]);
     }
   }
 }
