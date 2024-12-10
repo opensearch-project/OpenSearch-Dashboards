@@ -347,7 +347,7 @@ export class DataExplorerPage {
    * @param isEnabled Boolean determining if these buttons are disabled
    */
   static checkDocTableFirstExpandedFieldFirstRowFilterForAndOutButtons(isEnabled) {
-    const shouldText = isEnabled ? 'be.enabled' : 'not.be.enabled';
+    const shouldText = isEnabled ? 'be.enabled' : 'be.disabled';
     DataExplorerPage.expandDocTableRow(0);
     DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
       DataExplorerPage.getDocTableExpandedDocRowFilterForButton().should(shouldText);
