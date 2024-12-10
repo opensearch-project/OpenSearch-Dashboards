@@ -6,7 +6,6 @@ import {
   MiscUtils,
   TestFixtureHandler,
 } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { CURRENT_TENANT } from '../../../../../utils/commands';
 import { clusterName, clusterConnection } from '../../../../../utils/constants';
 
 const miscUtils = new MiscUtils(cy);
@@ -15,11 +14,6 @@ const testFixtureHandler = new TestFixtureHandler(cy, Cypress.env('openSearchUrl
 const indexSet = ['logstash-2015.09.22', 'logstash-2015.09.21', 'logstash-2015.09.20'];
 
 describe('dataset navigator', { scrollBehavior: false }, () => {
-  before(() => {
-    CURRENT_TENANT.newTenant = 'global';
-    cy.fleshTenantSettings();
-  });
-
   describe('empty state', () => {
     it('no index pattern', function () {
       // Go to the Discover page

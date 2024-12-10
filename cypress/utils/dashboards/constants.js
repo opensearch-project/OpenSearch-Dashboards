@@ -13,5 +13,11 @@ export const TENANTS_MANAGE_PATH = BASE_PATH + '/app/security-dashboards-plugin#
 
 export const INDEX_PATTERN_PATH = STACK_MANAGEMENT_PATH + '/opensearch-dashboards/indexPatterns';
 export const SAVED_OBJECTS_PATH = STACK_MANAGEMENT_PATH + '/opensearch-dashboards/objects';
+export const CURRENT_TENANT = {
+  defaultTenant: 'global',
+  set newTenant(changedTenant) {
+    this.defaultTenant = changedTenant;
+  },
+};
 
 export * from './query_enhancement/constants';

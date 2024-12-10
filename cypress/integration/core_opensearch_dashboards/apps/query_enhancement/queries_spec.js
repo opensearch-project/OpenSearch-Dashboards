@@ -6,16 +6,12 @@ import {
   MiscUtils,
   TestFixtureHandler,
 } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { CURRENT_TENANT } from '../../../../../utils/commands';
 
 const miscUtils = new MiscUtils(cy);
 const testFixtureHandler = new TestFixtureHandler(cy, Cypress.env('openSearchUrl'));
 
 describe('query enhancement queries', { scrollBehavior: false }, () => {
   before(() => {
-    CURRENT_TENANT.newTenant = 'global';
-    cy.fleshTenantSettings();
-
     testFixtureHandler.importJSONMapping(
       'cypress/fixtures/dashboard/opensearch_dashboards/query_enhancement/mappings.json.txt'
     );
