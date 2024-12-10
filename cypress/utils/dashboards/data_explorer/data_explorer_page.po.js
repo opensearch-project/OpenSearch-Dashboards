@@ -116,6 +116,87 @@ export class DataExplorerPage {
   }
 
   /**
+   * Get Toggle Button for Column in Doc Table Field.
+   */
+  static getDocTableExpandColumnToggleButton() {
+    return cy
+      .getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPAND_TOGGLE_COLUMN_BUTTON)
+      .find('button');
+  }
+
+  /**
+   * find all Rows in Doc Table Field Expanded Document.
+   * @param expandedDocument cypress representation of the Doc Table Field Expanded Document
+   */
+  static findDocTableExpandedDocRows(expandedDocument) {
+    return expandedDocument.findElementsByTestIdLike(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ROW_PREFIX
+    );
+  }
+
+  /**
+   * Get Row for Column by fieldName in Doc Table Field Expanded Document.
+   * @param fieldName Field name for row in Expanded Document.
+   * @example getDocTableExpandedDocColumnRow('id')
+   */
+  static getDocTableExpandedDocRow(fieldName) {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ROW_PREFIX + fieldName
+    );
+  }
+
+  /**
+   * Get Filter For Button in Doc Table Field Expanded Document Row.
+   */
+  static getDocTableExpandedDocRowFilterForButton() {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ADD_INCLUSIVE_FILTER_BUTTON
+    );
+  }
+
+  /**
+   * Get Filter Out Button in Doc Table Field Expanded Document Row.
+   */
+  static getDocTableExpandedDocRowFilterOutButton() {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_REMOVE_INCLUSIVE_FILTER_BUTTON
+    );
+  }
+
+  /**
+   * Get the "expandedDocumentRowNumber"th row from the expanded document from the "docTableRowNumber"th row of the DocTable.
+   * @param docTableRowNumber Integer starts from 0 for the first row
+   * @param expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @example
+   * // returns the first row from the expanded document from the second row of the DocTable.
+   * getExpandedDocRow(1, 0);
+   */
+  static getExpandedDocRow(docTableRowNumber, expandedDocumentRowNumber) {
+    return DataExplorerPage.findDocTableExpandedDocRows(
+      DataExplorerPage.getDocTableRow(docTableRowNumber + 1)
+    ).eq(expandedDocumentRowNumber);
+  }
+
+  /**
+   * Get the value for the "expandedDocumentRowNumber"th row from the expanded document from the "docTableRowNumber"th row of the DocTable.
+   * @param docTableRowNumber Integer starts from 0 for the first row
+   * @param expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @example
+   * // returns the value of the field from the first row from the expanded document from the second row of the DocTable.
+   * getExpandedDocRow(1, 0);
+   */
+  static getExpandedDocRowValue(docTableRowNumber, expandedDocumentRowNumber) {
+    return DataExplorerPage.findDocTableExpandedDocRows(
+      DataExplorerPage.getDocTableRow(docTableRowNumber + 1)
+    )
+      .eq(expandedDocumentRowNumber)
+      .find(
+        `[data-test-subj*="${DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ROW_PREFIX}"]`
+      )
+      .find('span');
+  }
+
+  /**
    * Open window to select Dataset
    */
   static openDatasetExplorerWindow() {
@@ -198,6 +279,16 @@ export class DataExplorerPage {
   }
 
   /**
+   * Expand rowNumber of Doc Table.
+   * @param rowNumber rowNumber of Doc Table starts at 0 for row 1.
+   */
+  static expandDocTableRow(rowNumber) {
+    DataExplorerPage.getDocTableRow(rowNumber).within(() => {
+      DataExplorerPage.getDocTableExpandColumnToggleButton().click();
+    });
+  }
+
+  /**
    * Check the filter pill text matches expectedFilterText.
    * @param expectedFilterText expected text in filter pill.
    */
@@ -214,7 +305,7 @@ export class DataExplorerPage {
   }
 
   /**
-   * Check for the first Table Field's Filter For and Filter Out button.
+   * Check if the first Table Field's Filter For and Filter Out buttons exists.
    * @param isExists Boolean determining if these button should exist
    */
   static checkDocTableFirstFieldFilterForAndOutButton(isExists) {
@@ -258,6 +349,54 @@ export class DataExplorerPage {
       DataExplorerPage.getDocTableField(0, 0)
         .find('span span')
         .should('not.have.text', filterFieldText);
+    });
+    DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
+    DataExplorerPage.checkQueryHitsText('10,000');
+  }
+
+  /**
+   * Check if the first expanded Doc Table Field's first row's Filter For and Filter Out button are disabled.
+   * @param isEnabled Boolean determining if these buttons are disabled
+   */
+  static checkDocTableFirstExpandedFieldFirstRowFilterForAndOutButtons(isEnabled) {
+    const shouldText = isEnabled ? 'be.enabled' : 'not.be.enabled';
+    DataExplorerPage.expandDocTableRow(0);
+    DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
+      DataExplorerPage.getDocTableExpandedDocRowFilterForButton().should(shouldText);
+      DataExplorerPage.getDocTableExpandedDocRowFilterForButton().should(shouldText);
+    });
+  }
+
+  /**
+   * Check the first expanded Doc Table Field's first row's Filter For button filters the correct value.
+   */
+  static checkDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField() {
+    DataExplorerPage.getExpandedDocRowValue(0, 0).then(($expandedDocumentRowValue) => {
+      const filterFieldText = $expandedDocumentRowValue.text();
+      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
+        DataExplorerPage.getDocTableExpandedDocRowFilterForButton().click();
+      });
+      DataExplorerPage.checkFilterPillText(filterFieldText);
+      DataExplorerPage.checkQueryHitsText('1'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+      DataExplorerPage.getExpandedDocRowValue(0, 0).should('have.text', filterFieldText);
+    });
+    DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
+    DataExplorerPage.checkQueryHitsText('10,000');
+  }
+
+  /**
+   * Check the first expanded Doc Table Field's first row's Filter Out button filters the correct value.
+   */
+  static checkDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField() {
+    DataExplorerPage.getExpandedDocRowValue(0, 0).then(($expandedDocumentRowValue) => {
+      const filterFieldText = $expandedDocumentRowValue.text();
+      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
+        DataExplorerPage.getDocTableExpandedDocRowFilterOutButton().click();
+      });
+      DataExplorerPage.checkFilterPillText(filterFieldText);
+      DataExplorerPage.checkQueryHitsText('9,999'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+      DataExplorerPage.expandDocTableRow(0);
+      DataExplorerPage.getExpandedDocRowValue(0, 0).should('not.have.text', filterFieldText);
     });
     DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
     DataExplorerPage.checkQueryHitsText('10,000');

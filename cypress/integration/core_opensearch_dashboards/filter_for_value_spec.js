@@ -57,4 +57,37 @@ describe('filter for value spec', () => {
       });
     });
   });
+
+  describe('filter actions in expanded table', () => {
+    describe('index pattern dataset', () => {
+      // filter actions should exist for DQL
+      it('DQL', () => {
+        DataExplorerPage.selectIndexPatternDataset('DQL');
+        DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForAndOutButtons(true);
+        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField();
+        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField();
+      });
+      // filter actions should exist for Lucene
+      it('Lucene', () => {});
+      // filter actions should not exist for SQL
+      it('SQL', () => {
+        DataExplorerPage.selectIndexPatternDataset('DQL');
+        DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForAndOutButtons(false);
+      });
+      // filter actions should not exist for PPL
+      it('PPL', () => {
+        DataExplorerPage.selectIndexPatternDataset('DQL');
+        DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForAndOutButtons(false);
+      });
+    });
+    describe('index dataset', () => {
+      // filter actions should not exist for SQL
+      it('SQL', () => {});
+      // filter actions should not exist for PPL
+      it('PPL', () => {});
+    });
+  });
 });
