@@ -75,6 +75,13 @@ declare namespace Cypress {
     deleteSavedObject<S = any>(type: string, id: string): Chainable<S>;
 
     /**
+     * Test if data source exists
+     * @example
+     * cy.ifDataSourceExists('data-source')
+     */
+    ifDataSourceExists<S = any>(search: string): Chainable<S>;
+
+    /**
      * Delete all saved objects of a particular type
      * Optionally, narrow down the results using search
      * @example

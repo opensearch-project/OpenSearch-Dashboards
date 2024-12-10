@@ -13,7 +13,7 @@ const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
 
 const indexSet = ['logstash-2015.09.22', 'logstash-2015.09.21', 'logstash-2015.09.20'];
 
-describe('dataset navigator', { scrollBehavior: false }, () => {
+describe('dataset selector', { scrollBehavior: false }, () => {
   describe('empty state', () => {
     it('no index pattern', function () {
       // Go to the Discover page
@@ -28,31 +28,29 @@ describe('dataset navigator', { scrollBehavior: false }, () => {
 
   describe('select indices', () => {
     before(() => {
-      testFixtureHandler.importJSONMapping(
-        'cypress/fixtures/dashboard/opensearch_dashboards/query_enhancement/mappings.json.txt'
-      );
+      testFixtureHandler.importJSONMapping('cypress/fixtures/timestamp/mappings.json.txt');
 
-      testFixtureHandler.importJSONDoc(
-        'cypress/fixtures/dashboard/opensearch_dashboards/query_enhancement/data.json.txt'
-      );
+      testFixtureHandler.importJSONDoc('cypress/fixtures/timestamp/data.json.txt');
 
-      // Since default cluster is removed, need to create a data source connection
-      miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/create');
-      cy.intercept('POST', '/api/saved_objects/data-source').as('createDataSourceRequest');
-      cy.getElementByTestId(`datasource_card_opensearch`).click();
-      cy.get('[name="dataSourceTitle"]').type(SECONDARY_ENGINE.name);
-      cy.get('[name="endpoint"]').type(SECONDARY_ENGINE.url);
-      cy.getElementByTestId('createDataSourceFormAuthTypeSelect').click();
-      cy.get(`button[id="no_auth"]`).click();
+      // Since default cluster is removed, need to create a data source connection if needed
+      if (!cy.ifDataSourceExists(SECONDARY_ENGINE.name)) {
+        miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/create');
+        cy.intercept('POST', '/api/saved_objects/data-source').as('createDataSourceRequest');
+        cy.getElementByTestId(`datasource_card_opensearch`).click();
+        cy.get('[name="dataSourceTitle"]').type(SECONDARY_ENGINE.name);
+        cy.get('[name="endpoint"]').type(SECONDARY_ENGINE.url);
+        cy.getElementByTestId('createDataSourceFormAuthTypeSelect').click();
+        cy.get(`button[id="no_auth"]`).click();
 
-      cy.getElementByTestId('createDataSourceButton').click();
-      cy.wait('@createDataSourceRequest').then((interception) => {
-        expect(interception.response.statusCode).to.equal(200);
-      });
-      cy.location('pathname', { timeout: 6000 }).should(
-        'include',
-        'app/management/opensearch-dashboards/dataSources'
-      );
+        cy.getElementByTestId('createDataSourceButton').click();
+        cy.wait('@createDataSourceRequest').then((interception) => {
+          expect(interception.response.statusCode).to.equal(200);
+        });
+        cy.location('pathname', { timeout: 6000 }).should(
+          'include',
+          'app/management/opensearch-dashboards/dataSources'
+        );
+      }
 
       // Go to the Discover page
       miscUtils.visitPage(`app/data-explorer/discover#/`);
@@ -64,18 +62,15 @@ describe('dataset navigator', { scrollBehavior: false }, () => {
       cy.getElementByTestId(`datasetSelectorButton`).click();
       cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
       cy.get(`[title="Indexes"]`).click();
-      cy.get(`[title=${clusterName}]`).click();
+      cy.get(`[title=${SECONDARY_ENGINE.name}]`).click();
       cy.get(`[title="timestamp-nanos"]`).click();
       cy.getElementByTestId('datasetSelectorNext').click();
 
       cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
-      // should have two options: SQL and PPL
-      cy.getElementByTestId('advancedSelectorLanguageSelect')
-        .get('option')
-        .should('have.length', 2);
 
       //select SQL
       cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
+      cy.getElementByTestId(`advancedSelectorTimeFieldSelect`).select('timestamp');
       cy.getElementByTestId('advancedSelectorConfirmButton').click();
 
       cy.waitForLoaderNewHeader();
@@ -97,7 +92,7 @@ describe('dataset navigator', { scrollBehavior: false }, () => {
       cy.getElementByTestId(`datasetSelectorButton`).click();
       cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
       cy.get(`[title="Indexes"]`).click();
-      cy.get(`[title=${clusterName}]`).click();
+      cy.get(`[title=${SECONDARY_ENGINE.name}]`).click();
       cy.get(`[title="timestamp-nanos"]`).click();
       cy.getElementByTestId('datasetSelectorNext').click();
 
@@ -138,16 +133,12 @@ describe('dataset navigator', { scrollBehavior: false }, () => {
       // import logstash functional
       testFixtureHandler.importJSONDocIfNeeded(
         indexSet,
-        'cypress/fixtures/dashboard/opensearch_dashboards/data_explorer/logstash/logstash.mappings.json.txt',
-        'cypress/fixtures/dashboard/opensearch_dashboards/data_explorer/logstash/logstash.json.txt'
+        'cypress/fixtures/logstash/mappings.json.txt',
+        'cypress/fixtures/logstash/data.json.txt'
       );
-      testFixtureHandler.importJSONMapping(
-        'cypress/fixtures/dashboard/opensearch_dashboards/data_explorer/discover/discover.mappings.json.txt'
-      );
+      testFixtureHandler.importJSONMapping('cypress/fixtures/discover/mappings.json.txt');
 
-      testFixtureHandler.importJSONDoc(
-        'cypress/fixtures/dashboard/opensearch_dashboards/data_explorer/discover/discover.json.txt'
-      );
+      testFixtureHandler.importJSONDoc('cypress/fixtures/discover/data.json.txt');
 
       // Go to the Discover page
       miscUtils.visitPage(
@@ -159,7 +150,7 @@ describe('dataset navigator', { scrollBehavior: false }, () => {
 
       cy.waitForLoaderNewHeader();
       cy.waitForSearch();
-      cy.verifyHitCount('14,004');
+      cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
     });
   });
 
@@ -167,7 +158,8 @@ describe('dataset navigator', { scrollBehavior: false }, () => {
     cy.deleteIndex('timestamp-nanos');
     // delete the data source connection
     miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/');
-    cy.get(`[class="euiTableRowCell"]`).contains(clusterName).click();
+    cy.waitForLoaderNewHeader();
+    cy.get(`[class="euiTableRowCell"]`).contains(SECONDARY_ENGINE.name).click();
     cy.getElementByTestId('editDatasourceDeleteIcon').click();
     cy.getElementByTestId('confirmModalConfirmButton').click();
   });

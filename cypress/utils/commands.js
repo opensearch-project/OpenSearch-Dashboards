@@ -171,6 +171,27 @@ Cypress.Commands.add('deleteSavedObjectByType', (type, search) => {
   });
 });
 
+// TODO: we should really make this a helper function that if the data source does not exist, it creates it so take what you have for the dataset selector spec and move it here
+Cypress.Commands.add('ifDataSourceExists', (search) => {
+  const searchParams = new URLSearchParams({
+    fields: 'id',
+    type: 'data-source',
+  });
+
+  if (search) {
+    searchParams.set('search', search);
+  }
+
+  const url = `${
+    Cypress.config().baseUrl
+  }/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+
+  return cy.request(url).then((response) => {
+    console.log('response', response);
+    return response.body.saved_objects.length > 0;
+  });
+});
+
 Cypress.Commands.add('createIndexPattern', (id, attributes, header = {}) => {
   const url = `${Cypress.config().baseUrl}/api/saved_objects/index-pattern/${id}`;
 

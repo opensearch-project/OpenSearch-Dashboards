@@ -13,13 +13,9 @@ const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
 
 describe('query enhancement queries', { scrollBehavior: false }, () => {
   before(() => {
-    testFixtureHandler.importJSONMapping(
-      'cypress/fixtures/dashboard/opensearch_dashboards/query_enhancement/mappings.json.txt'
-    );
+    testFixtureHandler.importJSONMapping('cypress/fixtures/timestamp/mappings.json.txt');
 
-    testFixtureHandler.importJSONDoc(
-      'cypress/fixtures/dashboard/opensearch_dashboards/query_enhancement/data_with_index_pattern.json.txt'
-    );
+    testFixtureHandler.importJSONDoc('cypress/fixtures/timestamp/data_with_index_pattern.json.txt');
 
     // Go to the Discover page
     miscUtils.visitPage(`app/data-explorer/discover#/`);

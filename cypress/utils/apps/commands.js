@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './data_explorer/commands';
 import './query_enhancements/commands';
 
 Cypress.Commands.add('waitForLoader', () => {
@@ -15,6 +16,18 @@ Cypress.Commands.add('waitForLoader', () => {
   });
   cy.wait(Cypress.env('WAIT_FOR_LOADER_BUFFER_MS'));
   cy.getElementByTestId('homeIcon', opts); // Update to `homeLoader` once useExpandedHeader is enabled
+});
+
+Cypress.Commands.add('waitForLoaderNewHeader', () => {
+  const opts = { log: false };
+
+  Cypress.log({
+    name: 'waitForPageLoad',
+    displayName: 'wait',
+    message: 'page load',
+  });
+  cy.wait(Cypress.env('WAIT_FOR_LOADER_BUFFER_MS'));
+  cy.getElementByTestId('recentItemsSectionButton', opts);
 });
 
 Cypress.Commands.add('setTopNavQuery', (value, submit = true) => {
