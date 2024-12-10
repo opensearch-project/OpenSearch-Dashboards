@@ -79,14 +79,12 @@ describe('filter for value spec', () => {
       it('Lucene', () => {});
       // filter actions should not exist for SQL
       it('SQL', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
-        cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
+        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'SQL');
         DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForAndOutButtons(false);
       });
       // filter actions should not exist for PPL
       it('PPL', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
-        cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
+        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'PPL');
         DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForAndOutButtons(false);
       });
     });
