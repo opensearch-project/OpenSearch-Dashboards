@@ -429,9 +429,7 @@ describe('workspace_id_consumer integration test', () => {
       ]);
       expect(bulkGetResultWithWorkspace.body.saved_objects[0]?.error).toBeUndefined();
       expect(bulkGetResultWithWorkspace.body.saved_objects[1].id).toEqual('bar');
-      expect(bulkGetResultWithWorkspace.body.saved_objects[1].workspaces).toEqual([
-        createdBarWorkspace.id,
-      ]);
+      expect(bulkGetResultWithWorkspace.body.saved_objects[1].workspaces).toBeUndefined();
       expect(bulkGetResultWithWorkspace.body.saved_objects[1]?.error).toMatchInlineSnapshot(`
         Object {
           "error": "Forbidden",

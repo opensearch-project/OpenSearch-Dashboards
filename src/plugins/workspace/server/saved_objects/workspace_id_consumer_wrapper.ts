@@ -188,7 +188,10 @@ export class WorkspaceIdConsumerWrapper {
               return this.validateObjectInAWorkspace(object, workspaces[0], wrapperOptions.request)
                 ? object
                 : {
-                    ...object,
+                    id: object.id,
+                    type: object.type,
+                    attributes: {} as T,
+                    references: [],
                     error: {
                       ...generateSavedObjectsForbiddenError().output.payload,
                     },
