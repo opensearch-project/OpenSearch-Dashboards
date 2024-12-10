@@ -6,9 +6,10 @@ import {
   MiscUtils,
   TestFixtureHandler,
 } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
+import { PATHS } from '../../../utils/constants';
 
 const miscUtils = new MiscUtils(cy);
-const testFixtureHandler = new TestFixtureHandler(cy, Cypress.env('openSearchUrl'));
+const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
 
 describe('query enhancement queries', { scrollBehavior: false }, () => {
   before(() => {

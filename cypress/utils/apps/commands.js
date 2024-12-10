@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './query_enhancement/commands';
+import './query_enhancements/commands';
 
 Cypress.Commands.add('waitForLoader', () => {
   const opts = { log: false };

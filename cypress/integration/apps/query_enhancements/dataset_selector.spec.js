@@ -6,10 +6,10 @@ import {
   MiscUtils,
   TestFixtureHandler,
 } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { clusterName, clusterConnection } from '../../../../../utils/constants';
+import { PATHS, SECONDARY_ENGINE } from '../../../utils/constants';
 
 const miscUtils = new MiscUtils(cy);
-const testFixtureHandler = new TestFixtureHandler(cy, Cypress.env('openSearchUrl'));
+const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
 
 const indexSet = ['logstash-2015.09.22', 'logstash-2015.09.21', 'logstash-2015.09.20'];
 
@@ -40,8 +40,8 @@ describe('dataset navigator', { scrollBehavior: false }, () => {
       miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/create');
       cy.intercept('POST', '/api/saved_objects/data-source').as('createDataSourceRequest');
       cy.getElementByTestId(`datasource_card_opensearch`).click();
-      cy.get('[name="dataSourceTitle"]').type(clusterName);
-      cy.get('[name="endpoint"]').type(clusterConnection);
+      cy.get('[name="dataSourceTitle"]').type(SECONDARY_ENGINE.name);
+      cy.get('[name="endpoint"]').type(SECONDARY_ENGINE.url);
       cy.getElementByTestId('createDataSourceFormAuthTypeSelect').click();
       cy.get(`button[id="no_auth"]`).click();
 
