@@ -250,7 +250,7 @@ jobs:
           install-command: npx cypress install --force
           start: ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
-          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --config '{"component": {"specPattern": ["cypress/integration/$(yarn --silent osd:ciGroup${{ matrix.group }})"]}}'
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --config '{\"component\": {\"specPattern\": [\"cypress/integration/$(yarn --silent osd:ciGroup${{ matrix.group }})\"]}}'
       - name: Run Dashboards Cypress tests without query enhancements
         if: matrix.test_location == 'source' && matrix.config == 'dashboard'
         uses: cypress-io/github-action@v6
