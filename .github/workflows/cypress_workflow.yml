@@ -182,7 +182,7 @@ jobs:
           IFS="," read -a SPEC_ARRAY <<< $(yarn --silent osd:ciGroup${{ matrix.group }})
           DASHBOARDS_SPEC=''
           for i in "${SPEC_ARRAY[@]}"; do
-          DASHBOARDS_SPEC+="cypress/integration/core_opensearch_dashboards/${i},"
+            DASHBOARDS_SPEC+="cypress/integration/core_opensearch_dashboards/${i},"
           done
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
