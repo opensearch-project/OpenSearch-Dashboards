@@ -14,22 +14,19 @@ describe('sidebar spec', function () {
     miscUtils.visitPage('app/data-explorer/discover');
   });
 
-  describe('results display and interaction in table', function () {
-    describe('filter by sidebar fields', function () {
+  describe('filter by sidebar fields', function () {
+    describe('add fields', function () {
       const expectedValues = ['50', '57', '52', '66', '46'];
+      const testFields = ['_id', 'age', 'birthdate', 'salary'];
+      const pplQuery = 'source = vis-builder* | where age > 40';
+      const sqlQuery = 'SELECT * FROM vis-builder* WHERE age > 40';
 
       it('index pattern: DQL to PPL and SQL', function () {
+        DataExplorerPage.selectIndexPatternDataset('DQL');
+
         DataExplorerPage.setQueryEditorLanguage('DQL');
         DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
-
-        cy.intercept('/internal/search/opensearch-with-long-numerals').as('data');
-        DataExplorerPage.selectIndexPatternDataset('DQL');
-        cy.wait('@data').then(function () {
-          // Check default second column
-          DataExplorerPage.getDocTableHeader(1).should('have.text', '_source');
-        });
-
-        const testFields = ['_id', 'age', 'birthdate', 'salary'];
+        DataExplorerPage.getDocTableHeader(1).should('have.text', '_source');
 
         // Select some fields
         testFields.forEach((field) => {
@@ -73,7 +70,7 @@ describe('sidebar spec', function () {
 
         // Send PPL query
         cy.intercept('/api/enhancements/search/ppl').as('pplQuery');
-        DataExplorerPage.sendQueryOnMultilineEditor('source = vis-builder* | where age > 40');
+        DataExplorerPage.sendQueryOnMultilineEditor(pplQuery);
         cy.wait('@pplQuery').then(function () {
           // Check table headers persistence after PPL query
           DataExplorerPage.checkTableHeadersByArray(testFields);
@@ -87,10 +84,7 @@ describe('sidebar spec', function () {
         // Send SQL query
         DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
         cy.intercept('/api/enhancements/search/sql').as('sqlQuery');
-        DataExplorerPage.sendQueryOnMultilineEditor(
-          'SELECT * FROM vis-builder* WHERE age > 40',
-          false
-        );
+        DataExplorerPage.sendQueryOnMultilineEditor(sqlQuery, false);
         cy.wait('@sqlQuery').then(function () {
           // Check table headers persistence after SQL query
           DataExplorerPage.checkTableHeadersByArray(testFields);
@@ -101,17 +95,11 @@ describe('sidebar spec', function () {
       });
 
       it('index: SQL and PPL', function () {
-        cy.intercept('/api/enhancements/search/sql').as('sqlData');
         DataExplorerPage.selectIndexDataset(
           'OpenSearch SQL',
           "I don't want to use the time filter"
         );
-        cy.wait('@sqlData').then(function () {
-          // Check default first column
-          DataExplorerPage.getDocTableHeader(0).should('have.text', '_source');
-        });
-
-        const testFields = ['_id', 'age', 'birthdate', 'salary'];
+        DataExplorerPage.getDocTableHeader(0).should('have.text', '_source');
 
         // Select some fields
         testFields.forEach((field) => {
@@ -150,7 +138,7 @@ describe('sidebar spec', function () {
 
         // Send PPL query
         cy.intercept('/api/enhancements/search/ppl').as('pplQuery');
-        DataExplorerPage.sendQueryOnMultilineEditor('source = vis-builder* | where age > 40');
+        DataExplorerPage.sendQueryOnMultilineEditor(pplQuery);
         cy.wait('@pplQuery').then(function () {
           // Check table headers persistence after PPL query
           DataExplorerPage.checkTableHeadersByArray(testFields, 0);
@@ -161,16 +149,47 @@ describe('sidebar spec', function () {
         // Send SQL query
         DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
         cy.intercept('/api/enhancements/search/sql').as('sqlQuery');
-        DataExplorerPage.sendQueryOnMultilineEditor(
-          'SELECT * FROM vis-builder* WHERE age > 40',
-          false
-        );
+        DataExplorerPage.sendQueryOnMultilineEditor(sqlQuery, false);
         cy.wait('@sqlQuery').then(function () {
           // Check table headers persistence after SQL query
           DataExplorerPage.checkTableHeadersByArray(testFields, 0);
           // Validate the first 5 rows on the _id column
           DataExplorerPage.checkDocTableColumnByArr(expectedValues, 1);
         });
+      });
+    });
+
+    describe('filter fields', function () {
+      it('index pattern: DQL, PPL and SQL', function () {
+        DataExplorerPage.selectIndexPatternDataset('DQL');
+        DataExplorerPage.setQueryEditorLanguage('DQL');
+        DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+        DataExplorerPage.checkSidebarFilterBarResults('equal', 'categories');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'a');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'ag');
+
+        DataExplorerPage.setQueryEditorLanguage('PPL');
+        DataExplorerPage.checkSidebarFilterBarResults('equal', 'categories');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'a');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'ag');
+
+        DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
+        DataExplorerPage.checkSidebarFilterBarResults('equal', 'categories');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'a');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'ag');
+      });
+
+      it('index: PPL and SQL', function () {
+        DataExplorerPage.selectIndexDataset('PPL', "I don't want to use the time filter");
+        DataExplorerPage.setQueryEditorLanguage('PPL');
+        DataExplorerPage.checkSidebarFilterBarResults('equal', 'categories');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'a');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'ag');
+
+        DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
+        DataExplorerPage.checkSidebarFilterBarResults('equal', 'categories');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'a');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'ag');
       });
     });
   });

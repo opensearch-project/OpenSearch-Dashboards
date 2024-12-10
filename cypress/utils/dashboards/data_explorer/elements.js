@@ -28,4 +28,5 @@ export const DATA_EXPLORER_PAGE_ELEMENTS = {
   QUERY_EDITOR_MULTILINE: 'osdQueryEditor__multiLine',
   GLOBAL_QUERY_EDITOR_FILTER_VALUE: 'globalFilterLabelValue',
   GLOBAL_FILTER_BAR: 'globalFilterBar',
+  SIDEBAR_FILTER_BAR: 'fieldFilterSearchInput',
 };

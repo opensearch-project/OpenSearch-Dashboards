@@ -193,6 +193,20 @@ export class DataExplorerPage {
   }
 
   /**
+   * Get sidebar filter bar.
+   */
+  static getSidebarFilterBar() {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.SIDEBAR_FILTER_BAR);
+  }
+
+  /**
+   * Click on the "Clear input" button on the sidebar filter bar.
+   */
+  static clearSidebarFilterBar() {
+    return cy.get('button[aria-label="Clear input"]').click();
+  }
+
+  /**
    * Get sidebar add field button by index.
    * @param index Integer that starts at 0 for the first add button.
    */
@@ -205,6 +219,31 @@ export class DataExplorerPage {
    */
   static getFieldBtnByName(name) {
     return cy.getElementByTestId('fieldToggle-' + name);
+  }
+
+  /**
+   * Get all sidebar add field button.
+   */
+  static getAllSidebarAddFields() {
+    return cy.get('[data-test-subj^="field-"]:not([data-test-subj$="showDetails"])');
+  }
+
+  /**
+   * Check the results of the sidebar filter bar search.
+   * @param search string to look up
+   * @param assertion the type of assertion that is going to be performed. Example: 'eq', 'include'
+   */
+  static checkSidebarFilterBarResults(assertion, search) {
+    DataExplorerPage.getSidebarFilterBar().type(search);
+    DataExplorerPage.getAllSidebarAddFields().each(function ($field) {
+      cy.wrap($field)
+        .should('be.visible')
+        .invoke('text')
+        .then(function ($fieldTxt) {
+          cy.wrap($fieldTxt).should(assertion, search);
+        });
+    });
+    DataExplorerPage.clearSidebarFilterBar();
   }
 
   /**
