@@ -82,7 +82,8 @@ export const DatasetSelector = ({
   const { overlays } = services;
   const datasetService = getQueryService().queryString.getDatasetService();
   const datasetIcon =
-    datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
+    datasetService.getType(selectedDataset?.sourceDatasetRef?.type || selectedDataset?.type || '')
+      ?.meta.icon.type || 'database';
 
   useEffect(() => {
     isMounted.current = true;
