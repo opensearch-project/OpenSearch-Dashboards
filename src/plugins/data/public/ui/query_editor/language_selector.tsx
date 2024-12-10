@@ -151,6 +151,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
         )}
         size="s"
         items={languageOptionsMenu}
+        data-test-subj="queryEditorLanguageOptions"
       />
     </EuiPopover>
   );
