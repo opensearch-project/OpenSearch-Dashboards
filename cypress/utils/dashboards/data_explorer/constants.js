@@ -3,6 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const INDEX_CLUSTER_NAME = 'cypress-test-os';
-export const INDEX_NAME = 'vis-builder';
-export const INDEX_PATTERN_NAME = 'cypress-test-os::vis-builder*';
+export const INDEX_CLUSTER_NAME = 'data-logs-1';
+export const INDEX_NAME = 'data_logs_small_time_1';
+export const INDEX_PATTERN_NAME = 'data-logs-1::data_logs_small_time_1*';
