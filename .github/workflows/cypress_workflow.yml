@@ -179,7 +179,7 @@ jobs:
         if: ${{ inputs.specs == '' && matrix.test_location == 'source' }}
         shell: bash
         run: |
-          DASHBOARDS_SPEC="cypress/integration/$(yarn --silent osd:ciGroup${{ matrix.group }}),"
+          DASHBOARDS_SPEC="cypress/integration/$(yarn --silent osd:ciGroup${{ matrix.group }})"
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 
