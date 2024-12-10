@@ -4,7 +4,6 @@
  */
 
 import { DATA_EXPLORER_PAGE_ELEMENTS } from './elements.js';
-import { INDEX_CLUSTER_NAME, INDEX_NAME, INDEX_PATTERN_NAME } from './constants.js';
 
 export class DataExplorerPage {
   /**
@@ -228,15 +227,17 @@ export class DataExplorerPage {
 
   /**
    * Select an index dataset.
-   * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
+   * @param indexClusterName Name of the cluster to be used for the Index.
+   * @param indexName Name of the index dataset to be used.
+   * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL".
    */
-  static selectIndexDataset(datasetLanguage) {
+  static selectIndexDataset(indexClusterName, indexName, datasetLanguage) {
     DataExplorerPage.openDatasetExplorerWindow();
     DataExplorerPage.getDatasetExplorerWindow().contains('Indexes').click();
     DataExplorerPage.getDatasetExplorerWindow()
-      .contains(INDEX_CLUSTER_NAME, { timeout: 10000 })
+      .contains(indexClusterName, { timeout: 10000 })
       .click();
-    DataExplorerPage.getDatasetExplorerWindow().contains(INDEX_NAME, { timeout: 10000 }).click();
+    DataExplorerPage.getDatasetExplorerWindow().contains(indexName, { timeout: 10000 }).click();
     DataExplorerPage.getDatasetExplorerNextButton().click();
     DataExplorerPage.selectIndexDatasetLanguage(datasetLanguage);
   }
@@ -252,30 +253,17 @@ export class DataExplorerPage {
 
   /**
    * Select an index pattern dataset.
+   * @param indexPatternName Name of the index pattern to be used.
    * @param datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
    */
-  static selectIndexPatternDataset(datasetLanguage) {
+  static selectIndexPatternDataset(indexPatternName, datasetLanguage) {
     DataExplorerPage.openDatasetExplorerWindow();
     DataExplorerPage.getDatasetExplorerWindow().contains('Index Patterns').click();
     DataExplorerPage.getDatasetExplorerWindow()
-      .contains(INDEX_PATTERN_NAME, { timeout: 10000 })
+      .contains(indexPatternName, { timeout: 10000 })
       .click();
     DataExplorerPage.getDatasetExplorerNextButton().click();
     DataExplorerPage.selectIndexPatternDatasetLanguage(datasetLanguage);
-  }
-
-  /**
-   * Set search Date range
-   * @param relativeNumber Relative integer string to set date range
-   * @param relativeUnit Unit for number. Accepted Units: seconds/Minutes/Hours/Days/Weeks/Months/Years ago/from now
-   * @example setSearchRelativeDateRange('15', 'years ago')
-   */
-  static setSearchRelativeDateRange(relativeNumber, relativeUnit) {
-    cy.getSearchDatePickerButton().click();
-    cy.getDatePickerRelativeTab().click();
-    cy.getDatePickerRelativeInput().clear().type(relativeNumber);
-    cy.getDatePickerRelativeUnitSelector().select(relativeUnit);
-    cy.getQuerySubmitButton().click();
   }
 
   /**
