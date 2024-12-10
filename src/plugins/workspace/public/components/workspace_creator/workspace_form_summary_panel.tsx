@@ -160,6 +160,7 @@ export const WorkspaceFormSummaryPanel = ({
 }: WorkspaceFormSummaryPanelProps) => {
   const useCase = availableUseCases.find((item) => item.id === formData.useCase);
   const useCaseIcon = useCase?.icon || 'logoOpenSearch';
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   return (
     <EuiCard
@@ -200,9 +201,12 @@ export const WorkspaceFormSummaryPanel = ({
           )}
         </FieldSummaryItem>
       )}
-      <FieldSummaryItem field={RightSidebarScrollField.PrivacyType}>
-        {privacyType && <EuiText size="xs">{privacyType2CopyMap[privacyType].title}</EuiText>}
-      </FieldSummaryItem>
+      {isPermissionEnabled && (
+        <FieldSummaryItem field={RightSidebarScrollField.PrivacyType}>
+          {privacyType && <EuiText size="xs">{privacyType2CopyMap[privacyType].title}</EuiText>}
+        </FieldSummaryItem>
+      )}
+
       <WorkspaceCreateActionPanel
         formData={formData}
         formId={formId}
