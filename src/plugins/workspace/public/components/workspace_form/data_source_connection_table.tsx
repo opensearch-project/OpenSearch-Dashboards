@@ -196,11 +196,11 @@ export const DataSourceConnectionTable = forwardRef<
               >
                 {relatedConnections.map((item) => (
                   <EuiListGroupItem
+                    className="direct-query-connection-popover-item"
                     key={item.id}
                     size="xs"
                     label={item.name}
                     icon={<ConnectionTypeIcon type={item.type} />}
-                    style={{ maxHeight: '30px' }}
                   />
                 ))}
               </EuiListGroup>
