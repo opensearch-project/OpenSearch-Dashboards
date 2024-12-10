@@ -185,6 +185,7 @@ jobs:
           DASHBOARDS_SPEC+="cypress/integration/core_opensearch_dashboards/${i},"
           done
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
+          echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 
       - name: Get Cypress version
         if: ${{ matrix.test_location == 'ftr' }}
