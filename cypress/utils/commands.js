@@ -27,6 +27,38 @@ Cypress.Commands.add('getElementsByTestIds', (testIds, options = {}) => {
 });
 
 /**
+ * Find DOM elements with a data-test-subj id containing the testId.
+ * @param testId data-test-subj value.
+ * @param options get options. Default: {}
+ * @example
+ * // returns all DOM elements that has a data-test-subj including the string 'table'
+ * cy.findElementsByTestIdLike('table')
+ */
+Cypress.Commands.add(
+  'findElementsByTestIdLike',
+  { prevSubject: true },
+  (subject, partialTestId, options = {}) => {
+    return cy.wrap(subject).find(`[data-test-subj*="${partialTestId}"]`, options);
+  }
+);
+
+/**
+ * Find DOM element with a data-test-subj id containing the testId.
+ * @param testId data-test-subj value.
+ * @param options get options. Default: {}
+ * @example
+ * // returns all DOM elements that has a data-test-subj including the string 'table'
+ * cy.findElementsByTestIdLike('table')
+ */
+Cypress.Commands.add(
+  'findElementByTestId',
+  { prevSubject: true },
+  (subject, partialTestId, options = {}) => {
+    return cy.wrap(subject).find(`[data-test-subj="${partialTestId}"]`, options);
+  }
+);
+
+/**
  * Find element from previous chained element by data-test-subj id.
  */
 Cypress.Commands.add(
