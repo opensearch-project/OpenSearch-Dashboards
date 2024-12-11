@@ -33,24 +33,22 @@ describe('dataset selector', { scrollBehavior: false }, () => {
       testFixtureHandler.importJSONDoc('cypress/fixtures/timestamp/data.json.txt');
 
       // Since default cluster is removed, need to create a data source connection if needed
-      if (!cy.ifDataSourceExists(SECONDARY_ENGINE.name)) {
-        miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/create');
-        cy.intercept('POST', '/api/saved_objects/data-source').as('createDataSourceRequest');
-        cy.getElementByTestId(`datasource_card_opensearch`).click();
-        cy.get('[name="dataSourceTitle"]').type(SECONDARY_ENGINE.name);
-        cy.get('[name="endpoint"]').type(SECONDARY_ENGINE.url);
-        cy.getElementByTestId('createDataSourceFormAuthTypeSelect').click();
-        cy.get(`button[id="no_auth"]`).click();
+      miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/create');
+      cy.intercept('POST', '/api/saved_objects/data-source').as('createDataSourceRequest');
+      cy.getElementByTestId(`datasource_card_opensearch`).click();
+      cy.get('[name="dataSourceTitle"]').type(SECONDARY_ENGINE.name);
+      cy.get('[name="endpoint"]').type(SECONDARY_ENGINE.url);
+      cy.getElementByTestId('createDataSourceFormAuthTypeSelect').click();
+      cy.get(`button[id="no_auth"]`).click();
 
-        cy.getElementByTestId('createDataSourceButton').click();
-        cy.wait('@createDataSourceRequest').then((interception) => {
-          expect(interception.response.statusCode).to.equal(200);
-        });
-        cy.location('pathname', { timeout: 6000 }).should(
-          'include',
-          'app/management/opensearch-dashboards/dataSources'
-        );
-      }
+      cy.getElementByTestId('createDataSourceButton').click();
+      cy.wait('@createDataSourceRequest').then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+      });
+      cy.location('pathname', { timeout: 6000 }).should(
+        'include',
+        'app/management/opensearch-dashboards/dataSources'
+      );
 
       // Go to the Discover page
       miscUtils.visitPage(`app/data-explorer/discover#/`);
