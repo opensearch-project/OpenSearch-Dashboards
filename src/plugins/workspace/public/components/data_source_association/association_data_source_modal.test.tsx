@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { fireEvent, render, screen, waitFor, act } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 
@@ -78,7 +78,7 @@ const setupAssociationDataSourceModal = ({
       id: 'ds1-dqc1',
       name: 'dqc1',
       type: 'Amazon S3',
-      connectionType: 1,
+      connectionType: DataSourceConnectionType.DirectQueryConnection,
       parentId: 'ds1',
     },
   ]);

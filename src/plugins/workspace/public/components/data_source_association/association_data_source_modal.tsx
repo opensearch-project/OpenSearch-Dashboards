@@ -259,9 +259,12 @@ export const AssociationDataSourceModalContent = ({
           openSearchConnections,
           dataConnections,
         } = convertDataSourcesToOpenSearchAndDataConnections(dataSourcesList);
-
-        const initialLoadingStatus = dataSourcesList.reduce((acc, ds) => {
-          acc[ds.id] = true;
+        //  Only data source saved object type needs to fetch data source connections, data connection type object not, use loadingStatus to track the loading status of each data source connections
+        const initialLoadingStatus = [
+          ...openSearchConnections.map((ds) => ({ id: ds.id, status: true })),
+          ...dataConnections.map((ds) => ({ id: ds.id, status: false })),
+        ].reduce((acc, { id, status }) => {
+          acc[id] = status;
           return acc;
         }, {} as Record<string, boolean>);
 
@@ -272,9 +275,8 @@ export const AssociationDataSourceModalContent = ({
         return { openSearchConnections };
       })
       .then(({ openSearchConnections }) => {
-        //  Only data source saved object type needs to fetch data source connections, data connection type object not.
         openSearchConnections.forEach((ds) => {
-          // fetch direct query connections for each data source, and set loading status accordingly
+          //  only fetch direct query connections for data source saved object, and set loading status accordingly
           fetchDirectQueryConnectionsByIDs([ds.id], http, notifications)
             .then((directQueryConnections) => {
               setAllConnections((prev) => {
