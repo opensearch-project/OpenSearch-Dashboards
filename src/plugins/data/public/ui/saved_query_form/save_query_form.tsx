@@ -53,7 +53,6 @@ interface Props {
   setSaveAsNew?: (shouldSaveAsNew: boolean) => void;
   showFilterOption?: boolean;
   showTimeFilterOption?: boolean;
-  showDataSourceOption?: boolean;
   saveAsNew?: boolean;
   cannotBeOverwritten?: boolean;
 }
@@ -63,7 +62,6 @@ export interface SavedQueryMeta {
   description: string;
   shouldIncludeFilters: boolean;
   shouldIncludeTimeFilter: boolean;
-  shouldIncludeDataSource: boolean;
 }
 
 export function SaveQueryForm({
@@ -74,7 +72,6 @@ export function SaveQueryForm({
   onClose,
   showFilterOption = true,
   showTimeFilterOption = true,
-  showDataSourceOption = false,
   saveAsNew,
   setSaveAsNew,
   cannotBeOverwritten,
@@ -87,7 +84,6 @@ export function SaveQueryForm({
     onClose,
     showFilterOption,
     showTimeFilterOption,
-    showDataSourceOption,
     saveAsNew,
     setSaveAsNew,
     cannotBeOverwritten,

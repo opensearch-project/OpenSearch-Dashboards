@@ -43,7 +43,6 @@ export function SaveQueryFlyout({
       savedQueryService={savedQueryService}
       showFilterOption={showFilterOption}
       showTimeFilterOption={showTimeFilterOption}
-      showDataSourceOption={true}
       setSaveAsNew={(shouldSaveAsNew) => setSaveAsNew(shouldSaveAsNew)}
       savedQuery={saveAsNew ? undefined : savedQuery}
       saveAsNew={saveAsNew}
