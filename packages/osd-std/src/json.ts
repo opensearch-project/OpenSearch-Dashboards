@@ -69,7 +69,7 @@ export const parse = (
       numeralsAreNumbers &&
       typeof val === 'number' &&
       isFinite(val) &&
-      (val < Number.MAX_SAFE_INTEGER || val > Number.MAX_SAFE_INTEGER)
+      (val < Number.MIN_SAFE_INTEGER || val > Number.MAX_SAFE_INTEGER)
     ) {
       numeralsAreNumbers = false;
     }
