@@ -72,12 +72,14 @@ describe('findRelationships', () => {
           id: 'ref-1',
           attributes: {},
           references: [],
+          workspaces: ['workspace1'],
         },
         {
           type: 'another-type',
           id: 'ref-2',
           attributes: {},
           references: [],
+          workspaces: ['workspace1'],
         },
       ],
     });
@@ -90,6 +92,7 @@ describe('findRelationships', () => {
           attributes: {},
           score: 1,
           references: [],
+          workspaces: ['workspace1'],
         },
       ],
       total: 1,
@@ -130,18 +133,21 @@ describe('findRelationships', () => {
         relationship: 'child',
         type: 'some-type',
         meta: expect.any(Object),
+        workspaces: ['workspace1'],
       },
       {
         id: 'ref-2',
         relationship: 'child',
         type: 'another-type',
         meta: expect.any(Object),
+        workspaces: ['workspace1'],
       },
       {
         id: 'parent-id',
         relationship: 'parent',
         type: 'parent-type',
         meta: expect.any(Object),
+        workspaces: ['workspace1'],
       },
     ]);
   });

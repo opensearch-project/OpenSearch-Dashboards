@@ -95,5 +95,6 @@ function extractCommonProperties(savedObject: SavedObjectWithMetadata) {
     id: savedObject.id,
     type: savedObject.type,
     meta: savedObject.meta,
+    workspaces: savedObject.workspaces,
   };
 }

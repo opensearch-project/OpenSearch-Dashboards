@@ -52,7 +52,7 @@ describe('Utils', () => {
       attributes: {},
       references: [],
       meta: {
-        editUrl: '/management/opensearch-dashboards/objects/savedDashboards/ID1',
+        editUrl: '/management/opensearch-dashboards/objects/dashboard/ID1',
       },
     };
     const savedObjectWithWorkspaces = {
@@ -89,7 +89,7 @@ describe('Utils', () => {
         get: jest.fn().mockReturnValue(false),
       };
       const result = formatInspectUrl(savedObject, mockCoreStart);
-      expect(result).toBe('/management/opensearch-dashboards/objects/savedDashboards/ID1');
+      expect(result).toBe('/app/management/opensearch-dashboards/objects/dashboard/ID1');
     });
 
     it('formats URL correctly when useUpdatedUX is false, saved object does not belong to certain workspaces and not in current workspace', () => {
@@ -98,7 +98,7 @@ describe('Utils', () => {
         get: jest.fn().mockReturnValue(false),
       };
       const result = formatInspectUrl(savedObject, mockCoreStart);
-      expect(result).toBe('/management/opensearch-dashboards/objects/savedDashboards/ID1');
+      expect(result).toBe('/app/management/opensearch-dashboards/objects/dashboard/ID1');
     });
 
     it('formats URL correctly when useUpdatedUX is true and in current workspace', () => {
@@ -106,21 +106,21 @@ describe('Utils', () => {
       mockCoreStart.workspaces.currentWorkspace$.next(currentWorkspace);
       const result = formatInspectUrl(savedObjectWithWorkspaces, mockCoreStart);
 
-      expect(result).toBe('http://localhost/w/workspace1/app/objects/savedDashboards/ID1');
+      expect(result).toBe('http://localhost/w/workspace1/app/objects/dashboard/ID1');
     });
 
     it('formats URL correctly when useUpdatedUX is true and saved object belongs to certain workspaces', () => {
       mockCoreStart.workspaces.workspaceList$.next([{ id: 'workspace1', name: 'workspace1' }]);
       const result = formatInspectUrl(savedObjectWithWorkspaces, mockCoreStart);
 
-      expect(result).toBe('http://localhost/w/workspace1/app/objects/savedDashboards/ID1');
+      expect(result).toBe('http://localhost/w/workspace1/app/objects/dashboard/ID1');
     });
 
     it('formats URL correctly when useUpdatedUX is true and the object does not belong to any workspace', () => {
       mockCoreStart.workspaces.workspaceList$.next([{ id: 'workspace2', name: 'workspace2' }]);
       const result = formatInspectUrl(savedObjectWithWorkspaces, mockCoreStart);
 
-      expect(result).toBe('/app/objects/savedDashboards/ID1');
+      expect(result).toBe('/app/objects/dashboard/ID1');
     });
   });
 });
