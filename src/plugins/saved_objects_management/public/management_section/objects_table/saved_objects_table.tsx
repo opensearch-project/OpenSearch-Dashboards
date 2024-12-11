@@ -74,6 +74,7 @@ import {
   SavedObjectsImportError,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -167,6 +168,7 @@ export interface SavedObjectsTableState {
   failedCopies: SavedObjectsImportError[];
   successfulCopies: SavedObjectsImportSuccess[];
   targetWorkspaceName: string;
+  targetWorkspace: string;
 }
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
@@ -209,6 +211,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       failedCopies: [],
       successfulCopies: [],
       targetWorkspaceName: '',
+      targetWorkspace: '',
     };
   }
 
@@ -756,7 +759,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     savedObjects: DuplicateObject[],
     includeReferencesDeep: boolean,
     targetWorkspace: string,
-    targetWorkspaceName: string
+    targetWorkspaceName: string,
+    isSolveErrorsOperation?: boolean
   ) => {
     const { notifications, workspaces, useUpdatedUX } = this.props;
     const workspaceClient = workspaces.client$.getValue();
@@ -785,12 +789,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       if (result?.error) {
         showErrorNotification(result.error);
       } else {
-        this.setState({
-          isShowingDuplicateResultFlyout: true,
-          failedCopies: result?.errors || [],
-          successfulCopies: result?.successCount > 0 ? result.successResults : [],
-          targetWorkspaceName,
-        });
+        if (isSolveErrorsOperation) {
+          this.setState({
+            failedCopies: result?.errors || [],
+            successfulCopies: result?.successCount > 0 ? result.successResults : [],
+            targetWorkspaceName,
+          });
+        } else {
+          this.setState({
+            isShowingDuplicateResultFlyout: true,
+            failedCopies: result?.errors || [],
+            successfulCopies: result?.successCount > 0 ? result.successResults : [],
+            targetWorkspace,
+            targetWorkspaceName,
+          });
+        }
       }
     } catch (e) {
       showErrorNotification();
@@ -830,11 +843,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       targetWorkspaceName,
       failedCopies,
       successfulCopies,
+      targetWorkspace,
     } = this.state;
+    const { applications, http } = this.props;
 
     if (!isShowingDuplicateResultFlyout) {
       return null;
     }
+
+    const targetWorkspaceDataSourceUrl = formatUrlWithWorkspaceId(
+      applications.getUrlForApp('dataSources', {
+        absolute: false,
+      }),
+      targetWorkspace,
+      http.basePath
+    );
 
     return (
       <DuplicateResultFlyout
@@ -842,6 +865,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         failedCopies={failedCopies}
         successfulCopies={successfulCopies}
         onClose={this.hideDuplicateResultFlyout}
+        onCopy={this.onDuplicate}
+        targetWorkspace={targetWorkspace}
+        useUpdatedUX={this.props.useUpdatedUX}
+        targetWorkspaceDataSourceUrl={targetWorkspaceDataSourceUrl}
       />
     );
   }
