@@ -252,6 +252,15 @@ export class DataExplorerPage {
   }
 
   /**
+   * Get Exists Filter Button in Doc Table Field Expanded Document Row.
+   */
+  static getDocTableExpandedDocRowExistsFilterButton() {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_EXISTS_FILTER_BUTTON
+    );
+  }
+
+  /**
    * Open window to select Dataset
    */
   static openDatasetExplorerWindow() {
@@ -341,6 +350,17 @@ export class DataExplorerPage {
   }
 
   /**
+   * Check the entire filter pill text matches expectedFilterText.
+   * @param expectedFilterText expected text in filter pill.
+   */
+  static checkFullFilterPillText(expectedFilterText) {
+    // GLOBAL_QUERY_EDITOR_FILTER_VALUE gives the inner element, but we may want all the text in the filter pill
+    DataExplorerPage.getGlobalQueryEditorFilterValue()
+      .parent()
+      .should('have.text', expectedFilterText);
+  }
+
+  /**
    * Check the query hit text matches expectedQueryHitText.
    * @param expectedQueryHitsText expected text for query hits
    */
@@ -399,14 +419,15 @@ export class DataExplorerPage {
   }
 
   /**
-   * Check if the first expanded Doc Table Field's first row's Filter For and Filter Out button are disabled.
+   * Check if the first expanded Doc Table Field's first row's Filter For, Filter Out and Exists Filter buttons are disabled.
    * @param isEnabled Boolean determining if these buttons are disabled
    */
-  static checkDocTableFirstExpandedFieldFirstRowFilterForAndOutButtons(isEnabled) {
+  static checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(isEnabled) {
     const shouldText = isEnabled ? 'be.enabled' : 'be.disabled';
     DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
       DataExplorerPage.getDocTableExpandedDocRowFilterForButton().should(shouldText);
-      DataExplorerPage.getDocTableExpandedDocRowFilterForButton().should(shouldText);
+      DataExplorerPage.getDocTableExpandedDocRowFilterOutButton().should(shouldText);
+      DataExplorerPage.getDocTableExpandedDocRowExistsFilterButton().should(shouldText);
     });
   }
 
@@ -447,7 +468,7 @@ export class DataExplorerPage {
   }
 
   /**
-   * Check the first expanded Doc Table Field's first row's Toggle Column button filters the correct value.
+   * Check the first expanded Doc Table Field's first row's Toggle Column button has intended behavior.
    */
   static checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior() {
     DataExplorerPage.getExpandedDocRowFieldName(0, 0).then(($expandedDocumentRowFieldText) => {
@@ -466,5 +487,21 @@ export class DataExplorerPage {
       });
       DataExplorerPage.getDocTableHeader(fieldText).should('not.exist');
     });
+  }
+
+  /**
+   * Check the first expanded Doc Table Field's first row's Exists Filter button filters the correct Field.
+   */
+  static checkDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField() {
+    DataExplorerPage.getExpandedDocRowFieldName(0, 0).then(($expandedDocumentRowField) => {
+      const filterFieldText = $expandedDocumentRowField.text();
+      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
+        DataExplorerPage.getDocTableExpandedDocRowExistsFilterButton().click();
+      });
+      DataExplorerPage.checkFullFilterPillText(filterFieldText + ': ' + 'exists');
+      DataExplorerPage.checkQueryHitsText('10,000');
+    });
+    DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
+    DataExplorerPage.checkQueryHitsText('10,000');
   }
 }
