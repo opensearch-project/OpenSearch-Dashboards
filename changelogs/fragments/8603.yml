@@ -1,0 +1,2 @@
+fix:
+- Upgrade JSON11 from 1.1.2 to 2.0.0 to ensure UTF-8 safety when stringifying JSON data ([#8603](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8603))
