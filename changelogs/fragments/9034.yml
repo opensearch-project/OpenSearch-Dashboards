@@ -1,0 +1,2 @@
+fix:
+- Fix saved search loading issue ([#9034](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9034))
