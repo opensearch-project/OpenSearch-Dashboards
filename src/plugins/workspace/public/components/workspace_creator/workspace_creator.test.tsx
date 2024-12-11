@@ -16,7 +16,7 @@ import {
   WorkspaceCreatorProps,
 } from './workspace_creator';
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
-import { DataSourceConnectionType, DataSourceConnection } from '../../../common/types';
+import { DataSourceConnectionType } from '../../../common/types';
 import * as utils from '../../utils';
 import * as workspaceUtilsExports from '../utils/workspace';
 
@@ -140,7 +140,7 @@ jest.spyOn(utils, 'fulfillRelatedConnections').mockReturnValue([
   },
 ]);
 
-jest.spyOn(utils, 'fetchDirectQueryConnections').mockResolvedValue(directQueryConnectionsMock);
+jest.spyOn(utils, 'fetchDirectQueryConnectionsByIDs').mockResolvedValue(directQueryConnectionsMock);
 
 const mockCoreStart = coreMock.createStart();
 

@@ -63,25 +63,7 @@ jest
   .spyOn(utils, 'convertDataSourcesToOpenSearchAndDataConnections')
   .mockReturnValue({ openSearchConnections: [...dataSourceConnectionsMock], dataConnections: [] });
 
-jest.spyOn(utils, 'fetchDirectQueryConnections').mockResolvedValue(directQueryConnectionsMock);
-
-jest.spyOn(utils, 'fulfillRelatedConnections').mockReturnValue([
-  {
-    id: 'ds1',
-    name: 'Data Source 1',
-    type: 'OpenSearch',
-    connectionType: DataSourceConnectionType.OpenSearchConnection,
-    relatedConnections: [
-      {
-        id: 'ds1-dqc1',
-        name: 'dqc1',
-        type: 'Amazon S3',
-        connectionType: DataSourceConnectionType.DirectQueryConnection,
-        parentId: 'ds1',
-      },
-    ],
-  },
-]);
+jest.spyOn(utils, 'fetchDirectQueryConnectionsByIDs').mockResolvedValue(directQueryConnectionsMock);
 
 const mockCoreStart = coreMock.createStart();
 

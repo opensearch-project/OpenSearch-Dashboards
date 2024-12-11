@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 
@@ -15,6 +15,32 @@ import {
   AssociationDataSourceModalProps,
 } from './association_data_source_modal';
 import { AssociationDataSourceModalMode } from 'src/plugins/workspace/common/constants';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+const dataSourcesList = [
+  {
+    id: 'ds1',
+    title: 'Data Source 1',
+    description: 'Description of data source 1',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
+    // This is used for mocking saved object function
+    get: () => {
+      return 'Data Source 1';
+    },
+  },
+  {
+    id: 'dqs1',
+    title: 'Data Connection 1',
+    description: 'Description of data connection 1',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
+    get: () => {
+      return 'Data Connection 1';
+    },
+  },
+];
 
 const openSearchAndDataConnectionsMock = {
   openSearchConnections: [
@@ -41,37 +67,18 @@ const setupAssociationDataSourceModal = ({
   handleAssignDataSourceConnections,
 }: Partial<AssociationDataSourceModalProps> = {}) => {
   const coreServices = coreMock.createStart();
-  jest.spyOn(utilsExports, 'getDataSourcesList').mockResolvedValue([]);
+  jest.spyOn(utilsExports, 'getDataSourcesList').mockResolvedValue(dataSourcesList);
 
   jest
     .spyOn(utilsExports, 'convertDataSourcesToOpenSearchAndDataConnections')
     .mockReturnValue(openSearchAndDataConnectionsMock);
 
-  jest.spyOn(utilsExports, 'fulfillRelatedConnections').mockReturnValue([
-    {
-      id: 'ds1',
-      name: 'Data Source 1',
-      type: 'OpenSearch',
-      connectionType: DataSourceConnectionType.OpenSearchConnection,
-      relatedConnections: [
-        {
-          id: 'ds1-dqc1',
-          name: 'dqc1',
-          type: 'Amazon S3',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds1',
-        },
-      ],
-    },
-  ]);
-
-  jest.spyOn(utilsExports, 'fetchDirectQueryConnections').mockResolvedValue([
+  jest.spyOn(utilsExports, 'fetchDirectQueryConnectionsByIDs').mockResolvedValue([
     {
       id: 'ds1-dqc1',
       name: 'dqc1',
       type: 'Amazon S3',
       connectionType: 1,
-      description: 'direct_query_connections_1',
       parentId: 'ds1',
     },
   ]);
@@ -165,11 +172,13 @@ describe('AssociationDataSourceModal', () => {
     setupAssociationDataSourceModal({
       handleAssignDataSourceConnections: handleAssignDataSourceConnectionsMock,
     });
-
     await waitFor(() => {
-      fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Associate data sources' }));
+      expect(screen.getByText('Data Source 1')).toBeInTheDocument();
+      expect(screen.getByText('Associate data sources')).toBeInTheDocument();
     });
+
+    fireEvent.click(screen.getByText('Data Source 1'));
+    fireEvent.click(screen.getByText('Associate data sources'));
 
     expect(handleAssignDataSourceConnectionsMock).toHaveBeenCalledWith([
       {
@@ -196,11 +205,12 @@ describe('AssociationDataSourceModal', () => {
       handleAssignDataSourceConnections: handleAssignDataSourceConnectionsMock,
       mode: AssociationDataSourceModalMode.DirectQueryConnections,
     });
-
     await waitFor(() => {
-      fireEvent.click(screen.getByRole('option', { name: 'Data Connection 1' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Associate data sources' }));
+      expect(screen.getByText('Data Connection 1')).toBeInTheDocument();
+      expect(screen.getByText('Associate data sources')).toBeInTheDocument();
     });
+    fireEvent.click(screen.getByText('Data Connection 1'));
+    fireEvent.click(screen.getByText('Associate data sources'));
 
     expect(handleAssignDataSourceConnectionsMock).toHaveBeenCalledWith([
       {

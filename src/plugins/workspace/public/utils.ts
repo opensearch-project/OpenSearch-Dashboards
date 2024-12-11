@@ -539,15 +539,15 @@ export const fetchDataSourceConnections = async (
   }
 };
 
-export const fetchDirectQueryConnections = async (
-  dataSources: DataSource[],
+export const fetchDirectQueryConnectionsByIDs = async (
+  dataSourceIds: string[],
   http: HttpSetup | undefined,
   notifications: NotificationsStart | undefined
 ) => {
   try {
     const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
       // Only data source saved object type needs to fetch data source connections, data connection type object not.
-      dataSources.filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE).map((ds) => ds.id),
+      dataSourceIds,
       http
     );
 
