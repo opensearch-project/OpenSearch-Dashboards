@@ -44,10 +44,10 @@ const setupAssociationDataSourceModal = ({
   jest.spyOn(utilsExports, 'getDataSourcesList').mockResolvedValue([]);
 
   jest
-    .spyOn(utilsExports, 'getOpenSearchAndDataConnections')
+    .spyOn(utilsExports, 'convertDataSourcesToOpenSearchAndDataConnections')
     .mockReturnValue(openSearchAndDataConnectionsMock);
 
-  jest.spyOn(utilsExports, 'updateFullFillRelatedConnections').mockReturnValue([
+  jest.spyOn(utilsExports, 'fulfillRelatedConnections').mockReturnValue([
     {
       id: 'ds1',
       name: 'Data Source 1',

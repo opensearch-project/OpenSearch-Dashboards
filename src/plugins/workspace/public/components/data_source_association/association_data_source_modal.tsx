@@ -27,9 +27,9 @@ import { i18n } from '@osd/i18n';
 
 import {
   getDataSourcesList,
-  getOpenSearchAndDataConnections,
+  fulfillRelatedConnections,
   fetchDirectQueryConnections,
-  updateFullFillRelatedConnections,
+  convertDataSourcesToOpenSearchAndDataConnections,
 } from '../../utils';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
@@ -256,16 +256,17 @@ export const AssociationDataSourceModalContent = ({
     setIsLoading(true);
     getDataSourcesList(savedObjects.client, ['*'])
       .then((dataSourcesList) => {
-        const { openSearchConnections, dataConnections } = getOpenSearchAndDataConnections(
-          dataSourcesList
-        );
+        const {
+          openSearchConnections,
+          dataConnections,
+        } = convertDataSourcesToOpenSearchAndDataConnections(dataSourcesList);
         setAllConnections([...openSearchConnections, ...dataConnections]);
         return { openSearchConnections, dataConnections, dataSourcesList };
       })
       .then(({ openSearchConnections, dataConnections, dataSourcesList }) => {
         fetchDirectQueryConnections(dataSourcesList, http, notifications).then(
           (directQueryConnections) => {
-            const updatedOpenSearchConnections = updateFullFillRelatedConnections(
+            const updatedOpenSearchConnections = fulfillRelatedConnections(
               openSearchConnections,
               directQueryConnections
             );

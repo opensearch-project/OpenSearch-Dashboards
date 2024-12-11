@@ -10,7 +10,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import * as utils from '../../utils';
 import { DataSourceEngineType } from 'src/plugins/data_source/common/data_sources';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
-import { DataSourceConnectionType, DataSourceConnection } from '../../../common/types';
+import { DataSourceConnectionType } from '../../../common/types';
 
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
 
@@ -57,39 +57,31 @@ const dataSources = [
     workspaces: [],
   },
 ];
-
-jest
-  .spyOn(utils, 'getOpenSearchAndDataConnections')
-  .mockReturnValue({ openSearchConnections: [...dataSourceConnectionsMock], dataConnections: [] });
-
 jest.spyOn(utils, 'getDataSourcesList').mockResolvedValue(dataSources);
 
 jest
-  .spyOn(utils, 'updateFullFillRelatedConnections')
-  .mockImplementationOnce(
-    (
-      openSearchConnections: DataSourceConnection[],
-      directQueryConnections: DataSourceConnection[]
-    ): DataSourceConnection[] => [
-      {
-        id: 'ds1',
-        name: 'Data Source 1',
-        type: 'OpenSearch',
-        connectionType: 0,
-        relatedConnections: [
-          {
-            id: 'ds1-dqc1',
-            name: 'dqc1',
-            type: 'Amazon S3',
-            connectionType: 1,
-            parentId: 'ds1',
-          },
-        ],
-      },
-    ]
-  );
+  .spyOn(utils, 'convertDataSourcesToOpenSearchAndDataConnections')
+  .mockReturnValue({ openSearchConnections: [...dataSourceConnectionsMock], dataConnections: [] });
 
 jest.spyOn(utils, 'fetchDirectQueryConnections').mockResolvedValue(directQueryConnectionsMock);
+
+jest.spyOn(utils, 'fulfillRelatedConnections').mockReturnValue([
+  {
+    id: 'ds1',
+    name: 'Data Source 1',
+    type: 'OpenSearch',
+    connectionType: DataSourceConnectionType.OpenSearchConnection,
+    relatedConnections: [
+      {
+        id: 'ds1-dqc1',
+        name: 'dqc1',
+        type: 'Amazon S3',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+        parentId: 'ds1',
+      },
+    ],
+  },
+]);
 
 const mockCoreStart = coreMock.createStart();
 
@@ -163,24 +155,19 @@ describe('SelectDataSourcePanel', () => {
 
   it('should call onChange when updating data sources', async () => {
     const onChangeMock = jest.fn();
-    const { getByTestId, getByText } = setup({
+    const { getByTestId, getByText, findByText } = setup({
       onChange: onChangeMock,
       assignedDataSourceConnections: [],
     });
 
     expect(onChangeMock).not.toHaveBeenCalled();
     fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
-
-    await waitFor(() => {
-      expect(
-        getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
-        )
-      ).toBeInTheDocument();
-      expect(getByText('Data Source 1')).toBeInTheDocument();
-      expect(getByText('Data Source 2')).toBeInTheDocument();
-    });
-
+    expect(
+      getByText(
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+      )
+    ).toBeInTheDocument();
+    await findByText('Data Source 1');
     fireEvent.click(getByText('Data Source 1'));
     fireEvent.click(getByText('Associate data sources'));
     expect(onChangeMock).toHaveBeenCalledWith([expect.objectContaining({ id: 'ds1' })]);

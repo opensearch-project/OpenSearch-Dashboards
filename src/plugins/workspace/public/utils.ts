@@ -539,13 +539,6 @@ export const fetchDataSourceConnections = async (
   }
 };
 
-export const updateFullFillRelatedConnections = (
-  openSearchConnections: DataSourceConnection[],
-  directQueryConnections: DataSourceConnection[]
-): DataSourceConnection[] => {
-  return fulfillRelatedConnections(openSearchConnections, directQueryConnections);
-};
-
 export const fetchDirectQueryConnections = async (
   dataSources: DataSource[],
   http: HttpSetup | undefined,
@@ -567,20 +560,6 @@ export const fetchDirectQueryConnections = async (
     );
     return [];
   }
-};
-
-export const getOpenSearchAndDataConnections = (
-  dataSources: DataSource[] | DataConnection[]
-): {
-  openSearchConnections: DataSourceConnection[];
-  dataConnections: DataSourceConnection[];
-} => {
-  const {
-    openSearchConnections,
-    dataConnections,
-  } = convertDataSourcesToOpenSearchAndDataConnections(dataSources);
-
-  return { openSearchConnections, dataConnections };
 };
 
 export const getUseCase = (workspace: WorkspaceObject, availableUseCases: WorkspaceUseCase[]) => {
