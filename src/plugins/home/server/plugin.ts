@@ -41,7 +41,7 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry, homepageSavedObjectType } from './saved_objects';
 import { registerRoutes } from './routes';
-import { uiSettings } from './ui_settings';
+import { uiSettings, searchOverviewPageUISetting } from './ui_settings';
 
 interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
@@ -60,6 +60,7 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     const router = core.http.createRouter();
     registerRoutes(router);
     core.uiSettings.register(uiSettings);
+    core.uiSettings.register(searchOverviewPageUISetting);
 
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },
