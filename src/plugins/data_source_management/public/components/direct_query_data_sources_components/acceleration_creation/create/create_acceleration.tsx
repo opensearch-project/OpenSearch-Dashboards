@@ -277,6 +277,7 @@ export const CreateAcceleration = ({
               resetFlyout={resetFlyout}
               notifications={notifications}
               application={application}
+              http={http}
             />
           </EuiForm>
         </EuiFlyoutBody>
