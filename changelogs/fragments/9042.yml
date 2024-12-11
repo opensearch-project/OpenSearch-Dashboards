@@ -1,0 +1,2 @@
+feat:
+- Disable buttons in sample data cards for read-only users ([#9042](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9042))
