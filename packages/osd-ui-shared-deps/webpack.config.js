@@ -59,7 +59,6 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     devtoolModuleFilenameTemplate: (info) =>
       `osd-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__osdSharedDeps__',
-    hashFunction: 'Xxh64',
   },
 
   module: {

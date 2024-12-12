@@ -17029,22 +17029,6 @@ terser-webpack-plugin@^2.1.2:
     terser "^4.6.12"
     webpack-sources "^1.4.3"
 
-"terser-webpack-plugin@npm:@amoo-miki/terser-webpack-plugin@1.4.5-rc.2":
-  version "1.4.5-rc.2"
-  resolved "https://registry.yarnpkg.com/@amoo-miki/terser-webpack-plugin/-/terser-webpack-plugin-1.4.5-rc.2.tgz#046c062ef22c126c2544718674bc6624e3651b9c"
-  integrity sha512-JFSGSzsWgSHEqQXlnHDh3gw+jdVdVlWM2Irdps9P/yWYNY/5VjuG8sdoW4mbuP8/HM893/k8N+ipbeqsd8/xpA==
-  dependencies:
-    "@node-rs/xxhash" "^1.3.0"
-    cacache "^12.0.2"
-    find-cache-dir "^2.1.0"
-    is-wsl "^1.1.0"
-    schema-utils "^1.0.0"
-    serialize-javascript "^4.0.0"
-    source-map "^0.6.1"
-    terser "^4.1.2"
-    webpack-sources "^1.4.0"
-    worker-farm "^1.7.0"
-
 terser@^4.1.2, terser@^4.6.12:
   version "4.8.1"
   resolved "https://registry.yarnpkg.com/terser/-/terser-4.8.1.tgz#a00e5634562de2239fd404c649051bf6fc21144f"
@@ -18649,36 +18633,6 @@ webpack@^4.47.0:
     schema-utils "^1.0.0"
     tapable "^1.1.3"
     terser-webpack-plugin "^1.4.3"
-    watchpack "^1.7.4"
-    webpack-sources "^1.4.1"
-
-"webpack@npm:@amoo-miki/webpack@4.46.0-xxhash.1":
-  version "4.46.0-xxhash.1"
-  resolved "https://registry.yarnpkg.com/@amoo-miki/webpack/-/webpack-4.46.0-xxhash.1.tgz#e8fdb0399d36715e558ad35e3ff70fd1d4ea47a7"
-  integrity sha512-gPwQMqfrE9326g+rZoU4BPOfcYvEcAR0XxfpV9AGUcRwl2oHoqEwq7nxSWchilpGV1i9XI7mCa8u8k4ePz6ziA==
-  dependencies:
-    "@node-rs/xxhash" "^1.3.0"
-    "@webassemblyjs/ast" "1.9.0"
-    "@webassemblyjs/helper-module-context" "1.9.0"
-    "@webassemblyjs/wasm-edit" "1.9.0"
-    "@webassemblyjs/wasm-parser" "1.9.0"
-    acorn "^6.4.1"
-    ajv "^6.10.2"
-    ajv-keywords "^3.4.1"
-    chrome-trace-event "^1.0.2"
-    enhanced-resolve "^4.5.0"
-    eslint-scope "^4.0.3"
-    glob-to-regexp "^0.4.1"
-    json-parse-better-errors "^1.0.2"
-    loader-runner "^2.4.0"
-    loader-utils "^2.0.4"
-    memory-fs "^0.4.1"
-    mkdirp "^0.5.3"
-    neo-async "^2.6.1"
-    node-libs-browser "^2.2.1"
-    schema-utils "^1.0.0"
-    tapable "^1.1.3"
-    terser-webpack-plugin "npm:@amoo-miki/terser-webpack-plugin@1.4.5-rc.2"
     watchpack "^1.7.4"
     webpack-sources "^1.4.1"
 

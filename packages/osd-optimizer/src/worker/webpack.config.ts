@@ -69,7 +69,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           info.absoluteResourcePath
         )}${info.query}`,
       jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
-      hashFunction: 'Xxh64',
     },
 
     optimization: {
