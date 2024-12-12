@@ -82,6 +82,10 @@ describe('dataset selector', { scrollBehavior: false }, () => {
 
       // Switch language to PPL
       cy.setQueryLanguage('PPL');
+      const fromTime = 'Sep 19, 2018 @ 00:00:00.000';
+      const toTime = 'Sep 21, 2019 @ 00:00:00.000';
+      cy.setTopNavDate(fromTime, toTime);
+
       cy.waitForLoaderNewHeader();
       cy.get(`[data-test-subj="queryResultCompleteMsg"]`).should('be.visible');
     });
@@ -128,14 +132,10 @@ describe('dataset selector', { scrollBehavior: false }, () => {
 
   describe('index pattern', () => {
     it('create index pattern and select it', function () {
-      // import logstash functional
-      testFixtureHandler.importJSONDocIfNeeded(
-        indexSet,
-        'cypress/fixtures/logstash/mappings.json.txt',
-        'cypress/fixtures/logstash/data.json.txt'
-      );
-      testFixtureHandler.importJSONMapping('cypress/fixtures/discover/mappings.json.txt');
+      testFixtureHandler.importJSONMapping('cypress/fixtures/logstash/mappings.json.txt');
+      testFixtureHandler.importJSONDoc('cypress/fixtures/logstash/data.json.txt');
 
+      testFixtureHandler.importJSONMapping('cypress/fixtures/discover/mappings.json.txt');
       testFixtureHandler.importJSONDoc('cypress/fixtures/discover/data.json.txt');
 
       // Go to the Discover page
@@ -156,6 +156,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
     cy.deleteIndex('timestamp-nanos');
     // delete the data source connection
     miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/');
+    cy.wait(10000);
     cy.waitForLoaderNewHeader();
     cy.get(`[class="euiTableRowCell"]`).contains(SECONDARY_ENGINE.name).click();
     cy.getElementByTestId('editDatasourceDeleteIcon').click();
