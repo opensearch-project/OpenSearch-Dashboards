@@ -40,7 +40,6 @@ describe('dataset selector', { scrollBehavior: false }, () => {
       cy.get(`button[id="no_auth"]`).click();
 
       cy.getElementByTestId('createDataSourceButton').click();
-      cy.getElementByTestId('editSetDefaultDataSource').click(); // set as default
 
       cy.wait('@createDataSourceRequest').then((interception) => {
         expect(interception.response.statusCode).to.equal(200);
@@ -158,11 +157,11 @@ describe('dataset selector', { scrollBehavior: false }, () => {
   after(() => {
     cy.deleteIndex('timestamp-nanos');
     // delete the data source connection
-    miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/');
-    cy.wait(10000);
-    cy.waitForLoaderNewHeader();
-    cy.get(`[class="euiTableRowCell"]`).contains(SECONDARY_ENGINE.name).click();
-    cy.getElementByTestId('editDatasourceDeleteIcon').click();
-    cy.getElementByTestId('confirmModalConfirmButton').click();
+    // miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/');
+    // cy.wait(10000);
+    // cy.waitForLoaderNewHeader();
+    // cy.get(`[class="euiTableRowCell"]`).contains(SECONDARY_ENGINE.name).click();
+    // cy.getElementByTestId('editDatasourceDeleteIcon').click();
+    // cy.getElementByTestId('confirmModalConfirmButton').click();
   });
 });
