@@ -11,8 +11,6 @@ import { PATHS, SECONDARY_ENGINE } from '../../../utils/constants';
 const miscUtils = new MiscUtils(cy);
 const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
 
-const indexSet = ['logstash-2015.09.22', 'logstash-2015.09.21', 'logstash-2015.09.20'];
-
 describe('dataset selector', { scrollBehavior: false }, () => {
   describe('empty state', () => {
     it('no index pattern', function () {
@@ -42,6 +40,8 @@ describe('dataset selector', { scrollBehavior: false }, () => {
       cy.get(`button[id="no_auth"]`).click();
 
       cy.getElementByTestId('createDataSourceButton').click();
+      cy.getElementByTestId('editSetDefaultDataSource').click(); // set as default
+
       cy.wait('@createDataSourceRequest').then((interception) => {
         expect(interception.response.statusCode).to.equal(200);
       });
