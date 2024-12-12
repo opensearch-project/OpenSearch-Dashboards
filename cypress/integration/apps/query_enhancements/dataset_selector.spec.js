@@ -143,8 +143,11 @@ describe('dataset selector', { scrollBehavior: false }, () => {
         `app/data-explorer/discover#/?_g=(filters:!(),time:(from:'2015-09-19T13:31:44.000Z',to:'2015-09-24T01:31:44.000Z'))`
       );
 
-      cy.get(`[class~="datasetSelector__button"]`).click();
-      cy.getElementByTestId(`datasetOption-logstash-*`).click();
+      cy.getElementByTestId(`datasetSelectorButton`).click();
+      cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
+      cy.get(`[title="Index Patterns"]`).click();
+      cy.get(`[title="logstash-*"]`).click();
+      cy.getElementByTestId('datasetSelectorNext').click();
 
       cy.waitForLoaderNewHeader();
       cy.waitForSearch();
