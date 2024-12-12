@@ -117,6 +117,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
         <EuiContextMenuItem
           key={language.label}
           className="languageSelector__menuItem"
+          data-test-subj="languageSelector"
           icon={language.label === selectedLanguage.label ? 'check' : 'empty'}
           onClick={() => handleLanguageChange(language.value)}
         >
