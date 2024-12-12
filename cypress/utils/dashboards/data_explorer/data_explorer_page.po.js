@@ -4,7 +4,7 @@
  */
 
 import { DATA_EXPLORER_PAGE_ELEMENTS } from './elements.js';
-import { INDEX_CLUSTER_NAME, INDEX_NAME, INDEX_PATTERN_NAME } from './constants.js';
+import { INDEX_PATTERN_NAME } from './constants.js';
 
 export class DataExplorerPage {
   /**
@@ -127,7 +127,9 @@ export class DataExplorerPage {
       .then(function ($content) {
         const contentLen = $content.length;
         const deletionType = del ? '{del}' : '{backspace}';
-        DataExplorerPage.getQueryMultilineEditor().type(deletionType.repeat(contentLen));
+        DataExplorerPage.getQueryMultilineEditor().type(deletionType.repeat(contentLen), {
+          force: true,
+        });
       });
   }
 
@@ -138,7 +140,7 @@ export class DataExplorerPage {
    */
   static sendQueryOnMultilineEditor(query, del = true) {
     DataExplorerPage.clearQueryMultilineEditor(del);
-    DataExplorerPage.getQueryMultilineEditor().type(query);
+    DataExplorerPage.getQueryMultilineEditor().type(query, { force: true });
     DataExplorerPage.getQuerySubmitBtn().click();
   }
 
@@ -228,6 +230,27 @@ export class DataExplorerPage {
     return cy.get('[data-test-subj^="field-"]:not([data-test-subj$="showDetails"])');
   }
 
+  static getSidebar() {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.SIDEBAR_PANEL_OWNREFERENCE);
+  }
+
+  static getResizeableBar() {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.SIDEBAR_PANEL_RESIZEABLE_BAR);
+  }
+
+  static getResizeableToggleButton() {
+    return cy.get('.euiResizableToggleButton');
+  }
+
+  static collapseSidebar() {
+    DataExplorerPage.getResizeableBar().trigger('mouseover').click();
+    DataExplorerPage.getResizeableToggleButton().click();
+  }
+
+  static expandSidebar() {
+    DataExplorerPage.getResizeableToggleButton().click();
+  }
+
   /**
    * Check the results of the sidebar filter bar search.
    * @param search string to look up
@@ -243,6 +266,16 @@ export class DataExplorerPage {
           cy.wrap($fieldTxt).should(assertion, search);
         });
     });
+    DataExplorerPage.clearSidebarFilterBar();
+  }
+
+  /**
+   * Checks that the searched non-existent field does not appear on the DOM.
+   * @param search non-existent field
+   */
+  static checkSidebarFilterBarNegativeResults(search) {
+    DataExplorerPage.getSidebarFilterBar().type(search);
+    DataExplorerPage.getAllSidebarAddFields().should('not.exist');
     DataExplorerPage.clearSidebarFilterBar();
   }
 
@@ -276,13 +309,11 @@ export class DataExplorerPage {
    * Select an index dataset.
    * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
    */
-  static selectIndexDataset(datasetLanguage, timeField) {
+  static selectIndexDataset(datasetLanguage, timeField, indexCluster, indexName) {
     DataExplorerPage.openDatasetExplorerWindow();
     DataExplorerPage.getDatasetExplorerWindow().contains('Indexes').click();
-    DataExplorerPage.getDatasetExplorerWindow()
-      .contains(INDEX_CLUSTER_NAME, { timeout: 10000 })
-      .click();
-    DataExplorerPage.getDatasetExplorerWindow().contains(INDEX_NAME, { timeout: 10000 }).click();
+    DataExplorerPage.getDatasetExplorerWindow().contains(indexCluster, { timeout: 10000 }).click();
+    DataExplorerPage.getDatasetExplorerWindow().contains(indexName, { timeout: 10000 }).click();
     DataExplorerPage.getDatasetExplorerNextButton().click();
     DataExplorerPage.selectIndexDatasetLanguage(datasetLanguage, timeField);
   }
