@@ -15,6 +15,50 @@ import {
 
 const miscUtils = new MiscUtils(cy);
 
+function selectDataSet(datasetType, language) {
+  switch (datasetType) {
+    case 'index':
+      DataExplorerPage.selectIndexDataset(INDEX_CLUSTER_NAME, INDEX_NAME, language);
+      break;
+    case 'index_pattern':
+      DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, language);
+      if (language !== 'OpenSearch SQL') {
+        cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
+      }
+      break;
+  }
+}
+
+function checkTableFieldFilterActions(datasetType, language, isEnabled) {
+  selectDataSet(datasetType, language);
+
+  DataExplorerPage.getDiscoverQueryHits().should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+
+  DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(isEnabled);
+
+  if (isEnabled) {
+    DataExplorerPage.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
+    DataExplorerPage.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
+  }
+}
+
+function checkExpandedTableFilterActions(datasetType, language, isEnabled) {
+  selectDataSet(datasetType, language);
+
+  DataExplorerPage.getDiscoverQueryHits().should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+  DataExplorerPage.toggleDocTableRow(0);
+  DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
+    isEnabled
+  );
+  DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
+
+  if (isEnabled) {
+    DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField();
+    DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField();
+    DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField();
+  }
+}
+
 describe('filter for value spec', () => {
   beforeEach(() => {
     cy.localLogin(Cypress.env('username'), Cypress.env('password'));
@@ -25,42 +69,29 @@ describe('filter for value spec', () => {
     describe('index pattern dataset', () => {
       // filter actions should exist for DQL
       it('DQL', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
-        cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
-        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(true);
-        DataExplorerPage.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
-        DataExplorerPage.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
+        checkTableFieldFilterActions('index_pattern', 'DQL', true);
       });
       // filter actions should exist for Lucene
       it('Lucene', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'Lucene');
-        cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
-        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(true);
-        DataExplorerPage.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
-        DataExplorerPage.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
+        checkTableFieldFilterActions('index_pattern', 'Lucene', true);
       });
       // filter actions should not exist for SQL
       it('SQL', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'OpenSearch SQL');
-        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
+        checkTableFieldFilterActions('index_pattern', 'OpenSearch SQL', false);
       });
       // filter actions should not exist for PPL
       it('PPL', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'PPL');
-        cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
-        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
+        checkTableFieldFilterActions('index_pattern', 'PPL', false);
       });
     });
     describe('index dataset', () => {
       // filter actions should not exist for SQL
       it('SQL', () => {
-        DataExplorerPage.selectIndexDataset(INDEX_CLUSTER_NAME, INDEX_NAME, 'OpenSearch SQL');
-        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
+        checkTableFieldFilterActions('index', 'OpenSearch SQL', false);
       });
       // filter actions should not exist for PPL
       it('PPL', () => {
-        DataExplorerPage.selectIndexDataset(INDEX_CLUSTER_NAME, INDEX_NAME, 'PPL');
-        DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(false);
+        checkTableFieldFilterActions('index', 'PPL', false);
       });
     });
   });
@@ -69,68 +100,29 @@ describe('filter for value spec', () => {
     describe('index pattern dataset', () => {
       // filter actions should exist for DQL
       it('DQL', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
-        cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
-        DataExplorerPage.toggleDocTableRow(0);
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
-          true
-        );
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField();
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField();
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField();
+        checkExpandedTableFilterActions('index_pattern', 'DQL', true);
       });
       // filter actions should exist for Lucene
       it('Lucene', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'Lucene');
-        cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
-        DataExplorerPage.toggleDocTableRow(0);
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
-          true
-        );
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField();
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField();
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField();
+        checkExpandedTableFilterActions('index_pattern', 'Lucene', true);
       });
       // filter actions should not exist for SQL
       it('SQL', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'SQL');
-        DataExplorerPage.toggleDocTableRow(0);
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
-          false
-        );
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
+        checkExpandedTableFilterActions('index_pattern', 'OpenSearch SQL', false);
       });
       // filter actions should not exist for PPL
       it('PPL', () => {
-        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'PPL');
-        cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
-        DataExplorerPage.toggleDocTableRow(0);
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
-          false
-        );
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
+        checkExpandedTableFilterActions('index_pattern', 'PPL', false);
       });
     });
     describe('index dataset', () => {
       // filter actions should not exist for SQL
       it('SQL', () => {
-        DataExplorerPage.selectIndexDataset(INDEX_CLUSTER_NAME, INDEX_NAME, 'OpenSearch SQL');
-        DataExplorerPage.toggleDocTableRow(0);
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
-          false
-        );
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
+        checkExpandedTableFilterActions('index', 'OpenSearch SQL', false);
       });
       // filter actions should not exist for PPL
       it('PPL', () => {
-        DataExplorerPage.selectIndexDataset(INDEX_CLUSTER_NAME, INDEX_NAME, 'PPL');
-        DataExplorerPage.toggleDocTableRow(0);
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
-          false
-        );
-        DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
+        checkExpandedTableFilterActions('index', 'OpenSearch SQL', false);
       });
     });
   });

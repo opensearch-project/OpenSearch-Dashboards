@@ -56,14 +56,18 @@ export class DataExplorerPage {
   }
 
   /**
+   * Get Doc Table
+   */
+  static getDocTable() {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE);
+  }
+
+  /**
    * Get specific row of DocTable.
    * @param rowNumber Integer starts from 0 for the first row
    */
   static getDocTableRow(rowNumber) {
-    return cy
-      .getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE)
-      .get('tbody tr')
-      .eq(rowNumber);
+    return DataExplorerPage.getDocTable().get('tbody tr').eq(rowNumber);
   }
 
   /**
@@ -127,7 +131,7 @@ export class DataExplorerPage {
    * find all Rows in Doc Table Field Expanded Document.
    * @param expandedDocument cypress representation of the Doc Table Field Expanded Document
    */
-  static findDocTableExpandedDocRows(expandedDocument) {
+  static findDocTableExpandedDocRowsIn(expandedDocument) {
     return expandedDocument.findElementsByTestIdLike(
       DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ROW_PREFIX
     );
@@ -171,7 +175,7 @@ export class DataExplorerPage {
    * getExpandedDocRow(1, 0);
    */
   static getExpandedDocRow(docTableRowNumber, expandedDocumentRowNumber) {
-    return DataExplorerPage.findDocTableExpandedDocRows(
+    return DataExplorerPage.findDocTableExpandedDocRowsIn(
       DataExplorerPage.getDocTableRow(docTableRowNumber + 1)
     ).eq(expandedDocumentRowNumber);
   }

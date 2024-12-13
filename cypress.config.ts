@@ -12,6 +12,7 @@ module.exports = defineConfig({
   responseTimeout: 60000,
   viewportWidth: 2000,
   viewportHeight: 1320,
+  retries: 2,
   env: {
     openSearchUrl: 'http://localhost:9200',
     SECURITY_ENABLED: false,
