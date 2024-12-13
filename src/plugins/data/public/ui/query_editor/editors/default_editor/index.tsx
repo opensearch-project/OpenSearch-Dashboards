@@ -32,7 +32,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   provideCompletionItems,
 }) => {
   return (
-    <div className="defaultEditor" data-test-subj="osdQueryEditor__multiLine">
+    <div className="defaultEditor" data-test-subj="osdQueryEditor__multiLine" contentEditable>
       <div ref={headerRef} className="defaultEditor__header" />
       <CodeEditor
         height={100}

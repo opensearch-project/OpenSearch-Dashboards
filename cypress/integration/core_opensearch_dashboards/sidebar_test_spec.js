@@ -101,7 +101,7 @@ describe('sidebar spec', function () {
         // Send SQL query
         DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
         cy.intercept('/api/enhancements/search/sql').as('sqlQuery');
-        DataExplorerPage.sendQueryOnMultilineEditor(sqlQuery, false);
+        DataExplorerPage.sendQueryOnMultilineEditor(sqlQuery);
         cy.wait('@sqlQuery').then(function () {
           // Check table headers persistence after SQL query
           DataExplorerPage.checkTableHeadersByArray(testFields, offset);
@@ -139,7 +139,7 @@ describe('sidebar spec', function () {
         addFields(nestedTestFields, expectedRegionValues, pplQuery, sqlQuery, true, true);
       });
 
-      it('add field in index: SQL and PPL', function () {
+      it('add nested field in index: SQL and PPL', function () {
         addFields(nestedTestFields, expectedRegionValues, pplQuery, sqlQuery, false, true);
       });
     });
@@ -157,10 +157,8 @@ describe('sidebar spec', function () {
         DataExplorerPage.setQueryEditorLanguage('DQL');
         DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
         filterFields();
-
         DataExplorerPage.setQueryEditorLanguage('PPL');
         filterFields();
-
         DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
         filterFields();
       });
@@ -174,8 +172,9 @@ describe('sidebar spec', function () {
         );
         DataExplorerPage.setQueryEditorLanguage('PPL');
         filterFields();
-
         DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
+        filterFields();
+        DataExplorerPage.setQueryEditorLanguage('Lucene');
         filterFields();
       });
     });

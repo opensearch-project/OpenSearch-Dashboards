@@ -4,6 +4,7 @@
  */
 
 export const DATA_EXPLORER_PAGE_ELEMENTS = {
+  HEADER_GLOBAL_NAV: 'headerGlobalNav',
   NEW_SEARCH_BUTTON: 'discoverNewButton',
   DISCOVER_QUERY_HITS: 'discoverQueryHits',
   DATASET_SELECTOR_BUTTON: 'datasetSelectorButton',

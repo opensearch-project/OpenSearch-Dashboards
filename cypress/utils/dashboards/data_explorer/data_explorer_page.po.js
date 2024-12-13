@@ -87,12 +87,18 @@ export class DataExplorerPage {
   }
 
   /**
+   * Get page header.
+   */
+  static getPageHeader() {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.HEADER_GLOBAL_NAV);
+  }
+
+  /**
    * Get query multiline editor element.
    */
   static getQueryMultilineEditor() {
-    return cy
-      .getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_EDITOR_MULTILINE)
-      .find('textarea');
+    DataExplorerPage.getPageHeader().click();
+    return cy.get('.view-line');
   }
 
   /**
@@ -121,15 +127,13 @@ export class DataExplorerPage {
    * @param del true/false. true: Deletes character to the right of the cursor; false: Deletes character to the left of the cursor
    * @see https://docs.cypress.io/api/commands/type#Arguments
    */
-  static clearQueryMultilineEditor(del = true) {
+  static clearQueryMultilineEditor() {
     DataExplorerPage.getQueryMultilineEditor()
-      .invoke('val')
+      .invoke('text')
       .then(function ($content) {
-        const contentLen = $content.length;
-        const deletionType = del ? '{del}' : '{backspace}';
-        DataExplorerPage.getQueryMultilineEditor().type(deletionType.repeat(contentLen), {
-          force: true,
-        });
+        const contentLen = $content.length + 1;
+        DataExplorerPage.getQueryMultilineEditor().type('a');
+        DataExplorerPage.getQueryMultilineEditor().type('{backspace}'.repeat(contentLen));
       });
   }
 
@@ -138,9 +142,9 @@ export class DataExplorerPage {
    * @param del true/false. true: Deletes character to the right of the cursor; false: Deletes character to the left of the cursor
    * @see https://docs.cypress.io/api/commands/type#Arguments
    */
-  static sendQueryOnMultilineEditor(query, del = true) {
-    DataExplorerPage.clearQueryMultilineEditor(del);
-    DataExplorerPage.getQueryMultilineEditor().type(query, { force: true });
+  static sendQueryOnMultilineEditor(query) {
+    DataExplorerPage.clearQueryMultilineEditor();
+    DataExplorerPage.getQueryMultilineEditor().type(query);
     DataExplorerPage.getQuerySubmitBtn().click();
   }
 
@@ -149,6 +153,8 @@ export class DataExplorerPage {
    * @param language Accepted values: 'DQL', 'Lucene', 'OpenSearch SQL', 'PPL'
    */
   static setQueryEditorLanguage(language) {
+    DataExplorerPage.getPageHeader().click(); // remove helper message
+
     cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_EDITOR_LANGUAGE_SELECTOR).click();
 
     cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.QUERY_EDITOR_LANGUAGE_OPTIONS)
@@ -244,7 +250,7 @@ export class DataExplorerPage {
 
   static collapseSidebar() {
     DataExplorerPage.getResizeableBar().trigger('mouseover').click();
-    DataExplorerPage.getResizeableToggleButton().click();
+    DataExplorerPage.getResizeableToggleButton().click({ force: true });
   }
 
   static expandSidebar() {
@@ -257,7 +263,7 @@ export class DataExplorerPage {
    * @param assertion the type of assertion that is going to be performed. Example: 'eq', 'include'
    */
   static checkSidebarFilterBarResults(assertion, search) {
-    DataExplorerPage.getSidebarFilterBar().type(search);
+    DataExplorerPage.getSidebarFilterBar().type(search, { force: true });
     DataExplorerPage.getAllSidebarAddFields().each(function ($field) {
       cy.wrap($field)
         .should('be.visible')
