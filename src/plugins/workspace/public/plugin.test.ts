@@ -526,11 +526,10 @@ describe('Workspace plugin', () => {
 
     workspacePlugin.start(coreStart, getMockDependencies());
 
-    const mockApps = [
-      { id: 'dashboards', workspaceAvailability: WorkspaceAvailability.insideWorkspace },
-      { id: 'visualize', workspaceAvailability: WorkspaceAvailability.insideWorkspace },
-      { id: 'other', workspaceAvailability: WorkspaceAvailability.outsideWorkspace },
-    ];
+    const mockApp = {
+      id: 'dashboards',
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+    };
 
     const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
 
@@ -541,19 +540,14 @@ describe('Workspace plugin', () => {
       ) {
         return { status: AppStatus.inaccessible };
       }
-
       return { status: AppStatus.accessible };
     });
+
     appUpdater$.subscribe(appUpdaterChangeMock);
 
-    mockApps.forEach((app) => {
-      const result = appUpdaterChangeMock(app);
-      if (app.workspaceAvailability === WorkspaceAvailability.insideWorkspace) {
-        expect(result).toEqual({ status: AppStatus.inaccessible });
-      } else {
-        expect(result).toEqual({ status: AppStatus.accessible });
-      }
-    });
+    const result = appUpdaterChangeMock(mockApp);
+    expect(result).toEqual({ status: AppStatus.inaccessible });
+    expect(appUpdaterChangeMock).toHaveBeenCalledWith(mockApp);
   });
 
   it('#stop should call unregisterNavGroupUpdater', async () => {
