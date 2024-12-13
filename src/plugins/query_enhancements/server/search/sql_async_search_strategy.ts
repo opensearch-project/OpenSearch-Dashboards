@@ -13,7 +13,7 @@ import {
   Query,
 } from '../../../data/common';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
-import { buildQueryStatusConfig, getFields, handleFacetError, SEARCH_STRATEGY } from '../../common';
+import { buildQueryStatusConfig, getFields, throwFacetError, SEARCH_STRATEGY } from '../../common';
 import { Facet } from '../utils';
 
 export const sqlAsyncSearchStrategyProvider = (
@@ -45,7 +45,7 @@ export const sqlAsyncSearchStrategyProvider = (
           request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
           const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
 
-          if (!rawResponse.success) handleFacetError(rawResponse);
+          if (!rawResponse.success) throwFacetError(rawResponse);
 
           const statusConfig = buildQueryStatusConfig(rawResponse);
 
@@ -60,7 +60,7 @@ export const sqlAsyncSearchStrategyProvider = (
           request.params = { queryId: inProgressQueryId };
           const queryStatusResponse = await sqlAsyncJobsFacet.describeQuery(context, request);
 
-          if (!queryStatusResponse.success) handleFacetError(queryStatusResponse);
+          if (!queryStatusResponse.success) throwFacetError(queryStatusResponse);
 
           const queryStatus = queryStatusResponse.data?.status;
           logger.info(`sqlAsyncSearchStrategy: JOB: ${inProgressQueryId} - STATUS: ${queryStatus}`);
