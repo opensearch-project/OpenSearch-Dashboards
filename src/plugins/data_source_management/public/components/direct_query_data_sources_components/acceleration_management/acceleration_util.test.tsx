@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiButton, EuiHealth } from '@elastic/eui';
+import { EuiHealth, EuiSmallButton } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { CachedAcceleration } from '../../../../framework/types';
 import {
@@ -136,7 +136,7 @@ describe('acceleration_utils', () => {
         />
       );
 
-      wrapper.find(EuiButton).simulate('click');
+      wrapper.find(EuiSmallButton).simulate('click');
       expect(renderCreateAccelerationFlyout).toHaveBeenCalledWith({
         dataSourceName: 'test_data_source',
         handleRefresh,
