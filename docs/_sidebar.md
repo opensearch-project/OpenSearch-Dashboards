@@ -149,7 +149,6 @@
     - [Opensearch dashboards.release notes 1.3.17](../release-notes/opensearch-dashboards.release-notes-1.3.17.md)
     - [Opensearch dashboards.release notes 1.3.19](../release-notes/opensearch-dashboards.release-notes-1.3.19.md)
     - [Opensearch dashboards.release notes 1.3.2](../release-notes/opensearch-dashboards.release-notes-1.3.2.md)
-    - [Opensearch dashboards.release notes 1.3.20](../release-notes/opensearch-dashboards.release-notes-1.3.20.md)
     - [Opensearch dashboards.release notes 1.3.3](../release-notes/opensearch-dashboards.release-notes-1.3.3.md)
     - [Opensearch dashboards.release notes 1.3.5](../release-notes/opensearch-dashboards.release-notes-1.3.5.md)
     - [Opensearch dashboards.release notes 1.3.6](../release-notes/opensearch-dashboards.release-notes-1.3.6.md)
