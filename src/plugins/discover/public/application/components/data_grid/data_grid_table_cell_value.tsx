@@ -38,7 +38,7 @@ export function fetchSourceTypeDataCell(
         <Fragment key={key}>
           <EuiDescriptionListTitle
             className="osdDescriptionListFieldTitle"
-            data-test-subj="osdDescriptionListFieldTitle"
+            data-test-subj="dscDataGridTableCellListFieldTitle"
           >
             {key + ':'}
           </EuiDescriptionListTitle>

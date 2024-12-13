@@ -158,7 +158,7 @@ describe('Testing fetchTableDataCell function', () => {
       >
         <EuiDescriptionListTitle
           className="osdDescriptionListFieldTitle"
-          data-test-subj="osdDescriptionListFieldTitle"
+          data-test-subj="dscDataGridTableCellListFieldTitle"
         >
           order_date:
         </EuiDescriptionListTitle>
