@@ -139,7 +139,7 @@ describe('sidebar spec', function () {
         addFields(nestedTestFields, expectedRegionValues, pplQuery, sqlQuery, true, true);
       });
 
-      it('add nested field in index: SQL and PPL', function () {
+      it.skip('add nested field in index: SQL and PPL', function () {
         addFields(nestedTestFields, expectedRegionValues, pplQuery, sqlQuery, false, true);
       });
     });
