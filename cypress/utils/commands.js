@@ -27,6 +27,18 @@ Cypress.Commands.add('getElementsByTestIds', (testIds, options = {}) => {
 });
 
 /**
+ * Get DOM elements with a data-test-subj id containing the testId.
+ * @param testId data-test-subj value.
+ * @param options get options. Default: {}
+ * @example
+ * // returns all DOM elements that has a data-test-subj including the string 'table'
+ * cy.getElementsByTestIdLike('table')
+ */
+Cypress.Commands.add('getElementsByTestIdLike', (partialTestId, options = {}) => {
+  return cy.get(`[data-test-subj*="${partialTestId}"]`, options);
+});
+
+/**
  * Find DOM elements with a data-test-subj id containing the testId.
  * @param testId data-test-subj value.
  * @param options get options. Default: {}
