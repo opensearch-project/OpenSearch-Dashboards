@@ -4,7 +4,7 @@
  */
 
 import { mount } from 'enzyme';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
 import { DataSourceColumn } from './data_source_column';
 import { DataSourceTableItem } from '../../types';
 import * as utils from '../utils';
@@ -42,8 +42,8 @@ describe('DataSourceColumn', () => {
     const navigateToAppMock = jest.fn();
     spyOn(utils, 'getApplication').and.returnValue({ navigateToApp: navigateToAppMock });
     const wrapper = mount(<>{dataSourceColumn.euiColumn.render('1')}</>);
-    expect(wrapper.find(EuiLink).text()).toBe('DataSource 1');
-    wrapper.find(EuiLink).simulate('click');
+    expect(wrapper.find(EuiButtonEmpty).text()).toBe('DataSource 1');
+    wrapper.find(EuiButtonEmpty).simulate('click');
 
     expect(navigateToAppMock).toHaveBeenCalledWith('management', {
       path: `opensearch-dashboards/${DSM_APP_ID}/1`,

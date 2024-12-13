@@ -55,7 +55,7 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
   }, [filter, onAddFilter]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={10}>
         <EuiCompressedFieldText
           fullWidth
