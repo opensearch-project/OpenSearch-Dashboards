@@ -78,7 +78,12 @@ function FilterBarUI(props: Props) {
 
   function renderItems() {
     return props.filters.map((filter, i) => (
-      <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
+      <EuiFlexItem
+        key={i}
+        grow={false}
+        className="globalFilterBar__flexItem"
+        data-test-subj="globalFilterBar"
+      >
         <FilterItem
           id={`${i}`}
           intl={props.intl}
