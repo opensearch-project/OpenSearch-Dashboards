@@ -199,7 +199,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
           className="osdQueryEditor"
-          data-test-subj="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
           filterBar={props.filterBar}
           savedQueryManagement={props.savedQueryManagement}

@@ -433,7 +433,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
             : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
         </div>
         {languageSelector}
-        <div className="osdQueryEditor__querycontrols" data-test-subj="osdQueryEditorQuerycontrols">
+        <div className="osdQueryEditor__querycontrols" data-test-subj="osdQueryEditorQueryControls">
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             <div
               ref={queryControlsContainer}

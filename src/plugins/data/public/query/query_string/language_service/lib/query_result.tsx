@@ -133,7 +133,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
             size="xs"
             color="danger"
             className="editor__footerItem"
-            data-test-subj="editorfooterItem"
+            data-test-subj="editorFooterItem"
           >
             {i18n.translate('data.query.languageService.queryResults.error', {
               defaultMessage: `Error`,

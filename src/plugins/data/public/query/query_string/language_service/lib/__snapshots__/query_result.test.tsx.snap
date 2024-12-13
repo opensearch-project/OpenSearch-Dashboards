@@ -16,7 +16,7 @@ exports[`Query Result show error status with error message 2`] = `
       <EuiText
         className="editor__footerItem"
         color="danger"
-        data-test-subj="editorfooterItem"
+        data-test-subj="editorFooterItem"
         size="xs"
       >
         Error

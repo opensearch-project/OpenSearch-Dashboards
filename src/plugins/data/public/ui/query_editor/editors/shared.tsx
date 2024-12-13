@@ -98,7 +98,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   return (
     <div
       className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap"
-      data-test-subj="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap"
+      data-test-subj="osdQueryBarWrapper"
     >
       {prepend}
       <div
