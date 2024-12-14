@@ -4,3 +4,4 @@
  */
 
 import '../utils/commands';
+import '../utils/apps/commands';
