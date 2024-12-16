@@ -532,11 +532,6 @@ describe('Workspace plugin', () => {
     };
 
     const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
-    appUpdater$.next((app) => {
-      if (app.workspaceAvailability === WorkspaceAvailability.insideWorkspace) {
-        return { status: AppStatus.inaccessible };
-      }
-    });
 
     const appState = await appUpdater$.pipe(first()).toPromise();
     expect(appState(mockApp)).toEqual({ status: AppStatus.inaccessible });
