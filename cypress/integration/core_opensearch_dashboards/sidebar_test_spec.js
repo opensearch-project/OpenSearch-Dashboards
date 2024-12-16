@@ -14,10 +14,9 @@ describe('sidebar spec', function () {
     miscUtils.visitPage('app/data-explorer/discover');
   });
 
-  const REGULAR_CLUSTER = 'cypress-test-os';
-  const REGULAR_INDEX = 'vis-builder';
-  const NESTED_CLUSTER = 'data-logs-1';
-  const NESTED_INDEX = 'data_logs_small_time_1';
+  const CLUSTER = 'data-logs-1';
+  const INDEX = 'data_logs_small_time_1';
+  const INDEX_PATTERN = `${CLUSTER}::${INDEX}*`;
 
   describe('sidebar fields', function () {
     describe('add fields', function () {
@@ -31,18 +30,15 @@ describe('sidebar spec', function () {
       ) {
         const offset = indexPattern ? 1 : 0; // defines starting column
         if (indexPattern) {
-          DataExplorerPage.selectIndexPatternDataset(
-            'DQL',
-            nested ? `${NESTED_CLUSTER}::${NESTED_INDEX}*` : `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`
-          );
+          DataExplorerPage.selectIndexPatternDataset('DQL', INDEX_PATTERN);
           DataExplorerPage.setQueryEditorLanguage('DQL');
           DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
         } else {
           DataExplorerPage.selectIndexDataset(
             'OpenSearch SQL',
             "I don't want to use the time filter",
-            nested ? NESTED_CLUSTER : REGULAR_CLUSTER,
-            nested ? NESTED_INDEX : REGULAR_INDEX
+            CLUSTER,
+            INDEX
           );
         }
         // Check default column
@@ -94,9 +90,9 @@ describe('sidebar spec', function () {
           // Check table headers persistence after PPL query
           cy.wait(1000);
           DataExplorerPage.checkTableHeadersByArray(testFields, offset);
-          if (indexPattern && !nested) {
+          if (indexPattern) {
             // Check filter was correctly applied
-            DataExplorerPage.checkQueryHitsText('6,588');
+            DataExplorerPage.checkQueryHitsText('1,040');
           }
           // Validate the first 5 rows on the _id column
           DataExplorerPage.checkDocTableColumnByArr(expectedValues, 1 + offset);
@@ -114,16 +110,16 @@ describe('sidebar spec', function () {
         });
       }
 
-      const pplQuery = 'source = vis-builder* | where age > 40';
-      const sqlQuery = 'SELECT * FROM vis-builder* WHERE age > 40';
-      const testFields = ['_id', 'age', 'birthdate', 'salary'];
-      const expectedIdValues = ['50', '57', '52', '66', '46'];
+      const pplQuery = 'source = data_logs_small_time_1 | where status_code = 200';
+      const sqlQuery = 'SELECT * FROM data_logs_small_time_1 WHERE status_code = 200';
+      const testFields = ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'];
+      const expectedTimeValues = ['0.56', '4.21', '4.13', '0.65', '3.45'];
       it('add field in index pattern', function () {
-        addFields(testFields, expectedIdValues, pplQuery, sqlQuery);
+        addFields(testFields, expectedTimeValues, pplQuery, sqlQuery);
       });
 
       it('add field in index', function () {
-        addFields(testFields, expectedIdValues, pplQuery, sqlQuery, false);
+        addFields(testFields, expectedTimeValues, pplQuery, sqlQuery, false);
       });
 
       const nestedPplQuery = 'source = data_logs_small_time_1 | where status_code = 200';
@@ -145,18 +141,16 @@ describe('sidebar spec', function () {
 
     describe('filter fields', function () {
       function filterFields() {
-        DataExplorerPage.checkSidebarFilterBarResults('equal', 'age');
+        DataExplorerPage.checkSidebarFilterBarResults('equal', '_index');
         DataExplorerPage.checkSidebarFilterBarResults('include', 'a');
         DataExplorerPage.checkSidebarFilterBarResults('include', 'ag');
+        DataExplorerPage.checkSidebarFilterBarResults('include', 'age');
         DataExplorerPage.checkSidebarFilterBarNegativeResults('non-existent field');
       }
 
       function checkFilteredFields(indexPattern = true) {
         if (indexPattern) {
-          DataExplorerPage.selectIndexPatternDataset(
-            'DQL',
-            `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`
-          );
+          DataExplorerPage.selectIndexPatternDataset('DQL', INDEX_PATTERN);
           DataExplorerPage.setQueryEditorLanguage('DQL');
           DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
           filterFields();
@@ -166,8 +160,8 @@ describe('sidebar spec', function () {
           DataExplorerPage.selectIndexDataset(
             'PPL',
             "I don't want to use the time filter",
-            REGULAR_CLUSTER,
-            REGULAR_INDEX
+            CLUSTER,
+            INDEX
           );
         }
         DataExplorerPage.setQueryEditorLanguage('PPL');
@@ -237,13 +231,13 @@ describe('sidebar spec', function () {
         // 1. checks the persistence of the sidebar state accross query languages
         // 2. checks that the default state is expanded (first iteration of collapseAndExpand())
         // 3. collapses and expands the sidebar for every language
-        DataExplorerPage.selectIndexPatternDataset('DQL', `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`);
+        DataExplorerPage.selectIndexPatternDataset('DQL', INDEX_PATTERN);
         checkCollapseAndExpand();
       });
 
       it('index pattern: check collapsed state', function () {
         // this test case checks that the sidebar remains collapsed accross query languages
-        DataExplorerPage.selectIndexPatternDataset('DQL', `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`);
+        DataExplorerPage.selectIndexPatternDataset('DQL', INDEX_PATTERN);
         checkCollapse();
       });
 
@@ -255,8 +249,8 @@ describe('sidebar spec', function () {
         DataExplorerPage.selectIndexDataset(
           'PPL',
           "I don't want to use the time filter",
-          REGULAR_CLUSTER,
-          REGULAR_INDEX
+          CLUSTER,
+          INDEX
         );
         checkCollapseAndExpand(false);
       });
@@ -266,8 +260,8 @@ describe('sidebar spec', function () {
         DataExplorerPage.selectIndexDataset(
           'PPL',
           "I don't want to use the time filter",
-          REGULAR_CLUSTER,
-          REGULAR_INDEX
+          CLUSTER,
+          INDEX
         );
         checkCollapse(false);
       });
