@@ -1,0 +1,2 @@
+feat:
+  - Migrate query enhancement cypress tests to OSD repo ([#9048](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9048))
