@@ -510,7 +510,7 @@ describe('Workspace plugin', () => {
     });
   });
 
-  it('#start should not be able to access dashboards and visualize when out of workspace and not admin', async () => {
+  it('#start should not be able to access app of which workspaceAvailability is set to insideWorkspace when out of workspace', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();
     const coreStart = coreMock.createStart();
@@ -532,22 +532,14 @@ describe('Workspace plugin', () => {
     };
 
     const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
-
-    const appUpdaterChangeMock = jest.fn((app) => {
-      if (
-        app.workspaceAvailability === WorkspaceAvailability.insideWorkspace &&
-        !coreStart.workspaces.currentWorkspace$.getValue()
-      ) {
+    appUpdater$.next((app) => {
+      if (app.workspaceAvailability === WorkspaceAvailability.insideWorkspace) {
         return { status: AppStatus.inaccessible };
       }
-      return { status: AppStatus.accessible };
     });
 
-    appUpdater$.subscribe(appUpdaterChangeMock);
-
-    const result = appUpdaterChangeMock(mockApp);
-    expect(result).toEqual({ status: AppStatus.inaccessible });
-    expect(appUpdaterChangeMock).toHaveBeenCalledWith(mockApp);
+    const appState = await appUpdater$.pipe(first()).toPromise();
+    expect(appState(mockApp)).toEqual({ status: AppStatus.inaccessible });
   });
 
   it('#stop should call unregisterNavGroupUpdater', async () => {
