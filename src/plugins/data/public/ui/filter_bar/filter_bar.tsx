@@ -185,10 +185,15 @@ function FilterBarUI(props: Props) {
       gutterSize="none"
       alignItems="flexStart"
       responsive={false}
+      data-test-subj="globalFilterGroup"
     >
       <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
         {useNewHeader ? (
-          <EuiText size="s" className="globalFilterGroup__filterPrefix">
+          <EuiText
+            size="s"
+            className="globalFilterGroup__filterPrefix"
+            data-test-subj="globalFilterGroupFilterPrefix"
+          >
             {filterBarPrefixText}:
           </EuiText>
         ) : (
@@ -200,7 +205,10 @@ function FilterBarUI(props: Props) {
           />
         )}
       </EuiFlexItem>
-      <EuiFlexItem className="globalFilterGroup__filterFlexItem">
+      <EuiFlexItem
+        className="globalFilterGroup__filterFlexItem"
+        data-test-subj="globalFilterGroupFilterFlexItem"
+      >
         <EuiFlexGroup
           className={classes}
           wrap={true}
