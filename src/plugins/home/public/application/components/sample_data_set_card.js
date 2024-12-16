@@ -129,7 +129,6 @@ export const SampleDataSetCard = (props) => {
                 name={props.name}
                 overviewDashboard={props.overviewDashboard}
                 appLinks={props.appLinks}
-                isReadOnly={isReadOnly}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

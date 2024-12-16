@@ -76,7 +76,6 @@ export class SampleDataViewDataButton extends React.Component {
     if (this.props.appLinks.length === 0 && this.props.overviewDashboard !== '') {
       return (
         <EuiSmallButton
-          isDisabled={this.props.isReadOnly}
           onClick={createAppNavigationHandler(dashboardPath)}
           data-test-subj={`launchSampleDataSet${this.props.id}`}
           aria-label={viewDataButtonAriaLabel}
