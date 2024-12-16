@@ -36,7 +36,7 @@ describe('Workspace Commands / API Test', () => {
 
   after(() => {
     cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
-    // TODO: Add utility to clean out data sources
+    cy.removeDataSource(`${DATASOURCE_NAME}`);
     // TODO: Modify deleteIndex to handle an array of index and remove hard code
     cy.deleteIndex('data_logs_small_time_1');
     cy.deleteIndex('data_logs_small_time_2');

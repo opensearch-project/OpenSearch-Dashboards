@@ -82,3 +82,15 @@ Cypress.Commands.add('addDataSource', (options) => {
     'app/management/opensearch-dashboards/dataSources'
   );
 });
+
+Cypress.Commands.add('removeDataSource', (dataSourceName) => {
+  // Navigate to the dataSource Management page
+  cy.visit('app/dataSources');
+
+  // Find the anchor text correpsonding to specified dataSource
+  cy.get('a').contains(dataSourceName).click();
+
+  // Delete the dataSource connection
+  cy.getElementByTestId('editDatasourceDeleteIcon').click();
+  cy.getElementByTestId('confirmModalConfirmButton').click();
+});
