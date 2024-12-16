@@ -4,3 +4,5 @@
  */
 
 import '../utils/commands';
+import '../utils/dashboards/commands';
+import '../utils/dashboards/data_explorer/commands';
