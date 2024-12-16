@@ -462,13 +462,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private onSelectLanguage = (language: string) => {
-    // Send telemetry info every time the user opts in or out of kuery
-    // As a result it is important this function only ever gets called in the
-    // UI component's change handler.
-    this.services.http.post('/api/opensearch-dashboards/dql_opt_in_stats', {
-      body: JSON.stringify({ opt_in: language === 'kuery' }),
-    });
-
     this.services.storage.set('userQueryLanguage', language);
 
     const newQuery = { query: '', language };
