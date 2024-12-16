@@ -290,3 +290,45 @@ Cypress.Commands.add('fleshTenantSettings', () => {
     });
   }
 });
+
+Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
+  cy.wait(3000);
+  cy.getElementByTestId('workspace-detail-delete-button').should('be.visible').click();
+  cy.getElementByTestId('delete-workspace-modal-body').should('be.visible');
+  cy.getElementByTestId('delete-workspace-modal-input').type(workspaceName);
+  cy.getElementByTestId('delete-workspace-modal-confirm').click();
+  cy.contains(/successfully/);
+});
+
+Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
+  cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
+    .should('be.visible')
+    .click();
+  cy.getElementByTestId('workspace-initial-button-create-observability-workspace')
+    .should('be.visible')
+    .click();
+  cy.getElementByTestId('workspaceForm-workspaceDetails-nameInputText')
+    .should('be.visible')
+    .type(workspaceName);
+  cy.getElementByTestId('workspace-creator-dataSources-assign-button').should('be.visible').click();
+  cy.get(`.euiSelectableListItem[title="${dataSourceTitle}"]`)
+    .should('be.visible')
+    .trigger('click');
+  cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button')
+    .should('be.visible')
+    .click();
+  cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
+  cy.contains(/successfully/);
+});
+
+Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
+  cy.getElementByTestId('workspace-select-button').should('exist').click();
+  cy.getElementByTestId('workspace-menu-manage-button').should('exist').click();
+  cy.get('.euiBasicTable')
+    .find('tr')
+    .filter((index, row) => {
+      return Cypress.$(row).find('td').text().includes(workspaceName);
+    })
+    .find('a.euiLink')
+    .click();
+});
