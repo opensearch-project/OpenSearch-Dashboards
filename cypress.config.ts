@@ -7,7 +7,7 @@ import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
 
 module.exports = defineConfig({
-  retries: 2,
+  retries: 1,
   defaultCommandTimeout: 60000,
   requestTimeout: 60000,
   responseTimeout: 60000,

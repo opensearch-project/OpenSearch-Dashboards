@@ -4,7 +4,6 @@
  */
 
 import { DATA_EXPLORER_PAGE_ELEMENTS } from './elements.js';
-import { INDEX_PATTERN_NAME } from './constants.js';
 
 export class DataExplorerPage {
   /**
@@ -337,12 +336,10 @@ export class DataExplorerPage {
    * Select an index pattern dataset.
    * @param datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
    */
-  static selectIndexPatternDataset(datasetLanguage) {
+  static selectIndexPatternDataset(datasetLanguage, indexPattern) {
     DataExplorerPage.openDatasetExplorerWindow();
     DataExplorerPage.getDatasetExplorerWindow().contains('Index Patterns').click();
-    DataExplorerPage.getDatasetExplorerWindow()
-      .contains(INDEX_PATTERN_NAME, { timeout: 10000 })
-      .click();
+    DataExplorerPage.getDatasetExplorerWindow().contains(indexPattern, { timeout: 10000 }).click();
     DataExplorerPage.getDatasetExplorerNextButton().click();
     DataExplorerPage.selectIndexPatternDatasetLanguage(datasetLanguage);
   }
