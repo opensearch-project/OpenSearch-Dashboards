@@ -198,7 +198,13 @@ export const DiscoverField = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} className="dscSidebarField">
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      className="dscSidebarField"
+      data-test-subj="dscSidebarField"
+    >
       <EuiFlexItem grow={false}>
         <FieldIcon
           type={field.type}
