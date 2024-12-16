@@ -33,7 +33,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
 }) => {
   return (
     <div className="defaultEditor" data-test-subj="osdQueryEditor__multiLine">
-      <div ref={headerRef} className="defaultEditor__header" />
+      <div ref={headerRef} className="defaultEditor__header" data-test-subj="defaultEditorHeader" />
       <CodeEditor
         height={100}
         languageId={languageId}
@@ -69,19 +69,21 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         }}
         triggerSuggestOnFocus={true}
       />
-      <div className="defaultEditor__footer">
+      <div className="defaultEditor__footer" data-test-subj="defaultEditorFooter">
         {footerItems && (
           <EuiFlexGroup
             direction="row"
             alignItems="center"
             gutterSize="none"
             className="defaultEditor__footerRow"
+            data-test-subj="defaultEditorFooterRow"
           >
             {footerItems.start?.map((item, idx) => (
               <EuiFlexItem
                 key={`defaultEditor__footerItem-start-${idx}`}
                 grow={false}
                 className="defaultEditor__footerItem"
+                data-test-subj="defaultEditorFooterStartItem"
               >
                 {item}
               </EuiFlexItem>
@@ -92,6 +94,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
                 key={`defaultEditor__footerItem-end-${idx}`}
                 grow={false}
                 className="defaultEditor__footerItem"
+                data-test-subj="defaultEditorFooterEndItem"
               >
                 {item}
               </EuiFlexItem>
