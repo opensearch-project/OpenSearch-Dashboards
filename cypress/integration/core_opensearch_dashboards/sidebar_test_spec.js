@@ -92,6 +92,7 @@ describe('sidebar spec', function () {
         DataExplorerPage.sendQueryOnMultilineEditor(pplQuery);
         cy.wait('@pplQuery').then(function () {
           // Check table headers persistence after PPL query
+          cy.wait(1000);
           DataExplorerPage.checkTableHeadersByArray(testFields, offset);
           if (indexPattern && !nested) {
             // Check filter was correctly applied
@@ -106,6 +107,7 @@ describe('sidebar spec', function () {
         DataExplorerPage.sendQueryOnMultilineEditor(sqlQuery);
         cy.wait('@sqlQuery').then(function () {
           // Check table headers persistence after SQL query
+          cy.wait(1000);
           DataExplorerPage.checkTableHeadersByArray(testFields, offset);
           // Validate the first 5 rows on the _id column
           DataExplorerPage.checkDocTableColumnByArr(expectedValues, 1 + offset);
@@ -125,12 +127,12 @@ describe('sidebar spec', function () {
       });
 
       const nestedPplQuery = 'source = data_logs_small_time_1 | where status_code = 200';
-      const nestedSqlQuery = 'SELECT * FROM data_logs_small_time_1 WHERE status_code = 200'
+      const nestedSqlQuery = 'SELECT * FROM data_logs_small_time_1 WHERE status_code = 200';
       const nestedTestFields = [
         'personal.name',
         'personal.age',
         'personal.birthdate',
-        'personal.address.country'
+        'personal.address.country',
       ];
       const expectedAgeValues = ['75', '76', '78', '73', '74'];
       it('add nested field in index pattern', function () {
@@ -143,39 +145,43 @@ describe('sidebar spec', function () {
 
     describe('filter fields', function () {
       function filterFields() {
-        DataExplorerPage.checkSidebarFilterBarResults('equal', 'categories');
+        DataExplorerPage.checkSidebarFilterBarResults('equal', 'age');
         DataExplorerPage.checkSidebarFilterBarResults('include', 'a');
         DataExplorerPage.checkSidebarFilterBarResults('include', 'ag');
         DataExplorerPage.checkSidebarFilterBarNegativeResults('non-existent field');
       }
 
-      it('filter index pattern', function () {
-        DataExplorerPage.selectIndexPatternDataset(
-          'DQL',
-          `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`
-        );
-        DataExplorerPage.setQueryEditorLanguage('DQL');
-        DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
-        filterFields();
-        DataExplorerPage.setQueryEditorLanguage('Lucene');
-        filterFields();
+      function checkFilteredFields(indexPattern = true) {
+        if (indexPattern) {
+          DataExplorerPage.selectIndexPatternDataset(
+            'DQL',
+            `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`
+          );
+          DataExplorerPage.setQueryEditorLanguage('DQL');
+          DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+          filterFields();
+          DataExplorerPage.setQueryEditorLanguage('Lucene');
+          filterFields();
+        } else {
+          DataExplorerPage.selectIndexDataset(
+            'PPL',
+            "I don't want to use the time filter",
+            REGULAR_CLUSTER,
+            REGULAR_INDEX
+          );
+        }
         DataExplorerPage.setQueryEditorLanguage('PPL');
         filterFields();
         DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
         filterFields();
+      }
+
+      it('filter index pattern', function () {
+        checkFilteredFields();
       });
 
       it('filter index', function () {
-        DataExplorerPage.selectIndexDataset(
-          'PPL',
-          "I don't want to use the time filter",
-          REGULAR_CLUSTER,
-          REGULAR_INDEX
-        );
-        DataExplorerPage.setQueryEditorLanguage('PPL');
-        filterFields();
-        DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
-        filterFields();
+        checkFilteredFields(false);
       });
     });
 
@@ -192,9 +198,9 @@ describe('sidebar spec', function () {
         if (indexPattern) {
           DataExplorerPage.setQueryEditorLanguage('DQL');
           collapseAndExpand();
+          DataExplorerPage.setQueryEditorLanguage('Lucene');
+          collapseAndExpand();
         }
-        DataExplorerPage.setQueryEditorLanguage('Lucene');
-        collapseAndExpand();
         DataExplorerPage.setQueryEditorLanguage('PPL');
         collapseAndExpand();
         DataExplorerPage.setQueryEditorLanguage('OpenSearch SQL');
@@ -231,19 +237,13 @@ describe('sidebar spec', function () {
         // 1. checks the persistence of the sidebar state accross query languages
         // 2. checks that the default state is expanded (first iteration of collapseAndExpand())
         // 3. collapses and expands the sidebar for every language
-        DataExplorerPage.selectIndexPatternDataset(
-          'DQL',
-          `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`
-        );
+        DataExplorerPage.selectIndexPatternDataset('DQL', `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`);
         checkCollapseAndExpand();
       });
 
       it('index pattern: check collapsed state', function () {
         // this test case checks that the sidebar remains collapsed accross query languages
-        DataExplorerPage.selectIndexPatternDataset(
-          'DQL',
-          `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`
-        );
+        DataExplorerPage.selectIndexPatternDataset('DQL', `${REGULAR_CLUSTER}::${REGULAR_INDEX}*`);
         checkCollapse();
       });
 
