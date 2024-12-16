@@ -10,7 +10,7 @@
  */
 
 import { UiSettingsParams } from 'opensearch-dashboards/public';
-import { uiSettings } from './ui_settings';
+import { searchOverviewPageUISetting, uiSettings } from './ui_settings';
 
 describe('home settings', () => {
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
@@ -18,6 +18,23 @@ describe('home settings', () => {
 
   describe('home:useNewHomePage', () => {
     const validate = getValidationFn(uiSettings['home:useNewHomePage']);
+
+    it('should only accept boolean values', () => {
+      expect(() => validate(true)).not.toThrow();
+      expect(() => validate(false)).not.toThrow();
+      expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [boolean] but got [string]"`
+      );
+      expect(() => validate(12)).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [boolean] but got [number]"`
+      );
+    });
+  });
+
+  describe('searchWorkspace:dismissGetStarted', () => {
+    const validate = getValidationFn(
+      searchOverviewPageUISetting['searchWorkspace:dismissGetStarted']
+    );
 
     it('should only accept boolean values', () => {
       expect(() => validate(true)).not.toThrow();
