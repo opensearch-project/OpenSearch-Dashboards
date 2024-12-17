@@ -9,8 +9,7 @@ import '../utils/dashboards/data_explorer/commands.js';
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-const scopedHistoryNavigationError =
-  /^[^(ScopedHistory instance has fell out of navigation scope)]/;
+const scopedHistoryNavigationError = /^[^(ScopedHistory instance has fell out of navigation scope)]/;
 Cypress.on('uncaught:exception', (err) => {
   /* returning false here prevents Cypress from failing the test */
   if (scopedHistoryNavigationError.test(err.message)) {

@@ -156,13 +156,13 @@ export const getTimeField = (
  * the `dateFormat` parameter
  */
 export const formatTimePickerDate = (dateRange: TimeRange, dateFormat: string) => {
-  const dateMathParse = (date: string, roundUp?: boolean) => {
-    const parsedDate = datemath.parse(date, { roundUp });
+  const dateMathParse = (date: string) => {
+    const parsedDate = datemath.parse(date);
     return parsedDate ? parsedDate.utc().format(dateFormat) : '';
   };
 
   const fromDate = dateMathParse(dateRange.from);
-  const toDate = dateMathParse(dateRange.to, true);
+  const toDate = dateMathParse(dateRange.to);
 
   return { fromDate, toDate };
 };
