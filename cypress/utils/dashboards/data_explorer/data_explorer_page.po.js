@@ -59,8 +59,15 @@ export class DataExplorerPage {
    * Get specific DocTable column header.
    * @param index Integer starts from 0 for the first column header.
    */
-  static getDocTableHeader(index) {
+  static getDocTableHeaderByIndex(index) {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_HEADER_FIELD).eq(index);
+  }
+
+  /**
+   * Get Doc Table
+   */
+  static getDocTable() {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE);
   }
 
   /**
@@ -200,6 +207,7 @@ export class DataExplorerPage {
   }
 
   /**
+<<<<<<< HEAD
    * Get sidebar filter bar.
    */
   static getSidebarFilterBar() {
@@ -285,6 +293,152 @@ export class DataExplorerPage {
   }
 
   /**
+   * Get Toggle Button for Column in Doc Table Field.
+   */
+  static getDocTableExpandColumnToggleButton() {
+    return cy
+      .getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPAND_TOGGLE_COLUMN_BUTTON)
+      .find('button');
+  }
+
+  /**
+   * find all Rows in Doc Table Field Expanded Document.
+   * @param expandedDocument cypress representation of the Doc Table Field Expanded Document
+   */
+  static findDocTableExpandedDocRowsIn(expandedDocument) {
+    return expandedDocument.findElementsByTestIdLike(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ROW_PREFIX
+    );
+  }
+
+  /**
+   * Get Row for Column by fieldName in Doc Table Field Expanded Document.
+   * @param fieldName Field name for row in Expanded Document.
+   * @example getDocTableExpandedDocColumnRow('id')
+   */
+  static getDocTableExpandedDocRow(fieldName) {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ROW_PREFIX + fieldName
+    );
+  }
+
+  /**
+   * Get Filter For Button in Doc Table Field Expanded Document Row.
+   */
+  static getDocTableExpandedDocRowFilterForButton() {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ADD_INCLUSIVE_FILTER_BUTTON
+    );
+  }
+
+  /**
+   * Get Filter Out Button in Doc Table Field Expanded Document Row.
+   */
+  static getDocTableExpandedDocRowFilterOutButton() {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_REMOVE_INCLUSIVE_FILTER_BUTTON
+    );
+  }
+
+  /**
+   * Get the "expandedDocumentRowNumber"th row from the expanded document from the "docTableRowNumber"th row of the DocTable.
+   * @param docTableRowNumber Integer starts from 0 for the first row
+   * @param expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @example
+   * // returns the first row from the expanded document from the second row of the DocTable.
+   * getExpandedDocRow(1, 0);
+   */
+  static getExpandedDocRow(docTableRowNumber, expandedDocumentRowNumber) {
+    return DataExplorerPage.findDocTableExpandedDocRowsIn(
+      DataExplorerPage.getDocTableRow(docTableRowNumber + 1)
+    ).eq(expandedDocumentRowNumber);
+  }
+
+  /**
+   * Get the value for the "expandedDocumentRowNumber"th row from the expanded document from the "docTableRowNumber"th row of the DocTable.
+   * @param docTableRowNumber Integer starts from 0 for the first row
+   * @param expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @example
+   * // returns the value of the field from the first row from the expanded document from the second row of the DocTable.
+   * getExpandedDocRow(1, 0);
+   */
+  static getExpandedDocRowValue(docTableRowNumber, expandedDocumentRowNumber) {
+    return DataExplorerPage.getExpandedDocRow(docTableRowNumber, expandedDocumentRowNumber)
+      .find(
+        `[data-test-subj*="${DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ROW_PREFIX}"]`
+      )
+      .find('span');
+  }
+
+  /**
+   * Get the field name for the "expandedDocumentRowNumber"th row from the expanded document from the "docTableRowNumber"th row of the DocTable.
+   * @param docTableRowNumber Integer starts from 0 for the first row
+   * @param expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @example
+   * // returns the name of the field from the first row from the expanded document from the second row of the DocTable.
+   * getExpandedDocRow(1, 0);
+   */
+  static getExpandedDocRowFieldName(docTableRowNumber, expandedDocumentRowNumber) {
+    return DataExplorerPage.getExpandedDocRow(docTableRowNumber, expandedDocumentRowNumber)
+      .find('td')
+      .eq(1) // Field name is in the second column.
+      .find('span[class*="textTruncate"]');
+  }
+
+  /**
+   * Get Toggle Column Button in Doc Table Field Expanded Document Row.
+   */
+  static getDocTableExpandedDocRowToggleColumnButton() {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_TOGGLE_COLUMN_BUTTON
+    );
+  }
+
+  /**
+   * Get Selected fields list in sidebar.
+   */
+  static getSideBarSelectedFieldsList() {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.SIDE_BAR_SELECTED_FIELDS_LIST);
+  }
+
+  /**
+   * Get fieldName in sidebar.
+   * @param fieldName Field name for row in Expanded Document.
+   */
+  static getSideBarField(fieldName) {
+    return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.SIDE_BAR_FIELD_PREFIX + fieldName);
+  }
+
+  /**
+   * Get field remove button in sidebar selected fields.
+   * @param fieldName Field name for row in Expanded Document.
+   */
+  static getSideBarSelectedFieldRemoveButton(fieldName) {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.SIDE_BAR_SELECTED_FIELD_REMOVE_BUTTON_PREFIX + fieldName
+    );
+  }
+
+  /**
+   * Get header from Document Table.
+   * @param headerName Header name from Document Table.
+   */
+  static getDocTableHeader(headerName) {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_HEADER_FIELD_PREFIX + headerName
+    );
+  }
+
+  /**
+   * Get Exists Filter Button in Doc Table Field Expanded Document Row.
+   */
+  static getDocTableExpandedDocRowExistsFilterButton() {
+    return cy.getElementByTestId(
+      DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_EXISTS_FILTER_BUTTON
+    );
+  }
+
+  /**
    * Open window to select Dataset
    */
   static openDatasetExplorerWindow() {
@@ -312,15 +466,19 @@ export class DataExplorerPage {
 
   /**
    * Select an index dataset.
-   * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
+   * @param indexClusterName Name of the cluster to be used for the Index.
+   * @param indexName Name of the index dataset to be used.
+   * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL".
    */
-  static selectIndexDataset(datasetLanguage, timeField, indexCluster, indexName) {
+  static selectIndexDataset(indexClusterName, indexName, datasetLanguage) {
     DataExplorerPage.openDatasetExplorerWindow();
     DataExplorerPage.getDatasetExplorerWindow().contains('Indexes').click();
-    DataExplorerPage.getDatasetExplorerWindow().contains(indexCluster, { timeout: 10000 }).click();
+    DataExplorerPage.getDatasetExplorerWindow()
+      .contains(indexClusterName, { timeout: 10000 })
+      .click();
     DataExplorerPage.getDatasetExplorerWindow().contains(indexName, { timeout: 10000 }).click();
     DataExplorerPage.getDatasetExplorerNextButton().click();
-    DataExplorerPage.selectIndexDatasetLanguage(datasetLanguage, timeField);
+    DataExplorerPage.selectIndexDatasetLanguage(datasetLanguage);
   }
 
   /**
@@ -334,12 +492,15 @@ export class DataExplorerPage {
 
   /**
    * Select an index pattern dataset.
+   * @param indexPatternName Name of the index pattern to be used.
    * @param datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
    */
-  static selectIndexPatternDataset(datasetLanguage, indexPattern) {
+  static selectIndexPatternDataset(indexPatternName, datasetLanguage) {
     DataExplorerPage.openDatasetExplorerWindow();
     DataExplorerPage.getDatasetExplorerWindow().contains('Index Patterns').click();
-    DataExplorerPage.getDatasetExplorerWindow().contains(indexPattern, { timeout: 10000 }).click();
+    DataExplorerPage.getDatasetExplorerWindow()
+      .contains(indexPatternName, { timeout: 10000 })
+      .click();
     DataExplorerPage.getDatasetExplorerNextButton().click();
     DataExplorerPage.selectIndexPatternDatasetLanguage(datasetLanguage);
   }
@@ -357,6 +518,15 @@ export class DataExplorerPage {
     cy.getDatePickerRelativeUnitSelector().select(relativeUnit);
     cy.getQuerySubmitButton().click();
   }
+  /*
+   * Toggle expansion of row rowNumber of Doc Table.
+   * @param rowNumber rowNumber of Doc Table starts at 0 for row 1.
+   */
+  static toggleDocTableRow(rowNumber) {
+    DataExplorerPage.getDocTableRow(rowNumber).within(() => {
+      DataExplorerPage.getDocTableExpandColumnToggleButton().click();
+    });
+  }
 
   /**
    * Check the filter pill text matches expectedFilterText.
@@ -364,6 +534,17 @@ export class DataExplorerPage {
    */
   static checkFilterPillText(expectedFilterText) {
     DataExplorerPage.getGlobalQueryEditorFilterValue().should('have.text', expectedFilterText);
+  }
+
+  /**
+   * Check the entire filter pill text matches expectedFilterText.
+   * @param expectedFilterText expected text in filter pill.
+   */
+  static checkFullFilterPillText(expectedFilterText) {
+    // GLOBAL_QUERY_EDITOR_FILTER_VALUE gives the inner element, but we may want all the text in the filter pill
+    DataExplorerPage.getGlobalQueryEditorFilterValue()
+      .parent()
+      .should('have.text', expectedFilterText);
   }
 
   /**
@@ -375,7 +556,7 @@ export class DataExplorerPage {
   }
 
   /**
-   * Check for the first Table Field's Filter For and Filter Out button.
+   * Check if the first Table Field's Filter For and Filter Out buttons exists.
    * @param isExists Boolean determining if these button should exist
    */
   static checkDocTableFirstFieldFilterForAndOutButton(isExists) {
@@ -425,7 +606,6 @@ export class DataExplorerPage {
   }
 
   /**
-   *
    * @param expectedHeaders array containing the expected header names
    * @param offset used to adjust the index of the table headers being checked. Set to 1 by default, which means the method starts checking headers from an index that is 1 higher than the current loop index (i + offset).
    */
@@ -433,5 +613,92 @@ export class DataExplorerPage {
     for (let i = 0; i < expectedHeaders.length; i++) {
       DataExplorerPage.getDocTableHeader(i + offset).should('have.text', expectedHeaders[i]);
     }
+  }
+
+  /**
+   * Check if the first expanded Doc Table Field's first row's Filter For, Filter Out and Exists Filter buttons are disabled.
+   * @param isEnabled Boolean determining if these buttons are disabled
+   */
+  static checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(isEnabled) {
+    const shouldText = isEnabled ? 'be.enabled' : 'be.disabled';
+    DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
+      DataExplorerPage.getDocTableExpandedDocRowFilterForButton().should(shouldText);
+      DataExplorerPage.getDocTableExpandedDocRowFilterOutButton().should(shouldText);
+      DataExplorerPage.getDocTableExpandedDocRowExistsFilterButton().should(shouldText);
+    });
+  }
+
+  /**
+   * Check the first expanded Doc Table Field's first row's Filter For button filters the correct value.
+   */
+  static checkDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField() {
+    DataExplorerPage.getExpandedDocRowValue(0, 0).then(($expandedDocumentRowValue) => {
+      const filterFieldText = $expandedDocumentRowValue.text();
+      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
+        DataExplorerPage.getDocTableExpandedDocRowFilterForButton().click();
+      });
+      DataExplorerPage.checkFilterPillText(filterFieldText);
+      DataExplorerPage.checkQueryHitsText('1'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+      DataExplorerPage.getExpandedDocRowValue(0, 0).should('have.text', filterFieldText);
+    });
+    DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
+    DataExplorerPage.checkQueryHitsText('10,000');
+  }
+
+  /**
+   * Check the first expanded Doc Table Field's first row's Filter Out button filters the correct value.
+   */
+  static checkDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField() {
+    DataExplorerPage.getExpandedDocRowValue(0, 0).then(($expandedDocumentRowValue) => {
+      const filterFieldText = $expandedDocumentRowValue.text();
+      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
+        DataExplorerPage.getDocTableExpandedDocRowFilterOutButton().click();
+      });
+      DataExplorerPage.checkFilterPillText(filterFieldText);
+      DataExplorerPage.checkQueryHitsText('9,999'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+      DataExplorerPage.toggleDocTableRow(0);
+      DataExplorerPage.getExpandedDocRowValue(0, 0).should('not.have.text', filterFieldText);
+    });
+    DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
+    DataExplorerPage.checkQueryHitsText('10,000');
+    DataExplorerPage.toggleDocTableRow(0);
+  }
+
+  /**
+   * Check the first expanded Doc Table Field's first row's Toggle Column button has intended behavior.
+   */
+  static checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior() {
+    DataExplorerPage.getExpandedDocRowFieldName(0, 0).then(($expandedDocumentRowFieldText) => {
+      const fieldText = $expandedDocumentRowFieldText.text();
+      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
+        DataExplorerPage.getDocTableHeader(fieldText).should('not.exist');
+        DataExplorerPage.getDocTableExpandedDocRowToggleColumnButton().click();
+      });
+      DataExplorerPage.getSideBarSelectedFieldsList().within(() => {
+        DataExplorerPage.getSideBarField(fieldText).should('exist');
+      });
+      DataExplorerPage.getDocTableHeader(fieldText).should('exist');
+      DataExplorerPage.getSideBarSelectedFieldRemoveButton(fieldText).click();
+      DataExplorerPage.getSideBarSelectedFieldsList().within(() => {
+        DataExplorerPage.getSideBarField(fieldText).should('not.exist');
+      });
+      DataExplorerPage.getDocTableHeader(fieldText).should('not.exist');
+    });
+  }
+
+  /**
+   * Check the first expanded Doc Table Field's first row's Exists Filter button filters the correct Field.
+   */
+  static checkDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField() {
+    DataExplorerPage.getExpandedDocRowFieldName(0, 0).then(($expandedDocumentRowField) => {
+      const filterFieldText = $expandedDocumentRowField.text();
+      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
+        DataExplorerPage.getDocTableExpandedDocRowExistsFilterButton().click();
+      });
+      DataExplorerPage.checkFullFilterPillText(filterFieldText + ': ' + 'exists');
+      DataExplorerPage.checkQueryHitsText('10,000');
+    });
+    DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
+    DataExplorerPage.checkQueryHitsText('10,000');
   }
 }
