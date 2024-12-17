@@ -53,13 +53,7 @@ export const SampleDataSetCard = (props) => {
   const {
     services: { workspaces },
   } = useOpenSearchDashboards();
-  const isInstalled = () => {
-    if (props.status === INSTALLED_STATUS) {
-      return true;
-    }
-
-    return false;
-  };
+  const isInstalled = props.status === INSTALLED_STATUS;
   const currentWorkspace = useObservable(workspaces.currentWorkspace$);
   const isReadOnly = !!(currentWorkspace && currentWorkspace.readonly);
 
@@ -214,7 +208,6 @@ export const SampleDataSetCard = (props) => {
     }
   };
 
-  // render() {
   return (
     <EuiCard
       textAlign="left"
@@ -222,12 +215,11 @@ export const SampleDataSetCard = (props) => {
       image={props.previewUrl}
       title={props.name}
       description={props.description}
-      betaBadgeLabel={isInstalled() ? 'INSTALLED' : null}
+      betaBadgeLabel={isInstalled ? 'INSTALLED' : null}
       footer={renderBtn()}
       data-test-subj={`sampleDataSetCard${props.id}`}
     />
   );
-  // }
 };
 
 SampleDataSetCard.propTypes = {
