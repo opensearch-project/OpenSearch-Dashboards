@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../../../core/types';
 import { PermissionModeId } from '../../../../../core/public';
 import { WORKSPACE_ACCESS_LEVEL_NAMES } from '../../constants';
 

@@ -10,7 +10,7 @@ import {
   WorkspacePermissionSettingPanelProps,
 } from './workspace_permission_setting_panel';
 import { WorkspacePermissionItemType } from './constants';
-import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../../../core/types';
 
 const setup = (options?: Partial<WorkspacePermissionSettingPanelProps>) => {
   const onChangeMock = jest.fn();

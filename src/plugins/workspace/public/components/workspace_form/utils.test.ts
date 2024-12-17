@@ -12,7 +12,7 @@ import {
   isWorkspacePermissionSetting,
   getPermissionModeName,
 } from './utils';
-import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../../../core/types';
 import { WorkspacePermissionItemType, optionIdToWorkspacePermissionModesMap } from './constants';
 import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceFormErrorCode } from './types';

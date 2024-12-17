@@ -21,7 +21,6 @@ import { WorkspaceFormDataState } from '../workspace_form';
 import { WorkspaceUseCase } from '../../types';
 import { RightSidebarScrollField, RIGHT_SIDEBAR_SCROLL_KEY } from './utils';
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
-import { WorkspacePermissionMode } from '../../../common/constants';
 
 const SCROLL_FIELDS = {
   [RightSidebarScrollField.Name]: i18n.translate('workspace.form.summary.panel.name.title', {

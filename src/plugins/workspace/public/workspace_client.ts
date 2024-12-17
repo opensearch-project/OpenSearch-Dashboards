@@ -13,8 +13,12 @@ import {
   IWorkspaceClient,
   IWorkspaceResponse as IResponse,
 } from '../../../core/public';
-import { WorkspacePermissionMode } from '../common/constants';
-import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
+import { WorkspacePermissionMode } from '../../../core/types';
+import {
+  SavedObjectPermissions,
+  WorkspaceAttributeWithPermission,
+  WorkspaceFindOptions,
+} from '../../../core/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
@@ -24,16 +28,6 @@ const join = (...uriComponents: Array<string | undefined>) =>
     .filter((comp): comp is string => Boolean(comp))
     .map(encodeURIComponent)
     .join('/');
-
-interface WorkspaceFindOptions {
-  page?: number;
-  perPage?: number;
-  search?: string;
-  searchFields?: string[];
-  sortField?: string;
-  sortOrder?: string;
-  permissionModes?: WorkspacePermissionMode[];
-}
 
 /**
  * Workspaces is OpenSearchDashboards's visualize mechanism allowing admins to
