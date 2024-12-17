@@ -130,6 +130,7 @@ export class VegaBaseView {
           this._view.finalize();
         }
         this._view = null;
+        this._vegaViewConfig = null;
       });
 
       this._vegaViewConfig = this.createViewConfig();
@@ -507,6 +508,9 @@ export class VegaBaseView {
       this._addDestroyHandler(() => {
         if (debugObj === window.VEGA_DEBUG) {
           window.VEGA_DEBUG = null;
+          window.VEGA_DEBUG.view = null;
+          window.VEGA_DEBUG.vega_spec = null;
+          window.VEGA_DEBUG.vegalite_spec = null;
         }
       });
     }
