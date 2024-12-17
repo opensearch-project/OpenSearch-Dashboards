@@ -140,7 +140,7 @@ class FilterEditorUI extends Component<Props, State> {
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
-        <div className="globalFilterItem__editorForm">
+        <div className="globalFilterItem__editorForm" data-test-subj="globalFilterItemEditor">
           <EuiForm>
             {this.renderIndexPatternInput()}
 

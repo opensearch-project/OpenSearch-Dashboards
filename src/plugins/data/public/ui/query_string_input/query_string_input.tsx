@@ -638,6 +638,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
             <div
               role="search"
               className="euiFormControlLayout__childrenWrapper osdQueryBar__textareaWrap"
+              data-test-subj="queryBarInputContainer"
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiCompressedTextArea

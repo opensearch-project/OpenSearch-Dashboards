@@ -87,14 +87,16 @@ export function SuggestionComponent(props: Props) {
       }-${props.suggestion.text.replace(/\s/g, '-')}`}
     >
       <div className={'osdSuggestionItem osdSuggestionItem--' + props.suggestion.type}>
-        <div className="osdSuggestionItem__type">
+        <div className="osdSuggestionItem__type" data-test-subj="osdSuggestionType">
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
         <div className="osdSuggestionItem__text" data-test-subj="autoCompleteSuggestionText">
           {props.suggestion.text}
         </div>
         {props.shouldDisplayDescription && (
-          <div className="osdSuggestionItem__description">{props.suggestion.description}</div>
+          <div className="osdSuggestionItem__description" data-test-subj="osdSuggestionDescription">
+            {props.suggestion.description}
+          </div>
         )}
       </div>
     </div>

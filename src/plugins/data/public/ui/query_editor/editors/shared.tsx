@@ -96,7 +96,10 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   );
 
   return (
-    <div className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap">
+    <div
+      className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap"
+      data-test-subj="osdQueryBarWrapper"
+    >
       {prepend}
       <div
         className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper"
@@ -150,7 +153,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
           triggerSuggestOnFocus={true}
         />
         {editorIsFocused && (
-          <div className="queryEditor__footer">
+          <div className="queryEditor__footer" data-test-subj="queryEditorFooter">
             {footerItems && (
               <Fragment>
                 {footerItems.start?.map((item) => (

@@ -76,7 +76,7 @@ export const SavedQueryListItem = ({
   });
 
   const label = (
-    <span className="osdSavedQueryListItem__label">
+    <span className="osdSavedQueryListItem__label" data-test-subj="osdSavedQueryListItemLabel">
       <span className="osdSavedQueryListItem__labelText">{savedQuery.attributes.title}</span>{' '}
       {savedQuery.attributes.description && (
         <EuiIconTip

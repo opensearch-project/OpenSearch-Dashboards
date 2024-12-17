@@ -88,7 +88,7 @@ export function ContextApp({
         onChangeCount={onChangeCount}
         type={SurrDocType.PREDECESSORS}
       />
-      <div className="dscDocsGrid">
+      <div className="dscDocsGrid" data-test-subj="dscDocsGrid">
         <DataGridTable
           aria-label={'ContextTable'}
           columns={columns}

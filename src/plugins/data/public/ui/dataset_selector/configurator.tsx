@@ -187,7 +187,7 @@ export const Configurator = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiForm className="datasetConfigurator">
+        <EuiForm className="datasetConfigurator" data-test-subj="datasetConfigurator">
           <EuiFormRow
             label={i18n.translate(
               'data.explorer.datasetSelector.advancedSelector.configurator.datasetLabel',

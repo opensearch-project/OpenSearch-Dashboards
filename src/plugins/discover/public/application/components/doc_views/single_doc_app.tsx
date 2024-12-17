@@ -76,7 +76,7 @@ export function SingleDocApp() {
   }
 
   return (
-    <div className="single doc view">
+    <div className="single doc view" data-test-subj="singleDocView">
       <Doc
         id={docId}
         index={index}

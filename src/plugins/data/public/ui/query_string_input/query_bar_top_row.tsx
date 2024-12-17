@@ -321,6 +321,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
           className="osdQueryBar__datePicker"
+          data-test-subj="osdQueryBarDatePicker"
           compressed={true}
         />
       </EuiFlexItem>
@@ -402,7 +403,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       >
         {renderQueryInput()}
         {renderSharingMetaFields()}
-        <EuiFlexItem grow={false} className="osdQueryBar--hideEmpty">
+        <EuiFlexItem grow={false} className="osdQueryBar--hideEmpty" data-test-subj="osdQueryBar">
           {shouldUseDatePickerRef
             ? createPortal(renderUpdateButton(), props.datePickerRef!.current!)
             : renderUpdateButton()}

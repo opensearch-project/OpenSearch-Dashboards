@@ -21,6 +21,7 @@ export function DiscoverFieldDataFrame({ onCreateIndexPattern, onNormalizeIndexP
           onClick={onNormalizeIndexPattern}
           size="xs"
           className="dscSideBar_normalizeIndexPattern"
+          data-test-subj="dscSideBarNormalizeIndexPatternButton"
         >
           {i18n.translate('discover.fieldChooser.dataFrame.normalizeIndexPattern', {
             defaultMessage: 'Normalize',
@@ -33,6 +34,7 @@ export function DiscoverFieldDataFrame({ onCreateIndexPattern, onNormalizeIndexP
           onClick={onCreateIndexPattern}
           size="xs"
           className="dscSideBar_createIndexPattern"
+          data-test-subj="dscSideBarCreateIndexPatternButton"
         >
           {i18n.translate('discover.fieldChooser.dataFrame.createIndexPattern', {
             defaultMessage: 'Create index pattern',
