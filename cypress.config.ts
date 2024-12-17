@@ -7,11 +7,13 @@ import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
 
 module.exports = defineConfig({
+  retries: 1,
   defaultCommandTimeout: 60000,
   requestTimeout: 60000,
   responseTimeout: 60000,
   viewportWidth: 2000,
   viewportHeight: 1320,
+  retries: 2,
   env: {
     openSearchUrl: 'http://localhost:9200',
     SECURITY_ENABLED: false,
@@ -27,6 +29,7 @@ module.exports = defineConfig({
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
+    supportFile: 'cypress/support/e2e.{js,jsx,ts,tsx}',
     specPattern: 'cypress/integration/**/*_spec.{js,jsx,ts,tsx}',
     testIsolation: false,
     setupNodeEvents,
