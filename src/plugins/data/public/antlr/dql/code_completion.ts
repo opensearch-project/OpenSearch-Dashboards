@@ -255,7 +255,7 @@ export const getSuggestions = async ({
     }
 
     const booleanOperators = new Set([DQLParser.AND, DQLParser.OR, DQLParser.NOT]);
-    const operators = new Set([
+    const relationalOperators = new Set([
       DQLParser.EQ,
       DQLParser.GE,
       DQLParser.GT,
@@ -270,7 +270,7 @@ export const getSuggestions = async ({
         return;
       }
 
-      const tokenSymbolName = operators.has(token)
+      const tokenSymbolName = relationalOperators.has(token)
         ? parser.vocabulary.getDisplayName(token)?.replace(/'/g, '')
         : parser.vocabulary.getSymbolicName(token)?.toLowerCase();
 
@@ -278,7 +278,7 @@ export const getSuggestions = async ({
         let type = monaco.languages.CompletionItemKind.Keyword;
         let detail = SuggestionItemDetailsTags.Keyword;
 
-        if (booleanOperators.has(token) || operators.has(token)) {
+        if (booleanOperators.has(token) || relationalOperators.has(token)) {
           type = monaco.languages.CompletionItemKind.Operator;
           detail = SuggestionItemDetailsTags.Operator;
         }
