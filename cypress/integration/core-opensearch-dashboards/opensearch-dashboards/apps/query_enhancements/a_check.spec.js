@@ -4,7 +4,8 @@
  */
 
 import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { WORKSPACE_NAME, DATASOURCE_NAME, DATASOURCE_URL } from './constants';
+import { WORKSPACE_NAME, DATASOURCE_NAME } from './constants';
+import { SECONDARY_ENGINE } from '../../../../../utils/constants';
 
 const miscUtils = new MiscUtils(cy);
 
@@ -24,7 +25,7 @@ describe('Workspace Commands / API Test', () => {
     // Add data source
     cy.addDataSource({
       name: `${DATASOURCE_NAME}`,
-      url: `${DATASOURCE_URL}`,
+      url: `${SECONDARY_ENGINE.url}`,
       authType: 'no_auth',
     });
     // Create workspace
@@ -36,7 +37,7 @@ describe('Workspace Commands / API Test', () => {
 
   after(() => {
     cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
-    // TODO: Add utility to clean out data sources
+    cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
     // TODO: Modify deleteIndex to handle an array of index and remove hard code
     cy.deleteIndex('data_logs_small_time_1');
     cy.deleteIndex('data_logs_small_time_2');

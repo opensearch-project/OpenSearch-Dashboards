@@ -6,7 +6,7 @@ import {
   MiscUtils,
   TestFixtureHandler,
 } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { PATHS, SECONDARY_ENGINE } from '../../../utils/constants';
+import { PATHS, SECONDARY_ENGINE } from '../../../../../utils/constants';
 
 const miscUtils = new MiscUtils(cy);
 const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
