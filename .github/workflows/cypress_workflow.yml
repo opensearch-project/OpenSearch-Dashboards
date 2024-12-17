@@ -41,6 +41,9 @@ env:
   COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
   COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'
   LATEST_VERSION: '2.17.0'
+  S3_CONNECTION_URL: ${{ secrets.S3_CONNECTION_URL}}
+  S3_CONNECTION_USERNAME: ${{ secrets.S3_CONNECTION_USERNAME }}
+  S3_CONNECTION_PASSWORD: ${{ secrets.S3_CONNECTION_PASSWORD }}
 
 jobs:
   cypress-tests:
