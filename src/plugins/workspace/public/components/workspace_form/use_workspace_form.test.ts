@@ -4,10 +4,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { WorkspacePermissionMode } from '../../../common/constants';
-import { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
+import { WorkspaceOperationType } from './constants';
 import { WorkspaceFormSubmitData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { waitFor } from '@testing-library/dom';
