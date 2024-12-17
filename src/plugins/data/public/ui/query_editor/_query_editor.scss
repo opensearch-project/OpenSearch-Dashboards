@@ -64,26 +64,10 @@
   }
 }
 
-.osdQueryEditor__dataSetWrapper {
-  max-width: 350px;
-
-  .dataExplorerDSSelect {
-    border-bottom: $euiBorderThin !important;
-    min-width: 300px;
-
-    span:is([class$="__text"]) {
-      width: 350px;
-      text-align: left;
-    }
-
-    div:is([class$="--group"]) {
-      padding: 0 !important;
-    }
-
-    .sourceRefreshText {
-      max-height: 40px;
-    }
-  }
+// TODO: ths is a temporary fix to make sure the height is set to auto
+// Can remove this once, height issue is fixed for combo box append in Oui
+.dataExplorerDSSelect .euiFormControlLayout.euiFormControlLayout--group > .euiToolTipAnchor {
+  height: auto;
 }
 
 .osdQueryEditor__prependWrapper {
@@ -122,7 +106,7 @@
 }
 
 // IE specific fix for the datepicker to not collapse
-@include euiBreakpoint("m", "l", "xl") {
+@include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
   .osdQueryEditor__datePickerWrapper {
     max-width: 40vw;
     flex-grow: 0 !important;
@@ -153,13 +137,12 @@
 .osdQueryEditor__header {
   display: flex;
   align-items: center;
-  padding: 0 $euiSizeXS $euiSizeXS;
+  padding: 0 $euiSizeXS $euiSizeS;
 }
 
 .osdQueryEditor__topBar {
   display: flex;
   align-items: center;
-  padding: $euiSizeXS;
 
   > * {
     flex: 0 1 auto;
@@ -167,8 +150,11 @@
   }
 
   .osdQueryEditor__querycontrols {
-    float: right;
-    margin: $euiSizeS $euiSizeS;
+    .osdQueryEditor__extensionQueryControls {
+      display: flex;
+      padding: 0 $euiSizeS 0 $euiSizeXS;
+      border-right: $euiBorderThin;
+    }
   }
 
   .osdQueryEditor__dataSetPicker {
@@ -197,12 +183,19 @@
 }
 
 .osdQuerEditor__singleLine {
-  padding: $euiSizeS;
-  background-color: $euiColorEmptyShade;
+  padding: calc($euiSizeXS + 1px);
   overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
+  min-width: 0;
 
   .monaco-editor .view-overlays .current-line {
     border: none;
+  }
+
+  &,
+  & .monaco-editor,
+  & .monaco-editor .inputarea.ime-input,
+  & .monaco-editor-background {
+    background-color: $euiFormBackgroundColor;
   }
 }
 
@@ -212,7 +205,7 @@
   &.visible::after {
     position: absolute;
     height: auto;
-    bottom: auto;
+    bottom: calc(-1 * ($euiFontSizeXS * 2 + $euiSizeXS) + 1px);
     left: 0;
     width: 100%;
     background-color: $euiColorLightestShade;
@@ -224,4 +217,41 @@
     content: "Tab to insert, ESC to close window";
     display: block;
   }
+}
+
+.queryEditor__footer {
+  display: flex;
+  gap: 4px;
+  background: $euiColorLightestShade;
+  padding: 2px 4px;
+  margin-top: 5px;
+  margin-left: -5px;
+  margin-right: -5px;
+  z-index: 1;
+  position: relative;
+  align-items: center;
+}
+
+.queryEditor__footerSpacer {
+  flex-grow: 1;
+}
+
+.queryEditor__footerItem {
+  // Needed so the footer items never have paddings
+  padding: 0 !important;
+}
+
+// TODO: Temporary workaround to disable padding for single line editor footer
+.euiFormControlLayout--group.euiFormControlLayout--compressed .osdQuerEditor__singleLine .euiText {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiText {
+  background-color: unset !important;
+  line-height: 21px !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiButtonEmpty {
+  border-right: 0;
 }

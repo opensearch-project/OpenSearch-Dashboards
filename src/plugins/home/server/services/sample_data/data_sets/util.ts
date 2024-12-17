@@ -5,10 +5,10 @@
 
 import { SavedObject } from 'opensearch-dashboards/server';
 import {
-  extractVegaSpecFromSavedObject,
   extractTimelineExpression,
-  updateDataSourceNameInVegaSpec,
+  extractVegaSpecFromSavedObject,
   updateDataSourceNameInTimeline,
+  updateDataSourceNameInVegaSpec,
 } from '../../../../../../core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 
@@ -42,6 +42,13 @@ const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: strin
       const searchSource = JSON.parse(searchSourceString);
       if (searchSource.index) {
         searchSource.index = idGenerator(searchSource.index);
+        if (Array.isArray(searchSource.filter)) {
+          searchSource.filter.forEach((item) => {
+            if (item.meta?.index) {
+              item.meta.index = idGenerator(item.meta.index);
+            }
+          });
+        }
         savedObject.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
           searchSource
         );
@@ -192,4 +199,35 @@ export const getFinalSavedObjects = ({
   }
 
   return dataset.savedObjects;
+};
+
+// Helper function to get a nested field by path
+export const getNestedField = (doc: any, path: string) => {
+  // First check if the exact path exists as a field
+  if (path in doc) {
+    return doc[path];
+  }
+  // If not, treat it as a nested path
+  return path
+    .split('.')
+    .reduce((obj, key) => (obj && obj[key] !== 'undefined' ? obj[key] : undefined), doc);
+};
+
+// Helper function to set a nested field by path
+export const setNestedField = (doc: any, path: string, value: any) => {
+  // First check if the exact path exists as a field
+  if (path in doc) {
+    doc[path] = value;
+    return;
+  }
+  // If not, treat it as a nested path
+  const keys = path.split('.');
+  keys.reduce((obj, key, indexName) => {
+    if (indexName === keys.length - 1) {
+      obj[key] = value;
+    } else {
+      if (!obj[key]) obj[key] = {}; // Create the object if it doesn't exist
+      return obj[key];
+    }
+  }, doc);
 };

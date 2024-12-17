@@ -83,7 +83,17 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
           fetchForWildcard: jest.fn(),
         },
       }),
-      get: jest.fn().mockReturnValue(Promise.resolve({})),
+      get: jest.fn().mockReturnValue(
+        Promise.resolve({
+          id: 'id',
+          name: 'name',
+          dataSourceRef: {
+            id: 'id',
+            type: 'datasource',
+            name: 'datasource',
+          },
+        })
+      ),
       getDefault: jest.fn().mockReturnValue(
         Promise.resolve({
           name: 'Default name',
@@ -91,6 +101,12 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
         })
       ),
       clearCache: jest.fn(),
+      create: jest.fn().mockResolvedValue({
+        id: 'test-index-pattern',
+        title: 'Test Index Pattern',
+        type: 'INDEX_PATTERN',
+      }),
+      saveToCache: jest.fn(),
     } as unknown) as IndexPatternsContract,
     dataSources: dataSourceServiceMock.createStartContract(),
   };

@@ -72,7 +72,7 @@ export const DiscoverChart = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const hitsCounter = (
-    <div className="dscChart__hitsCounter">
+    <div className="dscChart__hitsCounter" data-test-subj="dscChartHitsCounter">
       <HitsCounter
         hits={hits > 0 ? hits : 0}
         showResetButton={showResetButton}
@@ -82,7 +82,7 @@ export const DiscoverChart = ({
   );
 
   const timeChartHeader = (
-    <div className="dscChart__TimechartHeader">
+    <div className="dscChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
       <TimechartHeader
         bucketInterval={bucketInterval}
         dateFormat={config.get('dateFormat')}
@@ -94,7 +94,7 @@ export const DiscoverChart = ({
     </div>
   );
 
-  const toggleLabel = i18n.translate('histogram.collapse', {
+  const toggleLabel = i18n.translate('discover.histogram.collapse', {
     defaultMessage: 'Toggle histogram',
   });
 
@@ -112,13 +112,17 @@ export const DiscoverChart = ({
   );
 
   const queryEnhancedHistogramHeader = (
-    <EuiFlexGroup direction="row" gutterSize="m" className="dscChart__chartheader">
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="m"
+      className="dscChart__chartheader"
+      data-test-subj="dscChartChartheader"
+    >
       <EuiFlexItem grow={false}>{toggle}</EuiFlexItem>
       <EuiFlexItem grow={false}>{hitsCounter}</EuiFlexItem>
       <EuiFlexItem grow={true} style={{ justifyContent: 'flex-start' }}>
         {isTimeBased && timeChartHeader}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -139,6 +143,7 @@ export const DiscoverChart = ({
       direction="column"
       gutterSize="none"
       className={isEnhancementsEnabled ? 'dscChart__wrapper' : ''}
+      data-test-subj="dscChartWrapper"
     >
       {isEnhancementsEnabled ? queryEnhancedHistogramHeader : histogramHeader}
       {isTimeBased && chartData && showHistogram && (
@@ -148,6 +153,7 @@ export const DiscoverChart = ({
               defaultMessage: 'Histogram of found documents',
             })}
             className="dscTimechart"
+            data-test-subj="dscTimechart"
           >
             <div className="dscHistogram" data-test-subj="discoverChart">
               <DiscoverHistogram

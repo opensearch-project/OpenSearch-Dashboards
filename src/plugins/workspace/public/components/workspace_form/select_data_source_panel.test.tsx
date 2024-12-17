@@ -155,7 +155,7 @@ describe('SelectDataSourcePanel', () => {
     await waitFor(() => {
       expect(
         getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
         )
       ).toBeInTheDocument();
       expect(getByText(assignedDataSourcesConnections[1].name)).toBeInTheDocument();
@@ -218,15 +218,27 @@ describe('SelectDataSourcePanel', () => {
     await waitFor(() => {
       expect(
         getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
         )
       ).toBeInTheDocument();
     });
     fireEvent.click(getByText('Close'));
     expect(
       queryByText(
-        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
       )
     ).toBeNull();
+  });
+
+  it('should render empty message and action buttons', () => {
+    const { getByText, getByTestId } = setup({
+      assignedDataSourceConnections: [],
+    });
+
+    expect(getByText('Associated data sources will appear here')).toBeInTheDocument();
+    expect(
+      getByTestId('workspace-creator-emptyPrompt-dataSources-assign-button')
+    ).toBeInTheDocument();
+    expect(getByTestId('workspace-creator-emptyPrompt-dqc-assign-button')).toBeInTheDocument();
   });
 });

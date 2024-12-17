@@ -12,7 +12,7 @@ exports[`Header - workspace enabled should render \`Import\` button inside a wor
           Object {
             "controlType": "button",
             "iconType": "exportAction",
-            "label": "Export all objects",
+            "label": "Export all assets",
             "run": [Function],
             "testId": "exportAllObjects",
           },
@@ -261,16 +261,16 @@ exports[`Header should render normally when useUpdatedUX is true 1`] = `
         Array [
           Object {
             "controlType": "button",
-            "disabled": false,
             "iconType": "copy",
-            "label": "Copy all objects to...",
+            "isDisabled": false,
+            "label": "Copy all assets to...",
             "run": [Function],
             "testId": "duplicateObjects",
           },
           Object {
             "controlType": "button",
             "iconType": "exportAction",
-            "label": "Export all objects",
+            "label": "Export all assets",
             "run": [Function],
             "testId": "exportAllObjects",
           },

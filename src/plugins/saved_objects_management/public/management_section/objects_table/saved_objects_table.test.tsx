@@ -735,7 +735,7 @@ describe('SavedObjectsTable', () => {
       expect(filters[1].options[1].value).toBe('bar');
     });
 
-    it('workspace filter only include current workspaces when in a workspace', async () => {
+    it('should hide workspace filter when in a workspace', async () => {
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
         navLinks: {},
@@ -775,9 +775,7 @@ describe('SavedObjectsTable', () => {
       const props = component.find('Table').props() as TableProps;
       const filters = props.filters;
       const wsFilter = filters.filter((f) => f.field === 'workspaces');
-      expect(wsFilter.length).toBe(1);
-      expect(wsFilter[0].options.length).toBe(1);
-      expect(wsFilter[0].options[0].value).toBe('foo');
+      expect(wsFilter.length).toBe(0);
     });
 
     it('current workspace in find options when workspace on', async () => {
@@ -1023,7 +1021,38 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('should catch error when duplicating selected object is fail', async () => {
+    it('should catch error when duplicating selected object is failed', async () => {
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      const mockCopy = jest.fn().mockResolvedValue({ error: 'error' });
+      workspaces.client$.next({ copy: mockCopy });
+      const client = workspaces.client$.getValue();
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
+
+      expect(client?.copy).toHaveBeenCalledWith(
+        [
+          { id: '1', type: 'dashboard' },
+          { id: '2', type: 'dashboard' },
+        ],
+        'workspace2',
+        false
+      );
+      component.update();
+
+      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: 'Unable to copy 2 saved objects.',
+        text: 'error',
+      });
+    });
+
+    it('should show error toast when copy is fail', async () => {
       const component = shallowRender({ applications, workspaces });
       component.setState({ isShowingDuplicateModal: true });
 

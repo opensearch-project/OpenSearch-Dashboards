@@ -7,7 +7,10 @@ import { loggerMock } from '@osd/logging/target/mocks';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceUiSettingsClientWrapper } from './workspace_ui_settings_client_wrapper';
 import { WORKSPACE_TYPE } from '../../../../core/server';
-import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../../data_source_management/common';
+import {
+  DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+  DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID,
+} from '../../../data_source_management/common';
 
 import * as utils from '../../../../core/server/utils';
 
@@ -28,8 +31,9 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
           references: [],
           type: 'config',
           attributes: {
-            defaultIndex: 'default-index-global',
+            defaultDashboard: 'default-dashboard-global',
             [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: 'default-ds-global',
+            [DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID]: 'default-index-global',
           },
         });
       } else if (type === WORKSPACE_TYPE) {
@@ -39,7 +43,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
           type: WORKSPACE_TYPE,
           attributes: {
             uiSettings: {
-              defaultIndex: 'default-index-workspace',
+              defaultDashboard: 'default-dashboard-workspace',
             },
           },
         });
@@ -61,7 +65,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
     };
   };
 
-  it('should return workspace ui settings and should return workspace default data source and not extend global if in a workspace', async () => {
+  it('should return workspace ui settings and should return workspace default data / index pattern source and not extend global if in a workspace', async () => {
     // Currently in a workspace
     jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ requestWorkspaceId: 'workspace-id' });
 
@@ -73,8 +77,9 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
       references: [],
       type: 'config',
       attributes: {
-        defaultIndex: 'default-index-workspace',
+        defaultDashboard: 'default-dashboard-workspace',
         [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: undefined,
+        [DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID]: undefined,
       },
     });
   });
@@ -91,8 +96,9 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
       references: [],
       type: 'config',
       attributes: {
-        defaultIndex: 'default-index-global',
+        defaultDashboard: 'default-dashboard-global',
         [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: 'default-ds-global',
+        [DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID]: 'default-index-global',
       },
     });
   });
@@ -109,18 +115,18 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
       type: WORKSPACE_TYPE,
       attributes: {
         uiSettings: {
-          defaultIndex: 'new-index-id',
+          defaultDashboard: 'new-dashboard-id',
         },
       },
     });
 
-    await wrappedClient.update('config', '3.0.0', { defaultIndex: 'new-index-id' });
+    await wrappedClient.update('config', '3.0.0', { defaultDashboard: 'new-dashboard-id' });
 
     expect(clientMock.update).toHaveBeenCalledWith(
       WORKSPACE_TYPE,
       'workspace-id',
       {
-        uiSettings: { defaultIndex: 'new-index-id' },
+        uiSettings: { defaultDashboard: 'new-dashboard-id' },
       },
       {}
     );
@@ -132,13 +138,13 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
 
     const { wrappedClient, clientMock } = createWrappedClient();
 
-    await wrappedClient.update('config', '3.0.0', { defaultIndex: 'new-index-id' });
+    await wrappedClient.update('config', '3.0.0', { defaultDashboard: 'new-dashboard-id' });
 
     expect(clientMock.update).toHaveBeenCalledWith(
       'config',
       '3.0.0',
       {
-        defaultIndex: 'new-index-id',
+        defaultDashboard: 'new-dashboard-id',
       },
       {}
     );
@@ -159,7 +165,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
           references: [],
           type: 'config',
           attributes: {
-            defaultIndex: 'default-index-global',
+            defaultDashboard: 'new-dashboard-id',
           },
         });
       }
@@ -169,7 +175,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
     const config = await wrappedClient.get('config', '3.0.0');
     expect(config).toEqual({
       attributes: {
-        defaultIndex: 'default-index-global',
+        defaultDashboard: 'new-dashboard-id',
       },
       id: '3.0.0',
       references: [],

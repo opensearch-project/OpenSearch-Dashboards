@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 .datasetExplorer {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 240px)) minmax(300px, 1fr);
@@ -25,5 +30,12 @@
   &__columnTitle {
     padding: $euiSizeS;
     border-bottom: $euiBorderThin;
+  }
+
+  .datasetTable {
+    &__loadMore {
+      text-align: center;
+      padding: $euiSizeS;
+    }
   }
 }

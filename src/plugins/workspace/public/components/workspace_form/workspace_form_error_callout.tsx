@@ -31,11 +31,11 @@ const getSuggestionFromErrorCode = (error: WorkspaceFormError) => {
         defaultMessage: 'Enter a user group.',
       });
     case WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting:
-      return i18n.translate('workspace.form.errorCallout.duplicatePermission', {
+      return i18n.translate('workspace.form.errorCallout.duplicateUserPermission', {
         defaultMessage: 'Enter a unique user.',
       });
     case WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting:
-      return i18n.translate('workspace.form.errorCallout.duplicatePermission', {
+      return i18n.translate('workspace.form.errorCallout.duplicateGroupPermission', {
         defaultMessage: 'Enter a unique user group.',
       });
     case WorkspaceFormErrorCode.PermissionSettingOwnerMissing:
@@ -44,7 +44,7 @@ const getSuggestionFromErrorCode = (error: WorkspaceFormError) => {
       });
     case WorkspaceFormErrorCode.InvalidColor:
       return i18n.translate('workspace.form.errorCallout.invalidColor', {
-        defaultMessage: 'Enter a valid color.',
+        defaultMessage: 'Choose a valid color.',
       });
     default:
       return error.message;
@@ -112,7 +112,7 @@ export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutP
           )}
           {errors.color && (
             <WorkspaceFormErrorCalloutItem
-              errorKey={i18n.translate('workspace.form.errorCallout.nameKey', {
+              errorKey={i18n.translate('workspace.form.errorCallout.colorKey', {
                 defaultMessage: 'Color:',
               })}
               message={getSuggestionFromErrorCode(errors.color)}

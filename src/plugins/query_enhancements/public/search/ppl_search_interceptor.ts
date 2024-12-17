@@ -15,12 +15,13 @@ import {
   SearchInterceptorDeps,
 } from '../../../data/public';
 import {
-  formatDate,
-  SEARCH_STRATEGY,
   API,
+  DATASET,
   EnhancedFetchContext,
   fetch,
+  formatDate,
   QueryAggConfig,
+  SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
@@ -47,6 +48,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${strategy}`),
       signal,
+      body: {
+        pollQueryResultsParams: request.params?.pollQueryResultsParams,
+        timeRange: request.params?.body?.timeRange,
+      },
     };
 
     const query = this.buildQuery();
@@ -57,24 +62,44 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
     const dataset = this.queryService.queryString.getQuery().dataset;
     const datasetType = dataset?.type;
-    let strategy = SEARCH_STRATEGY.PPL;
+    let strategy = datasetType === DATASET.S3 ? SEARCH_STRATEGY.PPL_ASYNC : SEARCH_STRATEGY.PPL;
 
     if (datasetType) {
       const datasetTypeConfig = this.queryService.queryString
         .getDatasetService()
         .getType(datasetType);
       strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
+
+      if (
+        dataset?.timeFieldName &&
+        datasetTypeConfig?.languageOverrides?.PPL?.hideDatePicker === false
+      ) {
+        request.params = {
+          ...request.params,
+          body: {
+            ...request.params.body,
+            timeRange: this.queryService.timefilter.timefilter.getTime(),
+          },
+        };
+      }
     }
 
     return this.runSearch(request, options.abortSignal, strategy);
   }
 
   private buildQuery() {
-    const query: Query = this.queryService.queryString.getQuery();
+    const { queryString } = this.queryService;
+    const query: Query = queryString.getQuery();
     const dataset = query.dataset;
     if (!dataset || !dataset.timeFieldName) return query;
+    const datasetService = queryString.getDatasetService();
+    if (datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker === false)
+      return query;
+
+    const [baseQuery, ...afterPipeParts] = query.query.split('|');
+    const afterPipe = afterPipeParts.length > 0 ? ` | ${afterPipeParts.join('|').trim()}` : '';
     const timeFilter = this.getTimeFilter(dataset.timeFieldName);
-    return { ...query, query: query.query + timeFilter };
+    return { ...query, query: baseQuery + timeFilter + afterPipe };
   }
 
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {

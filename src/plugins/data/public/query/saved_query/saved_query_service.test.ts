@@ -31,6 +31,7 @@
 import { createSavedQueryService } from './saved_query_service';
 import { FilterStateStore } from '../../../common';
 import { SavedQueryAttributes } from './types';
+import { applicationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -89,7 +90,11 @@ const {
   getSavedQueryCount,
 } = createSavedQueryService(
   // @ts-ignore
-  mockSavedObjectsClient
+  mockSavedObjectsClient,
+  {
+    application: applicationServiceMock.create(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+  }
 );
 
 describe('saved query service', () => {
@@ -452,7 +457,7 @@ describe('saved query service', () => {
       );
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         page: 1,
-        perPage: 0,
+        perPage: 1,
         type: 'query',
       });
     });

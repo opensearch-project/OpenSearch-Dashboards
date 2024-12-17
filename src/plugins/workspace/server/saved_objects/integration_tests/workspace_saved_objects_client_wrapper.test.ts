@@ -243,19 +243,14 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
   describe('find', () => {
     it('should return empty result if user not permitted', async () => {
-      const result = await notPermittedSavedObjectedClient.find({
-        type: 'dashboard',
-        workspaces: ['workspace-1'],
-        perPage: 999,
-        page: 1,
-      });
-
-      expect(result).toEqual({
-        saved_objects: [],
-        total: 0,
-        page: 1,
-        per_page: 999,
-      });
+      await expect(
+        notPermittedSavedObjectedClient.find({
+          type: 'dashboard',
+          workspaces: ['workspace-1'],
+          perPage: 999,
+          page: 1,
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
     });
 
     it('should return consistent inner workspace data when user permitted', async () => {
@@ -354,21 +349,16 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
   });
 
   describe('create', () => {
-    it('should throw forbidden error when workspace not permitted and create called', async () => {
-      let error;
-      try {
-        await notPermittedSavedObjectedClient.create(
+    it('should throw bad request error when workspace is invalid and create called', async () => {
+      await expect(
+        notPermittedSavedObjectedClient.create(
           'dashboard',
           {},
           {
             workspaces: ['workspace-1'],
           }
-        );
-      } catch (e) {
-        error = e;
-      }
-
-      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+        )
+      ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
     });
 
     it('should able to create saved objects into permitted workspaces after create called', async () => {
@@ -432,7 +422,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       expect(createResult.error).toBeUndefined();
     });
 
-    it('should throw forbidden error when user create a workspce and is not OSD admin', async () => {
+    it('should throw forbidden error when user create a workspace and is not OSD admin', async () => {
       let error;
       try {
         await permittedSavedObjectedClient.create('workspace', {}, {});
@@ -473,17 +463,12 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
   });
 
   describe('bulkCreate', () => {
-    it('should throw forbidden error when workspace not permitted and bulkCreate called', async () => {
-      let error;
-      try {
-        await notPermittedSavedObjectedClient.bulkCreate([{ type: 'dashboard', attributes: {} }], {
+    it('should throw bad request error when workspace is invalid and bulkCreate called', async () => {
+      await expect(
+        notPermittedSavedObjectedClient.bulkCreate([{ type: 'dashboard', attributes: {} }], {
           workspaces: ['workspace-1'],
-        });
-      } catch (e) {
-        error = e;
-      }
-
-      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
     });
 
     it('should able to create saved objects into permitted workspaces after bulkCreate called', async () => {
@@ -511,7 +496,6 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           ],
           {
             overwrite: true,
-            workspaces: ['workspace-1'],
           }
         );
       } catch (e) {
@@ -758,7 +742,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         {
           id: deleteWorkspaceId,
           permissions: {
-            library_read: { users: ['foo'] },
+            read: { users: ['foo'] },
             library_write: { users: ['foo'] },
           },
         }

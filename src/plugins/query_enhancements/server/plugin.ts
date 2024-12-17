@@ -15,12 +15,13 @@ import {
 } from '../../../core/server';
 import { SEARCH_STRATEGY } from '../common';
 import { ConfigSchema } from '../common/config';
-import { defineRoutes } from './routes';
+import { defineRoutes, defineSearchStrategyRouteProvider } from './routes';
 import {
-  pplSearchStrategyProvider,
+  pplAsyncSearchStrategyProvider,
   pplRawSearchStrategyProvider,
-  sqlSearchStrategyProvider,
+  pplSearchStrategyProvider,
   sqlAsyncSearchStrategyProvider,
+  sqlSearchStrategyProvider,
 } from './search';
 import {
   QueryEnhancementsPluginSetup,
@@ -58,11 +59,17 @@ export class QueryEnhancementsPlugin
       this.logger,
       client
     );
+    const pplAsyncSearchStrategy = pplAsyncSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client
+    );
 
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_RAW, pplRawSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL_ASYNC, sqlAsyncSearchStrategy);
+    data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_ASYNC, pplAsyncSearchStrategy);
 
     core.http.registerRouteHandlerContext('query_assist', () => ({
       logger: this.logger,
@@ -86,10 +93,13 @@ export class QueryEnhancementsPlugin
       ppl: pplSearchStrategy,
       sql: sqlSearchStrategy,
       sqlasync: sqlAsyncSearchStrategy,
+      pplasync: pplAsyncSearchStrategy,
     });
 
     this.logger.info('queryEnhancements: Setup complete');
-    return {};
+    return {
+      defineSearchStrategyRoute: defineSearchStrategyRouteProvider(this.logger, router),
+    };
   }
 
   public start(core: CoreStart) {

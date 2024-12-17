@@ -17,14 +17,16 @@ import {
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
-import { UseCaseService } from './services/use_case_service';
+import { UseCaseService, WorkspaceCollaboratorTypesService } from './services';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { WorkspacePlugin } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
 import { navigationPluginMock } from '../../navigation/public/mocks';
+import * as registerDefaultCollaboratorTypesExports from './register_default_collaborator_types';
+import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 
-// Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
-const registrationAppNumber = 6;
+// Expect 6 app registrations: create, fatal error, detail, initial, navigation, collaborator and list apps.
+const registrationAppNumber = 7;
 
 describe('Workspace plugin', () => {
   const getMockDependencies = () => ({
@@ -221,7 +223,20 @@ describe('Workspace plugin', () => {
     );
   });
 
-  it('#setup should register registerCollapsibleNavHeader when new left nav is turned on', async () => {
+  it('#setup should register registerCollapsibleNavHeader when enter a workspace', async () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
+          },
+        } as any)
+    );
+    workspaceClientMock.enterWorkspace.mockResolvedValueOnce({
+      success: true,
+      error: 'error',
+    });
     const setupMock = coreMock.createSetup();
     let collapsibleNavHeaderImplementation = () => null;
     setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
@@ -234,6 +249,7 @@ describe('Workspace plugin', () => {
     const startMock = coreMock.createStart();
     await workspacePlugin.start(startMock, getMockDependencies());
     expect(collapsibleNavHeaderImplementation()).not.toEqual(null);
+    windowSpy.mockRestore();
   });
 
   it('#setup should register workspace essential use case when new home is disabled', async () => {
@@ -320,6 +336,34 @@ describe('Workspace plugin', () => {
         navLinkStatus: AppNavLinkStatus.hidden,
       })
     );
+  });
+
+  it('#setup should call registerDefaultCollaboratorTypes', async () => {
+    const registerDefaultCollaboratorTypesMock = jest.fn();
+    jest
+      .spyOn(registerDefaultCollaboratorTypesExports, 'registerDefaultCollaboratorTypes')
+      .mockImplementationOnce(registerDefaultCollaboratorTypesMock);
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    expect(registerDefaultCollaboratorTypesMock).not.toHaveBeenCalled();
+    await workspacePlugin.setup(setupMock, {});
+    expect(registerDefaultCollaboratorTypesMock).toHaveBeenCalled();
+  });
+
+  it('#setup should return WorkspaceCollaboratorTypesService', async () => {
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    const result = await workspacePlugin.setup(setupMock, {});
+
+    expect(result.collaboratorTypes).toBeInstanceOf(WorkspaceCollaboratorTypesService);
+  });
+
+  it('#setup should return getAddCollaboratorsModal method', async () => {
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    const result = await workspacePlugin.setup(setupMock, {});
+
+    expect(result.ui.AddCollaboratorsModal).toBe(AddCollaboratorsModal);
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {
@@ -465,49 +509,6 @@ describe('Workspace plugin', () => {
     });
   });
 
-  it('#start should only register get started cards of use cases to new home page', async () => {
-    const workspacePlugin = new WorkspacePlugin();
-    const setupMock = getSetupMock();
-    const coreStart = coreMock.createStart();
-    await workspacePlugin.setup(setupMock, {});
-    const registeredUseCases$ = new BehaviorSubject([
-      {
-        id: 'foo',
-        title: 'Foo',
-        systematic: true,
-        description: '',
-        features: [],
-      },
-      {
-        id: 'bar',
-        title: 'Bar',
-        description: '',
-        features: [],
-      },
-    ]);
-    jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
-      getRegisteredUseCases$: jest.fn(() => registeredUseCases$),
-    }));
-
-    coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
-
-    const mockDependencies = getMockDependencies();
-
-    workspacePlugin.start(coreStart, mockDependencies);
-    await waitFor(() => {
-      expect(mockDependencies.contentManagement.registerContentProvider).toBeCalledWith(
-        expect.objectContaining({
-          id: `home_get_start_bar`,
-        })
-      );
-      expect(mockDependencies.contentManagement.registerContentProvider).not.toBeCalledWith(
-        expect.objectContaining({
-          id: `home_get_start_foo`,
-        })
-      );
-    });
-  });
-
   it('#stop should call unregisterNavGroupUpdater', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();
@@ -565,5 +566,19 @@ describe('Workspace plugin', () => {
 
     registeredUseCases$.next([]);
     expect(appUpdaterChangeMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('#stop should call collaboratorTypesService.stop', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const stopMock = jest.fn();
+    jest
+      .spyOn(WorkspaceCollaboratorTypesService.prototype, 'stop')
+      .mockImplementationOnce(stopMock);
+    await workspacePlugin.setup(setupMock, {});
+
+    expect(stopMock).not.toHaveBeenCalled();
+    workspacePlugin.stop();
+    expect(stopMock).toHaveBeenCalled();
   });
 });

@@ -6,9 +6,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { CoreStart } from 'opensearch-dashboards/public';
+import { AppMountParameters, CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
-import { EuiBreadcrumb } from '@elastic/eui';
 import { of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { WorkspaceDetail, WorkspaceDetailProps } from './workspace_detail/workspace_detail';
@@ -21,8 +20,6 @@ import {
 } from './workspace_form';
 import { DataSourceConnectionType } from '../../common/types';
 import { WorkspaceClient } from '../workspace_client';
-import { formatUrlWithWorkspaceId } from '../../../../core/public/utils';
-import { WORKSPACE_DETAIL_APP_ID } from '../../common/constants';
 import { getDataSourcesList, mergeDataSourcesWithConnections } from '../utils';
 import { WorkspaceAttributeWithPermission } from '../../../../core/types';
 
@@ -41,7 +38,11 @@ function getFormDataFromWorkspace(
   };
 }
 
-export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
+export interface WorkspaceDetailPropsWithOnAppLeave extends WorkspaceDetailProps {
+  onAppLeave: AppMountParameters['onAppLeave'];
+}
+
+export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) => {
   const {
     services: {
       workspaces,
@@ -65,29 +66,14 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
    * set breadcrumbs to chrome
    */
   useEffect(() => {
-    const breadcrumbs: EuiBreadcrumb[] = [
+    chrome?.setBreadcrumbs([
       {
-        text: 'Home',
-        onClick: () => {
-          application?.navigateToApp('home');
-        },
-      },
-    ];
-    if (currentWorkspace) {
-      breadcrumbs.push({
-        text: currentWorkspace.name,
-      });
-      breadcrumbs.push({
         text: i18n.translate('workspace.detail.title', {
-          defaultMessage: '{name} settings',
-          values: {
-            name: currentWorkspace.name,
-          },
+          defaultMessage: 'Workspace details',
         }),
-      });
-    }
-    chrome?.setBreadcrumbs(breadcrumbs);
-  }, [chrome, currentWorkspace, application]);
+      },
+    ]);
+  }, [chrome]);
 
   useEffect(() => {
     const rawFormData = getFormDataFromWorkspace(currentWorkspace);
@@ -111,7 +97,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
       }
       if (!currentWorkspace) {
         notifications?.toasts.addDanger({
-          title: i18n.translate('Cannot find current workspace', {
+          title: i18n.translate('workspace.detail.notFoundError', {
             defaultMessage: 'Cannot update workspace',
           }),
         });
@@ -133,25 +119,14 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
           dataSources: selectedDataSourceIds,
           permissions: convertPermissionSettingsToPermissions(permissionSettings),
         });
+        setIsFormSubmitting(false);
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.update.success', {
               defaultMessage: 'Update workspace successfully',
             }),
           });
-          if (application && http) {
-            // Redirect page after one second, leave one second time to show update successful toast.
-            window.setTimeout(() => {
-              window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
-                  absolute: true,
-                }),
-                currentWorkspace.id,
-                http.basePath
-              );
-            }, 1000);
-          }
-          return;
+          return result;
         } else {
           throw new Error(result?.error ? result?.error : 'update workspace failed');
         }
@@ -162,12 +137,11 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
-        return;
-      } finally {
         setIsFormSubmitting(false);
+        return;
       }
     },
-    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient, application, http]
+    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient]
   );
 
   if (!workspaces || !application || !http || !savedObjects || !currentWorkspaceFormData) {
@@ -183,6 +157,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
       onSubmit={handleWorkspaceFormSubmit}
       defaultValues={currentWorkspaceFormData}
       availableUseCases={availableUseCases}
+      onAppLeave={props.onAppLeave}
     >
       <I18nProvider>
         <WorkspaceDetail {...props} isFormSubmitting={isFormSubmitting} />

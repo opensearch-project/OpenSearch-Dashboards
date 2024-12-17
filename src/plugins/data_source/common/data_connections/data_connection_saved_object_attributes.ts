@@ -24,5 +24,3 @@ export enum DataConnectionType {
   SecurityLake = 'AWS Security Lake',
   NA = 'None',
 }
-
-export const DATA_CONNECTION_ID_LENGTH_LIMIT = 32;

@@ -5,7 +5,13 @@
 
 import { i18n } from '@osd/i18n';
 
-import { getWorkspaceState } from '../../../../core/server/utils';
+import {
+  ACLAuditorStateKey,
+  CLIENT_CALL_AUDITOR_KEY,
+  getACLAuditor,
+  getClientCallAuditor,
+  getWorkspaceState,
+} from '../../../../core/server/utils';
 import {
   OpenSearchDashboardsRequest,
   SavedObject,
@@ -27,13 +33,14 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
   SavedObjectsDeleteByWorkspaceOptions,
+  SavedObjectsFindResult,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WorkspacePermissionMode,
 } from '../../common/constants';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
+import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -48,17 +55,8 @@ const generateWorkspacePermissionError = () =>
 const generateSavedObjectsPermissionError = () =>
   SavedObjectsErrorHelpers.decorateForbiddenError(
     new Error(
-      i18n.translate('saved_objects.permission.invalidate', {
+      i18n.translate('workspace.saved_objects.permission.invalidate', {
         defaultMessage: 'Invalid saved objects permission',
-      })
-    )
-  );
-
-const generateDataSourcePermissionError = () =>
-  SavedObjectsErrorHelpers.decorateForbiddenError(
-    new Error(
-      i18n.translate('saved_objects.data_source.invalidate', {
-        defaultMessage: 'Invalid data source permission, please associate it to current workspace',
       })
     )
   );
@@ -66,7 +64,7 @@ const generateDataSourcePermissionError = () =>
 const generateOSDAdminPermissionError = () =>
   SavedObjectsErrorHelpers.decorateForbiddenError(
     new Error(
-      i18n.translate('dashboard.admin.permission.invalidate', {
+      i18n.translate('workspace.admin.permission.invalidate', {
         defaultMessage: 'Invalid permission, please contact OSD admin',
       })
     )
@@ -198,32 +196,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     return hasPermission;
   }
 
-  // Data source is a workspace level object, validate if the request has access to the data source within the requested workspace.
-  private validateDataSourcePermissions = (
-    object: SavedObject,
-    request: OpenSearchDashboardsRequest
-  ) => {
-    const requestWorkspaceId = getWorkspaceState(request).requestWorkspaceId;
-    // Deny access if the object is a global data source (no workspaces assigned)
-    if (!object.workspaces || object.workspaces.length === 0) {
-      return false;
-    }
-    /**
-     * Allow access if no specific workspace is requested.
-     * This typically occurs when retrieving data sources or performing operations
-     * that don't require a specific workspace, such as pages within the
-     * Data Administration navigation group that include a data source picker.
-     */
-    if (!requestWorkspaceId) {
-      return true;
-    }
-    /*
-     * Allow access if the requested workspace matches one of the object's assigned workspaces
-     * This ensures that the user can only access data sources within their current workspace
-     */
-    return object.workspaces.includes(requestWorkspaceId);
-  };
-
   private getWorkspaceTypeEnabledClient(request: OpenSearchDashboardsRequest) {
     return this.getScopedClient?.(request, {
       includedHiddenTypes: [WORKSPACE_TYPE],
@@ -236,12 +208,16 @@ export class WorkspaceSavedObjectsClientWrapper {
   }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
+    const ACLAuditor = getACLAuditor(wrapperOptions.request);
+    const clientCallAuditor = getClientCallAuditor(wrapperOptions.request);
     const deleteWithWorkspacePermissionControl = async (
       type: string,
       id: string,
       options: SavedObjectsDeleteOptions = {}
     ) => {
       const objectToDeleted = await wrapperOptions.client.get(type, id, options);
+      // System request, -1 for compensation.
+      ACLAuditor?.increment(ACLAuditorStateKey.DATABASE_OPERATION, -1);
       if (
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           objectToDeleted,
@@ -250,8 +226,10 @@ export class WorkspaceSavedObjectsClientWrapper {
           [WorkspacePermissionMode.Write]
         ))
       ) {
+        ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
         throw generateSavedObjectsPermissionError();
       }
+      ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
       return await wrapperOptions.client.delete(type, id, options);
     };
 
@@ -279,10 +257,14 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
       const objectToUpdate = await wrapperOptions.client.get<T>(type, id, options);
+      // System request, -1 for compensation.
+      ACLAuditor?.increment(ACLAuditorStateKey.DATABASE_OPERATION, -1);
       const permitted = await validateUpdateWithWorkspacePermission(objectToUpdate);
       if (!permitted) {
+        ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
         throw generateSavedObjectsPermissionError();
       }
+      ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
       return await wrapperOptions.client.update(type, id, attributes, options);
     };
 
@@ -291,6 +273,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
       const objectsToUpdate = await wrapperOptions.client.bulkGet<T>(objects, options);
+      // System request, -1 * objects.length for compensation.
+      ACLAuditor?.increment(ACLAuditorStateKey.DATABASE_OPERATION, -1 * objects.length);
       this.permissionControl.addToCacheAllowlist(
         wrapperOptions.request,
         getWorkspacesFromSavedObjects(objectsToUpdate.saved_objects)
@@ -299,10 +283,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       for (const object of objectsToUpdate.saved_objects) {
         const permitted = await validateUpdateWithWorkspacePermission(object);
         if (!permitted) {
+          ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
           throw generateSavedObjectsPermissionError();
         }
       }
 
+      ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, objects.length);
       return await wrapperOptions.client.bulkUpdate(objects, options);
     };
 
@@ -344,6 +330,8 @@ export class WorkspaceSavedObjectsClientWrapper {
             let rawObject;
             try {
               rawObject = await wrapperOptions.client.get(type, id);
+              // System request, -1 for compensation.
+              ACLAuditor?.increment(ACLAuditorStateKey.DATABASE_OPERATION, -1);
             } catch (error) {
               // If object is not found, we will skip the validation of this object.
               if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
@@ -365,11 +353,14 @@ export class WorkspaceSavedObjectsClientWrapper {
                 false
               ))
             ) {
+              ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
               throw generateWorkspacePermissionError();
             }
           }
         }
       }
+
+      ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, objects.length);
 
       return await wrapperOptions.client.bulkCreate(objects, options);
     };
@@ -396,6 +387,7 @@ export class WorkspaceSavedObjectsClientWrapper {
           [WorkspacePermissionMode.LibraryWrite]
         ))
       ) {
+        ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, options.workspaces?.length ?? 0);
         throw generateWorkspacePermissionError();
       }
 
@@ -406,21 +398,25 @@ export class WorkspaceSavedObjectsClientWrapper {
        * it has permission to any of the workspaces that the object associates with.
        *
        */
-      if (
-        options?.overwrite &&
-        options.id &&
-        !hasTargetWorkspaces &&
-        !(await this.validateWorkspacesAndSavedObjectsPermissions(
-          await wrapperOptions.client.get(type, options.id),
-          wrapperOptions.request,
-          [WorkspacePermissionMode.LibraryWrite],
-          [WorkspacePermissionMode.Write],
-          false
-        ))
-      ) {
-        throw generateWorkspacePermissionError();
+      if (options?.overwrite && options.id && !hasTargetWorkspaces) {
+        const object = await wrapperOptions.client.get(type, options.id);
+        // System request, -1 for compensation.
+        ACLAuditor?.increment(ACLAuditorStateKey.DATABASE_OPERATION, -1);
+        if (
+          !(await this.validateWorkspacesAndSavedObjectsPermissions(
+            object,
+            wrapperOptions.request,
+            [WorkspacePermissionMode.LibraryWrite],
+            [WorkspacePermissionMode.Write],
+            false
+          ))
+        ) {
+          ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
+          throw generateWorkspacePermissionError();
+        }
       }
 
+      ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
       return await wrapperOptions.client.create(type, attributes, options);
     };
 
@@ -431,19 +427,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     ): Promise<SavedObject<T>> => {
       const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
 
-      if (objectToGet.type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
-        if (isDataSourceAdmin) {
-          return objectToGet;
-        }
-        const hasPermission = this.validateDataSourcePermissions(
-          objectToGet,
-          wrapperOptions.request
-        );
-        if (!hasPermission) {
-          throw generateDataSourcePermissionError();
-        }
-      }
-
       if (
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           objectToGet,
@@ -453,8 +436,10 @@ export class WorkspaceSavedObjectsClientWrapper {
           false
         ))
       ) {
+        ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
         throw generateSavedObjectsPermissionError();
       }
+      ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
       return objectToGet;
     };
 
@@ -469,13 +454,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       );
 
       for (const object of objectToBulkGet.saved_objects) {
-        if (object.type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
-          const hasPermission = this.validateDataSourcePermissions(object, wrapperOptions.request);
-          if (!hasPermission) {
-            throw generateDataSourcePermissionError();
-          }
-        }
-
         if (
           !(await this.validateWorkspacesAndSavedObjectsPermissions(
             object,
@@ -485,10 +463,14 @@ export class WorkspaceSavedObjectsClientWrapper {
             false
           ))
         ) {
+          ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
           throw generateSavedObjectsPermissionError();
         }
       }
-
+      ACLAuditor?.increment(
+        ACLAuditorStateKey.VALIDATE_SUCCESS,
+        objectToBulkGet.saved_objects.length
+      );
       return objectToBulkGet;
     };
 
@@ -498,10 +480,11 @@ export class WorkspaceSavedObjectsClientWrapper {
       if (
         isDataSourceAdmin &&
         options?.type &&
-        (options.type === DATA_SOURCE_SAVED_OBJECT_TYPE ||
+        ((!Array.isArray(options.type) &&
+          validateIsWorkspaceDataSourceAndConnectionObjectType(options.type)) ||
           (Array.isArray(options.type) &&
             options.type.length === 1 &&
-            options.type[0] === DATA_SOURCE_SAVED_OBJECT_TYPE))
+            validateIsWorkspaceDataSourceAndConnectionObjectType(options.type[0])))
       ) {
         return await wrapperOptions.client.find<T>(options);
       }
@@ -539,7 +522,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         return {
           ...findResult,
           total: finalSavedObjects.length,
-          saved_objects: finalSavedObjects,
+          saved_objects: finalSavedObjects as Array<SavedObjectsFindResult<T>>,
         };
       } else if (!options.workspaces && !options.ACLSearchParams) {
         options.workspaces = permittedWorkspaceIds;
@@ -576,9 +559,11 @@ export class WorkspaceSavedObjectsClientWrapper {
           WorkspacePermissionMode.LibraryWrite,
         ]))
       ) {
+        ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
         throw generateWorkspacePermissionError();
       }
 
+      ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);
     };
 
@@ -589,10 +574,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsBaseOptions = {}
     ) => {
       // Only dashboard admin can assign data source to workspace
-      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+      if (validateIsWorkspaceDataSourceAndConnectionObjectType(type)) {
+        ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
         throw generateOSDAdminPermissionError();
       }
-      // In current version, only the type is data-source that will call addToWorkspaces
+      ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
+      // In current version, only the type is data-source and data-connection that will call addToWorkspaces
       return await wrapperOptions.client.addToWorkspaces(type, id, targetWorkspaces, options);
     };
 
@@ -602,11 +589,13 @@ export class WorkspaceSavedObjectsClientWrapper {
       targetWorkspaces: string[],
       options: SavedObjectsBaseOptions = {}
     ) => {
-      // Only dashboard admin can unassign data source to workspace
-      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+      // Only dashboard admin can unassign data source and data-connection to workspace
+      if (validateIsWorkspaceDataSourceAndConnectionObjectType(type)) {
+        ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
         throw generateOSDAdminPermissionError();
       }
-      // In current version, only the type is data-source will that call deleteFromWorkspaces
+      ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
+      // In current version, only the type is data-source and data-connection will that call deleteFromWorkspaces
       return await wrapperOptions.client.deleteFromWorkspaces(type, id, targetWorkspaces, options);
     };
 
@@ -615,23 +604,65 @@ export class WorkspaceSavedObjectsClientWrapper {
       return wrapperOptions.client;
     }
 
+    const ACLAuditDecorator = function <T extends (...args: any[]) => any>(fn: T): T {
+      return function (...args: Parameters<T>): ReturnType<T> {
+        clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.incoming);
+        const result = fn.apply(wrapperOptions.client, args);
+        if (result instanceof Promise) {
+          result.then(
+            () => {
+              clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
+              try {
+                const checkoutInfo = JSON.stringify([fn.name, ...args]);
+                if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
+                  ACLAuditor?.checkout(checkoutInfo);
+                }
+              } catch (e) {
+                if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
+                  ACLAuditor?.checkout();
+                }
+              }
+            },
+            /**
+             * The catch here is required because unhandled promise will make server crashed,
+             * and we will reset the auditor state when catch an error.
+             */
+            () => {
+              clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
+              if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
+                ACLAuditor?.reset();
+              }
+            }
+          );
+        } else {
+          // The decorator is used to decorate async functions so the branch here won't be picked.
+          // But we still need to keep it in case there are sync calls in the future.
+          clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
+          if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
+            ACLAuditor?.checkout();
+          }
+        }
+        return result;
+      } as T;
+    };
+
     return {
       ...wrapperOptions.client,
-      get: getWithWorkspacePermissionControl,
+      get: ACLAuditDecorator(getWithWorkspacePermissionControl),
       checkConflicts: wrapperOptions.client.checkConflicts,
       find: findWithWorkspacePermissionControl,
-      bulkGet: bulkGetWithWorkspacePermissionControl,
+      bulkGet: ACLAuditDecorator(bulkGetWithWorkspacePermissionControl),
       errors: wrapperOptions.client.errors,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
       deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
-      create: createWithWorkspacePermissionControl,
-      bulkCreate: bulkCreateWithWorkspacePermissionControl,
-      delete: deleteWithWorkspacePermissionControl,
-      update: updateWithWorkspacePermissionControl,
-      bulkUpdate: bulkUpdateWithWorkspacePermissionControl,
-      deleteByWorkspace: deleteByWorkspaceWithPermissionControl,
-      addToWorkspaces: addToWorkspacesWithPermissionControl,
-      deleteFromWorkspaces: deleteFromWorkspacesWithPermissionControl,
+      create: ACLAuditDecorator(createWithWorkspacePermissionControl),
+      bulkCreate: ACLAuditDecorator(bulkCreateWithWorkspacePermissionControl),
+      delete: ACLAuditDecorator(deleteWithWorkspacePermissionControl),
+      update: ACLAuditDecorator(updateWithWorkspacePermissionControl),
+      bulkUpdate: ACLAuditDecorator(bulkUpdateWithWorkspacePermissionControl),
+      deleteByWorkspace: ACLAuditDecorator(deleteByWorkspaceWithPermissionControl),
+      addToWorkspaces: ACLAuditDecorator(addToWorkspacesWithPermissionControl),
+      deleteFromWorkspaces: ACLAuditDecorator(deleteFromWorkspacesWithPermissionControl),
     };
   };
 

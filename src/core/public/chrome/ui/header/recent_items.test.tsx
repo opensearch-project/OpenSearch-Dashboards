@@ -18,7 +18,7 @@ jest.mock('./nav_link', () => ({
   }),
 }));
 
-const mockRecentlyAccessed = new BehaviorSubject([
+const mockRecentlyAccessed$ = new BehaviorSubject([
   {
     id: '6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b',
     label: 'visualizeMock',
@@ -28,7 +28,7 @@ const mockRecentlyAccessed = new BehaviorSubject([
   },
 ]);
 
-const mockWorkspaceList = new BehaviorSubject([
+const mockWorkspaceList$ = new BehaviorSubject([
   {
     id: 'workspace_1',
     name: 'WorkspaceMock_1',
@@ -49,10 +49,18 @@ const defaultMockProps = {
   navigateToUrl: applicationServiceMock.createStartContract().navigateToUrl,
   workspaceList$: new BehaviorSubject([]),
   recentlyAccessed$: new BehaviorSubject([]),
-  navLinks$: new BehaviorSubject([]),
+  navLinks$: new BehaviorSubject([
+    {
+      id: '',
+      title: '',
+      baseUrl: '',
+      href: '',
+    },
+  ]),
   basePath: httpServiceMock.createStartContract().basePath,
   http: httpServiceMock.createSetupContract(),
   renderBreadcrumbs: <></>,
+  loadingCount$: new BehaviorSubject(0),
 };
 
 jest.spyOn(defaultMockProps.http, 'get').mockImplementation(
@@ -84,7 +92,8 @@ describe('Recent items', () => {
   it('should be able to render recent works', async () => {
     const mockProps = {
       ...defaultMockProps,
-      recentlyAccessed$: mockRecentlyAccessed,
+      recentlyAccessed$: mockRecentlyAccessed$,
+      workspaceList$: mockWorkspaceList$,
     };
 
     await act(async () => {
@@ -96,11 +105,11 @@ describe('Recent items', () => {
     expect(screen.getByText('visualizeMock')).toBeInTheDocument();
   });
 
-  it('shoulde be able to display workspace name if the asset is attched to a workspace and render it with brackets wrapper ', async () => {
+  it('should be able to display workspace name if the asset is attched to a workspace and render it with brackets wrapper ', async () => {
     const mockProps = {
       ...defaultMockProps,
-      recentlyAccessed$: mockRecentlyAccessed,
-      workspaceList$: mockWorkspaceList,
+      recentlyAccessed$: mockRecentlyAccessed$,
+      workspaceList$: mockWorkspaceList$,
     };
 
     await act(async () => {
@@ -115,8 +124,8 @@ describe('Recent items', () => {
   it('should call navigateToUrl with link generated from createRecentNavLink when clicking a recent item', async () => {
     const mockProps = {
       ...defaultMockProps,
-      recentlyAccessed$: mockRecentlyAccessed,
-      workspaceList$: mockWorkspaceList,
+      recentlyAccessed$: mockRecentlyAccessed$,
+      workspaceList$: mockWorkspaceList$,
     };
 
     const navigateToUrl = jest.fn();
@@ -136,7 +145,7 @@ describe('Recent items', () => {
   it('should be able to display the preferences popover setting when clicking Preferences button', async () => {
     const mockProps = {
       ...defaultMockProps,
-      recentlyAccessed$: mockRecentlyAccessed,
+      recentlyAccessed$: mockRecentlyAccessed$,
     };
 
     await act(async () => {
@@ -149,5 +158,17 @@ describe('Recent items', () => {
     const preferencesButton = screen.getByTestId('preferencesSettingButton');
     fireEvent.click(preferencesButton);
     expect(screen.getByTestId('preferencesSettingPopover')).toBeInTheDocument();
+  });
+
+  it('should show loading indicator if loading count > 0', () => {
+    const { baseElement } = render(
+      <RecentItems {...defaultMockProps} loadingCount$={new BehaviorSubject(1)} />
+    );
+    expect(baseElement).toMatchSnapshot();
+  });
+
+  it('should show not display item if it is in a workspace which is not available', () => {
+    render(<RecentItems {...defaultMockProps} recentlyAccessed$={mockRecentlyAccessed$} />);
+    expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
   });
 });

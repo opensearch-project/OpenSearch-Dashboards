@@ -37,10 +37,12 @@ const workspacePermissions = schema.recordOf(
 );
 
 const dataSourceIds = schema.arrayOf(schema.string());
+const dataConnectionIds = schema.arrayOf(schema.string());
 
 const settingsSchema = schema.object({
   permissions: schema.maybe(workspacePermissions),
   dataSources: schema.maybe(dataSourceIds),
+  dataConnections: schema.maybe(dataConnectionIds),
 });
 
 const featuresSchema = schema.arrayOf(schema.string(), {
@@ -139,7 +141,6 @@ export function registerRoutes({
       const result = await client.list(
         {
           request: req,
-          logger,
         },
         req.body
       );
@@ -178,7 +179,6 @@ export function registerRoutes({
       const result = await client.get(
         {
           request: req,
-          logger,
         },
         id
       );
@@ -203,6 +203,7 @@ export function registerRoutes({
       const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
         dataSources?: string[];
+        dataConnections?: string[];
       } = attributes;
 
       if (isPermissionControlEnabled) {
@@ -217,11 +218,11 @@ export function registerRoutes({
       }
 
       createPayload.dataSources = settings.dataSources;
+      createPayload.dataConnections = settings.dataConnections;
 
       const result = await client.create(
         {
           request: req,
-          logger,
         },
         createPayload
       );
@@ -248,13 +249,13 @@ export function registerRoutes({
       const result = await client.update(
         {
           request: req,
-          logger,
         },
         id,
         {
           ...attributes,
           ...(isPermissionControlEnabled ? { permissions: settings.permissions } : {}),
           ...{ dataSources: settings.dataSources },
+          ...{ dataConnections: settings.dataConnections },
         }
       );
       return res.ok({ body: result });
@@ -275,9 +276,60 @@ export function registerRoutes({
       const result = await client.delete(
         {
           request: req,
-          logger,
         },
         id
+      );
+      return res.ok({ body: result });
+    })
+  );
+
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_associate`,
+      validate: {
+        body: schema.object({
+          workspaceId: schema.string(),
+          savedObjects: schema.arrayOf(
+            schema.object({ id: schema.string(), type: schema.string() })
+          ),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { workspaceId, savedObjects } = req.body;
+
+      const result = await client.associate(
+        {
+          request: req,
+        },
+        workspaceId,
+        savedObjects
+      );
+      return res.ok({ body: result });
+    })
+  );
+
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_dissociate`,
+      validate: {
+        body: schema.object({
+          workspaceId: schema.string(),
+          savedObjects: schema.arrayOf(
+            schema.object({ id: schema.string(), type: schema.string() })
+          ),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { workspaceId, savedObjects } = req.body;
+
+      const result = await client.dissociate(
+        {
+          request: req,
+        },
+        workspaceId,
+        savedObjects
       );
       return res.ok({ body: result });
     })

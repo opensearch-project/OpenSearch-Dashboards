@@ -95,6 +95,7 @@ test('alias with warning status', () => {
       : 
       <span
         class="globalFilterLabel__value"
+        data-test-subj="globalFilterLabelValue"
       >
         Warning
       </span>
@@ -125,6 +126,7 @@ test('alias with error status', () => {
       : 
       <span
         class="globalFilterLabel__value"
+        data-test-subj="globalFilterLabelValue"
       >
         Error
       </span>
@@ -141,6 +143,7 @@ test('warning', () => {
       : 
       <span
         class="globalFilterLabel__value"
+        data-test-subj="globalFilterLabelValue"
       >
         Warning
       </span>
@@ -157,6 +160,7 @@ test('error', () => {
       : 
       <span
         class="globalFilterLabel__value"
+        data-test-subj="globalFilterLabelValue"
       >
         Error
       </span>

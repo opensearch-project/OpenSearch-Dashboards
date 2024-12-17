@@ -51,6 +51,7 @@ import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 import type { Logos } from '../../../../common/types';
+import { getIsCategoryOpen, setIsCategoryOpen } from '../../utils';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -70,20 +71,6 @@ function getOrderedCategories(
     Object.keys(mainCategories),
     (categoryName) => categoryDictionary[categoryName]?.order
   );
-}
-
-function getCategoryLocalStorageKey(id: string) {
-  return `core.navGroup.${id}`;
-}
-
-function getIsCategoryOpen(id: string, storage: Storage) {
-  const value = storage.getItem(getCategoryLocalStorageKey(id)) ?? 'true';
-
-  return value === 'true';
-}
-
-function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
-  storage.setItem(getCategoryLocalStorageKey(id), `${isOpen}`);
 }
 
 interface Props {
@@ -282,7 +269,7 @@ export function CollapsibleNav({
         ))}
 
         {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={['l', 'xl']}>
+        <EuiShowFor sizes={['l', 'xl', 'xxl', 'xxxl']}>
           <EuiCollapsibleNavGroup>
             <EuiListGroup flush>
               <EuiListGroupItem

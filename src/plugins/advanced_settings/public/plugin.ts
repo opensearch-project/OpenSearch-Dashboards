@@ -46,7 +46,12 @@ import {
   AdvancedSettingsPluginStart,
 } from './types';
 import { setupTopNavThemeButton } from './register_nav_control';
-import { DEFAULT_NAV_GROUPS, AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
+import {
+  DEFAULT_NAV_GROUPS,
+  AppNavLinkStatus,
+  WorkspaceAvailability,
+  AppStatus,
+} from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { setupUserSettingsPage } from './management_app/user_settings';
 
@@ -193,6 +198,7 @@ export class AdvancedSettingsPlugin
       const userSettingsEnabled = core.application.capabilities.userSettings?.enabled;
       if (app.id === USER_SETTINGS_APPID) {
         return {
+          status: userSettingsEnabled ? AppStatus.accessible : AppStatus.inaccessible,
           navLinkStatus: userSettingsEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
         };
       }

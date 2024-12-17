@@ -16,11 +16,7 @@ import {
   OBSERVABILITY_OVERVIEW_PAGE_ID,
   SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../../plugins/content_management/public';
-import {
-  WHATS_NEW_CONFIG,
-  LEARN_OPENSEARCH_CONFIG,
-  registerHomeListCard,
-} from './components/home_list_card';
+import { getLearnOpenSearchConfig, registerHomeListCard } from './components/home_list_card';
 
 import { registerUseCaseCard } from './components/use_case_card';
 
@@ -58,6 +54,7 @@ export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
         order: 1000,
         title: "Get started with OpenSearch's powerful features",
         kind: 'card',
+        collapsible: true,
       },
     ],
   });
@@ -90,18 +87,10 @@ export const initHome = (contentManagement: ContentManagementPluginStart, core: 
   }
 
   registerHomeListCard(contentManagement, {
-    id: 'whats_new',
-    order: 10,
-    config: WHATS_NEW_CONFIG,
-    target: HOME_CONTENT_AREAS.SERVICE_CARDS,
-    width: 16,
-  });
-
-  registerHomeListCard(contentManagement, {
     id: 'learn_opensearch_new',
     order: 11,
-    config: LEARN_OPENSEARCH_CONFIG,
+    config: getLearnOpenSearchConfig(core.docLinks),
     target: HOME_CONTENT_AREAS.SERVICE_CARDS,
-    width: 16,
+    width: workspaceEnabled ? 32 : 48,
   });
 };

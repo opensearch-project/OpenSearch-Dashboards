@@ -30,6 +30,7 @@ import { WorkspaceObject } from '../../../workspace';
 import { HttpStart } from '../../../http';
 import { createRecentNavLink } from './nav_link';
 import { ChromeNavLink } from '../../../';
+import { LoadingIndicator } from '../loading_indicator';
 import './recent_items.scss';
 
 const widthForRightMargin = 8;
@@ -43,6 +44,7 @@ export interface Props {
   renderBreadcrumbs: React.JSX.Element;
   buttonSize?: EuiHeaderSectionItemButtonProps['size'];
   http: HttpStart;
+  loadingCount$: Rx.Observable<number>;
 }
 
 interface SavedObjectMetadata {
@@ -109,6 +111,7 @@ export const RecentItems = ({
   renderBreadcrumbs,
   buttonSize = 's',
   http,
+  loadingCount$,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPreferencesPopoverOpen, setIsPreferencesPopoverOpen] = useState(false);
@@ -118,7 +121,8 @@ export const RecentItems = ({
   const [detailedSavedObjects, setDetailedSavedObjects] = useState<DetailedRecentlyAccessedItem[]>(
     []
   );
-  const navLinks = useObservable(navLinks$, []).filter((link) => !link.hidden);
+  const navLinks = useObservable(navLinks$, []);
+  const loadingCount = useObservable(loadingCount$, 0);
 
   const handleItemClick = (link: string) => {
     navigateToUrl(link);
@@ -139,7 +143,9 @@ export const RecentItems = ({
             setIsPreferencesPopoverOpen((IsPreferencesPopoverOpe) => !IsPreferencesPopoverOpe);
           }}
         >
-          Preferences
+          {i18n.translate('core.header.recent.preferences', {
+            defaultMessage: 'Preferences',
+          })}
         </EuiButtonEmpty>
       }
       isOpen={isPreferencesPopoverOpen}
@@ -148,7 +154,11 @@ export const RecentItems = ({
         setIsPreferencesPopoverOpen(false);
       }}
     >
-      <EuiPopoverTitle>Preferences</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        {i18n.translate('core.header.recent.preferences.title', {
+          defaultMessage: 'Preferences',
+        })}
+      </EuiPopoverTitle>
       <EuiRadioGroup
         options={recentsRadios}
         idSelected={recentsRadioIdSelected}
@@ -158,11 +168,26 @@ export const RecentItems = ({
         }}
         name="radio group"
         legend={{
-          children: <span>Recents</span>,
+          children: (
+            <span>
+              {i18n.translate('core.header.recent.preferences.legend', {
+                defaultMessage: 'Recents',
+              })}
+            </span>
+          ),
         }}
       />
     </EuiPopover>
   );
+
+  const recentButtonCommonProps = {
+    'aria-expanded': isPopoverOpen,
+    'aria-label': i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsAriaLabel', {
+      defaultMessage: 'View recents',
+    }),
+    onClick: () => setIsPopoverOpen((prev) => !prev),
+    'data-test-subj': 'recentItemsSectionButton',
+  };
   const recentButton = (
     <EuiToolTip
       content={i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsTooltip', {
@@ -171,32 +196,42 @@ export const RecentItems = ({
       delay="long"
       position="bottom"
     >
-      <EuiButtonIcon
-        iconType="recent"
-        color="text"
-        size="xs"
-        aria-expanded={isPopoverOpen}
-        aria-haspopup="true"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsAriaLabel', {
-          defaultMessage: 'View recents',
-        })}
-        onClick={() => {
-          setIsPopoverOpen((prev) => !prev);
-        }}
-        data-test-subj="recentItemsSectionButton"
-        className="headerRecentItemsButton"
-      />
+      {!(loadingCount > 0) ? (
+        <EuiButtonIcon
+          iconType="recent"
+          color="text"
+          size="xs"
+          aria-haspopup="true"
+          className="headerRecentItemsButton"
+          {...recentButtonCommonProps}
+        />
+      ) : (
+        <EuiButtonEmpty
+          size="xs"
+          aria-haspopup="true"
+          className="headerRecentItemsButton headerRecentItemsButton--loadingIndicator"
+          {...recentButtonCommonProps}
+        >
+          <LoadingIndicator loadingCount$={loadingCount$} />
+        </EuiButtonEmpty>
+      )}
     </EuiToolTip>
   );
 
   useEffect(() => {
     const savedObjects = recentlyAccessedItems
-      .filter((item) => item.meta?.type)
+      .filter(
+        (item) =>
+          item.meta?.type &&
+          (!item.workspaceId ||
+            // If the workspace id is existing but the workspace is deleted, filter the item
+            (item.workspaceId &&
+              !!workspaceList.find((workspace) => workspace.id === item.workspaceId)))
+      )
       .map((item) => ({
         type: item.meta?.type || '',
         id: item.id,
       }));
-
     if (savedObjects.length) {
       bulkGetDetail(savedObjects, http).then((res) => {
         const formatDetailedSavedObjects = res.map((obj) => {
@@ -207,32 +242,21 @@ export const RecentItems = ({
           const findWorkspace = workspaceList.find(
             (workspace) => workspace.id === recentAccessItem.workspaceId
           );
+
           return {
             ...recentAccessItem,
             ...obj,
             ...recentAccessItem.meta,
             updatedAt: moment(obj?.updated_at).valueOf(),
             workspaceName: findWorkspace?.name,
-            link: createRecentNavLink(recentAccessItem, navLinks, basePath, navigateToUrl).href,
           };
         });
-        // here I write this argument to avoid Unnecessary re-rendering
-        if (JSON.stringify(formatDetailedSavedObjects) !== JSON.stringify(detailedSavedObjects)) {
-          setDetailedSavedObjects(formatDetailedSavedObjects);
-        }
+        setDetailedSavedObjects(formatDetailedSavedObjects);
       });
     }
-  }, [
-    navLinks,
-    basePath,
-    navigateToUrl,
-    recentlyAccessedItems,
-    http,
-    workspaceList,
-    detailedSavedObjects,
-  ]);
+  }, [recentlyAccessedItems, http, workspaceList]);
 
-  const selectedRecentsItems = useMemo(() => {
+  const selectedRecentItems = useMemo(() => {
     return detailedSavedObjects.slice(0, Number(recentsRadioIdSelected));
   }, [detailedSavedObjects, recentsRadioIdSelected]);
 
@@ -257,14 +281,27 @@ export const RecentItems = ({
         style={{ maxHeight: '35vh', overflow: 'auto' }}
       >
         <EuiTitle size="xxs">
-          <h4>Recent</h4>
+          <h4>
+            {i18n.translate('core.header.recent.title', {
+              defaultMessage: 'Recent assets',
+            })}
+          </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {selectedRecentsItems.length > 0 ? (
+        {selectedRecentItems.length > 0 ? (
           <EuiListGroup flush={true} gutterSize="s">
-            {selectedRecentsItems.map((item) => (
+            {selectedRecentItems.map((item) => (
               <EuiListGroupItem
-                onClick={() => handleItemClick(item.link)}
+                onClick={() =>
+                  handleItemClick(
+                    createRecentNavLink(
+                      item,
+                      navLinks.filter((link) => !link.hidden),
+                      basePath,
+                      navigateToUrl
+                    ).href
+                  )
+                }
                 key={item.link}
                 style={{ padding: '1px' }}
                 label={
@@ -286,7 +323,9 @@ export const RecentItems = ({
           </EuiListGroup>
         ) : (
           <EuiText color="subdued" size="s">
-            No recently viewed items
+            {i18n.translate('core.header.recent.no.recents', {
+              defaultMessage: 'No recently viewed items',
+            })}
           </EuiText>
         )}
         <EuiSpacer size="s" />

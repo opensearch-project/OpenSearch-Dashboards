@@ -1,0 +1,38 @@
+.workspaceNameLabel {
+  background-color: $euiSideNavBackgroundColor;
+}
+
+.workspaceSelectorPopoverButton:hover,
+.workspaceSelectorPopoverButton:focus {
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Trying to show the border label:
+     * The following style is referenced from data souce selector
+     * see file src/plugins/data_source_management/public/components/popover_button/popover_button.scss
+*/
+.workspaceSelectorPopoverButtonContainer {
+  position: relative;
+  background-color: $euiSideNavBackgroundColor;
+  border: 1px solid $euiColorMediumShade;
+  border-radius: 4px;
+
+  &::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -0.2rem;
+    left: $euiSizeS;
+    font-size: 0.4rem;
+    line-height: 0.4rem;
+    padding: 0 $euiSizeXS;
+
+    /* update
+     * Delete the line-gradient and set the background color to euiSideNavBackgroundColor directly
+     */
+    background-color: $euiSideNavBackgroundColor;
+    color: $euiTextColor;
+    z-index: 0;
+    text-transform: uppercase;
+  }
+}

@@ -32,8 +32,8 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   provideCompletionItems,
 }) => {
   return (
-    <div className="defaultEditor">
-      <div ref={headerRef} className="defaultEditor__header" />
+    <div className="defaultEditor" data-test-subj="osdQueryEditor__multiLine">
+      <div ref={headerRef} className="defaultEditor__header" data-test-subj="defaultEditorHeader" />
       <CodeEditor
         height={100}
         languageId={languageId}
@@ -43,14 +43,15 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         options={{
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
-          fontSize: 14,
-          fontFamily: 'Roboto Mono',
+          fontSize: 12,
+          lineHeight: 20,
+          fontFamily: 'var(--font-code)',
           lineNumbers: 'on',
           folding: true,
           wordWrap: 'on',
           wrappingIndent: 'same',
           lineDecorationsWidth: 0,
-          lineNumbersMinChars: 2,
+          lineNumbersMinChars: 1,
           wordBasedSuggestions: false,
         }}
         suggestionProvider={{
@@ -68,17 +69,33 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         }}
         triggerSuggestOnFocus={true}
       />
-      <div className="defaultEditor__footer">
+      <div className="defaultEditor__footer" data-test-subj="defaultEditorFooter">
         {footerItems && (
-          <EuiFlexGroup direction="row" alignItems="center">
-            {footerItems.start?.map((item) => (
-              <EuiFlexItem grow={false} className="defaultEditor__footerItem">
+          <EuiFlexGroup
+            direction="row"
+            alignItems="center"
+            gutterSize="none"
+            className="defaultEditor__footerRow"
+            data-test-subj="defaultEditorFooterRow"
+          >
+            {footerItems.start?.map((item, idx) => (
+              <EuiFlexItem
+                key={`defaultEditor__footerItem-start-${idx}`}
+                grow={false}
+                className="defaultEditor__footerItem"
+                data-test-subj="defaultEditorFooterStartItem"
+              >
                 {item}
               </EuiFlexItem>
             ))}
             <EuiFlexItem grow />
-            {footerItems.end?.map((item) => (
-              <EuiFlexItem grow={false} className="defaultEditor__footerItem">
+            {footerItems.end?.map((item, idx) => (
+              <EuiFlexItem
+                key={`defaultEditor__footerItem-end-${idx}`}
+                grow={false}
+                className="defaultEditor__footerItem"
+                data-test-subj="defaultEditorFooterEndItem"
+              >
                 {item}
               </EuiFlexItem>
             ))}
