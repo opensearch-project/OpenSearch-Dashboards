@@ -28,7 +28,12 @@ export const Pagination = ({
   sampleSize,
 }: Props) => {
   return (
-    <EuiFlexGroup className="osdDocTable_pagination" alignItems="center" justifyContent="flexEnd">
+    <EuiFlexGroup
+      className="osdDocTable_pagination"
+      alignItems="center"
+      justifyContent="flexEnd"
+      data-test-subj="osdDocTablePagination"
+    >
       {endItem >= sampleSize && (
         <EuiFlexItem grow={false}>
           <EuiTextColor color="subdued">

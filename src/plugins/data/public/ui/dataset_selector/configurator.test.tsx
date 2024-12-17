@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { Configurator } from './configurator';
 import '@testing-library/jest-dom';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { setQueryService, setIndexPatterns } from '../../services';
 import { IntlProvider } from 'react-intl';
-import { Query } from '../../../../data/public';
 import { Dataset } from 'src/plugins/data/common';
+import { Query } from '../../../../data/public';
+import { setIndexPatterns, setQueryService } from '../../services';
+import { Configurator } from './configurator';
 
 const getQueryMock = jest.fn().mockReturnValue({
   query: '',
@@ -357,5 +357,69 @@ describe('Configurator Component', () => {
     await waitFor(() => {
       expect(submitButton).toBeEnabled();
     });
+  });
+
+  it('should show the date picker if supportsTimeFilter is undefined', async () => {
+    const mockDataset = {
+      ...mockBaseDataset,
+      timeFieldName: undefined,
+      type: 'index',
+    };
+    const { container } = render(
+      <IntlProvider locale="en" messages={messages}>
+        <Configurator
+          services={mockServices}
+          baseDataset={mockDataset}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          onPrevious={mockOnPrevious}
+        />
+      </IntlProvider>
+    );
+
+    expect(
+      container.querySelector(`[data-test-subj="advancedSelectorTimeFieldSelect"]`)
+    ).toBeTruthy();
+  });
+
+  it('should hide the date picker if supportsTimeFilter is false', async () => {
+    const mockDataset = {
+      ...mockBaseDataset,
+      timeFieldName: undefined,
+      type: 'index',
+    };
+    const datasetTypeConfig = mockServices
+      .getQueryService()
+      .queryString.getDatasetService()
+      .getType();
+    mockServices
+      .getQueryService()
+      .queryString.getDatasetService()
+      .getType.mockReturnValue({
+        ...datasetTypeConfig,
+        meta: {
+          supportsTimeFilter: false,
+        },
+      });
+    const { container } = render(
+      <IntlProvider locale="en" messages={messages}>
+        <Configurator
+          services={mockServices}
+          baseDataset={mockDataset}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          onPrevious={mockOnPrevious}
+        />
+      </IntlProvider>
+    );
+
+    expect(
+      container.querySelector(`[data-test-subj="advancedSelectorTimeFieldSelect"]`)
+    ).toBeFalsy();
+
+    mockServices
+      .getQueryService()
+      .queryString.getDatasetService()
+      .getType.mockReturnValue(datasetTypeConfig);
   });
 });
