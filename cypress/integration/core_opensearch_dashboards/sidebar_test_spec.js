@@ -5,6 +5,13 @@
 
 import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
 import { DataExplorerPage } from '../../utils/dashboards/data_explorer/data_explorer_page.po';
+import {
+  INDEX_CLUSTER_NAME,
+  INDEX_NAME,
+  INDEX_PATTERN_NAME,
+  SEARCH_ABSOLUTE_START_DATE,
+  SEARCH_ABSOLUTE_END_DATE,
+} from '../constants.js';
 
 const miscUtils = new MiscUtils(cy);
 
@@ -14,41 +21,30 @@ describe('sidebar spec', function () {
     miscUtils.visitPage('app/data-explorer/discover');
   });
 
-  const CLUSTER = 'data-logs-1';
-  const INDEX = 'data_logs_small_time_1';
-  const INDEX_PATTERN = `${CLUSTER}::${INDEX}*`;
-
   describe('sidebar fields', function () {
     describe('add fields', function () {
-      function addFields(
-        testFields,
-        expectedValues,
-        pplQuery,
-        sqlQuery,
-        indexPattern = true,
-        nested = false
-      ) {
+      function addFields(testFields, expectedValues, pplQuery, sqlQuery, indexPattern = true) {
         const offset = indexPattern ? 1 : 0; // defines starting column
         if (indexPattern) {
-          DataExplorerPage.selectIndexPatternDataset('DQL', INDEX_PATTERN);
+          DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
           DataExplorerPage.setQueryEditorLanguage('DQL');
-          DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+          cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
         } else {
           DataExplorerPage.selectIndexDataset(
+            INDEX_CLUSTER_NAME,
+            INDEX_NAME,
             'OpenSearch SQL',
-            "I don't want to use the time filter",
-            CLUSTER,
-            INDEX
+            "I don't want to use the time filter"
           );
         }
         // Check default column
-        DataExplorerPage.getDocTableHeader(0 + offset).should('have.text', '_source');
+        DataExplorerPage.getDocTableHeaderByIndex(0 + offset).should('have.text', '_source');
         // Select some fields
         testFields.forEach((field) => {
           DataExplorerPage.getFieldBtnByName(field).click();
         });
         // Check that the default column no longer exists
-        DataExplorerPage.getDocTableHeader(0 + offset).should('not.have.text', '_source');
+        DataExplorerPage.getDocTableHeaderByIndex(0 + offset).should('not.have.text', '_source');
         // Check table headers persistence between DQL and PPL
         DataExplorerPage.checkTableHeadersByArray(testFields, offset);
         if (indexPattern) {
@@ -62,26 +58,32 @@ describe('sidebar spec', function () {
         const secondTestField = testFields[1];
         DataExplorerPage.getFieldBtnByName(firstTestField).click();
         DataExplorerPage.getFieldBtnByName(secondTestField).click();
-        DataExplorerPage.getDocTableHeader(0 + offset).should('not.have.text', firstTestField);
-        DataExplorerPage.getDocTableHeader(1 + offset).should('not.have.text', secondTestField);
+        DataExplorerPage.getDocTableHeaderByIndex(0 + offset).should(
+          'not.have.text',
+          firstTestField
+        );
+        DataExplorerPage.getDocTableHeaderByIndex(1 + offset).should(
+          'not.have.text',
+          secondTestField
+        );
         // Remove all fields
         const thirdTestField = testFields[2];
         const fourthTestField = testFields[3];
         DataExplorerPage.getFieldBtnByName(thirdTestField).click();
         DataExplorerPage.getFieldBtnByName(fourthTestField).click();
-        DataExplorerPage.getDocTableHeader(0 + offset).should('have.text', '_source');
-        DataExplorerPage.getDocTableHeader(1 + offset).should('not.exist');
+        DataExplorerPage.getDocTableHeaderByIndex(0 + offset).should('have.text', '_source');
+        DataExplorerPage.getDocTableHeaderByIndex(1 + offset).should('not.exist');
         // Select some fields
         testFields.forEach((field) => {
           DataExplorerPage.getFieldBtnByName(field).click();
         });
         // Check default column again
-        DataExplorerPage.getDocTableHeader(0 + offset).should('not.have.text', '_source');
+        DataExplorerPage.getDocTableHeaderByIndex(0 + offset).should('not.have.text', '_source');
         // Check the columns match the selected fields
         DataExplorerPage.checkTableHeadersByArray(testFields, offset);
-        if (indexPattern && !nested) {
+        if (indexPattern) {
           // Validate default hits
-          DataExplorerPage.checkQueryHitsText('10,000');
+          DataExplorerPage.checkQueryHitsText('9,997');
         }
         // Send PPL query
         cy.intercept('/api/enhancements/search/ppl').as('pplQuery');
@@ -132,10 +134,10 @@ describe('sidebar spec', function () {
       ];
       const expectedAgeValues = ['75', '76', '78', '73', '74'];
       it('add nested field in index pattern', function () {
-        addFields(nestedTestFields, expectedAgeValues, nestedPplQuery, nestedSqlQuery, true, true);
+        addFields(nestedTestFields, expectedAgeValues, nestedPplQuery, nestedSqlQuery, true);
       });
       it('add nested field in index', function () {
-        addFields(nestedTestFields, expectedAgeValues, nestedPplQuery, nestedSqlQuery, false, true);
+        addFields(nestedTestFields, expectedAgeValues, nestedPplQuery, nestedSqlQuery, false);
       });
     });
 
@@ -150,18 +152,18 @@ describe('sidebar spec', function () {
 
       function checkFilteredFields(indexPattern = true) {
         if (indexPattern) {
-          DataExplorerPage.selectIndexPatternDataset('DQL', INDEX_PATTERN);
+          DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
           DataExplorerPage.setQueryEditorLanguage('DQL');
-          DataExplorerPage.setSearchRelativeDateRange('15', 'Years ago');
+          cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
           filterFields();
           DataExplorerPage.setQueryEditorLanguage('Lucene');
           filterFields();
         } else {
           DataExplorerPage.selectIndexDataset(
+            INDEX_CLUSTER_NAME,
+            INDEX_NAME,
             'PPL',
-            "I don't want to use the time filter",
-            CLUSTER,
-            INDEX
+            "I don't want to use the time filter"
           );
         }
         DataExplorerPage.setQueryEditorLanguage('PPL');
@@ -231,13 +233,13 @@ describe('sidebar spec', function () {
         // 1. checks the persistence of the sidebar state accross query languages
         // 2. checks that the default state is expanded (first iteration of collapseAndExpand())
         // 3. collapses and expands the sidebar for every language
-        DataExplorerPage.selectIndexPatternDataset('DQL', INDEX_PATTERN);
+        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
         checkCollapseAndExpand();
       });
 
       it('index pattern: check collapsed state', function () {
         // this test case checks that the sidebar remains collapsed accross query languages
-        DataExplorerPage.selectIndexPatternDataset('DQL', INDEX_PATTERN);
+        DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
         checkCollapse();
       });
 
@@ -247,10 +249,10 @@ describe('sidebar spec', function () {
         // 2. checks that the default state is expanded (first iteration of collapseAndExpand())
         // 3. collapses and expands the sidebar for every language
         DataExplorerPage.selectIndexDataset(
+          INDEX_CLUSTER_NAME,
+          INDEX_NAME,
           'PPL',
-          "I don't want to use the time filter",
-          CLUSTER,
-          INDEX
+          "I don't want to use the time filter"
         );
         checkCollapseAndExpand(false);
       });
@@ -258,10 +260,10 @@ describe('sidebar spec', function () {
       it('index: check collapsed state', function () {
         // this test case checks that the sidebar remains collapsed accross query languages
         DataExplorerPage.selectIndexDataset(
+          INDEX_CLUSTER_NAME,
+          INDEX_NAME,
           'PPL',
-          "I don't want to use the time filter",
-          CLUSTER,
-          INDEX
+          "I don't want to use the time filter"
         );
         checkCollapse(false);
       });

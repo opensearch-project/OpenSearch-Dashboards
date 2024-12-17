@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DATA_EXPLORER_PAGE_ELEMENTS } from './elements.js';
+import { DATA_EXPLORER_PAGE_ELEMENTS } from './elements';
 
 /**
  * Get the New Search button.

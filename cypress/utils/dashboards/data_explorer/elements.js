@@ -27,6 +27,8 @@ export const DATA_EXPLORER_PAGE_ELEMENTS = {
   TABLE_FIELD_FILTER_FOR_BUTTON: 'filterForValue',
   TABLE_FIELD_FILTER_OUT_BUTTON: 'filterOutValue',
   SEARCH_DATE_PICKER_BUTTON: 'superDatePickerShowDatesButton',
+  SEARCH_DATE_PICKER_START_DATE_BUTTON: 'superDatePickerstartDatePopoverButton',
+  SEARCH_DATE_PICKER_END_DATE_BUTTON: 'superDatePickerendDatePopoverButton',
   SEARCH_DATE_PICKER_RELATIVE_TAB: 'superDatePickerRelativeTab',
   SEARCH_DATE_RELATIVE_PICKER_INPUT: 'superDatePickerRelativeDateInputNumber',
   SEARCH_DATE_RELATIVE_PICKER_UNIT_SELECTOR: 'superDatePickerRelativeDateInputUnitSelector',

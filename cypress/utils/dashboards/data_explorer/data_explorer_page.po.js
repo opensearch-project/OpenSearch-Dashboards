@@ -470,7 +470,7 @@ export class DataExplorerPage {
    * @param indexName Name of the index dataset to be used.
    * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL".
    */
-  static selectIndexDataset(indexClusterName, indexName, datasetLanguage) {
+  static selectIndexDataset(indexClusterName, indexName, datasetLanguage, timeField) {
     DataExplorerPage.openDatasetExplorerWindow();
     DataExplorerPage.getDatasetExplorerWindow().contains('Indexes').click();
     DataExplorerPage.getDatasetExplorerWindow()
@@ -478,7 +478,7 @@ export class DataExplorerPage {
       .click();
     DataExplorerPage.getDatasetExplorerWindow().contains(indexName, { timeout: 10000 }).click();
     DataExplorerPage.getDatasetExplorerNextButton().click();
-    DataExplorerPage.selectIndexDatasetLanguage(datasetLanguage);
+    DataExplorerPage.selectIndexDatasetLanguage(datasetLanguage, timeField);
   }
 
   /**
@@ -611,7 +611,7 @@ export class DataExplorerPage {
    */
   static checkTableHeadersByArray(expectedHeaders, offset = 1) {
     for (let i = 0; i < expectedHeaders.length; i++) {
-      DataExplorerPage.getDocTableHeader(i + offset).should('have.text', expectedHeaders[i]);
+      DataExplorerPage.getDocTableHeaderByIndex(i + offset).should('have.text', expectedHeaders[i]);
     }
   }
 
