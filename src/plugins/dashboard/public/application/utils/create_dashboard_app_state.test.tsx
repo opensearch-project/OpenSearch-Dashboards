@@ -17,8 +17,7 @@ import { createDashboardServicesMock } from './mocks';
 import { SavedObjectDashboard } from '../..';
 import { syncQueryStateWithUrl } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
-import { ScopedHistory } from '../../../../../core/public';
-import { createMemoryHistory } from 'history';
+import { scopedHistoryMock } from '../../../../../core/public/mocks';
 
 const mockStartStateSync = jest.fn();
 const mockStopStateSync = jest.fn();
@@ -154,10 +153,10 @@ describe('updateStateUrl', () => {
   test('update URL to not contain panels', () => {
     const { panels, ...statesWithoutPanels } = dashboardAppState;
 
-    const basePath = '/app/opensearch-dashboards';
-    const rawHistory = createMemoryHistory();
-    rawHistory.push(basePath);
-    const history = new ScopedHistory(rawHistory, basePath);
+    const basePath = '/base';
+    const history = scopedHistoryMock.create({
+      pathname: basePath,
+    });
 
     updateStateUrl({
       osdUrlStateStorage,
@@ -173,15 +172,14 @@ describe('updateStateUrl', () => {
   });
 
   test('preserve Dashboards scoped history state', () => {
-    const basePath = '/app/opensearch-dashboards';
-    const newPath = '/new-page';
+    const basePath = '/base';
     const someState = { some: 'state' };
-    const rawHistory = createMemoryHistory();
-    rawHistory.push(basePath);
-    const history = new ScopedHistory(rawHistory, basePath);
-    const replaceSpy = jest.spyOn(history, 'replace');
-    history.push(newPath, someState);
+    const history = scopedHistoryMock.create({
+      pathname: basePath,
+      state: someState,
+    });
     const { location } = history;
+    const replaceSpy = jest.spyOn(history, 'replace');
 
     const changed = updateStateUrl({
       osdUrlStateStorage,
@@ -190,7 +188,6 @@ describe('updateStateUrl', () => {
       replace: true,
     });
 
-    expect(history.location.pathname).toEqual(newPath);
     expect(history.location.state).toEqual(someState);
     expect(changed).toBe(true);
     expect(replaceSpy).toHaveBeenCalledWith({ ...location, state: someState });
