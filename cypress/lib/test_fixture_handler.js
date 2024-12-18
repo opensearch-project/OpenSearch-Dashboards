@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BASE_ENGINE } from '../utils/constants';
+
 export class TestFixtureHandler {
-  constructor(inputTestRunner, openSearchUrl = 'localhost:9200') {
+  constructor(inputTestRunner, openSearchUrl = BASE_ENGINE.url) {
     this.testRunner = inputTestRunner;
     this.openSearchUrl = openSearchUrl;
   }

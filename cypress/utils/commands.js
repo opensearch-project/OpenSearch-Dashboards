@@ -8,6 +8,7 @@
  */
 
 import { BASE_PATH } from './constants';
+import { TestFixtureHandler } from '../lib/test_fixture_handler';
 
 // This function does not delete all indices
 Cypress.Commands.add('deleteAllIndices', () => {
@@ -331,4 +332,25 @@ Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
     })
     .find('a.euiLink')
     .click();
+});
+
+Cypress.Commands.add('setupTestData', (endpoint, mappingFiles, dataFiles) => {
+  if (!Array.isArray(mappingFiles) || !Array.isArray(dataFiles)) {
+    throw new Error('Both mappingFiles and dataFiles must be arrays');
+  }
+
+  if (mappingFiles.length !== dataFiles.length) {
+    throw new Error('The number of mapping files must match the number of data files');
+  }
+
+  const handler = new TestFixtureHandler(cy, endpoint);
+
+  let chain = cy.wrap(null);
+  mappingFiles.forEach((mappingFile, index) => {
+    chain = chain
+      .then(() => handler.importMapping(mappingFile))
+      .then(() => handler.importData(dataFiles[index]));
+  });
+
+  return chain;
 });
