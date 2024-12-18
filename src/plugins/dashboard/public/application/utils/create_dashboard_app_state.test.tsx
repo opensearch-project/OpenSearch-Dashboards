@@ -159,7 +159,7 @@ describe('updateStateUrl', () => {
     rawHistory.push(basePath);
     const history = new ScopedHistory(rawHistory, basePath);
 
-    const changed = updateStateUrl({
+    updateStateUrl({
       osdUrlStateStorage,
       state: dashboardAppState,
       scopedHistory: history,
@@ -170,7 +170,6 @@ describe('updateStateUrl', () => {
       replace: true,
     });
     expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
-    expect(changed).toBe(true);
   });
 
   test('preserve Dashboards scoped history state', () => {
@@ -180,9 +179,11 @@ describe('updateStateUrl', () => {
     const rawHistory = createMemoryHistory();
     rawHistory.push(basePath);
     const history = new ScopedHistory(rawHistory, basePath);
+    const replaceSpy = jest.spyOn(history, 'replace');
     history.push(newPath, someState);
+    const { location } = history;
 
-    updateStateUrl({
+    const changed = updateStateUrl({
       osdUrlStateStorage,
       state: dashboardAppState,
       scopedHistory: history,
@@ -191,5 +192,7 @@ describe('updateStateUrl', () => {
 
     expect(history.location.pathname).toEqual(newPath);
     expect(history.location.state).toEqual(someState);
+    expect(changed).toBe(true);
+    expect(replaceSpy).toHaveBeenCalledWith({ ...location, state: someState });
   });
 });
