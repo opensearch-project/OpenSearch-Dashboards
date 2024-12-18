@@ -17,9 +17,9 @@ import { AutocompleteResultBase, KeywordSuggestion } from './types';
 import { ParsingSubject } from './types';
 import { quotesRegex, SuggestionItemDetailsTags } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
-import { QuerySuggestion } from '../../autocomplete';
 import { IDataPluginServices } from '../../types';
 import { UI_SETTINGS } from '../../../common';
+import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -101,7 +101,7 @@ export const fetchColumnValues = async (
   column: string,
   services: IDataPluginServices,
   fieldInOsd: IndexPatternField | undefined
-): Promise<string[]> => {
+): Promise<any[]> => {
   // default to true/false values for type boolean
   if (fieldInOsd?.type === 'boolean') {
     return ['true', 'false'];
@@ -129,8 +129,8 @@ export const fetchColumnValues = async (
         query: {
           query: `SELECT ${column} FROM ${table} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
           language: 'SQL',
-          dataset,
           format: 'jdbc',
+          dataset,
         },
       })
     )
@@ -138,19 +138,19 @@ export const fetchColumnValues = async (
 };
 
 export const formatValuesToSuggestions = (
-  values: string[],
-  modifyInsertText?: (input: string) => string
+  values: any[], // generic for any value type
+  modifyInsertText?: (input: any) => string
 ) => {
   let i = 0;
 
-  const valueSuggestions: QuerySuggestion[] = values.map((val: any) => {
+  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values.map((val: any) => {
     i++;
     return {
       text: val.toString(),
-      insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
       type: monaco.languages.CompletionItemKind.Value,
       detail: SuggestionItemDetailsTags.Value,
       sortText: i.toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
+      ...(modifyInsertText && { insertText: modifyInsertText(val) }),
     };
   });
 
@@ -159,14 +159,14 @@ export const formatValuesToSuggestions = (
 
 export const formatFieldsToSuggestions = (
   indexPattern: IndexPattern,
-  modifyInsertText?: (input: string) => string,
+  modifyInsertText?: (input: any) => string,
   sortTextImportance?: string
 ) => {
   const filteredFields = indexPattern.fields.filter(
     (idxField: IndexPatternField) => !idxField?.subType
   ); // filter removed .keyword fields
 
-  const fieldSuggestions: QuerySuggestion[] = filteredFields.map((field) => {
+  const fieldSuggestions: MonacoCompatibleQuerySuggestion[] = filteredFields.map((field) => {
     return {
       text: field.name,
       type: monaco.languages.CompletionItemKind.Field,
