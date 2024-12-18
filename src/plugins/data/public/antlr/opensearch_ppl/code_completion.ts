@@ -11,7 +11,7 @@
 
 import { monaco } from '@osd/monaco';
 import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
-import { fetchColumnValues, fetchFieldSuggestions, parseQuery } from '../shared/utils';
+import { fetchColumnValues, formatFieldsToSuggestions, parseQuery } from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
@@ -37,7 +37,7 @@ export const getSuggestions = async ({
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
-      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '3'));
+      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '3'));
     }
 
     if (suggestions.suggestValuesForColumn) {

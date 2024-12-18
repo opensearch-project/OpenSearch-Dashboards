@@ -18,7 +18,7 @@ import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 import { IDataPluginServices } from '../..';
-import { fetchFieldSuggestions } from '../shared/utils';
+import { formatFieldsToSuggestions } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 
 const findCursorIndex = (
@@ -135,7 +135,7 @@ export const getSuggestions = async ({
 
     // check to see if field rule is a candidate. if so, suggest field names
     if (candidates.rules.has(DQLParser.RULE_field)) {
-      completions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f}: `));
+      completions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f}: `));
     }
 
     interface FoundLastValue {

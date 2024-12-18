@@ -19,7 +19,7 @@ import { quotesRegex } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion } from '../../autocomplete';
 import { IDataPluginServices } from '../../types';
-import { Dataset, UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -137,7 +137,7 @@ export const fetchColumnValues = async (
   ).body.fields[0].values;
 };
 
-export const fetchFieldSuggestions = (
+export const formatFieldsToSuggestions = (
   indexPattern: IndexPattern,
   modifyInsertText?: (input: string) => string,
   sortTextImportance?: string

@@ -12,7 +12,7 @@ import {
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { fetchColumnValues, fetchFieldSuggestions, parseQuery } from '../shared/utils';
+import { fetchColumnValues, formatFieldsToSuggestions, parseQuery } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 import { OpenSearchSQLParser } from './.generated/OpenSearchSQLParser';
 
@@ -49,13 +49,15 @@ export const getSuggestions = async ({
     if (suggestions.suggestColumns?.tables?.length) {
       // NOTE:  currently 'suggestions' returns the table present in the query, but since the
       //        parameters already provide that, it may not be needed anymore
-      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '2'));
+      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '2'));
     }
 
     if (suggestions.suggestColumnValuePredicate) {
       switch (suggestions.suggestColumnValuePredicate) {
         case ColumnValuePredicate.COLUMN: {
-          finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '2'));
+          finalSuggestions.push(
+            ...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '2')
+          );
           break;
         }
         case ColumnValuePredicate.OPERATOR: {

@@ -4,7 +4,7 @@
  */
 
 import { of } from 'rxjs';
-import { fetchData, fetchFieldSuggestions } from './utils';
+import { fetchColumnValues, fetchData, formatFieldsToSuggestions } from './utils';
 import { QueryStringManager } from '../../query';
 import { IndexPattern } from '../../index_patterns';
 import { monaco } from '@osd/monaco';
@@ -71,10 +71,7 @@ describe('fetchData', () => {
   });
 });
 
-describe('fetchFieldSuggestions', () => {
-  // test for fetching field suggestions from index pattern
-  // test for fetching with modified Insert Text
-  // test for fetching with some sort importance
+describe('formatFieldsToSuggestions', () => {
   let mockIndexPattern: IndexPattern;
 
   beforeEach(() => {
@@ -89,7 +86,7 @@ describe('fetchFieldSuggestions', () => {
   });
 
   test('should fetch field suggestions from index pattern', async () => {
-    const result = fetchFieldSuggestions(mockIndexPattern);
+    const result = formatFieldsToSuggestions(mockIndexPattern);
 
     expect(result).toHaveLength(3);
     expect(result).toEqual([
@@ -108,7 +105,7 @@ describe('fetchFieldSuggestions', () => {
   });
 
   test('should fetch suggestions with modified insert text', async () => {
-    const result = fetchFieldSuggestions(mockIndexPattern, (f: any) => `${f} : `);
+    const result = formatFieldsToSuggestions(mockIndexPattern, (f: any) => `${f} : `);
 
     expect(result).toHaveLength(3);
     expect(result).toEqual([
@@ -134,7 +131,7 @@ describe('fetchFieldSuggestions', () => {
   });
 
   test('should fetch suggestions with sort importance', async () => {
-    const result = fetchFieldSuggestions(mockIndexPattern, (f: any) => `${f} = `, '01');
+    const result = formatFieldsToSuggestions(mockIndexPattern, (f: any) => `${f} = `, '01');
 
     expect(result).toHaveLength(3);
     expect(result).toEqual([
