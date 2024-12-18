@@ -43,6 +43,7 @@ import {
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
+import { formatInspectUrl } from '../utils';
 
 const SavedObjectsTablePage = ({
   coreStart,
@@ -116,15 +117,9 @@ const SavedObjectsTablePage = ({
       workspaces={coreStart.workspaces}
       perPageConfig={itemsPerPage}
       goInspectObject={(savedObject) => {
-        const { editUrl } = savedObject.meta;
-        let finalEditUrl = editUrl;
-        if (useUpdatedUX && finalEditUrl) {
-          finalEditUrl = finalEditUrl.replace(/^\/management\/opensearch-dashboards/, '');
-        }
-        if (finalEditUrl) {
-          return coreStart.application.navigateToUrl(
-            coreStart.http.basePath.prepend(`/app${finalEditUrl}`)
-          );
+        const inAppUrl = formatInspectUrl(savedObject, coreStart);
+        if (inAppUrl) {
+          return coreStart.application.navigateToUrl(inAppUrl);
         }
       }}
       dateFormat={dateFormat}

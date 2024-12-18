@@ -14,7 +14,7 @@ import {
   Query,
   createDataFrame,
 } from '../../../data/common';
-import { getFields, handleFacetError } from '../../common/utils';
+import { getFields, throwFacetError } from '../../common/utils';
 import { Facet } from '../utils';
 import { QueryAggConfig } from '../../common';
 
@@ -39,7 +39,7 @@ export const pplSearchStrategyProvider = (
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
-        if (!rawResponse.success) handleFacetError(rawResponse);
+        if (!rawResponse.success) throwFacetError(rawResponse);
 
         const dataFrame = createDataFrame({
           name: query.dataset?.id,
@@ -56,6 +56,7 @@ export const pplSearchStrategyProvider = (
           for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
             request.body.query.query = aggQueryString;
             const rawAggs: any = await pplFacet.describeQuery(context, request);
+            if (!rawAggs.success) continue;
             (dataFrame as IDataFrameWithAggs).aggs = {};
             (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
               return {

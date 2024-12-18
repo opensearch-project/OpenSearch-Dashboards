@@ -58,4 +58,5 @@ export interface SavedObjectRelation {
   type: string;
   relationship: 'child' | 'parent';
   meta: SavedObjectMetadata;
+  workspaces?: SavedObject['workspaces'];
 }

@@ -31,7 +31,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart, NotificationsSetup } from 'opensearch-dashboards/public';
-import { debounce, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
@@ -54,13 +54,28 @@ export class QueryStringManager {
     private readonly notifications: NotificationsSetup
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
-    this.queryHistory = createHistory({ storage });
+    this.queryHistory = createHistory({ storage: this.sessionStorage });
     this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
   }
 
   private getDefaultQueryString() {
     return this.storage.get('userQueryString') || '';
+  }
+
+  private getInitialDatasetQueryString(query: Query) {
+    const { language, dataset } = query;
+
+    const languageConfig = this.languageService.getLanguage(language);
+    let typeConfig;
+
+    if (dataset) {
+      typeConfig = this.datasetService.getType(dataset.type);
+    }
+
+    return (
+      typeConfig?.getInitialQueryString?.(query) ?? (languageConfig?.getQueryString(query) || '')
+    );
   }
 
   public getDefaultQuery(): Query {
@@ -79,13 +94,11 @@ export class QueryStringManager {
       defaultDataset &&
       this.languageService
     ) {
-      const language = this.languageService.getLanguage(defaultLanguageId);
       const newQuery = { ...query, dataset: defaultDataset };
-      const newQueryString = language?.getQueryString(newQuery) || '';
 
       return {
         ...newQuery,
-        query: newQueryString,
+        query: this.getInitialDatasetQueryString(newQuery),
       };
     }
 
@@ -154,8 +167,42 @@ export class QueryStringManager {
    */
   public setQuery = (query: Partial<Query>) => {
     const curQuery = this.query$.getValue();
-    const newQuery = { ...curQuery, ...query };
+    let newQuery = { ...curQuery, ...query };
     if (!isEqual(curQuery, newQuery)) {
+      // Check if dataset changed and if new dataset has language restrictions
+      if (newQuery.dataset && !isEqual(curQuery.dataset, newQuery.dataset)) {
+        // Get supported languages for the dataset
+        const supportedLanguages = this.datasetService
+          .getType(newQuery.dataset.type)
+          ?.supportedLanguages(newQuery.dataset);
+
+        // If we have supported languages and current language isn't supported
+        if (supportedLanguages && !supportedLanguages.includes(newQuery.language)) {
+          // Get initial query with first supported language and new dataset
+          newQuery = this.getInitialQuery({
+            language: supportedLanguages[0],
+            dataset: newQuery.dataset,
+          });
+
+          // Show warning about language change
+          showWarning(this.notifications, {
+            title: i18n.translate('data.languageChangeTitle', {
+              defaultMessage: 'Language Changed',
+            }),
+            text: i18n.translate('data.languageChangeBody', {
+              defaultMessage: 'Query language changed to {supportedLanguage}.',
+              values: {
+                supportedLanguage:
+                  this.languageService.getLanguage(supportedLanguages[0])?.title ||
+                  supportedLanguages[0],
+              },
+            }),
+          });
+        }
+
+        // Add to recent datasets
+        this.datasetService.addRecentDataset(newQuery.dataset);
+      }
       this.query$.next(newQuery);
     }
   };
@@ -194,34 +241,82 @@ export class QueryStringManager {
     return this.languageService;
   };
 
-  public getInitialQuery = () => {
-    return this.getInitialQueryByLanguage(this.query$.getValue().language);
+  /**
+   * Gets the initial query based on the provided partial query object.
+   * If both language and dataset are provided, generates a new query without using current state
+   * If only language is provided, uses current dataset
+   * If only dataset is provided, uses current or dataset's preferred language
+   */
+  public getInitialQuery = (partialQuery?: Partial<Query>) => {
+    if (!partialQuery) {
+      return this.getInitialQueryByLanguage(this.query$.getValue().language);
+    }
+
+    const { language, dataset } = partialQuery;
+    const currentQuery = this.query$.getValue();
+
+    // Both language and dataset provided - generate fresh query
+    if (language && dataset) {
+      const newQuery = {
+        language,
+        dataset,
+        query: '',
+      };
+      newQuery.query = this.getInitialDatasetQueryString(newQuery);
+      return newQuery;
+    }
+
+    // Only dataset provided - use dataset's preferred language or current language
+    if (dataset) {
+      return this.getInitialQueryByDataset(dataset);
+    }
+
+    // Only language provided - use current dataset
+    if (language) {
+      return this.getInitialQueryByLanguage(language);
+    }
+
+    // Fallback to current query
+    return currentQuery;
   };
 
+  /**
+   * Gets initial query for a language, preserving current dataset
+   * Called by getInitialQuery when only language changes
+   */
   public getInitialQueryByLanguage = (languageId: string) => {
     const curQuery = this.query$.getValue();
-    const language = this.languageService.getLanguage(languageId);
-    const dataset = curQuery.dataset;
-    const input = language?.getQueryString(curQuery) || '';
-    this.languageService.setUserQueryString(input);
-
-    return {
-      query: input,
+    const newQuery = {
+      ...curQuery,
       language: languageId,
-      dataset,
     };
-  };
 
-  public getInitialQueryByDataset = (newDataset: Dataset) => {
-    const curQuery = this.query$.getValue();
-    const languageId = newDataset.language || curQuery.language;
-    const language = this.languageService.getLanguage(languageId);
-    const newQuery = { ...curQuery, language: languageId, dataset: newDataset };
-    const newQueryString = language?.getQueryString(newQuery) || '';
+    const queryString = this.getInitialDatasetQueryString(newQuery);
+    this.languageService.setUserQueryString(queryString);
 
     return {
       ...newQuery,
-      query: newQueryString,
+      query: queryString,
+    };
+  };
+
+  /**
+   * Gets initial query for a dataset, using dataset's preferred language or current language
+   * Called by getInitialQuery when only dataset changes
+   */
+  public getInitialQueryByDataset = (newDataset: Dataset) => {
+    const curQuery = this.query$.getValue();
+    // Use dataset's preferred language or fallback to current language
+    const languageId = newDataset.language || curQuery.language;
+    const newQuery = {
+      ...curQuery,
+      language: languageId,
+      dataset: newDataset,
+    };
+
+    return {
+      ...newQuery,
+      query: this.getInitialDatasetQueryString(newQuery),
     };
   };
 
@@ -262,7 +357,10 @@ export class QueryStringManager {
   };
 }
 
-const showWarning = (notifications: NotificationsSetup, { title, text }) => {
+const showWarning = (
+  notifications: NotificationsSetup,
+  { title, text }: { title: string; text: string }
+) => {
   notifications.toasts.addWarning({ title, text, id: 'unsupported_language_selected' });
 };
 

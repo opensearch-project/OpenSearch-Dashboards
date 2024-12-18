@@ -30,7 +30,7 @@
 
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
-import { compact, get, isEqual } from 'lodash';
+import { cloneDeep, compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import {
@@ -284,11 +284,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
+    const query = cloneDeep(this.state.query);
+    delete query.dataset;
 
     const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
-      query: this.state.query,
+      query,
     };
 
     if (savedQueryMeta.shouldIncludeFilters) {
@@ -296,7 +298,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     if (
-      savedQueryMeta.shouldIncludeTimefilter &&
+      savedQueryMeta.shouldIncludeTimeFilter &&
       this.state.dateRangeTo !== undefined &&
       this.state.dateRangeFrom !== undefined &&
       this.props.refreshInterval !== undefined &&
@@ -334,9 +336,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       if (this.props.onSaved) {
         this.props.onSaved(response);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.services.notifications.toasts.addDanger(
-        `An error occured while saving your query: ${error.message}`
+        this.props.intl.formatMessage(
+          {
+            id: 'data.search_bar.save_query.failedToSaveQuery',
+            defaultMessage: 'An error occured while saving your query{errorMessage}',
+          },
+          { errorMessage: error.message ? `: ${error.message}` : '' }
+        )
       );
       throw error;
     }
@@ -447,13 +455,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             indexPatterns={this.props.indexPatterns!}
             showSaveQuery={this.props.showSaveQuery}
             loadedSavedQuery={this.props.savedQuery}
-            onSave={this.onInitiateSave}
-            onSaveAsNew={this.onInitiateSaveNew}
+            onInitiateSave={this.onInitiateSave}
+            onInitiateSaveAsNew={this.onInitiateSaveNew}
             onLoad={this.onLoadSavedQuery}
             savedQueryService={this.savedQueryService}
             onClearSavedQuery={this.props.onClearSavedQuery}
             useSaveQueryMenu={useSaveQueryMenu}
             isQueryEditorControl={isQueryEditorControl}
+            saveQuery={this.onSave}
           />
         )
       );
@@ -480,6 +489,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           >
             <FilterBar
               className="globalFilterGroup__filterBar"
+              data-test-subj="globalFilterGroupFilterBar"
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
@@ -569,6 +579,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
+            formUiType="Modal"
             savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
             savedQueryService={this.savedQueryService}
             onSave={this.onSave}
@@ -579,6 +590,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         ) : null}
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
+            formUiType="Modal"
             savedQueryService={this.savedQueryService}
             onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}

@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`dev/i18n/integrate_locale_files integrateLocaleFiles adds translations despite missing formats object 1`] = `
+Array [
+  "src/dev/i18n/__fixtures__/integrate_locale_files/destination/missing_formats.json",
+  "{
+  \\"formats\\": {},
+  \\"messages\\": {
+    \\"plugin-1.message-id-1\\": \\"Translated text 1\\",
+    \\"plugin-1.message-id-2\\": \\"Translated text 2\\",
+    \\"plugin-2.message-id-1\\": \\"Translated text 1\\",
+    \\"plugin-2.message-id-2\\": \\"Translated text 2\\",
+    \\"plugin-4.message-id-1\\": \\"Translated text 1\\"
+  }
+}
+",
+]
+`;
+
 exports[`dev/i18n/integrate_locale_files integrateLocaleFiles splits locale file by plugins and writes them into the right folders 1`] = `
 Array [
   "src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1/translations/fr.json",
@@ -141,6 +158,79 @@ exports[`dev/i18n/integrate_locale_files integrateLocaleFiles splits locale file
 Array [
   "src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1/translations",
   "src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2/translations",
+]
+`;
+
+exports[`dev/i18n/integrate_locale_files integrateLocaleFiles updates existing translations 1`] = `
+Array [
+  "src/dev/i18n/__fixtures__/integrate_locale_files/destination/tr.json",
+  "{
+  \\"formats\\": {
+    \\"number\\": {
+      \\"currency\\": {
+        \\"style\\": \\"currency\\"
+      },
+      \\"percent\\": {
+        \\"style\\": \\"percent\\"
+      }
+    },
+    \\"date\\": {
+      \\"short\\": {
+        \\"month\\": \\"numeric\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"2-digit\\"
+      },
+      \\"medium\\": {
+        \\"month\\": \\"short\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"full\\": {
+        \\"weekday\\": \\"long\\",
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      }
+    },
+    \\"time\\": {
+      \\"short\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\"
+      },
+      \\"medium\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      },
+      \\"full\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      }
+    }
+  },
+  \\"messages\\": {
+    \\"plugin-1.message-id-1\\": \\"Translated text 1\\",
+    \\"plugin-1.message-id-2\\": \\"Translated text 2\\",
+    \\"plugin-2.message-id-1\\": \\"Translated text 1\\",
+    \\"plugin-2.message-id-2\\": \\"Old translated text 2\\",
+    \\"plugin-3.message-id-1\\": \\"Old translated text 1\\",
+    \\"plugin-4.message-id-1\\": \\"Translated text 1\\"
+  }
+}
+",
 ]
 `;
 

@@ -11,18 +11,22 @@ import {
   PopoverAnchorPosition,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Query } from '../..';
+import { isEqual } from 'lodash';
 import { LanguageConfig } from '../../query';
 import { getQueryService } from '../../services';
 
 export interface QueryLanguageSelectorProps {
-  query: Query;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   appName?: string;
 }
 
-const mapExternalLanguageToOptions = (language: LanguageConfig) => {
+interface LanguageOption {
+  label: string;
+  value: string;
+}
+
+const mapExternalLanguageToOptions = (language: LanguageConfig): LanguageOption => {
   return {
     label: language.title,
     value: language.id,
@@ -30,54 +34,62 @@ const mapExternalLanguageToOptions = (language: LanguageConfig) => {
 };
 
 export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
-  const [isPopoverOpen, setPopover] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState(props.query.language);
-
   const queryString = getQueryService().queryString;
   const languageService = queryString.getLanguageService();
 
-  const datasetSupportedLanguages = useMemo(() => {
-    const dataset = props.query.dataset;
-    if (!dataset) {
-      return undefined;
-    }
-    const datasetType = queryString.getDatasetService().getType(dataset.type);
-    return datasetType?.supportedLanguages(dataset);
-  }, [props.query.dataset, queryString]);
+  const [isPopoverOpen, setPopover] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<string>(
+    queryString.getQuery()?.language || languageService.getDefaultLanguage()?.id || ''
+  );
+  const [languageOptions, setLanguageOptions] = useState<LanguageOption[]>([]);
 
   useEffect(() => {
-    const subscription = queryString.getUpdates$().subscribe((query: Query) => {
-      if (query.language !== currentLanguage) {
-        setCurrentLanguage(query.language);
+    const updateState = () => {
+      const query = queryString.getQuery();
+      const language = query.language || languageService.getDefaultLanguage()?.id;
+      const dataset = query.dataset;
+
+      // Update current language if changed
+      if (language !== currentLanguage) {
+        setCurrentLanguage(language || '');
       }
+
+      // Get supported languages
+      const languages = !dataset
+        ? languageService.getLanguages().map((l) => l.id)
+        : queryString.getDatasetService().getType(dataset.type)?.supportedLanguages(dataset) ??
+          null;
+
+      if (!languages) {
+        return;
+      }
+
+      // Build new options including app support check
+      const newOptions = languageService
+        .getLanguages()
+        .filter(
+          (lang) =>
+            languages.includes(lang.id) &&
+            (!props.appName || lang.editorSupportedAppNames?.includes(props.appName))
+        )
+        .map(mapExternalLanguageToOptions)
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+      if (!isEqual(newOptions, languageOptions)) {
+        setLanguageOptions(newOptions);
+      }
+    };
+
+    updateState();
+
+    const subscription = queryString.getUpdates$().subscribe(() => {
+      updateState();
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [queryString, currentLanguage, props]);
-
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
-
-  const languageOptions = useMemo(() => {
-    const options: Array<{ label: string; value: string }> = [];
-
-    languageService.getLanguages().forEach((language) => {
-      const isSupported =
-        !datasetSupportedLanguages || datasetSupportedLanguages.includes(language.id);
-      const isBlocklisted = languageService.getUserQueryLanguageBlocklist().includes(language?.id);
-      const isAppSupported =
-        !props.appName || language?.editorSupportedAppNames?.includes(props.appName);
-
-      if (!isSupported || isBlocklisted || !isAppSupported) return;
-
-      options.unshift(mapExternalLanguageToOptions(language));
-    });
-
-    return options.sort((a, b) => a.label.localeCompare(b.label));
-  }, [languageService, props.appName, datasetSupportedLanguages]);
+  }, [currentLanguage, languageOptions, languageService, queryString, props.appName]);
 
   const selectedLanguage = useMemo(
     () => ({
@@ -105,6 +117,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
         <EuiContextMenuItem
           key={language.label}
           className="languageSelector__menuItem"
+          data-test-subj="languageSelectorMenuItem"
           icon={language.label === selectedLanguage.label ? 'check' : 'empty'}
           onClick={() => handleLanguageChange(language.value)}
         >
@@ -120,7 +133,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
       button={
         <EuiSmallButtonEmpty
           iconSide="right"
-          onClick={onButtonClick}
+          onClick={() => setPopover(!isPopoverOpen)}
           className="languageSelector__button"
           iconType="arrowDown"
           data-test-subj="queryEditorLanguageSelector"
@@ -139,6 +152,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
         )}
         size="s"
         items={languageOptionsMenu}
+        data-test-subj="queryEditorLanguageOptions"
       />
     </EuiPopover>
   );

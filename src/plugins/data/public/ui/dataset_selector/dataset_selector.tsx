@@ -18,7 +18,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
-import { Dataset, DEFAULT_DATA } from '../../../common';
+import { Dataset, DEFAULT_DATA, Query } from '../../../common';
 import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 import { AdvancedSelector } from './advanced_selector';
@@ -33,7 +33,7 @@ type EuiSmallButtonEmptyProps = React.ComponentProps<typeof EuiSmallButtonEmpty>
 
 interface DatasetSelectorProps {
   selectedDataset?: Dataset;
-  setSelectedDataset: (dataset: Dataset) => void;
+  onSelect: (partialQuery: Partial<Query>) => void;
   services: IDataPluginServices;
 }
 
@@ -70,7 +70,7 @@ const RootComponent: React.FC<
  */
 export const DatasetSelector = ({
   selectedDataset,
-  setSelectedDataset,
+  onSelect,
   services,
   appearance,
   buttonProps,
@@ -82,7 +82,8 @@ export const DatasetSelector = ({
   const { overlays } = services;
   const datasetService = getQueryService().queryString.getDatasetService();
   const datasetIcon =
-    datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
+    datasetService.getType(selectedDataset?.sourceDatasetRef?.type || selectedDataset?.type || '')
+      ?.meta.icon.type || 'database';
 
   useEffect(() => {
     isMounted.current = true;
@@ -102,7 +103,7 @@ export const DatasetSelector = ({
 
       // If no dataset is selected, select the first one
       if (!selectedDataset && fetchedDatasets.length > 0) {
-        setSelectedDataset(fetchedDatasets[0]);
+        onSelect({ dataset: fetchedDatasets[0] });
       }
     };
 
@@ -180,11 +181,11 @@ export const DatasetSelector = ({
           indexPatterns.find((dataset) => dataset.id === selectedOption.key);
         if (foundDataset) {
           closePopover();
-          setSelectedDataset(foundDataset);
+          onSelect({ dataset: foundDataset });
         }
       }
     },
-    [recentDatasets, indexPatterns, setSelectedDataset, closePopover]
+    [recentDatasets, indexPatterns, onSelect, closePopover]
   );
 
   const datasetTitle = useMemo(() => {
@@ -215,11 +216,16 @@ export const DatasetSelector = ({
             appearance={appearance}
             {...buttonProps}
             className="datasetSelector__button"
+            data-test-subj="datasetSelectorButton"
             iconType="arrowDown"
             iconSide="right"
             onClick={togglePopover}
           >
-            <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
+            <EuiIcon
+              type={datasetIcon}
+              className="datasetSelector__icon"
+              data-test-subj="datasetSelectorIcon"
+            />
             {datasetTitle}
           </RootComponent>
         </EuiToolTip>
@@ -232,6 +238,7 @@ export const DatasetSelector = ({
     >
       <EuiSelectable
         className="datasetSelector__selectable"
+        data-test-subj="datasetSelectorSelectable"
         options={options}
         singleSelection="always"
         searchable={true}
@@ -250,9 +257,14 @@ export const DatasetSelector = ({
           </>
         )}
       </EuiSelectable>
-      <EuiPopoverFooter paddingSize="none" className="datasetSelector__footer">
+      <EuiPopoverFooter
+        paddingSize="none"
+        className="datasetSelector__footer"
+        data-test-subj="datasetSelectorFooter"
+      >
         <EuiButton
           className="datasetSelector__advancedButton"
+          data-test-subj="datasetSelectorAdvancedButton"
           iconType="gear"
           iconSide="right"
           iconSize="s"
@@ -264,10 +276,10 @@ export const DatasetSelector = ({
               toMountPoint(
                 <AdvancedSelector
                   services={services}
-                  onSelect={(dataset?: Dataset) => {
+                  onSelect={(query: Partial<Query>) => {
                     overlay?.close();
-                    if (dataset) {
-                      setSelectedDataset(dataset);
+                    if (query) {
+                      onSelect(query);
                     }
                   }}
                   onCancel={() => overlay?.close()}
