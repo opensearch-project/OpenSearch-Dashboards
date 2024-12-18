@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import '@cypress/code-coverage/support';
+
 import '../utils/commands';
 import '../utils/commands.osd';
 import '../utils/apps/commands';

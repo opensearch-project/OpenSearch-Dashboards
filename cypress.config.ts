@@ -4,6 +4,7 @@
  */
 
 import { defineConfig } from 'cypress';
+import codeCoverageTask from '@cypress/code-coverage/task';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
 // TODO: import { paste } from 'copy-paste';
 
@@ -61,6 +62,11 @@ function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): Cypress.PluginConfigOptions {
+  if (process.env.COVERAGE) {
+    config.env.codeCoverage = { url: '/__coverage__' };
+    codeCoverageTask(on, config);
+  }
+
   const { webpackOptions } = webpackPreprocessor.defaultOptions;
 
   /**
