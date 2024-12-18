@@ -97,11 +97,10 @@ export const fetchData = (
 };
 
 export const fetchColumnValues = async (
-  tables: string[],
+  table: string,
   column: string,
   services: IDataPluginServices,
-  fieldInOsd: IndexPatternField | undefined,
-  dataset?: Dataset
+  fieldInOsd: IndexPatternField | undefined
 ): Promise<string[]> => {
   // default to true/false values for type boolean
   if (fieldInOsd?.type === 'boolean') {
@@ -120,12 +119,15 @@ export const fetchColumnValues = async (
   }
   const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
 
+  // get dataset for connecting to the cluster currently engaged
+  const dataset = services.data.query.queryString.getQuery().dataset;
+
   return (
     await fetchFromAPI(
       services.http,
       JSON.stringify({
         query: {
-          query: `SELECT ${column} FROM ${tables[0]} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
+          query: `SELECT ${column} FROM ${table} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
           language: 'SQL',
           dataset,
           format: 'jdbc',

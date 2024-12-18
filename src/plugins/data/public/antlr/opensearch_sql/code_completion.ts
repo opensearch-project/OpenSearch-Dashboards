@@ -97,18 +97,12 @@ export const getSuggestions = async ({
         }
         case ColumnValuePredicate.VALUE: {
           if (suggestions.suggestValuesForColumn) {
-            // get dataset for connecting to the cluster currently engaged
-            const dataset = services.data.query.queryString.getQuery().dataset;
-
             // take the column and push in values for that column
             const values = await fetchColumnValues(
-              [indexPattern.title],
+              indexPattern.title,
               suggestions.suggestValuesForColumn,
               services,
-              indexPattern.fields.find(
-                (field) => field.name === suggestions.suggestValuesForColumn
-              ),
-              dataset
+              indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn)
             );
 
             let i = 0;
