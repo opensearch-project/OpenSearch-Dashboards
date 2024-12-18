@@ -286,11 +286,7 @@ export class DataExplorerPage {
    */
   static selectIndexDatasetLanguage(datasetLanguage) {
     DataExplorerPage.getDatasetLanguageSelector().select(datasetLanguage);
-    switch (datasetLanguage) {
-      case 'PPL':
-        DataExplorerPage.selectDatasetTimeField("I don't want to use the time filter");
-        break;
-    }
+    DataExplorerPage.selectDatasetTimeField("I don't want to use the time filter");
     DataExplorerPage.getDatasetSelectDataButton().click();
   }
 
