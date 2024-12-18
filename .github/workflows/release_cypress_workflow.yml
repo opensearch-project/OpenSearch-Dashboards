@@ -72,7 +72,7 @@ jobs:
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
       TERM: xterm
-    name: Run cypress tests (osd:ciGroup${{ matrix.spec_group }}) ${{ inputs.UNIQUE_ID}} 
+    name: Run cypress tests (osd:ciGroup${{ matrix.spec_group }}) ${{ inputs.UNIQUE_ID}}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -130,7 +130,7 @@ jobs:
           mkdir -p $CWD/${{ env.OPENSEARCH_DIR }}
           source ${{ env.OSD_PATH }}/scripts/common/utils.sh
           open_artifact $CWD/${{ env.OPENSEARCH_DIR }} ${{ env.OPENSEARCH }}
-      
+
       - name: Download and extract OpenSearch Dashboards artifacts
         run: |
           CWD=$(pwd)
@@ -138,22 +138,22 @@ jobs:
           source ${{ env.OSD_PATH }}/scripts/common/utils.sh
           open_artifact $CWD/${{ env.DASHBOARDS_DIR }} ${{ env.DASHBOARDS }}
 
-      - name: Run Cypress tests 
+      - name: Run Cypress tests
         run: |
           chown -R 1000:1000 `pwd`
           su `id -un 1000` -c "source ${{ env.OSD_PATH }}/scripts/cypress_tests.sh && run_dashboards_cypress_tests"
 
       # Screenshots are only captured on failures
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: release-osd-cypress-screenshots
+          name: release-osd-cypress-screenshots-${{ matrix.spec_group }}
           path: ${{ env.OSD_PATH }}/cypress/screenshots
           retention-days: 1
-      
-      - uses: actions/upload-artifact@v3
+
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: release-osd-cypress-videos
+          name: release-osd-cypress-videos-${{ matrix.spec_group }}
           path: ${{ env.OSD_PATH }}/cypress/videos
           retention-days: 1
