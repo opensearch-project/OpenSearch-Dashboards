@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Query, UI_SETTINGS } from '../../../common';
-import { coreMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../mocks';
-import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
-import { createEditor, DQLBody, QueryEditorTopRow, SingleLineInput } from '../';
-import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { cleanup, render, waitFor } from '@testing-library/react';
-import { LanguageConfig } from '../../query';
+import React from 'react';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { createEditor, DQLBody, QueryEditorTopRow, SingleLineInput } from '../';
+import { coreMock } from '../../../../../core/public/mocks';
+import { Query, UI_SETTINGS } from '../../../common';
+import { dataPluginMock } from '../../mocks';
+import { DatasetTypeConfig, LanguageConfig } from '../../query';
+import { datasetServiceMock } from '../../query/query_string/dataset_service/dataset_service.mock';
 import { getQueryService } from '../../services';
 
 const startMock = coreMock.createStart();
@@ -66,6 +67,7 @@ const createMockStorage = () => ({
 });
 
 const dataPlugin = dataPluginMock.createStartContract(true);
+const datasetService = datasetServiceMock.createStartContract();
 
 function wrapQueryEditorTopRowInContext(testProps: any) {
   const defaultOptions = {
@@ -111,6 +113,7 @@ describe('QueryEditorTopRow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getQueryService as jest.Mock).mockReturnValue(dataPlugin.query);
+    dataPlugin.query.queryString.getDatasetService = jest.fn().mockReturnValue(datasetService);
   });
 
   afterEach(() => {
@@ -154,5 +157,50 @@ describe('QueryEditorTopRow', () => {
     );
     await waitFor(() => expect(container.querySelector(QUERY_EDITOR)).toBeTruthy());
     expect(container.querySelector(DATE_PICKER)).toBeFalsy();
+  });
+
+  it('Should not render date picker if dataset type does not support time field', async () => {
+    const query: Query = {
+      query: 'test query',
+      dataset: datasetService.getDefault(),
+      language: 'test-language',
+    };
+    dataPlugin.query.queryString.getQuery = jest.fn().mockReturnValue(query);
+    datasetService.getType.mockReturnValue({
+      meta: { supportsTimeFilter: false },
+    } as DatasetTypeConfig);
+
+    const { container } = render(
+      wrapQueryEditorTopRowInContext({
+        query,
+        showQueryEditor: false,
+        showDatePicker: true,
+      })
+    );
+    await waitFor(() => expect(container.querySelector(QUERY_EDITOR)).toBeTruthy());
+    expect(container.querySelector(DATE_PICKER)).toBeFalsy();
+  });
+
+  it('Should render date picker if dataset overrides hideDatePicker to false', async () => {
+    const query: Query = {
+      query: 'test query',
+      dataset: datasetService.getDefault(),
+      language: 'test-language',
+    };
+    dataPlugin.query.queryString.getQuery = jest.fn().mockReturnValue(query);
+    datasetService.getType.mockReturnValue(({
+      meta: { supportsTimeFilter: true },
+      languageOverrides: { 'test-language': { hideDatePicker: false } },
+    } as unknown) as DatasetTypeConfig);
+
+    const { container } = render(
+      wrapQueryEditorTopRowInContext({
+        query,
+        showQueryEditor: false,
+        showDatePicker: true,
+      })
+    );
+    await waitFor(() => expect(container.querySelector(QUERY_EDITOR)).toBeTruthy());
+    expect(container.querySelector(DATE_PICKER)).toBeTruthy();
   });
 });
