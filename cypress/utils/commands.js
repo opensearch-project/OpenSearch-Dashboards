@@ -41,7 +41,6 @@ Cypress.Commands.add('getElementsByTestIds', (testIds, options = {}) => {
   return cy.get(selectors.join(','), options);
 });
 
-
 /**
  * Get DOM elements with a data-test-subj id containing the testId.
  * @param testId data-test-subj value.

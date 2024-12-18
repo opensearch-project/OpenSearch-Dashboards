@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WORKSPACE_API_PREFIX } from './constants';
+import { PATHS } from './constants';
 
 const BASE_PATH = Cypress.config('baseUrl');
 
 Cypress.Commands.add('deleteWorkspaceById', (workspaceId) => {
   cy.request({
     method: 'DELETE',
-    url: `${BASE_PATH}${WORKSPACE_API_PREFIX}/${workspaceId}`,
+    url: `${BASE_PATH}${PATHS.WORKSPACE_API_PREFIX}/${workspaceId}`,
     headers: {
       'osd-xsrf': true,
     },
@@ -20,7 +20,7 @@ Cypress.Commands.add('deleteWorkspaceById', (workspaceId) => {
 Cypress.Commands.add('deleteWorkspaceByName', (workspaceName) => {
   cy.request({
     method: 'POST',
-    url: `${BASE_PATH}${WORKSPACE_API_PREFIX}/_list`,
+    url: `${BASE_PATH}${PATHS.WORKSPACE_API_PREFIX}/_list`,
     headers: {
       'osd-xsrf': true,
     },
@@ -31,7 +31,7 @@ Cypress.Commands.add('deleteWorkspaceByName', (workspaceName) => {
         if (workspaceName === name) {
           cy.request({
             method: 'DELETE',
-            url: `${BASE_PATH}${WORKSPACE_API_PREFIX}/${id}`,
+            url: `${BASE_PATH}${PATHS.WORKSPACE_API_PREFIX}/${id}`,
             headers: {
               'osd-xsrf': true,
             },
@@ -46,7 +46,7 @@ Cypress.Commands.add('createWorkspace', ({ settings, ...workspace } = {}) => {
   return cy
     .request({
       method: 'POST',
-      url: `${BASE_PATH}${WORKSPACE_API_PREFIX}`,
+      url: `${BASE_PATH}${PATHS.WORKSPACE_API_PREFIX}`,
       headers: {
         'osd-xsrf': true,
       },
@@ -75,7 +75,7 @@ Cypress.Commands.add('createWorkspace', ({ settings, ...workspace } = {}) => {
 Cypress.Commands.add('checkWorkspace', (workspaceId, expected) => {
   cy.request({
     method: 'GET',
-    url: `${BASE_PATH}${WORKSPACE_API_PREFIX}/${workspaceId}`,
+    url: `${BASE_PATH}${PATHS.WORKSPACE_API_PREFIX}/${workspaceId}`,
   }).then((resp) => {
     if (resp && resp.body && resp.body.success) {
       const { name, description, features, permissions } = resp.body.result;
@@ -164,7 +164,7 @@ function checkPrincipalArrayEquals(expectedPrincipals, actualPrincipals) {
 Cypress.Commands.add('deleteAllWorkspaces', () => {
   cy.request({
     method: 'POST',
-    url: `${BASE_PATH}${WORKSPACE_API_PREFIX}/_list`,
+    url: `${BASE_PATH}${PATHS.WORKSPACE_API_PREFIX}/_list`,
     headers: {
       'osd-xsrf': true,
     },
@@ -174,7 +174,7 @@ Cypress.Commands.add('deleteAllWorkspaces', () => {
       resp.body.result.workspaces.forEach(({ id }) => {
         cy.request({
           method: 'DELETE',
-          url: `${BASE_PATH}${WORKSPACE_API_PREFIX}/${id}`,
+          url: `${BASE_PATH}${PATHS.WORKSPACE_API_PREFIX}/${id}`,
           headers: {
             'osd-xsrf': true,
           },

@@ -4,21 +4,21 @@
  */
 
 import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { DataExplorerPage } from '../../utils/dashboards/data_explorer/data_explorer_page.po';
+import { DataExplorerPage } from '../../../../../utils/dashboards/data_explorer/data_explorer_page.po.js';
 import {
-  INDEX_CLUSTER_NAME,
+  DATASOURCE_NAME,
   INDEX_NAME,
   INDEX_PATTERN_NAME,
   SEARCH_ABSOLUTE_START_DATE,
   SEARCH_ABSOLUTE_END_DATE,
-} from '../constants.js';
+} from './constants.js';
 
 const miscUtils = new MiscUtils(cy);
 
 function selectDataSet(datasetType, language) {
   switch (datasetType) {
     case 'index':
-      DataExplorerPage.selectIndexDataset(INDEX_CLUSTER_NAME, INDEX_NAME, language);
+      DataExplorerPage.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, language);
       break;
     case 'index_pattern':
       DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, language);
