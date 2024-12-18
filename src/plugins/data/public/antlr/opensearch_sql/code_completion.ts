@@ -52,13 +52,15 @@ export const getSuggestions = async ({
 
     // Fetch columns and values
     if (suggestions.suggestColumns?.tables?.length) {
-      formatFieldsToSuggestions(finalSuggestions, indexPattern, (f: any) => `${f} `, '2');
+      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '2'));
     }
 
     if (suggestions.suggestColumnValuePredicate) {
       switch (suggestions.suggestColumnValuePredicate) {
         case ColumnValuePredicate.COLUMN: {
-          formatFieldsToSuggestions(finalSuggestions, indexPattern, (f: any) => `${f} `, '2');
+          finalSuggestions.push(
+            ...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '2')
+          );
           break;
         }
         case ColumnValuePredicate.OPERATOR: {
@@ -100,17 +102,18 @@ export const getSuggestions = async ({
         }
         case ColumnValuePredicate.VALUE: {
           if (suggestions.suggestValuesForColumn) {
-            formatValuesToSuggestions(
-              finalSuggestions,
-              await fetchColumnValues(
-                indexPattern.title,
-                suggestions.suggestValuesForColumn,
-                services,
-                indexPattern.fields.find(
-                  (field) => field.name === suggestions.suggestValuesForColumn
-                )
-              ),
-              (val: any) => (typeof val === 'string' ? `'${val}' ` : `${val} `)
+            finalSuggestions.push(
+              ...formatValuesToSuggestions(
+                await fetchColumnValues(
+                  indexPattern.title,
+                  suggestions.suggestValuesForColumn,
+                  services,
+                  indexPattern.fields.find(
+                    (field) => field.name === suggestions.suggestValuesForColumn
+                  )
+                ),
+                (val: any) => (typeof val === 'string' ? `'${val}' ` : `${val} `)
+              )
             );
           }
           break;

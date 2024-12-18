@@ -138,27 +138,26 @@ export const fetchColumnValues = async (
 };
 
 export const formatValuesToSuggestions = (
-  suggestionListRef: QuerySuggestion[],
   values: string[],
   modifyInsertText?: (input: string) => string
 ) => {
   let i = 0;
-  suggestionListRef.push(
-    ...values.map((val: any) => {
-      i++;
-      return {
-        text: val.toString(),
-        insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
-        type: monaco.languages.CompletionItemKind.Value,
-        detail: SuggestionItemDetailsTags.Value,
-        sortText: i.toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
-      };
-    })
-  );
+
+  const valueSuggestions: QuerySuggestion[] = values.map((val: any) => {
+    i++;
+    return {
+      text: val.toString(),
+      insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
+      type: monaco.languages.CompletionItemKind.Value,
+      detail: SuggestionItemDetailsTags.Value,
+      sortText: i.toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
+    };
+  });
+
+  return valueSuggestions;
 };
 
 export const formatFieldsToSuggestions = (
-  suggestionListRef: QuerySuggestion[],
   indexPattern: IndexPattern,
   modifyInsertText?: (input: string) => string,
   sortTextImportance?: string
@@ -167,17 +166,17 @@ export const formatFieldsToSuggestions = (
     (idxField: IndexPatternField) => !idxField?.subType
   ); // filter removed .keyword fields
 
-  suggestionListRef.push(
-    ...filteredFields.map((field) => {
-      return {
-        text: field.name,
-        type: monaco.languages.CompletionItemKind.Field,
-        detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
-        ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
-        ...(sortTextImportance && { sortText: sortTextImportance }),
-      };
-    })
-  );
+  const fieldSuggestions: QuerySuggestion[] = filteredFields.map((field) => {
+    return {
+      text: field.name,
+      type: monaco.languages.CompletionItemKind.Field,
+      detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
+      ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+      ...(sortTextImportance && { sortText: sortTextImportance }),
+    };
+  });
+
+  return fieldSuggestions;
 };
 
 export const parseQuery = <

@@ -42,19 +42,20 @@ export const getSuggestions = async ({
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
-      formatFieldsToSuggestions(finalSuggestions, indexPattern, (f: any) => `${f} `, '3');
+      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '3'));
     }
 
     if (suggestions.suggestValuesForColumn) {
-      formatValuesToSuggestions(
-        finalSuggestions,
-        await fetchColumnValues(
-          indexPattern.title,
-          suggestions.suggestValuesForColumn,
-          services,
-          indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn)
-        ),
-        (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
+      finalSuggestions.push(
+        ...formatValuesToSuggestions(
+          await fetchColumnValues(
+            indexPattern.title,
+            suggestions.suggestValuesForColumn,
+            services,
+            indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn)
+          ),
+          (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
+        )
       );
     }
 
