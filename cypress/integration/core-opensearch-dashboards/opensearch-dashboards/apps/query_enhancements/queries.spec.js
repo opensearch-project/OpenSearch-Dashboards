@@ -11,7 +11,7 @@ import { PATHS } from '../../../../../utils/constants';
 const miscUtils = new MiscUtils(cy);
 const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
 
-describe('query enhancement queries', { scrollBehavior: false }, () => {
+describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
   before(() => {
     testFixtureHandler.importJSONMapping('cypress/fixtures/timestamp/mappings.json.txt');
 

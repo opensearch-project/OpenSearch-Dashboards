@@ -34,7 +34,7 @@ module.exports = defineConfig({
     WAIT_FOR_LOADER_BUFFER_MS: 0,
   },
   e2e: {
-    baseUrl: 'http://localhost:5602',
+    baseUrl: 'http://localhost:5601',
     specPattern: 'cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
     testIsolation: false,
     setupNodeEvents,

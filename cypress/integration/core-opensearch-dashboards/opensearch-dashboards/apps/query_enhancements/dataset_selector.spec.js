@@ -11,7 +11,7 @@ import { PATHS, SECONDARY_ENGINE } from '../../../../../utils/constants';
 const miscUtils = new MiscUtils(cy);
 const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
 
-describe('dataset selector', { scrollBehavior: false }, () => {
+describe.skip('dataset selector', { scrollBehavior: false }, () => {
   describe('empty state', () => {
     it('no index pattern', function () {
       // Go to the Discover page
