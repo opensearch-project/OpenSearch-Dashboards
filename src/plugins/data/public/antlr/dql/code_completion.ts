@@ -135,7 +135,7 @@ export const getSuggestions = async ({
 
     // check to see if field rule is a candidate. if so, suggest field names
     if (candidates.rules.has(DQLParser.RULE_field)) {
-      completions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f}: `));
+      formatFieldsToSuggestions(completions, indexPattern, (f: any) => `${f}: `);
     }
 
     interface FoundLastValue {

@@ -11,7 +11,12 @@
 
 import { monaco } from '@osd/monaco';
 import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
-import { fetchColumnValues, formatFieldsToSuggestions, parseQuery } from '../shared/utils';
+import {
+  fetchColumnValues,
+  formatFieldsToSuggestions,
+  formatValuesToSuggestions,
+  parseQuery,
+} from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
@@ -37,31 +42,19 @@ export const getSuggestions = async ({
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
-      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '3'));
+      formatFieldsToSuggestions(finalSuggestions, indexPattern, (f: any) => `${f} `, '3');
     }
 
     if (suggestions.suggestValuesForColumn) {
-      // take the column and push in values for that column
-      const values = await fetchColumnValues(
-        indexPattern.title,
-        suggestions.suggestValuesForColumn,
-        services,
-        indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn)
-      );
-
-      let i = 0;
-      finalSuggestions.push(
-        ...values.map((val: any) => {
-          i++;
-          return {
-            text: val.toString(),
-            insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
-            type: monaco.languages.CompletionItemKind.Value,
-            detail: SuggestionItemDetailsTags.Value,
-            // keeps the order of sorted values, places them above everything except sortText '0' reserved for PIPE
-            sortText: i.toString().padStart(values.length.toString().length + 1, '0'),
-          };
-        })
+      formatValuesToSuggestions(
+        finalSuggestions,
+        await fetchColumnValues(
+          indexPattern.title,
+          suggestions.suggestValuesForColumn,
+          services,
+          indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn)
+        ),
+        (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
       );
     }
 

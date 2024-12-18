@@ -12,7 +12,12 @@ import {
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { fetchColumnValues, formatFieldsToSuggestions, parseQuery } from '../shared/utils';
+import {
+  fetchColumnValues,
+  formatFieldsToSuggestions,
+  formatValuesToSuggestions,
+  parseQuery,
+} from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 import { OpenSearchSQLParser } from './.generated/OpenSearchSQLParser';
 
@@ -47,17 +52,13 @@ export const getSuggestions = async ({
 
     // Fetch columns and values
     if (suggestions.suggestColumns?.tables?.length) {
-      // NOTE:  currently 'suggestions' returns the table present in the query, but since the
-      //        parameters already provide that, it may not be needed anymore
-      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '2'));
+      formatFieldsToSuggestions(finalSuggestions, indexPattern, (f: any) => `${f} `, '2');
     }
 
     if (suggestions.suggestColumnValuePredicate) {
       switch (suggestions.suggestColumnValuePredicate) {
         case ColumnValuePredicate.COLUMN: {
-          finalSuggestions.push(
-            ...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '2')
-          );
+          formatFieldsToSuggestions(finalSuggestions, indexPattern, (f: any) => `${f} `, '2');
           break;
         }
         case ColumnValuePredicate.OPERATOR: {
@@ -99,26 +100,17 @@ export const getSuggestions = async ({
         }
         case ColumnValuePredicate.VALUE: {
           if (suggestions.suggestValuesForColumn) {
-            // take the column and push in values for that column
-            const values = await fetchColumnValues(
-              indexPattern.title,
-              suggestions.suggestValuesForColumn,
-              services,
-              indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn)
-            );
-
-            let i = 0;
-            finalSuggestions.push(
-              ...values.map((val: any) => {
-                i++;
-                return {
-                  text: val.toString(),
-                  insertText: typeof val === 'string' ? `'${val}' ` : `${val} `,
-                  type: monaco.languages.CompletionItemKind.Value,
-                  detail: SuggestionItemDetailsTags.Value,
-                  sortText: i.toString().padStart(values.length.toString().length + 1, '0'),
-                };
-              })
+            formatValuesToSuggestions(
+              finalSuggestions,
+              await fetchColumnValues(
+                indexPattern.title,
+                suggestions.suggestValuesForColumn,
+                services,
+                indexPattern.fields.find(
+                  (field) => field.name === suggestions.suggestValuesForColumn
+                )
+              ),
+              (val: any) => (typeof val === 'string' ? `'${val}' ` : `${val} `)
             );
           }
           break;

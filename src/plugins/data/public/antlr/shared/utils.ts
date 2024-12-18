@@ -15,7 +15,7 @@ import { GeneralErrorListener } from './general_error_listerner';
 import { createParser } from '../opensearch_sql/parse';
 import { AutocompleteResultBase, KeywordSuggestion } from './types';
 import { ParsingSubject } from './types';
-import { quotesRegex } from './constants';
+import { quotesRegex, SuggestionItemDetailsTags } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion } from '../../autocomplete';
 import { IDataPluginServices } from '../../types';
@@ -137,7 +137,28 @@ export const fetchColumnValues = async (
   ).body.fields[0].values;
 };
 
+export const formatValuesToSuggestions = (
+  suggestionListRef: QuerySuggestion[],
+  values: string[],
+  modifyInsertText?: (input: string) => string
+) => {
+  let i = 0;
+  suggestionListRef.push(
+    ...values.map((val: any) => {
+      i++;
+      return {
+        text: val.toString(),
+        insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: i.toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
+      };
+    })
+  );
+};
+
 export const formatFieldsToSuggestions = (
+  suggestionListRef: QuerySuggestion[],
   indexPattern: IndexPattern,
   modifyInsertText?: (input: string) => string,
   sortTextImportance?: string
@@ -146,17 +167,17 @@ export const formatFieldsToSuggestions = (
     (idxField: IndexPatternField) => !idxField?.subType
   ); // filter removed .keyword fields
 
-  const fieldSuggestions: QuerySuggestion[] = filteredFields.map((field) => {
-    return {
-      text: field.name,
-      type: monaco.languages.CompletionItemKind.Field,
-      detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
-      ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
-      ...(sortTextImportance && { sortText: sortTextImportance }),
-    };
-  });
-
-  return fieldSuggestions;
+  suggestionListRef.push(
+    ...filteredFields.map((field) => {
+      return {
+        text: field.name,
+        type: monaco.languages.CompletionItemKind.Field,
+        detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
+        ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+        ...(sortTextImportance && { sortText: sortTextImportance }),
+      };
+    })
+  );
 };
 
 export const parseQuery = <
