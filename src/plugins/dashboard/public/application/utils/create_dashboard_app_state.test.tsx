@@ -17,6 +17,8 @@ import { createDashboardServicesMock } from './mocks';
 import { SavedObjectDashboard } from '../..';
 import { syncQueryStateWithUrl } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
+import { ScopedHistory } from '../../../../../core/public';
+import { createMemoryHistory } from 'history';
 
 const mockStartStateSync = jest.fn();
 const mockStopStateSync = jest.fn();
@@ -148,13 +150,45 @@ describe('updateStateUrl', () => {
     ...dashboardAppStateStub,
     viewMode: ViewMode.VIEW,
   };
-  updateStateUrl({ osdUrlStateStorage, state: dashboardAppState, replace: true });
 
   test('update URL to not contain panels', () => {
     const { panels, ...statesWithoutPanels } = dashboardAppState;
+
+    const basePath = '/app/opensearch-dashboards';
+    const rawHistory = createMemoryHistory();
+    rawHistory.push(basePath);
+    const history = new ScopedHistory(rawHistory, basePath);
+
+    updateStateUrl({
+      osdUrlStateStorage,
+      state: dashboardAppState,
+      scopedHistory: history,
+      replace: true,
+    });
+
     expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', statesWithoutPanels, {
       replace: true,
     });
     expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
+  });
+
+  test('preserve Dashboards scoped history state', () => {
+    const basePath = '/app/opensearch-dashboards';
+    const newPath = '/new-page';
+    const someState = { some: 'state' };
+    const rawHistory = createMemoryHistory();
+    rawHistory.push(basePath);
+    const history = new ScopedHistory(rawHistory, basePath);
+    history.push(newPath, someState);
+
+    updateStateUrl({
+      osdUrlStateStorage,
+      state: dashboardAppState,
+      scopedHistory: history,
+      replace: true,
+    });
+
+    expect(history.location.pathname).toEqual(newPath);
+    expect(history.location.state).toEqual(someState);
   });
 });
