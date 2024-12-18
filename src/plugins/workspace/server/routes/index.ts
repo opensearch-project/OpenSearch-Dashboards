@@ -4,7 +4,14 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, Logger, PrincipalType, ACL, DEFAULT_NAV_GROUPS } from '../../../../core/server';
+import {
+  IRouter,
+  Logger,
+  PrincipalType,
+  ACL,
+  DEFAULT_NAV_GROUPS,
+  WorkspacePermissionMode,
+} from '../../../../core/server';
 import { getUseCaseFeatureConfig } from '../../common/utils';
 import {
   MAX_WORKSPACE_NAME_LENGTH,
@@ -15,7 +22,6 @@ import { SavedObjectsPermissionControlContract } from '../permission_control/cli
 import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
-import { WorkspacePermissionMode } from '../../../../core/types';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 

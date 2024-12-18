@@ -12,13 +12,10 @@ import {
   WorkspacesSetup,
   IWorkspaceClient,
   IWorkspaceResponse as IResponse,
-} from '../../../core/public';
-import { WorkspacePermissionMode } from '../../../core/types';
-import {
-  SavedObjectPermissions,
-  WorkspaceAttributeWithPermission,
   WorkspaceFindOptions,
-} from '../../../core/types';
+  WorkspacePermissionMode,
+} from '../../../core/public';
+import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';

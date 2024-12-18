@@ -13,6 +13,7 @@ import {
   UiSettingsServiceStart,
   WORKSPACE_TYPE,
   Logger,
+  WorkspaceFindOptions,
 } from '../../../core/server';
 import { updateWorkspaceState, getWorkspaceState } from '../../../core/server/utils';
 import {
@@ -31,7 +32,6 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
-import { WorkspaceFindOptions } from '../../../core/types';
 
 const WORKSPACE_ID_SIZE = 6;
 

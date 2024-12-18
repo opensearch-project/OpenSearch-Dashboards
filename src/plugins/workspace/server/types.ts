@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WorkspaceFindOptions } from '../../../core/types';
 import {
   OpenSearchDashboardsRequest,
   SavedObjectsFindResponse,
@@ -12,6 +11,7 @@ import {
   SavedObjectsServiceStart,
   Permissions,
   UiSettingsServiceStart,
+  WorkspaceFindOptions,
 } from '../../../core/server';
 import { PermissionModeId } from '../../../core/server';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {

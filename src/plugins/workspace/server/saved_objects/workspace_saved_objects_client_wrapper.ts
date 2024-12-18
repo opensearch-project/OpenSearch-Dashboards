@@ -34,11 +34,11 @@ import {
   SavedObjectsClientContract,
   SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsFindResult,
+  WorkspacePermissionMode,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
-import { WorkspacePermissionMode } from '../../../../core/types';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>

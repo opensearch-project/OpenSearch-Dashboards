@@ -6,7 +6,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { WorkspacePermissionMode } from '../../../../../core/types';
+import { WorkspacePermissionMode } from '../../../../../core/public';
 import { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { WorkspaceFormSubmitData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';

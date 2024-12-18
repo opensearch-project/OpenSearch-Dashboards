@@ -10,6 +10,7 @@ import {
   SavedObjectsClientContract,
   IUiSettingsClient,
   Principals,
+  WorkspacePermissionMode,
 } from '../../../core/server';
 import { updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
@@ -19,7 +20,6 @@ import {
   OSD_ADMIN_WILDCARD_MATCH_ALL,
 } from '../common/constants';
 import { PermissionModeId } from '../../../core/server';
-import { WorkspacePermissionMode } from '../../../core/types';
 
 /**
  * Generate URL friendly random ID
