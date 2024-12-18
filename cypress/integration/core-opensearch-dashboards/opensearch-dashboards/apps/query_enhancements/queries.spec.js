@@ -32,7 +32,7 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
     cy.get(`[class~="datasetSelector__button"]`).click();
     cy.get(`[data-test-subj="datasetOption-timestamp-*"]`).click();
 
-    cy.waitForLoaderNewHeader();
+    cy.waitForLoader(true);
     cy.waitForSearch();
   });
 
@@ -40,7 +40,7 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
     it('with DQL', function () {
       const query = `_id:1`;
       cy.setSingleLineQueryEditor(query);
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);
 
@@ -54,7 +54,7 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
 
       const query = `_id:1`;
       cy.setSingleLineQueryEditor(query);
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);
 
@@ -67,7 +67,7 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setQueryLanguage('OpenSearch SQL');
 
       // default SQL query should be set
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
         `SELECT * FROM timestamp-* LIMIT 10`
       );
@@ -87,7 +87,7 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setQueryLanguage('PPL');
 
       // default PPL query should be set
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(`source = timestamp-*`);
       cy.waitForSearch();
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
