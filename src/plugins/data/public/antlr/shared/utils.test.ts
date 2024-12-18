@@ -4,10 +4,11 @@
  */
 
 import { of } from 'rxjs';
-import { fetchColumnValues, fetchData, formatFieldsToSuggestions } from './utils';
+import { fetchData, formatFieldsToSuggestions, formatValuesToSuggestions } from './utils';
 import { QueryStringManager } from '../../query';
 import { IndexPattern } from '../../index_patterns';
 import { monaco } from '@osd/monaco';
+import { SuggestionItemDetailsTags } from './constants';
 
 describe('fetchData', () => {
   it('should fetch data using the dataSourceRequestHandler', async () => {
@@ -157,5 +158,108 @@ describe('formatFieldsToSuggestions', () => {
         sortText: '01',
       },
     ]);
+  });
+});
+
+describe('formatValuesToSuggestions', () => {
+  const stringQuoter = (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `);
+
+  it('should format string values correctly', () => {
+    const values = ['apple', 'banana', 'cherry'];
+    const result = formatValuesToSuggestions(values, stringQuoter);
+
+    expect(result).toEqual([
+      {
+        text: 'apple',
+        insertText: '"apple" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '01',
+      },
+      {
+        text: 'banana',
+        insertText: '"banana" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '02',
+      },
+      {
+        text: 'cherry',
+        insertText: '"cherry" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '03',
+      },
+    ]);
+  });
+
+  it('should format numeric values correctly', () => {
+    const values = [1, 2, 3];
+    const result = formatValuesToSuggestions(values);
+
+    expect(result).toEqual([
+      {
+        text: '1',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '01',
+      },
+      {
+        text: '2',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '02',
+      },
+      {
+        text: '3',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '03',
+      },
+    ]);
+  });
+
+  it('should handle empty array', () => {
+    const values: string[] = [];
+    const result = formatValuesToSuggestions(values);
+
+    expect(result).toEqual([]);
+  });
+
+  it('should handle mixed type values', () => {
+    const values = ['apple', 42, true];
+    const result = formatValuesToSuggestions(values, stringQuoter);
+
+    expect(result).toEqual([
+      {
+        text: 'apple',
+        insertText: '"apple" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '01',
+      },
+      {
+        text: '42',
+        insertText: '42 ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '02',
+      },
+      {
+        text: 'true',
+        insertText: 'true ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '03',
+      },
+    ]);
+  });
+
+  it('should pad sortText correctly for larger arrays', () => {
+    const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+    const result = formatValuesToSuggestions(values, stringQuoter);
+
+    expect(result[0].sortText).toBe('001');
+    expect(result[9].sortText).toBe('010');
   });
 });
