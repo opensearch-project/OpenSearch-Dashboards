@@ -1,0 +1,2 @@
+fix:
+- [Enhancement] Use HTTP service instead of fetch for plugin check #9052 ([#9052](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9052))
