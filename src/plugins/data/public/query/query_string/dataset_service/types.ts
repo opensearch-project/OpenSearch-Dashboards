@@ -43,6 +43,13 @@ export interface DatasetTypeConfig {
   id: string;
   /** Human-readable title for the dataset type */
   title: string;
+  languageOverrides?: {
+    [language: string]: {
+      /** The override transfers the responsibility of handling the input from
+       * the language interceptor to the dataset type search strategy. */
+      hideDatePicker?: boolean;
+    };
+  };
   /** Metadata for UI representation */
   meta: {
     /** Icon to represent the dataset type */
@@ -51,7 +58,7 @@ export interface DatasetTypeConfig {
     tooltip?: string;
     /** Optional preference for search on page load else defaulted to true */
     searchOnLoad?: boolean;
-    /** Optional supportsTimeFilter determines if a time filter is needed */
+    /** Optional supportsTimeFilter determines if a time field is supported */
     supportsTimeFilter?: boolean;
     /** Optional isFieldLoadAsync determines if field loads are async */
     isFieldLoadAsync?: boolean;

@@ -55,6 +55,7 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
     query: { ...query, format: 'jdbc' },
     aggConfig,
     pollQueryResultsParams: context.body?.pollQueryResultsParams,
+    timeRange: context.body?.timeRange,
   });
   return from(
     http.fetch({

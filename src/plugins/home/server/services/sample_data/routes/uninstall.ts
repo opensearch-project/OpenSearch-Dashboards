@@ -62,27 +62,10 @@ export function createUninstallRoute(
         return response.notFound();
       }
 
-      const caller = dataSourceId
-        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
-        : context.core.opensearch.legacy.client.callAsCurrentUser;
-
-      for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
-        const dataIndexConfig = sampleDataset.dataIndices[i];
-        const index =
-          dataIndexConfig.indexName ?? createIndexName(sampleDataset.id, dataIndexConfig.id);
-
-        try {
-          await caller('indices.delete', { index });
-        } catch (err) {
-          return response.customError({
-            statusCode: err.status,
-            body: {
-              message: `Unable to delete sample data index "${index}", error: ${err.message}`,
-            },
-          });
-        }
-      }
-
+      /**
+       * Delete saved objects before removing the data index to avoid partial deletion
+       * of sample data when a read-only workspace user attempts to remove sample data.
+       */
       const savedObjectsList = getFinalSavedObjects({
         dataset: sampleDataset,
         workspaceId,
@@ -99,9 +82,30 @@ export function createUninstallRoute(
         // ignore 404s since users could have deleted some of the saved objects via the UI
         if (_.get(err, 'output.statusCode') !== 404) {
           return response.customError({
-            statusCode: err.status,
+            statusCode: err.status || _.get(err, 'output.statusCode'),
             body: {
               message: `Unable to delete sample dataset saved objects, error: ${err.message}`,
+            },
+          });
+        }
+      }
+
+      const caller = dataSourceId
+        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
+        : context.core.opensearch.legacy.client.callAsCurrentUser;
+
+      for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
+        const dataIndexConfig = sampleDataset.dataIndices[i];
+        const index =
+          dataIndexConfig.indexName ?? createIndexName(sampleDataset.id, dataIndexConfig.id);
+
+        try {
+          await caller('indices.delete', { index });
+        } catch (err) {
+          return response.customError({
+            statusCode: err.status,
+            body: {
+              message: `Unable to delete sample data index "${index}", error: ${err.message}`,
             },
           });
         }
