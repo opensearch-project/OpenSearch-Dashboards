@@ -50,7 +50,7 @@ const { createStateContainer, syncState } = jest.requireMock(
 const osdUrlStateStorage = ({
   set: jest.fn(),
   get: jest.fn(() => ({ linked: false })),
-  flush: jest.fn(),
+  flush: jest.fn().mockReturnValue(true),
 } as unknown) as IOsdUrlStateStorage;
 
 describe('createDashboardGlobalAndAppState', () => {
@@ -159,7 +159,7 @@ describe('updateStateUrl', () => {
     rawHistory.push(basePath);
     const history = new ScopedHistory(rawHistory, basePath);
 
-    updateStateUrl({
+    const changed = updateStateUrl({
       osdUrlStateStorage,
       state: dashboardAppState,
       scopedHistory: history,
@@ -170,6 +170,7 @@ describe('updateStateUrl', () => {
       replace: true,
     });
     expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
+    expect(changed).toBe(true);
   });
 
   test('preserve Dashboards scoped history state', () => {
