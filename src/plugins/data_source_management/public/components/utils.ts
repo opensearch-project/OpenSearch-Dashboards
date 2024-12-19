@@ -30,13 +30,14 @@ import { DataSourceGroupLabelOption } from './data_source_menu/types';
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { getManageDataSourceButton, getReloadButton } from './toast_button';
-import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from './constants';
+import { DatasourceTypeToDisplayName, DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from './constants';
 import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
 } from '../service/data_source_selection_service';
 import { DataSourceError } from '../types';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../constants';
+import { DataConnectionSavedObjectAttributes } from '../../../data_source/common/data_connections';
 
 export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
   const endpoint = `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceId}`;
@@ -50,8 +51,8 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
       title: dataConnection.name,
       type:
         {
-          S3GLUE: 'Amazon S3',
-          PROMETHEUS: 'Prometheus',
+          S3GLUE: DatasourceTypeToDisplayName.S3GLUE,
+          PROMETHEUS: DatasourceTypeToDisplayName.PROMETHEUS,
         }[dataConnection.connector] || dataConnection.connector,
       connectionType: DataSourceConnectionType.DirectQueryConnection,
       description: dataConnection.description,
@@ -179,6 +180,17 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
           };
         }) || []
     );
+}
+
+export async function getDataConnections(savedObjectsClient: SavedObjectsClientContract) {
+  return savedObjectsClient
+    .find<DataConnectionSavedObjectAttributes>({
+      type: 'data-connection',
+      perPage: 10000,
+    })
+    .then((response) => {
+      return response?.savedObjects ?? [];
+    });
 }
 
 export async function getDataSourcesWithFields(
