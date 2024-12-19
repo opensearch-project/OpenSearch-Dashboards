@@ -5,6 +5,8 @@
 
 import '@cypress/code-coverage/support';
 
+import './conditional_describers';
+
 import '../utils/commands';
 import '../utils/commands.osd';
 import '../utils/apps/commands';
