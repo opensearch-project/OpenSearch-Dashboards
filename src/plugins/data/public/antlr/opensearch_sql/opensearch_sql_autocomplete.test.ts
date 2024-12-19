@@ -50,20 +50,33 @@ describe('processVisitedRules', () => {
     expect(result.suggestAggregateFunctions).toBe(true);
   });
 
-  describe.skip('processVisitedRules', () => {
-    it('should suggest values for column when RULE_constant is present', () => {
+  describe('Test Specific Rules', () => {
+    it('RULE_columnName - should suggest values for column when rule is present', () => {
       const mockRules = new Map();
-      mockRules.set(OpenSearchSQLParser.RULE_constant, { ruleList: [] });
-
+      mockRules.set(OpenSearchSQLParser.RULE_columnName, { ruleList: [] });
       const tokenStream = ({ get: jest.fn(() => ({ type: 1 })) } as unknown) as TokenStream;
 
-      (getPreviousToken as jest.Mock).mockReturnValue({ text: 'column_name' });
+      const result = processVisitedRules(mockRules, 0, tokenStream);
+      expect(result.shouldSuggestColumns).toBe(true);
+    });
+
+    it('RULE_columnName - suggests column aliases', () => {
+      const mockRules = new Map();
+      mockRules.set(OpenSearchSQLParser.RULE_columnName, {
+        ruleList: [
+          OpenSearchSQLParser.RULE_groupByElements,
+          OpenSearchSQLParser.RULE_orderByElement,
+        ],
+      });
+      const tokenStream = ({ get: jest.fn(() => ({ type: 1 })) } as unknown) as TokenStream;
 
       const result = processVisitedRules(mockRules, 0, tokenStream);
-
-      expect(result.suggestValuesForColumn).toBe('column_name');
+      expect(result.shouldSuggestColumns).toBe(true);
+      expect(result.shouldSuggestColumnAliases).toBe(true);
     });
   });
+
+  // todo: rules column name, column aliases, predicates
 });
 
 describe('getParseTree', () => {
@@ -101,7 +114,7 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
       query
@@ -124,7 +137,7 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
       query
@@ -147,7 +160,7 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
       query
