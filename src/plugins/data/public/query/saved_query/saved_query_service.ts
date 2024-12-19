@@ -207,7 +207,8 @@ export const createSavedQueryService = (
   const getSavedQueryCount = async (): Promise<number> => {
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
-      perPage: 0,
+      // ToDo: Revert this back to `0` when Neo reports the count correctly irrespective of perPage.
+      perPage: 1,
       page: 1,
     });
     return response.total;

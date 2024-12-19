@@ -1,0 +1,2 @@
+refactor:
+- [Workspace] Integrate dashboard admin with dynamic config ([#8137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8137))
