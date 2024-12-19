@@ -109,7 +109,6 @@ export const fetchColumnValues = async (
 
   const allowedType = ['string'];
   // don't return values if ui settings prevent it or the field type isn't allowed
-  // todo: check if a field's aggretability means anything
   if (
     !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
     !fieldInOsd ||

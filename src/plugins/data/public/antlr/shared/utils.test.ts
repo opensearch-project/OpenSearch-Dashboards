@@ -4,11 +4,20 @@
  */
 
 import { of } from 'rxjs';
-import { fetchData, formatFieldsToSuggestions, formatValuesToSuggestions } from './utils';
-import { QueryStringManager } from '../../query';
-import { IndexPattern } from '../../index_patterns';
+import {
+  fetchColumnValues,
+  fetchData,
+  formatFieldsToSuggestions,
+  formatValuesToSuggestions,
+} from './utils';
+import { IQueryStart, QueryStringContract, QueryStringManager } from '../../query';
+import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { monaco } from '@osd/monaco';
 import { SuggestionItemDetailsTags } from './constants';
+import { DataPublicPluginStart, IDataPluginServices } from '../../types';
+import { HttpSetup } from 'opensearch-dashboards/public';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { UI_SETTINGS } from '../../../common';
 
 describe('fetchData', () => {
   it('should fetch data using the dataSourceRequestHandler', async () => {
@@ -261,5 +270,120 @@ describe('formatValuesToSuggestions', () => {
 
     expect(result[0].sortText).toBe('001');
     expect(result[9].sortText).toBe('010');
+  });
+});
+
+describe('fetchColumnValues', () => {
+  let mockServices: IDataPluginServices;
+  let mockHttp: HttpSetup;
+  let mockUiSettings: IUiSettingsClient;
+
+  beforeEach(() => {
+    mockHttp = ({
+      fetch: jest.fn(),
+    } as unknown) as HttpSetup;
+
+    mockUiSettings = ({
+      get: jest.fn().mockImplementation((setting) => {
+        if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) {
+          return true;
+        }
+        if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT) {
+          return 10;
+        }
+      }),
+    } as unknown) as IUiSettingsClient;
+
+    mockServices = ({
+      http: mockHttp,
+      uiSettings: mockUiSettings,
+      data: ({
+        query: ({
+          queryString: ({
+            getQuery: jest.fn().mockReturnValue({ dataset: { dataSource: { id: 'test-id' } } }),
+          } as unknown) as QueryStringContract,
+        } as unknown) as IQueryStart,
+      } as unknown) as DataPublicPluginStart,
+    } as unknown) as IDataPluginServices;
+  });
+
+  it('should return boolean values for boolean fields', async () => {
+    const result = await fetchColumnValues('test-table', 'boolean-column', mockServices, {
+      type: 'boolean',
+    } as IndexPatternField);
+
+    expect(result).toEqual(['true', 'false']);
+  });
+
+  it('should return empty array when value suggestions are disabled', async () => {
+    (mockUiSettings.get as jest.Mock).mockImplementationOnce((setting) => {
+      if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) {
+        return false;
+      }
+    });
+
+    const result = await fetchColumnValues('test-table', 'test-column', mockServices, {
+      type: 'string',
+    } as IndexPatternField);
+
+    expect(result).toEqual([]);
+  });
+
+  it('should return empty array for unsupported field types', async () => {
+    const result = await fetchColumnValues('test-table', 'number-column', mockServices, {
+      type: 'number',
+    } as IndexPatternField);
+
+    expect(result).toEqual([]);
+  });
+
+  it('should fetch and return column values for string fields', async () => {
+    const mockResponse = {
+      body: {
+        fields: [
+          {
+            values: ['value1', 'value2', 'value3'],
+          },
+        ],
+      },
+    };
+
+    (mockHttp.fetch as jest.Mock).mockResolvedValue(mockResponse);
+
+    const result = await fetchColumnValues('test-table', 'string-column', mockServices, {
+      type: 'string',
+    } as IndexPatternField);
+
+    expect(mockHttp.fetch).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/api/enhancements/search/sql',
+      body: JSON.stringify({
+        query: {
+          query:
+            'SELECT string-column FROM test-table GROUP BY string-column ORDER BY COUNT(string-column) DESC LIMIT 10',
+          language: 'SQL',
+          format: 'jdbc',
+          dataset: { dataSource: { id: 'test-id' } },
+        },
+      }),
+    });
+
+    expect(result).toEqual(['value1', 'value2', 'value3']);
+  });
+
+  it('should handle API errors', async () => {
+    (mockHttp.fetch as jest.Mock).mockRejectedValue(new Error('SQL API Error'));
+
+    await expect(
+      fetchColumnValues('test-table', 'string-column', mockServices, {
+        type: 'string',
+      } as IndexPatternField)
+    ).rejects.toThrow('SQL API Error');
+  });
+
+  it('should return empty array when field is undefined', async () => {
+    const result = await fetchColumnValues('test-table', 'string-column', mockServices, undefined);
+
+    expect(result).toEqual([]);
   });
 });
