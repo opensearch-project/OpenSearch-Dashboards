@@ -13,9 +13,14 @@ import { createDataExplorerServicesMock } from '../../../../../data_explorer/pub
 import { DiscoverViewServices } from '../../../build_services';
 import { discoverPluginMock } from '../../../mocks';
 import { ResultStatus, useSearch } from './use_search';
+import { ISearchSource, UI_SETTINGS } from '../../../../../data/common';
 
 jest.mock('./use_index_pattern', () => ({
-  useIndexPattern: jest.fn(),
+  useIndexPattern: jest.fn().mockReturnValue(true),
+}));
+
+jest.mock('../../helpers/validate_time_range', () => ({
+  validateTimeRange: jest.fn().mockReturnValue(true),
 }));
 
 const mockQuery = {
@@ -57,6 +62,10 @@ const mockSavedSearchEmptyQuery = {
   getFullPath: jest.fn(),
   getOpenSearchType: jest.fn(),
 };
+
+jest.mock('./update_search_source', () => ({
+  updateSearchSource: ({ searchSource }: { searchSource?: ISearchSource }) => searchSource,
+}));
 
 const createMockServices = (): DiscoverViewServices => {
   const dataExplorerServicesMock = createDataExplorerServicesMock();
@@ -187,7 +196,10 @@ describe('useSearch', () => {
     const initialStartTime = result.current.data$.getValue().queryStatus?.startTime;
     expect(initialStartTime).toBeDefined();
 
-    rerender();
+    act(() => {
+      rerender();
+    });
+
     const newStartTime = result.current.data$.getValue().queryStatus?.startTime;
     expect(newStartTime).toBeDefined();
     expect(newStartTime).not.toEqual(initialStartTime);
@@ -271,5 +283,81 @@ describe('useSearch', () => {
     });
 
     expect(services.data.query.queryString.setQuery).toBeCalledWith(mockDefaultQuery);
+  });
+
+  it('should call fetch without long numerals support when configured not to', async () => {
+    const services = createMockServices();
+    (services.uiSettings.get as jest.Mock).mockImplementation((key) =>
+      Promise.resolve(key === UI_SETTINGS.DATA_WITH_LONG_NUMERALS ? false : undefined)
+    );
+
+    const mockDatasetUpdates$ = new Subject();
+    services.data.query.queryString.getUpdates$ = jest.fn().mockReturnValue(mockDatasetUpdates$);
+
+    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
+    });
+
+    await act(async () => {
+      try {
+        await waitForNextUpdate({ timeout: 1000 });
+      } catch (_) {
+        // Do nothing.
+      }
+    });
+
+    expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        withLongNumeralsSupport: false,
+      })
+    );
+  });
+
+  it('should call fetch with long numerals support when configured to', async () => {
+    const services = createMockServices();
+    (services.uiSettings.get as jest.Mock).mockImplementation((key) =>
+      Promise.resolve(key === UI_SETTINGS.DATA_WITH_LONG_NUMERALS ? true : undefined)
+    );
+
+    const mockDatasetUpdates$ = new Subject();
+    services.data.query.queryString.getUpdates$ = jest.fn().mockReturnValue(mockDatasetUpdates$);
+
+    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
+    });
+
+    await act(async () => {
+      try {
+        await waitForNextUpdate({ timeout: 1000 });
+      } catch (_) {
+        // Do nothing.
+      }
+    });
+
+    expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        withLongNumeralsSupport: true,
+      })
+    );
   });
 });
