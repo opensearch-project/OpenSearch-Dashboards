@@ -4,7 +4,6 @@
  */
 
 import {
-  EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +12,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSmallButton,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
@@ -133,15 +133,15 @@ export const AccelerationTable = ({
 
   const RefreshButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         onClick={handleRefresh}
         isLoading={
           isRefreshing ||
           isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)
         }
       >
-        Refresh
-      </EuiButton>
+        Update
+      </EuiSmallButton>
     );
   };
 
@@ -165,7 +165,7 @@ export const AccelerationTable = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="rowReverse" alignItems="flexEnd">
+            <EuiFlexGroup direction="rowReverse" alignItems="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <CreateAccelerationFlyoutButton
                   dataSourceName={dataSourceName}
