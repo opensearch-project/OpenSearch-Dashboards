@@ -189,7 +189,7 @@ export async function getDataConnections(savedObjectsClient: SavedObjectsClientC
       perPage: 10000,
     })
     .then((response) => {
-      return response?.savedObjects;
+      return response?.savedObjects ?? [];
     });
 }
 

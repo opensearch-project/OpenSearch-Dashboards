@@ -193,8 +193,11 @@ export const ManageDirectQueryDataConnectionsTable = ({
         ]);
         setData([...openSearchConnections, ...directQueryConnections]);
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log('Error fetching OpenSearch and Direct Query Connections', error);
+        notifications.toasts.addDanger(
+          i18n.translate('dataSourcesManagement.directQueryTable.fetchAllConnections', {
+            defaultMessage: 'Could not fetch OpenSearch and Direct Query Connections',
+          })
+        );
       } finally {
         setIsLoading(false);
       }
@@ -420,19 +423,18 @@ export const ManageDirectQueryDataConnectionsTable = ({
         ) {
           // TODO: link to details page for security lake and cloudwatch
           return <span style={indentStyle}> {name}</span>;
-        } else {
-          return (
-            <EuiButtonEmpty
-              size="xs"
-              href={`${window.location.href.replace(/\/$/, '')}/${path}`}
-              style={indentStyle}
-              disabled={record.id === LOCAL_CLUSTER}
-              flush="left"
-            >
-              {name}
-            </EuiButtonEmpty>
-          );
         }
+        return (
+          <EuiButtonEmpty
+            size="xs"
+            href={`${window.location.href.replace(/\/$/, '')}/${path}`}
+            style={indentStyle}
+            disabled={record.id === LOCAL_CLUSTER}
+            flush="left"
+          >
+            {name}
+          </EuiButtonEmpty>
+        );
       },
     },
     {
