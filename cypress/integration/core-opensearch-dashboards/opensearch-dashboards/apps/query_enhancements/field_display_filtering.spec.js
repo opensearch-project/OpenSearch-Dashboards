@@ -5,6 +5,7 @@
 
 import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
 import { DataExplorerPage } from '../../../../../utils/dashboards/data_explorer/data_explorer_page.po.js';
+import { DATA_EXPLORER_PAGE_ELEMENTS } from '../../../../../utils/dashboards/data_explorer/elements.js';
 import {
   DATASOURCE_NAME,
   INDEX_NAME,
@@ -22,6 +23,13 @@ function selectDataSet(datasetType, language) {
       break;
     case 'index_pattern':
       DataExplorerPage.selectIndexPatternDataset(INDEX_PATTERN_NAME, language);
+      break;
+  }
+}
+
+function setDateRange(datasetType, language) {
+  switch (datasetType) {
+    case 'index_pattern':
       if (language !== 'OpenSearch SQL') {
         cy.setSearchAbsoluteDateRange(SEARCH_ABSOLUTE_START_DATE, SEARCH_ABSOLUTE_END_DATE);
       }
@@ -29,33 +37,62 @@ function selectDataSet(datasetType, language) {
   }
 }
 
-function checkTableFieldFilterActions(datasetType, language, isEnabled) {
+function checkTableFieldFilterActions(datasetType, language, shouldExist) {
   selectDataSet(datasetType, language);
+  setDateRange(datasetType, language);
 
   DataExplorerPage.getDiscoverQueryHits().should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
-  DataExplorerPage.checkDocTableFirstFieldFilterForAndOutButton(isEnabled);
+  DataExplorerPage.verifyDocTableRowFilterForAndOutButton(0, shouldExist);
 
-  if (isEnabled) {
-    DataExplorerPage.checkDocTableFirstFieldFilterForButtonFiltersCorrectField();
-    DataExplorerPage.checkDocTableFirstFieldFilterOutButtonFiltersCorrectField();
+  if (shouldExist) {
+    DataExplorerPage.verifyDocTableFilterAction(
+      0,
+      DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON,
+      '10,000',
+      '1',
+      true
+    );
+    DataExplorerPage.verifyDocTableFilterAction(
+      0,
+      DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON,
+      '10,000',
+      '9,999',
+      false
+    );
   }
 }
 
 function checkExpandedTableFilterActions(datasetType, language, isEnabled) {
   selectDataSet(datasetType, language);
+  setDateRange(datasetType, language);
 
   DataExplorerPage.getDiscoverQueryHits().should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
   DataExplorerPage.toggleDocTableRow(0);
-  DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
+  DataExplorerPage.verifyDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
     isEnabled
   );
-  DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
+  DataExplorerPage.verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
 
   if (isEnabled) {
-    DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField();
-    DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField();
-    DataExplorerPage.checkDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField();
+    DataExplorerPage.verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField(
+      0,
+      0,
+      '10,000',
+      '1'
+    );
+    DataExplorerPage.verifyDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField(
+      0,
+      0,
+      '10,000',
+      '9,999'
+    );
+    DataExplorerPage.verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField(
+      0,
+      0,
+      '10,000',
+      '10,000'
+    );
   }
 }
 

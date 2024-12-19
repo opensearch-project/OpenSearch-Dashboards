@@ -6,16 +6,10 @@
 import { DATA_EXPLORER_PAGE_ELEMENTS } from './elements.js';
 
 export class DataExplorerPage {
-  /**
-   * Get the Dataset selector button
-   */
   static getDatasetSelectorButton() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_BUTTON);
   }
 
-  /**
-   * Get the all Datasets button in the Datasets popup.
-   */
   static getAllDatasetsButton() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.ALL_DATASETS_BUTTON);
   }
@@ -41,9 +35,6 @@ export class DataExplorerPage {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_SELECT_DATA_BUTTON);
   }
 
-  /**
-   * Get the Dataset Explorer Window.
-   */
   static getDatasetExplorerWindow() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_EXPLORER_WINDOW);
   }
@@ -55,16 +46,13 @@ export class DataExplorerPage {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DATASET_SELECTOR_NEXT_BUTTON);
   }
 
-  /**
-   * Get Doc Table
-   */
   static getDocTable() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE);
   }
 
   /**
    * Get specific row of DocTable.
-   * @param rowNumber Integer starts from 0 for the first row
+   * @param {number} rowNumber Integer starts from 0 for the first row
    */
   static getDocTableRow(rowNumber) {
     return DataExplorerPage.getDocTable().get('tbody tr').eq(rowNumber);
@@ -72,8 +60,8 @@ export class DataExplorerPage {
 
   /**
    * Get specific field of DocTable.
-   * @param columnNumber Integer starts from 0 for the first column
-   * @param rowNumber Integer starts from 0 for the first row
+   * @param {number} columnNumber Integer starts from 0 for the first column
+   * @param {number} rowNumber Integer starts from 0 for the first row
    */
   static getDocTableField(columnNumber, rowNumber) {
     return DataExplorerPage.getDocTableRow(rowNumber)
@@ -90,30 +78,18 @@ export class DataExplorerPage {
     });
   }
 
-  /**
-   * Get query hits.
-   */
   static getDiscoverQueryHits() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.DISCOVER_QUERY_HITS);
   }
 
-  /**
-   * Get Table Field Filter Out Button.
-   */
   static getTableFieldFilterOutButton() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON);
   }
 
-  /**
-   * Get Table Field Filter For Button.
-   */
   static getTableFieldFilterForButton() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON);
   }
 
-  /**
-   * Get Filter Bar.
-   */
   static getFilterBar() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.GLOBAL_FILTER_BAR);
   }
@@ -132,14 +108,14 @@ export class DataExplorerPage {
    * @param expandedDocument cypress representation of the Doc Table Field Expanded Document
    */
   static findDocTableExpandedDocRowsIn(expandedDocument) {
-    return expandedDocument.findElementsByTestIdLike(
+    return expandedDocument.findElementByTestIdLike(
       DATA_EXPLORER_PAGE_ELEMENTS.DOC_TABLE_EXPANDED_DOC_COLUMN_ROW_PREFIX
     );
   }
 
   /**
    * Get Row for Column by fieldName in Doc Table Field Expanded Document.
-   * @param fieldName Field name for row in Expanded Document.
+   * @param {string} fieldName Field name for row in Expanded Document.
    * @example getDocTableExpandedDocColumnRow('id')
    */
   static getDocTableExpandedDocRow(fieldName) {
@@ -168,8 +144,8 @@ export class DataExplorerPage {
 
   /**
    * Get the "expandedDocumentRowNumber"th row from the expanded document from the "docTableRowNumber"th row of the DocTable.
-   * @param docTableRowNumber Integer starts from 0 for the first row
-   * @param expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @param {number} docTableRowNumber Integer starts from 0 for the first row
+   * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
    * @example
    * // returns the first row from the expanded document from the second row of the DocTable.
    * getExpandedDocRow(1, 0);
@@ -182,8 +158,8 @@ export class DataExplorerPage {
 
   /**
    * Get the value for the "expandedDocumentRowNumber"th row from the expanded document from the "docTableRowNumber"th row of the DocTable.
-   * @param docTableRowNumber Integer starts from 0 for the first row
-   * @param expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @param {number} docTableRowNumber Integer starts from 0 for the first row
+   * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
    * @example
    * // returns the value of the field from the first row from the expanded document from the second row of the DocTable.
    * getExpandedDocRow(1, 0);
@@ -198,8 +174,8 @@ export class DataExplorerPage {
 
   /**
    * Get the field name for the "expandedDocumentRowNumber"th row from the expanded document from the "docTableRowNumber"th row of the DocTable.
-   * @param docTableRowNumber Integer starts from 0 for the first row
-   * @param expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @param {number} docTableRowNumber Integer starts from 0 for the first row
+   * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
    * @example
    * // returns the name of the field from the first row from the expanded document from the second row of the DocTable.
    * getExpandedDocRow(1, 0);
@@ -220,9 +196,6 @@ export class DataExplorerPage {
     );
   }
 
-  /**
-   * Get Selected fields list in sidebar.
-   */
   static getSideBarSelectedFieldsList() {
     return cy.getElementByTestId(DATA_EXPLORER_PAGE_ELEMENTS.SIDE_BAR_SELECTED_FIELDS_LIST);
   }
@@ -274,7 +247,7 @@ export class DataExplorerPage {
 
   /**
    * Select a Time Field in the Dataset Selector
-   * @param timeField Timefield for Language specific Time field. PPL allows "birthdate", "timestamp" and "I don't want to use the time filter"
+   * @param {string} timeField Timefield for Language specific Time field. PPL allows "birthdate", "timestamp" and "I don't want to use the time filter"
    */
   static selectDatasetTimeField(timeField) {
     DataExplorerPage.getDatasetTimeSelector().select(timeField);
@@ -282,7 +255,7 @@ export class DataExplorerPage {
 
   /**
    * Select a language in the Dataset Selector for Index
-   * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL"
+   * @param {string} datasetLanguage Index supports "OpenSearch SQL" and "PPL"
    */
   static selectIndexDatasetLanguage(datasetLanguage) {
     DataExplorerPage.getDatasetLanguageSelector().select(datasetLanguage);
@@ -292,9 +265,9 @@ export class DataExplorerPage {
 
   /**
    * Select an index dataset.
-   * @param indexClusterName Name of the cluster to be used for the Index.
-   * @param indexName Name of the index dataset to be used.
-   * @param datasetLanguage Index supports "OpenSearch SQL" and "PPL".
+   * @param {string} indexClusterName Name of the cluster to be used for the Index.
+   * @param {string} indexName Name of the index dataset to be used.
+   * @param {string} datasetLanguage Index supports "OpenSearch SQL" and "PPL".
    */
   static selectIndexDataset(indexClusterName, indexName, datasetLanguage) {
     DataExplorerPage.openDatasetExplorerWindow();
@@ -309,7 +282,7 @@ export class DataExplorerPage {
 
   /**
    * Select a language in the Dataset Selector for Index Pattern
-   * @param datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
+   * @param {string} datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
    */
   static selectIndexPatternDatasetLanguage(datasetLanguage) {
     DataExplorerPage.getDatasetLanguageSelector().select(datasetLanguage);
@@ -318,8 +291,8 @@ export class DataExplorerPage {
 
   /**
    * Select an index pattern dataset.
-   * @param indexPatternName Name of the index pattern to be used.
-   * @param datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
+   * @param {string} indexPatternName Name of the index pattern to be used.
+   * @param {string} datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
    */
   static selectIndexPatternDataset(indexPatternName, datasetLanguage) {
     DataExplorerPage.openDatasetExplorerWindow();
@@ -333,7 +306,7 @@ export class DataExplorerPage {
 
   /**
    * Toggle expansion of row rowNumber of Doc Table.
-   * @param rowNumber rowNumber of Doc Table starts at 0 for row 1.
+   * @param {number} rowNumber rowNumber of Doc Table starts at 0 for row 1.
    */
   static toggleDocTableRow(rowNumber) {
     DataExplorerPage.getDocTableRow(rowNumber).within(() => {
@@ -343,17 +316,17 @@ export class DataExplorerPage {
 
   /**
    * Check the filter pill text matches expectedFilterText.
-   * @param expectedFilterText expected text in filter pill.
+   * @param {string} expectedFilterText expected text in filter pill.
    */
-  static checkFilterPillText(expectedFilterText) {
+  static verifyFilterPillText(expectedFilterText) {
     DataExplorerPage.getGlobalQueryEditorFilterValue().should('have.text', expectedFilterText);
   }
 
   /**
    * Check the entire filter pill text matches expectedFilterText.
-   * @param expectedFilterText expected text in filter pill.
+   * @param {string} expectedFilterText expected text in filter pill.
    */
-  static checkFullFilterPillText(expectedFilterText) {
+  static verifyFullFilterPillText(expectedFilterText) {
     // GLOBAL_QUERY_EDITOR_FILTER_VALUE gives the inner element, but we may want all the text in the filter pill
     DataExplorerPage.getGlobalQueryEditorFilterValue()
       .parent()
@@ -362,67 +335,61 @@ export class DataExplorerPage {
 
   /**
    * Check the query hit text matches expectedQueryHitText.
-   * @param expectedQueryHitsText expected text for query hits
+   * @param {string} expectedQueryHitsText expected text for query hits. Commas must be added e.g. 10,000
    */
-  static checkQueryHitsText(expectedQueryHitsText) {
+  static verifyQueryHitsText(expectedQueryHitsText) {
     DataExplorerPage.getDiscoverQueryHits().should('have.text', expectedQueryHitsText);
   }
 
   /**
-   * Check if the first Table Field's Filter For and Filter Out buttons exists.
-   * @param isExists Boolean determining if these button should exist
+   * Check if the Doc table's rowNumberth row's Filter For and Filter Out buttons exists.
+   * @param {number} rowNumber Doc table row number to check (First row is row 0)
+   * @param {boolean} shouldExist Should this button exist
    */
-  static checkDocTableFirstFieldFilterForAndOutButton(isExists) {
-    const shouldText = isExists ? 'exist' : 'not.exist';
-    DataExplorerPage.getDocTableField(0, 0).within(() => {
+  static verifyDocTableRowFilterForAndOutButton(rowNumber, shouldExist) {
+    const shouldText = shouldExist ? 'exist' : 'not.exist';
+    DataExplorerPage.getDocTableField(0, rowNumber).within(() => {
       DataExplorerPage.getTableFieldFilterForButton().should(shouldText);
       DataExplorerPage.getTableFieldFilterOutButton().should(shouldText);
     });
   }
 
   /**
-   * Check the Doc Table first Field's Filter For button filters the correct value.
+   * Check the Doc Table rowNumberth row's Filter buttons filters the correct value.
+   * @param {number} rowNumber Doc table row number to check (First row is row 0)
+   * @param {DATA_EXPLORER_PAGE_ELEMENTS} filterElement data-test-sub element for filter.
+   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
+   * @param {boolean} shouldMatch boolean to determine if same rowNumber text should match after filter is applied
+   * @example verifyDocTableFilterAction(0, DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON, '10,000', '1', true)
    */
-  static checkDocTableFirstFieldFilterForButtonFiltersCorrectField() {
-    DataExplorerPage.getDocTableField(0, 0).then(($field) => {
-      const filterFieldText = $field.find('span span').text();
-      $field
-        .find(`[data-test-subj="${DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON}"]`)
-        .click();
-      DataExplorerPage.checkFilterPillText(filterFieldText);
-      DataExplorerPage.checkQueryHitsText('1'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
-      DataExplorerPage.getDocTableField(0, 0)
-        .find('span span')
-        .should('have.text', filterFieldText);
-    });
-    DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
-    DataExplorerPage.checkQueryHitsText('10,000');
-  }
+  static verifyDocTableFilterAction(
+    rowNumber,
+    filterElement,
+    expectedQueryHitsWithoutFilter,
+    expectedQueryHitsAfterFilterApplied,
+    shouldMatch
+  ) {
+    DataExplorerPage.getDocTableField(0, rowNumber).then(($field) => {
+      const shouldText = shouldMatch ? 'have.text' : 'not.have.text';
 
-  /**
-   * Check the Doc Table first Field's Filter Out button filters the correct value.
-   */
-  static checkDocTableFirstFieldFilterOutButtonFiltersCorrectField() {
-    DataExplorerPage.getDocTableField(0, 0).then(($field) => {
       const filterFieldText = $field.find('span span').text();
-      $field
-        .find(`[data-test-subj="${DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON}"]`)
-        .click();
-      DataExplorerPage.checkFilterPillText(filterFieldText);
-      DataExplorerPage.checkQueryHitsText('9,999'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
-      DataExplorerPage.getDocTableField(0, 0)
+      $field.find(`[data-test-subj="${filterElement}"]`).click();
+      DataExplorerPage.verifyFilterPillText(filterFieldText);
+      DataExplorerPage.verifyQueryHitsText(expectedQueryHitsAfterFilterApplied); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+      DataExplorerPage.getDocTableField(0, rowNumber)
         .find('span span')
-        .should('not.have.text', filterFieldText);
+        .should(shouldText, filterFieldText);
     });
     DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
-    DataExplorerPage.checkQueryHitsText('10,000');
+    DataExplorerPage.verifyQueryHitsText(expectedQueryHitsWithoutFilter);
   }
 
   /**
    * Check if the first expanded Doc Table Field's first row's Filter For, Filter Out and Exists Filter buttons are disabled.
-   * @param isEnabled Boolean determining if these buttons are disabled
+   * @param {boolean} isEnabled Boolean determining if these buttons are disabled
    */
-  static checkDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(isEnabled) {
+  static verifyDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(isEnabled) {
     const shouldText = isEnabled ? 'be.enabled' : 'be.disabled';
     DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
       DataExplorerPage.getDocTableExpandedDocRowFilterForButton().should(shouldText);
@@ -432,45 +399,77 @@ export class DataExplorerPage {
   }
 
   /**
-   * Check the first expanded Doc Table Field's first row's Filter For button filters the correct value.
+   * Check the Filter For button in the expandedDocumentRowNumberth field in the expanded Document filters the correct value.
+   * @param {number} docTableRowNumber Integer starts from 0 for the first row
+   * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
    */
-  static checkDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField() {
-    DataExplorerPage.getExpandedDocRowValue(0, 0).then(($expandedDocumentRowValue) => {
-      const filterFieldText = $expandedDocumentRowValue.text();
-      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
-        DataExplorerPage.getDocTableExpandedDocRowFilterForButton().click();
-      });
-      DataExplorerPage.checkFilterPillText(filterFieldText);
-      DataExplorerPage.checkQueryHitsText('1'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
-      DataExplorerPage.getExpandedDocRowValue(0, 0).should('have.text', filterFieldText);
-    });
+  static verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField(
+    docTableRowNumber,
+    expandedDocumentRowNumber,
+    expectedQueryHitsWithoutFilter,
+    expectedQueryHitsAfterFilterApplied
+  ) {
+    DataExplorerPage.getExpandedDocRowValue(docTableRowNumber, expandedDocumentRowNumber).then(
+      ($expandedDocumentRowValue) => {
+        const filterFieldText = $expandedDocumentRowValue.text();
+        DataExplorerPage.getExpandedDocRow(docTableRowNumber, expandedDocumentRowNumber).within(
+          () => {
+            DataExplorerPage.getDocTableExpandedDocRowFilterForButton().click();
+          }
+        );
+        DataExplorerPage.verifyFilterPillText(filterFieldText);
+        DataExplorerPage.verifyQueryHitsText(expectedQueryHitsAfterFilterApplied); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+        DataExplorerPage.getExpandedDocRowValue(
+          docTableRowNumber,
+          expandedDocumentRowNumber
+        ).should('have.text', filterFieldText);
+      }
+    );
     DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
-    DataExplorerPage.checkQueryHitsText('10,000');
+    DataExplorerPage.verifyQueryHitsText(expectedQueryHitsWithoutFilter);
   }
 
   /**
-   * Check the first expanded Doc Table Field's first row's Filter Out button filters the correct value.
+   * Check the Filter Out button in the expandedDocumentRowNumberth field in the expanded Document filters the correct value.
+   * @param {number} docTableRowNumber Integer starts from 0 for the first row
+   * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
    */
-  static checkDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField() {
-    DataExplorerPage.getExpandedDocRowValue(0, 0).then(($expandedDocumentRowValue) => {
-      const filterFieldText = $expandedDocumentRowValue.text();
-      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
-        DataExplorerPage.getDocTableExpandedDocRowFilterOutButton().click();
-      });
-      DataExplorerPage.checkFilterPillText(filterFieldText);
-      DataExplorerPage.checkQueryHitsText('9,999'); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
-      DataExplorerPage.toggleDocTableRow(0);
-      DataExplorerPage.getExpandedDocRowValue(0, 0).should('not.have.text', filterFieldText);
-    });
+  static verifyDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField(
+    docTableRowNumber,
+    expandedDocumentRowNumber,
+    expectedQueryHitsWithoutFilter,
+    expectedQueryHitsAfterFilterApplied
+  ) {
+    DataExplorerPage.getExpandedDocRowValue(docTableRowNumber, expandedDocumentRowNumber).then(
+      ($expandedDocumentRowValue) => {
+        const filterFieldText = $expandedDocumentRowValue.text();
+        DataExplorerPage.getExpandedDocRow(docTableRowNumber, expandedDocumentRowNumber).within(
+          () => {
+            DataExplorerPage.getDocTableExpandedDocRowFilterOutButton().click();
+          }
+        );
+        DataExplorerPage.verifyFilterPillText(filterFieldText);
+        DataExplorerPage.verifyQueryHitsText(expectedQueryHitsAfterFilterApplied); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+        DataExplorerPage.toggleDocTableRow(docTableRowNumber);
+        DataExplorerPage.getExpandedDocRowValue(
+          docTableRowNumber,
+          expandedDocumentRowNumber
+        ).should('not.have.text', filterFieldText);
+      }
+    );
     DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
-    DataExplorerPage.checkQueryHitsText('10,000');
-    DataExplorerPage.toggleDocTableRow(0);
+    DataExplorerPage.verifyQueryHitsText(expectedQueryHitsWithoutFilter);
+    DataExplorerPage.toggleDocTableRow(docTableRowNumber);
   }
 
   /**
    * Check the first expanded Doc Table Field's first row's Toggle Column button has intended behavior.
    */
-  static checkDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior() {
+  static verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior() {
     DataExplorerPage.getExpandedDocRowFieldName(0, 0).then(($expandedDocumentRowFieldText) => {
       const fieldText = $expandedDocumentRowFieldText.text();
       DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
@@ -491,17 +490,30 @@ export class DataExplorerPage {
 
   /**
    * Check the first expanded Doc Table Field's first row's Exists Filter button filters the correct Field.
+   * @param {number} docTableRowNumber Integer starts from 0 for the first row
+   * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
    */
-  static checkDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField() {
-    DataExplorerPage.getExpandedDocRowFieldName(0, 0).then(($expandedDocumentRowField) => {
-      const filterFieldText = $expandedDocumentRowField.text();
-      DataExplorerPage.getExpandedDocRow(0, 0).within(() => {
-        DataExplorerPage.getDocTableExpandedDocRowExistsFilterButton().click();
-      });
-      DataExplorerPage.checkFullFilterPillText(filterFieldText + ': ' + 'exists');
-      DataExplorerPage.checkQueryHitsText('10,000');
-    });
+  static verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField(
+    docTableRowNumber,
+    expandedDocumentRowNumber,
+    expectedQueryHitsWithoutFilter,
+    expectedQueryHitsAfterFilterApplied
+  ) {
+    DataExplorerPage.getExpandedDocRowFieldName(docTableRowNumber, expandedDocumentRowNumber).then(
+      ($expandedDocumentRowField) => {
+        const filterFieldText = $expandedDocumentRowField.text();
+        DataExplorerPage.getExpandedDocRow(docTableRowNumber, expandedDocumentRowNumber).within(
+          () => {
+            DataExplorerPage.getDocTableExpandedDocRowExistsFilterButton().click();
+          }
+        );
+        DataExplorerPage.verifyFullFilterPillText(filterFieldText + ': ' + 'exists');
+        DataExplorerPage.verifyQueryHitsText(expectedQueryHitsAfterFilterApplied);
+      }
+    );
     DataExplorerPage.getFilterBar().find('[aria-label="Delete"]').click();
-    DataExplorerPage.checkQueryHitsText('10,000');
+    DataExplorerPage.verifyQueryHitsText(expectedQueryHitsWithoutFilter);
   }
 }
