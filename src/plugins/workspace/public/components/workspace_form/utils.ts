@@ -202,114 +202,14 @@ export const convertPermissionsToPermissionSettings = (permissions: SavedObjectP
   return finalPermissionSettings;
 };
 
-const validateUserPermissionSetting = (
-  setting: WorkspaceUserPermissionSetting,
-  previousPermissionSettings: Array<Partial<WorkspacePermissionSetting>>
-) => {
-  if (!!setting.userId && hasSameUserIdOrGroup(previousPermissionSettings, setting)) {
-    return {
-      code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
-      message: i18n.translate(
-        'workspace.form.permission.invalidate.DuplicateUserIdPermissionSetting',
-        {
-          defaultMessage: 'User must be unique. Enter a unique user.',
-        }
-      ),
-    };
-  }
-};
-
-const validateUserGroupPermissionSetting = (
-  setting: WorkspaceUserGroupPermissionSetting,
-  previousPermissionSettings: Array<Partial<WorkspacePermissionSetting>>
-) => {
-  if (!!setting.group && hasSameUserIdOrGroup(previousPermissionSettings, setting)) {
-    return {
-      code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
-      message: i18n.translate(
-        'workspace.form.permission.invalidate.duplicateUserGroupPermissionSetting',
-        {
-          defaultMessage: 'User group must be unique. Enter a unique user group.',
-        }
-      ),
-    };
-  }
-};
-
-const validatePermissionSettings = (
-  permissionSettings?: Array<
-    Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
-  >
-) => {
-  const permissionSettingOwnerMissingError = {
-    code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-    message: i18n.translate('workspace.form.permission.setting.owner.missing', {
-      defaultMessage: 'Add a workspace owner.',
-    }),
-  };
-  if (!permissionSettings) {
-    return {
-      overall: permissionSettingOwnerMissingError,
-    };
-  }
-
-  const permissionSettingsErrors: { [key: number]: WorkspaceFormError } = {};
-  for (let i = 0; i < permissionSettings.length; i++) {
-    const setting = permissionSettings[i];
-    if (!setting.type) {
-      permissionSettingsErrors[setting.id] = {
-        code: WorkspaceFormErrorCode.InvalidPermissionType,
-        message: i18n.translate('workspace.form.permission.invalidate.type', {
-          defaultMessage: 'Invalid type',
-        }),
-      };
-    } else if (!setting.modes || setting.modes.length === 0) {
-      permissionSettingsErrors[setting.id] = {
-        code: WorkspaceFormErrorCode.InvalidPermissionModes,
-        message: i18n.translate('workspace.form.permission.invalidate.modes', {
-          defaultMessage: 'Invalid permission modes',
-        }),
-      };
-    } else if (setting.type === WorkspacePermissionItemType.User) {
-      const validateResult = validateUserPermissionSetting(
-        setting as WorkspaceUserPermissionSetting,
-        permissionSettings.slice(0, i)
-      );
-      if (validateResult) {
-        permissionSettingsErrors[setting.id] = validateResult;
-      }
-    } else if (setting.type === WorkspacePermissionItemType.Group) {
-      const validateResult = validateUserGroupPermissionSetting(
-        setting as WorkspaceUserGroupPermissionSetting,
-        permissionSettings.slice(0, i)
-      );
-      if (validateResult) {
-        permissionSettingsErrors[setting.id] = validateResult;
-      }
-    }
-  }
-  return {
-    ...(!permissionSettings.some(
-      (setting) => setting.modes && getPermissionModeId(setting.modes) === PermissionModeId.Owner
-    )
-      ? { overall: permissionSettingOwnerMissingError }
-      : {}),
-    ...(Object.keys(permissionSettingsErrors).length > 0
-      ? { fields: permissionSettingsErrors }
-      : {}),
-  };
-};
 export const isSelectedDataSourceConnectionsDuplicated = (
   selectedDataSourceConnections: DataSourceConnection[],
   row: DataSourceConnection
 ) => selectedDataSourceConnections.some((connection) => connection.id === row.id);
 
-export const validateWorkspaceForm = (
-  formData: Partial<WorkspaceFormDataState>,
-  isPermissionEnabled: boolean
-) => {
+export const validateWorkspaceForm = (formData: Partial<WorkspaceFormDataState>) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, permissionSettings, color, features, selectedDataSourceConnections } = formData;
+  const { name, color, features, selectedDataSourceConnections } = formData;
   if (name && name.trim()) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = {
@@ -342,9 +242,6 @@ export const validateWorkspaceForm = (
         defaultMessage: 'Color is invalid. Choose a valid color.',
       }),
     };
-  }
-  if (isPermissionEnabled) {
-    formErrors.permissionSettings = validatePermissionSettings(permissionSettings);
   }
   if (selectedDataSourceConnections) {
     const dataSourcesErrors: { [key: number]: WorkspaceFormError } = {};
@@ -386,16 +283,6 @@ interface PermissionSettingLike
     Omit<Partial<WorkspaceUserGroupPermissionSetting>, 'type'> {
   type?: string;
 }
-const isSamePermissionSetting = (a: PermissionSettingLike, b: PermissionSettingLike) => {
-  return (
-    a.id === b.id &&
-    a.type === b.type &&
-    a.userId === b.userId &&
-    a.group === b.group &&
-    a.modes?.length === b.modes?.length &&
-    a.modes?.every((mode) => b.modes?.includes(mode))
-  );
-};
 
 export const isWorkspacePermissionSetting = (
   permissionSetting: PermissionSettingLike
