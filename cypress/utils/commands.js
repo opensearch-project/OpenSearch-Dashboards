@@ -43,8 +43,8 @@ Cypress.Commands.add('getElementsByTestIds', (testIds, options = {}) => {
 
 /**
  * Get DOM elements with a data-test-subj id containing the testId.
- * @param testId data-test-subj value.
- * @param options get options. Default: {}
+ * @param {string} testId data-test-subj value.
+ * @param {object} options get options. Default: {}
  * @example
  * // returns all DOM elements that has a data-test-subj including the string 'table'
  * cy.getElementsByTestIdLike('table')
@@ -54,15 +54,16 @@ Cypress.Commands.add('getElementsByTestIdLike', (partialTestId, options = {}) =>
 });
 
 /**
- * Find DOM elements with a data-test-subj id containing the testId.
- * @param testId data-test-subj value.
- * @param options get options. Default: {}
+ * Find element from previous chained element with a data-test-subj id containing the testId.
+ * @param {string} subject DOM object to find within.
+ * @param {string} testId data-test-subj value.
+ * @param {object} options get options. Default: {}
  * @example
  * // returns all DOM elements that has a data-test-subj including the string 'table'
  * cy.findElementsByTestIdLike('table')
  */
 Cypress.Commands.add(
-  'findElementsByTestIdLike',
+  'findElementByTestIdLike',
   { prevSubject: true },
   (subject, partialTestId, options = {}) => {
     return cy.wrap(subject).find(`[data-test-subj*="${partialTestId}"]`, options);
@@ -70,23 +71,10 @@ Cypress.Commands.add(
 );
 
 /**
- * Find DOM element with a data-test-subj id containing the testId.
- * @param testId data-test-subj value.
- * @param options get options. Default: {}
- * @example
- * // returns all DOM elements that has a data-test-subj including the string 'table'
- * cy.findElementsByTestIdLike('table')
- */
-Cypress.Commands.add(
-  'findElementByTestId',
-  { prevSubject: true },
-  (subject, partialTestId, options = {}) => {
-    return cy.wrap(subject).find(`[data-test-subj="${partialTestId}"]`, options);
-  }
-);
-
-/**
  * Find element from previous chained element by data-test-subj id.
+ * @param {string} subject DOM object to find within.
+ * @param {string} testId data-test-subj value.
+ * @param {object} options get options. Default: {}
  */
 Cypress.Commands.add(
   'findElementByTestId',
