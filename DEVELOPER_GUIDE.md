@@ -162,7 +162,7 @@ $ mkdir -p /configs/prod
 ```
 3. Create `opensearch_dashboards.yml` file(s) in your config directories. Here's an example config:
 ```yaml
-opensearch.hosts: ["https://your-opensearch-host:9200"]
+opensearch.hosts: ["https://your-opensearch-host"]
 opensearch.username: 'admin' 
 opensearch.password: 'your-password'
 opensearch.ignoreVersionMismatch: true
