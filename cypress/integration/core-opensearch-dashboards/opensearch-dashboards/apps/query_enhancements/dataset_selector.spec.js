@@ -19,7 +19,7 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
         `app/data-explorer/discover#/?_g=(filters:!(),time:(from:'2015-09-19T13:31:44.000Z',to:'2015-09-24T01:31:44.000Z'))`
       );
 
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.getElementByTestId('discoverNoIndexPatterns');
     });
   });
@@ -52,7 +52,7 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
       // Go to the Discover page
       miscUtils.visitPage(`app/data-explorer/discover#/`);
 
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
     });
 
     it('with SQL as default language', function () {
@@ -70,11 +70,11 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
       cy.getElementByTestId(`advancedSelectorTimeFieldSelect`).select('timestamp');
       cy.getElementByTestId('advancedSelectorConfirmButton').click();
 
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
 
       // SQL should already be selected
       cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'OpenSearch SQL');
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
 
       // SQL query should be executed and sending back result
       cy.get(`[data-test-subj="queryResultCompleteMsg"]`).should('be.visible');
@@ -85,7 +85,7 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
       const toTime = 'Sep 21, 2019 @ 00:00:00.000';
       cy.setTopNavDate(fromTime, toTime);
 
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.get(`[data-test-subj="queryResultCompleteMsg"]`).should('be.visible');
     });
 
@@ -105,7 +105,7 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
       cy.getElementByTestId(`advancedSelectorTimeFieldSelect`).select('timestamp');
       cy.getElementByTestId('advancedSelectorConfirmButton').click();
 
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
 
       // PPL should already be selected
       cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'PPL');
@@ -114,7 +114,7 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
       const toTime = 'Sep 21, 2019 @ 00:00:00.000';
       cy.setTopNavDate(fromTime, toTime);
 
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
 
       // Query should finish running with timestamp and finish time in the footer
       cy.getElementByTestId('queryResultCompleteMsg').should('be.visible');
@@ -123,7 +123,7 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
       // Switch language to SQL
       cy.setQueryLanguage('OpenSearch SQL');
 
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.getElementByTestId('queryResultCompleteMsg').should('be.visible');
       cy.getElementByTestId('queryEditorFooterTimestamp').should('contain', 'timestamp');
     });
@@ -148,7 +148,7 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
       cy.get(`[title="logstash-*"]`).click();
       cy.getElementByTestId('datasetSelectorNext').click();
 
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.waitForSearch();
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
     });
