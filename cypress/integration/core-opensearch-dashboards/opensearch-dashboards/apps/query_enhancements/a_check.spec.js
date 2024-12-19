@@ -47,7 +47,7 @@ describe('No Index Pattern Check Test', () => {
   describe('empty state', () => {
     it('no index pattern', function () {
       // Go to the Discover page
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.getElementByTestId('discoverNoIndexPatterns');
     });
   });
