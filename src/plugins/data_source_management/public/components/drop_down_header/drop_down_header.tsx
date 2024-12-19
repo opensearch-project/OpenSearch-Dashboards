@@ -13,12 +13,14 @@ interface DataSourceOptionItemProps {
   totalDataSourceCount: number;
   activeDataSourceCount?: number;
   application?: ApplicationStart;
+  onChangeDevToolsModalVisible: () => void;
 }
 
 export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
   activeDataSourceCount,
   totalDataSourceCount,
   application,
+  onChangeDevToolsModalVisible,
 }) => {
   const dataSourceCounterPrefix = totalDataSourceCount === 1 ? 'DATA SOURCE' : 'DATA SOURCES';
   const dataSourceCounter =
@@ -35,11 +37,12 @@ export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
         <div tabIndex={0} className="dataSourceDropDownHeaderInvisibleFocusable" />
         <EuiFlexItem grow={false}>
           <EuiLink
-            onClick={() =>
+            onClick={() => {
+              onChangeDevToolsModalVisible();
               application?.navigateToApp('management', {
                 path: `opensearch-dashboards/${DSM_APP_ID}`,
-              })
-            }
+              });
+            }}
           >
             Manage
           </EuiLink>

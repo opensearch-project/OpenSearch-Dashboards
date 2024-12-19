@@ -59,6 +59,7 @@ interface DevToolsWrapperProps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
   useUpdatedUX?: boolean;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+  onChangeDevToolsModalVisible: () => void;
 }
 
 interface MountedDevToolDescriptor {
@@ -68,6 +69,7 @@ interface MountedDevToolDescriptor {
 }
 
 function DevToolsWrapper({
+  onChangeDevToolsModalVisible,
   devTools,
   activeDevTool,
   updateRoute,
@@ -125,6 +127,7 @@ function DevToolsWrapper({
       const DataSourceMenu = dataSourceManagement!.ui.getDataSourceMenu();
       return (
         <DataSourceMenu
+          onChangeDevToolsModalVisible={onChangeDevToolsModalVisible}
           setMenuMountPoint={setMenuMountPoint}
           componentType={'DataSourceSelectable'}
           componentConfig={{
@@ -241,6 +244,7 @@ function setBreadcrumbs(chrome: ChromeStart) {
 
 export function MainApp(
   props: {
+    onChangeDevToolsModalVisible: () => void;
     devTools: readonly DevToolApp[];
     RouterComponent?: React.ComponentClass;
     defaultRoute?: string;
@@ -255,6 +259,7 @@ export function MainApp(
   >
 ) {
   const {
+    onChangeDevToolsModalVisible,
     devTools,
     savedObjects,
     notifications,
@@ -280,6 +285,7 @@ export function MainApp(
                 exact={!devTool.enableRouting}
                 render={(routeProps) => (
                   <DevToolsWrapper
+                    onChangeDevToolsModalVisible={onChangeDevToolsModalVisible}
                     updateRoute={routeProps.history.push}
                     activeDevTool={devTool}
                     devTools={devTools}
