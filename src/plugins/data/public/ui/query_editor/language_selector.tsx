@@ -117,6 +117,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
         <EuiContextMenuItem
           key={language.label}
           className="languageSelector__menuItem"
+          data-test-subj="languageSelectorMenuItem"
           icon={language.label === selectedLanguage.label ? 'check' : 'empty'}
           onClick={() => handleLanguageChange(language.value)}
         >
@@ -151,6 +152,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
         )}
         size="s"
         items={languageOptionsMenu}
+        data-test-subj="queryEditorLanguageOptions"
       />
     </EuiPopover>
   );

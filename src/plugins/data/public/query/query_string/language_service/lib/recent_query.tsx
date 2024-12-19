@@ -96,6 +96,7 @@ export function RecentQueriesTable({
       rowProps={getRowProps}
       cellProps={getCellProps}
       className="recentQuery__table"
+      data-test-subj="recentQueryTable"
       tableLayout="fixed"
       compressed
     />

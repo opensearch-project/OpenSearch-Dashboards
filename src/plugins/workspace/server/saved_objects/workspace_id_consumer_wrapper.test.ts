@@ -432,8 +432,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
       {
         type: 'dashboard',
         id: 'dashboard_id',
-        attributes: {},
-        references: [],
+        attributes: { description: 'description' },
+        references: ['reference_id'],
         workspaces: ['foo'],
       },
       {
@@ -450,8 +450,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
       {
         type: 'visualization',
         id: 'visualization_id',
-        attributes: {},
-        references: [],
+        attributes: { description: 'description' },
+        references: ['reference_id'],
         workspaces: ['bar'],
       },
       {
@@ -493,9 +493,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
         Object {
           "saved_objects": Array [
             Object {
-              "attributes": Object {},
+              "attributes": Object {
+                "description": "description",
+              },
               "id": "dashboard_id",
-              "references": Array [],
+              "references": Array [
+                "reference_id",
+              ],
               "type": "dashboard",
               "workspaces": Array [
                 "foo",
@@ -522,9 +526,6 @@ describe('WorkspaceIdConsumerWrapper', () => {
               "id": "visualization_id",
               "references": Array [],
               "type": "visualization",
-              "workspaces": Array [
-                "bar",
-              ],
             },
             Object {
               "attributes": Object {},
@@ -571,9 +572,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
         Object {
           "saved_objects": Array [
             Object {
-              "attributes": Object {},
+              "attributes": Object {
+                "description": "description",
+              },
               "id": "dashboard_id",
-              "references": Array [],
+              "references": Array [
+                "reference_id",
+              ],
               "type": "dashboard",
               "workspaces": Array [
                 "foo",
@@ -600,9 +605,6 @@ describe('WorkspaceIdConsumerWrapper', () => {
               "id": "visualization_id",
               "references": Array [],
               "type": "visualization",
-              "workspaces": Array [
-                "bar",
-              ],
             },
             Object {
               "attributes": Object {},
@@ -688,9 +690,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
         Object {
           "saved_objects": Array [
             Object {
-              "attributes": Object {},
+              "attributes": Object {
+                "description": "description",
+              },
               "id": "dashboard_id",
-              "references": Array [],
+              "references": Array [
+                "reference_id",
+              ],
               "type": "dashboard",
               "workspaces": Array [
                 "foo",
@@ -717,9 +723,6 @@ describe('WorkspaceIdConsumerWrapper', () => {
               "id": "visualization_id",
               "references": Array [],
               "type": "visualization",
-              "workspaces": Array [
-                "bar",
-              ],
             },
             Object {
               "attributes": Object {},
