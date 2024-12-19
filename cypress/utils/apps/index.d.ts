@@ -10,14 +10,7 @@ declare namespace Cypress {
      * @example
      * cy.waitForLoader()
      */
-    waitForLoader(): Chainable<any>;
-
-    /**
-     * Wait for Dashboards page to load with new header
-     * @example
-     * cy.waitForLoaderNewHeader()
-     */
-    waitForLoaderNewHeader(): Chainable<any>;
+    waitForLoader(isEnhancement?: boolean): Chainable<any>;
 
     /**
      * Set the top nav query value
