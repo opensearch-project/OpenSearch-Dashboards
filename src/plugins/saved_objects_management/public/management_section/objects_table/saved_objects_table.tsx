@@ -759,20 +759,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     savedObjects: DuplicateObject[],
     includeReferencesDeep: boolean,
     targetWorkspace: string,
-    targetWorkspaceName: string,
-    isSolveErrorsOperation?: boolean
+    targetWorkspaceName: string
   ) => {
     const { notifications, workspaces, useUpdatedUX } = this.props;
     const workspaceClient = workspaces.client$.getValue();
 
-    const showErrorNotification = (text?: string) => {
+    const showErrorNotification = () => {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
           defaultMessage:
             'Unable to copy {useUpdatedUX, select, true {{errorCount, plural, one {# asset} other {# assets}}} other {{errorCount, plural, one {# saved object} other {# saved objects}}}}.',
           values: { errorCount: savedObjects.length, useUpdatedUX },
         }),
-        ...(text && { text }),
       });
     };
     if (!workspaceClient) {
@@ -786,25 +784,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         targetWorkspace,
         includeReferencesDeep
       );
-      if (result?.error) {
-        showErrorNotification(result.error);
-      } else {
-        if (isSolveErrorsOperation) {
-          this.setState({
-            failedCopies: result?.errors || [],
-            successfulCopies: result?.successCount > 0 ? result.successResults : [],
-            targetWorkspaceName,
-          });
-        } else {
-          this.setState({
-            isShowingDuplicateResultFlyout: true,
-            failedCopies: result?.errors || [],
-            successfulCopies: result?.successCount > 0 ? result.successResults : [],
-            targetWorkspace,
-            targetWorkspaceName,
-          });
-        }
-      }
+      this.setState({
+        isShowingDuplicateResultFlyout: true,
+        failedCopies: result?.errors || [],
+        successfulCopies: result?.successResults || [],
+        targetWorkspace,
+        targetWorkspaceName,
+      });
     } catch (e) {
       showErrorNotification();
     } finally {

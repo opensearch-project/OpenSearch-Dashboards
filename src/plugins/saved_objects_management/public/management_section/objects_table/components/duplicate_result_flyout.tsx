@@ -55,8 +55,7 @@ export interface DuplicateResultFlyoutProps {
     savedObjects: DuplicateObject[],
     includeReferencesDeep: boolean,
     targetWorkspace: string,
-    targetWorkspaceName: string,
-    isSolveErrorsOperation: boolean
+    targetWorkspaceName: string
   ) => Promise<void>;
   targetWorkspace: string;
   useUpdatedUX: boolean;
@@ -355,7 +354,7 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
       isLoading: true,
     });
 
-    await onCopy(savedObjects, false, targetWorkspace, workspaceName, true);
+    await onCopy(savedObjects, false, targetWorkspace, workspaceName);
 
     this.setState({
       isLoading: false,
