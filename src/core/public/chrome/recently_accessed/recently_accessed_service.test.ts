@@ -65,6 +65,7 @@ class LocalStorageMock implements Storage {
 
 describe('RecentlyAccessed#start()', () => {
   let originalLocalStorage: Storage;
+  let workspaceEnabled = false;
   beforeAll(() => {
     originalLocalStorage = window.localStorage;
 
@@ -78,7 +79,19 @@ describe('RecentlyAccessed#start()', () => {
   const getStart = async () => {
     const http = httpServiceMock.createStartContract();
     const workspaces = workspacesServiceMock.createStartContract();
-    const recentlyAccessed = await new RecentlyAccessedService().start({ http, workspaces });
+    const application = {
+      ...jest.requireActual('../../application'),
+      capabilities: {
+        workspaces: {
+          enabled: workspaceEnabled,
+        },
+      },
+    };
+    const recentlyAccessed = await new RecentlyAccessedService().start({
+      http,
+      workspaces,
+      application,
+    });
     return { http, recentlyAccessed, workspaces };
   };
 
@@ -153,6 +166,25 @@ Array [
   });
 
   it('adding items with workspaceId if is inside a workspace', async () => {
+    const { recentlyAccessed, workspaces } = await getStart();
+    workspaces.currentWorkspaceId$.next('foo');
+    recentlyAccessed.add('/app/item1', 'Item 1', 'item1');
+    expect(recentlyAccessed.get()).toEqual([
+      { link: '/app/item1', label: 'Item 1', id: 'item1', workspaceId: 'foo' },
+    ]);
+  });
+
+  it('should not get objects without related workspace when workspace enabled', async () => {
+    workspaceEnabled = true;
+
+    const { recentlyAccessed } = await getStart();
+    recentlyAccessed.add('/app/item1', 'Item 1', 'item1');
+    expect(recentlyAccessed.get()).toEqual([]);
+  });
+
+  it('should get objects with related workspace when workspace enabled', async () => {
+    workspaceEnabled = true;
+
     const { recentlyAccessed, workspaces } = await getStart();
     workspaces.currentWorkspaceId$.next('foo');
     recentlyAccessed.add('/app/item1', 'Item 1', 'item1');
