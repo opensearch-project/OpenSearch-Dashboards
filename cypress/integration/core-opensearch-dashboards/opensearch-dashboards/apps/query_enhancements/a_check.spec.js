@@ -9,7 +9,7 @@ import { SECONDARY_ENGINE } from '../../../../../utils/constants';
 
 const miscUtils = new MiscUtils(cy);
 
-describe('No Index Pattern Check Test', () => {
+ifEnabled('WORKSPACE').describe('No Index Pattern Check Test', () => {
   before(() => {
     // Load test data
     cy.setupTestData(
