@@ -113,6 +113,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
       //query should persist across refresh
       cy.reload();
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+      cy.verifyHitCount('10,000');
     });
   });
 });
