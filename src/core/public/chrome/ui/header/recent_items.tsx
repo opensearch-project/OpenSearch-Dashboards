@@ -44,6 +44,7 @@ export interface Props {
   renderBreadcrumbs: React.JSX.Element;
   buttonSize?: EuiHeaderSectionItemButtonProps['size'];
   http: HttpStart;
+  workspaceEnabled: boolean | undefined;
   loadingCount$: Rx.Observable<number>;
 }
 
@@ -111,6 +112,7 @@ export const RecentItems = ({
   renderBreadcrumbs,
   buttonSize = 's',
   http,
+  workspaceEnabled,
   loadingCount$,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
