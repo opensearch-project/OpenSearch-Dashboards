@@ -4,7 +4,6 @@
  */
 
 import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { DATA_EXPLORER_PAGE_ELEMENTS } from '../../../../../utils/dashboards/data_explorer/elements.js';
 import {
   DATASOURCE_NAME,
   INDEX_NAME,
@@ -46,20 +45,8 @@ function checkTableFieldFilterActions(datasetType, language, shouldExist) {
   dataExplorer.verifyDocTableRowFilterForAndOutButton(0, shouldExist);
 
   if (shouldExist) {
-    dataExplorer.verifyDocTableFilterAction(
-      0,
-      DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON,
-      '10,000',
-      '1',
-      true
-    );
-    dataExplorer.verifyDocTableFilterAction(
-      0,
-      DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON,
-      '10,000',
-      '9,999',
-      false
-    );
+    dataExplorer.verifyDocTableFilterAction(0, 'filterForValue', '10,000', '1', true);
+    dataExplorer.verifyDocTableFilterAction(0, 'filterOutValue', '10,000', '9,999', false);
   }
 }
 
@@ -69,18 +56,25 @@ function checkExpandedTableFilterActions(datasetType, language, isEnabled) {
 
   cy.getElementByTestId('discoverQueryHits').should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
   toggleDocTableRow(0);
-  verifyDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(isEnabled);
-  verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
+  dataExplorer.verifyDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
+    isEnabled
+  );
+  dataExplorer.verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
 
   if (isEnabled) {
-    verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField(0, 0, '10,000', '1');
-    verifyDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField(
+    dataExplorer.verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField(
+      0,
+      0,
+      '10,000',
+      '1'
+    );
+    dataExplorer.verifyDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField(
       0,
       0,
       '10,000',
       '9,999'
     );
-    verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField(
+    dataExplorer.verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField(
       0,
       0,
       '10,000',
