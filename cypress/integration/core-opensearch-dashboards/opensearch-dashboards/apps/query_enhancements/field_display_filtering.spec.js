@@ -55,7 +55,7 @@ function checkExpandedTableFilterActions(datasetType, language, isEnabled) {
   setDateRange(datasetType, language);
 
   cy.getElementByTestId('discoverQueryHits').should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
-  toggleDocTableRow(0);
+  dataExplorer.toggleDocTableRow(0);
   dataExplorer.verifyDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
     isEnabled
   );
