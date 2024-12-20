@@ -129,7 +129,12 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
           className="editor__footerItem"
           color="danger"
         >
-          <EuiText size="xs" color="danger" className="editor__footerItem">
+          <EuiText
+            size="xs"
+            color="danger"
+            className="editor__footerItem"
+            data-test-subj="editorFooterItem"
+          >
             {i18n.translate('data.query.languageService.queryResults.error', {
               defaultMessage: `Error`,
             })}
@@ -146,6 +151,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       <div
         style={{ width: '250px', maxHeight: '250px', overflowY: 'auto' }}
         className="eui-textBreakWord"
+        data-test-subj="textBreakWord"
       >
         <EuiText size="s">
           <p>
