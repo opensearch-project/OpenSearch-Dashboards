@@ -31,6 +31,10 @@ const dummyArgs: OpenSearchRequestArgs = {
 };
 
 describe('test sendRequestToOpenSearch', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('test request success, json', () => {
     const mockHttpResponse = createMockHttpResponse(
       200,
@@ -47,9 +51,9 @@ describe('test sendRequestToOpenSearch', () => {
     });
   });
 
-  it('test request success, json with long numerals', () => {
-    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n;
-    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n;
+  it('test request success, json with long numerals when precision enabled', () => {
+    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n + 1n;
+    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n + 1n;
     const mockHttpResponse = createMockHttpResponse(
       200,
       'ok',
@@ -60,11 +64,56 @@ describe('test sendRequestToOpenSearch', () => {
       }
     );
 
-    jest.spyOn(opensearch, 'send').mockResolvedValue(mockHttpResponse);
-    sendRequestToOpenSearch(dummyArgs).then((result) => {
+    const send = jest.spyOn(opensearch, 'send');
+    send.mockResolvedValue(mockHttpResponse);
+    sendRequestToOpenSearch({
+      ...dummyArgs,
+      withLongNumeralsSupport: true,
+    }).then((result) => {
+      expect(send).toHaveBeenCalledWith(
+        expect.anything(),
+        dummyArgs.requests[0].method,
+        dummyArgs.requests[0].url,
+        dummyArgs.requests[0].data.join('\n') + '\n',
+        undefined,
+        true
+      );
       const value = (result as any)[0].response.value;
       expect(value).toMatch(new RegExp(`"long-max": ${longPositive}[,\n]`));
       expect(value).toMatch(new RegExp(`"long-min": ${longNegative}[,\n]`));
+    });
+  });
+
+  it('test request success, json with long numerals when precision disabled', () => {
+    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n + 1n;
+    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n + 1n;
+    const mockHttpResponse = createMockHttpResponse(
+      200,
+      'ok',
+      [['Content-Type', 'application/json, utf-8']],
+      {
+        'long-max': Number(longPositive),
+        'long-min': Number(longNegative),
+      }
+    );
+
+    const send = jest.spyOn(opensearch, 'send');
+    send.mockResolvedValue(mockHttpResponse);
+    sendRequestToOpenSearch({
+      ...dummyArgs,
+      withLongNumeralsSupport: false,
+    }).then((result) => {
+      expect(send).toHaveBeenCalledWith(
+        expect.anything(),
+        dummyArgs.requests[0].method,
+        dummyArgs.requests[0].url,
+        dummyArgs.requests[0].data.join('\n') + '\n',
+        undefined,
+        false
+      );
+      const value = (result as any)[0].response.value;
+      expect(value).toMatch(new RegExp(`"long-max": ${Number(longPositive)}[,\n]`));
+      expect(value).toMatch(new RegExp(`"long-min": ${Number(longNegative)}[,\n]`));
     });
   });
 
