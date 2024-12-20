@@ -3,11 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
 import { WORKSPACE_NAME, DATASOURCE_NAME, START_TIME, END_TIME } from './constants';
 import { BASE_PATH, SECONDARY_ENGINE } from '../../../../../utils/constants';
-
-const miscUtils = new MiscUtils(cy);
 
 describe('query enhancement queries', { scrollBehavior: false }, () => {
   before(() => {
@@ -27,7 +24,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
 
     // Create workspace and set up index pattern
     cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
-    miscUtils.visitPage('/app/home');
+    cy.visit('/app/home');
     cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${WORKSPACE_NAME}`);
 
     // Create and select index pattern for data_logs_small_time_1*
