@@ -12,17 +12,17 @@ import {
   SEARCH_ABSOLUTE_START_DATE,
   SEARCH_ABSOLUTE_END_DATE,
 } from './constants.js';
-import './helpers.js';
+import * as dataExplorer from './helpers.js';
 
 const miscUtils = new MiscUtils(cy);
 
 function selectDataSet(datasetType, language) {
   switch (datasetType) {
     case 'index':
-      selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, language);
+      dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, language);
       break;
     case 'index_pattern':
-      selectIndexPatternDataset(INDEX_PATTERN_NAME, language);
+      dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, language);
       break;
   }
 }
@@ -43,17 +43,17 @@ function checkTableFieldFilterActions(datasetType, language, shouldExist) {
 
   cy.getElementByTestId('discoverQueryHits').should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
-  verifyDocTableRowFilterForAndOutButton(0, shouldExist);
+  dataExplorer.verifyDocTableRowFilterForAndOutButton(0, shouldExist);
 
   if (shouldExist) {
-    verifyDocTableFilterAction(
+    dataExplorer.verifyDocTableFilterAction(
       0,
       DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_FOR_BUTTON,
       '10,000',
       '1',
       true
     );
-    verifyDocTableFilterAction(
+    dataExplorer.verifyDocTableFilterAction(
       0,
       DATA_EXPLORER_PAGE_ELEMENTS.TABLE_FIELD_FILTER_OUT_BUTTON,
       '10,000',
