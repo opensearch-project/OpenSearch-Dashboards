@@ -1,0 +1,296 @@
+
+name: Cypress 12 experimental tests
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
+
+env:
+  CYPRESS_BROWSER: 'chromium'
+  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
+  COVERAGE: true
+  PROJECT_ARTIFACT_NAME: 'project-artifact'
+  COMBINATIONS: |
+    [
+      [],
+      ["SECURITY"],
+      ["WORKSPACE", "DATA_SOURCE", "QUERY_ENHANCEMENTS", "USE_NEW_HOME_PAGE"]
+    ]
+
+jobs:
+  build-and-validate:
+    name: Build and validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Check for yarn.lock changes
+        run: |
+          if [[ `git status --porcelain yarn.lock` ]]; then
+            echo -e "\033[31mThe yarn.lock file is out of sync!\033[0m"
+            git diff
+            exit 1
+          fi
+
+      - name: Generate dev docs
+        run: yarn docs:generateDevDocs
+
+      - name: Check for dev docs changes
+        run: |
+          if [[ `git status --porcelain docs/_sidebar.md` ]]; then
+            echo -e "\033[31mThe dev docs are out of sync; run yarn docs:generateDevDocs and amend the PR.\033[0m"
+            git diff
+            exit 1
+          fi
+
+      - name: Run linter
+        id: linter
+        run: yarn lint
+
+      - name: Validate NOTICE file
+        id: notice-validate
+        run: yarn notice:validate
+
+      - name: Validate licenses
+        id: i18n-licenses
+        run: yarn checkLicenses
+
+      - name: Check i18n
+        id: i18n-check
+        run: yarn i18n:check
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      # upload-artifact looses permissions; we need to tar it to maintain them
+      - name: Archive content
+        run: tar -czf /tmp/osd-build.tar.gz --exclude=.git --exclude=.yarn .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PROJECT_ARTIFACT_NAME }}
+          path: /tmp/osd-build.tar.gz
+          retention-days: 1
+
+  prepare-cypress-matrix:
+    name: Prepare Cypress tests
+    needs: build-and-validate
+    runs-on: ubuntu-latest
+    outputs:
+      test-matrix: ${{ steps.create-list.outputs.list }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Trigger tests for combinations
+        id: create-list
+        run: |
+          declare -a inputs_array
+
+          process_spec() {
+            local spec_path="$1"
+            local spec_name="$2"
+            local counter=1
+
+            while IFS= read -r combo; do
+              echo "Preparing tests for $spec_name with combination $counter: $combo"
+
+              input_object=$(jq -n \
+                --arg spec_pattern "$spec_path" \
+                --arg run_flag "${spec_name}:${counter}" \
+                --argjson combo "$combo" \
+                '{
+                  spec_pattern: $spec_pattern,
+                  run_flag: $run_flag
+                } + ($combo | to_entries | map({key: .value, value: "true"}) | from_entries)')
+
+              echo "Generated input_object:"
+              echo "$input_object" | jq .
+
+              inputs_array+=("$input_object")
+              echo "Current size of inputs_array: ${#inputs_array[@]}"
+
+              counter=$((counter + 1))
+            done < <(echo "$COMBINATIONS" | jq -c '.[]')
+          }
+
+          # Process spec files at the root
+          root_specs=$(find ./cypress/integration -maxdepth 1 -name "*.spec.js")
+          if [ -n "$root_specs" ]; then
+            echo "Found root specs: $root_specs"
+            process_spec "cypress/integration/*.spec.js" "root"
+          fi
+
+          # Process spec folders
+          for folder in ./cypress/integration/*/; do
+            if [ -d "$folder" ]; then
+              folder_name=$(basename "$folder")
+              echo "Processing folder: $folder_name"
+              folder_specs=$(find "$folder" -name "*.spec.js")
+              if [ -n "$folder_specs" ]; then
+                echo "Found specs in $folder_name: $folder_specs"
+                process_spec "cypress/integration/$folder_name/**/*.spec.js" "$folder_name"
+              fi
+            fi
+          done
+
+          if [ ${#inputs_array[@]} -eq 0 ]; then
+            echo "No test configurations generated!"
+            json_output='{"include":[]}'
+          else
+            json_output=$(printf '%s\n' "${inputs_array[@]}" | jq -s '{"include": .}')
+          fi
+
+          # Escape the JSON string for GitHub Actions
+          escaped_json_output=$(echo "$json_output" | jq -c -r @json)
+          echo "list=$escaped_json_output" >> $GITHUB_OUTPUT
+
+
+  run-tests:
+    name: Run tests (cypress:${{ matrix.run_flag }})
+    needs: [prepare-cypress-matrix, build-and-validate]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.prepare-cypress-matrix.outputs.test-matrix) }}
+      fail-fast: false
+    steps:
+      - name: Display run details
+        run: |
+          echo "Flag: ${{ matrix.run_flag }}"
+          echo "Spec pattern: ${{ matrix.spec_pattern }}"
+          echo "Security enabled: ${{ matrix.SECURITY || 'false' }}"
+          echo "Workspace enabled: ${{ matrix.WORKSPACE || 'false' }}"
+          echo "Data Source enabled: ${{ matrix.DATA_SOURCE || 'false' }}"
+          echo "Query Enhancements enabled: ${{ matrix.QUERY_ENHANCEMENTS || 'false' }}"
+          echo "New Home enabled: ${{ matrix.USE_NEW_HOME_PAGE || 'false' }}"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download built artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PROJECT_ARTIFACT_NAME }}
+          path: .
+
+      - name: Extract archive
+        run: |
+          tar -xzf osd-build.tar.gz --overwrite --ignore-command-error
+          rm osd-build.tar.gz
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Security setup
+        if: ${{ matrix.SECURITY == 'true' }}
+        # ToDo: make this branch specific
+        run: git clone https://github.com/opensearch-project/security-dashboards-plugin.git --depth 1 -- ./plugins/security-dashboards-plugin
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap --single-version=loose
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: Get package version
+        run: |
+          echo "OSD_VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
+
+      - name: Run OpenSearch
+        run: |
+          npm i osd-launcher -g
+
+          if [ "${{ matrix.SECURITY }}" = "true" ]; then
+            osd-launcher -os ${{ env.OSD_VERSION }} -p dummy --destination ~/
+          else
+            osd-launcher -os ${{ env.OSD_VERSION }} --no-security --no-plugins -p dummy --destination ~/
+          fi
+
+          /bin/bash -c ~/OpenSearch-v${{ env.OSD_VERSION }}/bin/opensearch &
+
+      - name: Run OSD
+        run: |
+          SECURITY_FLAG=$([ "${{ matrix.SECURITY }}" = "true" ] && echo "--opensearch.hosts=https://localhost:9200 --opensearch.username=admin --opensearch.password=dummy" || echo "--opensearch.hosts=http://localhost:9200")
+          WORKSPACE_FLAG=$([ "${{ matrix.WORKSPACE }}" = "true" ] && echo "--workspace.enabled=true" || echo "--workspace.enabled=false")
+          DATA_SOURCE_FLAG=$([ "${{ matrix.DATA_SOURCE }}" = "true" ] && echo "--data_source.enabled=true" || echo "--data_source.enabled=false")
+          QUERY_ENHANCEMENTS_FLAG=$([ "${{ matrix.QUERY_ENHANCEMENTS }}" = "true" ] && echo "--uiSettings.overrides["query:enhancements:enabled"]=true" || echo "--uiSettings.overrides["query:enhancements:enabled"]=false")
+          USE_NEW_HOME_PAGE_FLAG=$([ "${{ matrix.USE_NEW_HOME_PAGE }}" = "true" ] && echo "--uiSettings.overrides["home:useNewHomePage"]=true" || echo "--uiSettings.overrides["home:useNewHomePage"]=false")
+
+          if [ "${{ matrix.SECURITY }}" = "true" ]; then
+            sed -i -e 's/.*opensearch\.username\s*:.*/opensearch.username: "admin"/g' -e 's/.*opensearch\.password\s*:.*/opensearch.password: "dummy"/g' -e 's/.*opensearch\.ssl\.verificationMode\s*:.*/opensearch.ssl.verificationMode: none/g' config/opensearch_dashboards.yml
+          fi
+          /bin/bash -c "node scripts/opensearch_dashboards --dev --no-base-path --no-watch --opensearch.ignoreVersionMismatch=true --opensearch.ssl.verificationMode=none --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false SECURITY_FLAG $WORKSPACE_FLAG $DATA_SOURCE_FLAG $QUERY_ENHANCEMENTS_FLAG USE_NEW_HOME_PAGE_FLAG & pid=\$!; sleep 30; disown \$pid"
+
+
+      - name: Wait for 60 seconds
+        run: sleep 60s
+        shell: bash
+
+      - name: Run tests
+        run: yarn test:cypress --spec "${{ matrix.spec_pattern }}"
+
+      - name: Upload coverage
+        id: upload-code-coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage
+          flags: "cypress:${{ matrix.run_flag }}"
+
+      - name: Generate safe artifact name
+        if: always()
+        id: safe-name
+        run: |
+          value=$(echo "${{ matrix.run_flag }}" | sed -E 's/[^a-z0-9_-]+/_/gi' | sed -E 's/^_|_$//g')
+          echo "value=${value}" >> $GITHUB_OUTPUT
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress_artifact_${{ steps.safe-name.outputs.value }}
+          path: |
+            cypress/screenshots
+            cypress/videos
+            coverage
+          retention-days: 1

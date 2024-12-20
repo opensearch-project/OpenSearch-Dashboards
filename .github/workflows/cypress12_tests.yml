@@ -1,23 +1,5 @@
 
-name: Cypress 12 experimental tests
-
-on:
-  push:
-    branches: ['**'] # Run the functional test on push for only release branches
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
-  pull_request:
-    branches: ['**']
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
+name: Cypress 12 experimental tests (old)
 
 env:
   CYPRESS_BROWSER: 'chromium'
