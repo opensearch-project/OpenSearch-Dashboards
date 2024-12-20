@@ -69,18 +69,11 @@ function checkExpandedTableFilterActions(datasetType, language, isEnabled) {
 
   cy.getElementByTestId('discoverQueryHits').should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
   toggleDocTableRow(0);
-  verifyDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
-    isEnabled
-  );
+  verifyDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(isEnabled);
   verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
 
   if (isEnabled) {
-    verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField(
-      0,
-      0,
-      '10,000',
-      '1'
-    );
+    verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField(0, 0, '10,000', '1');
     verifyDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField(
       0,
       0,
