@@ -2,10 +2,13 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { DS_API, DSM_API, S3_CLUSTER } from '../../../utils/apps/query_enhancements/constants';
 
-const miscUtils = new MiscUtils(cy);
+import {
+  DS_API,
+  DSM_API,
+  S3_CLUSTER,
+} from '../../../../../utils/apps/query_enhancements/constants';
+import { WORKSPACE_NAME } from './constants';
 
 let dataSourceId = '';
 
@@ -74,10 +77,14 @@ describe('S3 Dataset', { defaultCommandTimeout: 120000 }, () => {
   });
 
   describe('Run S3 Query', () => {
-    // Navigate to Discover
     beforeEach(() => {
-      miscUtils.visitPage(`app/data-explorer/discover#/`);
-      cy.waitForLoaderNewHeader();
+      // Create workspace
+      cy.deleteWorkspaceByName(WORKSPACE_NAME);
+      cy.visit('/app/home');
+      cy.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, WORKSPACE_NAME);
+    });
+    afterEach(() => {
+      cy.deleteWorkspaceByName(WORKSPACE_NAME);
     });
 
     it('with SQL', function () {
@@ -94,10 +101,13 @@ describe('S3 Dataset', { defaultCommandTimeout: 120000 }, () => {
 
       cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
       cy.getElementByTestId('advancedSelectorConfirmButton').click();
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
+      cy.waitForSearch();
 
       cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'OpenSearch SQL');
       cy.get(`[data-test-subj="queryResultCompleteMsg"]`).should('be.visible');
+      cy.getElementByTestId('docTable').should('be.visible');
+      cy.getElementByTestId('docTable').find('tr').should('have.length', 11);
     });
 
     // Skipping until #8922 is merged in
@@ -115,10 +125,13 @@ describe('S3 Dataset', { defaultCommandTimeout: 120000 }, () => {
 
       cy.getElementByTestId('advancedSelectorLanguageSelect').select('PPL');
       cy.getElementByTestId('advancedSelectorConfirmButton').click();
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
+      cy.waitForSearch();
 
       cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'PPL');
       cy.get(`[data-test-subj="queryResultCompleteMsg"]`).should('be.visible');
+      cy.getElementByTestId('docTable').should('be.visible');
+      cy.getElementByTestId('docTable').find('tr').should('have.length', 11);
     });
   });
 });
