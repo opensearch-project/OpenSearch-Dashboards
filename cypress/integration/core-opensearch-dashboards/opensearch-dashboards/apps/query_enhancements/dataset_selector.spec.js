@@ -4,7 +4,7 @@
  */
 
 import { WORKSPACE_NAME, DATASOURCE_NAME, START_TIME, END_TIME } from './constants';
-import { BASE_PATH, SECONDARY_ENGINE } from '../../../../../utils/constants';
+import { SECONDARY_ENGINE } from '../../../../../utils/constants';
 
 describe('dataset selector', { scrollBehavior: false }, () => {
   before(() => {
