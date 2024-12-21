@@ -111,8 +111,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
     it('create index pattern and select it', function () {
       // Create and select index pattern for data_logs_small_time_1*
       cy.createWorkspaceIndexPatterns({
-        url: `${BASE_PATH}`,
-        workspaceName: `${WORKSPACE_NAME}`,
+        workspaceName: WORKSPACE_NAME,
         indexPattern: 'data_logs_small_time_1',
         timefieldName: 'timestamp',
         indexPatternHasTimefield: true,
@@ -120,7 +119,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
         isEnhancement: true,
       });
 
-      cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${WORKSPACE_NAME}`);
+      cy.navigateToWorkSpaceHomePage(WORKSPACE_NAME);
 
       cy.waitForLoader(true);
       cy.getElementByTestId(`datasetSelectorButton`).click();

@@ -29,8 +29,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
 
     // Create and select index pattern for data_logs_small_time_1*
     cy.createWorkspaceIndexPatterns({
-      url: `${BASE_PATH}`,
-      workspaceName: `${WORKSPACE_NAME}`,
+      workspaceName: WORKSPACE_NAME,
       indexPattern: 'data_logs_small_time_1',
       timefieldName: 'timestamp',
       indexPatternHasTimefield: true,
@@ -39,7 +38,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
     });
 
     // Go to workspace home
-    cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${WORKSPACE_NAME}`);
+    cy.navigateToWorkSpaceHomePage(WORKSPACE_NAME);
     cy.setTopNavDate(START_TIME, END_TIME);
     cy.waitForLoader(true);
   });
@@ -55,7 +54,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setQueryLanguage('DQL');
 
       const query = `_id:1`;
-      cy.setSingleLineQueryEditor(query);
+      cy.setQueryEditor(query);
       cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);
@@ -69,7 +68,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setQueryLanguage('Lucene');
 
       const query = `_id:1`;
-      cy.setSingleLineQueryEditor(query);
+      cy.setQueryEditor(query);
       cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);

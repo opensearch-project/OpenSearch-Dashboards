@@ -5,7 +5,7 @@
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    setSingleLineQueryEditor(value: string, submit?: boolean): Chainable<any>;
+    setQueryEditor(value: string, submit?: boolean): Chainable<any>;
     setQueryLanguage(value: 'DQL' | 'Lucene' | 'OpenSearch SQL' | 'PPL'): Chainable<any>;
     addDataSource(opts: {
       name: string;
