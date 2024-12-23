@@ -12,6 +12,10 @@ Cypress.Commands.add('setQueryEditor', (value, submit = true) => {
     message: value,
   });
 
+  // On a new session, a syntax helper popover appears, which obstructs the typing within the query
+  // editor. Clicking on a random element removes the popover.
+  cy.getElementByTestId('headerGlobalNav').click();
+
   // clear the editor first and then set
   cy.get('.globalQueryEditor .react-monaco-editor-container')
     .click()
