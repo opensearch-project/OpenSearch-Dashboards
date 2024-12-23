@@ -31,7 +31,6 @@ export const useWorkspaceForm = ({
   application,
   defaultValues,
   onSubmit,
-  permissionEnabled,
   onAppLeave,
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
@@ -119,10 +118,7 @@ export const useWorkspaceForm = ({
           (item.type === WorkspacePermissionItemType.User && !!item.userId) ||
           (item.type === WorkspacePermissionItemType.Group && !!item.group)
       );
-      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(
-        currentFormData,
-        !!permissionEnabled
-      );
+      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(currentFormData);
       setFormErrors(currentFormErrors);
       if (getNumberOfErrors(currentFormErrors) > 0) {
         return;
@@ -135,7 +131,7 @@ export const useWorkspaceForm = ({
         setIsEditing(false);
       }
     },
-    [onSubmit, permissionEnabled]
+    [onSubmit]
   );
 
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {

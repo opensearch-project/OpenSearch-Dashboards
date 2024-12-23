@@ -46,7 +46,7 @@ export class ViewEventsOptionAction implements Action<EmbeddableContext> {
     const vis = (embeddable as VisualizeEmbeddable).vis;
     return (
       vis !== undefined &&
-      (await isEligibleForVisLayers(vis)) &&
+      isEligibleForVisLayers(vis) &&
       !isEmpty((embeddable as VisualizeEmbeddable).visLayers)
     );
   }
