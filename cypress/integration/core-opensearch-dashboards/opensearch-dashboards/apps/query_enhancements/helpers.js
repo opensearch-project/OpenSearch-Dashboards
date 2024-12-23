@@ -340,3 +340,73 @@ export function verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFilter
   cy.getElementByTestId('globalFilterBar').find('[aria-label="Delete"]').click();
   cy.getElementByTestId('discoverQueryHits').should('have.text', expectedQueryHitsWithoutFilter);
 }
+
+/**
+ * Sends a new query via the query multiline editor.
+ * @param {string} query Query text
+ * @see https://docs.cypress.io/api/commands/type#Arguments
+ */
+export function sendQueryOnMultilineEditor(query) {
+  const getMultilineEditor = () => {
+    cy.getElementByTestId('headerGlobalNav').click(); // remove syntax helper
+    return cy.get('.view-line'); // get the line we want to edit
+  };
+  // Clear default text on the editor by an alternative method, since
+  // cy.clear() won't work for some reason
+  getMultilineEditor()
+    .invoke('text')
+    .then(function ($content) {
+      const contentLen = $content.length + 1;
+      getMultilineEditor().type('a'); // make sure we're at the end of the string
+      getMultilineEditor().type('{backspace}'.repeat(contentLen));
+    });
+  // Type query
+  getMultilineEditor().type(query);
+  // Send query
+  cy.getElementByTestId('querySubmitButton').click();
+}
+
+/**
+ * Set the query editor language
+ * @param language Accepted values: 'DQL', 'Lucene', 'OpenSearch SQL', 'PPL'
+ */
+export function setQueryEditorLanguage(language) {
+  cy.getElementByTestId('headerGlobalNav').click(); // remove helper message
+  cy.getElementByTestId('queryEditorLanguageSelector').click();
+  cy.getElementByTestId('queryEditorLanguageOptions').find('button').contains(language).click();
+}
+
+export function clickSidebarCollapseBtn(collapse = true) {
+  if (collapse) {
+    cy.getElementByTestId('euiResizableButton').trigger('mouseover').click();
+    cy.get('.euiResizableToggleButton').click({ force: true });
+  } else {
+    cy.get('.euiResizableToggleButton').click();
+  }
+}
+
+/**
+ * Check the results of the sidebar filter bar search.
+ * @param {string} search text to look up
+ * @param {string} assertion the type of assertion that is going to be performed. Example: 'eq', 'include'. If an assertion is not passed, a negative test is performend.
+ */
+export function checkSidebarFilterBarResults(search, assertion) {
+  cy.getElementByTestId('fieldFilterSearchInput').type(search, { force: true });
+  if (assertion) {
+    // Get all sidebar fields and iterate over all of them
+    cy.get('[data-test-subj^="field-"]:not([data-test-subj$="showDetails"])').each(function (
+      $field
+    ) {
+      cy.wrap($field)
+        .should('be.visible')
+        .invoke('text')
+        .then(function ($fieldTxt) {
+          cy.wrap($fieldTxt).should(assertion, search);
+        });
+    });
+  } else {
+    // Select all sidebar fields and verify that no match is found
+    cy.get('[data-test-subj^="field-"]:not([data-test-subj$="showDetails"])').should('not.exist');
+  }
+  cy.get('button[aria-label="Clear input"]').click();
+}
