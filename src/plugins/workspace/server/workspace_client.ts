@@ -13,11 +13,11 @@ import {
   UiSettingsServiceStart,
   WORKSPACE_TYPE,
   Logger,
+  WorkspaceFindOptions,
 } from '../../../core/server';
 import { updateWorkspaceState, getWorkspaceState } from '../../../core/server/utils';
 import {
   IWorkspaceClientImpl,
-  WorkspaceFindOptions,
   IResponse,
   IRequestDetail,
   WorkspaceAttributeWithPermission,
