@@ -1,0 +1,78 @@
+{
+  "mappings": {
+    "properties": {
+      "category": {
+        "type": "keyword"
+      },
+      "status_code": {
+        "type": "integer"
+      },
+      "response_time": {
+        "type": "float"
+      },
+      "bytes_transferred": {
+        "type": "long"
+      },
+      "event_sequence_number": {
+        "type": "long"
+      },
+      "request_url": {
+        "type": "keyword"
+      },
+      "service_endpoint": {
+        "type": "keyword"
+      },
+      "personal": {
+        "type": "nested",
+        "properties": {
+          "user_id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          },
+          "age": {
+            "type": "integer"
+          },
+          "email": {
+            "type": "keyword"
+          },
+          "address": {
+            "type": "nested",
+            "properties": {
+              "street": {
+                "type": "keyword"
+              },
+              "city": {
+                "type": "keyword"
+              },
+              "country": {
+                "type": "keyword"
+              },
+              "coordinates": {
+                "type": "nested",
+                "properties": {
+                  "lat": {
+                    "type": "float"
+                  },
+                  "lon": {
+                    "type": "float"
+                  }
+                }
+              }
+            }
+          },
+          "birthdate": {
+            "type": "date"
+          }
+        }
+      },
+      "timestamp": {
+        "type": "date"
+      },
+      "event_time": {
+        "type": "date"
+      }
+    }
+  }
+}
