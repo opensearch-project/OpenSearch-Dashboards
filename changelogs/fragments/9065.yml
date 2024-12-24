@@ -1,0 +1,2 @@
+refactor:
+- Remove permission validation in workspace form ([#9065](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9065))
