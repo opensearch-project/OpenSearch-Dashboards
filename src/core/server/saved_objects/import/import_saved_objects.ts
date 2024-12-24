@@ -42,6 +42,7 @@ import { checkConflicts } from './check_conflicts';
 import { regenerateIds } from './regenerate_ids';
 import { checkConflictsForDataSource } from './check_conflict_for_data_source';
 import { isSavedObjectWithDataSource } from './validate_object_id';
+import { validateDataSources } from './validate_data_sources';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -61,6 +62,7 @@ export async function importSavedObjectsFromStream({
   dataSourceTitle,
   workspaces,
   dataSourceEnabled,
+  isCopy,
 }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
@@ -107,6 +109,20 @@ export async function importSavedObjectsFromStream({
     namespace
   );
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
+
+  if (isCopy) {
+    // Data sources can only be assigned to workspaces and can not be copied between workspaces.
+    collectSavedObjectsResult.collectedObjects = collectSavedObjectsResult.collectedObjects.filter(
+      (obj) => obj.type !== 'data-source'
+    );
+    const validateDataSourcesResult = await validateDataSources(
+      collectSavedObjectsResult.collectedObjects,
+      savedObjectsClient,
+      errorAccumulator,
+      workspaces
+    );
+    errorAccumulator = [...errorAccumulator, ...validateDataSourcesResult];
+  }
 
   if (createNewCopies) {
     // randomly generated id

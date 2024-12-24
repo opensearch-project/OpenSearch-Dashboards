@@ -395,6 +395,11 @@ describe('#createSavedObjects', () => {
         id: 'baz-id',
         error: { type: 'missing_references' },
       } as SavedObjectsImportError,
+      {
+        type: 'baz',
+        id: 'baz-id',
+        error: { type: 'missing_data_source' },
+      } as SavedObjectsImportError,
     ];
     const unresolvableErrors: SavedObjectsImportError[] = [
       { type: 'qux', id: 'qux-id', error: { type: 'unsupported_type' } } as SavedObjectsImportError,
