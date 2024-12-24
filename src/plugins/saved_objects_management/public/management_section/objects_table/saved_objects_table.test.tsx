@@ -637,6 +637,7 @@ describe('SavedObjectsTable', () => {
         { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
       expect(component.state('isDeleting')).toBe(false);
       expect(component.state('isShowingDeleteConfirmModal')).toBe(false);
     });

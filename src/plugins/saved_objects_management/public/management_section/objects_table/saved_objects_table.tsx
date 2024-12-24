@@ -109,7 +109,7 @@ import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { DuplicateObject } from '../types';
 import { formatWorkspaceIdParams } from '../../utils';
 import { NavigationPublicPluginStart } from '../../../../navigation/public';
-
+import { WorkspaceObject } from '../../../../workspaces/public';
 interface ExportAllOption {
   id: string;
   label: string;
