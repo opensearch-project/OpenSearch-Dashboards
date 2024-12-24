@@ -11,8 +11,10 @@ import {
   INDEX_PATTERN_NAME,
   START_TIME,
   END_TIME,
+  WORKSPACE_NAME,
 } from './constants.js';
 import * as dataExplorer from './helpers.js';
+import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
 
 const miscUtils = new MiscUtils(cy);
 
@@ -89,14 +91,8 @@ describe('filter for value spec', () => {
     // Load test data
     cy.setupTestData(
       SECONDARY_ENGINE.url,
-      [
-        'cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.mapping.json',
-        'cypress/fixtures/query_enhancements/data-logs-2/data_logs_small_time_2.mapping.json',
-      ],
-      [
-        'cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.data.ndjson',
-        'cypress/fixtures/query_enhancements/data-logs-2/data_logs_small_time_2.data.ndjson',
-      ]
+      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.mapping.json'],
+      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.data.ndjson']
     );
     // Add data source
     cy.addDataSource({
@@ -104,11 +100,22 @@ describe('filter for value spec', () => {
       url: `${SECONDARY_ENGINE.url}`,
       authType: 'no_auth',
     });
+
     // Create workspace
     cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
     miscUtils.visitPage('/app/home');
     cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${WORKSPACE_NAME}`);
     cy.wait(2000);
+    cy.createWorkspaceIndexPatterns({
+      url: `${BASE_PATH}`,
+      workspaceName: `${WORKSPACE_NAME}`,
+      indexPattern: 'data_logs_small_time_1',
+      timefieldName: 'timestamp',
+      indexPatternHasTimefield: true,
+      dataSource: DATASOURCE_NAME,
+      isEnhancement: true,
+    });
+    cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${WORKSPACE_NAME}`);
   });
 
   beforeEach(() => {
@@ -120,7 +127,6 @@ describe('filter for value spec', () => {
     cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
     // TODO: Modify deleteIndex to handle an array of index and remove hard code
     cy.deleteIndex('data_logs_small_time_1');
-    cy.deleteIndex('data_logs_small_time_2');
   });
 
   const testCases = [
