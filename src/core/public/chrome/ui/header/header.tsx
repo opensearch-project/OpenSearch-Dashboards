@@ -500,7 +500,6 @@ export function Header({
         navigateToUrl={application.navigateToUrl}
         renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
-        workspaceEnabled={application.capabilities.workspaces.enabled}
         loadingCount$={observables.loadingCount$}
       />
     </EuiHeaderSectionItem>
