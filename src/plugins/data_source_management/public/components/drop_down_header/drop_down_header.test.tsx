@@ -47,15 +47,16 @@ describe('DataSourceDropDownHeader', () => {
     expect(wrapper.text()).toContain(`${activeDataSourceCount}/${totalDataSourceCount}`);
   });
 
-  it('should call application.navigateToApp when the "Manage" link is clicked', () => {
+  it('should call application.navigateToApp and close the modal mask when the "Manage" link is clicked', () => {
     const totalDataSourceCount = 5;
     const applicationMock = coreMock.createStart().application;
     const navigateToAppMock = applicationMock.navigateToApp;
-
+    const onManageDataSourceMock = jest.fn();
     const wrapper = mount(
       <DataSourceDropDownHeader
         totalDataSourceCount={totalDataSourceCount}
         application={applicationMock}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
 
@@ -63,5 +64,6 @@ describe('DataSourceDropDownHeader', () => {
     expect(navigateToAppMock).toHaveBeenCalledWith('management', {
       path: `opensearch-dashboards/${DSM_APP_ID}`,
     });
+    expect(onManageDataSourceMock).toHaveBeenCalled();
   });
 });
