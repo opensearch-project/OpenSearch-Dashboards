@@ -8,6 +8,7 @@
  */
 
 import { BASE_PATH } from './constants';
+import { TestFixtureHandler } from '../lib/test_fixture_handler';
 
 // This function does not delete all indices
 Cypress.Commands.add('deleteAllIndices', () => {
@@ -289,4 +290,68 @@ Cypress.Commands.add('fleshTenantSettings', () => {
       failOnStatusCode: false,
     });
   }
+});
+
+Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
+  cy.wait(3000);
+  cy.getElementByTestId('workspace-detail-delete-button').should('be.visible').click();
+  cy.getElementByTestId('delete-workspace-modal-body').should('be.visible');
+  cy.getElementByTestId('delete-workspace-modal-input').type(workspaceName);
+  cy.getElementByTestId('delete-workspace-modal-confirm').click();
+  cy.contains(/successfully/);
+});
+
+Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
+  cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
+    .should('be.visible')
+    .click();
+  cy.getElementByTestId('workspace-initial-button-create-observability-workspace')
+    .should('be.visible')
+    .click();
+  cy.getElementByTestId('workspaceForm-workspaceDetails-nameInputText')
+    .should('be.visible')
+    .type(workspaceName);
+  cy.getElementByTestId('workspace-creator-dataSources-assign-button')
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
+  cy.get(`.euiSelectableListItem[title="${dataSourceTitle}"]`)
+    .should('be.visible')
+    .trigger('click');
+  cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button').click();
+  cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
+  cy.contains(/successfully/);
+});
+
+Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
+  cy.getElementByTestId('workspace-select-button').should('exist').click();
+  cy.getElementByTestId('workspace-menu-manage-button').should('exist').click();
+  cy.get('.euiBasicTable')
+    .find('tr')
+    .filter((index, row) => {
+      return Cypress.$(row).find('td').text().includes(workspaceName);
+    })
+    .find('a.euiLink')
+    .click();
+});
+
+Cypress.Commands.add('setupTestData', (endpoint, mappingFiles, dataFiles) => {
+  if (!Array.isArray(mappingFiles) || !Array.isArray(dataFiles)) {
+    throw new Error('Both mappingFiles and dataFiles must be arrays');
+  }
+
+  if (mappingFiles.length !== dataFiles.length) {
+    throw new Error('The number of mapping files must match the number of data files');
+  }
+
+  const handler = new TestFixtureHandler(cy, endpoint);
+
+  let chain = cy.wrap(null);
+  mappingFiles.forEach((mappingFile, index) => {
+    chain = chain
+      .then(() => handler.importMapping(mappingFile))
+      .then(() => handler.importData(dataFiles[index]));
+  });
+
+  return chain;
 });

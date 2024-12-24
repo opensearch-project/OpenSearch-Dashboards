@@ -160,198 +160,72 @@ describe('convertPermissionsToPermissionSettings', () => {
 
 describe('validateWorkspaceForm', () => {
   it('should return error if name is empty', () => {
-    expect(validateWorkspaceForm({}, false).name).toEqual({
+    expect(validateWorkspaceForm({}).name).toEqual({
       code: WorkspaceFormErrorCode.WorkspaceNameMissing,
       message: 'Name is required. Enter a name.',
     });
   });
   it('should return error if name is empty string', () => {
-    expect(validateWorkspaceForm({ name: '' }, false).name).toEqual({
+    expect(validateWorkspaceForm({ name: '' }).name).toEqual({
       code: WorkspaceFormErrorCode.WorkspaceNameMissing,
       message: 'Name is required. Enter a name.',
     });
   });
   it('should return error if name is blank string', () => {
-    expect(validateWorkspaceForm({ name: '   ' }, false).name).toEqual({
+    expect(validateWorkspaceForm({ name: '   ' }).name).toEqual({
       code: WorkspaceFormErrorCode.WorkspaceNameMissing,
       message: 'Name is required. Enter a name.',
     });
   });
   it('should return error if name is invalid', () => {
-    expect(validateWorkspaceForm({ name: '~' }, false).name).toEqual({
+    expect(validateWorkspaceForm({ name: '~' }).name).toEqual({
       code: WorkspaceFormErrorCode.InvalidWorkspaceName,
       message: 'Name is invalid. Enter a valid name.',
     });
   });
   it('should return error if color is invalid', () => {
-    expect(validateWorkspaceForm({ color: 'QWERTY' }, false).color).toEqual({
+    expect(validateWorkspaceForm({ color: 'QWERTY' }).color).toEqual({
       code: WorkspaceFormErrorCode.InvalidColor,
       message: 'Color is invalid. Choose a valid color.',
     });
   });
   it('should return error if use case is empty', () => {
-    expect(validateWorkspaceForm({}, false).features).toEqual({
+    expect(validateWorkspaceForm({}).features).toEqual({
       code: WorkspaceFormErrorCode.UseCaseMissing,
       message: 'Use case is required. Select a use case.',
-    });
-  });
-  it('should return error if permission setting type is invalid', () => {
-    expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-          permissionSettings: [{ id: 0 }],
-        },
-        true
-      ).permissionSettings?.fields
-    ).toEqual({
-      0: { code: WorkspaceFormErrorCode.InvalidPermissionType, message: 'Invalid type' },
-    });
-  });
-  it('should return error if permission setting modes is invalid', () => {
-    expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-          permissionSettings: [{ id: 0, type: WorkspacePermissionItemType.User, modes: [] }],
-        },
-        true
-      ).permissionSettings?.fields
-    ).toEqual({
-      0: {
-        code: WorkspaceFormErrorCode.InvalidPermissionModes,
-        message: 'Invalid permission modes',
-      },
-    });
-  });
-
-  it('should return error if permission setting is duplicate', () => {
-    expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-          permissionSettings: [
-            {
-              id: 0,
-              type: WorkspacePermissionItemType.User,
-              modes: [WorkspacePermissionMode.LibraryRead],
-              userId: 'foo',
-            },
-            {
-              id: 1,
-              type: WorkspacePermissionItemType.User,
-              modes: [WorkspacePermissionMode.LibraryRead],
-              userId: 'foo',
-            },
-          ],
-        },
-        true
-      ).permissionSettings?.fields
-    ).toEqual({
-      1: {
-        code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
-        message: 'User must be unique. Enter a unique user.',
-      },
-    });
-    expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-          permissionSettings: [
-            {
-              id: 0,
-              type: WorkspacePermissionItemType.Group,
-              modes: [WorkspacePermissionMode.LibraryRead],
-              group: 'foo',
-            },
-            {
-              id: 1,
-              type: WorkspacePermissionItemType.Group,
-              modes: [WorkspacePermissionMode.LibraryRead],
-              group: 'foo',
-            },
-          ],
-        },
-        true
-      ).permissionSettings?.fields
-    ).toEqual({
-      1: {
-        code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
-        message: 'User group must be unique. Enter a unique user group.',
-      },
-    });
-  });
-
-  it('should return error if owner is missing in permission settings', () => {
-    expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-        },
-        true
-      ).permissionSettings?.overall
-    ).toEqual({
-      code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-      message: 'Add a workspace owner.',
-    });
-
-    expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-          permissionSettings: [
-            {
-              id: 0,
-              type: WorkspacePermissionItemType.User,
-              modes: [WorkspacePermissionMode.LibraryRead],
-              userId: 'foo',
-            },
-          ],
-        },
-        true
-      ).permissionSettings?.overall
-    ).toEqual({
-      code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-      message: 'Add a workspace owner.',
     });
   });
 
   it('should return empty object for valid form data', () => {
     expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-          permissionSettings: [
-            {
-              id: 0,
-              type: WorkspacePermissionItemType.Group,
-              modes: [WorkspacePermissionMode.LibraryRead],
-              group: 'foo',
-            },
-          ],
-          features: ['use-case-observability'],
-        },
-        false
-      )
+      validateWorkspaceForm({
+        name: 'test',
+        permissionSettings: [
+          {
+            id: 0,
+            type: WorkspacePermissionItemType.Group,
+            modes: [WorkspacePermissionMode.LibraryRead],
+            group: 'foo',
+          },
+        ],
+        features: ['use-case-observability'],
+      })
     ).toEqual({});
   });
 
   it('should return error if selected data source id is null', () => {
     expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-          selectedDataSourceConnections: [
-            {
-              id: '',
-              name: 'title',
-              connectionType: DataSourceConnectionType.OpenSearchConnection,
-              type: 'OpenSearch',
-            },
-          ],
-        },
-        false
-      ).selectedDataSourceConnections
+      validateWorkspaceForm({
+        name: 'test',
+        selectedDataSourceConnections: [
+          {
+            id: '',
+            name: 'title',
+            connectionType: DataSourceConnectionType.OpenSearchConnection,
+            type: 'OpenSearch',
+          },
+        ],
+      }).selectedDataSourceConnections
     ).toEqual({
       0: { code: WorkspaceFormErrorCode.InvalidDataSource, message: 'Invalid data source' },
     });
@@ -359,26 +233,23 @@ describe('validateWorkspaceForm', () => {
 
   it('should return error if selected data source id is duplicated', () => {
     expect(
-      validateWorkspaceForm(
-        {
-          name: 'test',
-          selectedDataSourceConnections: [
-            {
-              id: 'id',
-              name: 'title1',
-              connectionType: DataSourceConnectionType.OpenSearchConnection,
-              type: 'OpenSearch',
-            },
-            {
-              id: 'id',
-              name: 'title2',
-              connectionType: DataSourceConnectionType.OpenSearchConnection,
-              type: 'OpenSearch',
-            },
-          ],
-        },
-        false
-      ).selectedDataSourceConnections
+      validateWorkspaceForm({
+        name: 'test',
+        selectedDataSourceConnections: [
+          {
+            id: 'id',
+            name: 'title1',
+            connectionType: DataSourceConnectionType.OpenSearchConnection,
+            type: 'OpenSearch',
+          },
+          {
+            id: 'id',
+            name: 'title2',
+            connectionType: DataSourceConnectionType.OpenSearchConnection,
+            type: 'OpenSearch',
+          },
+        ],
+      }).selectedDataSourceConnections
     ).toEqual({
       '1': { code: WorkspaceFormErrorCode.DuplicateDataSource, message: 'Duplicate data sources' },
     });
@@ -419,25 +290,6 @@ describe('getNumberOfErrors', () => {
         },
       })
     ).toEqual(1);
-  });
-
-  it('should return consistent permission settings errors count', () => {
-    expect(
-      getNumberOfErrors({
-        permissionSettings: {
-          overall: {
-            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-            message: '',
-          },
-          fields: {
-            1: {
-              code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
-              message: '',
-            },
-          },
-        },
-      })
-    ).toEqual(2);
   });
 });
 
