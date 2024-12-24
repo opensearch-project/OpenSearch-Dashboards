@@ -51,12 +51,12 @@ describe('DataSourceDropDownHeader', () => {
     const totalDataSourceCount = 5;
     const applicationMock = coreMock.createStart().application;
     const navigateToAppMock = applicationMock.navigateToApp;
-    const onChangeDevToolsModalVisibleMock = jest.fn();
+    const onManageDataSourceMock = jest.fn();
     const wrapper = mount(
       <DataSourceDropDownHeader
         totalDataSourceCount={totalDataSourceCount}
         application={applicationMock}
-        onChangeDevToolsModalVisible={onChangeDevToolsModalVisibleMock}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
 
@@ -64,6 +64,6 @@ describe('DataSourceDropDownHeader', () => {
     expect(navigateToAppMock).toHaveBeenCalledWith('management', {
       path: `opensearch-dashboards/${DSM_APP_ID}`,
     });
-    expect(onChangeDevToolsModalVisibleMock).toHaveBeenCalled();
+    expect(onManageDataSourceMock).toHaveBeenCalled();
   });
 });

@@ -25,7 +25,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     uiSettings,
     hideLocalCluster,
     application,
-    onChangeDevToolsModalVisible,
+    onManageDataSource,
   } = props;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
@@ -81,7 +81,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     } = config;
     return (
       <DataSourceSelectable
-        onChangeDevToolsModalVisible={onChangeDevToolsModalVisible}
+        onManageDataSource={onManageDataSource}
         savedObjectsClient={savedObjects!}
         notifications={notifications!.toasts}
         onSelectedDataSources={onSelectedDataSources}

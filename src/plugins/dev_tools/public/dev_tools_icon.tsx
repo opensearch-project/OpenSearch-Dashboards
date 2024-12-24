@@ -134,7 +134,7 @@ export function DevToolsIcon({
                     setMenuMountPoint={setMountPoint}
                     RouterComponent={MemoryRouter}
                     defaultRoute={devToolTab}
-                    onChangeDevToolsModalVisible={closeModalVisible}
+                    onManageDataSource={closeModalVisible}
                   />
                   <EuiSpacer size="s" />
                   <EuiSmallButton
