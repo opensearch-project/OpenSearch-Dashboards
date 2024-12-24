@@ -336,7 +336,6 @@ export class WorkspaceClient implements IWorkspaceClient {
     targetWorkspace: string,
     includeReferencesDeep: boolean = true
   ): Promise<SavedObjectsImportResponse> {
-    // throw 'err';
     const path = this.getPath('_duplicate_saved_objects');
     const body = {
       objects,
