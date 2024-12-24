@@ -7,7 +7,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
   >
     Organize collaborative projects with use-case-specific workspaces.
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
       role="main"
     >
       <div>
@@ -163,7 +163,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
               </div>
             </div>
             <table
-              class="euiTable euiTable--compressed euiTable--responsive"
+              class="euiTable euiTable--responsive"
               id="__table_generated-id"
               tabindex="-1"
             >
@@ -414,7 +414,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -587,7 +587,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -760,9 +760,11 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
-                        />
+                        >
+                          —
+                        </div>
                       </span>
                     </div>
                   </td>
@@ -870,7 +872,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         >
                           Rows per page
                           : 
-                          10
+                          20
                         </span>
                       </span>
                     </button>

@@ -215,8 +215,30 @@ describe('WorkspaceList', () => {
     const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
     fireEvent.click(operationIcons);
     expect(getByText('Copy ID')).toBeInTheDocument();
+    expect(getByText('Set as my default')).toBeInTheDocument();
     expect(getByText('Edit')).toBeInTheDocument();
     expect(getByText('Delete')).toBeInTheDocument();
+  });
+
+  it('should not be able to see the  operation: delete after click in the meatballs button for non-dashboard-admin', async () => {
+    const { getAllByTestId, queryByText } = render(
+      getWrapWorkspaceListInContext(
+        [
+          {
+            id: 'id2',
+            name: 'name2',
+            features: ['use-case-observability'],
+            description:
+              'should be able to see the description tooltip when hovering over the description',
+            lastUpdatedTime: '1999-08-06T00:00:00.00Z',
+          },
+        ],
+        false
+      )
+    );
+    const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
+    fireEvent.click(operationIcons);
+    expect(queryByText('Delete')).not.toBeInTheDocument();
   });
 
   it('should be able to copy workspace ID after clicking copy button', async () => {
@@ -251,8 +273,8 @@ describe('WorkspaceList', () => {
 
   it('should be able to pagination when clicking pagination button', async () => {
     const list = [];
-    // add 15 items into list
-    for (let i = 100; i < 115; i++) {
+    // add 25 items into list
+    for (let i = 100; i < 125; i++) {
       list.push({
         id: `id${i}`,
         name: `name${i}`,
@@ -263,11 +285,11 @@ describe('WorkspaceList', () => {
     }
     const { getByTestId, getByText, queryByText } = render(getWrapWorkspaceListInContext(list));
     expect(getByText('name100')).toBeInTheDocument();
-    expect(queryByText('name110')).not.toBeInTheDocument();
+    expect(queryByText('name124')).not.toBeInTheDocument();
     const paginationButton = getByTestId('pagination-button-next');
     fireEvent.click(paginationButton);
     expect(queryByText('name100')).not.toBeInTheDocument();
-    expect(queryByText('name110')).toBeInTheDocument();
+    expect(queryByText('name124')).toBeInTheDocument();
   });
 
   it('should display create workspace button for dashboard admin', async () => {
@@ -278,6 +300,35 @@ describe('WorkspaceList', () => {
   it('should hide create workspace button for non dashboard admin', async () => {
     const { queryByText } = render(getWrapWorkspaceListInContext([], false));
     expect(queryByText('Create workspace')).toBeNull();
+  });
+
+  it('displays "Delete 1 workspace" when one workspace is selected for deletion', async () => {
+    const { getByText, container, getByTestId } = render(getWrapWorkspaceListInContext());
+    const checkboxes = container.querySelectorAll('[data-test-subj^="checkboxSelectRow-"]');
+    expect(checkboxes.length).toBeGreaterThanOrEqual(2);
+    fireEvent.click(checkboxes[0]);
+    expect(getByText('Delete 1 workspace')).toBeInTheDocument();
+    const deleteButton = getByTestId('multi-deletion-button');
+    fireEvent.click(deleteButton);
+    expect(screen.queryByLabelText('mock delete workspace modal')).toBeInTheDocument();
+    const modalCancelButton = screen.getByLabelText('mock delete workspace modal button');
+    fireEvent.click(modalCancelButton);
+    expect(screen.queryByLabelText('mock delete workspace modal')).not.toBeInTheDocument();
+  });
+
+  it('should display "Delete 2 workspaces" and show modal when two workspaces are selected for deletion', async () => {
+    const { getByText, container, getByTestId } = render(getWrapWorkspaceListInContext());
+    const checkboxes = container.querySelectorAll('[data-test-subj^="checkboxSelectRow-"]');
+    expect(checkboxes.length).toBeGreaterThanOrEqual(2);
+    fireEvent.click(checkboxes[0]);
+    fireEvent.click(checkboxes[1]);
+    expect(getByText('Delete 2 workspaces')).toBeInTheDocument();
+    const deleteButton = getByTestId('multi-deletion-button');
+    fireEvent.click(deleteButton);
+    expect(screen.queryByLabelText('mock delete workspace modal')).toBeInTheDocument();
+    const modalCancelButton = screen.getByLabelText('mock delete workspace modal button');
+    fireEvent.click(modalCancelButton);
+    expect(screen.queryByLabelText('mock delete workspace modal')).not.toBeInTheDocument();
   });
 
   it('should render data source badge when more than two data sources', async () => {
