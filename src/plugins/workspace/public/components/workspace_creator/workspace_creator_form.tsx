@@ -19,9 +19,12 @@ import { generateRightSidebarScrollProps, RightSidebarScrollField } from './util
 import { CreatorDetailsPanel } from './creator_details_panel';
 
 import './workspace_creator_form.scss';
+import { WorkspacePrivacySettingPanel } from '../workspace_form/workspace_privacy_setting_panel';
 
 interface WorkspaceCreatorFormProps extends WorkspaceFormProps {
   isSubmitting: boolean;
+  goToCollaborators: boolean;
+  onGoToCollaboratorsChange: (value: boolean) => void;
 }
 
 export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
@@ -42,9 +45,12 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
     handleColorChange,
     handleUseCaseChange,
     setSelectedDataSourceConnections,
+    privacyType,
+    setPrivacyType,
   } = useWorkspaceForm(props);
 
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
+  const isPermissionEnabled = !!application?.capabilities.workspaces.permissionEnabled;
 
   return (
     <EuiFlexGroup className="workspaceCreateFormContainer">
@@ -110,6 +116,15 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
               </EuiPanel>
             </>
           )}
+          <EuiSpacer size="m" />
+          {isDashboardAdmin && isPermissionEnabled && (
+            <WorkspacePrivacySettingPanel
+              privacyType={privacyType}
+              onPrivacyTypeChange={setPrivacyType}
+              goToCollaborators={props.goToCollaborators}
+              onGoToCollaboratorsChange={props.onGoToCollaboratorsChange}
+            />
+          )}
         </EuiForm>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -122,6 +137,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
               application={application}
               isSubmitting={props.isSubmitting}
               dataSourceEnabled={!!isDataSourceEnabled}
+              privacyType={privacyType}
             />
           </div>
         </div>
