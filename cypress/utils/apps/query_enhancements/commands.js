@@ -3,16 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-Cypress.Commands.add('setSingleLineQueryEditor', (value, submit = true) => {
+Cypress.Commands.add('setQueryEditor', (value, submit = true) => {
   const opts = { log: false };
 
   Cypress.log({
-    name: 'setSingleLineQueryEditor',
+    name: 'setQueryEditor',
     displayName: 'set query',
     message: value,
   });
 
-  cy.getElementByTestId('osdQueryEditor__singleLine', opts).type(value, opts);
+  // On a new session, a syntax helper popover appears, which obstructs the typing within the query
+  // editor. Clicking on a random element removes the popover.
+  cy.getElementByTestId('headerGlobalNav').click();
+
+  // clear the editor first and then set
+  cy.get('.globalQueryEditor .react-monaco-editor-container')
+    .click()
+    .focused()
+    .type('{ctrl}a')
+    .type('{backspace}')
+    .type('{meta}a')
+    .type('{backspace}')
+    .type(value, opts);
 
   if (submit) {
     cy.updateTopNav(opts);
