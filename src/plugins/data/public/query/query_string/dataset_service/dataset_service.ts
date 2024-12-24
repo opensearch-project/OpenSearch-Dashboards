@@ -80,7 +80,9 @@ export class DatasetService {
   }
 
   public getRecentDatasets(): Dataset[] {
-    return this.recentDatasets.values();
+    // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8814
+    return [];
+    // return this.recentDatasets.values();
   }
 
   public addRecentDataset(dataset: Dataset | undefined, serialize: boolean = true): void {
@@ -161,14 +163,17 @@ export class DatasetService {
       .join('&');
     const cacheKey =
       `${dataType}.${lastPathItem.id}` + (fetchOptionsKey.length ? `?${fetchOptionsKey}` : '');
-
-    const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
-    if (cachedDataStructure?.children?.length > 0) {
-      return this.cacheToDataStructure(dataType, cachedDataStructure);
+    if (type.meta.cacheOptions) {
+      const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
+      if (cachedDataStructure?.children?.length > 0) {
+        return this.cacheToDataStructure(dataType, cachedDataStructure);
+      }
     }
 
     const fetchedDataStructure = await type.fetch(services, path, options);
-    this.cacheDataStructure(dataType, fetchedDataStructure);
+    if (type.meta.cacheOptions) {
+      this.cacheDataStructure(dataType, fetchedDataStructure);
+    }
     return fetchedDataStructure;
   }
 
@@ -256,6 +261,11 @@ export class DatasetService {
       return undefined;
     }
 
+    let dataSource;
+    if (indexPattern.dataSourceRef) {
+      dataSource = await this.indexPatterns?.getDataSource(indexPattern.dataSourceRef?.id);
+    }
+
     const dataType = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (dataType) {
       const dataset = dataType.toDataset([
@@ -263,8 +273,16 @@ export class DatasetService {
           id: indexPattern.id,
           title: indexPattern.title,
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+          parent: dataSource
+            ? {
+                id: dataSource.id,
+                title: dataSource.attributes?.title,
+                type: dataSource.attributes?.dataSourceEngineType || '',
+              }
+            : undefined,
         },
       ]);
+
       return { ...dataset, timeFieldName: indexPattern.timeFieldName };
     }
 

@@ -168,6 +168,7 @@ export enum AssociationDataSourceModalMode {
   DirectQueryConnections = 'direction-query-connections',
 }
 export const USE_CASE_PREFIX = 'use-case-';
+export const OPENSEARCHDASHBOARDS_CONFIG_PATH = 'opensearchDashboards';
 
 // Workspace will handle both data source and data connection type saved object.
 export const WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES = [

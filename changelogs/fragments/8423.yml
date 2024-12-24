@@ -1,2 +1,0 @@
-infra:
-- Add precommit hook to validate i18n ([#8423](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8423))

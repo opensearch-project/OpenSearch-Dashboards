@@ -42,9 +42,10 @@ export const removeKeyword = (queryString: string | undefined) => {
   return queryString?.replace(new RegExp('.keyword'), '') ?? '';
 };
 
-export const handleFacetError = (response: any) => {
-  const error = new Error(response.data.body ?? response.data);
-  error.name = response.data.status ?? response.status;
+export const throwFacetError = (response: any) => {
+  const error = new Error(response.data.body?.message ?? response.data.body ?? response.data);
+  error.name = response.data.status ?? response.status ?? response.data.statusCode;
+  (error as any).status = error.name;
   throw error;
 };
 
@@ -54,6 +55,7 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
     query: { ...query, format: 'jdbc' },
     aggConfig,
     pollQueryResultsParams: context.body?.pollQueryResultsParams,
+    timeRange: context.body?.timeRange,
   });
   return from(
     http.fetch({

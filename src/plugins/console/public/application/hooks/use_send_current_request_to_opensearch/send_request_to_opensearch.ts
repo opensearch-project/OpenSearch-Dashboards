@@ -41,6 +41,7 @@ export interface OpenSearchRequestArgs {
   http: HttpSetup;
   requests: any;
   dataSourceId?: string;
+  withLongNumeralsSupport?: boolean;
 }
 
 export interface OpenSearchRequestObject {
@@ -104,7 +105,8 @@ export function sendRequestToOpenSearch(
           opensearchMethod,
           opensearchPath,
           opensearchData,
-          args.dataSourceId
+          args.dataSourceId,
+          args.withLongNumeralsSupport
         );
         if (reqId !== CURRENT_REQ_ID) {
           return;
