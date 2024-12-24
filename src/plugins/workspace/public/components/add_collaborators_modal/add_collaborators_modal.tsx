@@ -84,15 +84,12 @@ export const AddCollaboratorsModal = ({
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddCollaborators = async () => {
-    const singleStarUserIds =
-      permissionType === 'user'
-        ? validInnerCollaborators.flatMap(({ id, collaboratorId }) =>
-            collaboratorId.trim() === '*' ? id : []
-          )
-        : [];
-    if (singleStarUserIds.length > 0) {
+    const singleStarIds = validInnerCollaborators.flatMap(({ id, collaboratorId }) =>
+      collaboratorId.trim() === '*' ? id : []
+    );
+    if (singleStarIds.length > 0) {
       setErrors(
-        singleStarUserIds.reduce(
+        singleStarIds.reduce(
           (previousErrors, id) => ({
             ...previousErrors,
             [id]: i18n.translate('workspace.addCollaboratorsModal.errors.invalidUserFormat', {

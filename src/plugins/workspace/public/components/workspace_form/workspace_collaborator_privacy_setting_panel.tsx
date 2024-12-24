@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import _ from 'lodash';
 import { i18n } from '@osd/i18n';
 import { WorkspacePrivacyItemType, privacyType2CopyMap, workspacePrivacyTitle } from './constants';
 import { WorkspacePermissionSetting } from './types';
