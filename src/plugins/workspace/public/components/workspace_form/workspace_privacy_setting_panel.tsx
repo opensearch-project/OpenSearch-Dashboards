@@ -16,12 +16,22 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { privacyType2CopyMap, WorkspacePrivacyItemType, workspacePrivacyTitle } from './constants';
+import { privacyType2TextMap, WorkspacePrivacyItemType, workspacePrivacyTitle } from './constants';
 import './workspace_privacy_setting.scss';
 import {
   generateRightSidebarScrollProps,
   RightSidebarScrollField,
 } from '../workspace_creator/utils';
+
+const options = [
+  WorkspacePrivacyItemType.PrivateToCollaborators,
+  WorkspacePrivacyItemType.AnyoneCanView,
+  WorkspacePrivacyItemType.AnyoneCanEdit,
+].map((value) => ({
+  id: value,
+  label: privacyType2TextMap[value].title,
+  description: privacyType2TextMap[value].description,
+}));
 
 export interface WorkspacePrivacySettingProps {
   privacyType: WorkspacePrivacyItemType;
@@ -36,16 +46,6 @@ export const WorkspacePrivacySettingPanel = ({
   goToCollaborators,
   onGoToCollaboratorsChange,
 }: WorkspacePrivacySettingProps) => {
-  const options = [
-    WorkspacePrivacyItemType.PrivateToCollaborators,
-    WorkspacePrivacyItemType.AnyoneCanView,
-    WorkspacePrivacyItemType.AnyoneCanEdit,
-  ].map((value) => ({
-    id: value,
-    label: privacyType2CopyMap[value].title,
-    description: privacyType2CopyMap[value].description,
-  }));
-
   return (
     <EuiPanel>
       <EuiText size="s" {...generateRightSidebarScrollProps(RightSidebarScrollField.PrivacyType)}>
@@ -84,7 +84,7 @@ export const WorkspacePrivacySettingPanel = ({
         </EuiFlexGroup>
       </EuiCompressedFormRow>
       <EuiSpacer size="m" />
-      <EuiText size="s">{privacyType2CopyMap[privacyType].additionalDescription}</EuiText>
+      <EuiText size="s">{privacyType2TextMap[privacyType].additionalDescription}</EuiText>
       <EuiSpacer size="m" />
       <EuiCheckbox
         id={htmlIdGenerator()()}

@@ -6,7 +6,7 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import {
-  privacyType2CopyMap,
+  privacyType2TextMap,
   WorkspacePermissionItemType,
   WorkspacePrivacyItemType,
 } from './constants';
@@ -88,7 +88,7 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     const { renderResult: privateWorkspace } = setup();
     expect(
       privateWorkspace.getByText(
-        privacyType2CopyMap[WorkspacePrivacyItemType.PrivateToCollaborators].title,
+        privacyType2TextMap[WorkspacePrivacyItemType.PrivateToCollaborators].title,
         { exact: false }
       )
     ).toBeInTheDocument();
@@ -98,7 +98,7 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     });
     expect(
       anyoneCanViewWorkspace.getByText(
-        privacyType2CopyMap[WorkspacePrivacyItemType.AnyoneCanView].title,
+        privacyType2TextMap[WorkspacePrivacyItemType.AnyoneCanView].title,
         { exact: false }
       )
     ).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     });
     expect(
       anyoneCanEditWorkspace.getByText(
-        privacyType2CopyMap[WorkspacePrivacyItemType.AnyoneCanEdit].title,
+        privacyType2TextMap[WorkspacePrivacyItemType.AnyoneCanEdit].title,
         { exact: false }
       )
     ).toBeInTheDocument();
@@ -121,11 +121,11 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     fireEvent.click(renderResult.getByText('Edit'));
     fireEvent.click(
       renderResult.getByText(
-        privacyType2CopyMap[WorkspacePrivacyItemType.PrivateToCollaborators].title
+        privacyType2TextMap[WorkspacePrivacyItemType.PrivateToCollaborators].title
       )
     );
     fireEvent.click(
-      renderResult.getByText(privacyType2CopyMap[WorkspacePrivacyItemType.AnyoneCanView].title)
+      renderResult.getByText(privacyType2TextMap[WorkspacePrivacyItemType.AnyoneCanView].title)
     );
     fireEvent.click(renderResult.getByText('Save changes'));
     expect(handleSubmitPermissionSettingsMock).toHaveBeenCalledWith(permissionSettingsView);
@@ -142,11 +142,11 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     fireEvent.click(renderResult.getByText('Edit'));
     fireEvent.click(
       renderResult.getByText(
-        privacyType2CopyMap[WorkspacePrivacyItemType.PrivateToCollaborators].title
+        privacyType2TextMap[WorkspacePrivacyItemType.PrivateToCollaborators].title
       )
     );
     fireEvent.click(
-      renderResult.getByText(privacyType2CopyMap[WorkspacePrivacyItemType.AnyoneCanEdit].title)
+      renderResult.getByText(privacyType2TextMap[WorkspacePrivacyItemType.AnyoneCanEdit].title)
     );
     fireEvent.click(renderResult.getByText('Save changes'));
     const addSuccessMock = useOpenSearchDashboards().services.notifications?.toasts.addSuccess;
@@ -168,11 +168,11 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     fireEvent.click(renderResult.getByText('Edit'));
     fireEvent.click(
       renderResult.getByText(
-        privacyType2CopyMap[WorkspacePrivacyItemType.PrivateToCollaborators].title
+        privacyType2TextMap[WorkspacePrivacyItemType.PrivateToCollaborators].title
       )
     );
     fireEvent.click(
-      renderResult.getByText(privacyType2CopyMap[WorkspacePrivacyItemType.AnyoneCanEdit].title)
+      renderResult.getByText(privacyType2TextMap[WorkspacePrivacyItemType.AnyoneCanEdit].title)
     );
     fireEvent.click(renderResult.getByText('Save changes'));
     const addErrorMock = useOpenSearchDashboards().services.notifications?.toasts.addError;

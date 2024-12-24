@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { EuiCompressedSuperSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import { privacyType2CopyMap, WorkspacePrivacyItemType, workspacePrivacyTitle } from './constants';
+import { privacyType2TextMap, WorkspacePrivacyItemType, workspacePrivacyTitle } from './constants';
 
 export interface WorkspacePrivacySettingSelectProps {
   selectedPrivacyType: WorkspacePrivacyItemType;
@@ -22,13 +22,13 @@ export const WorkspacePrivacySettingSelect = ({
     WorkspacePrivacyItemType.AnyoneCanEdit,
   ].map((value) => ({
     value,
-    inputDisplay: privacyType2CopyMap[value].title,
+    inputDisplay: privacyType2TextMap[value].title,
     dropdownDisplay: (
       <>
-        <EuiText>{privacyType2CopyMap[value].title}</EuiText>
+        <EuiText>{privacyType2TextMap[value].title}</EuiText>
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          {privacyType2CopyMap[value].description}
+          {privacyType2TextMap[value].description}
         </EuiText>
       </>
     ),
@@ -46,7 +46,7 @@ export const WorkspacePrivacySettingSelect = ({
         />
       </EuiFormRow>
       <EuiText size="xs" color="subdued" style={{ paddingLeft: '2px' }}>
-        {privacyType2CopyMap[selectedPrivacyType].description}
+        {privacyType2TextMap[selectedPrivacyType].description}
       </EuiText>
     </>
   );

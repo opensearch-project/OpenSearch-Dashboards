@@ -23,7 +23,7 @@ import {
   detailsDescriptionIntroduction,
   detailsUseCaseHelpText,
   workspacePrivacyTitle,
-  privacyType2CopyMap,
+  privacyType2TextMap,
 } from '../workspace_form/constants';
 import { CoreStart } from '../../../../../core/public';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
@@ -176,9 +176,9 @@ export const WorkspaceDetailFormContent = ({
               onSelectedPrivacyTypeChange={setPrivacyType}
             />
           ) : (
-            <EuiCompressedFormRow label={privacyType2CopyMap[privacyType].title}>
+            <EuiCompressedFormRow label={privacyType2TextMap[privacyType].title}>
               <EuiText size="xs" color="subdued">
-                {privacyType2CopyMap[privacyType].description}
+                {privacyType2TextMap[privacyType].description}
               </EuiText>
             </EuiCompressedFormRow>
           )}

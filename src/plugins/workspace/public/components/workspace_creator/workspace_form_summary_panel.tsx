@@ -22,7 +22,7 @@ import { WorkspaceUseCase } from '../../types';
 import { RightSidebarScrollField, RIGHT_SIDEBAR_SCROLL_KEY } from './utils';
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 import { WorkspacePermissionMode } from '../../../common/constants';
-import { privacyType2CopyMap, WorkspacePrivacyItemType } from '../workspace_form/constants';
+import { privacyType2TextMap, WorkspacePrivacyItemType } from '../workspace_form/constants';
 
 const SCROLL_FIELDS = {
   [RightSidebarScrollField.Name]: i18n.translate('workspace.form.summary.panel.name.title', {
@@ -203,7 +203,7 @@ export const WorkspaceFormSummaryPanel = ({
       )}
       {isPermissionEnabled && (
         <FieldSummaryItem field={RightSidebarScrollField.PrivacyType}>
-          {privacyType && <EuiText size="xs">{privacyType2CopyMap[privacyType].title}</EuiText>}
+          {privacyType && <EuiText size="xs">{privacyType2TextMap[privacyType].title}</EuiText>}
         </FieldSummaryItem>
       )}
 

@@ -20,7 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspacePrivacyItemType, privacyType2CopyMap, workspacePrivacyTitle } from './constants';
+import { WorkspacePrivacyItemType, privacyType2TextMap, workspacePrivacyTitle } from './constants';
 import { WorkspacePermissionSetting } from './types';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart, IWorkspaceResponse } from '../../../../../core/public';
@@ -112,8 +112,8 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
         {i18n.translate('workspace.form.collaborators.panels.privacy.description', {
           defaultMessage: '{title} ({description})',
           values: {
-            title: privacyType2CopyMap[privacyType].title,
-            description: privacyType2CopyMap[privacyType].description,
+            title: privacyType2TextMap[privacyType].title,
+            description: privacyType2TextMap[privacyType].description,
           },
         })}
       </EuiText>

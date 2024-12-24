@@ -115,7 +115,7 @@ export const workspacePrivacyTitle = i18n.translate(
   }
 );
 
-export const privacyType2CopyMap = {
+export const privacyType2TextMap = {
   [WorkspacePrivacyItemType.PrivateToCollaborators]: {
     title: i18n.translate('workspace.privacy.privateToCollaborators.title', {
       defaultMessage: 'Private to collaborators',

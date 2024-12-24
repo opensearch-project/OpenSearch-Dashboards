@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { privacyType2CopyMap, WorkspacePrivacyItemType } from './constants';
+import { privacyType2TextMap, WorkspacePrivacyItemType } from './constants';
 import {
   WorkspacePrivacySettingPanel,
   WorkspacePrivacySettingProps,
@@ -35,14 +35,14 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     const { renderResult } = setup();
     expect(
       renderResult.getByText(
-        privacyType2CopyMap[WorkspacePrivacyItemType.PrivateToCollaborators].title,
+        privacyType2TextMap[WorkspacePrivacyItemType.PrivateToCollaborators].title,
         { exact: false }
       )
     ).toBeInTheDocument();
 
     expect(
       renderResult
-        .getByText(privacyType2CopyMap[WorkspacePrivacyItemType.PrivateToCollaborators].title, {
+        .getByText(privacyType2TextMap[WorkspacePrivacyItemType.PrivateToCollaborators].title, {
           exact: false,
         })
         .closest('.euiCheckableCard')
