@@ -183,7 +183,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           return (
             <>
               {useUpdatedUX && <EuiSpacer size="m" />}
-              <Wrapper>
+              <Wrapper paddingSize="m">
                 <EuiSpacer size="m" />
                 {getFilterSection(type)}
                 <EuiSpacer size="m" />
@@ -207,7 +207,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           return (
             <>
               {useUpdatedUX && <EuiSpacer size="m" />}
-              <Wrapper>
+              <Wrapper paddingSize="m">
                 <EuiSpacer size="m" />
                 {getFilterSection(type)}
                 <EuiSpacer size="m" />
@@ -231,7 +231,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           return (
             <>
               {useUpdatedUX && <EuiSpacer size="m" />}
-              <Wrapper>
+              <Wrapper paddingSize="m">
                 <EuiSpacer size="m" />
                 {getFilterSection(type)}
                 <EuiSpacer size="m" />
