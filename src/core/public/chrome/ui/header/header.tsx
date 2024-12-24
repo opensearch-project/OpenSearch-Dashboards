@@ -689,6 +689,7 @@ export function Header({
             }}
             customNavLink$={observables.customNavLink$}
             logos={logos}
+            workspaceEnabled={application.capabilities.workspaces.enabled}
           />
         )}
       </header>
