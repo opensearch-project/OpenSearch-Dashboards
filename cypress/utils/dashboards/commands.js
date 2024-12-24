@@ -61,33 +61,29 @@ Cypress.Commands.add(
   'navigateToWorkSpaceSpecificPage',
   (opts) => {
     const { url, workspaceName, page, isEnhancement = false } = opts;
-
     // Navigating to the WorkSpace Home Page
     cy.navigateToWorkSpaceHomePage(url, workspaceName);
-
-    // Opening the side panel
-    cy.getElementByTestId('toggleNavButton')
-      .should('be.visible')
-      .then((ele) => {
-        if (ele.length > 0) {
-          ele.first().click();
-        }
-      });
-
-    cy.getElementByTestId(`collapsibleNavAppLink-${page}`).should('be.visible').click();
-
-    // wait until page loads and close side panel
     cy.waitForLoader(isEnhancement);
 
-    // close the nav menu
-    if (isEnhancement) {
-      cy.getElementByTestId('collapsibleNavShrinkButton').should('be.visible').click();
-    }
+    // Check for toggleNavButton and handle accordingly
+    // If collapsibleNavShrinkButton is shown which means toggleNavButton is already clicked, try clicking the app link directly
+    // Using collapsibleNavShrinkButton is more robust than using toggleNavButton due to another toggleNavButton item on discover page
+    cy.get('body').then(($body) => {
+      const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
+
+      if (shrinkButton.length === 0) {
+        cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
+      }
+
+      cy.getElementByTestId(`collapsibleNavAppLink-${page}`).should('be.visible').click();
+    });
+
+    cy.waitForLoader(isEnhancement);
   }
 );
 
 Cypress.Commands.add(
-  // creates an index pattern within the workspace
+  // Creates an index pattern within the workspace using cluster
   // Don't use * in the indexPattern it adds it by default at the end of name
   'createWorkspaceIndexPatterns',
   (opts) => {
@@ -109,8 +105,14 @@ Cypress.Commands.add(
       isEnhancement,
     });
     cy.getElementByTestId('createIndexPatternButton').click();
+    cy.waitForLoader(isEnhancement);
 
     if (dataSource) {
+      // First select "Use external data source connection" radio button
+      // Ensure the radio is enabled and need to force click it
+      // This is due to data-test-subj="createIndexPatternStepDataSourceUseDataSourceRadio") is on the parent div, not on the actual radio input element
+      cy.get('input#useDataSource').should('not.be.disabled').click({ force: true });
+
       cy.get('[type="data-source"]').contains(dataSource).click();
     }
 

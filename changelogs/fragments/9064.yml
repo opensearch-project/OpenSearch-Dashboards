@@ -1,0 +1,9 @@
+infra:
+- Add checks for out of sync lockfile and dev docc to the CI ([#9064](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9064))
+- Validate the licensing imposed by dependencies during CI ([#9064](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9064))
+
+chore:
+- Bump actions used by build and test workflows ([#9064](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9064))
+
+feat:
+- Improve validation of the licensing imposed by dependencies. ([#9064](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9064))
