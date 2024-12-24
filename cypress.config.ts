@@ -4,7 +4,9 @@
  */
 
 import { defineConfig } from 'cypress';
+import codeCoverageTask from '@cypress/code-coverage/task';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
+import { setupDynamicConfig } from './cypress/scripts/dynamic_config';
 
 module.exports = defineConfig({
   defaultCommandTimeout: 60000,
@@ -22,7 +24,6 @@ module.exports = defineConfig({
       url: 'http://localhost:9200',
     },
     openSearchUrl: 'http://localhost:9200',
-    SECURITY_ENABLED: false,
     AGGREGATION_VIEW: false,
     username: 'admin',
     password: 'myStrongPassword123!',
@@ -32,6 +33,9 @@ module.exports = defineConfig({
     DATASOURCE_MANAGEMENT_ENABLED: false,
     ML_COMMONS_DASHBOARDS_ENABLED: true,
     WAIT_FOR_LOADER_BUFFER_MS: 0,
+
+    // This value is automatically determined at runtime
+    SECURITY_ENABLED: false,
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
@@ -41,10 +45,15 @@ module.exports = defineConfig({
   },
 });
 
-function setupNodeEvents(
+async function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
-): Cypress.PluginConfigOptions {
+): Promise<Cypress.PluginConfigOptions> {
+  if (process.env.COVERAGE) {
+    config.env.codeCoverage = { url: '/__coverage__' };
+    codeCoverageTask(on, config);
+  }
+
   const { webpackOptions } = webpackPreprocessor.defaultOptions;
 
   /**
@@ -68,6 +77,8 @@ function setupNodeEvents(
       webpackOptions,
     })
   );
+
+  await setupDynamicConfig(config);
 
   return config;
 }
