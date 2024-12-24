@@ -539,6 +539,29 @@ export const fetchDataSourceConnections = async (
   }
 };
 
+export const fetchDirectQueryConnectionsByIDs = async (
+  dataSourceIds: string[],
+  http: HttpSetup | undefined,
+  notifications: NotificationsStart | undefined
+) => {
+  try {
+    const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
+      // Only data source saved object type needs to fetch data source connections, data connection type object not.
+      dataSourceIds,
+      http
+    );
+
+    return directQueryConnections.sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    notifications?.toasts.addDanger(
+      i18n.translate('workspace.detail.dataSources.error.message', {
+        defaultMessage: 'Cannot fetch direct query connections',
+      })
+    );
+    return [];
+  }
+};
+
 export const getUseCase = (workspace: WorkspaceObject, availableUseCases: WorkspaceUseCase[]) => {
   if (!workspace.features) {
     return;
