@@ -31,6 +31,7 @@ import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../..
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
 import { ConnectionTypeIcon } from '../workspace_form/connection_type_icon';
+import './association_data_source_modal.scss';
 
 const ConnectionIcon = ({
   connection: { connectionType, type },
@@ -113,15 +114,17 @@ const convertConnectionToOption = ({
     selectedConnectionIds.includes(connection.id)
       ? ('on' as const)
       : undefined,
-  prepend:
-    connection.connectionType === DataSourceConnectionType.DirectQueryConnection ? (
-      <>
-        <div style={{ width: 16 }} />
-        <ConnectionIcon connection={connection} logos={logos} />
-      </>
-    ) : (
+  prepend: (
+    <div
+      className={
+        connection.connectionType === DataSourceConnectionType.DirectQueryConnection
+          ? 'dsm-associate-modal-direct-query-connection-icon'
+          : ''
+      }
+    >
       <ConnectionIcon connection={connection} logos={logos} />
-    ),
+    </div>
+  ),
   parentId: connection.parentId,
 });
 
@@ -287,6 +290,7 @@ export const AssociationDataSourceModalContent = ({
               'workspace.detail.dataSources.associateModal.searchPlaceholder',
               { defaultMessage: 'Search' }
             ),
+            compressed: true,
           }}
           options={options}
           onChange={handleSelectionChange}
@@ -305,8 +309,8 @@ export const AssociationDataSourceModalContent = ({
       <EuiModalFooter>
         <EuiSmallButton onClick={closeModal}>
           <FormattedMessage
-            id="workspace.detail.dataSources.associateModal.close.button"
-            defaultMessage="Close"
+            id="workspace.detail.dataSources.associateModal.cancel.button"
+            defaultMessage="Cancel"
           />
         </EuiSmallButton>
         <EuiSmallButton
