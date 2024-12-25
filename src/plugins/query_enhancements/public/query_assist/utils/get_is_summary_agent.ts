@@ -9,7 +9,7 @@ import { API } from '../../../common/constants';
 export async function checkAgentsExist(
   http: HttpSetup,
   agentConfigName: string | string[],
-  dataSourceId: string
+  dataSourceId?: string
 ) {
   const queryParams = new URLSearchParams();
   if (Array.isArray(agentConfigName)) {

@@ -224,6 +224,8 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
           // eslint-disable-next-line no-console
           console.error(error);
         }
+      } else if (!selectedDataset.current?.dataSource) {
+        setIsSummaryAgentAvailable(false);
       }
     };
     fetchSummaryAgent();
