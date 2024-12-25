@@ -65,7 +65,6 @@ import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 import { WorkspaceObject } from 'opensearch-dashboards/public';
 import { TableProps } from './components/table';
-import { EuiToolTip } from '@elastic/eui';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
 
@@ -608,10 +607,10 @@ describe('SavedObjectsTable', () => {
       const typeField = columns.find((col) => col.field === 'type');
       mockSelectedSavedObjects.forEach((savedObject) => {
         const renderedContent = typeField.render(savedObject.type, savedObject);
-        expect(renderedContent.type).toBe(EuiToolTip);
+        expect(component.find('EuiToolTip')).toMatchSnapshot();
         expect(renderedContent.props.content).toBe(mockGetSavedObjectLabel(savedObject.type));
-        expect(renderedContent.props.content).toBe(savedObject.type);
         const iconElement = renderedContent.props.children;
+        expect(component.find('EuiIcon')).toMatchSnapshot();
         expect(iconElement.props.type).toBe(savedObject.meta.icon || 'apps');
       });
     });

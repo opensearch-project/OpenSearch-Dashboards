@@ -137,6 +137,14 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
 
 exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 4`] = `null`;
 
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 5`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 6`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 7`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 8`] = `null`;
+
 exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 1`] = `
 <EuiModal
   maxWidth="50vw"
