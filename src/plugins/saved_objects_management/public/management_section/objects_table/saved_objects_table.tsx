@@ -957,7 +957,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               onClick={onConfirm}
               fill
               color="danger"
-              disabled={isDeleting ? true : false}
+              data-test-subj="confirmModalConfirmButton"
+              disabled={!!isDeleting}
             >
               {isDeleting ? (
                 <FormattedMessage
