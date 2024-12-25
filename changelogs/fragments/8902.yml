@@ -1,0 +1,2 @@
+fix:
+- Removed extra parameter ([#8902](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8902))

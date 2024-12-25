@@ -16,6 +16,8 @@ import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
 import { injectMetaToDataStructures } from './utils';
 
+export const DELIMITER = '::';
+
 export const indexTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX,
   title: 'Indexes',
@@ -119,13 +121,11 @@ const fetchDataSources = async (client: SavedObjectsClientContract) => {
     type: 'data-source',
     perPage: 10000,
   });
-  const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE].concat(
-    response.savedObjects.map((savedObject) => ({
-      id: savedObject.id,
-      title: savedObject.attributes.title,
-      type: 'DATA_SOURCE',
-    }))
-  );
+  const dataSources: DataStructure[] = response.savedObjects.map((savedObject) => ({
+    id: savedObject.id,
+    title: savedObject.attributes.title,
+    type: 'DATA_SOURCE',
+  }));
 
   return injectMetaToDataStructures(dataSources);
 };
@@ -154,9 +154,19 @@ const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => 
 
   const searchResponseToArray = (response: any) => {
     const { rawResponse } = response;
-    return rawResponse.aggregations
-      ? rawResponse.aggregations.indices.buckets.map((bucket: { key: any }) => bucket.key)
-      : [];
+    if (!rawResponse.aggregations) {
+      return [];
+    }
+
+    return rawResponse.aggregations.indices.buckets.map((bucket: { key: string }) => {
+      const key = bucket.key;
+      // Note: Index names cannot contain ':' or '::' in OpenSearch, so these delimiters
+      // are guaranteed not to be part of the regular format of index name
+      const parts = key.split(DELIMITER);
+      const lastPart = parts[parts.length - 1] || key;
+      // extract index name or return original key if pattern doesn't match
+      return lastPart.split(':')[0] || key;
+    });
   };
 
   return search

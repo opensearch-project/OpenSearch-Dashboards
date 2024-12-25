@@ -82,7 +82,8 @@ export const DatasetSelector = ({
   const { overlays } = services;
   const datasetService = getQueryService().queryString.getDatasetService();
   const datasetIcon =
-    datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
+    datasetService.getType(selectedDataset?.sourceDatasetRef?.type || selectedDataset?.type || '')
+      ?.meta.icon.type || 'database';
 
   useEffect(() => {
     isMounted.current = true;
@@ -215,11 +216,16 @@ export const DatasetSelector = ({
             appearance={appearance}
             {...buttonProps}
             className="datasetSelector__button"
+            data-test-subj="datasetSelectorButton"
             iconType="arrowDown"
             iconSide="right"
             onClick={togglePopover}
           >
-            <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
+            <EuiIcon
+              type={datasetIcon}
+              className="datasetSelector__icon"
+              data-test-subj="datasetSelectorIcon"
+            />
             {datasetTitle}
           </RootComponent>
         </EuiToolTip>
@@ -232,6 +238,7 @@ export const DatasetSelector = ({
     >
       <EuiSelectable
         className="datasetSelector__selectable"
+        data-test-subj="datasetSelectorSelectable"
         options={options}
         singleSelection="always"
         searchable={true}
@@ -250,9 +257,14 @@ export const DatasetSelector = ({
           </>
         )}
       </EuiSelectable>
-      <EuiPopoverFooter paddingSize="none" className="datasetSelector__footer">
+      <EuiPopoverFooter
+        paddingSize="none"
+        className="datasetSelector__footer"
+        data-test-subj="datasetSelectorFooter"
+      >
         <EuiButton
           className="datasetSelector__advancedButton"
+          data-test-subj="datasetSelectorAdvancedButton"
           iconType="gear"
           iconSide="right"
           iconSize="s"

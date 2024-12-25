@@ -44,7 +44,6 @@ describe('QueryStringManager', () => {
     storage = new DataStorage(window.localStorage, 'opensearchDashboards.');
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
-
     service = new QueryStringManager(
       storage,
       sessionStorage,
@@ -141,6 +140,121 @@ describe('QueryStringManager', () => {
     expect(query).toHaveProperty('dataset', dataset);
   });
 
+  describe('setQuery', () => {
+    beforeEach(() => {
+      // Mock dataset service and language service methods
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn(),
+      });
+      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+        title: 'SQL',
+        getQueryString: jest.fn().mockReturnValue('SELECT * FROM table'),
+      });
+    });
+
+    test('updates query when no dataset change', () => {
+      const newQuery = { query: 'test query' };
+      service.setQuery(newQuery);
+      expect(service.getQuery().query).toBe('test query');
+    });
+
+    test('adds dataset to recent datasets when dataset changes', () => {
+      const mockDataset = {
+        id: 'test-id',
+        title: 'Test Dataset',
+        type: 'INDEX_PATTERN',
+      };
+      const addRecentDatasetSpy = jest.spyOn(service.getDatasetService(), 'addRecentDataset');
+
+      service.setQuery({ dataset: mockDataset });
+
+      expect(addRecentDatasetSpy).toHaveBeenCalledWith(mockDataset);
+    });
+
+    test('changes language when dataset does not support current language', () => {
+      // Setup initial query with 'kuery' language
+      service.setQuery({ query: 'test', language: 'kuery' });
+
+      const mockDataset = {
+        id: 'test-id',
+        title: 'Test Dataset',
+        type: 'S3',
+      };
+
+      // Mock that S3 only supports SQL
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn().mockReturnValue(['sql']),
+      });
+
+      service.setQuery({ dataset: mockDataset });
+
+      const resultQuery = service.getQuery();
+      expect(resultQuery.language).toBe('sql');
+      expect(resultQuery.dataset).toBe(mockDataset);
+      expect(resultQuery.query).toBe('SELECT * FROM table');
+    });
+
+    test('maintains current language when supported by new dataset', () => {
+      // Setup initial query
+      const initialQuery = { query: 'test', language: 'sql' };
+      service.setQuery(initialQuery);
+
+      const mockDataset = {
+        id: 'test-id',
+        title: 'Test Dataset',
+        type: 'S3',
+      };
+
+      // Mock that dataset supports SQL
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn().mockReturnValue(['sql', 'ppl']),
+      });
+
+      service.setQuery({ dataset: mockDataset });
+
+      const resultQuery = service.getQuery();
+      expect(resultQuery.language).toBe('sql');
+      expect(resultQuery.dataset).toBe(mockDataset);
+    });
+
+    test('does not trigger updates when new query equals current query', () => {
+      const initialQuery = { query: 'test', language: 'sql' };
+      let updateCount = 0;
+
+      // Subscribe to updates
+      service.getUpdates$().subscribe(() => {
+        updateCount++;
+      });
+
+      service.setQuery(initialQuery);
+      expect(updateCount).toBe(1);
+
+      // Set same query again
+      service.setQuery({ ...initialQuery });
+      expect(updateCount).toBe(1); // Should not increment
+    });
+
+    test('handles undefined supportedLanguages gracefully', () => {
+      service.setQuery({ query: 'test', language: 'sql' });
+
+      const mockDataset = {
+        id: 'test-id',
+        title: 'Test Dataset',
+        type: 'UNKNOWN',
+      };
+
+      // Mock undefined supportedLanguages
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn().mockReturnValue(undefined),
+      });
+
+      service.setQuery({ dataset: mockDataset });
+
+      const resultQuery = service.getQuery();
+      expect(resultQuery.language).toBe('sql'); // Should maintain current language
+    });
+  });
+
   describe('getInitialQuery', () => {
     const mockDataset = {
       id: 'test-dataset',
@@ -193,6 +307,38 @@ describe('QueryStringManager', () => {
       expect(result.language).toBe('ppl');
       expect(result.dataset).toEqual(currentDataset);
       expect(result.query).toBeDefined();
+    });
+
+    test('getInitialQueryByLanguage returns the initial query from the dataset config if present', () => {
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn(),
+        getInitialQueryString: jest.fn().mockImplementation(({ language }) => {
+          switch (language) {
+            case 'sql':
+              return 'default sql dataset query';
+            case 'ppl':
+              return 'default ppl dataset query';
+          }
+        }),
+      });
+
+      const sqlQuery = service.getInitialQueryByLanguage('sql');
+      expect(sqlQuery).toHaveProperty('query', 'default sql dataset query');
+
+      const pplQuery = service.getInitialQueryByLanguage('ppl');
+      expect(pplQuery).toHaveProperty('query', 'default ppl dataset query');
+    });
+
+    test('getInitialQueryByLanguage returns the initial query from the language config if dataset does not provide one', () => {
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn(),
+      });
+      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+        getQueryString: jest.fn().mockReturnValue('default-language-service-query'),
+      });
+
+      const sqlQuery = service.getInitialQueryByLanguage('sql');
+      expect(sqlQuery).toHaveProperty('query', 'default-language-service-query');
     });
   });
 });

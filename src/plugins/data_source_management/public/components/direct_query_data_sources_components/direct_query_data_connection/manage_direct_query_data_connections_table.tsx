@@ -41,11 +41,13 @@ import {
   deleteMultipleDataSources,
   setFirstDataSourceAsDefault,
   getHideLocalCluster,
+  getDataConnections,
 } from '../../utils';
 import { LoadingMask } from '../../loading_mask';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../../../constants';
-import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../constants';
+import { DatasourceTypeToDisplayName, DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../constants';
+import { DataConnectionType } from '../../../../../data_source/common';
 
 interface DirectQueryDataConnectionsProps extends RouteComponentProps {
   featureFlagStatus: boolean;
@@ -128,50 +130,80 @@ export const ManageDirectQueryDataConnectionsTable = ({
   const fetchDataSources = useCallback(() => {
     setIsLoading(true);
 
-    const fetchConnections = featureFlagStatus
-      ? getDataSources(savedObjects.client)
-      : http.get(`${DATACONNECTIONS_BASE}`);
+    const fetchOpenSearchConnections = async (): Promise<DataSourceTableItem[]> => {
+      const fetchConnections = featureFlagStatus
+        ? getDataSources(savedObjects.client)
+        : http.get(`${DATACONNECTIONS_BASE}`);
 
-    return fetchConnections
-      .then((response) => {
-        return featureFlagStatus
-          ? fetchDataSourceConnections(
-              response,
-              http,
-              notifications,
-              true,
-              getHideLocalCluster().enabled
-            )
-          : response.map((dataConnection: DirectQueryDatasourceDetails) => ({
-              id: dataConnection.name,
-              title: dataConnection.name,
-              type:
-                {
-                  S3GLUE: 'Amazon S3',
-                  PROMETHEUS: 'Prometheus',
-                }[dataConnection.connector] || dataConnection.connector,
-              connectionType: dataConnection.connector,
-              description: dataConnection.description,
-            }));
-      })
-      .then((finalData) => {
-        setData(
-          featureFlagStatus
+      return fetchConnections
+        .then((response) => {
+          return featureFlagStatus
+            ? fetchDataSourceConnections(
+                response,
+                http,
+                notifications,
+                true,
+                getHideLocalCluster().enabled
+              )
+            : response.map((dataConnection: DirectQueryDatasourceDetails) => ({
+                id: dataConnection.name,
+                title: dataConnection.name,
+                type:
+                  {
+                    S3GLUE: DatasourceTypeToDisplayName.S3GLUE,
+                    PROMETHEUS: DatasourceTypeToDisplayName.PROMETHEUS,
+                  }[dataConnection.connector] || dataConnection.connector,
+                connectionType: dataConnection.connector,
+                description: dataConnection.description,
+              }));
+        })
+        .then((finalData) => {
+          return featureFlagStatus
             ? finalData.filter((item) => item.relatedConnections?.length > 0)
-            : finalData
-        );
-      })
-      .catch(() => {
-        setData([]);
+            : finalData;
+        })
+        .catch(() => {
+          notifications.toasts.addDanger(
+            i18n.translate('dataSourcesManagement.directQueryTable.fetchDataSources', {
+              defaultMessage: 'Could not fetch data sources',
+            })
+          );
+          return [];
+        });
+    };
+
+    const fetchDirectQueryConnections = async (): Promise<DataSourceTableItem[]> => {
+      try {
+        const dataConnectionSavedObjects = await getDataConnections(savedObjects.client);
+        return dataConnectionSavedObjects.map((obj) => ({
+          id: obj.id,
+          title: obj.attributes.connectionId,
+          type: obj.attributes.type,
+        }));
+      } catch (error: any) {
+        return [];
+      }
+    };
+
+    const fetchAllData = async () => {
+      try {
+        const [openSearchConnections, directQueryConnections] = await Promise.all([
+          fetchOpenSearchConnections(),
+          fetchDirectQueryConnections(),
+        ]);
+        setData([...openSearchConnections, ...directQueryConnections]);
+      } catch (error) {
         notifications.toasts.addDanger(
-          i18n.translate('dataSourcesManagement.directQueryTable.fetchDataSources', {
-            defaultMessage: 'Could not fetch data sources',
+          i18n.translate('dataSourcesManagement.directQueryTable.fetchAllConnections', {
+            defaultMessage: 'Could not fetch OpenSearch and Direct Query Connections',
           })
         );
-      })
-      .finally(() => {
+      } finally {
         setIsLoading(false);
-      });
+      }
+    };
+
+    fetchAllData();
   }, [http, savedObjects, notifications, featureFlagStatus]);
 
   /* Delete selected data sources*/
@@ -385,6 +417,13 @@ export const ManageDirectQueryDataConnectionsTable = ({
           record.connectionType !== DataSourceConnectionType.OpenSearchConnection
             ? { marginLeft: '20px' }
             : {};
+        if (
+          record.type === DataConnectionType.SecurityLake ||
+          record.type === DataConnectionType.CloudWatch
+        ) {
+          // TODO: link to details page for security lake and cloudwatch
+          return <span style={indentStyle}> {name}</span>;
+        }
         return (
           <EuiButtonEmpty
             size="xs"
