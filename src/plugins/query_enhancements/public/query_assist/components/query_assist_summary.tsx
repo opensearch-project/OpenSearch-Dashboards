@@ -212,20 +212,16 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   useEffect(() => {
     setIsSummaryAgentAvailable(false);
     const fetchSummaryAgent = async () => {
-      if (selectedDataset.current?.dataSource?.id) {
-        try {
-          const summaryAgentStatus = await checkAgentsExist(
-            props.http,
-            DATA2SUMMARY_AGENT_CONFIG_ID,
-            selectedDataset.current?.dataSource?.id
-          );
-          setIsSummaryAgentAvailable(summaryAgentStatus.exists);
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(error);
-        }
-      } else if (!selectedDataset.current?.dataSource) {
-        setIsSummaryAgentAvailable(false);
+      try {
+        const summaryAgentStatus = await checkAgentsExist(
+          props.http,
+          DATA2SUMMARY_AGENT_CONFIG_ID,
+          selectedDataset.current?.dataSource?.id
+        );
+        setIsSummaryAgentAvailable(summaryAgentStatus.exists);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
       }
     };
     fetchSummaryAgent();

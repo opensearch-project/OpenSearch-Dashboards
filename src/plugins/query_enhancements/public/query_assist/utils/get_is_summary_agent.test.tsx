@@ -39,14 +39,8 @@ describe('checkAgentsExist', () => {
 
     expect(httpMock.get).toHaveBeenCalledWith(expect.any(String), {
       query: {
-        agentConfigName: 'name1',
-        dataSourceId: 'testDataSourceId',
-      },
-    });
-    expect(httpMock.get).toHaveBeenCalledWith(expect.any(String), {
-      query: {
-        agentConfigName: 'name2',
-        dataSourceId: 'testDataSourceId',
+        agentConfigName: agentConfigNames,
+        dataSourceId,
       },
     });
     expect(result).toEqual(response);

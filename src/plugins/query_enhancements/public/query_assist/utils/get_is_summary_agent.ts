@@ -11,16 +11,8 @@ export async function checkAgentsExist(
   agentConfigName: string | string[],
   dataSourceId?: string
 ) {
-  const queryParams = new URLSearchParams();
-  if (Array.isArray(agentConfigName)) {
-    agentConfigName.forEach((name) => queryParams.append('agentConfigName', name));
-  } else {
-    queryParams.append('agentConfigName', agentConfigName);
-  }
-  queryParams.append('dataSourceId', dataSourceId);
-
   const response = await http.get(API.AGENT_API.CONFIG_EXISTS, {
-    query: Object.fromEntries(queryParams),
+    query: { agentConfigName, dataSourceId },
   });
   return response;
 }
