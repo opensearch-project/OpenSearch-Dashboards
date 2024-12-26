@@ -13,6 +13,10 @@ import { WORKSPACE_NAME } from './constants';
 let dataSourceId = '';
 
 describe('S3 Dataset', { defaultCommandTimeout: 120000 }, () => {
+  if (!S3_CLUSTER.url) {
+    this.skip();
+  }
+
   before(() => {
     cy.request({
       method: 'POST',
