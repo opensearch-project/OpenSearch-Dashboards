@@ -52,17 +52,18 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly api: UiSettingsApi;
   private readonly defaults: Record<string, PublicUiSettingsParams>;
   private cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
+  private browserStoredSettings: Record<string, any> = {};
 
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
 
-    if (
+    const userControl =
       this.cache['theme:enableUserControl']?.userValue ??
-      this.cache['theme:enableUserControl']?.value
-    ) {
-      this.cache = defaultsDeep(this.cache, this.getBrowserStoredSettings());
+      this.cache['theme:enableUserControl']?.value;
+    if (userControl) {
+      this.browserStoredSettings = this.getBrowserStoredSettings();
     }
 
     params.done$.subscribe({
@@ -112,6 +113,43 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     const defaultValue = defaultOverride !== undefined ? defaultOverride : this.cache[key].value;
     const value = userValue == null ? defaultValue : userValue;
     return this.resolveValue(value, type);
+  }
+
+  getWithBrowserSettings<T = any>(
+    key: string,
+    defaultOverride?: T
+  ): {
+    advancedSettingValue: T | undefined;
+    browserValue: T | undefined;
+    defaultValue: T;
+  } {
+    const declared = this.isDeclared(key);
+
+    if (!declared && defaultOverride === undefined) {
+      throw new Error(
+        `Unexpected \`IUiSettingsClient.getWithBrowserSettings("${key}")\` call on unrecognized configuration setting "${key}".`
+      );
+    }
+
+    const type = this.cache[key]?.type;
+    const advancedSettingValue = this.cache[key]?.userValue;
+    const browserValue = this.browserStoredSettings[key]?.userValue;
+    const defaultValue = defaultOverride !== undefined ? defaultOverride : this.cache[key]?.value;
+
+    // Resolve the value based on the type
+    const resolveValue = (val: any): T => this.resolveValue(val, type);
+
+    const resolvedAdvancedValue =
+      advancedSettingValue !== undefined ? resolveValue(advancedSettingValue) : undefined;
+    const resolvedBrowserValue =
+      browserValue !== undefined ? resolveValue(browserValue) : undefined;
+    const resolvedDefaultValue = resolveValue(defaultValue);
+
+    return {
+      advancedSettingValue: resolvedAdvancedValue,
+      browserValue: resolvedBrowserValue,
+      defaultValue: resolvedDefaultValue,
+    };
   }
 
   get$<T = any>(key: string, defaultOverride?: T) {
@@ -230,8 +268,15 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
     const declared = this.isDeclared(key);
     const defaults = this.defaults;
-
-    const oldVal = declared ? this.cache[key].userValue : undefined;
+    const userControl =
+      this.cache['theme:enableUserControl']?.userValue ??
+      this.cache['theme:enableUserControl']?.value;
+    const oldVal = userControl
+      ? this.getBrowserStoredSettings()[key]?.userValue ??
+        (declared ? this.cache[key].userValue : undefined)
+      : declared
+      ? this.cache[key].userValue
+      : undefined;
 
     const unchanged = oldVal === newVal;
     if (unchanged) {
@@ -242,16 +287,15 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     this.setLocally(key, newVal);
 
     try {
-      if (
-        this.cache['theme:enableUserControl']?.userValue ??
-        this.cache['theme:enableUserControl']?.value
-      ) {
-        const { settings } = this.cache[key]?.preferBrowserSetting
-          ? this.setBrowserStoredSettings(key, newVal)
-          : (await this.api.batchSet(key, newVal)) || {};
-        this.cache = defaultsDeep({}, defaults, this.getBrowserStoredSettings(), settings);
+      if (userControl) {
+        if (this.cache[key]?.preferBrowserSetting) {
+          this.setBrowserStoredSettings(key, newVal);
+        } else {
+          const { settings = {} } = (await this.api.batchSet(key, newVal)) || {};
+          this.cache = defaultsDeep({}, this.cache, settings);
+        }
       } else {
-        const { settings } = (await this.api.batchSet(key, newVal)) || {};
+        const { settings = {} } = (await this.api.batchSet(key, newVal)) || {};
         this.cache = defaultsDeep({}, defaults, settings);
       }
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
