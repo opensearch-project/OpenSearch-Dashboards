@@ -81,6 +81,7 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
     </EuiButtonEmpty>
     <EuiButton
       color="danger"
+      data-test-subj="confirmModalConfirmButton"
       disabled={false}
       fill={true}
       onClick={[Function]}
@@ -121,6 +122,7 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
   </EuiButtonEmpty>
   <EuiButton
     color="danger"
+    data-test-subj="confirmModalConfirmButton"
     disabled={false}
     fill={true}
     onClick={[Function]}
@@ -216,6 +218,7 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
     </EuiButtonEmpty>
     <EuiButton
       color="danger"
+      data-test-subj="confirmModalConfirmButton"
       disabled={false}
       fill={true}
       onClick={[Function]}
@@ -302,6 +305,7 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
     </EuiButtonEmpty>
     <EuiButton
       color="danger"
+      data-test-subj="confirmModalConfirmButton"
       disabled={false}
       fill={true}
       onClick={[Function]}
