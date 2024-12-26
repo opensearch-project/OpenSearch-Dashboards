@@ -10,7 +10,7 @@ import {
   WorkspacePermissionSettingInputProps,
 } from './workspace_permission_setting_input';
 import { WorkspacePermissionItemType } from './constants';
-import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../../../core/public';
 
 const setup = (options?: Partial<WorkspacePermissionSettingInputProps>) => {
   const onGroupOrUserIdChangeMock = jest.fn();
