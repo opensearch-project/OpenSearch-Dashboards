@@ -7,8 +7,8 @@ import type {
   AppMountParameters,
   ApplicationStart,
   SavedObjectsStart,
+  WorkspacePermissionMode,
 } from '../../../../../core/public';
-import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { DataSourceConnection } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
