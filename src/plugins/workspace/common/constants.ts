@@ -25,13 +25,6 @@ export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
  */
 export const DEFAULT_WORKSPACE = 'defaultWorkspace';
 
-export enum WorkspacePermissionMode {
-  Read = 'read',
-  Write = 'write',
-  LibraryRead = 'library_read',
-  LibraryWrite = 'library_write',
-}
-
 export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';
 
 /**

@@ -12,7 +12,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../../../core/public';
 import {
   WorkspacePermissionItemType,
   optionIdToWorkspacePermissionModesMap,

@@ -27,3 +27,20 @@ export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;
 }
+
+export enum WorkspacePermissionMode {
+  Read = 'read',
+  Write = 'write',
+  LibraryRead = 'library_read',
+  LibraryWrite = 'library_write',
+}
+
+export interface WorkspaceFindOptions {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
+}

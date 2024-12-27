@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 
 import { WorkspaceCollaboratorAccessLevel } from './types';
-import { WorkspacePermissionMode } from '../common/constants';
+import { WorkspacePermissionMode } from '../../../core/public';
 
 export const WORKSPACE_ACCESS_LEVEL_NAMES: { [key in WorkspaceCollaboratorAccessLevel]: string } = {
   readOnly: i18n.translate('workspace.accessLevel.readOnlyName', {

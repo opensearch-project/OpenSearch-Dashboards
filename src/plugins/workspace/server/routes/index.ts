@@ -4,10 +4,16 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, Logger, PrincipalType, ACL, DEFAULT_NAV_GROUPS } from '../../../../core/server';
+import {
+  IRouter,
+  Logger,
+  PrincipalType,
+  ACL,
+  DEFAULT_NAV_GROUPS,
+  WorkspacePermissionMode,
+} from '../../../../core/server';
 import { getUseCaseFeatureConfig } from '../../common/utils';
 import {
-  WorkspacePermissionMode,
   MAX_WORKSPACE_NAME_LENGTH,
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
 } from '../../common/constants';

@@ -44,6 +44,13 @@ describe('WorkspacesService', () => {
       associate: jest.fn(),
       dissociate: jest.fn(),
       ui: jest.fn(),
+      list: jest.fn(),
+      get: jest.fn(),
+      getCurrentWorkspace: jest.fn(),
+      getCurrentWorkspaceId: jest.fn(),
+      update: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
     };
     workspacesSetUp.setClient(client);
     expect(workspacesStart.client$.value).toEqual(client);

@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WorkspaceAttribute } from '../../types';
+import {
+  SavedObjectPermissions,
+  WorkspaceAttribute,
+  WorkspaceAttributeWithPermission,
+  WorkspaceFindOptions,
+} from '../../types';
 
 export type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean; owner?: boolean };
 
@@ -25,8 +30,6 @@ export interface AssociationResult {
 /**
  * This interface representing a client for managing workspace-related operations.
  * Workspace client should implement this interface.
- *
- * TODO: Refactor the current workspace client implementation in workspace plugin to add the missing operations to this interface
  */
 export interface IWorkspaceClient {
   /**
@@ -74,6 +77,88 @@ export interface IWorkspaceClient {
   ): Promise<IWorkspaceResponse<AssociationResult[]>>;
 
   ui(): WorkspaceUI;
+
+  /**
+   * A bypass layer to get current workspace id
+   */
+  getCurrentWorkspaceId(): IWorkspaceResponse<WorkspaceAttributeWithPermission['id']>;
+
+  /**
+   * Do a find in the latest workspace list with current workspace id
+   */
+  getCurrentWorkspace(): Promise<IWorkspaceResponse<WorkspaceAttributeWithPermission>>;
+
+  /**
+   * Create a workspace
+   *
+   * @param attributes
+   * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
+   */
+  create(
+    attributes: Omit<WorkspaceAttribute, 'id'>,
+    settings: {
+      dataSources?: string[];
+      permissions?: SavedObjectPermissions;
+      dataConnections?: string[];
+    }
+  ): Promise<IWorkspaceResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>>;
+
+  /**
+   * Deletes a workspace by workspace id
+   *
+   * @param id
+   * @returns {Promise<IWorkspaceResponse<null>>} result for this operation
+   */
+  delete(id: string): Promise<IWorkspaceResponse<null>>;
+
+  /**
+   * Search for workspaces
+   *
+   * @param {object} [options={}]
+   * @property {string} options.search
+   * @property {string} options.searchFields - see OpenSearch Simple Query String
+   *                                        Query field argument for more information
+   * @property {integer} [options.page=1]
+   * @property {integer} [options.perPage=20]
+   * @property {array} options.fields
+   * @property {string array} permissionModes
+   * @returns A find result with workspaces matching the specified search.
+   */
+  list(
+    options?: WorkspaceFindOptions
+  ): Promise<
+    IWorkspaceResponse<{
+      workspaces: WorkspaceAttributeWithPermission[];
+      total: number;
+      per_page: number;
+      page: number;
+    }>
+  >;
+
+  /**
+   * Fetches a single workspace by a workspace id
+   *
+   * @param {string} id
+   * @returns {Promise<IWorkspaceResponse<WorkspaceAttributeWithPermission>>} The metadata of the workspace for the given id.
+   */
+  get(id: string): Promise<IWorkspaceResponse<WorkspaceAttributeWithPermission>>;
+
+  /**
+   * Updates a workspace
+   *
+   * @param {string} id
+   * @param {object} attributes
+   * @returns {Promise<IWorkspaceResponse<boolean>>} result for this operation
+   */
+  update(
+    id: string,
+    attributes: Partial<WorkspaceAttribute>,
+    settings: {
+      dataSources?: string[];
+      permissions?: SavedObjectPermissions;
+      dataConnections?: string[];
+    }
+  ): Promise<IWorkspaceResponse<boolean>>;
 }
 
 interface DataSourceAssociationProps {
