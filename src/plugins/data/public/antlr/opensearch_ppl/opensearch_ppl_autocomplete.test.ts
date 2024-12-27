@@ -9,6 +9,7 @@ import {
   enrichAutocompleteResult,
   getParseTree,
   openSearchPplAutocompleteData,
+  processVisitedRules,
 } from './opensearch_ppl_autocomplete';
 
 describe('Token Dictionary and Ignored Tokens', () => {
@@ -25,36 +26,34 @@ describe('Token Dictionary and Ignored Tokens', () => {
 });
 
 describe('processVisitedRules', () => {
-  //   // createTokenStream takes a list of 'tokens' defined only by its type or an actual object to be returned as the Token
-  //   const createTokenStream = (list: Array<number | { type: number; text: string }>) =>
-  //     (({
-  //       get: jest.fn((num: number) =>
-  //         typeof list[num] === 'number' ? { type: list[num] } : list[num]
-  //       ),
-  //     } as unknown) as TokenStream);
+  // createTokenStream takes a list of 'tokens' defined only by its type or an actual object to be returned as the Token
+  const createTokenStream = (list: Array<number | { type: number; text: string }>) =>
+    (({
+      get: jest.fn((num: number) =>
+        typeof list[num] === 'number' ? { type: list[num] } : list[num]
+      ),
+    } as unknown) as TokenStream);
 
-  //   it('should set the correct suggestions based on the rules visited', () => {
-  //     const mockRules = new Map();
-  //     mockRules.set(OpenSearchSQLParser.RULE_tableName, {});
-  //     const tokenStream = createTokenStream([1]);
+  it('should set the correct suggestions based on the rules visited', () => {
+    const mockRules = new Map();
+    mockRules.set(OpenSearchPPLParser.RULE_statsFunctionName, {});
+    const tokenStream = createTokenStream([1]);
 
-  //     const result = processVisitedRules(mockRules, 2, tokenStream);
-  //     expect(result.suggestViewsOrTables).toBeDefined();
-  //     expect(result.suggestAggregateFunctions).toBe(false);
-  //   });
+    const result = processVisitedRules(mockRules, 2, tokenStream);
+    expect(result.suggestAggregateFunctions).toBeDefined();
+    expect(result.shouldSuggestColumns).toBe(false);
+  });
 
-  //   it('should handle multiple rules correctly', () => {
-  //     const mockRules = new Map();
-  //     mockRules.set(OpenSearchSQLParser.RULE_tableName, {});
-  //     mockRules.set(OpenSearchSQLParser.RULE_aggregateFunction, {});
-  //     const tokenStream = createTokenStream([1]);
+  it('should handle multiple rules correctly', () => {
+    const mockRules = new Map();
+    mockRules.set(OpenSearchPPLParser.RULE_statsFunctionName, {});
+    mockRules.set(OpenSearchPPLParser.RULE_fieldExpression, {});
+    const tokenStream = createTokenStream([1]);
 
-  //     const result = processVisitedRules(mockRules, 2, tokenStream);
-  //     expect(result.suggestViewsOrTables).toBeDefined();
-  //     expect(result.suggestAggregateFunctions).toBe(true);
-  //   });
-
-  describe('Test Specific Rules', () => {});
+    const result = processVisitedRules(mockRules, 2, tokenStream);
+    expect(result.suggestAggregateFunctions).toBeDefined();
+    expect(result.shouldSuggestColumns).toBe(true);
+  });
 });
 
 describe('getParseTree', () => {

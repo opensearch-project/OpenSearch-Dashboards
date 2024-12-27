@@ -203,7 +203,6 @@ export const parseQuery = <
   getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);
-  // core.showDebugOutput = true;
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
