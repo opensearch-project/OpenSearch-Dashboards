@@ -134,6 +134,8 @@ export {
   WorkspaceAttributeWithPermission,
   UiSettingScope,
   PermissionModeId,
+  WorkspacePermissionMode,
+  WorkspaceFindOptions,
 } from '../types';
 
 export {

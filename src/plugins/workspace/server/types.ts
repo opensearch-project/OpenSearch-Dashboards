@@ -4,7 +4,6 @@
  */
 
 import {
-  Logger,
   OpenSearchDashboardsRequest,
   SavedObjectsFindResponse,
   CoreSetup,
@@ -12,22 +11,12 @@ import {
   SavedObjectsServiceStart,
   Permissions,
   UiSettingsServiceStart,
+  WorkspaceFindOptions,
 } from '../../../core/server';
 import { PermissionModeId } from '../../../core/server';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;
-}
-import { WorkspacePermissionMode } from '../common/constants';
-
-export interface WorkspaceFindOptions {
-  page?: number;
-  perPage?: number;
-  search?: string;
-  searchFields?: string[];
-  sortField?: string;
-  sortOrder?: string;
-  permissionModes?: WorkspacePermissionMode[];
 }
 
 export interface IRequestDetail {
