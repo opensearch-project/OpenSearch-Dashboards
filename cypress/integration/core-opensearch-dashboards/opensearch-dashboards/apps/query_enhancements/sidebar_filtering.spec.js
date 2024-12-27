@@ -78,7 +78,7 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
     checkTableHeadersByArray(testFields, offset);
     if (indexPattern) {
         // Validate default hits
-        getDiscoverQueryHits().should('have.text', '9,997');
+        cy.getElementByTestId('discoverQueryHits').should('have.text', '9,997');
     }
     // Send PPL query
     cy.intercept('/api/enhancements/search/ppl').as('pplQuery');
@@ -89,7 +89,7 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
         checkTableHeadersByArray(testFields, offset);
         if (indexPattern) {
             // Check filter was correctly applied
-            getDiscoverQueryHits().should('have.text', '1,040');
+            cy.getElementByTestId('discoverQueryHits').should('have.text', '1,040');
         }
         // Validate the first 5 rows on the _id column
         checkDocTableColumnByArr(expectedValues, 1 + offset);
