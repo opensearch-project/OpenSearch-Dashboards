@@ -109,8 +109,7 @@ import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { DuplicateObject } from '../types';
 import { formatWorkspaceIdParams } from '../../utils';
 import { NavigationPublicPluginStart } from '../../../../navigation/public';
-import { WorkspaceObject } from '../../../../workspaces/public';
-
+import { WorkspaceObject } from '../../../../../core/public';
 interface ExportAllOption {
   id: string;
   label: string;
@@ -1174,7 +1173,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         searchThreshold: 1,
       });
     }
-
     return (
       <EuiPageContent horizontalPosition="center" paddingSize={useUpdatedUX ? 'm' : undefined}>
         {this.renderFlyout()}
