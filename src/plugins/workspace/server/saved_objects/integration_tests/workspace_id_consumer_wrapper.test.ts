@@ -150,8 +150,33 @@ describe('workspace_id_consumer integration test', () => {
         `/api/saved_objects/${config.type}/${packageInfo.version}`
       );
 
-      // workspaces arrtibutes should not be append
+      // workspaces attributes should not be append
       expect(!getConfigResult.body.workspaces).toEqual(true);
+    });
+
+    it('should return error when create with a not existing workspace', async () => {
+      await clearFooAndBar();
+      const createResultWithNonExistRequestWorkspace = await osdTestServer.request
+        .post(root, `/w/not_exist_workspace_id/api/saved_objects/${dashboard.type}`)
+        .send({
+          attributes: dashboard.attributes,
+        })
+        .expect(400);
+
+      expect(createResultWithNonExistRequestWorkspace.body.message).toEqual(
+        'Exist invalid workspaces'
+      );
+
+      const createResultWithNonExistOptionsWorkspace = await osdTestServer.request
+        .post(root, `/api/saved_objects/${dashboard.type}`)
+        .send({
+          attributes: dashboard.attributes,
+          workspaces: ['not_exist_workspace_id'],
+        })
+        .expect(400);
+      expect(createResultWithNonExistOptionsWorkspace.body.message).toEqual(
+        'Exist invalid workspaces'
+      );
     });
 
     it('bulk create', async () => {
@@ -181,6 +206,37 @@ describe('workspace_id_consumer integration test', () => {
             id: item.id,
           })
         )
+      );
+    });
+
+    it('should return error when bulk create with a not existing workspace', async () => {
+      await clearFooAndBar();
+      const bulkCreateResultWithNonExistRequestWorkspace = await osdTestServer.request
+        .post(root, `/w/not_exist_workspace_id/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(400);
+
+      expect(bulkCreateResultWithNonExistRequestWorkspace.body.message).toEqual(
+        'Exist invalid workspaces'
+      );
+
+      const bulkCreateResultWithNonExistOptionsWorkspace = await osdTestServer.request
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=not_exist_workspace_id`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(400);
+
+      expect(bulkCreateResultWithNonExistOptionsWorkspace.body.message).toEqual(
+        'Exist invalid workspaces'
       );
     });
 
@@ -288,7 +344,7 @@ describe('workspace_id_consumer integration test', () => {
         .get(root, `/w/not_exist_workspace_id/api/saved_objects/_find?type=${dashboard.type}`)
         .expect(400);
 
-      expect(findResult.body.message).toEqual('Invalid workspaces');
+      expect(findResult.body.message).toEqual('Exist invalid workspaces');
     });
 
     it('import within workspace', async () => {
