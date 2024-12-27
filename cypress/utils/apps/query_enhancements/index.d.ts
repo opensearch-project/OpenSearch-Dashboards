@@ -5,7 +5,11 @@
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    setQueryEditor(value: string, submit?: boolean): Chainable<any>;
+    setQueryEditor(
+      value: string,
+      opts?: { parseSpecialCharSequences?: boolean },
+      submit?: boolean
+    ): Chainable<any>;
     setQueryLanguage(value: 'DQL' | 'Lucene' | 'OpenSearch SQL' | 'PPL'): Chainable<any>;
     addDataSource(opts: {
       name: string;
@@ -14,5 +18,16 @@ declare namespace Cypress {
       credentials?: { username: string; password: string };
     }): Chainable<any>;
     deleteDataSourceByName(dataSourceName: string): Chainable<any>;
+    setIndexAsDataset(
+      index: string,
+      dataSourceName: string,
+      language?: 'OpenSearch SQL' | 'PPL'
+    ): Chainable<any>;
+    setIndexPatternAsDataset(indexPattern: string, dataSourceName: string): Chainable<any>;
+    setDataset(
+      dataset: string,
+      dataSourceName: string,
+      type: 'INDEXES' | 'INDEX_PATTERN'
+    ): Chainable<any>;
   }
 }

@@ -38,21 +38,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
 
   describe('select indices', () => {
     it('with SQL as default language', function () {
-      cy.getElementByTestId(`datasetSelectorButton`).click();
-      cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
-      cy.get(`[title="Indexes"]`).click();
-      cy.get(`[title=${DATASOURCE_NAME}]`).click();
-      cy.get(`[title="data_logs_small_time_1"]`).click(); // Updated to match loaded data
-      cy.getElementByTestId('datasetSelectorNext').click();
-
-      cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
-
-      //select SQL
-      cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
-      cy.getElementByTestId(`advancedSelectorTimeFieldSelect`).select('timestamp');
-      cy.getElementByTestId('advancedSelectorConfirmButton').click();
-
-      cy.waitForLoader(true);
+      cy.setIndexAsDataset('data_logs_small_time_1', DATASOURCE_NAME, 'OpenSearch SQL');
 
       // SQL should already be selected
       cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'OpenSearch SQL');
@@ -70,22 +56,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
     });
 
     it('with PPL as default language', function () {
-      cy.getElementByTestId(`datasetSelectorButton`).click();
-      cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
-      cy.get(`[title="Indexes"]`).click();
-      cy.get(`[title=${DATASOURCE_NAME}]`).click();
-      cy.get(`[title="data_logs_small_time_1"]`).click(); // Updated to match loaded data
-      cy.getElementByTestId('datasetSelectorNext').click();
-
-      cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
-
-      //select PPL
-      cy.getElementByTestId('advancedSelectorLanguageSelect').select('PPL');
-
-      cy.getElementByTestId(`advancedSelectorTimeFieldSelect`).select('timestamp');
-      cy.getElementByTestId('advancedSelectorConfirmButton').click();
-
-      cy.waitForLoader(true);
+      cy.setIndexAsDataset('data_logs_small_time_1', DATASOURCE_NAME, 'PPL');
 
       // PPL should already be selected
       cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'PPL');
@@ -122,10 +93,9 @@ describe('dataset selector', { scrollBehavior: false }, () => {
       cy.navigateToWorkSpaceHomePage(WORKSPACE_NAME);
 
       cy.waitForLoader(true);
-      cy.getElementByTestId(`datasetSelectorButton`).click();
-      cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
-      cy.get(`[title="Index Patterns"]`).click();
-      cy.get(`[title="${DATASOURCE_NAME}::data_logs_small_time_1*"]`).should('exist');
+      cy.setIndexPatternAsDataset('data_logs_small_time_1*', DATASOURCE_NAME);
+      // setting OpenSearch SQL as the code following it does not work if this test is isolated
+      cy.setQueryLanguage('OpenSearch SQL');
 
       cy.waitForLoader(true);
       cy.waitForSearch();

@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-Cypress.Commands.add('setQueryEditor', (value, submit = true) => {
-  const opts = { log: false };
-
+Cypress.Commands.add('setQueryEditor', (value, opts = {}, submit = true) => {
   Cypress.log({
     name: 'setQueryEditor',
     displayName: 'set query',
@@ -27,7 +25,7 @@ Cypress.Commands.add('setQueryEditor', (value, submit = true) => {
     .type(value, opts);
 
   if (submit) {
-    cy.updateTopNav(opts);
+    cy.updateTopNav({ log: false });
   }
 });
 
@@ -99,10 +97,57 @@ Cypress.Commands.add('deleteDataSourceByName', (dataSourceName) => {
   // Navigate to the dataSource Management page
   cy.visit('app/dataSources');
 
-  // Find the anchor text correpsonding to specified dataSource
+  // Find the anchor text corresponding to specified dataSource
   cy.get('a').contains(dataSourceName).click();
 
   // Delete the dataSource connection
   cy.getElementByTestId('editDatasourceDeleteIcon').click();
   cy.getElementByTestId('confirmModalConfirmButton').click();
+});
+
+Cypress.Commands.add('setIndexAsDataset', (index, dataSourceName, language) => {
+  cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+  cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
+  cy.get(`[title="Indexes"]`).click();
+  cy.get(`[title="${dataSourceName}"]`).click();
+  // this element is sometimes dataSourceName masked by another element
+  cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+  cy.getElementByTestId('datasetSelectorNext').click();
+
+  if (language) {
+    cy.getElementByTestId('advancedSelectorLanguageSelect').select(language);
+  }
+
+  cy.getElementByTestId('advancedSelectorTimeFieldSelect').select('timestamp');
+  cy.getElementByTestId('advancedSelectorConfirmButton').click();
+
+  // verify that it has been selected
+  cy.getElementByTestId('datasetSelectorButton').should(
+    'contain.text',
+    `${dataSourceName}::${index}`
+  );
+});
+
+Cypress.Commands.add('setIndexPatternAsDataset', (indexPattern, dataSourceName) => {
+  cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+  cy.get(`[title="${dataSourceName}::${indexPattern}"]`).click();
+
+  // verify that it has been selected
+  cy.getElementByTestId('datasetSelectorButton').should(
+    'contain.text',
+    `${dataSourceName}::${indexPattern}`
+  );
+});
+
+Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
+  switch (type) {
+    case 'INDEX_PATTERN':
+      cy.setIndexPatternAsDataset(dataset, dataSourceName);
+      break;
+    case 'INDEXES':
+      cy.setIndexAsDataset(dataset, dataSourceName);
+      break;
+    default:
+      throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
+  }
 });
