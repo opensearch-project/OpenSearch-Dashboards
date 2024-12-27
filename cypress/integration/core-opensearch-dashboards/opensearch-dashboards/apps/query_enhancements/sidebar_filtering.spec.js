@@ -13,7 +13,7 @@ import {
 import * as dataExplorer from './helpers.js';
 
 const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern = true) => {
-    const getDocTableHeaderByIndex = (index, offset) => {
+    const getDocTableHeaderByIndex = (index, offset = 0) => {
         return cy.getElementByTestId('docTableHeaderField').eq(index + offset);
     };
     const checkTableHeadersByArray = (expectedHeaders, offset = 1) => {
