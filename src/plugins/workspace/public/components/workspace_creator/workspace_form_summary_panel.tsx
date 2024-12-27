@@ -21,7 +21,6 @@ import { WorkspaceFormDataState } from '../workspace_form';
 import { WorkspaceUseCase } from '../../types';
 import { RightSidebarScrollField, RIGHT_SIDEBAR_SCROLL_KEY } from './utils';
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
-import { WorkspacePermissionMode } from '../../../common/constants';
 import { privacyType2TextMap, WorkspacePrivacyItemType } from '../workspace_form/constants';
 
 const SCROLL_FIELDS = {

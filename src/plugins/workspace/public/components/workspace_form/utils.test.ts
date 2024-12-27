@@ -14,7 +14,6 @@ import {
   getPermissionSettingsWithPrivacyType,
   convertPermissionsToPrivacyType,
 } from './utils';
-import { WorkspacePermissionMode } from '../../../common/constants';
 import {
   WorkspacePermissionItemType,
   optionIdToWorkspacePermissionModesMap,
@@ -22,7 +21,7 @@ import {
 } from './constants';
 import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceFormErrorCode } from './types';
-import { PermissionModeId } from '../../../../../core/public';
+import { PermissionModeId, WorkspacePermissionMode } from '../../../../../core/public';
 
 describe('convertPermissionSettingsToPermissions', () => {
   it('should return undefined if permission items not provided', () => {

@@ -52,6 +52,7 @@ interface DataSourceSelectableProps {
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   uiSettings?: IUiSettingsClient;
+  onManageDataSource: () => void;
 }
 
 interface DataSourceSelectableState extends DataSourceBaseState {
@@ -293,6 +294,7 @@ export class DataSourceSelectable extends React.Component<
         data-test-subj={'dataSourceSelectableContextMenuPopover'}
       >
         <DataSourceDropDownHeader
+          onManageDataSource={this.props.onManageDataSource}
           totalDataSourceCount={this.state.dataSourceOptions.length}
           application={this.props.application}
         />

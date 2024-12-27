@@ -41,7 +41,7 @@ export const WorkspacePrivacyFlyout = ({ onClose }: WorkspacePrivacyFlyoutProps)
       linkText: i18n.translate('workspace.forms.privacyFlyout.workspacePrivacy.linkText', {
         defaultMessage: 'Learn more in documentation',
       }),
-      link: '',
+      link: docLinks?.links.opensearchDashboards.workspace.acl,
     },
     {
       id: 'collaborators',
@@ -54,7 +54,7 @@ export const WorkspacePrivacyFlyout = ({ onClose }: WorkspacePrivacyFlyoutProps)
       linkText: i18n.translate('workspace.forms.privacyFlyout.collaborator.linkText', {
         defaultMessage: 'Learn more in documentation',
       }),
-      link: '',
+      link: docLinks?.links.opensearchDashboards.workspace.acl,
     },
   ];
   return (
@@ -91,7 +91,9 @@ export const WorkspacePrivacyFlyout = ({ onClose }: WorkspacePrivacyFlyoutProps)
                 {description}
               </EuiText>
               <EuiSpacer />
-              <EuiLink href={link}>{linkText}</EuiLink>
+              <EuiLink href={link} target="_blank" style={{ fontWeight: 'normal' }}>
+                {linkText}
+              </EuiLink>
             </EuiAccordion>
             <EuiSpacer size="s" />
           </>
