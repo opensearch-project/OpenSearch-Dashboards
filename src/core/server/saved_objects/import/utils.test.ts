@@ -376,33 +376,42 @@ describe('findReferenceDataSourceForObject', () => {
       type: 'non-data-source',
       attributes: {},
     },
+    {
+      id: '8',
+      references: [
+        { id: '1', type: 'index-pattern', name: '1' },
+        { id: '6', type: 'data-source', name: '6' },
+      ],
+      type: 'dashboards',
+      attributes: {},
+    },
   ];
 
   const ObjectsMap = new Map(savedObjects.map((so) => [so.id, so]));
 
   test('returns the data-source reference if it exists in the references', () => {
     const result = findReferenceDataSourceForObject(savedObjects[0], ObjectsMap);
-    expect(result).toEqual({ id: '5', type: 'data-source', name: '5' });
+    expect(result).toEqual(new Set('5'));
   });
 
-  test('returns null if there is no data-source reference and no nested references', () => {
-    expect(findReferenceDataSourceForObject(savedObjects[1], ObjectsMap)).toBeNull();
+  test('returns empty Set if there is no data-source reference and no nested references', () => {
+    expect(findReferenceDataSourceForObject(savedObjects[1], ObjectsMap)).toEqual(new Set());
   });
 
-  test('returns null if no references exist', () => {
-    expect(findReferenceDataSourceForObject(savedObjects[2], ObjectsMap)).toBeNull();
+  test('returns empty Set if no references exist', () => {
+    expect(findReferenceDataSourceForObject(savedObjects[2], ObjectsMap)).toEqual(new Set());
   });
 
   test('returns nested data-source reference if found', () => {
     const result = findReferenceDataSourceForObject(savedObjects[3], ObjectsMap);
-    expect(result).toEqual({ id: '5', type: 'data-source', name: '5' });
+    expect(result).toEqual(new Set('5'));
   });
 
-  test('returns null if the nested references have no data-source reference', () => {
-    expect(findReferenceDataSourceForObject(savedObjects[4], ObjectsMap)).toBeNull();
+  test('returns empty Set if the nested references have no data-source reference', () => {
+    expect(findReferenceDataSourceForObject(savedObjects[4], ObjectsMap)).toEqual(new Set());
   });
 
-  test('returns null if circular reference', () => {
+  test('returns empty Set if circular reference', () => {
     const circularAssets: Array<SavedObject<{ title?: string }>> = [
       {
         id: '1',
@@ -426,10 +435,10 @@ describe('findReferenceDataSourceForObject', () => {
     const circularAssetsMap = new Map(circularAssets.map((so) => [so.id, so]));
 
     const result = findReferenceDataSourceForObject(circularAssets[0], circularAssetsMap);
-    expect(result).toBeNull();
+    expect(result).toEqual(new Set());
   });
 
-  test('returns null if circular reference is itself', () => {
+  test('returns empty Set if circular reference is itself', () => {
     const circularAssets: Array<SavedObject<{ title?: string }>> = [
       {
         id: '1',
@@ -441,6 +450,11 @@ describe('findReferenceDataSourceForObject', () => {
     const circularAssetsMap = new Map(circularAssets.map((so) => [so.id, so]));
 
     const result = findReferenceDataSourceForObject(circularAssets[0], circularAssetsMap);
-    expect(result).toBeNull();
+    expect(result).toEqual(new Set());
+  });
+
+  test('returns multiple data sources if they exist in the references', () => {
+    const result = findReferenceDataSourceForObject(savedObjects[5], ObjectsMap);
+    expect(result).toEqual(new Set(['5', '6']));
   });
 });

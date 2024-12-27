@@ -59,12 +59,11 @@ export interface DuplicateResultFlyoutProps {
   ) => Promise<void>;
   targetWorkspace: string;
   useUpdatedUX: boolean;
-  targetWorkspaceDataSourceUrl: string;
+  dataSourceUrlForTargetWorkspace: string;
 }
 
 interface State {
   isLoading: boolean;
-  showRemainingButton: boolean;
 }
 
 const DEFAULT_ICON = 'apps';
@@ -96,11 +95,6 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
     super(props);
     this.state = {
       isLoading: false,
-      showRemainingButton:
-        props.successfulCopies.length > 0 &&
-        !!props.failedCopies.find(
-          ({ error }) => error.type === 'missing_references' || error.type === 'missing_data_source'
-        ),
     };
   }
 
@@ -150,7 +144,7 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
           values={{
             useUpdatedUX: this.props.useUpdatedUX,
             targetWorkspaceDataSourceLink: (
-              <EuiLink href={this.props.targetWorkspaceDataSourceUrl} target="_blank">
+              <EuiLink href={this.props.dataSourceUrlForTargetWorkspace} target="_blank">
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.copyResult.missingDataSourceCalloutLinkText"
                   defaultMessage="{targetWorkspace}"
@@ -163,6 +157,15 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
       </p>
     </EuiCallOut>
   );
+
+  private get isShowRemainingButton() {
+    return (
+      this.props.successfulCopies.length > 0 &&
+      !!this.props.failedCopies.find(
+        ({ error }) => error.type === 'missing_references' || error.type === 'missing_data_source'
+      )
+    );
+  }
 
   getCountIndicators(copyItems: CopyItem[]) {
     if (!copyItems.length) {
@@ -364,7 +367,7 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
 
   render() {
     const { onClose, failedCopies, successfulCopies, workspaceName, useUpdatedUX } = this.props;
-    const { isLoading, showRemainingButton } = this.state;
+    const { isLoading } = this.state;
 
     return (
       <EuiFlyout ownFocus onClose={onClose} size="s">
@@ -390,7 +393,7 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
                 />
               </EuiSmallButtonEmpty>
             </EuiFlexItem>
-            {showRemainingButton && (
+            {this.isShowRemainingButton && (
               <EuiFlexItem grow={false}>
                 <EuiSmallButton
                   fill

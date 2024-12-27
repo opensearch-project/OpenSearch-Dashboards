@@ -836,7 +836,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
 
-    const targetWorkspaceDataSourceUrl = formatUrlWithWorkspaceId(
+    const dataSourceUrlForTargetWorkspace = formatUrlWithWorkspaceId(
       applications.getUrlForApp('dataSources', {
         absolute: false,
       }),
@@ -853,7 +853,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         onCopy={this.onDuplicate}
         targetWorkspace={targetWorkspace}
         useUpdatedUX={this.props.useUpdatedUX}
-        targetWorkspaceDataSourceUrl={targetWorkspaceDataSourceUrl}
+        dataSourceUrlForTargetWorkspace={dataSourceUrlForTargetWorkspace}
       />
     );
   }

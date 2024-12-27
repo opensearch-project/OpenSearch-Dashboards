@@ -37,7 +37,7 @@ export async function validateDataSources(
       workspaces,
     })
     .then((response) => {
-      return response?.saved_objects?.map((ds) => ds.id) ?? [];
+      return new Set(response?.saved_objects?.map((ds) => ds.id));
     });
 
   const nestedDependencies = await fetchNestedDependencies(filteredObjects, savedObjectsClient);
@@ -52,7 +52,10 @@ export async function validateDataSources(
   for (const object of filteredObjects) {
     const { id, type, attributes } = object;
     const referenceDS = findReferenceDataSourceForObject(object, nestedObjectsMap);
-    if (referenceDS && !assignedDataSourcesInTargetWorkspace.includes(referenceDS.id)) {
+    const missingDataSources = Array.from(referenceDS).filter(
+      (item) => !assignedDataSourcesInTargetWorkspace.has(item)
+    );
+    if (missingDataSources.length > 0) {
       errorMap[`${type}:${id}`] = {
         id,
         type,
@@ -60,7 +63,9 @@ export async function validateDataSources(
         meta: { title: attributes?.title },
         error: {
           type: 'missing_data_source',
-          dataSource: sourceDataSourceMap.get(referenceDS.id) || referenceDS.id,
+          dataSource: missingDataSources
+            .map((mdId) => sourceDataSourceMap.get(mdId) || mdId)
+            .join(', '),
         },
       };
     }

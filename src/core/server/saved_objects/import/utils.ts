@@ -188,33 +188,26 @@ export function findReferenceDataSourceForObject(
   savedObject: SavedObject,
   savedObjects: Map<string, SavedObject>,
   visited = new Set<string>()
-): SavedObjectReference | null {
-  const { references } = savedObject;
-  if (!references || references.length === 0) {
-    return null;
-  }
+): Set<string> {
+  const dataSourceReferences = new Set<string>();
 
-  const dataSourceReference = references.find((ref) => ref.type === 'data-source');
-  if (dataSourceReference) {
-    return dataSourceReference;
-  }
-
+  const references = savedObject.references ?? [];
   visited.add(savedObject.id);
 
-  for (const { id } of references) {
-    if (visited.has(id)) {
-      continue;
-    }
-    const referenceObject = savedObjects.get(id);
-    if (referenceObject) {
-      const dataSource = findReferenceDataSourceForObject(referenceObject, savedObjects, visited);
-      if (dataSource) {
-        return dataSource;
+  // Traverse referenced objects recursively
+  for (const reference of references) {
+    // Add 'data-source' references directly associated with the object
+    if (reference.type === 'data-source') {
+      dataSourceReferences.add(reference.id);
+    } else if (!visited.has(reference.id)) {
+      const referenceObject = savedObjects.get(reference.id);
+      if (referenceObject) {
+        findReferenceDataSourceForObject(referenceObject, savedObjects, visited).forEach((ref) =>
+          dataSourceReferences.add(ref)
+        );
       }
     }
   }
 
-  visited.delete(savedObject.id);
-
-  return null;
+  return dataSourceReferences;
 }
