@@ -101,22 +101,54 @@ Cypress.Commands.add('setSearchRelativeDateRange', (relativeNumber, relativeUnit
 });
 
 /**
- * Set search to an absolute Date
+ * Set search to an absolute Date using searchDatePickerButton (this button only appears if the start date is "now" and end date is a relative date, or vice versa)
  * @param absoluteStartDate String for Absolute Datetime for start date in format 'MMM dd, yyyy @ HH:mm:ss.SSS'.
  * @param absoluteEndDate String for Absolute Datetime for end date in format 'MMM dd, yyyy @ HH:mm:ss.SSS'.
- * @example setSearchRelativeDateRange('Dec 31, 2020 @ 16:00:00.000', 'Dec 31, 2022 @ 14:14:42.801')
+ * @example setSearchAbsoluteDateRangeWithSearchDatePickerButton('Dec 31, 2020 @ 16:00:00.000', 'Dec 31, 2022 @ 14:14:42.801')
  */
-Cypress.Commands.add('setSearchAbsoluteDateRange', (absoluteStartDate, absoluteEndDate) => {
-  cy.getSearchDatePickerButton().click();
-  cy.getDatePickerAbsoluteTab().click();
-  cy.getDatePickerAbsoluteInput().clear().type(absoluteStartDate);
-  cy.getSearchDatePickerEndDateButton().click();
-  cy.getDatePickerAbsoluteTab()
-    .should(($elements) => {
-      // This prevents there being 2 Absolute Tabs returned.
-      expect($elements).to.have.length(1);
-    })
-    .click();
-  cy.getDatePickerAbsoluteInput().clear().type(absoluteEndDate);
-  cy.getQuerySubmitButton().click();
-});
+Cypress.Commands.add(
+  'setSearchAbsoluteDateRangeWithSearchDatePickerButton',
+  (absoluteStartDate, absoluteEndDate) => {
+    cy.getSearchDatePickerButton().click();
+    cy.getDatePickerAbsoluteTab().click();
+    cy.getDatePickerAbsoluteInput().clear().type(absoluteStartDate);
+    cy.getSearchDatePickerEndDateButton().click();
+    cy.getDatePickerAbsoluteTab()
+      .should(($elements) => {
+        // This prevents there being 2 Absolute Tabs returned.
+        expect($elements).to.have.length(1);
+      })
+      .click();
+    cy.getDatePickerAbsoluteInput().clear().type(absoluteEndDate);
+    cy.getQuerySubmitButton().click();
+  }
+);
+
+/**
+ * Set search to an absolute Date using start date and end date buttons.
+ * @param absoluteStartDate String for Absolute Datetime for start date in format 'MMM dd, yyyy @ HH:mm:ss.SSS'.
+ * @param absoluteEndDate String for Absolute Datetime for end date in format 'MMM dd, yyyy @ HH:mm:ss.SSS'.
+ * @example setSearchAbsoluteDateRangeWithStartEndDateButtons('Dec 31, 2020 @ 16:00:00.000', 'Dec 31, 2022 @ 14:14:42.801')
+ */
+Cypress.Commands.add(
+  'setSearchAbsoluteDateRangeWithStartEndDateButtons',
+  (absoluteStartDate, absoluteEndDate) => {
+    cy.getSearchDatePickerStartDateButton().click();
+    cy.getDatePickerAbsoluteTab()
+      .should(($elements) => {
+        // This prevents there being 2 Absolute Tabs returned.
+        expect($elements).to.have.length(1);
+      })
+      .click();
+    cy.getDatePickerAbsoluteInput().clear().type(absoluteStartDate);
+    cy.getSearchDatePickerEndDateButton().click();
+    cy.getDatePickerAbsoluteTab()
+      .should(($elements) => {
+        // This prevents there being 2 Absolute Tabs returned.
+        expect($elements).to.have.length(1);
+      })
+      .click();
+    cy.getDatePickerAbsoluteInput().clear().type(absoluteEndDate);
+    cy.getQuerySubmitButton().click();
+  }
+);

@@ -30,10 +30,38 @@ function selectDataset(datasetType, language) {
 }
 
 function setDateRange(datasetType, language) {
+  function isNowTime(inputTimeString) {
+    return inputTimeString === 'now';
+  }
+
+  function isRelativeTime(inputTimeString) {
+    return inputTimeString.match(/now[+-].+/);
+  }
+
+  function setAbsoluteDateRangeUsingDatePickerButtonOrStartEndTimeButtons() {
+    cy.url({ decode: true }).then(($url) => {
+      const timeRegex = /time:\(from:(.+?),to:(.+?)\)/;
+      const matches = $url.match(timeRegex);
+      cy.wrap(matches).should('have.length.above', 0); // There should be a fromTime and endTime
+
+      const fromTime = matches[1];
+      const toTime = matches[2];
+
+      if (
+        (isNowTime(fromTime) && isRelativeTime(toTime)) ||
+        (isRelativeTime(fromTime) && isNowTime(toTime))
+      ) {
+        cy.setSearchAbsoluteDateRangeWithSearchDatePickerButton(START_TIME, END_TIME);
+      } else {
+        cy.setSearchAbsoluteDateRangeWithStartEndDateButtons(START_TIME, END_TIME);
+      }
+    });
+  }
+
   switch (datasetType) {
     case 'index_pattern':
       if (language !== 'OpenSearch SQL') {
-        cy.setSearchAbsoluteDateRange(START_TIME, END_TIME);
+        setAbsoluteDateRangeUsingDatePickerButtonOrStartEndTimeButtons();
       }
       break;
   }
@@ -43,7 +71,7 @@ function verifyTableFieldFilterActions(datasetType, language, shouldExist) {
   selectDataset(datasetType, language);
   setDateRange(datasetType, language);
 
-  cy.getElementByTestId('discoverQueryHits').should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+  cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
   dataExplorer.verifyDocTableRowFilterForAndOutButton(0, shouldExist);
 
@@ -57,7 +85,7 @@ function verifyExpandedTableFilterActions(datasetType, language, isEnabled) {
   selectDataset(datasetType, language);
   setDateRange(datasetType, language);
 
-  cy.getElementByTestId('discoverQueryHits').should('not.exist'); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+  cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
   dataExplorer.toggleDocTableRow(0);
   dataExplorer.verifyDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
     isEnabled
@@ -97,7 +125,7 @@ describe('filter for value spec', () => {
     // Add data source
     cy.addDataSource({
       name: `${DATASOURCE_NAME}`,
-      url: `${SECONDARY_ENGINE.url}`,
+      url: 'http://opensearch-node:9200',
       authType: 'no_auth',
     });
 
