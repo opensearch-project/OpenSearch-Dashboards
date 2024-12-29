@@ -5,27 +5,21 @@
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    navigateToWorkSpaceHomePage(url: string, workspaceName: string): Chainable<any>;
-    navigateToWorkSpaceSpecificPage(opts: {
-      url: string;
-      workspaceName: string;
-      page: string;
-      isEnhancement?: boolean;
-    }): Chainable<any>;
-    createWorkspaceIndexPatterns(opts: {
-      url: string;
-      workspaceName: string;
-      indexPattern: string;
-      timefieldName?: string;
-      indexPatternHasTimefield?: boolean;
-      dataSource?: string;
-      isEnhancement?: boolean;
-    }): Chainable<any>;
-    deleteWorkspaceIndexPatterns(opts: {
-      url: string;
-      workspaceName: string;
-      indexPattern: string;
-      isEnhancement?: boolean;
-    }): Chainable<any>;
+    /**
+     * Selects a data source from the data source selector combo box
+     * @param dataSourceTitle - The title of the data source to select
+     * @param dataSourceId - The ID of the data source to select (optional)
+     */
+    selectFromDataSourceSelector(dataSourceTitle?: string, dataSourceId?: string): Chainable<any>;
+
+    /**
+     * Selects a data source from the standard page header's data source selector
+     * @param dataSourceTitle - The title of the data source to select
+     * @param dataSourceId - The ID of the data source to select (optional)
+     */
+    selectFromDataSourceSelectorFromStandardPageHeader(
+      dataSourceTitle?: string,
+      dataSourceId?: string
+    ): Chainable<any>;
   }
 }
