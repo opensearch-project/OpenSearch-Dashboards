@@ -361,7 +361,6 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
 
     this.setState({
       isLoading: false,
-      showRemainingButton: false,
     });
   };
 
