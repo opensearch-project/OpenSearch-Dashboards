@@ -3,8 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WORKSPACE_NAME, DATASOURCE_NAME, START_TIME, END_TIME } from './constants';
+import {
+  WORKSPACE_NAME,
+  DATASOURCE_NAME,
+  START_TIME,
+  END_TIME,
+} from '../../../../../utils/apps/constants';
 import { BASE_PATH, SECONDARY_ENGINE } from '../../../../../utils/constants';
+
+const randomString = Math.random().toString(36).substring(7);
+const workspace = `${WORKSPACE_NAME}-${randomString}`;
 
 describe('dataset selector', { scrollBehavior: false }, () => {
   before(() => {
@@ -27,13 +35,13 @@ describe('dataset selector', { scrollBehavior: false }, () => {
   });
   beforeEach(() => {
     // Create workspace
-    cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
+    cy.deleteWorkspaceByName(`${workspace}`);
     cy.visit('/app/home');
-    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${WORKSPACE_NAME}`);
+    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
   });
 
   afterEach(() => {
-    cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
+    cy.deleteWorkspaceByName(`${workspace}`);
   });
 
   describe('select indices', () => {
@@ -47,7 +55,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
 
       cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
 
-      //select SQL
+      // Select SQL
       cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
       cy.getElementByTestId(`advancedSelectorTimeFieldSelect`).select('timestamp');
       cy.getElementByTestId('advancedSelectorConfirmButton').click();
@@ -79,7 +87,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
 
       cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
 
-      //select PPL
+      // Select PPL
       cy.getElementByTestId('advancedSelectorLanguageSelect').select('PPL');
 
       cy.getElementByTestId(`advancedSelectorTimeFieldSelect`).select('timestamp');
@@ -112,7 +120,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
       // Create and select index pattern for data_logs_small_time_1*
       cy.createWorkspaceIndexPatterns({
         url: `${BASE_PATH}`,
-        workspaceName: `${WORKSPACE_NAME}`,
+        workspaceName: `${workspace}`,
         indexPattern: 'data_logs_small_time_1',
         timefieldName: 'timestamp',
         indexPatternHasTimefield: true,
@@ -120,7 +128,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
         isEnhancement: true,
       });
 
-      cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${WORKSPACE_NAME}`);
+      cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${workspace}`);
 
       cy.waitForLoader(true);
       cy.getElementByTestId(`datasetSelectorButton`).click();
