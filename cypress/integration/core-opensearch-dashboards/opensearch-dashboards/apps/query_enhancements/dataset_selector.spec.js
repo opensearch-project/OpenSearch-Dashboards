@@ -2,70 +2,60 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import {
-  MiscUtils,
-  TestFixtureHandler,
-} from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { PATHS, SECONDARY_ENGINE } from '../../../../../utils/constants';
+  WORKSPACE_NAME,
+  DATASOURCE_NAME,
+  START_TIME,
+  END_TIME,
+} from '../../../../../utils/apps/constants';
+import { BASE_PATH, SECONDARY_ENGINE } from '../../../../../utils/constants';
 
-const miscUtils = new MiscUtils(cy);
-const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
+const randomString = Math.random().toString(36).substring(7);
+const workspace = `${WORKSPACE_NAME}-${randomString}`;
 
-describe.skip('dataset selector', { scrollBehavior: false }, () => {
-  describe('empty state', () => {
-    it('no index pattern', function () {
-      // Go to the Discover page
-      miscUtils.visitPage(
-        `app/data-explorer/discover#/?_g=(filters:!(),time:(from:'2015-09-19T13:31:44.000Z',to:'2015-09-24T01:31:44.000Z'))`
-      );
+describe('dataset selector', { scrollBehavior: false }, () => {
+  before(() => {
+    cy.setupTestData(
+      SECONDARY_ENGINE.url,
+      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.mapping.json'],
+      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.data.ndjson']
+    );
 
-      cy.waitForLoader(true);
-      cy.getElementByTestId('discoverNoIndexPatterns');
+    // Add data source
+    cy.addDataSource({
+      name: `${DATASOURCE_NAME}`,
+      url: `${SECONDARY_ENGINE.url}`,
+      authType: 'no_auth',
     });
+  });
+  after(() => {
+    cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
+    cy.deleteIndex('data_logs_small_time_1');
+  });
+  beforeEach(() => {
+    // Create workspace
+    cy.deleteWorkspaceByName(`${workspace}`);
+    cy.visit('/app/home');
+    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
+  });
+
+  afterEach(() => {
+    cy.deleteWorkspaceByName(`${workspace}`);
   });
 
   describe('select indices', () => {
-    before(() => {
-      testFixtureHandler.importJSONMapping('cypress/fixtures/timestamp/mappings.json.txt');
-
-      testFixtureHandler.importJSONDoc('cypress/fixtures/timestamp/data.json.txt');
-
-      // Since default cluster is removed, need to create a data source connection if needed
-      miscUtils.visitPage('app/management/opensearch-dashboards/dataSources/create');
-      cy.intercept('POST', '/api/saved_objects/data-source').as('createDataSourceRequest');
-      cy.getElementByTestId(`datasource_card_opensearch`).click();
-      cy.get('[name="dataSourceTitle"]').type(SECONDARY_ENGINE.name);
-      cy.get('[name="endpoint"]').type(SECONDARY_ENGINE.url);
-      cy.getElementByTestId('createDataSourceFormAuthTypeSelect').click();
-      cy.get(`button[id="no_auth"]`).click();
-
-      cy.getElementByTestId('createDataSourceButton').click();
-
-      cy.wait('@createDataSourceRequest').then((interception) => {
-        expect(interception.response.statusCode).to.equal(200);
-      });
-      cy.location('pathname', { timeout: 6000 }).should(
-        'include',
-        'app/management/opensearch-dashboards/dataSources'
-      );
-
-      // Go to the Discover page
-      miscUtils.visitPage(`app/data-explorer/discover#/`);
-
-      cy.waitForLoader(true);
-    });
-
     it('with SQL as default language', function () {
       cy.getElementByTestId(`datasetSelectorButton`).click();
       cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
       cy.get(`[title="Indexes"]`).click();
-      cy.get(`[title=${SECONDARY_ENGINE.name}]`).click();
-      cy.get(`[title="timestamp-nanos"]`).click();
+      cy.get(`[title=${DATASOURCE_NAME}]`).click();
+      cy.get(`[title="data_logs_small_time_1"]`).click(); // Updated to match loaded data
       cy.getElementByTestId('datasetSelectorNext').click();
 
       cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
 
-      //select SQL
+      // Select SQL
       cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
       cy.getElementByTestId(`advancedSelectorTimeFieldSelect`).select('timestamp');
       cy.getElementByTestId('advancedSelectorConfirmButton').click();
@@ -81,9 +71,7 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
 
       // Switch language to PPL
       cy.setQueryLanguage('PPL');
-      const fromTime = 'Sep 19, 2018 @ 00:00:00.000';
-      const toTime = 'Sep 21, 2019 @ 00:00:00.000';
-      cy.setTopNavDate(fromTime, toTime);
+      cy.setTopNavDate(START_TIME, END_TIME);
 
       cy.waitForLoader(true);
       cy.get(`[data-test-subj="queryResultCompleteMsg"]`).should('be.visible');
@@ -93,13 +81,13 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
       cy.getElementByTestId(`datasetSelectorButton`).click();
       cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
       cy.get(`[title="Indexes"]`).click();
-      cy.get(`[title=${SECONDARY_ENGINE.name}]`).click();
-      cy.get(`[title="timestamp-nanos"]`).click();
+      cy.get(`[title=${DATASOURCE_NAME}]`).click();
+      cy.get(`[title="data_logs_small_time_1"]`).click(); // Updated to match loaded data
       cy.getElementByTestId('datasetSelectorNext').click();
 
       cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
 
-      //select PPL
+      // Select PPL
       cy.getElementByTestId('advancedSelectorLanguageSelect').select('PPL');
 
       cy.getElementByTestId(`advancedSelectorTimeFieldSelect`).select('timestamp');
@@ -110,9 +98,7 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
       // PPL should already be selected
       cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'PPL');
 
-      const fromTime = 'Sep 19, 2018 @ 00:00:00.000';
-      const toTime = 'Sep 21, 2019 @ 00:00:00.000';
-      cy.setTopNavDate(fromTime, toTime);
+      cy.setTopNavDate(START_TIME, END_TIME);
 
       cy.waitForLoader(true);
 
@@ -131,30 +117,28 @@ describe.skip('dataset selector', { scrollBehavior: false }, () => {
 
   describe('index pattern', () => {
     it('create index pattern and select it', function () {
-      testFixtureHandler.importJSONMapping('cypress/fixtures/logstash/mappings.json.txt');
-      testFixtureHandler.importJSONDoc('cypress/fixtures/logstash/data.json.txt');
+      // Create and select index pattern for data_logs_small_time_1*
+      cy.createWorkspaceIndexPatterns({
+        url: `${BASE_PATH}`,
+        workspaceName: `${workspace}`,
+        indexPattern: 'data_logs_small_time_1',
+        timefieldName: 'timestamp',
+        indexPatternHasTimefield: true,
+        dataSource: DATASOURCE_NAME,
+        isEnhancement: true,
+      });
 
-      testFixtureHandler.importJSONMapping('cypress/fixtures/discover/mappings.json.txt');
-      testFixtureHandler.importJSONDoc('cypress/fixtures/discover/data.json.txt');
+      cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${workspace}`);
 
-      // Go to the Discover page
-      miscUtils.visitPage(
-        `app/data-explorer/discover#/?_g=(filters:!(),time:(from:'2015-09-19T13:31:44.000Z',to:'2015-09-24T01:31:44.000Z'))`
-      );
-
+      cy.waitForLoader(true);
       cy.getElementByTestId(`datasetSelectorButton`).click();
       cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
       cy.get(`[title="Index Patterns"]`).click();
-      cy.get(`[title="logstash-*"]`).click();
-      cy.getElementByTestId('datasetSelectorNext').click();
+      cy.get(`[title="${DATASOURCE_NAME}::data_logs_small_time_1*"]`).should('exist');
 
       cy.waitForLoader(true);
       cy.waitForSearch();
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
     });
-  });
-
-  after(() => {
-    cy.deleteIndex('timestamp-nanos');
   });
 });

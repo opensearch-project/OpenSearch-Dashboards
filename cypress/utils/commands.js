@@ -305,13 +305,14 @@ Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, w
   cy.getElementByTestId('workspaceForm-workspaceDetails-nameInputText')
     .should('be.visible')
     .type(workspaceName);
-  cy.getElementByTestId('workspace-creator-dataSources-assign-button').should('be.visible').click();
+  cy.getElementByTestId('workspace-creator-dataSources-assign-button')
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
   cy.get(`.euiSelectableListItem[title="${dataSourceTitle}"]`)
     .should('be.visible')
     .trigger('click');
-  cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button')
-    .should('be.visible')
-    .click();
+  cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button').click();
   cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
   cy.contains(/successfully/);
 });

@@ -94,3 +94,32 @@ Cypress.Commands.add('deleteDataSourceByName', (dataSourceName) => {
   cy.getElementByTestId('editDatasourceDeleteIcon').click();
   cy.getElementByTestId('confirmModalConfirmButton').click();
 });
+
+Cypress.Commands.add('deleteAllDataSources', () => {
+  cy.visit('app/dataSources');
+  cy.waitForLoader(true);
+  cy.wait(2000);
+
+  cy.get('body').then(($body) => {
+    const hasEmptyState = $body.find('[data-test-subj="datasourceTableEmptyState"]').length > 0;
+    const hasDataSources = $body.find('[data-test-subj="checkboxSelectAll"]').length > 0;
+    cy.log('hasEmptyState');
+    cy.log(hasEmptyState);
+    cy.log('hasDataSources');
+    cy.log(hasDataSources);
+
+    if (hasEmptyState) {
+      cy.log('No data sources to delete');
+    } else if (hasDataSources) {
+      cy.log('Need to clean out data sources');
+      cy.getElementByTestId('checkboxSelectAll')
+        .should('exist')
+        .should('not.be.disabled')
+        .check({ force: true });
+
+      cy.getElementByTestId('deleteDataSourceConnections').should('be.visible').click();
+
+      cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
+    }
+  });
+});
