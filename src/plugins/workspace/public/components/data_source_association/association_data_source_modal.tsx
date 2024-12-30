@@ -93,35 +93,39 @@ const convertConnectionToOption = ({
   selectedConnectionIds,
   logos,
   loadingStatus,
+  showDirectQueryConnections,
 }: {
   connection: DataSourceConnection;
   selectedConnectionIds: string[];
   logos: Logos;
   loadingStatus: Record<string, boolean>;
+  showDirectQueryConnections: boolean;
 }) => {
   return {
     label: connection.name,
     key: connection.id,
     description: connection.description,
-    append: !loadingStatus[connection.id] ? (
-      connection.relatedConnections && connection.relatedConnections.length > 0 ? (
+    append:
+      showDirectQueryConnections &&
+      (!loadingStatus[connection.id] ? (
+        connection.relatedConnections &&
+        connection.relatedConnections.length > 0 && (
+          <EuiBadge>
+            {i18n.translate('workspace.form.selectDataSource.optionBadge', {
+              defaultMessage: '+ {relatedConnections} related',
+              values: {
+                relatedConnections: connection.relatedConnections.length,
+              },
+            })}
+          </EuiBadge>
+        )
+      ) : (
         <EuiBadge>
-          {i18n.translate('workspace.form.selectDataSource.optionBadge', {
-            defaultMessage: '+ {relatedConnections} related',
-            values: {
-              relatedConnections: connection.relatedConnections.length,
-            },
+          {i18n.translate('workspace.form.selectDataSource.loading', {
+            defaultMessage: 'Loading...',
           })}
         </EuiBadge>
-      ) : undefined
-    ) : (
-      <EuiBadge>
-        {i18n.translate('workspace.form.selectDataSource.loading', {
-          defaultMessage: 'Loading...',
-        })}
-      </EuiBadge>
-    ),
-
+      )),
     disabled: connection.connectionType === DataSourceConnectionType.DirectQueryConnection,
     checked:
       connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
@@ -129,7 +133,6 @@ const convertConnectionToOption = ({
         ? ('on' as const)
         : undefined,
     prepend: <ConnectionIcon connection={connection} logos={logos} />,
-
     parentId: connection.parentId,
   };
 };
@@ -159,7 +162,7 @@ const convertConnectionsToOptions = ({
       }
 
       if (connection.connectionType === DataSourceConnectionType.DataConnection) {
-        if (showDirectQueryConnections) {
+        if (!showDirectQueryConnections) {
           return [connection];
         }
         return [];
@@ -186,6 +189,7 @@ const convertConnectionsToOptions = ({
         selectedConnectionIds,
         logos,
         loadingStatus,
+        showDirectQueryConnections,
       })
     );
 };
@@ -252,54 +256,71 @@ export const AssociationDataSourceModalContent = ({
   }, [selectedConnectionIds, allConnections, handleAssignDataSourceConnections]);
 
   useEffect(() => {
-    setIsLoading(true);
-    getDataSourcesList(savedObjects.client, ['*'])
-      .then((dataSourcesList) => {
-        const {
-          openSearchConnections,
-          dataConnections,
-        } = convertDataSourcesToOpenSearchAndDataConnections(dataSourcesList);
-        //  Only data source saved object type needs to fetch data source connections, data connection type object not, use loadingStatus to track the loading status of each data source connections
-        const initialLoadingStatus = [
-          ...openSearchConnections.map((ds) => ({ id: ds.id, status: true })),
-          ...dataConnections.map((ds) => ({ id: ds.id, status: false })),
-        ].reduce((acc, { id, status }) => {
-          acc[id] = status;
-          return acc;
-        }, {} as Record<string, boolean>);
+    const fetchDataSources = async () => {
+      const dataSourcesList = await getDataSourcesList(savedObjects.client, ['*']);
+      const {
+        openSearchConnections,
+        dataConnections,
+      } = convertDataSourcesToOpenSearchAndDataConnections(dataSourcesList);
+      return { openSearchConnections, dataConnections };
+    };
 
-        setLoadingStatus(initialLoadingStatus);
+    const handleDirectQueryConnections = async (
+      openSearchConnections: DataSourceConnection[],
+      dataConnections: DataSourceConnection[]
+    ) => {
+      const initialLoadingStatus = openSearchConnections.reduce((acc, ds) => {
+        acc[ds.id] = true;
+        return acc;
+      }, {} as Record<string, boolean>);
 
-        // display data sources connections first while loading direct query connection
-        setAllConnections([...openSearchConnections, ...dataConnections]);
-        return { openSearchConnections };
-      })
-      .then(({ openSearchConnections }) => {
-        openSearchConnections.forEach((ds) => {
-          //  only fetch direct query connections for data source saved object, and set loading status accordingly
-          fetchDirectQueryConnectionsByIDs([ds.id], http, notifications)
-            .then((directQueryConnections) => {
-              setAllConnections((prev) => {
-                return prev.map((connection) => {
-                  if (connection.id === ds.id) {
-                    return {
-                      ...connection,
-                      relatedConnections: directQueryConnections,
-                    };
-                  }
-                  return connection;
-                });
-              });
-            })
-            .finally(() => {
-              setLoadingStatus((prev) => ({ ...prev, [ds.id]: false }));
-            });
-        });
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [savedObjects.client, notifications, http]);
+      setLoadingStatus(initialLoadingStatus);
+
+      const fetchDqcConnectionsPromises = openSearchConnections.map((ds) =>
+        fetchDirectQueryConnectionsByIDs([ds.id], http, notifications)
+          .then((directQueryConnections) => ({
+            id: ds.id,
+            relatedConnections: directQueryConnections,
+          }))
+          .catch(() => ({
+            id: ds.id,
+            relatedConnections: [],
+          }))
+      );
+      const dqcConnections = await Promise.all(fetchDqcConnectionsPromises);
+
+      const allConnectionsWithDQC =
+        mode === AssociationDataSourceModalMode.DirectQueryConnections
+          ? openSearchConnections
+              .filter((connection) => {
+                const filteredData = dqcConnections.find((c) => c.id === connection.id);
+                return filteredData && filteredData.relatedConnections.length > 0;
+              })
+              .map((connection) => {
+                const relatedDQC = dqcConnections.find((c) => c.id === connection.id);
+                setLoadingStatus((prev) => ({
+                  ...prev,
+                  [connection.id]: false,
+                }));
+                return {
+                  ...connection,
+                  relatedConnections: relatedDQC?.relatedConnections,
+                } as DataSourceConnection;
+              })
+          : [...openSearchConnections, ...dataConnections];
+
+      setAllConnections(allConnectionsWithDQC);
+    };
+
+    const fetchDataSourcesAndHandleRelatedConnections = async () => {
+      setIsLoading(true);
+      const { openSearchConnections, dataConnections } = await fetchDataSources();
+      await handleDirectQueryConnections(openSearchConnections, dataConnections);
+      setIsLoading(false);
+    };
+
+    fetchDataSourcesAndHandleRelatedConnections();
+  }, [savedObjects.client, notifications, http, mode]);
 
   useEffect(() => {
     if (allConnections.length > 0) {

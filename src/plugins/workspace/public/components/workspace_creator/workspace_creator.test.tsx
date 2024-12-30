@@ -446,13 +446,14 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
-    fireEvent.click(getByTestId('workspace-creator-dqc-assign-button'));
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+    expect(
+      getByText(
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+      )
+    ).toBeInTheDocument();
+
     await waitFor(() => {
-      expect(
-        getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
-        )
-      ).toBeInTheDocument();
       expect(getByText(dataSourcesList[2].title)).toBeInTheDocument();
     });
     fireEvent.click(getByText(dataSourcesList[2].title));

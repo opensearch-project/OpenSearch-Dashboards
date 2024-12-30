@@ -88,7 +88,7 @@ const setupAssociationDataSourceModal = ({
     <IntlProvider locale="en">
       <AssociationDataSourceModal
         logos={logos}
-        mode={mode ?? AssociationDataSourceModalMode.OpenSearchConnections}
+        mode={mode ?? AssociationDataSourceModalMode.DirectQueryConnections}
         http={coreServices.http}
         notifications={coreServices.notifications}
         savedObjects={coreServices.savedObjects}
@@ -203,12 +203,14 @@ describe('AssociationDataSourceModal', () => {
     const handleAssignDataSourceConnectionsMock = jest.fn();
     setupAssociationDataSourceModal({
       handleAssignDataSourceConnections: handleAssignDataSourceConnectionsMock,
-      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+      mode: AssociationDataSourceModalMode.OpenSearchConnections,
     });
     await waitFor(() => {
+      expect(screen.getByText('Data Source 1')).toBeInTheDocument();
       expect(screen.getByText('Data Connection 1')).toBeInTheDocument();
-      expect(screen.getByText('Associate data sources')).toBeInTheDocument();
     });
+
+    expect(screen.getByText('Associate data sources')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Data Connection 1'));
     fireEvent.click(screen.getByText('Associate data sources'));
 
