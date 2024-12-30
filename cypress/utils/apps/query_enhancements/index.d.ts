@@ -18,6 +18,7 @@ declare namespace Cypress {
       credentials?: { username: string; password: string };
     }): Chainable<any>;
     deleteDataSourceByName(dataSourceName: string): Chainable<any>;
+    deleteAllDataSources(): Chainable<any>;
     setIndexAsDataset(
       index: string,
       dataSourceName: string,

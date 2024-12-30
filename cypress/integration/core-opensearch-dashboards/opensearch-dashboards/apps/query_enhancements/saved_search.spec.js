@@ -13,8 +13,8 @@ import {
   WORKSPACE_NAME,
   DatasetTypes,
   QueryLanguages,
-} from './constants';
-import { SECONDARY_ENGINE } from '../../../../../utils/constants';
+  SECONDARY_ENGINE,
+} from '../../../../../utils/constants';
 import { v4 as uuid } from 'uuid';
 
 const workspaceName = `${WORKSPACE_NAME}-${uuid().substring(0, 9)}`;
