@@ -4,7 +4,6 @@
  */
 
 import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_NAME,
@@ -19,14 +18,15 @@ import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
 const miscUtils = new MiscUtils(cy);
 
 const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern = true) => {
-  const getDocTableHeaderByIndex = (index, offset = 0) => {
-    return cy.getElementByTestId('docTableHeaderField').eq(index + offset);
+  const getDocTableHeaderByIndex = (index) => {
+    return cy.getElementByTestId('docTableHeaderField').eq(index);
   };
-  const checkTableHeadersByArray = (expectedHeaders, offset = 1) => {
-    for (let i = 0; i < expectedHeaders.length; i++) {
-      // Get headers by index
-      getDocTableHeaderByIndex(i + offset).should('have.text', expectedHeaders[i]);
-    }
+  const checkTableHeadersByArr = (expectedHeaders) => {
+    let currentHeader = 0;
+    expectedHeaders.forEach((header) => {
+      getDocTableHeaderByIndex(currentHeader).should('have.text', header);
+      currentHeader++;
+    });
   };
   const checkDocTableColumnByArr = (expectedValues, columnNumber) => {
     let currentRow = 0;
@@ -35,53 +35,52 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
       currentRow++;
     });
   };
-
-  const offset = indexPattern ? 1 : 0; // defines starting column
+  const selectFields = (testFields) => {
+    testFields.forEach((field) => {
+      cy.getElementByTestId('fieldToggle-' + field).click();
+    });
+  };
   if (indexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
     dataExplorer.setQueryEditorLanguage('DQL');
     cy.setSearchAbsoluteDateRange(START_TIME, END_TIME);
-    // Check default column
-    getDocTableHeaderByIndex(0 + offset).should('have.text', '_source');
   } else {
     dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'OpenSearch SQL');
   }
-  // Select some fields
-  testFields.forEach((field) => {
-    cy.getElementByTestId('fieldToggle-' + field).click();
-  });
-  // Check that the default column no longer exists
-  getDocTableHeaderByIndex(0 + offset).should('not.have.text', '_source');
+  // Check default column
+  getDocTableHeaderByIndex(1).should('have.text', '_source');
+  // Select all test fields
+  selectFields(testFields);
+  // Check that the default _source column no longer exists
+  getDocTableHeaderByIndex(1).should('not.have.text', '_source');
   // Check table headers persistence between DQL and PPL
-  checkTableHeadersByArray(testFields, offset);
+  checkTableHeadersByArr(testFields);
   if (indexPattern) {
     dataExplorer.setQueryEditorLanguage('Lucene');
-    checkTableHeadersByArray(testFields, offset);
+    checkTableHeadersByArr(testFields);
   }
   dataExplorer.setQueryEditorLanguage('PPL');
-  checkTableHeadersByArray(testFields, offset);
+  checkTableHeadersByArr(testFields);
   // Remove some fields
   const firstTestField = testFields[0];
   const secondTestField = testFields[1];
   cy.getElementByTestId('fieldToggle-' + firstTestField).click();
   cy.getElementByTestId('fieldToggle-' + secondTestField).click();
-  getDocTableHeaderByIndex(0 + offset).should('not.have.text', firstTestField);
-  getDocTableHeaderByIndex(1 + offset).should('not.have.text', secondTestField);
+  getDocTableHeaderByIndex(1).should('not.have.text', firstTestField);
+  getDocTableHeaderByIndex(2).should('not.have.text', secondTestField);
   // Remove all fields
   const thirdTestField = testFields[2];
   const fourthTestField = testFields[3];
   cy.getElementByTestId('fieldToggle-' + thirdTestField).click();
   cy.getElementByTestId('fieldToggle-' + fourthTestField).click();
-  getDocTableHeaderByIndex(0 + offset).should('have.text', '_source');
-  getDocTableHeaderByIndex(1 + offset).should('not.exist');
-  // Select some fields
-  testFields.forEach((field) => {
-    cy.getElementByTestId('fieldToggle-' + field).click();
-  });
+  getDocTableHeaderByIndex(1).should('have.text', '_source');
+  getDocTableHeaderByIndex(2).should('not.exist');
+  // Select all test fields
+  selectFields(testFields);
   // Check default column again
-  getDocTableHeaderByIndex(0 + offset).should('not.have.text', '_source');
+  getDocTableHeaderByIndex(1).should('not.have.text', '_source');
   // Check the columns match the selected fields
-  checkTableHeadersByArray(testFields, offset);
+  checkTableHeadersByArr(testFields);
   if (indexPattern) {
     // Validate default hits
     cy.getElementByTestId('discoverQueryHits').should('have.text', '10,000');
@@ -92,13 +91,13 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
   cy.wait('@pplQuery').then(() => {
     // Check table headers persistence after PPL query
     cy.wait(1000);
-    checkTableHeadersByArray(testFields, offset);
+    checkTableHeadersByArr(testFields);
     if (indexPattern) {
       // Check filter was correctly applied
       cy.getElementByTestId('discoverQueryHits').should('have.text', '1,152');
     }
     // Validate the first 5 rows on the _id column
-    checkDocTableColumnByArr(expectedValues, 1 + offset);
+    checkDocTableColumnByArr(expectedValues);
   });
   // Send SQL query
   dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
@@ -107,10 +106,12 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
   cy.wait('@sqlQuery').then(() => {
     // Check table headers persistence after SQL query
     cy.wait(1000);
-    checkTableHeadersByArray(testFields, offset);
+    checkTableHeadersByArr(testFields);
     // Validate the first 5 rows on the _id column
-    checkDocTableColumnByArr(expectedValues, 1 + offset);
+    checkDocTableColumnByArr(expectedValues);
   });
+  // Clean all test fields for the next test
+  selectFields(testFields);
 };
 
 const checkFilteredFields = (indexPattern = true) => {
