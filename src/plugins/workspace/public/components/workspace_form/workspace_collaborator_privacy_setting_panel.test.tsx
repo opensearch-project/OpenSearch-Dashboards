@@ -10,7 +10,7 @@ import {
   WorkspacePermissionItemType,
   WorkspacePrivacyItemType,
 } from './constants';
-import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../../../core/types';
 import {
   WorkspaceCollaboratorPrivacySettingPanel,
   WorkspaceCollaboratorPrivacySettingProps,
