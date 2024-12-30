@@ -86,7 +86,7 @@ export function selectIndexDatasetLanguage(datasetLanguage, timeField) {
  * @param {string} indexClusterName Name of the cluster to be used for the Index.
  * @param {string} indexName Name of the index dataset to be used.
  * @param {string} datasetLanguage Index supports "OpenSearch SQL" and "PPL".
- * @param {string} 
+ * @param {string}
  */
 export function selectIndexDataset(indexClusterName, indexName, datasetLanguage, timeField) {
   cy.getElementByTestId('datasetSelectorButton').click();

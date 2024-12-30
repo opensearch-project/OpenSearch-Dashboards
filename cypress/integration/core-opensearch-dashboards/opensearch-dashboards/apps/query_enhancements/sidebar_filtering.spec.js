@@ -22,7 +22,7 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
     return cy.getElementByTestId('docTableHeaderField').eq(index);
   };
   const checkTableHeadersByArr = (expectedHeaders) => {
-    let currentHeader = 0;
+    let currentHeader = 1;
     expectedHeaders.forEach((header) => {
       getDocTableHeaderByIndex(currentHeader).should('have.text', header);
       currentHeader++;
@@ -43,9 +43,9 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
   if (indexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
     dataExplorer.setQueryEditorLanguage('DQL');
-    cy.setSearchAbsoluteDateRange(START_TIME, END_TIME);
+    cy.setTopNavDate(START_TIME, END_TIME);
   } else {
-    dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'OpenSearch SQL');
+    dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'OpenSearch SQL', 'timestamp');
   }
   // Check default column
   getDocTableHeaderByIndex(1).should('have.text', '_source');
@@ -97,7 +97,7 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
       cy.getElementByTestId('discoverQueryHits').should('have.text', '1,152');
     }
     // Validate the first 5 rows on the _id column
-    checkDocTableColumnByArr(expectedValues);
+    checkDocTableColumnByArr(expectedValues, 2);
   });
   // Send SQL query
   dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
@@ -108,7 +108,7 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
     cy.wait(1000);
     checkTableHeadersByArr(testFields);
     // Validate the first 5 rows on the _id column
-    checkDocTableColumnByArr(expectedValues);
+    checkDocTableColumnByArr(expectedValues, 2);
   });
   // Clean all test fields for the next test
   selectFields(testFields);
@@ -131,12 +131,12 @@ const checkFilteredFields = (indexPattern = true) => {
   if (indexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
     dataExplorer.setQueryEditorLanguage('DQL');
-    cy.setSearchAbsoluteDateRange(START_TIME, END_TIME);
+    cy.setTopNavDate(START_TIME, END_TIME);
     filterFields();
     dataExplorer.setQueryEditorLanguage('Lucene');
     filterFields();
   } else {
-    dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL');
+    dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
   }
   dataExplorer.setQueryEditorLanguage('PPL');
   filterFields();
@@ -155,11 +155,14 @@ const checkCollapseAndExpand = (indexPattern = true) => {
 
   if (indexPattern) {
     dataExplorer.setQueryEditorLanguage('DQL');
+    cy.setTopNavDate(START_TIME, END_TIME);
     collapseAndExpand();
     dataExplorer.setQueryEditorLanguage('Lucene');
+    cy.setTopNavDate(START_TIME, END_TIME);
     collapseAndExpand();
   }
   dataExplorer.setQueryEditorLanguage('PPL');
+  cy.setTopNavDate(START_TIME, END_TIME);
   collapseAndExpand();
   dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
   collapseAndExpand();
@@ -178,7 +181,7 @@ const checkCollapse = (indexPattern = true) => {
     dataExplorer.setQueryEditorLanguage('Lucene');
     cy.getElementByTestId('sidebarPanel').should('not.be.visible');
   } else {
-    dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL');
+    dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
   }
   dataExplorer.setQueryEditorLanguage('PPL');
   if (!indexPattern) {
@@ -191,6 +194,7 @@ const checkCollapse = (indexPattern = true) => {
     dataExplorer.setQueryEditorLanguage('DQL');
     cy.getElementByTestId('sidebarPanel').should('not.be.visible');
   }
+  dataExplorer.clickSidebarCollapseBtn(false);
 };
 
 describe('sidebar spec', () => {
@@ -252,7 +256,7 @@ describe('sidebar spec', () => {
         'personal.birthdate',
         'personal.address.country',
       ];
-      const expectedAgeValues = ['75', '76', '78', '73', '74'];
+      const expectedAgeValues = ['28', '55', '76', '56', '36'];
       it('add nested field in index pattern', () => {
         addFields(nestedTestFields, expectedAgeValues, pplQuery, sqlQuery);
       });
