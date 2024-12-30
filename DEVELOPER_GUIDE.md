@@ -132,13 +132,58 @@ $ yarn osd clean
 
 ### Run OpenSearch
 
-OpenSearch Dashboards requires a running version of OpenSearch to connect to. In a separate terminal you can run the latest snapshot built using:
+OpenSearch Dashboards requires a running version of OpenSearch to connect to. You can choose to run OpenSearch locally yourself or point to an existing cluster.
+
+#### Run a local OpenSearch cluster 
+
+In a separate terminal you can run the latest snapshot built using:
 
 _(Linux, Windows, Darwin (MacOS) only - for others, you'll need to [set up using Docker](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/docs/docker-dev/docker-dev-setup-manual.md) or [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
 
 ```bash
 $ yarn opensearch snapshot
 ```
+
+#### Alternative - Connect to an external OpenSearch cluster
+
+Instead of running OpenSearch locally, you can point OpenSearch Dashboards to an existing OpenSearch cluster:
+
+1. Clone the security dashboards plugin inside your OpenSearch Dashboards plugins folder and bootstrap:
+```bash
+$ cd plugins
+$ git clone https://github.com/opensearch-project/security-dashboards-plugin.git
+$ cd ..
+$ yarn osd bootstrap --single-version=loose
+```
+2. Create a configuration directory outside your repository to avoid accidentally committing credentials. For example:
+```bash
+$ mkdir -p /configs/me
+$ mkdir -p /configs/prod
+```
+3. Create `opensearch_dashboards.yml` file(s) in your config directories. Here's an example config:
+```yaml
+opensearch.hosts: ["https://your-opensearch-host"]
+opensearch.username: 'admin' 
+opensearch.password: 'your-password'
+opensearch.ignoreVersionMismatch: true
+opensearch.ssl.verificationMode: none
+opensearch.requestHeadersWhitelist: [authorization]
+opensearch_security.multitenancy.enabled: false
+opensearch_security.readonly_mode.roles: [kibana_read_only]
+opensearch_security.cookie.secure: false
+```
+4. Set the `OSD_PATH_CONF` environment variable to point to your config directory:
+```bash
+$ export OSD_PATH_CONF=/absolute/path/to/configs/me
+```
+
+This approach allows you to:
+- Develop against a production-like environment
+- Avoid running resource-intensive local clusters
+- Maintain different configurations for different environments
+- Keep sensitive credentials out of your repository
+
+Note: Make sure your OpenSearch cluster is accessible and credentials are valid before starting OpenSearch Dashboards.
 
 ### Run OpenSearch Dashboards
 
