@@ -75,11 +75,9 @@ export function getExpandedDocRowFieldName(docTableRowNumber, expandedDocumentRo
  * Select a language in the Dataset Selector for Index
  * @param {string} datasetLanguage Index supports "OpenSearch SQL" and "PPL"
  */
-export function selectIndexDatasetLanguage(datasetLanguage) {
+export function selectIndexDatasetLanguage(datasetLanguage, timeField) {
   cy.getElementByTestId('advancedSelectorLanguageSelect').select(datasetLanguage);
-  cy.getElementByTestId('advancedSelectorTimeFieldSelect').select(
-    "I don't want to use the time filter"
-  );
+  cy.getElementByTestId('advancedSelectorTimeFieldSelect').select(timeField);
   cy.getElementByTestId('advancedSelectorConfirmButton').click();
 }
 
@@ -88,8 +86,9 @@ export function selectIndexDatasetLanguage(datasetLanguage) {
  * @param {string} indexClusterName Name of the cluster to be used for the Index.
  * @param {string} indexName Name of the index dataset to be used.
  * @param {string} datasetLanguage Index supports "OpenSearch SQL" and "PPL".
+ * @param {string} 
  */
-export function selectIndexDataset(indexClusterName, indexName, datasetLanguage) {
+export function selectIndexDataset(indexClusterName, indexName, datasetLanguage, timeField) {
   cy.getElementByTestId('datasetSelectorButton').click();
   cy.getElementByTestId('datasetSelectorAdvancedButton').click();
   cy.getElementByTestId('datasetExplorerWindow').contains('Indexes').click();
@@ -98,7 +97,7 @@ export function selectIndexDataset(indexClusterName, indexName, datasetLanguage)
     .click();
   cy.getElementByTestId('datasetExplorerWindow').contains(indexName, { timeout: 10000 }).click();
   cy.getElementByTestId('datasetSelectorNext').click();
-  selectIndexDatasetLanguage(datasetLanguage);
+  selectIndexDatasetLanguage(datasetLanguage, timeField);
 }
 
 /**
