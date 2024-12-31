@@ -8,7 +8,7 @@ import {
   DSM_API,
   S3_CLUSTER,
 } from '../../../../../utils/apps/query_enhancements/constants';
-import { WORKSPACE_NAME } from './constants';
+import { WORKSPACE_NAME } from '../../../../../utils/apps/constants';
 
 let dataSourceId = '';
 const definedS3Variables = !S3_CLUSTER.url;
