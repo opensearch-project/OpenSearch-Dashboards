@@ -44,6 +44,7 @@ Cypress.Commands.add('setQueryLanguage', (value) => {
 
 /**
  * Creates a new data source connection with basic auth
+ * It also saves the created data source's id to the alias @DATASOURCE_ID
  * @param {Object} options Configuration options for the data source
  * @param {string} options.name The name/title for the data source
  * @param {string} options.url The endpoint URL for the data source
@@ -84,6 +85,8 @@ Cypress.Commands.add('addDataSource', (options) => {
   // Wait for successful creation
   cy.wait('@createDataSourceRequest').then((interception) => {
     expect(interception.response.statusCode).to.equal(200);
+    // save the created data source ID as an alias
+    cy.wrap(interception.response.body.id).as('DATASOURCE_ID');
   });
 
   // Verify redirect to data sources list page
@@ -105,6 +108,8 @@ Cypress.Commands.add('deleteDataSourceByName', (dataSourceName) => {
   cy.getElementByTestId('confirmModalConfirmButton').click();
 });
 
+// Deletes all data sources. This command should only be used for convenience during development
+// and should never be used in production
 Cypress.Commands.add('deleteAllDataSources', () => {
   cy.visit('app/dataSources');
   cy.waitForLoader(true);

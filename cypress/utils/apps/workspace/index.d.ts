@@ -23,6 +23,7 @@ declare namespace Cypress {
 
     /**
      * Creates an index pattern within the workspace using cluster
+     * It also saves the created index pattern id to the alias @INDEX_PATTERN_ID
      * @param opts - Index pattern creation options
      */
     createWorkspaceIndexPatterns(opts: {

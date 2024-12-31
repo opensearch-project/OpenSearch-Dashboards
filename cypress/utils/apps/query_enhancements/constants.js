@@ -4,7 +4,7 @@
  */
 
 export const DATASOURCE_NAME = 'data-logs-1';
-export const WORKSPACE_NAME = 'query-workspace';
+export const WORKSPACE_NAME = 'query-ws';
 export const START_TIME = 'Jan 1, 2020 @ 00:00:00.000';
 export const END_TIME = 'Jan 1, 2024 @ 00:00:00.000';
 
@@ -12,10 +12,40 @@ export const INDEX_WITH_TIME_1 = 'data_logs_small_time_1';
 export const INDEX_WITH_TIME_2 = 'data_logs_small_time_2';
 export const INDEX_PATTERN_WITH_TIME = 'data_logs_small_time_*';
 
-// Maps all the query languages that is supported by query enhancements.
-// name: Name of the language as it appears in the dashboard app
-// apiName: Name of the language recognized by the OpenSearch API
-// supports: list of search operations that are viable for the given language
+/**
+ * The dataset type that saved search uses
+ * @typedef {('INDEXES'|'INDEX_PATTERN')} QueryEnhancementDataset
+ */
+
+/**
+ * The languages that saved search uses
+ * @typedef {('DQL'|'Lucene'|'OpenSearch SQL'|'PPL')} QueryEnhancementLanguage
+ */
+
+/**
+ * Describes discover operations that a given query language supports
+ * @typedef {Object} QueryEnhancementLanguageSupportedFeatures
+ * @property {boolean} filters - whether you can apply filters
+ * @property {boolean} histogram - whether the histogram appears
+ * @property {boolean} selectFields - whether you can select by specific fields to see the data
+ * @property {boolean} sort - whether you can sort the data by specific fields
+ */
+
+/**
+ * Contains relevant data for a given Query Language
+ * @typedef {Object} QueryEnhancementLanguageData
+ * @property {QueryEnhancementLanguage} name - name of the language as it appears in the dashboard app
+ * @property {string} apiName - the name of the language recognized by the OpenSearch API
+ * @property {QueryEnhancementLanguageSupportedFeatures} supports - the list of operations supported by the language
+ */
+
+/**
+ * Maps all the query languages that is supported by query enhancements to relevant data
+ * @property {QueryEnhancementLanguageData} DQL
+ * @property {QueryEnhancementLanguageData} Lucene
+ * @property {QueryEnhancementLanguageData} SQL
+ * @property {QueryEnhancementLanguageData} PPL
+ */
 export const QueryLanguages = {
   DQL: {
     name: 'DQL',
@@ -60,9 +90,17 @@ export const QueryLanguages = {
   },
 };
 
-// Maps the dataset types that are supported by query enhancements.
-// name: Name of the dataset as recognized by the OpenSearch API
-// supportedLanguages: List of all the languages that the dataset supports
+/**
+ * Contains relevant data for a given Dataset
+ * @typedef {Object} QueryEnhancementDatasetData
+ * @property {QueryEnhancementDataset} name - name of the dataset as recognized by the OpenSearch API
+ * @property {QueryEnhancementLanguage[]} supportedLanguages - an array of query languages that the dataset supports
+ */
+
+/**
+ * Maps all the dataset that is supported by query enhancements to relevant data
+ * @type {Object.<QueryEnhancementDataset, QueryEnhancementDatasetData>}
+ */
 export const DatasetTypes = {
   INDEX_PATTERN: {
     name: 'INDEX_PATTERN',

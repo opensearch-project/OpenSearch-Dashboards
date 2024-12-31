@@ -54,6 +54,10 @@ Cypress.Commands.add(
       isEnhancement = false,
     } = opts;
 
+    cy.intercept('POST', '/w/*/api/saved_objects/index-pattern').as(
+      'createIndexPatternInterception'
+    );
+
     // Navigate to Workspace Specific IndexPattern Page
     cy.navigateToWorkSpaceSpecificPage({
       workspaceName,
@@ -115,6 +119,12 @@ Cypress.Commands.add(
     }
 
     cy.getElementByTestId('createIndexPatternButton').should('be.visible').click();
+
+    cy.wait('@createIndexPatternInterception').then((interception) => {
+      // save the created index pattern ID as an alias
+      cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
+    });
+
     cy.getElementByTestId('headerApplicationTitle').contains(indexPattern);
   }
 );

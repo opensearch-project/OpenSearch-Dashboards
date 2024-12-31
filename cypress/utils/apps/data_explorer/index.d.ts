@@ -5,7 +5,7 @@
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    getTimeConfig(start: string, end: string): Chainable<any>;
+    verifyTimeConfig(start: string, end: string): Chainable<any>;
     saveSearch(name: string, saveAsNew?: boolean): Chainable<any>;
     loadSaveSearch(name: string, selectDuplicate?: boolean): Chainable<any>;
     verifyHitCount(count: string): Chainable<any>;
