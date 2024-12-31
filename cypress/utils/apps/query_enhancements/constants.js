@@ -17,18 +17,19 @@ export const DATASET_CONFIGS = {
     type: 'index_pattern',
     name: INDEX_PATTERN_NAME,
     languages: [
-      { name: 'DQL', isEnabled: true },
-      { name: 'Lucene', isEnabled: true },
-      { name: 'OpenSearch SQL', isEnabled: false },
-      { name: 'PPL', isEnabled: false },
+      // isFilterButtonsEnabled signifies if the filter buttons are supposed to be enabled.
+      { name: 'DQL', isFilterButtonsEnabled: true },
+      { name: 'Lucene', isFilterButtonsEnabled: true },
+      { name: 'OpenSearch SQL', isFilterButtonsEnabled: false },
+      { name: 'PPL', isFilterButtonsEnabled: false },
     ],
   },
   index: {
     type: 'index',
     name: INDEX_NAME,
     languages: [
-      { name: 'OpenSearch SQL', isEnabled: false },
-      { name: 'PPL', isEnabled: false },
+      { name: 'OpenSearch SQL', isFilterButtonsEnabled: false },
+      { name: 'PPL', isFilterButtonsEnabled: false },
     ],
   },
 };

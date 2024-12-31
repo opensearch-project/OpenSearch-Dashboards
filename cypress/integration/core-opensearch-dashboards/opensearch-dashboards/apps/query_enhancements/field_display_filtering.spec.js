@@ -12,13 +12,14 @@ import {
   END_TIME,
   DATASET_CONFIGS,
 } from '../../../../../utils/apps/constants';
-import * as dataExplorer from './helpers.js';
+import * as dataExplorer from '../../../../../utils/apps/data_explorer/commands';
 import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
+import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 
 const randomString = Math.random().toString(36).substring(7);
 const workspace = `${WORKSPACE_NAME}-${randomString}`;
 
-function selectDataset(datasetType, language) {
+const selectDataset = (datasetType, language) => {
   switch (datasetType) {
     case 'index':
       dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, language);
@@ -27,93 +28,159 @@ function selectDataset(datasetType, language) {
       dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, language);
       break;
   }
-}
-
-function setDateRange(datasetType, language) {
-  function isNowTime(inputTimeString) {
-    return inputTimeString === 'now';
+};
+const setDateRange = (datasetType, language) => {
+  if (language === 'OpenSearch SQL') {
+    return;
+  } else {
+    cy.setTopNavDate(START_TIME, END_TIME);
   }
-
-  function isRelativeTime(inputTimeString) {
-    return inputTimeString.match(/now[+-].+/);
-  }
-
-  function setAbsoluteDateRangeUsingDatePickerButtonOrStartEndTimeButtons() {
-    cy.url({ decode: true }).then(($url) => {
-      const timeRegex = /time:\(from:(.+?),to:(.+?)\)/;
-      const matches = $url.match(timeRegex);
-      cy.wrap(matches).should('have.length.above', 0); // There should be a fromTime and endTime
-
-      const fromTime = matches[1];
-      const toTime = matches[2];
-
-      if (
-        (isNowTime(fromTime) && isRelativeTime(toTime)) ||
-        (isRelativeTime(fromTime) && isNowTime(toTime))
-      ) {
-        cy.setSearchAbsoluteDateRangeWithSearchDatePickerButton(START_TIME, END_TIME);
-      } else {
-        cy.setSearchAbsoluteDateRangeWithStartEndDateButtons(START_TIME, END_TIME);
-      }
-    });
-  }
-
-  switch (datasetType) {
-    case 'index_pattern':
-      if (language !== 'OpenSearch SQL') {
-        setAbsoluteDateRangeUsingDatePickerButtonOrStartEndTimeButtons();
-      }
-      break;
-  }
-}
-
-function verifyTableFieldFilterActions(datasetType, language, shouldExist) {
+};
+const verifyTableFieldFilterActions = (datasetType, language, shouldExist) => {
   selectDataset(datasetType, language);
   setDateRange(datasetType, language);
 
   cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
-  dataExplorer.verifyDocTableRowFilterForAndOutButton(0, shouldExist);
+  const shouldText = shouldExist ? 'exist' : 'not.exist';
+  dataExplorer.getDocTableField(0, 0).within(() => {
+    cy.getElementByTestId('filterForValue').should(shouldText);
+    cy.getElementByTestId('filterOutValue').should(shouldText);
+  });
 
   if (shouldExist) {
     dataExplorer.verifyDocTableFilterAction(0, 'filterForValue', '10,000', '1', true);
     dataExplorer.verifyDocTableFilterAction(0, 'filterOutValue', '10,000', '9,999', false);
   }
-}
+};
+const verifyExpandedTableFilterActions = (datasetType, language, isFilterButtonsEnabled) => {
+  // Check if the first expanded Doc Table Field's first row's Filter For, Filter Out and Exists Filter buttons are disabled.
+  const verifyFirstExpandedFieldFilterForFilterOutFilterExistsButtons = () => {
+    const shouldText = isFilterButtonsEnabled ? 'be.enabled' : 'be.disabled';
+    dataExplorer.getExpandedDocTableRow(0, 0).within(() => {
+      cy.getElementByTestId('addInclusiveFilterButton').should(shouldText);
+      cy.getElementByTestId('removeInclusiveFilterButton').should(shouldText);
+      cy.getElementByTestId('addExistsFilterButton').should(shouldText);
+    });
+  };
 
-function verifyExpandedTableFilterActions(datasetType, language, isEnabled) {
+  /**
+   * Check the Filter For or Out buttons in the expandedDocumentRowNumberth field in the expanded Document filters the correct value.
+   * @param {string} filterButton For or Out
+   * @param {number} docTableRowNumber Integer starts from 0 for the first row
+   * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
+   * @example verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField('for', 0, 0, '10,000', '1');
+   */
+  const verifyDocTableFirstExpandedFieldFirstRowFilterForOutButtonFiltersCorrectField = (
+    filterButton,
+    docTableRowNumber,
+    expandedDocumentRowNumber,
+    expectedQueryHitsWithoutFilter,
+    expectedQueryHitsAfterFilterApplied
+  ) => {
+    if (filterButton !== 'for' || filterButton !== 'out') {
+      cy.log('Filter button must be for or or.');
+      return;
+    }
+
+    const filterButtonElement =
+      filterButton === 'for' ? 'addInclusiveFilterButton' : 'removeInclusiveFilterButton';
+    const shouldText = filterButton === 'for' ? 'have.text' : 'not.have.text';
+
+    dataExplorer
+      .getExpandedDocTableRowValue(docTableRowNumber, expandedDocumentRowNumber)
+      .then(($expandedDocumentRowValue) => {
+        const filterFieldText = $expandedDocumentRowValue.text();
+        dataExplorer
+          .getExpandedDocTableRow(docTableRowNumber, expandedDocumentRowNumber)
+          .within(() => {
+            cy.getElementByTestId(filterButtonElement).click();
+          });
+        // Verify pill text
+        cy.getElementByTestId('globalFilterLabelValue').should('have.text', filterFieldText);
+        cy.getElementByTestId('discoverQueryHits').should(
+          'have.text',
+          expectedQueryHitsAfterFilterApplied
+        ); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
+        dataExplorer
+          .getExpandedDocTableRowValue(docTableRowNumber, expandedDocumentRowNumber)
+          .should(shouldText, filterFieldText);
+      });
+    cy.getElementByTestId('globalFilterBar').find('[aria-label="Delete"]').click();
+    cy.getElementByTestId('discoverQueryHits').should('have.text', expectedQueryHitsWithoutFilter);
+  };
+
+  /**
+   * Check the first expanded Doc Table Field's first row's Exists Filter button filters the correct Field.
+   * @param {number} docTableRowNumber Integer starts from 0 for the first row
+   * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
+   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
+   */
+  const verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField = (
+    docTableRowNumber,
+    expandedDocumentRowNumber,
+    expectedQueryHitsWithoutFilter,
+    expectedQueryHitsAfterFilterApplied
+  ) => {
+    dataExplorer
+      .getExpandedDocTableRowFieldName(docTableRowNumber, expandedDocumentRowNumber)
+      .then(($expandedDocumentRowField) => {
+        const filterFieldText = $expandedDocumentRowField.text();
+        dataExplorer
+          .getExpandedDocTableRow(docTableRowNumber, expandedDocumentRowNumber)
+          .within(() => {
+            cy.getElementByTestId('addExistsFilterButton').click();
+          });
+        // Verify full pill text
+        // globalFilterLabelValue gives the inner element, but we may want all the text in the filter pill
+        cy.getElementByTestId('globalFilterLabelValue', {
+          timeout: 10000,
+        })
+          .parent()
+          .should('have.text', filterFieldText + ': ' + 'exists');
+        cy.getElementByTestId('discoverQueryHits').should(
+          'have.text',
+          expectedQueryHitsAfterFilterApplied
+        );
+      });
+    cy.getElementByTestId('globalFilterBar').find('[aria-label="Delete"]').click();
+    cy.getElementByTestId('discoverQueryHits').should('have.text', expectedQueryHitsWithoutFilter);
+  };
+
   selectDataset(datasetType, language);
   setDateRange(datasetType, language);
 
   cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
   dataExplorer.toggleDocTableRow(0);
-  dataExplorer.verifyDocTableFirstExpandedFieldFirstRowFilterForFilterOutExistsFilterButtons(
-    isEnabled
-  );
+  verifyFirstExpandedFieldFilterForFilterOutFilterExistsButtons();
   dataExplorer.verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
 
-  if (isEnabled) {
-    dataExplorer.verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField(
+  if (isFilterButtonsEnabled) {
+    verifyDocTableFirstExpandedFieldFirstRowFilterForOutButtonFiltersCorrectField(
+      'for',
       0,
       0,
       '10,000',
       '1'
     );
-    dataExplorer.verifyDocTableFirstExpandedFieldFirstRowFilterOutButtonFiltersCorrectField(
+    verifyDocTableFirstExpandedFieldFirstRowFilterForOutButtonFiltersCorrectField(
+      'out',
       0,
       0,
       '10,000',
       '9,999'
     );
-    dataExplorer.verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField(
+    verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField(
       0,
       0,
       '10,000',
       '10,000'
     );
   }
-}
-
+};
 describe('filter for value spec', () => {
   before(() => {
     // Load test data
@@ -147,7 +214,7 @@ describe('filter for value spec', () => {
 
   beforeEach(() => {
     cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${workspace}`);
-    cy.getNewSearchButton().click();
+    cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
   });
 
   after(() => {
@@ -166,9 +233,9 @@ describe('filter for value spec', () => {
     describe(`filter actions in ${name}`, () => {
       Object.entries(DATASET_CONFIGS).forEach(([type, config]) => {
         describe(`${type} dataset`, () => {
-          config.languages.forEach(({ name: language, isEnabled }) => {
+          config.languages.forEach(({ name: language, isFilterButtonsEnabled }) => {
             it(`${language}`, () => {
-              verifyFn(type, language, isEnabled);
+              verifyFn(type, language, isFilterButtonsEnabled);
             });
           });
         });
