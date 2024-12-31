@@ -11,6 +11,7 @@ import {
   ACL,
   DEFAULT_NAV_GROUPS,
   WorkspacePermissionMode,
+  OpenSearchClient,
 } from '../../../../core/server';
 import { getUseCaseFeatureConfig } from '../../common/utils';
 import {
@@ -22,6 +23,7 @@ import { SavedObjectsPermissionControlContract } from '../permission_control/cli
 import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
+import { IdentitySourceRegistry } from '../identity_service/IdentitySourceRegistry';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -120,6 +122,7 @@ export function registerRoutes({
   maxImportExportSize,
   permissionControlClient,
   isPermissionControlEnabled,
+  identitySourceRegistry,
 }: {
   client: IWorkspaceClientImpl;
   logger: Logger;
@@ -127,6 +130,7 @@ export function registerRoutes({
   maxImportExportSize: number;
   permissionControlClient?: SavedObjectsPermissionControlContract;
   isPermissionControlEnabled: boolean;
+  identitySourceRegistry: IdentitySourceRegistry;
 }) {
   router.post(
     {
@@ -343,4 +347,56 @@ export function registerRoutes({
 
   // duplicate saved objects among workspaces
   registerDuplicateRoute(router, logger, client, maxImportExportSize);
+
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_users`,
+      validate: {
+        body: schema.object({
+          source: schema.string({ defaultValue: 'localCluster' }),
+          perPage: schema.number({ min: 0, defaultValue: 20 }),
+          page: schema.number({ min: 0, defaultValue: 1 }),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { source } = req.body;
+      const handler = identitySourceRegistry.getSourceHandler<OpenSearchClient>(source);
+      let result: Array<{ name: string; id?: string }> = [];
+
+      if (handler.getUsers) {
+        result = await handler.getUsers({}, context.core.opensearch.client.asCurrentUser);
+      }
+
+      return res.ok({
+        body: result,
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_roles`,
+      validate: {
+        body: schema.object({
+          source: schema.string({ defaultValue: 'localCluster' }),
+          perPage: schema.number({ min: 0, defaultValue: 20 }),
+          page: schema.number({ min: 0, defaultValue: 1 }),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { source } = req.body;
+      const handler = identitySourceRegistry.getSourceHandler<OpenSearchClient>(source);
+      let result: Array<{ name: string; id?: string }> = [];
+
+      if (handler.getRoles) {
+        result = await handler.getRoles({}, context.core.opensearch.client.asCurrentUser);
+      }
+
+      return res.ok({
+        body: result,
+      });
+    })
+  );
 }
