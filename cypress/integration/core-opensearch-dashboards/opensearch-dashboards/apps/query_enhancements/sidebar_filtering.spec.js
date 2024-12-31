@@ -118,6 +118,7 @@ const checkFilteredFields = (indexPattern = true) => {
   const filterFields = () => {
     const expectedValues = [
       { search: '_index', assertion: 'equal' },
+      { search: ' ', assertion: null }, // no field should contain spaces
       { search: 'a', assertion: 'include' },
       { search: 'ag', assertion: 'include' },
       { search: 'age', assertion: 'include' },
@@ -145,7 +146,8 @@ const checkFilteredFields = (indexPattern = true) => {
 };
 
 const checkCollapseAndExpand = (indexPattern = true) => {
-  const collapseAndExpand = () => {
+  const collapseAndExpand = (sql = false) => {
+    if (!sql) cy.setTopNavDate(START_TIME, END_TIME);
     cy.getElementByTestId('sidebarPanel').should('be.visible');
     dataExplorer.clickSidebarCollapseBtn();
     cy.getElementByTestId('sidebarPanel').should('not.be.visible');
@@ -154,18 +156,18 @@ const checkCollapseAndExpand = (indexPattern = true) => {
   };
 
   if (indexPattern) {
+    dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
     dataExplorer.setQueryEditorLanguage('DQL');
-    cy.setTopNavDate(START_TIME, END_TIME);
     collapseAndExpand();
     dataExplorer.setQueryEditorLanguage('Lucene');
-    cy.setTopNavDate(START_TIME, END_TIME);
     collapseAndExpand();
+  } else {
+    dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
   }
   dataExplorer.setQueryEditorLanguage('PPL');
-  cy.setTopNavDate(START_TIME, END_TIME);
   collapseAndExpand();
   dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
-  collapseAndExpand();
+  collapseAndExpand(true);
   if (indexPattern) {
     dataExplorer.setQueryEditorLanguage('DQL');
     cy.getElementByTestId('sidebarPanel').should('be.visible');
@@ -245,11 +247,9 @@ describe('sidebar spec', () => {
       it('add field in index pattern', () => {
         addFields(testFields, expectedTimeValues, pplQuery, sqlQuery);
       });
-
       it('add field in index', () => {
         addFields(testFields, expectedTimeValues, pplQuery, sqlQuery, false);
       });
-
       const nestedTestFields = [
         'personal.name',
         'personal.age',
@@ -280,7 +280,7 @@ describe('sidebar spec', () => {
         // this test case does three things:
         // 1. checks the persistence of the sidebar state accross query languages
         // 2. checks that the default state is expanded (first iteration of collapseAndExpand())
-        // 3. collapses and expands the sidebar for every language
+        // 3. collapses and expands the sidebar for every query language
         checkCollapseAndExpand();
       });
 
@@ -290,10 +290,12 @@ describe('sidebar spec', () => {
       });
 
       it('index: collapse and expand', () => {
+        // see above
         checkCollapseAndExpand(false);
       });
 
       it('index: check collapsed state', () => {
+        // see above
         checkCollapse(false);
       });
     });
