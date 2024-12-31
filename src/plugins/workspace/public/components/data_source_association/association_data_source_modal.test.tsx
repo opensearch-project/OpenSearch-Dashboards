@@ -132,7 +132,7 @@ describe('AssociationDataSourceModal', () => {
   });
 
   it('should display opensearch connections', async () => {
-    setupAssociationDataSourceModal();
+    setupAssociationDataSourceModal({ mode: AssociationDataSourceModalMode.OpenSearchConnections });
     expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
     expect(
       screen.getByText(
