@@ -19,7 +19,14 @@ import {
 import { DataSourceSelectable } from '../data_source_selectable';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
-  const { componentType, componentConfig, uiSettings, hideLocalCluster, application } = props;
+  const {
+    componentType,
+    componentConfig,
+    uiSettings,
+    hideLocalCluster,
+    application,
+    onManageDataSource,
+  } = props;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
     const {
@@ -74,6 +81,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     } = config;
     return (
       <DataSourceSelectable
+        onManageDataSource={onManageDataSource}
         savedObjectsClient={savedObjects!}
         notifications={notifications!.toasts}
         onSelectedDataSources={onSelectedDataSources}

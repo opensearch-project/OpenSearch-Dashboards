@@ -27,13 +27,6 @@ export const DEFAULT_WORKSPACE = 'defaultWorkspace';
 export const ESSENTIAL_WORKSPACE_DISMISS_GET_STARTED = 'essentialWorkspace:dismissGetStarted';
 export const ANALYTICS_WORKSPACE_DISMISS_GET_STARTED = 'analyticsWorkspace:dismissGetStarted';
 
-export enum WorkspacePermissionMode {
-  Read = 'read',
-  Write = 'write',
-  LibraryRead = 'library_read',
-  LibraryWrite = 'library_write',
-}
-
 export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';
 
 /**

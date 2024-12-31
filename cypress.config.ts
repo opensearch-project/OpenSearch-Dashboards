@@ -13,6 +13,14 @@ module.exports = defineConfig({
   viewportWidth: 2000,
   viewportHeight: 1320,
   env: {
+    ENGINE: {
+      name: 'default',
+      url: 'http://localhost:9200',
+    },
+    SECONDARY_ENGINE: {
+      name: 'test_cluster',
+      url: 'http://localhost:9200',
+    },
     openSearchUrl: 'http://localhost:9200',
     SECURITY_ENABLED: false,
     AGGREGATION_VIEW: false,
@@ -24,10 +32,11 @@ module.exports = defineConfig({
     DATASOURCE_MANAGEMENT_ENABLED: false,
     ML_COMMONS_DASHBOARDS_ENABLED: true,
     WAIT_FOR_LOADER_BUFFER_MS: 0,
+    DISABLE_LOCAL_CLUSTER: false,
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
-    specPattern: 'cypress/integration/**/*_spec.{js,jsx,ts,tsx}',
+    specPattern: 'cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
     testIsolation: false,
     setupNodeEvents,
   },

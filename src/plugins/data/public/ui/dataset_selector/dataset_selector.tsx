@@ -221,7 +221,11 @@ export const DatasetSelector = ({
             iconSide="right"
             onClick={togglePopover}
           >
-            <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
+            <EuiIcon
+              type={datasetIcon}
+              className="datasetSelector__icon"
+              data-test-subj="datasetSelectorIcon"
+            />
             {datasetTitle}
           </RootComponent>
         </EuiToolTip>
@@ -234,6 +238,7 @@ export const DatasetSelector = ({
     >
       <EuiSelectable
         className="datasetSelector__selectable"
+        data-test-subj="datasetSelectorSelectable"
         options={options}
         singleSelection="always"
         searchable={true}
@@ -252,7 +257,11 @@ export const DatasetSelector = ({
           </>
         )}
       </EuiSelectable>
-      <EuiPopoverFooter paddingSize="none" className="datasetSelector__footer">
+      <EuiPopoverFooter
+        paddingSize="none"
+        className="datasetSelector__footer"
+        data-test-subj="datasetSelectorFooter"
+      >
         <EuiButton
           className="datasetSelector__advancedButton"
           data-test-subj="datasetSelectorAdvancedButton"
