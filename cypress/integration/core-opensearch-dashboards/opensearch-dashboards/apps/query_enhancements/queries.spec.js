@@ -45,9 +45,12 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
       isEnhancement: true,
     });
 
-    // Go to workspace home
-    cy.navigateToWorkSpaceHomePage(workspace);
-    cy.waitForLoader(true);
+    // Go to discover page
+    cy.navigateToWorkSpaceSpecificPage({
+      workspaceName: workspace,
+      page: 'discover',
+      isEnhancement: true,
+    });
   });
 
   after(() => {
