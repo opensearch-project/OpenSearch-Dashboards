@@ -7,11 +7,11 @@ import { Logger, OpenSearchClient } from '../../../../core/server';
 
 interface IdentitySourceHandler<T> {
   getUsers?: (
-    params: { filter?: string; page?: number; size?: number },
+    params: { page?: number; perPage?: number },
     client: T
   ) => Promise<Array<{ name: string; id?: string }> | []>;
   getRoles?: (
-    params: { filter?: string; page?: number; size?: number },
+    params: { page?: number; perPage?: number },
     client: T
   ) => Promise<Array<{ name: string; id?: string }> | []>;
 }
