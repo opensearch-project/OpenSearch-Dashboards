@@ -59,14 +59,6 @@ const generateSavedObjectsPermissionError = () =>
     )
   );
 
-const generateDataSourcePermissionError = () =>
-  SavedObjectsErrorHelpers.decorateForbiddenError(
-    new Error(
-      i18n.translate('workspace.saved_objects.data_source.invalidate', {
-        defaultMessage: 'Invalid data source permission, please associate it to current workspace',
-      })
-    )
-  );
 const generateOSDAdminPermissionError = () =>
   SavedObjectsErrorHelpers.decorateForbiddenError(
     new Error(
@@ -201,32 +193,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
     return hasPermission;
   }
-
-  // Data source is a workspace level object, validate if the request has access to the data source within the requested workspace.
-  private validateDataSourcePermissions = (
-    object: SavedObject,
-    request: OpenSearchDashboardsRequest
-  ) => {
-    const requestWorkspaceId = getWorkspaceState(request).requestWorkspaceId;
-    // Deny access if the object is a global data source (no workspaces assigned)
-    if (!object.workspaces || object.workspaces.length === 0) {
-      return false;
-    }
-    /**
-     * Allow access if no specific workspace is requested.
-     * This typically occurs when retrieving data sources or performing operations
-     * that don't require a specific workspace, such as pages within the
-     * Data Administration navigation group that include a data source picker.
-     */
-    if (!requestWorkspaceId) {
-      return true;
-    }
-    /*
-     * Allow access if the requested workspace matches one of the object's assigned workspaces
-     * This ensures that the user can only access data sources within their current workspace
-     */
-    return object.workspaces.includes(requestWorkspaceId);
-  };
 
   private getWorkspaceTypeEnabledClient(request: OpenSearchDashboardsRequest) {
     return this.getScopedClient?.(request, {
@@ -487,65 +453,28 @@ export class WorkspaceSavedObjectsClientWrapper {
       let flag = true;
       const processedObjects = await Promise.all(
         objectToBulkGet.saved_objects.map(async (object) => {
-          try {
-            if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
-              const hasPermission = this.validateDataSourcePermissions(
-                object,
-                wrapperOptions.request
-              );
-              if (!hasPermission) {
-                flag = false;
-                ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-                return {
-                  ...object,
-                  workspaces: [],
-                  attributes: {} as T,
-                  error: {
-                    ...generateDataSourcePermissionError().output.payload,
-                    statusCode: 403,
-                  },
-                };
-              }
-            }
-
-            if (
-              !(await this.validateWorkspacesAndSavedObjectsPermissions(
-                object,
-                wrapperOptions.request,
-                [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
-                [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
-                false
-              ))
-            ) {
-              flag = false;
-              ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-              return {
-                ...object,
-                workspaces: [],
-                attributes: {} as T,
-                error: {
-                  ...generateSavedObjectsPermissionError().output.payload,
-                  statusCode: 403,
-                },
-              };
-            }
-            return object;
-          } catch (error) {
+          if (
+            !(await this.validateWorkspacesAndSavedObjectsPermissions(
+              object,
+              wrapperOptions.request,
+              [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
+              [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
+              false
+            ))
+          ) {
             flag = false;
             ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-
-            const formattedError = {
-              message: error?.message || 'unexpected error',
-              error: error?.error,
-              statusCode: error.statusCode,
-            };
             return {
               ...object,
               workspaces: [],
               attributes: {} as T,
-              error: formattedError,
+              error: {
+                ...generateSavedObjectsPermissionError().output.payload,
+                statusCode: 403,
+              },
             };
           }
+          return object;
         })
       );
 
