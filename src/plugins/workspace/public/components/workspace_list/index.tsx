@@ -110,7 +110,7 @@ export const WorkspaceListInner = ({
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
     pageSizeOptions: [5, 10, 20],
   });
   const [deletedWorkspaces, setDeletedWorkspaces] = useState<WorkspaceAttribute[]>([]);
@@ -293,7 +293,7 @@ export const WorkspaceListInner = ({
       return null;
     }
     const amount = data.length;
-    const mostDisplayedTitles = data.slice(0, maxDisplayedAmount).join(',');
+    const mostDisplayedTitles = data.slice(0, maxDisplayedAmount).join(', ');
     return amount <= maxDisplayedAmount ? (
       mostDisplayedTitles
     ) : (
@@ -319,7 +319,7 @@ export const WorkspaceListInner = ({
 
   const renderToolsLeft = () => {
     if (selection.length === 0) {
-      return;
+      return undefined;
     }
 
     const onClick = () => {
@@ -354,7 +354,13 @@ export const WorkspaceListInner = ({
             size="s"
             data-test-subj="multi-deletion-button"
           >
-            Delete {selection.length} Workspace
+            {i18n.translate('workspace.list.page.delete.button.info', {
+              defaultMessage:
+                '{selectedCount, plural, one {Delete # workspace} other {Delete # workspaces}}',
+              values: {
+                selectedCount: selection.length,
+              },
+            })}
           </EuiButton>
           {deletedWorkspaces && deletedWorkspaces.length > 0 && (
             <DeleteWorkspaceModal
@@ -372,6 +378,7 @@ export const WorkspaceListInner = ({
   };
 
   const search: EuiSearchBarProps = {
+    compressed: true,
     box: {
       incremental: true,
     },
@@ -427,6 +434,7 @@ export const WorkspaceListInner = ({
 
     {
       field: 'description',
+
       name: i18n.translate('workspace.list.columns.description.title', {
         defaultMessage: 'Description',
       }),
@@ -438,34 +446,11 @@ export const WorkspaceListInner = ({
           data-test-subj="workspaceList-hover-description"
         >
           {/* Here I need to set width manually as the tooltip will ineffect the property : truncateText ',  */}
-          <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: 150 }}>
-            {description}
+          <EuiText className="eui-textTruncate" size="s" style={{ maxWidth: 150 }}>
+            {description ? description : '\u2014'}
           </EuiText>
         </EuiToolTip>
       ),
-    },
-    {
-      field: 'permissionMode',
-      name: i18n.translate('workspace.list.columns.permissions.title', {
-        defaultMessage: 'Permissions',
-      }),
-      width: '6%',
-      render: (permissionMode: WorkspaceAttributeWithPermission['permissionMode']) => {
-        return isDashboardAdmin ? (
-          <EuiToolTip
-            position="right"
-            content={i18n.translate('workspace.role.admin.description', {
-              defaultMessage: 'You are dashboard admin',
-            })}
-          >
-            <EuiText size="xs">
-              {i18n.translate('workspace.role.admin.name', { defaultMessage: 'Admin' })}
-            </EuiText>
-          </EuiToolTip>
-        ) : (
-          startCase(permissionMode)
-        );
-      },
     },
     {
       field: 'lastUpdatedTime',
@@ -607,7 +592,6 @@ export const WorkspaceListInner = ({
 
   const workspaceListTable = (
     <EuiInMemoryTable
-      compressed={true}
       items={newWorkspaceList}
       columns={columns}
       itemId="id"
@@ -649,7 +633,7 @@ export const WorkspaceListInner = ({
           verticalPosition="center"
           horizontalPosition="center"
           paddingSize="m"
-          panelPaddingSize="l"
+          panelPaddingSize="m"
           hasShadow={false}
         >
           {workspaceListTable}
