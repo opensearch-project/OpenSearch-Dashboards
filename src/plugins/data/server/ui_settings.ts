@@ -738,6 +738,37 @@ export function getUiSettings(
       requiresPageReload: true,
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES]: {
+      name: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesTitle', {
+        defaultMessage: 'Allow for Value Suggestion through the enhancements APIs',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesText', {
+        defaultMessage: `
+          Value Suggestion will be done through a SQL query to the enhancements APIs, sorted by the most frequent options
+          <strong>Experimental</strong>: Requires query enhancements enabled.`,
+      }),
+      category: ['search'],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT]: {
+      name: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesLimitTitle', {
+        defaultMessage: 'Enhancements Value Suggestion Limit',
+      }),
+      value: 200,
+      description: i18n.translate(
+        'data.advancedSettings.query.enhancements.suggestValuesLimitText',
+        {
+          defaultMessage: `
+          The limit on number of values fetched
+          <strong>Experimental</strong>: Requires query enhancements enabled.`,
+        }
+      ),
+      category: ['search'],
+      requiresPageReload: true,
+      schema: schema.number(),
+    },
     [UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY]: {
       name: i18n.translate('data.advancedSettings.query.dataFrameHydrationStrategyTitle', {
         defaultMessage: 'Data frame hydration strategy',
