@@ -2,8 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
-import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_NAME,
@@ -15,9 +13,7 @@ import {
 import * as dataExplorer from './helpers.js';
 import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
 
-const miscUtils = new MiscUtils(cy);
-
-const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern = true) => {
+const addSidebarFieldsAndCheckDocTableColumns = (testFields, expectedValues, pplQuery, sqlQuery, isIndexPattern = true) => {
   const getDocTableHeaderByIndex = (index) => {
     return cy.getElementByTestId('docTableHeaderField').eq(index);
   };
@@ -40,7 +36,7 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
       cy.getElementByTestId('fieldToggle-' + field).click();
     });
   };
-  if (indexPattern) {
+  if (isIndexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
     dataExplorer.setQueryEditorLanguage('DQL');
     cy.setTopNavDate(START_TIME, END_TIME);
@@ -55,7 +51,7 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
   getDocTableHeaderByIndex(1).should('not.have.text', '_source');
   // Check table headers persistence between DQL and PPL
   checkTableHeadersByArr(testFields);
-  if (indexPattern) {
+  if (isIndexPattern) {
     dataExplorer.setQueryEditorLanguage('Lucene');
     checkTableHeadersByArr(testFields);
   }
@@ -81,7 +77,7 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
   getDocTableHeaderByIndex(1).should('not.have.text', '_source');
   // Check the columns match the selected fields
   checkTableHeadersByArr(testFields);
-  if (indexPattern) {
+  if (isIndexPattern) {
     // Validate default hits
     cy.getElementByTestId('discoverQueryHits').should('have.text', '10,000');
   }
@@ -92,11 +88,11 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
     // Check table headers persistence after PPL query
     cy.wait(1000);
     checkTableHeadersByArr(testFields);
-    if (indexPattern) {
+    if (isIndexPattern) {
       // Check filter was correctly applied
       cy.getElementByTestId('discoverQueryHits').should('have.text', '1,152');
     }
-    // Validate the first 5 rows on the _id column
+    // Validate the first 5 rows on the third column
     checkDocTableColumnByArr(expectedValues, 2);
   });
   // Send SQL query
@@ -107,15 +103,15 @@ const addFields = (testFields, expectedValues, pplQuery, sqlQuery, indexPattern 
     // Check table headers persistence after SQL query
     cy.wait(1000);
     checkTableHeadersByArr(testFields);
-    // Validate the first 5 rows on the _id column
+    // Validate the first 5 rows on the third column
     checkDocTableColumnByArr(expectedValues, 2);
   });
   // Clean all test fields for the next test
   selectFields(testFields);
 };
 
-const checkFilteredFields = (indexPattern = true) => {
-  const filterFields = () => {
+const checkFilteredFieldsForAllLanguages = (isIndexPattern = true) => {
+  const checkSidebarFilterSearchResults = () => {
     const expectedValues = [
       { search: '_index', assertion: 'equal' },
       { search: ' ', assertion: null }, // no field should contain spaces
@@ -128,26 +124,25 @@ const checkFilteredFields = (indexPattern = true) => {
       dataExplorer.checkSidebarFilterBarResults(search, assertion);
     });
   };
-
-  if (indexPattern) {
+  if (isIndexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
     dataExplorer.setQueryEditorLanguage('DQL');
     cy.setTopNavDate(START_TIME, END_TIME);
-    filterFields();
+    checkSidebarFilterSearchResults();
     dataExplorer.setQueryEditorLanguage('Lucene');
-    filterFields();
+    checkSidebarFilterSearchResults();
   } else {
     dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
   }
   dataExplorer.setQueryEditorLanguage('PPL');
-  filterFields();
+  checkSidebarFilterSearchResults();
   dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
-  filterFields();
+  checkSidebarFilterSearchResults();
 };
 
-const checkCollapseAndExpand = (indexPattern = true) => {
-  const collapseAndExpand = (sql = false) => {
-    if (!sql) cy.setTopNavDate(START_TIME, END_TIME);
+const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
+  const collapseAndExpand = (isSql = false) => {
+    if (!isSql) cy.setTopNavDate(START_TIME, END_TIME);
     cy.getElementByTestId('sidebarPanel').should('be.visible');
     dataExplorer.clickSidebarCollapseBtn();
     cy.getElementByTestId('sidebarPanel').should('not.be.visible');
@@ -155,7 +150,7 @@ const checkCollapseAndExpand = (indexPattern = true) => {
     cy.getElementByTestId('sidebarPanel').should('be.visible');
   };
 
-  if (indexPattern) {
+  if (isIndexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
     dataExplorer.setQueryEditorLanguage('DQL');
     collapseAndExpand();
@@ -168,14 +163,14 @@ const checkCollapseAndExpand = (indexPattern = true) => {
   collapseAndExpand();
   dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
   collapseAndExpand(true);
-  if (indexPattern) {
+  if (isIndexPattern) {
     dataExplorer.setQueryEditorLanguage('DQL');
     cy.getElementByTestId('sidebarPanel').should('be.visible');
   }
 };
 
-const checkCollapse = (indexPattern = true) => {
-  if (indexPattern) {
+const checkSidebarPanelCollapsedState = (isIndexPattern = true) => {
+  if (isIndexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
     dataExplorer.setQueryEditorLanguage('DQL');
     dataExplorer.clickSidebarCollapseBtn();
@@ -186,13 +181,13 @@ const checkCollapse = (indexPattern = true) => {
     dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
   }
   dataExplorer.setQueryEditorLanguage('PPL');
-  if (!indexPattern) {
+  if (!isIndexPattern) {
     dataExplorer.clickSidebarCollapseBtn();
   }
   cy.getElementByTestId('sidebarPanel').should('not.be.visible');
   dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
   cy.getElementByTestId('sidebarPanel').should('not.be.visible');
-  if (indexPattern) {
+  if (isIndexPattern) {
     dataExplorer.setQueryEditorLanguage('DQL');
     cy.getElementByTestId('sidebarPanel').should('not.be.visible');
   }
@@ -216,7 +211,7 @@ describe('sidebar spec', () => {
 
     // Create workspace
     cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
-    miscUtils.visitPage('/app/home');
+    cy.visit('/app/home');
     cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${WORKSPACE_NAME}`);
     cy.wait(2000);
     cy.createWorkspaceIndexPatterns({
@@ -245,10 +240,10 @@ describe('sidebar spec', () => {
       const testFields = ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'];
       const expectedTimeValues = ['3.32', '2.8', '3.35', '1.68', '4.98'];
       it('add field in index pattern', () => {
-        addFields(testFields, expectedTimeValues, pplQuery, sqlQuery);
+        addSidebarFieldsAndCheckDocTableColumns(testFields, expectedTimeValues, pplQuery, sqlQuery);
       });
       it('add field in index', () => {
-        addFields(testFields, expectedTimeValues, pplQuery, sqlQuery, false);
+        addSidebarFieldsAndCheckDocTableColumns(testFields, expectedTimeValues, pplQuery, sqlQuery, false);
       });
       const nestedTestFields = [
         'personal.name',
@@ -258,20 +253,20 @@ describe('sidebar spec', () => {
       ];
       const expectedAgeValues = ['28', '55', '76', '56', '36'];
       it('add nested field in index pattern', () => {
-        addFields(nestedTestFields, expectedAgeValues, pplQuery, sqlQuery);
+        addSidebarFieldsAndCheckDocTableColumns(nestedTestFields, expectedAgeValues, pplQuery, sqlQuery);
       });
       it('add nested field in index', () => {
-        addFields(nestedTestFields, expectedAgeValues, pplQuery, sqlQuery, false);
+        addSidebarFieldsAndCheckDocTableColumns(nestedTestFields, expectedAgeValues, pplQuery, sqlQuery, false);
       });
     });
 
     describe('filter fields', () => {
       it('filter index pattern', () => {
-        checkFilteredFields();
+        checkFilteredFieldsForAllLanguages();
       });
 
       it('filter index', () => {
-        checkFilteredFields(false);
+        checkFilteredFieldsForAllLanguages(false);
       });
     });
 
@@ -281,22 +276,22 @@ describe('sidebar spec', () => {
         // 1. checks the persistence of the sidebar state accross query languages
         // 2. checks that the default state is expanded (first iteration of collapseAndExpand())
         // 3. collapses and expands the sidebar for every query language
-        checkCollapseAndExpand();
+        checkSidebarPanelCollapseAndExpandBehavior();
       });
 
       it('index pattern: check collapsed state', () => {
         // this test case checks that the sidebar remains collapsed accross query languages
-        checkCollapse();
+        checkSidebarPanelCollapsedState();
       });
 
       it('index: collapse and expand', () => {
         // see above
-        checkCollapseAndExpand(false);
+        checkSidebarPanelCollapseAndExpandBehavior(false);
       });
 
       it('index: check collapsed state', () => {
         // see above
-        checkCollapse(false);
+        checkSidebarPanelCollapsedState(false);
       });
     });
   });
