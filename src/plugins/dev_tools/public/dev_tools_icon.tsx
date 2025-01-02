@@ -68,6 +68,10 @@ export function DevToolsIcon({
     };
   }, [modalVisible]);
 
+  const closeModalVisible = () => {
+    setModalVisible(false);
+  };
+
   return (
     <>
       <EuiToolTip
@@ -130,6 +134,7 @@ export function DevToolsIcon({
                     setMenuMountPoint={setMountPoint}
                     RouterComponent={MemoryRouter}
                     defaultRoute={devToolTab}
+                    onManageDataSource={closeModalVisible}
                   />
                   <EuiSpacer size="s" />
                   <EuiSmallButton
