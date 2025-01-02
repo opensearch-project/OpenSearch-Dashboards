@@ -507,9 +507,10 @@ export class VegaBaseView {
       // On dispose, clean up, but don't use undefined to prevent repeated debug statements
       this._addDestroyHandler(() => {
         if (debugObj === window.VEGA_DEBUG) {
-          window.VEGA_DEBUG = null;
+          window.VEGA_DEBUG.view = null;
           window.VEGA_DEBUG.vega_spec = null;
           window.VEGA_DEBUG.vegalite_spec = null;
+          window.VEGA_DEBUG = null;
         }
       });
     }
