@@ -13,7 +13,13 @@ import {
 import * as dataExplorer from './helpers.js';
 import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
 
-const addSidebarFieldsAndCheckDocTableColumns = (testFields, expectedValues, pplQuery, sqlQuery, isIndexPattern = true) => {
+const addSidebarFieldsAndCheckDocTableColumns = (
+  testFields,
+  expectedValues,
+  pplQuery,
+  sqlQuery,
+  isIndexPattern = true
+) => {
   const getDocTableHeaderByIndex = (index) => {
     return cy.getElementByTestId('docTableHeaderField').eq(index);
   };
@@ -38,7 +44,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (testFields, expectedValues, ppl
   };
   if (isIndexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
-    dataExplorer.setQueryEditorLanguage('DQL');
+    cy.setQueryLanguage('DQL');
     cy.setTopNavDate(START_TIME, END_TIME);
   } else {
     dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'OpenSearch SQL', 'timestamp');
@@ -52,10 +58,10 @@ const addSidebarFieldsAndCheckDocTableColumns = (testFields, expectedValues, ppl
   // Check table headers persistence between DQL and PPL
   checkTableHeadersByArr(testFields);
   if (isIndexPattern) {
-    dataExplorer.setQueryEditorLanguage('Lucene');
+    cy.setQueryLanguage('Lucene');
     checkTableHeadersByArr(testFields);
   }
-  dataExplorer.setQueryEditorLanguage('PPL');
+  cy.setQueryLanguage('PPL');
   checkTableHeadersByArr(testFields);
   // Remove some fields
   const firstTestField = testFields[0];
@@ -96,7 +102,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (testFields, expectedValues, ppl
     checkDocTableColumnByArr(expectedValues, 2);
   });
   // Send SQL query
-  dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
+  cy.setQueryLanguage('OpenSearch SQL');
   cy.intercept('**/api/enhancements/search/sql').as('sqlQuery');
   dataExplorer.sendQueryOnMultilineEditor(sqlQuery);
   cy.wait('@sqlQuery').then(() => {
@@ -126,17 +132,17 @@ const checkFilteredFieldsForAllLanguages = (isIndexPattern = true) => {
   };
   if (isIndexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
-    dataExplorer.setQueryEditorLanguage('DQL');
+    cy.setQueryLanguage('DQL');
     cy.setTopNavDate(START_TIME, END_TIME);
     checkSidebarFilterSearchResults();
-    dataExplorer.setQueryEditorLanguage('Lucene');
+    cy.setQueryLanguage('Lucene');
     checkSidebarFilterSearchResults();
   } else {
     dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
   }
-  dataExplorer.setQueryEditorLanguage('PPL');
+  cy.setQueryLanguage('PPL');
   checkSidebarFilterSearchResults();
-  dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
+  cy.setQueryLanguage('OpenSearch SQL');
   checkSidebarFilterSearchResults();
 };
 
@@ -152,19 +158,19 @@ const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
 
   if (isIndexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
-    dataExplorer.setQueryEditorLanguage('DQL');
+    cy.setQueryLanguage('DQL');
     collapseAndExpand();
-    dataExplorer.setQueryEditorLanguage('Lucene');
+    cy.setQueryLanguage('Lucene');
     collapseAndExpand();
   } else {
     dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
   }
-  dataExplorer.setQueryEditorLanguage('PPL');
+  cy.setQueryLanguage('PPL');
   collapseAndExpand();
-  dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
+  cy.setQueryLanguage('OpenSearch SQL');
   collapseAndExpand(true);
   if (isIndexPattern) {
-    dataExplorer.setQueryEditorLanguage('DQL');
+    cy.setQueryLanguage('DQL');
     cy.getElementByTestId('sidebarPanel').should('be.visible');
   }
 };
@@ -172,23 +178,23 @@ const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
 const checkSidebarPanelCollapsedState = (isIndexPattern = true) => {
   if (isIndexPattern) {
     dataExplorer.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
-    dataExplorer.setQueryEditorLanguage('DQL');
+    cy.setQueryLanguage('DQL');
     dataExplorer.clickSidebarCollapseBtn();
     cy.getElementByTestId('sidebarPanel').should('not.be.visible');
-    dataExplorer.setQueryEditorLanguage('Lucene');
+    cy.setQueryLanguage('Lucene');
     cy.getElementByTestId('sidebarPanel').should('not.be.visible');
   } else {
     dataExplorer.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
   }
-  dataExplorer.setQueryEditorLanguage('PPL');
+  cy.setQueryLanguage('PPL');
   if (!isIndexPattern) {
     dataExplorer.clickSidebarCollapseBtn();
   }
   cy.getElementByTestId('sidebarPanel').should('not.be.visible');
-  dataExplorer.setQueryEditorLanguage('OpenSearch SQL');
+  cy.setQueryLanguage('OpenSearch SQL');
   cy.getElementByTestId('sidebarPanel').should('not.be.visible');
   if (isIndexPattern) {
-    dataExplorer.setQueryEditorLanguage('DQL');
+    cy.setQueryLanguage('DQL');
     cy.getElementByTestId('sidebarPanel').should('not.be.visible');
   }
   dataExplorer.clickSidebarCollapseBtn(false);
@@ -223,7 +229,12 @@ describe('sidebar spec', () => {
       dataSource: DATASOURCE_NAME,
       isEnhancement: true,
     });
-    cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${WORKSPACE_NAME}`);
+    cy.navigateToWorkSpaceSpecificPage({
+      url: BASE_PATH,
+      workspaceName: WORKSPACE_NAME,
+      page: 'discover',
+      isEnhancement: true,
+    });
   });
 
   after(() => {
@@ -240,7 +251,12 @@ describe('sidebar spec', () => {
       const testFields = ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'];
       const expectedTimeValues = ['3.32', '2.8', '3.35', '1.68', '4.98'];
       it('add field in index pattern', () => {
-        addSidebarFieldsAndCheckDocTableColumns(testFields, expectedTimeValues, pplQuery, sqlQuery);
+        addSidebarFieldsAndCheckDocTableColumns(
+          testFields,
+          expectedTimeValues,
+          pplQuery,
+          sqlQuery
+        );
       });
       it('add field in index', () => {
         addSidebarFieldsAndCheckDocTableColumns(testFields, expectedTimeValues, pplQuery, sqlQuery, false);

@@ -339,12 +339,12 @@ export const verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCo
  */
 export const sendQueryOnMultilineEditor = (query) => {
   // remove syntax helper
-  cy.getElementByTestId('headerGlobalNav').click()
+  cy.getElementByTestId('headerGlobalNav').click();
   // Clear default text on the editor by an alternative method, since
   // cy.clear() won't work for some reason
   cy.get('.view-line')
     .invoke('text')
-    .then(function ($content) {
+    .then(($content) => {
       const contentLen = $content.length + 1;
       cy.get('.view-line').type('a'); // make sure we're at the end of the string
       cy.get('.view-line').type('{backspace}'.repeat(contentLen));
@@ -353,16 +353,6 @@ export const sendQueryOnMultilineEditor = (query) => {
   cy.get('.view-line').type(query);
   // Send query
   cy.getElementByTestId('querySubmitButton').click();
-};
-
-/**
- * Set the query editor language
- * @param language Accepted values: 'DQL', 'Lucene', 'OpenSearch SQL', 'PPL'
- */
-export const setQueryEditorLanguage = (language) => {
-  cy.getElementByTestId('headerGlobalNav').click(); // remove helper message
-  cy.getElementByTestId('queryEditorLanguageSelector').click();
-  cy.getElementByTestId('queryEditorLanguageOptions').find('button').contains(language).click();
 };
 
 /**
@@ -387,13 +377,11 @@ export const checkSidebarFilterBarResults = (search, assertion) => {
   cy.getElementByTestId('fieldFilterSearchInput').type(search, { force: true });
   if (assertion) {
     // Get all sidebar fields and iterate over all of them
-    cy.get('[data-test-subj^="field-"]:not([data-test-subj$="showDetails"])').each(function (
-      $field
-    ) {
+    cy.get('[data-test-subj^="field-"]:not([data-test-subj$="showDetails"])').each(($field) => {
       cy.wrap($field)
         .should('be.visible')
         .invoke('text')
-        .then(function ($fieldTxt) {
+        .then(($fieldTxt) => {
           cy.wrap($fieldTxt).should(assertion, search);
         });
     });
