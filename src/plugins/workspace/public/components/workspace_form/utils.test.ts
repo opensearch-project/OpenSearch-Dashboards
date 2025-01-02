@@ -11,6 +11,7 @@ import {
   getNumberOfErrors,
   isWorkspacePermissionSetting,
   getPermissionModeName,
+  EMPTY_PERMISSIONS,
 } from './utils';
 import { WorkspacePermissionItemType, optionIdToWorkspacePermissionModesMap } from './constants';
 import { DataSourceConnectionType } from '../../../common/types';
@@ -18,9 +19,9 @@ import { WorkspaceFormErrorCode } from './types';
 import { PermissionModeId, WorkspacePermissionMode } from '../../../../../core/public';
 
 describe('convertPermissionSettingsToPermissions', () => {
-  it('should return undefined if permission items not provided', () => {
-    expect(convertPermissionSettingsToPermissions(undefined)).toBeUndefined();
-    expect(convertPermissionSettingsToPermissions([])).toBeUndefined();
+  it('should return empty permission object if permission items are not provided', () => {
+    expect(convertPermissionSettingsToPermissions(undefined)).toBe(EMPTY_PERMISSIONS);
+    expect(convertPermissionSettingsToPermissions([])).toBe(EMPTY_PERMISSIONS);
   });
 
   it('should not add duplicate users and groups', () => {

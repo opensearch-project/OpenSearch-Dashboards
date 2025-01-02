@@ -37,6 +37,13 @@ export const isValidFormTextInput = (input?: string) => {
   return typeof input === 'string' && regex.test(input);
 };
 
+export const EMPTY_PERMISSIONS: SavedObjectPermissions = {
+  library_read: {},
+  library_write: {},
+  read: {},
+  write: {},
+} as const;
+
 export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   let numberOfErrors = 0;
   if (formErrors.name) {
@@ -104,7 +111,8 @@ export const convertPermissionSettingsToPermissions = (
   permissionItems: WorkspacePermissionSetting[] | undefined
 ) => {
   if (!permissionItems || permissionItems.length === 0) {
-    return undefined;
+    // Workspace object should always have permissions, set it as an empty object here instead of undefined.
+    return EMPTY_PERMISSIONS;
   }
   return permissionItems.reduce<SavedObjectPermissions>((previous, current) => {
     current.modes.forEach((mode) => {
