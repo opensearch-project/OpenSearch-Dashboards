@@ -418,6 +418,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "values": Array [],
     }
   }
+  workspaceEnabled={true}
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2246,6 +2247,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "values": Array [],
     }
   }
+  workspaceEnabled={true}
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2551,6 +2553,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "values": Array [],
     }
   }
+  workspaceEnabled={true}
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -2856,6 +2859,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "values": Array [],
     }
   }
+  workspaceEnabled={true}
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -3500,6 +3504,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
       "values": Array [],
     }
   }
+  workspaceEnabled={true}
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -4618,6 +4623,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
       "values": Array [],
     }
   }
+  workspaceEnabled={true}
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -5729,6 +5735,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
       "values": Array [],
     }
   }
+  workspaceEnabled={true}
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -6836,6 +6843,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
       "values": Array [],
     }
   }
+  workspaceEnabled={true}
 >
   <EuiCollapsibleNav
     aria-label="Primary"
