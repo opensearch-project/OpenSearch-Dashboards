@@ -24,6 +24,8 @@ export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
  * UI setting for user default workspace
  */
 export const DEFAULT_WORKSPACE = 'defaultWorkspace';
+export const ESSENTIAL_WORKSPACE_DISMISS_GET_STARTED = 'essentialWorkspace:dismissGetStarted';
+export const ANALYTICS_WORKSPACE_DISMISS_GET_STARTED = 'analyticsWorkspace:dismissGetStarted';
 
 export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';
 
