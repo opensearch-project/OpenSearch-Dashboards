@@ -17,3 +17,8 @@
 .workspace-detail-direct-query-expanded-row > td:nth-child(2) {
   padding-left: 25px;
 }
+
+.direct-query-connection-popover-item span {
+  max-height: 30px;
+  gap: $euiSizeXS;
+}
