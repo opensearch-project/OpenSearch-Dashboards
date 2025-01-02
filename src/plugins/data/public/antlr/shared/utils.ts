@@ -8,6 +8,7 @@ import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
 import { monaco } from '@osd/monaco';
+import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryStringContract } from '../../query';
 import { findCursorTokenIndex } from './cursor';
 import { GeneralErrorListener } from './general_error_listerner';
@@ -17,6 +18,8 @@ import { ParsingSubject } from './types';
 import { quotesRegex } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion } from '../../autocomplete';
+import { IDataPluginServices } from '../../types';
+import { Dataset, UI_SETTINGS } from '../../../common';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -46,9 +49,9 @@ export const getRawSuggestionData$ = (
     })
   );
 
-const fetchFromAPI = async (api: any, body: string) => {
+const fetchFromAPI = async (http: HttpSetup, body: string) => {
   try {
-    return await api.http.fetch({
+    return await http.fetch({
       method: 'POST',
       path: '/api/enhancements/search/sql',
       body,
@@ -63,7 +66,7 @@ const fetchFromAPI = async (api: any, body: string) => {
 export const fetchData = (
   tables: string[],
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
-  api: any,
+  http: HttpSetup,
   queryString: QueryStringContract
 ) => {
   return new Promise((resolve, reject) => {
@@ -72,14 +75,14 @@ export const fetchData = (
       ({ dataSourceId, title }) => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table, dataSourceId, title));
-          return fetchFromAPI(api, body);
+          return fetchFromAPI(http, body);
         });
         return Promise.all(requests);
       },
       () => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table));
-          return fetchFromAPI(api, body);
+          return fetchFromAPI(http, body);
         });
         return Promise.all(requests);
       }
@@ -93,30 +96,49 @@ export const fetchData = (
   });
 };
 
-// Specific fetch function for table schemas
-// TODO: remove this after using data set table schema fetcher
-export const fetchTableSchemas = (tables: string[], api: any, queryString: QueryStringContract) => {
-  return fetchData(
-    tables,
-    (table, dataSourceId, title) => ({
-      query: { query: `DESCRIBE TABLES LIKE ${table}`, format: 'jdbc' },
-      df: {
-        meta: {
-          queryConfig: {
-            dataSourceId: dataSourceId || undefined,
-            title: title || undefined,
-          },
+export const fetchColumnValues = async (
+  tables: string[],
+  column: string,
+  services: IDataPluginServices,
+  fieldInOsd: IndexPatternField | undefined,
+  dataset?: Dataset
+): Promise<string[]> => {
+  // default to true/false values for type boolean
+  if (fieldInOsd?.type === 'boolean') {
+    return ['true', 'false'];
+  }
+
+  const allowedType = ['string'];
+  // don't return values if ui settings prevent it or the field type isn't allowed
+  // todo: check if a field's aggretability means anything
+  if (
+    !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
+    !fieldInOsd ||
+    !allowedType.includes(fieldInOsd.type)
+  ) {
+    return [];
+  }
+  const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
+
+  return (
+    await fetchFromAPI(
+      services.http,
+      JSON.stringify({
+        query: {
+          query: `SELECT ${column} FROM ${tables[0]} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
+          language: 'SQL',
+          dataset,
+          format: 'jdbc',
         },
-      },
-    }),
-    api,
-    queryString
-  );
+      })
+    )
+  ).body.fields[0].values;
 };
 
 export const fetchFieldSuggestions = (
   indexPattern: IndexPattern,
-  modifyInsertText?: (input: string) => string
+  modifyInsertText?: (input: string) => string,
+  sortTextImportance?: string
 ) => {
   const filteredFields = indexPattern.fields.filter(
     (idxField: IndexPatternField) => !idxField?.subType
@@ -128,6 +150,7 @@ export const fetchFieldSuggestions = (
       type: monaco.languages.CompletionItemKind.Field,
       detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
       ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+      ...(sortTextImportance && { sortText: sortTextImportance }),
     };
   });
 
@@ -149,7 +172,8 @@ export const parseQuery = <
   query,
   cursor,
   context,
-}: ParsingSubject<A, L, P>) => {
+  previousResult,
+}: ParsingSubject<A, L, P>): AutocompleteResultBase => {
   const parser = createParser(Lexer, Parser, query);
   const { tokenStream } = parser;
   const errorListener = new GeneralErrorListener(tokenDictionary.SPACE);
@@ -159,6 +183,7 @@ export const parseQuery = <
   getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);
+  // core.showDebugOutput = true;
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
@@ -189,5 +214,122 @@ export const parseQuery = <
     suggestKeywords,
   };
 
-  return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
+  // console.clear();
+  // console.log('cursorTokenIndex', cursorTokenIndex);
+  // console.log('Formatted Token Stream:');
+  // let index = 0;
+  // try {
+  //   while (true) {
+  //     const token = tokenStream.get(index);
+  //     if (!token) break;
+
+  //     const isCurrentToken = index === cursorTokenIndex;
+  //     const tokenInfo = `Token ${index}: ${token.text} (Type: ${token.type})`;
+
+  //     if (isCurrentToken) {
+  //       console.log(`%c${tokenInfo}`, 'background-color: red; font-weight: bold;');
+  //     } else {
+  //       console.log(tokenInfo);
+  //     }
+
+  //     index++;
+  //   }
+  // } catch (error) {
+  //   console.error('Error while iterating through token stream:', error);
+  // }
+
+  const currentResult = enrichAutocompleteResult(
+    result,
+    rules,
+    tokenStream,
+    cursorTokenIndex,
+    cursor,
+    query
+  );
+
+  // combine previous and current result
+  const combinedResult: A = {};
+
+  // look at every field in both results then combine inside of combinedResult
+
+  if (previousResult) {
+    Object.keys({ ...currentResult, ...previousResult }).forEach((key) => {
+      const currentField = currentResult[key as keyof A];
+      const previousField = previousResult[key as keyof A];
+
+      if (currentField && previousField) {
+        combinedResult[key as keyof A] = {
+          ...currentField,
+          suggestKeywords: [
+            ...(previousField.suggestKeywords ?? []),
+            ...(currentField.suggestKeywords ?? []),
+          ],
+        };
+      } else if (currentField) {
+        combinedResult[key as keyof A] = currentField;
+      } else if (previousField) {
+        combinedResult[key as keyof A] = previousField;
+      }
+    });
+  }
+
+  // // combine previous and current result
+  // if (previousResultKeywords) {
+  //   // only need to modify initial results if there are context keywords
+  //   if (!currentResult?.suggestKeywords) {
+  //     // set initial keywords to be context keywords
+  //     currentResult.suggestKeywords = previousResultKeywords;
+  //   } else {
+  //     // merge initial and context keywords
+  //     const combined = [...currentResult.suggestKeywords, ...previousResultKeywords];
+
+  //     // ES6 magic to filter out duplicate objects based on id field
+  //     currentResult.suggestKeywords = combined.filter(
+  //       (item, index, self) => index === self.findIndex((other) => other.id === item.id)
+  //     );
+  //   }
+  // }
+
+  // return when we don't have any more rerun and combine rules
+  if (!currentResult?.rerunWithoutRules || currentResult.rerunWithoutRules.length === 0) {
+    return currentResult;
+  }
+
+  // pop the top/last rule in the rerun and combine list
+  const nextRuleToAvoid = currentResult.rerunWithoutRules.pop();
+  if (!nextRuleToAvoid) {
+    // rerunWithoutRules being undefined or empty should lead to early return up above
+    throw new Error('nextRuleToAvoid is undefined');
+  }
+
+  const nextRulesToVisit = new Set(
+    Array.from(rulesToVisit).filter((rule) => rule !== nextRuleToAvoid)
+  );
+
+  /**
+   * TODO:
+   *
+   * need to handle the issue where the previous results findings from things like
+   * if we should suggest operators, persist. rn only the keywords are persisting
+   * across runs
+   *
+   * might have to fix the issue in a way where we grab all characteristics across runs,
+   * this thing might break for ppl if we need characteristics from later runs, where we
+   * unlease descendants
+   */
+
+  // call parseQuery again without specified rule and with this run's result
+  return parseQuery({
+    Lexer,
+    Parser,
+    tokenDictionary,
+    ignoredTokens,
+    rulesToVisit: nextRulesToVisit,
+    getParseTree,
+    enrichAutocompleteResult,
+    query,
+    cursor,
+    context,
+    previousResultKeywords: currentResult,
+  });
 };

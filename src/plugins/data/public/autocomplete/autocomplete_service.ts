@@ -48,7 +48,8 @@ export class AutocompleteService {
   }
 
   private readonly querySuggestionProviders: Map<string, QuerySuggestionGetFn> = new Map();
-  private getValueSuggestions?: ValueSuggestionsGetFn;
+  private readonly valueSuggestionProviders: Map<string, ValueSuggestionsGetFn> = new Map();
+  private defaultGetValueSuggestions?: ValueSuggestionsGetFn;
 
   private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
     if (language && provider && this.autocompleteConfig.querySuggestions.enabled) {
@@ -65,16 +66,37 @@ export class AutocompleteService {
     }
   };
 
+  private addValueSuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
+    if (language && provider && this.autocompleteConfig.querySuggestions.enabled) {
+      this.querySuggestionProviders.set(language, provider);
+    }
+  };
+
+  private getValueSuggestions: ValueSuggestionsGetFn = (args) => {
+    if ('language' in args) {
+      const { language } = args;
+      const provider = this.valueSuggestionProviders.get(language);
+
+      if (provider) {
+        return provider(args);
+      }
+    }
+    return this.defaultGetValueSuggestions
+      ? this.defaultGetValueSuggestions(args)
+      : Promise.resolve([]);
+  };
+
   private hasQuerySuggestions = (language: string) => this.querySuggestionProviders.has(language);
 
   /** @public **/
   public setup(core: CoreSetup) {
-    this.getValueSuggestions = this.autocompleteConfig.valueSuggestions.enabled
-      ? setupValueSuggestionProvider(core)
+    this.defaultGetValueSuggestions = this.autocompleteConfig.valueSuggestions.enabled
+      ? (setupValueSuggestionProvider(core) as ValueSuggestionsGetFn)
       : getEmptyValueSuggestions;
 
     return {
       addQuerySuggestionProvider: this.addQuerySuggestionProvider,
+      addValueSuggestionProvider: this.addValueSuggestionProvider,
 
       /** @obsolete **/
       /** please use "getProvider" only from the start contract **/
