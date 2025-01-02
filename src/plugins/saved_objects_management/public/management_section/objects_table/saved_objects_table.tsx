@@ -74,6 +74,7 @@ import {
   SavedObjectsImportError,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -166,6 +167,7 @@ export interface SavedObjectsTableState {
   failedCopies: SavedObjectsImportError[];
   successfulCopies: SavedObjectsImportSuccess[];
   targetWorkspaceName: string;
+  targetWorkspace: string;
 }
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
@@ -208,6 +210,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       failedCopies: [],
       successfulCopies: [],
       targetWorkspaceName: '',
+      targetWorkspace: '',
     };
   }
 
@@ -760,14 +763,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { notifications, workspaces, useUpdatedUX } = this.props;
     const workspaceClient = workspaces.client$.getValue();
 
-    const showErrorNotification = (text?: string) => {
+    const showErrorNotification = () => {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
           defaultMessage:
             'Unable to copy {useUpdatedUX, select, true {{errorCount, plural, one {# asset} other {# assets}}} other {{errorCount, plural, one {# saved object} other {# saved objects}}}}.',
           values: { errorCount: savedObjects.length, useUpdatedUX },
         }),
-        ...(text && { text }),
       });
     };
     if (!workspaceClient) {
@@ -781,16 +783,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         targetWorkspace,
         includeReferencesDeep
       );
-      if (result?.error) {
-        showErrorNotification(result.error);
-      } else {
-        this.setState({
-          isShowingDuplicateResultFlyout: true,
-          failedCopies: result?.errors || [],
-          successfulCopies: result?.successCount > 0 ? result.successResults : [],
-          targetWorkspaceName,
-        });
-      }
+      this.setState({
+        isShowingDuplicateResultFlyout: true,
+        failedCopies: result?.errors || [],
+        successfulCopies: result?.successResults || [],
+        targetWorkspace,
+        targetWorkspaceName,
+      });
     } catch (e) {
       showErrorNotification();
     } finally {
@@ -829,11 +828,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       targetWorkspaceName,
       failedCopies,
       successfulCopies,
+      targetWorkspace,
     } = this.state;
+    const { applications, http } = this.props;
 
     if (!isShowingDuplicateResultFlyout) {
       return null;
     }
+
+    const dataSourceUrlForTargetWorkspace = formatUrlWithWorkspaceId(
+      applications.getUrlForApp('dataSources', {
+        absolute: false,
+      }),
+      targetWorkspace,
+      http.basePath
+    );
 
     return (
       <DuplicateResultFlyout
@@ -841,6 +850,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         failedCopies={failedCopies}
         successfulCopies={successfulCopies}
         onClose={this.hideDuplicateResultFlyout}
+        onCopy={this.onDuplicate}
+        targetWorkspace={targetWorkspace}
+        useUpdatedUX={this.props.useUpdatedUX}
+        dataSourceUrlForTargetWorkspace={dataSourceUrlForTargetWorkspace}
       />
     );
   }
