@@ -16,7 +16,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import './workspace_privacy_flyout.scss';
 
 const WORKSPACE_PRIVACY_FLYOUT_TITLE_ID = 'workspacePrivacyFlyoutTitle';
 
@@ -87,7 +86,7 @@ export const WorkspacePrivacyFlyout = ({ onClose }: WorkspacePrivacyFlyoutProps)
               paddingSize="l"
               initialIsOpen={true}
             >
-              <EuiText className="workspace-privacy-flyout-description" size="s">
+              <EuiText style={{ whiteSpace: 'pre-line' }} size="s">
                 {description}
               </EuiText>
               <EuiSpacer />
