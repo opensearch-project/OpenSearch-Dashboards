@@ -450,26 +450,41 @@ export class WorkspaceSavedObjectsClientWrapper {
         wrapperOptions.request,
         getWorkspacesFromSavedObjects(objectToBulkGet.saved_objects)
       );
-
-      for (const object of objectToBulkGet.saved_objects) {
-        if (
-          !(await this.validateWorkspacesAndSavedObjectsPermissions(
-            object,
-            wrapperOptions.request,
-            [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
-            [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
-            false
-          ))
-        ) {
-          ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-          throw generateSavedObjectsPermissionError();
-        }
-      }
-      ACLAuditor?.increment(
-        ACLAuditorStateKey.VALIDATE_SUCCESS,
-        objectToBulkGet.saved_objects.length
+      let flag = true;
+      const processedObjects = await Promise.all(
+        objectToBulkGet.saved_objects.map(async (object) => {
+          if (
+            !(await this.validateWorkspacesAndSavedObjectsPermissions(
+              object,
+              wrapperOptions.request,
+              [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
+              [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
+              false
+            ))
+          ) {
+            flag = false;
+            ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
+            return {
+              ...object,
+              workspaces: [],
+              attributes: {} as T,
+              error: {
+                ...generateSavedObjectsPermissionError().output.payload,
+                statusCode: 403,
+              },
+            };
+          }
+          return object;
+        })
       );
-      return objectToBulkGet;
+
+      if (flag) {
+        ACLAuditor?.increment(
+          ACLAuditorStateKey.VALIDATE_SUCCESS,
+          objectToBulkGet.saved_objects.length
+        );
+      }
+      return { saved_objects: processedObjects };
     };
 
     const findWithWorkspacePermissionControl = async <T = unknown>(
