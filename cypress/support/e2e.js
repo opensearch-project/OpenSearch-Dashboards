@@ -5,7 +5,6 @@
 
 import '../utils/commands';
 import '../utils/apps/commands';
-import '../utils/dashboards/data_explorer/commands';
 import '../utils/dashboards/workspace-plugin/commands';
 import '../utils/dashboards/commands';
 
