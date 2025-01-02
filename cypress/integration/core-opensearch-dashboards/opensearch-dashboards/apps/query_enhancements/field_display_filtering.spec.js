@@ -12,7 +12,7 @@ import {
   END_TIME,
   DATASET_CONFIGS,
 } from '../../../../../utils/apps/constants';
-import * as dataExplorer from '../../../../../utils/apps/data_explorer/commands';
+import * as dataExplorer from '../../../../../integration/core-opensearch-dashboards/opensearch-dashboards/apps/query_enhancements/utils/field_display_filtering.js';
 import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
 import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 
@@ -213,7 +213,12 @@ describe('filter for value spec', () => {
   });
 
   beforeEach(() => {
-    cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${workspace}`);
+    cy.navigateToWorkSpaceSpecificPage({
+      url: BASE_PATH,
+      workspaceName: `${workspace}`,
+      page: 'discover',
+      isEnhancement: true,
+    });
     cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
   });
 

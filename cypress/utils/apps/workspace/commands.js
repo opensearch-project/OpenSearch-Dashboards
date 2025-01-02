@@ -10,6 +10,8 @@ Cypress.Commands.add(
     // Selecting the correct workspace
     cy.visit(`${url}/app/workspace_list#`);
     cy.openWorkspaceDashboard(workspaceName);
+    // wait until page loads
+    cy.getElementByTestId('headerAppActionMenu').should('be.visible');
   }
 );
 
@@ -20,7 +22,6 @@ Cypress.Commands.add(
     const { url, workspaceName, page, isEnhancement = false } = opts;
     // Navigating to the WorkSpace Home Page
     cy.navigateToWorkSpaceHomePage(url, workspaceName);
-    cy.waitForLoader(isEnhancement);
 
     // Check for toggleNavButton and handle accordingly
     // If collapsibleNavShrinkButton is shown which means toggleNavButton is already clicked, try clicking the app link directly

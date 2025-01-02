@@ -19,33 +19,5 @@ declare namespace Cypress {
     clearSaveQuery(): Chainable<any>;
     deleteSaveQuery(name: string): Chainable<any>;
     switchDiscoverTable(name: string): Chainable<any>;
-    getDocTableRow(rowNumber: number): Chainable<any>;
-    getDocTableField(columnNumber: number, rowNumber: number): Chainable<any>;
-    findExpandedDocTableRows(expandedDocument: Chainable<any>): Chainable<any>;
-    getExpandedDocTableRow(
-      docTableRowNumber: number,
-      expandedDocumentRowNumber: number
-    ): Chainable<any>;
-    getExpandedDocTableRowValue(
-      docTableRowNumber: number,
-      expandedDocumentRowNumber: number
-    ): string;
-    getExpandedDocTableRowFieldName(
-      docTableRowNumber: number,
-      expandedDocumentRowNumber: number
-    ): string;
-    selectIndexDatasetLanguage(datasetLanguage: string);
-    selectIndexDataset(indexClusterName: string, indexName: string, datasetLanguage: string);
-    selectIndexPatternDatasetLanguage(datasetLanguage: string);
-    selectIndexPatternDataset(indexPatternName: string, datasetLanguage: string);
-    toggleDocTableRow(rowNumber: number);
-    verifyDocTableFilterAction(
-      rowNumber: number,
-      filterElement: string,
-      expectedQueryHitsWithoutFilter: string,
-      expectedQueryHitsAfterFilterApplied: string,
-      shouldMatch: boolean
-    );
-    verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
   }
 }
