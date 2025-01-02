@@ -183,3 +183,31 @@ const parseJSONSpec = (spec: string) => {
 
   return undefined;
 };
+
+export function findReferenceDataSourceForObject(
+  savedObject: SavedObject,
+  savedObjects: Map<string, SavedObject>,
+  visited = new Set<string>()
+): Set<string> {
+  const dataSourceReferences = new Set<string>();
+
+  const references = savedObject.references ?? [];
+  visited.add(savedObject.id);
+
+  // Traverse referenced objects recursively
+  for (const reference of references) {
+    // Add 'data-source' references directly associated with the object
+    if (reference.type === 'data-source') {
+      dataSourceReferences.add(reference.id);
+    } else if (!visited.has(reference.id)) {
+      const referenceObject = savedObjects.get(reference.id);
+      if (referenceObject) {
+        findReferenceDataSourceForObject(referenceObject, savedObjects, visited).forEach((ref) =>
+          dataSourceReferences.add(ref)
+        );
+      }
+    }
+  }
+
+  return dataSourceReferences;
+}
