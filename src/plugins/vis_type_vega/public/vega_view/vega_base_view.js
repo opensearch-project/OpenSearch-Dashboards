@@ -508,7 +508,6 @@ export class VegaBaseView {
       this._addDestroyHandler(() => {
         if (debugObj === window.VEGA_DEBUG) {
           window.VEGA_DEBUG = null;
-          window.VEGA_DEBUG.view = null;
           window.VEGA_DEBUG.vega_spec = null;
           window.VEGA_DEBUG.vegalite_spec = null;
         }
