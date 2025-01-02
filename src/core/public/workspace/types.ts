@@ -9,6 +9,7 @@ import {
   WorkspaceAttributeWithPermission,
   WorkspaceFindOptions,
 } from '../../types';
+import { SavedObjectsImportResponse } from '../saved_objects';
 
 export type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean; owner?: boolean };
 
@@ -38,9 +39,13 @@ export interface IWorkspaceClient {
    * @param {Array<{ id: string; type: string }>} objects
    * @param {string} targetWorkspace
    * @param {boolean} includeReferencesDeep
-   * @returns {Promise<IResponse<any>>} result for this operation
+   * @returns {Promise<SavedObjectsImportResponse>} result for this operation
    */
-  copy(objects: any[], targetWorkspace: string, includeReferencesDeep?: boolean): Promise<any>;
+  copy(
+    objects: Array<{ id: string; type: string }>,
+    targetWorkspace: string,
+    includeReferencesDeep?: boolean
+  ): Promise<SavedObjectsImportResponse>;
 
   /**
    * Associates a list of objects with the given workspace ID.
