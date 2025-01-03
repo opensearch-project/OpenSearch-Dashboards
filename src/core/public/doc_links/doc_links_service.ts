@@ -436,6 +436,10 @@ export class DocLinksService {
             // https://opensearch.org/docs/latest/dashboards/management/advanced-settings/
             advancedSettings: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}management/advanced-settings/`,
           },
+          workspace: {
+            // https://opensearch.org/docs/latest/dashboards/workspace/workspace-acl/
+            acl: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}workspace/workspace-acl/`,
+          },
         },
         noDocumentation: {
           auditbeat: `${OPENSEARCH_WEBSITE_DOCS}tools/index/#downloads`,
