@@ -54,7 +54,7 @@ import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consume
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 import { uiSettings } from './ui_settings';
 import { RepositoryWrapper } from './saved_objects/repository_wrapper';
-import { IdentitySourceRegistry } from './identity_service/IdentitySourceRegistry';
+import { IdentitySourceRegistry } from './identity_service/identity_source_registry';
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -252,8 +252,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
     if (isPermissionControlEnabled) this.setupPermission(core);
 
-    const identitySourceRegistry = new IdentitySourceRegistry(this.logger);
-    identitySourceRegistry.setup();
+    const identitySource = globalConfig.opensearchDashboards.identity.source;
+    const identitySourceRegistry = new IdentitySourceRegistry(this.logger, identitySource);
 
     const router = core.http.createRouter();
 
@@ -285,6 +285,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
 
     return {
       client: this.client,
+      identitySourceRegistry,
     };
   }
 
