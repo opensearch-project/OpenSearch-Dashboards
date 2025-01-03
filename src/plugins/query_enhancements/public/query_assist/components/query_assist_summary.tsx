@@ -224,8 +224,10 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         console.error(error);
       }
     };
-    fetchSummaryAgent();
-  }, [selectedDataset.current?.dataSource?.id, props.http]);
+    if (isEnabledByCapability) {
+      fetchSummaryAgent();
+    }
+  }, [selectedDataset.current?.dataSource?.id, props.http, isEnabledByCapability]);
 
   const onFeedback = useCallback(
     (satisfied: boolean) => {
