@@ -240,27 +240,15 @@ export const AssociationDataSourceModalContent = ({
     }
   }, [selectedConnectionIds, allConnections, handleAssignDataSourceConnections]);
 
-  useEffect(() => {
-    const fetchDataSources = async () => {
-      const dataSourcesList = await getDataSourcesList(savedObjects.client, ['*']);
-      const {
-        openSearchConnections,
-        dataConnections,
-      } = convertDataSourcesToOpenSearchAndDataConnections(dataSourcesList);
-      return { openSearchConnections, dataConnections };
-    };
-
-    const handleDirectQueryConnections = async (
+  const handleDirectQueryConnections = useCallback(
+    async (
       openSearchConnections: DataSourceConnection[],
       dataConnections: DataSourceConnection[]
     ) => {
       if (mode === AssociationDataSourceModalMode.OpenSearchConnections) {
-        setAllConnections([...openSearchConnections, ...dataConnections]);
-        setIsLoading(false);
-        return;
+        return [...openSearchConnections, ...dataConnections];
       }
 
-      // When mode is  Direct Query connections
       const fetchDqcConnectionsPromises = openSearchConnections.map((ds) =>
         fetchDirectQueryConnectionsByIDs([ds.id], http, notifications)
           .then((directQueryConnections) => ({
@@ -287,32 +275,45 @@ export const AssociationDataSourceModalContent = ({
           } as DataSourceConnection;
         });
 
-      setAllConnections(allConnectionsWithDQC);
-      setIsLoading(false);
+      return allConnectionsWithDQC;
+    },
+    [http, mode, notifications]
+  );
+
+  useEffect(() => {
+    const fetchDataSources = async () => {
+      const dataSourcesList = await getDataSourcesList(savedObjects.client, ['*']);
+      const {
+        openSearchConnections,
+        dataConnections,
+      } = convertDataSourcesToOpenSearchAndDataConnections(dataSourcesList);
+      return { openSearchConnections, dataConnections };
     };
 
     const fetchDataSourcesAndHandleRelatedConnections = async () => {
       setIsLoading(true);
       const { openSearchConnections, dataConnections } = await fetchDataSources();
-      await handleDirectQueryConnections(openSearchConnections, dataConnections);
+      const connections = await handleDirectQueryConnections(
+        openSearchConnections,
+        dataConnections
+      );
+      setAllConnections(connections);
+      setIsLoading(false);
     };
 
     fetchDataSourcesAndHandleRelatedConnections();
-  }, [savedObjects.client, notifications, http, mode]);
+  }, [savedObjects.client, notifications, http, mode, handleDirectQueryConnections]);
 
   useEffect(() => {
-    if (allConnections.length > 0) {
-      setOptions(
-        convertConnectionsToOptions({
-          connections: allConnections,
-          excludedConnectionIds,
-          selectedConnectionIds,
-          showDirectQueryConnections:
-            mode === AssociationDataSourceModalMode.DirectQueryConnections,
-          logos,
-        })
-      );
-    }
+    setOptions(
+      convertConnectionsToOptions({
+        connections: allConnections,
+        excludedConnectionIds,
+        selectedConnectionIds,
+        showDirectQueryConnections: mode === AssociationDataSourceModalMode.DirectQueryConnections,
+        logos,
+      })
+    );
   }, [excludedConnectionIds, selectedConnectionIds, mode, allConnections, logos]);
 
   return (
