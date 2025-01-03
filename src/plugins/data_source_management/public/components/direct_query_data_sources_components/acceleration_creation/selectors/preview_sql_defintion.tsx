@@ -13,7 +13,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { ApplicationStart, NotificationsStart } from 'opensearch-dashboards/public';
+import { ApplicationStart, NotificationsStart, HttpStart } from 'opensearch-dashboards/public';
 import {
   queryWorkbenchPluginCheck,
   queryWorkbenchPluginID,
@@ -28,6 +28,7 @@ interface PreviewSQLDefinitionProps {
   resetFlyout: () => void;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  http: HttpStart;
 }
 
 export const PreviewSQLDefinition = ({
@@ -36,6 +37,7 @@ export const PreviewSQLDefinition = ({
   resetFlyout,
   notifications,
   application,
+  http,
 }: PreviewSQLDefinitionProps) => {
   const [isPreviewStale, setIsPreviewStale] = useState(false);
   const [isPreviewTriggered, setIsPreviewTriggered] = useState(false);
@@ -60,23 +62,10 @@ export const PreviewSQLDefinition = ({
   };
 
   const checkIfSQLWorkbenchPluginIsInstalled = () => {
-    fetch('/api/status', {
-      headers: {
-        'Content-Type': 'application/json',
-        'osd-xsrf': 'true',
-        'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
-        pragma: 'no-cache',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-      },
-      method: 'GET',
-      referrerPolicy: 'strict-origin-when-cross-origin',
-      mode: 'cors',
-      credentials: 'include',
-    })
+    http
+      .get('/api/status')
       .then(function (response) {
-        return response.json();
+        return response;
       })
       .then((data) => {
         for (let i = 0; i < data.status.statuses.length; ++i) {
