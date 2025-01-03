@@ -16,7 +16,6 @@ import {
   prependWorkspaceToBreadcrumbs,
   getIsOnlyAllowEssentialUseCase,
   mergeDataSourcesWithConnections,
-  getDirectQueryConnections,
   fetchDirectQueryConnectionsByIDs,
   getUseCaseUrl,
 } from './utils';
