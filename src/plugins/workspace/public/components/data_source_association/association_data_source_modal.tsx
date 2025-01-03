@@ -25,7 +25,11 @@ import {
 import { FormattedMessage } from 'react-intl';
 import { i18n } from '@osd/i18n';
 
-import { getDataSourcesList, fetchDataSourceConnections } from '../../utils';
+import {
+  getDataSourcesList,
+  fetchDirectQueryConnectionsByIDs,
+  convertDataSourcesToOpenSearchAndDataConnections,
+} from '../../utils';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
@@ -88,42 +92,39 @@ const convertConnectionToOption = ({
   connection,
   selectedConnectionIds,
   logos,
+  showDirectQueryConnections,
 }: {
   connection: DataSourceConnection;
   selectedConnectionIds: string[];
   logos: Logos;
-}) => ({
-  label: connection.name,
-  key: connection.id,
-  description: connection.description,
-  append:
-    connection.relatedConnections && connection.relatedConnections.length > 0 ? (
-      <EuiBadge>
-        {i18n.translate('workspace.form.selectDataSource.optionBadge', {
-          defaultMessage: '+ {relatedConnections} related',
-          values: {
-            relatedConnections: connection.relatedConnections.length,
-          },
-        })}
-      </EuiBadge>
-    ) : undefined,
-  disabled: connection.connectionType === DataSourceConnectionType.DirectQueryConnection,
-  checked:
-    connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
-    selectedConnectionIds.includes(connection.id)
-      ? ('on' as const)
-      : undefined,
-  prepend:
-    connection.connectionType === DataSourceConnectionType.DirectQueryConnection ? (
-      <>
-        <div style={{ width: 16 }} />
-        <ConnectionIcon connection={connection} logos={logos} />
-      </>
-    ) : (
-      <ConnectionIcon connection={connection} logos={logos} />
-    ),
-  parentId: connection.parentId,
-});
+  showDirectQueryConnections: boolean;
+}) => {
+  return {
+    label: connection.name,
+    key: connection.id,
+    description: connection.description,
+    append: showDirectQueryConnections &&
+      connection.relatedConnections &&
+      connection.relatedConnections.length > 0 && (
+        <EuiBadge>
+          {i18n.translate('workspace.form.selectDataSource.optionBadge', {
+            defaultMessage: '+ {relatedConnections} related',
+            values: {
+              relatedConnections: connection.relatedConnections.length,
+            },
+          })}
+        </EuiBadge>
+      ),
+    disabled: connection.connectionType === DataSourceConnectionType.DirectQueryConnection,
+    checked:
+      connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
+      selectedConnectionIds.includes(connection.id)
+        ? ('on' as const)
+        : undefined,
+    prepend: <ConnectionIcon connection={connection} logos={logos} />,
+    parentId: connection.parentId,
+  };
+};
 
 const convertConnectionsToOptions = ({
   connections,
@@ -148,24 +149,35 @@ const convertConnectionsToOptions = ({
       }
 
       if (connection.connectionType === DataSourceConnectionType.DataConnection) {
-        if (showDirectQueryConnections) {
+        if (!showDirectQueryConnections) {
           return [connection];
         }
         return [];
       }
 
-      if (showDirectQueryConnections) {
-        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-          return [];
+      if (connection.connectionType === DataSourceConnectionType.OpenSearchConnection) {
+        if (showDirectQueryConnections) {
+          if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
+            // return [connection] for the case where the connnection has no direct connections for now, but it may have in the future
+            return [connection];
+          }
+          return [
+            connection,
+            ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
+          ];
         }
-        return [
-          connection,
-          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
-        ];
       }
+
       return [connection];
     })
-    .map((connection) => convertConnectionToOption({ connection, selectedConnectionIds, logos }));
+    .map((connection) =>
+      convertConnectionToOption({
+        connection,
+        selectedConnectionIds,
+        logos,
+        showDirectQueryConnections,
+      })
+    );
 };
 
 export interface AssociationDataSourceModalProps {
@@ -228,17 +240,69 @@ export const AssociationDataSourceModalContent = ({
     }
   }, [selectedConnectionIds, allConnections, handleAssignDataSourceConnections]);
 
+  const handleDirectQueryConnections = useCallback(
+    async (
+      openSearchConnections: DataSourceConnection[],
+      dataConnections: DataSourceConnection[]
+    ) => {
+      if (mode === AssociationDataSourceModalMode.OpenSearchConnections) {
+        return [...openSearchConnections, ...dataConnections];
+      }
+
+      const fetchDqcConnectionsPromises = openSearchConnections.map((ds) =>
+        fetchDirectQueryConnectionsByIDs([ds.id], http, notifications)
+          .then((directQueryConnections) => ({
+            id: ds.id,
+            relatedConnections: directQueryConnections,
+          }))
+          .catch(() => ({
+            id: ds.id,
+            relatedConnections: [],
+          }))
+      );
+      const dqcConnections = await Promise.all(fetchDqcConnectionsPromises);
+
+      const allConnectionsWithDQC = openSearchConnections
+        .filter((connection) => {
+          const filteredData = dqcConnections.find((c) => c.id === connection.id);
+          return filteredData && filteredData.relatedConnections.length > 0;
+        })
+        .map((connection) => {
+          const relatedDQC = dqcConnections.find((c) => c.id === connection.id);
+          return {
+            ...connection,
+            relatedConnections: relatedDQC?.relatedConnections,
+          } as DataSourceConnection;
+        });
+
+      return allConnectionsWithDQC;
+    },
+    [http, mode, notifications]
+  );
+
   useEffect(() => {
-    setIsLoading(true);
-    getDataSourcesList(savedObjects.client, ['*'])
-      .then((dataSourcesList) => fetchDataSourceConnections(dataSourcesList, http, notifications))
-      .then((connections) => {
-        setAllConnections(connections);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [savedObjects.client, http, notifications, mode]);
+    const fetchDataSources = async () => {
+      const dataSourcesList = await getDataSourcesList(savedObjects.client, ['*']);
+      const {
+        openSearchConnections,
+        dataConnections,
+      } = convertDataSourcesToOpenSearchAndDataConnections(dataSourcesList);
+      return { openSearchConnections, dataConnections };
+    };
+
+    const fetchDataSourcesAndHandleRelatedConnections = async () => {
+      setIsLoading(true);
+      const { openSearchConnections, dataConnections } = await fetchDataSources();
+      const connections = await handleDirectQueryConnections(
+        openSearchConnections,
+        dataConnections
+      );
+      setAllConnections(connections);
+      setIsLoading(false);
+    };
+
+    fetchDataSourcesAndHandleRelatedConnections();
+  }, [savedObjects.client, notifications, http, mode, handleDirectQueryConnections]);
 
   useEffect(() => {
     setOptions(
@@ -250,7 +314,7 @@ export const AssociationDataSourceModalContent = ({
         logos,
       })
     );
-  }, [allConnections, excludedConnectionIds, selectedConnectionIds, mode, logos]);
+  }, [excludedConnectionIds, selectedConnectionIds, mode, allConnections, logos]);
 
   return (
     <>

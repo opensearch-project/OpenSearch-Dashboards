@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus, ChromeNavLink, NavGroupType, PublicAppInfo } from '../../../core/public';
+import { AppNavLinkStatus, NavGroupType, PublicAppInfo } from '../../../core/public';
 import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
@@ -16,6 +16,7 @@ import {
   prependWorkspaceToBreadcrumbs,
   getIsOnlyAllowEssentialUseCase,
   mergeDataSourcesWithConnections,
+  fetchDirectQueryConnectionsByIDs,
   getUseCaseUrl,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
@@ -328,6 +329,36 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
     expect(filteredApps.length).toEqual(2);
     expect(filteredApps[0].id).toEqual('dashboards');
     expect(filteredApps[1].id).toEqual('management');
+  });
+});
+
+describe('workspace utils: fetchDirectQueryConnectionsByIDs', () => {
+  it('should successfully retrieve direct query connections by Ids', async () => {
+    const coreStart = coreMock.createStart();
+    const httpMock = coreStart.http;
+    const notificationsMock = coreStart.notifications;
+    httpMock.get.mockResolvedValue([
+      { name: 'Connection A', description: 'Test A', connector: 'S3GLUE' },
+    ]);
+
+    const dataSourceIds = ['1'];
+    const result = await fetchDirectQueryConnectionsByIDs(
+      dataSourceIds,
+      httpMock,
+      notificationsMock
+    );
+    expect(result).toEqual([
+      {
+        id: '1-Connection A',
+        name: 'Connection A',
+        parentId: '1',
+        type: 'Amazon S3',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+        description: 'Test A',
+      },
+    ]);
+    expect(httpMock.get).toHaveBeenCalledWith(expect.stringContaining('dataSourceMDSId=1'));
+    expect(notificationsMock.toasts.addDanger).not.toHaveBeenCalled();
   });
 });
 

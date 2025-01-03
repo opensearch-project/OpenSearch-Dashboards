@@ -15,56 +15,80 @@ import {
   AssociationDataSourceModalProps,
 } from './association_data_source_modal';
 import { AssociationDataSourceModalMode } from 'src/plugins/workspace/common/constants';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+const dataSourcesList = [
+  {
+    id: 'ds1',
+    title: 'Data Source 1',
+    description: 'Description of data source 1',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
+    // This is used for mocking saved object function
+    get: () => {
+      return 'Data Source 1';
+    },
+  },
+  {
+    id: 'dqs1',
+    title: 'Data Connection 1',
+    description: 'Description of data connection 1',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
+    get: () => {
+      return 'Data Connection 1';
+    },
+  },
+];
 
-const setupAssociationDataSourceModal = ({
-  mode,
-  excludedConnectionIds,
-  handleAssignDataSourceConnections,
-}: Partial<AssociationDataSourceModalProps> = {}) => {
-  const coreServices = coreMock.createStart();
-  jest.spyOn(utilsExports, 'getDataSourcesList').mockResolvedValue([]);
-  jest.spyOn(utilsExports, 'fetchDataSourceConnections').mockResolvedValue([
+const openSearchAndDataConnectionsMock = {
+  openSearchConnections: [
     {
       id: 'ds1',
       name: 'Data Source 1',
-      connectionType: DataSourceConnectionType.OpenSearchConnection,
       type: 'OpenSearch',
-      relatedConnections: [
-        {
-          id: 'ds1-dqc1',
-          name: 'dqc1',
-          parentId: 'ds1',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          type: 'Amazon S3',
-        },
-      ],
-    },
-    {
-      id: 'ds1-dqc1',
-      name: 'dqc1',
-      parentId: 'ds1',
-      connectionType: DataSourceConnectionType.DirectQueryConnection,
-      type: 'Amazon S3',
-    },
-    {
-      id: 'ds2',
-      name: 'Data Source 2',
       connectionType: DataSourceConnectionType.OpenSearchConnection,
-      type: 'OpenSearch',
+      relatedConnections: [],
     },
+  ],
+  dataConnections: [
     {
       id: 'dqs1',
       name: 'Data Connection 1',
       connectionType: DataSourceConnectionType.DataConnection,
       type: 'AWS Security Lake',
     },
+  ],
+};
+const setupAssociationDataSourceModal = ({
+  mode,
+  excludedConnectionIds,
+  handleAssignDataSourceConnections,
+}: Partial<AssociationDataSourceModalProps> = {}) => {
+  const coreServices = coreMock.createStart();
+  jest.spyOn(utilsExports, 'getDataSourcesList').mockResolvedValue(dataSourcesList);
+
+  jest
+    .spyOn(utilsExports, 'convertDataSourcesToOpenSearchAndDataConnections')
+    .mockReturnValue(openSearchAndDataConnectionsMock);
+
+  jest.spyOn(utilsExports, 'fetchDirectQueryConnectionsByIDs').mockResolvedValue([
+    {
+      id: 'ds1-dqc1',
+      name: 'dqc1',
+      type: 'Amazon S3',
+      connectionType: DataSourceConnectionType.DirectQueryConnection,
+      parentId: 'ds1',
+    },
   ]);
+
   const { logos } = chromeServiceMock.createStartContract();
   render(
     <IntlProvider locale="en">
       <AssociationDataSourceModal
         logos={logos}
-        mode={mode ?? AssociationDataSourceModalMode.OpenSearchConnections}
+        mode={mode ?? AssociationDataSourceModalMode.DirectQueryConnections}
         http={coreServices.http}
         notifications={coreServices.notifications}
         savedObjects={coreServices.savedObjects}
@@ -108,17 +132,14 @@ describe('AssociationDataSourceModal', () => {
   });
 
   it('should display opensearch connections', async () => {
-    setupAssociationDataSourceModal();
+    setupAssociationDataSourceModal({ mode: AssociationDataSourceModalMode.OpenSearchConnections });
     expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
     expect(
       screen.getByText(
         'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
       )
     ).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
-      expect(screen.getByRole('option', { name: 'Data Source 2' })).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByText('Data Source 1')).toBeInTheDocument());
   });
 
   it('should display direct query connections after opensearch connection selected', async () => {
@@ -127,6 +148,7 @@ describe('AssociationDataSourceModal', () => {
     });
     expect(screen.getByText('Associate direct query data sources')).toBeInTheDocument();
     await waitFor(() => {
+      expect(screen.getByText('Data Source 1')).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'dqc1' })).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
       expect(screen.getByRole('option', { name: 'dqc1' })).toBeInTheDocument();
@@ -135,17 +157,14 @@ describe('AssociationDataSourceModal', () => {
 
   it('should hide associated connections', async () => {
     setupAssociationDataSourceModal({
-      excludedConnectionIds: ['ds2'],
+      excludedConnectionIds: ['ds1'],
     });
     expect(
       screen.getByText(
         'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
       )
     ).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
-      expect(screen.queryByRole('option', { name: 'Data Source 2' })).not.toBeInTheDocument();
-    });
+    expect(screen.queryByRole('option', { name: 'Data Source 1' })).not.toBeInTheDocument();
   });
 
   it('should call handleAssignDataSourceConnections with opensearch connections after assigned', async () => {
@@ -153,11 +172,13 @@ describe('AssociationDataSourceModal', () => {
     setupAssociationDataSourceModal({
       handleAssignDataSourceConnections: handleAssignDataSourceConnectionsMock,
     });
-
     await waitFor(() => {
-      fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Associate data sources' }));
+      expect(screen.getByText('Data Source 1')).toBeInTheDocument();
+      expect(screen.getByText('Associate data sources')).toBeInTheDocument();
     });
+
+    fireEvent.click(screen.getByText('Data Source 1'));
+    fireEvent.click(screen.getByText('Associate data sources'));
 
     expect(handleAssignDataSourceConnectionsMock).toHaveBeenCalledWith([
       {
@@ -182,13 +203,16 @@ describe('AssociationDataSourceModal', () => {
     const handleAssignDataSourceConnectionsMock = jest.fn();
     setupAssociationDataSourceModal({
       handleAssignDataSourceConnections: handleAssignDataSourceConnectionsMock,
-      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+      mode: AssociationDataSourceModalMode.OpenSearchConnections,
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Data Source 1')).toBeInTheDocument();
+      expect(screen.getByText('Data Connection 1')).toBeInTheDocument();
     });
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByRole('option', { name: 'Data Connection 1' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Associate data sources' }));
-    });
+    expect(screen.getByText('Associate data sources')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Data Connection 1'));
+    fireEvent.click(screen.getByText('Associate data sources'));
 
     expect(handleAssignDataSourceConnectionsMock).toHaveBeenCalledWith([
       {
