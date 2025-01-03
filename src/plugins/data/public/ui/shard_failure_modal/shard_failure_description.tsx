@@ -79,6 +79,7 @@ export function ShardFailureDescription(props: ShardFailure) {
         type="column"
         compressed
         className="shardFailureModal__desc"
+        data-test-subj="shardFailureModalDescription"
         titleProps={{ className: 'shardFailureModal__descTitle' }}
         descriptionProps={{ className: 'shardFailureModal__descValue' }}
       />

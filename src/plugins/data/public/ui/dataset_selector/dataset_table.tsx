@@ -76,7 +76,7 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
   };
 
   return (
-    <div className="datasetTable">
+    <div className="datasetTable" data-test-subj="datasetTable">
       <EuiFieldSearch
         fullWidth
         inputRef={(node) => (searchRef.current = node)}
@@ -93,7 +93,7 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
       />
 
       {paginationToken && (
-        <div className="datasetTable__loadMore">
+        <div className="datasetTable__loadMore" data-test-subj="datasetTableLoadMore">
           <EuiLink
             onClick={() => onTableChange({ paginationToken, search: searchRef.current?.value })}
           >
