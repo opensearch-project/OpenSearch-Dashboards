@@ -229,7 +229,12 @@ export const createSavedObjects = async <T>({
       return { ...object, ...(references && { references }) };
     })
   );
-  const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
+  const resolvableErrors = [
+    'conflict',
+    'ambiguous_conflict',
+    'missing_references',
+    'missing_data_source',
+  ];
   let expectedResults = objectsToCreate;
   if (!accumulatedErrors.some(({ error: { type } }) => resolvableErrors.includes(type))) {
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {

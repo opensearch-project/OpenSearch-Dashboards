@@ -54,7 +54,12 @@ import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consume
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 import { uiSettings } from './ui_settings';
 import { RepositoryWrapper } from './saved_objects/repository_wrapper';
+import { DataSourcePluginSetup } from '../../data_source/server';
 import { IdentitySourceRegistry } from './identity_service/identity_source_registry';
+
+export interface WorkspacePluginDependencies {
+  dataSource: DataSourcePluginSetup;
+}
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -213,10 +218,11 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, deps: WorkspacePluginDependencies) {
     this.logger.debug('Setting up Workspaces service');
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
+    const isDataSourceEnabled = !!deps.dataSource;
 
     // setup new ui_setting user's default workspace
     core.uiSettings.register(uiSettings);
@@ -264,6 +270,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       maxImportExportSize,
       permissionControlClient: this.permissionControl,
       isPermissionControlEnabled,
+      isDataSourceEnabled,
       identitySourceRegistry,
     });
 

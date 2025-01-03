@@ -121,6 +121,7 @@ export function registerRoutes({
   maxImportExportSize,
   permissionControlClient,
   isPermissionControlEnabled,
+  isDataSourceEnabled,
   identitySourceRegistry,
 }: {
   client: IWorkspaceClientImpl;
@@ -129,6 +130,7 @@ export function registerRoutes({
   maxImportExportSize: number;
   permissionControlClient?: SavedObjectsPermissionControlContract;
   isPermissionControlEnabled: boolean;
+  isDataSourceEnabled: boolean;
   identitySourceRegistry: IdentitySourceRegistry;
 }) {
   router.post(
@@ -344,8 +346,7 @@ export function registerRoutes({
     })
   );
 
-  // duplicate saved objects among workspaces
-  registerDuplicateRoute(router, logger, client, maxImportExportSize);
+  registerDuplicateRoute(router, logger, client, maxImportExportSize, isDataSourceEnabled);
 
   router.post(
     {
