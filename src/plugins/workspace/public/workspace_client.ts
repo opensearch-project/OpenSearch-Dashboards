@@ -12,6 +12,7 @@ import {
   WorkspacesSetup,
   IWorkspaceClient,
   IWorkspaceResponse as IResponse,
+  SavedObjectsImportResponse,
   WorkspaceFindOptions,
   WorkspacePermissionMode,
 } from '../../../core/public';
@@ -319,13 +320,13 @@ export class WorkspaceClient implements IWorkspaceClient {
    * @param {Array<{ id: string; type: string }>} objects
    * @param {string} targetWorkspace
    * @param {boolean} includeReferencesDeep
-   * @returns {Promise<IResponse<any>>} result for this operation
+   * @returns {Promise<SavedObjectsImportResponse>} result for this operation
    */
   public async copy(
     objects: Array<{ id: string; type: string }>,
     targetWorkspace: string,
     includeReferencesDeep: boolean = true
-  ): Promise<IResponse<any>> {
+  ): Promise<SavedObjectsImportResponse> {
     const path = this.getPath('_duplicate_saved_objects');
     const body = {
       objects,
@@ -333,7 +334,7 @@ export class WorkspaceClient implements IWorkspaceClient {
       includeReferencesDeep,
     };
 
-    const result = await this.safeFetch(path, {
+    const result = await this.http.fetch<SavedObjectsImportResponse>(path, {
       method: 'POST',
       body: JSON.stringify(body),
     });
