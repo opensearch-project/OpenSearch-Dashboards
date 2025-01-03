@@ -92,40 +92,29 @@ const convertConnectionToOption = ({
   connection,
   selectedConnectionIds,
   logos,
-  loadingStatus,
   showDirectQueryConnections,
 }: {
   connection: DataSourceConnection;
   selectedConnectionIds: string[];
   logos: Logos;
-  loadingStatus: Record<string, boolean>;
   showDirectQueryConnections: boolean;
 }) => {
   return {
     label: connection.name,
     key: connection.id,
     description: connection.description,
-    append:
-      showDirectQueryConnections &&
-      (!loadingStatus[connection.id] ? (
-        connection.relatedConnections &&
-        connection.relatedConnections.length > 0 && (
-          <EuiBadge>
-            {i18n.translate('workspace.form.selectDataSource.optionBadge', {
-              defaultMessage: '+ {relatedConnections} related',
-              values: {
-                relatedConnections: connection.relatedConnections.length,
-              },
-            })}
-          </EuiBadge>
-        )
-      ) : (
+    append: showDirectQueryConnections &&
+      connection.relatedConnections &&
+      connection.relatedConnections.length > 0 && (
         <EuiBadge>
-          {i18n.translate('workspace.form.selectDataSource.loading', {
-            defaultMessage: 'Loading...',
+          {i18n.translate('workspace.form.selectDataSource.optionBadge', {
+            defaultMessage: '+ {relatedConnections} related',
+            values: {
+              relatedConnections: connection.relatedConnections.length,
+            },
           })}
         </EuiBadge>
-      )),
+      ),
     disabled: connection.connectionType === DataSourceConnectionType.DirectQueryConnection,
     checked:
       connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
@@ -143,14 +132,12 @@ const convertConnectionsToOptions = ({
   selectedConnectionIds,
   excludedConnectionIds,
   logos,
-  loadingStatus,
 }: {
   connections: DataSourceConnection[];
   excludedConnectionIds: string[];
   showDirectQueryConnections: boolean;
   selectedConnectionIds: string[];
   logos: Logos;
-  loadingStatus: Record<string, boolean>;
 }) => {
   return connections
     .flatMap((connection) => {
@@ -188,7 +175,6 @@ const convertConnectionsToOptions = ({
         connection,
         selectedConnectionIds,
         logos,
-        loadingStatus,
         showDirectQueryConnections,
       })
     );
@@ -229,7 +215,6 @@ export const AssociationDataSourceModalContent = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const mountedRef = useRef(false);
-  const [loadingStatus, setLoadingStatus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     mountedRef.current = true;
@@ -269,13 +254,13 @@ export const AssociationDataSourceModalContent = ({
       openSearchConnections: DataSourceConnection[],
       dataConnections: DataSourceConnection[]
     ) => {
-      const initialLoadingStatus = openSearchConnections.reduce((acc, ds) => {
-        acc[ds.id] = true;
-        return acc;
-      }, {} as Record<string, boolean>);
+      if (mode === AssociationDataSourceModalMode.OpenSearchConnections) {
+        setAllConnections([...openSearchConnections, ...dataConnections]);
+        setIsLoading(false);
+        return;
+      }
 
-      setLoadingStatus(initialLoadingStatus);
-
+      // When mode is  Direct Query connections
       const fetchDqcConnectionsPromises = openSearchConnections.map((ds) =>
         fetchDirectQueryConnectionsByIDs([ds.id], http, notifications)
           .then((directQueryConnections) => ({
@@ -289,34 +274,27 @@ export const AssociationDataSourceModalContent = ({
       );
       const dqcConnections = await Promise.all(fetchDqcConnectionsPromises);
 
-      const allConnectionsWithDQC =
-        mode === AssociationDataSourceModalMode.DirectQueryConnections
-          ? openSearchConnections
-              .filter((connection) => {
-                const filteredData = dqcConnections.find((c) => c.id === connection.id);
-                return filteredData && filteredData.relatedConnections.length > 0;
-              })
-              .map((connection) => {
-                const relatedDQC = dqcConnections.find((c) => c.id === connection.id);
-                setLoadingStatus((prev) => ({
-                  ...prev,
-                  [connection.id]: false,
-                }));
-                return {
-                  ...connection,
-                  relatedConnections: relatedDQC?.relatedConnections,
-                } as DataSourceConnection;
-              })
-          : [...openSearchConnections, ...dataConnections];
+      const allConnectionsWithDQC = openSearchConnections
+        .filter((connection) => {
+          const filteredData = dqcConnections.find((c) => c.id === connection.id);
+          return filteredData && filteredData.relatedConnections.length > 0;
+        })
+        .map((connection) => {
+          const relatedDQC = dqcConnections.find((c) => c.id === connection.id);
+          return {
+            ...connection,
+            relatedConnections: relatedDQC?.relatedConnections,
+          } as DataSourceConnection;
+        });
 
       setAllConnections(allConnectionsWithDQC);
+      setIsLoading(false);
     };
 
     const fetchDataSourcesAndHandleRelatedConnections = async () => {
       setIsLoading(true);
       const { openSearchConnections, dataConnections } = await fetchDataSources();
       await handleDirectQueryConnections(openSearchConnections, dataConnections);
-      setIsLoading(false);
     };
 
     fetchDataSourcesAndHandleRelatedConnections();
@@ -332,11 +310,10 @@ export const AssociationDataSourceModalContent = ({
           showDirectQueryConnections:
             mode === AssociationDataSourceModalMode.DirectQueryConnections,
           logos,
-          loadingStatus,
         })
       );
     }
-  }, [excludedConnectionIds, selectedConnectionIds, mode, allConnections, logos, loadingStatus]);
+  }, [excludedConnectionIds, selectedConnectionIds, mode, allConnections, logos]);
 
   return (
     <>
