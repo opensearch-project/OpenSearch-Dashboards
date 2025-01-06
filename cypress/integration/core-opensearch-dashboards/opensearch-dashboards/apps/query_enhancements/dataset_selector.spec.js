@@ -10,11 +10,14 @@ import {
   END_TIME,
 } from '../../../../../utils/apps/constants';
 import { SECONDARY_ENGINE } from '../../../../../utils/constants';
+import { createOSDUtils } from '../../../../../utils/osd_utils';
 
 const randomString = Math.random().toString(36).substring(7);
 const workspace = `${WORKSPACE_NAME}-${randomString}`;
 
 describe('dataset selector', { scrollBehavior: false }, () => {
+  const osdUtils = createOSDUtils(cy);
+
   before(() => {
     cy.setupTestData(
       SECONDARY_ENGINE.url,
@@ -37,7 +40,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
     // Create workspace
     cy.deleteWorkspaceByName(`${workspace}`);
     cy.visit('/app/home');
-    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
+    osdUtils.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
     cy.navigateToWorkSpaceSpecificPage({
       workspaceName: workspace,
       page: 'discover',
