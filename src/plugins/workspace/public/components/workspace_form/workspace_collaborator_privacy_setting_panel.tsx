@@ -24,7 +24,11 @@ import { WorkspacePrivacyItemType, privacyType2TextMap, workspacePrivacyTitle } 
 import { WorkspacePermissionSetting } from './types';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart, IWorkspaceResponse } from '../../../../../core/public';
-import { convertPermissionsToPrivacyType, getPermissionSettingsWithPrivacyType } from './utils';
+import {
+  convertPermissionsToPrivacyType,
+  getPermissionSettingsWithPrivacyType,
+  isWorkspacePermissionSetting,
+} from './utils';
 import { WorkspacePrivacySettingSelect } from './workspace_privacy_setting_select';
 
 export interface WorkspaceCollaboratorPrivacySettingProps {
@@ -64,10 +68,9 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
     let result;
     try {
       result = await handleSubmitPermissionSettings(
-        getPermissionSettingsWithPrivacyType(
-          permissionSettings,
-          selectedPrivacyType
-        ) as WorkspacePermissionSetting[]
+        getPermissionSettingsWithPrivacyType(permissionSettings, selectedPrivacyType).filter(
+          isWorkspacePermissionSetting
+        )
       );
     } catch (error) {
       notifications?.toasts?.addError(error, {

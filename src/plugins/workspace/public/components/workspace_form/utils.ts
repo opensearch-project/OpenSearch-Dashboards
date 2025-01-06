@@ -369,7 +369,7 @@ export const convertPermissionsToPrivacyType = (
 export const getPermissionSettingsWithPrivacyType = (
   permissionSettings: WorkspaceFormDataState['permissionSettings'],
   privacyType: WorkspacePrivacyItemType
-) => {
+): WorkspaceFormDataState['permissionSettings'] => {
   const newSettings = permissionSettings.filter(
     (item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*')
   );

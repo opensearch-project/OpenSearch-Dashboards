@@ -182,4 +182,20 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
       });
     });
   });
+
+  it('should close the modal after clicking the close button', async () => {
+    const { renderResult } = setup();
+    fireEvent.click(renderResult.getByText('Edit'));
+    expect(renderResult.queryByText('Save changes')).toBeInTheDocument();
+    fireEvent.click(renderResult.getByLabelText('Closes this modal window'));
+    expect(renderResult.queryByText('Save changes')).not.toBeInTheDocument();
+  });
+
+  it('should close the modal after clicking the cancel button', async () => {
+    const { renderResult } = setup();
+    fireEvent.click(renderResult.getByText('Edit'));
+    expect(renderResult.queryByText('Save changes')).toBeInTheDocument();
+    fireEvent.click(renderResult.getByText('Cancel'));
+    expect(renderResult.queryByText('Save changes')).not.toBeInTheDocument();
+  });
 });

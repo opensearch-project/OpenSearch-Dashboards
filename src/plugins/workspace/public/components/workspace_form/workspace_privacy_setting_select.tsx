@@ -45,7 +45,7 @@ export const WorkspacePrivacySettingSelect = ({
           data-test-subj="workspacePrivacySettingSelector"
         />
       </EuiFormRow>
-      <EuiText size="xs" color="subdued" style={{ paddingLeft: '2px' }}>
+      <EuiText size="xs" color="subdued">
         {privacyType2TextMap[selectedPrivacyType].description}
       </EuiText>
     </>
