@@ -9,6 +9,7 @@ import {
   S3_CLUSTER,
 } from '../../../../../utils/apps/query_enhancements/constants';
 import { WORKSPACE_NAME } from '../../../../../utils/apps/constants';
+import { createOSDUtils } from '../../../../../utils/osd_utils';
 
 let dataSourceId = '';
 const definedS3Variables = !S3_CLUSTER.url;
@@ -81,11 +82,12 @@ const definedS3Variables = !S3_CLUSTER.url;
     });
 
     describe('Run S3 Query', () => {
+      const osdUtils = createOSDUtils(cy);
       beforeEach(() => {
         // Create workspace
         cy.deleteWorkspaceByName(WORKSPACE_NAME);
         cy.visit('/app/home');
-        cy.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, WORKSPACE_NAME);
+        osdUtils.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, WORKSPACE_NAME);
       });
       afterEach(() => {
         cy.deleteWorkspaceByName(WORKSPACE_NAME);

@@ -9,6 +9,7 @@
 
 import { BASE_PATH } from './constants';
 import { TestFixtureHandler } from '../lib/test_fixture_handler';
+import { addOSDUtil } from './osd_utils';
 
 // This function does not delete all indices
 Cypress.Commands.add('deleteAllIndices', () => {
@@ -301,7 +302,7 @@ Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
   cy.contains(/successfully/);
 });
 
-Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
+addOSDUtil('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
   cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
     .should('be.visible')
     .click();
@@ -323,7 +324,7 @@ Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, w
   cy.contains(/successfully/);
 });
 
-Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
+addOSDUtil('openWorkspaceDashboard', (workspaceName) => {
   cy.getElementByTestId('workspace-select-button').should('exist').click();
   cy.getElementByTestId('workspace-menu-manage-button').should('exist').click();
   cy.get('.euiBasicTable')
