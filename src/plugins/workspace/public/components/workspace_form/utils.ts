@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import type { SavedObjectPermissions } from '../../../../../core/types';
-import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../../../core/public';
 import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
@@ -36,6 +36,13 @@ export const isValidFormTextInput = (input?: string) => {
   const regex = /^[0-9a-zA-Z()_\[\]\-\s]+$/;
   return typeof input === 'string' && regex.test(input);
 };
+
+export const EMPTY_PERMISSIONS: SavedObjectPermissions = {
+  library_read: {},
+  library_write: {},
+  read: {},
+  write: {},
+} as const;
 
 export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   let numberOfErrors = 0;
@@ -104,7 +111,8 @@ export const convertPermissionSettingsToPermissions = (
   permissionItems: WorkspacePermissionSetting[] | undefined
 ) => {
   if (!permissionItems || permissionItems.length === 0) {
-    return undefined;
+    // Workspace object should always have permissions, set it as an empty object here instead of undefined.
+    return EMPTY_PERMISSIONS;
   }
   return permissionItems.reduce<SavedObjectPermissions>((previous, current) => {
     current.modes.forEach((mode) => {

@@ -6,13 +6,14 @@
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
 import { first } from 'rxjs/operators';
-
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
 import {
   ChromeBreadcrumb,
   NavGroupStatus,
   DEFAULT_NAV_GROUPS,
   AppNavLinkStatus,
+  WorkspaceAvailability,
+  AppStatus,
 } from '../../../core/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
@@ -507,6 +508,33 @@ describe('Workspace plugin', () => {
     expect(navGroupUpdater({ id: 'bar' })).toEqual({
       status: NavGroupStatus.Hidden,
     });
+  });
+
+  it('#start should not be able to access app of which workspaceAvailability is set to insideWorkspace when out of workspace', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+    coreStart.workspaces.currentWorkspace$.next(null);
+
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      dashboard: {
+        isDashboardAdmin: false,
+      },
+    };
+
+    workspacePlugin.start(coreStart, getMockDependencies());
+
+    const mockApp = {
+      id: 'dashboards',
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+    };
+
+    const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
+
+    const appState = await appUpdater$.pipe(first()).toPromise();
+    expect(appState(mockApp)).toEqual({ status: AppStatus.inaccessible });
   });
 
   it('#stop should call unregisterNavGroupUpdater', async () => {

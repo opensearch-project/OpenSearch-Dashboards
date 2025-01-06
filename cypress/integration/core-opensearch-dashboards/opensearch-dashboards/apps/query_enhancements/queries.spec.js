@@ -2,63 +2,90 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import {
-  MiscUtils,
-  TestFixtureHandler,
-} from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { PATHS } from '../../../../../utils/constants';
+  WORKSPACE_NAME,
+  DATASOURCE_NAME,
+  START_TIME,
+  END_TIME,
+} from '../../../../../utils/apps/constants';
+import { SECONDARY_ENGINE } from '../../../../../utils/constants';
 
-const miscUtils = new MiscUtils(cy);
-const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
+const randomString = Math.random().toString(36).substring(7);
+const workspace = `${WORKSPACE_NAME}-${randomString}`;
 
-describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
+describe('query enhancement queries', { scrollBehavior: false }, () => {
   before(() => {
-    testFixtureHandler.importJSONMapping('cypress/fixtures/timestamp/mappings.json.txt');
-
-    testFixtureHandler.importJSONDoc('cypress/fixtures/timestamp/data_with_index_pattern.json.txt');
-
-    // Go to the Discover page
-    miscUtils.visitPage(`app/data-explorer/discover#/`);
-
-    cy.setAdvancedSetting({
-      defaultIndex: 'timestamp-*',
-    });
-
-    // Go to the Discover page
-    miscUtils.visitPage(
-      `app/data-explorer/discover#/?_g=(filters:!(),time:(from:'2018-09-19T13:31:44.000Z',to:'2019-09-24T01:31:44.000Z'))`
+    // Load test data
+    cy.setupTestData(
+      SECONDARY_ENGINE.url,
+      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.mapping.json'],
+      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.data.ndjson']
     );
 
-    cy.get(`[class~="datasetSelector__button"]`).click();
-    cy.get(`[data-test-subj="datasetOption-timestamp-*"]`).click();
+    // Add data source
+    cy.addDataSource({
+      name: `${DATASOURCE_NAME}`,
+      url: `${SECONDARY_ENGINE.url}`,
+      authType: 'no_auth',
+    });
 
-    cy.waitForLoader(true);
-    cy.waitForSearch();
+    // Create workspace and set up index pattern
+    cy.deleteWorkspaceByName(`${workspace}`);
+    cy.visit('/app/home');
+    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
+
+    // Create and select index pattern for data_logs_small_time_1*
+    cy.createWorkspaceIndexPatterns({
+      workspaceName: workspace,
+      indexPattern: 'data_logs_small_time_1',
+      timefieldName: 'timestamp',
+      indexPatternHasTimefield: true,
+      dataSource: DATASOURCE_NAME,
+      isEnhancement: true,
+    });
+
+    // Go to discover page
+    cy.navigateToWorkSpaceSpecificPage({
+      workspaceName: workspace,
+      page: 'discover',
+      isEnhancement: true,
+    });
+  });
+
+  after(() => {
+    cy.deleteWorkspaceByName(workspace);
+    cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
+    cy.deleteIndex('data_logs_small_time_1');
   });
 
   describe('send queries', () => {
     it('with DQL', function () {
+      cy.setQueryLanguage('DQL');
+      cy.setTopNavDate(START_TIME, END_TIME);
+
       const query = `_id:1`;
-      cy.setSingleLineQueryEditor(query);
+      cy.setQueryEditor(query);
       cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);
 
-      //query should persist across refresh
+      // Query should persist across refresh
       cy.reload();
       cy.verifyHitCount(1);
     });
 
     it('with Lucene', function () {
       cy.setQueryLanguage('Lucene');
+      cy.setTopNavDate(START_TIME, END_TIME);
 
       const query = `_id:1`;
-      cy.setSingleLineQueryEditor(query);
+      cy.setQueryEditor(query);
       cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);
 
-      //query should persist across refresh
+      // Query should persist across refresh
       cy.reload();
       cy.verifyHitCount(1);
     });
@@ -66,18 +93,28 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
     it('with SQL', function () {
       cy.setQueryLanguage('OpenSearch SQL');
 
-      // default SQL query should be set
+      // Default SQL query should be set
       cy.waitForLoader(true);
       cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-        `SELECT * FROM timestamp-* LIMIT 10`
+        `SELECT * FROM data_logs_small_time_1* LIMIT 10`
       );
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
 
-      //query should persist across refresh
+      // Query should persist across refresh
       cy.reload();
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
 
-      cy.getElementByTestId(`osdQueryEditor__multiLine`).type(`{backspace}`);
+      cy.getElementByTestId('osdQueryEditor__multiLine')
+        .find('.monaco-editor')
+        .should('be.visible')
+        // Ensure editor is in the correct visual state ('vs' is Monaco's default theme)
+        // This helps verify the editor is fully initialized and ready
+        .should('have.class', 'vs')
+        .click()
+        .find('textarea.inputarea')
+        .focus()
+        .type('{backspace}', { force: true });
+
       cy.getElementByTestId(`querySubmitButton`).click();
       cy.waitForSearch();
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
@@ -86,23 +123,18 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
     it('with PPL', function () {
       cy.setQueryLanguage('PPL');
 
-      // default PPL query should be set
+      // Default PPL query should be set
       cy.waitForLoader(true);
-      cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(`source = timestamp-*`);
+      cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
+        `source = data_logs_small_time_1*`
+      );
       cy.waitForSearch();
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
-      cy.get('[class="euiText euiText--small"]').then((text) => cy.log(text));
-      cy.verifyHitCount(4);
 
-      //query should persist across refresh
+      // Query should persist across refresh
       cy.reload();
-      cy.verifyHitCount(4);
-    });
-
-    after(() => {
-      cy.deleteIndex('timestamp-nanos');
-      cy.deleteIndex('timestamp-milis');
-      cy.deleteSavedObject('index-pattern', 'index-pattern:timestamp-*');
+      cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+      cy.verifyHitCount('10,000');
     });
   });
 });
