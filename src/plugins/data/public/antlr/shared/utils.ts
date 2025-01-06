@@ -136,13 +136,13 @@ export const fetchColumnValues = async (
   ).body.fields[0].values;
 };
 
-export const formatValuesToSuggestions = (
-  values: any[], // generic for any value type
-  modifyInsertText?: (input: any) => string
+export const formatValuesToSuggestions = <T extends { toString(): string }>(
+  values: T[], // generic for any value type
+  modifyInsertText?: (input: T) => string
 ) => {
   let i = 0;
 
-  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values.map((val: any) => {
+  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values.map((val: T) => {
     i++;
     return {
       text: val.toString(),
@@ -158,7 +158,7 @@ export const formatValuesToSuggestions = (
 
 export const formatFieldsToSuggestions = (
   indexPattern: IndexPattern,
-  modifyInsertText?: (input: any) => string,
+  modifyInsertText?: (input: string) => string,
   sortTextImportance?: string
 ) => {
   const filteredFields = indexPattern.fields.filter(
