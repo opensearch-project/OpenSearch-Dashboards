@@ -125,6 +125,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, datasetSelectorRef }) => {
         className="eui-yScroll deSidebar_panel"
         hasBorder={true}
         borderRadius="l"
+        data-test-subj="sidebarPanel"
       >
         <EuiSplitPanel.Inner paddingSize="s" grow={false} className="deSidebar_dataSource">
           {isEnhancementEnabled && <div ref={datasetSelectorRef} />}

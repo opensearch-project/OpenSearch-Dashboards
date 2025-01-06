@@ -162,6 +162,12 @@ export class WorkspacePlugin
            */
           return { status: AppStatus.inaccessible };
         });
+      } else {
+        this.appUpdater$.next((app) => {
+          if (app.workspaceAvailability === WorkspaceAvailability.insideWorkspace) {
+            return { status: AppStatus.inaccessible };
+          }
+        });
       }
     });
 
@@ -596,7 +602,12 @@ export class WorkspacePlugin
     this.coreStart = core;
     const isPermissionEnabled = core?.application?.capabilities.workspaces.permissionEnabled;
     this.collaboratorsAppUpdater$.next(() => {
-      return { status: isPermissionEnabled ? AppStatus.accessible : AppStatus.inaccessible };
+      return {
+        status: isPermissionEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+        navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+      };
     });
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();

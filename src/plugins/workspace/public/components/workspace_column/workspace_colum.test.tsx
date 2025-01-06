@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { coreMock } from '../../../../../core/public/mocks';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { WorkspaceColumn } from './workspace_column';
 
 describe('workspace column in saved objects page', () => {
@@ -21,27 +21,77 @@ describe('workspace column in saved objects page', () => {
   ];
   coreSetup.workspaces.workspaceList$.next(workspaceList);
 
-  it('should show workspace name correctly', () => {
+  it('should show workspace name badge correctly', async () => {
     const workspaces = ['ws-1', 'ws-2'];
-    const { container } = render(<WorkspaceColumn coreSetup={coreSetup} workspaces={workspaces} />);
+    const { findByTestId, findByText, container } = render(
+      <WorkspaceColumn coreSetup={coreSetup} workspaces={workspaces} />
+    );
+    const badge = await findByTestId('workspace-column-more-workspaces-badge');
+    expect(badge).toBeInTheDocument();
+    fireEvent.click(badge);
+    expect(await findByTestId('workspace-column-popover')).toBeInTheDocument();
+    expect(await findByText('foo')).toBeInTheDocument();
+    expect(await findByText('bar')).toBeInTheDocument();
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="euiText euiText--medium"
+          class="euiText euiText--small"
         >
-          foo | bar
+          foo
+        </div>
+          
+        <span
+          class="euiBadge euiBadge--hollow euiBadge--iconRight"
+        >
+          <span
+            class="euiBadge__content"
+          >
+            <button
+              aria-label="Open workspaces popover"
+              class="euiBadge__childButton"
+              data-test-subj="workspace-column-more-workspaces-badge"
+              title="+ 1 more"
+            >
+              + 
+              1
+               more
+            </button>
+            <button
+              aria-label="Open workspaces popover"
+              class="euiBadge__iconButton"
+              title="Open workspaces popover"
+              type="button"
+            >
+              <span
+                class="euiBadge__icon"
+                color="inherit"
+                data-euiicon-type="popout"
+              />
+            </button>
+          </span>
+        </span>
+        <div
+          class="euiPopover euiPopover--anchorRightCenter euiPopover-isOpen"
+          data-test-subj="workspace-column-popover"
+        >
+          <div
+            class="euiPopover__anchor"
+          />
         </div>
       </div>
     `);
   });
 
-  it('show empty when no workspace', () => {
+  it('show  — when no workspace', () => {
     const { container } = render(<WorkspaceColumn coreSetup={coreSetup} />);
+
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="euiText euiText--medium"
-        />
+          class="euiText euiText--small"
+        >
+          —
+        </div>
       </div>
     `);
   });
@@ -51,8 +101,10 @@ describe('workspace column in saved objects page', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="euiText euiText--medium"
-        />
+          class="euiText euiText--small"
+        >
+          —
+        </div>
       </div>
     `);
   });
