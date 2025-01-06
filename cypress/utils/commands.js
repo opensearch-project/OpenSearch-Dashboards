@@ -330,6 +330,7 @@ Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
 });
 
 addOSDUtil('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
+  cy.intercept('POST', '/api/workspaces').as('createWorkspaceInterception');
   cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
     .should('be.visible')
     .click();
@@ -348,6 +349,11 @@ addOSDUtil('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceNa
     .trigger('click');
   cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button').click();
   cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
+
+  cy.wait('@createWorkspaceInterception').then((interception) => {
+    // save the created workspace ID as an alias
+    cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
+  });
   cy.contains(/successfully/);
 });
 
