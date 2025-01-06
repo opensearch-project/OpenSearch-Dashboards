@@ -439,7 +439,8 @@ export class DocLinksService {
           workspace: {
             // https://opensearch.org/docs/latest/dashboards/workspace/workspace-acl/#defining-workspace-collaborators
             collaborators: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}workspace/workspace-acl/#defining-workspace-collaborators`,
-            privacy: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}workspace/workspace-acl/`,
+            // https://opensearch.org/docs/latest/dashboards/workspace/workspace-acl/#workspace-privacy
+            privacy: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}workspace/workspace-acl/#workspace-privacy`,
           },
         },
         noDocumentation: {
