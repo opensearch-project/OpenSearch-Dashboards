@@ -24,17 +24,13 @@ const addSidebarFieldsAndCheckDocTableColumns = (
     return cy.getElementByTestId('docTableHeaderField').eq(index);
   };
   const checkTableHeadersByArr = (expectedHeaders) => {
-    let currentHeader = 1;
-    expectedHeaders.forEach((header) => {
-      getDocTableHeaderByIndex(currentHeader).should('have.text', header);
-      currentHeader++;
+    expectedHeaders.forEach((header, currentHeader) => {
+      getDocTableHeaderByIndex(++currentHeader).should('have.text', header);
     });
   };
   const checkDocTableColumnByArr = (expectedValues, columnNumber) => {
-    let currentRow = 0;
-    expectedValues.forEach((value) => {
+    expectedValues.forEach((value, currentRow) => {
       dataExplorer.getDocTableField(columnNumber, currentRow).should('have.text', value);
-      currentRow++;
     });
   };
   const selectFields = (testFields) => {
@@ -251,12 +247,7 @@ describe('sidebar spec', () => {
       const testFields = ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'];
       const expectedTimeValues = ['3.32', '2.8', '3.35', '1.68', '4.98'];
       it('add field in index pattern', () => {
-        addSidebarFieldsAndCheckDocTableColumns(
-          testFields,
-          expectedTimeValues,
-          pplQuery,
-          sqlQuery
-        );
+        addSidebarFieldsAndCheckDocTableColumns(testFields, expectedTimeValues, pplQuery, sqlQuery);
       });
       it('add field in index', () => {
         addSidebarFieldsAndCheckDocTableColumns(testFields, expectedTimeValues, pplQuery, sqlQuery, false);
