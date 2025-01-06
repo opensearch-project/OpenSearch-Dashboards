@@ -450,40 +450,47 @@ export class WorkspaceSavedObjectsClientWrapper {
         wrapperOptions.request,
         getWorkspacesFromSavedObjects(objectToBulkGet.saved_objects)
       );
-      let flag = true;
       const processedObjects = await Promise.all(
         objectToBulkGet.saved_objects.map(async (object) => {
-          if (
-            !(await this.validateWorkspacesAndSavedObjectsPermissions(
+          try {
+            const hasPermission = await this.validateWorkspacesAndSavedObjectsPermissions(
               object,
               wrapperOptions.request,
               [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
               [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
               false
-            ))
-          ) {
-            flag = false;
+            );
+            if (hasPermission) {
+              ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
+              return object;
+            } else {
+              ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
+              return {
+                ...object,
+                workspaces: [],
+                attributes: {} as T,
+                error: {
+                  ...generateSavedObjectsPermissionError().output.payload,
+                  statusCode: 403,
+                },
+              };
+            }
+          } catch (error) {
             ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
             return {
               ...object,
               workspaces: [],
               attributes: {} as T,
               error: {
-                ...generateSavedObjectsPermissionError().output.payload,
-                statusCode: 403,
+                ...generateWorkspacePermissionError().output.payload,
+                statusCode: error.statusCode,
+                message: error.message,
               },
             };
           }
-          return object;
         })
       );
 
-      if (flag) {
-        ACLAuditor?.increment(
-          ACLAuditorStateKey.VALIDATE_SUCCESS,
-          objectToBulkGet.saved_objects.length
-        );
-      }
       return { saved_objects: processedObjects };
     };
 
