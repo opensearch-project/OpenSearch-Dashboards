@@ -157,13 +157,11 @@ const convertConnectionsToOptions = ({
 
       if (connection.connectionType === DataSourceConnectionType.OpenSearchConnection) {
         if (showDirectQueryConnections) {
-          if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-            // return [connection] for the case where the connnection has no direct connections for now, but it may have in the future
-            return [connection];
-          }
           return [
             connection,
-            ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
+            ...(selectedConnectionIds.includes(connection.id)
+              ? connection.relatedConnections ?? []
+              : []),
           ];
         }
       }
@@ -292,13 +290,22 @@ export const AssociationDataSourceModalContent = ({
 
     const fetchDataSourcesAndHandleRelatedConnections = async () => {
       setIsLoading(true);
-      const { openSearchConnections, dataConnections } = await fetchDataSources();
-      const connections = await handleDirectQueryConnections(
-        openSearchConnections,
-        dataConnections
-      );
-      setAllConnections(connections);
-      setIsLoading(false);
+      try {
+        const { openSearchConnections, dataConnections } = await fetchDataSources();
+        const connections = await handleDirectQueryConnections(
+          openSearchConnections,
+          dataConnections
+        );
+        setAllConnections(connections);
+      } catch {
+        notifications?.toasts.addDanger(
+          i18n.translate('workspace.detail.dataSources.associateModal.fetchDataSourcesError', {
+            defaultMessage: 'Failed to get data sources',
+          })
+        );
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchDataSourcesAndHandleRelatedConnections();
