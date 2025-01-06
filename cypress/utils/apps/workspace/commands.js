@@ -6,9 +6,9 @@
 Cypress.Commands.add(
   // navigates to the workspace HomePage of a given workspace
   'navigateToWorkSpaceHomePage',
-  (url, workspaceName) => {
+  (workspaceName) => {
     // Selecting the correct workspace
-    cy.visit(`${url}/app/workspace_list#`);
+    cy.visit('/app/workspace_list#');
     cy.openWorkspaceDashboard(workspaceName);
     // wait until page loads
     cy.getElementByTestId('headerAppActionMenu').should('be.visible');
@@ -19,9 +19,9 @@ Cypress.Commands.add(
   //navigate to workspace specific pages
   'navigateToWorkSpaceSpecificPage',
   (opts) => {
-    const { url, workspaceName, page, isEnhancement = false } = opts;
+    const { workspaceName, page, isEnhancement = false } = opts;
     // Navigating to the WorkSpace Home Page
-    cy.navigateToWorkSpaceHomePage(url, workspaceName);
+    cy.navigateToWorkSpaceHomePage(workspaceName);
 
     // Check for toggleNavButton and handle accordingly
     // If collapsibleNavShrinkButton is shown which means toggleNavButton is already clicked, try clicking the app link directly
@@ -46,7 +46,6 @@ Cypress.Commands.add(
   'createWorkspaceIndexPatterns',
   (opts) => {
     const {
-      url,
       workspaceName,
       indexPattern,
       timefieldName,
@@ -55,9 +54,12 @@ Cypress.Commands.add(
       isEnhancement = false,
     } = opts;
 
+    cy.intercept('POST', '/w/*/api/saved_objects/index-pattern').as(
+      'createIndexPatternInterception'
+    );
+
     // Navigate to Workspace Specific IndexPattern Page
     cy.navigateToWorkSpaceSpecificPage({
-      url,
       workspaceName,
       page: 'indexPatterns',
       isEnhancement,
@@ -117,6 +119,12 @@ Cypress.Commands.add(
     }
 
     cy.getElementByTestId('createIndexPatternButton').should('be.visible').click();
+
+    cy.wait('@createIndexPatternInterception').then((interception) => {
+      // save the created index pattern ID as an alias
+      cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
+    });
+
     cy.getElementByTestId('headerApplicationTitle').contains(indexPattern);
   }
 );
@@ -126,11 +134,10 @@ Cypress.Commands.add(
   // Don't use * in the indexPattern it adds it by default at the end of name
   'deleteWorkspaceIndexPatterns',
   (opts) => {
-    const { url, workspaceName, indexPattern, isEnhancement = false } = opts;
+    const { workspaceName, indexPattern, isEnhancement = false } = opts;
 
     // Navigate to Workspace Specific IndexPattern Page
     cy.navigateToWorkSpaceSpecificPage({
-      url,
       workspaceName,
       page: 'indexPatterns',
       isEnhancement,
