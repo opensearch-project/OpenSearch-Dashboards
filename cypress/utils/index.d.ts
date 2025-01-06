@@ -181,5 +181,14 @@ declare namespace Cypress {
      * cy.get('sourceSelector').drag('targetSelector')
      */
     drag<S = any>(targetSelector: string): Chainable<S>;
+
+    /**
+     * Creates workspace and attaches it to the provided data source
+     * It also saves the created workspace id as the alias @WORKSPACE_ID
+     */
+    createInitialWorkspaceWithDataSource<S = any>(
+      dataSourceTitle: string,
+      workspaceName: string
+    ): Chainable<S>;
   }
 }
