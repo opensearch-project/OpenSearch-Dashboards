@@ -19,6 +19,7 @@ import {
   verifyDiscoverPageState,
   verifySavedSearchInAssetsPage,
   postRequestSaveSearch,
+  updateSavedSearchAndSaveAndVerify,
 } from './utils/saved_search';
 
 export const runSavedSearchTests = () => {
@@ -120,6 +121,16 @@ export const runSavedSearchTests = () => {
             verifyDiscoverPageState(config);
           });
         });
+
+      it(`should successfully update a saved search for ${config.testName}`, () => {
+        postRequestSaveSearch(config);
+        updateSavedSearchAndSaveAndVerify(config, false);
+      });
+
+      it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
+        postRequestSaveSearch(config);
+        updateSavedSearchAndSaveAndVerify(config, true);
+      });
     });
   });
 };
