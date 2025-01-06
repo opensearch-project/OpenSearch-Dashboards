@@ -10,7 +10,7 @@ import {
   OpenSearchSqlAutocompleteResult,
 } from '../shared/types';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
-import { SQL_SYMBOLS } from './constants';
+import { SQL_SUGGESTION_IMPORTANCE, SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import {
   fetchColumnValues,
@@ -19,7 +19,6 @@ import {
   parseQuery,
 } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
-import { OpenSearchSQLParser } from './.generated/OpenSearchSQLParser';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -142,10 +141,6 @@ export const getSuggestions = async ({
       });
     }
 
-    const suggestionImportance = new Map<number, string>();
-    suggestionImportance.set(OpenSearchSQLParser.STAR, '1');
-    suggestionImportance.set(OpenSearchSQLParser.IN, '09');
-
     // Fill in SQL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
@@ -154,7 +149,7 @@ export const getSuggestions = async ({
           type: monaco.languages.CompletionItemKind.Keyword,
           insertText: `${sk.value} `,
           detail: SuggestionItemDetailsTags.Keyword,
-          sortText: suggestionImportance.get(sk.id) ?? '9' + sk.value.toLowerCase(),
+          sortText: SQL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(),
         }))
       );
     }

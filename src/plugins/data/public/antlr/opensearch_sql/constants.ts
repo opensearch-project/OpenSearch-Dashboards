@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { OpenSearchSQLParser } from './.generated/OpenSearchSQLParser';
+
 export const SQL_SYMBOLS = {
   AGREGATE_FUNCTIONS: [
     'AVG',
@@ -19,3 +21,8 @@ export const SQL_SYMBOLS = {
     'STDDEV_SAMP',
   ],
 };
+
+export const SQL_SUGGESTION_IMPORTANCE = new Map<number, string>([
+  [OpenSearchSQLParser.STAR, '1'],
+  [OpenSearchSQLParser.IN, '09'],
+]);
