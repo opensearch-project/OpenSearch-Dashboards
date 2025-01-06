@@ -5,7 +5,7 @@
 
 export * from './apps/constants';
 
-export const BASE_PATH = Cypress.env('baseUrl');
+export const BASE_PATH = Cypress.config('baseUrl');
 export const BASE_ENGINE = Cypress.env('ENGINE');
 export const SECONDARY_ENGINE = Cypress.env('SECONDARY_ENGINE');
 

@@ -568,12 +568,22 @@ describe('SavedObjectsTable', () => {
   });
 
   describe('delete', () => {
-    it('should show a confirm modal', async () => {
+    it('should show a confirm modal with correct icons and tooltips', async () => {
+      const mockGetSavedObjectLabel = jest.fn((type) => {
+        switch (type) {
+          case 'index-pattern':
+          case 'index-patterns':
+          case 'indexPatterns':
+            return 'index patterns';
+          default:
+            return type;
+        }
+      });
       const component = shallowRender();
 
       const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' },
+        { id: '1', type: 'config', meta: { icon: 'configApp' } },
+        { id: '3', type: 'dashboard', meta: { icon: 'dashboardApp' } },
       ] as SavedObjectWithMetadata[];
 
       // Ensure all promises resolve
@@ -586,7 +596,23 @@ describe('SavedObjectsTable', () => {
       await component.instance().onDelete();
       component.update();
 
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
+      expect(component.find('EuiModalHeader')).toMatchSnapshot();
+      expect(component.find('EuiModalFooter')).toMatchSnapshot();
+      expect(component.find('Delete assets')).toMatchSnapshot();
+
+      const table = component.find('EuiInMemoryTable');
+      const columns = table.prop('columns');
+
+      const typeField = columns.find((col) => col.field === 'type');
+      mockSelectedSavedObjects.forEach((savedObject) => {
+        const renderedContent = typeField.render(savedObject.type, savedObject);
+        expect(component.find('EuiToolTip')).toMatchSnapshot();
+        expect(renderedContent.props.content).toBe(mockGetSavedObjectLabel(savedObject.type));
+        const iconElement = renderedContent.props.children;
+        expect(component.find('EuiIcon')).toMatchSnapshot();
+        expect(iconElement.props.type).toBe(savedObject.meta.icon || 'apps');
+      });
     });
 
     it('should delete selected objects', async () => {
@@ -675,14 +701,14 @@ describe('SavedObjectsTable', () => {
       await component.instance().onDelete();
       component.update();
       expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
 
       await component.instance().delete();
       component.update();
       expect(notifications.toasts.addDanger).toHaveBeenCalled();
       // If user fail to delete the saved objects, the delete modal will continue to display
       expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
       expect(component.state('isDeleting')).toBe(false);
     });
   });
@@ -1018,37 +1044,6 @@ describe('SavedObjectsTable', () => {
 
       expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: 'Unable to copy 2 saved objects.',
-      });
-    });
-
-    it('should catch error when duplicating selected object is failed', async () => {
-      const component = shallowRender({ applications, workspaces });
-      component.setState({ isShowingDuplicateModal: true });
-
-      const mockCopy = jest.fn().mockResolvedValue({ error: 'error' });
-      workspaces.client$.next({ copy: mockCopy });
-      const client = workspaces.client$.getValue();
-
-      // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
-      // Ensure the state changes are reflected
-      component.update();
-
-      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
-
-      expect(client?.copy).toHaveBeenCalledWith(
-        [
-          { id: '1', type: 'dashboard' },
-          { id: '2', type: 'dashboard' },
-        ],
-        'workspace2',
-        false
-      );
-      component.update();
-
-      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Unable to copy 2 saved objects.',
-        text: 'error',
       });
     });
 

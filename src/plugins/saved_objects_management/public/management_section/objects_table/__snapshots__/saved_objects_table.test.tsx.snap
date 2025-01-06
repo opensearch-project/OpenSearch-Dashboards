@@ -1,229 +1,324 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
-<EuiConfirmModal
-  buttonColor="danger"
-  cancelButtonText={
-    <FormattedMessage
-      defaultMessage="Cancel"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-      values={Object {}}
-    />
-  }
-  confirmButtonText={
-    <FormattedMessage
-      defaultMessage="Delete"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-      values={Object {}}
-    />
-  }
-  defaultFocusedButton="confirm"
-  onCancel={[Function]}
-  onConfirm={[Function]}
-  title={
-    <FormattedMessage
-      defaultMessage="Delete saved objects"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-      values={Object {}}
-    />
-  }
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 1`] = `
+<EuiModal
+  maxWidth="50vw"
+  onClose={[Function]}
 >
-  <EuiText
-    size="s"
-  >
-    <p>
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
       <FormattedMessage
-        defaultMessage="This action will delete the following saved objects:"
-        id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+        defaultMessage="Delete assets"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
         values={Object {}}
       />
-    </p>
-  </EuiText>
-  <EuiInMemoryTable
-    columns={
-      Array [
-        Object {
-          "field": "type",
-          "name": "Type",
-          "render": [Function],
-          "width": "50px",
-        },
-        Object {
-          "field": "id",
-          "name": "Id",
-        },
-        Object {
-          "field": "meta.title",
-          "name": "Title",
-        },
-      ]
-    }
-    items={
-      Array [
-        Object {
-          "id": "1",
-          "type": "index-pattern",
-        },
-        Object {
-          "id": "3",
-          "type": "dashboard",
-        },
-      ]
-    }
-    pagination={true}
-    responsive={true}
-    sorting={false}
-    tableLayout="fixed"
-  />
-</EuiConfirmModal>
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiText
+      size="s"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="This action will delete the following assets:"
+          id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "type",
+            "name": "Type",
+            "render": [Function],
+            "width": "50px",
+          },
+          Object {
+            "field": "meta.title",
+            "name": "Title",
+          },
+          Object {
+            "field": "id",
+            "name": "ID",
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "meta": Object {
+              "icon": "configApp",
+            },
+            "type": "config",
+          },
+          Object {
+            "id": "3",
+            "meta": Object {
+              "icon": "dashboardApp",
+            },
+            "type": "dashboard",
+          },
+        ]
+      }
+      pagination={true}
+      responsive={true}
+      sorting={false}
+      tableLayout="fixed"
+    />
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiButtonEmpty
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Cancel"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+    <EuiButton
+      color="danger"
+      data-test-subj="confirmModalConfirmButton"
+      disabled={false}
+      fill={true}
+      onClick={[Function]}
+      type="submit"
+    >
+      <FormattedMessage
+        defaultMessage="Delete"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiModalFooter>
+</EuiModal>
 `;
 
-exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 1`] = `
-<EuiConfirmModal
-  buttonColor="danger"
-  cancelButtonText={
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 2`] = `
+<EuiModalHeader>
+  <EuiModalHeaderTitle>
+    <FormattedMessage
+      defaultMessage="Delete assets"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
+      values={Object {}}
+    />
+  </EuiModalHeaderTitle>
+</EuiModalHeader>
+`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 3`] = `
+<EuiModalFooter>
+  <EuiButtonEmpty
+    onClick={[Function]}
+  >
     <FormattedMessage
       defaultMessage="Cancel"
       id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
       values={Object {}}
     />
-  }
-  confirmButtonText={
+  </EuiButtonEmpty>
+  <EuiButton
+    color="danger"
+    data-test-subj="confirmModalConfirmButton"
+    disabled={false}
+    fill={true}
+    onClick={[Function]}
+    type="submit"
+  >
     <FormattedMessage
       defaultMessage="Delete"
       id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
       values={Object {}}
     />
-  }
-  defaultFocusedButton="confirm"
-  onCancel={[Function]}
-  onConfirm={[Function]}
-  title={
-    <FormattedMessage
-      defaultMessage="Delete saved objects"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-      values={Object {}}
-    />
-  }
+  </EuiButton>
+</EuiModalFooter>
+`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 4`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 5`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 6`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 7`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 8`] = `null`;
+
+exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 1`] = `
+<EuiModal
+  maxWidth="50vw"
+  onClose={[Function]}
 >
-  <EuiText
-    size="s"
-  >
-    <p>
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
       <FormattedMessage
-        defaultMessage="This action will delete the following saved objects:"
-        id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+        defaultMessage="Delete assets"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
         values={Object {}}
       />
-    </p>
-  </EuiText>
-  <EuiInMemoryTable
-    columns={
-      Array [
-        Object {
-          "field": "type",
-          "name": "Type",
-          "render": [Function],
-          "width": "50px",
-        },
-        Object {
-          "field": "id",
-          "name": "Id",
-        },
-        Object {
-          "field": "meta.title",
-          "name": "Title",
-        },
-      ]
-    }
-    items={
-      Array [
-        Object {
-          "id": "1",
-          "type": "index-pattern",
-        },
-      ]
-    }
-    pagination={true}
-    responsive={true}
-    sorting={false}
-    tableLayout="fixed"
-  />
-</EuiConfirmModal>
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiText
+      size="s"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="This action will delete the following assets:"
+          id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "type",
+            "name": "Type",
+            "render": [Function],
+            "width": "50px",
+          },
+          Object {
+            "field": "meta.title",
+            "name": "Title",
+          },
+          Object {
+            "field": "id",
+            "name": "ID",
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "type": "index-pattern",
+          },
+        ]
+      }
+      pagination={true}
+      responsive={true}
+      sorting={false}
+      tableLayout="fixed"
+    />
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiButtonEmpty
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Cancel"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+    <EuiButton
+      color="danger"
+      data-test-subj="confirmModalConfirmButton"
+      disabled={false}
+      fill={true}
+      onClick={[Function]}
+      type="submit"
+    >
+      <FormattedMessage
+        defaultMessage="Delete"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiModalFooter>
+</EuiModal>
 `;
 
 exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 2`] = `
-<EuiConfirmModal
-  buttonColor="danger"
-  cancelButtonText={
-    <FormattedMessage
-      defaultMessage="Cancel"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-      values={Object {}}
-    />
-  }
-  confirmButtonText={
-    <FormattedMessage
-      defaultMessage="Delete"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-      values={Object {}}
-    />
-  }
-  defaultFocusedButton="confirm"
-  onCancel={[Function]}
-  onConfirm={[Function]}
-  title={
-    <FormattedMessage
-      defaultMessage="Delete saved objects"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-      values={Object {}}
-    />
-  }
+<EuiModal
+  maxWidth="50vw"
+  onClose={[Function]}
 >
-  <EuiText
-    size="s"
-  >
-    <p>
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
       <FormattedMessage
-        defaultMessage="This action will delete the following saved objects:"
-        id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+        defaultMessage="Delete assets"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
         values={Object {}}
       />
-    </p>
-  </EuiText>
-  <EuiInMemoryTable
-    columns={
-      Array [
-        Object {
-          "field": "type",
-          "name": "Type",
-          "render": [Function],
-          "width": "50px",
-        },
-        Object {
-          "field": "id",
-          "name": "Id",
-        },
-        Object {
-          "field": "meta.title",
-          "name": "Title",
-        },
-      ]
-    }
-    items={
-      Array [
-        Object {
-          "id": "1",
-          "type": "index-pattern",
-        },
-      ]
-    }
-    pagination={true}
-    responsive={true}
-    sorting={false}
-    tableLayout="fixed"
-  />
-</EuiConfirmModal>
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiText
+      size="s"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="This action will delete the following assets:"
+          id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "type",
+            "name": "Type",
+            "render": [Function],
+            "width": "50px",
+          },
+          Object {
+            "field": "meta.title",
+            "name": "Title",
+          },
+          Object {
+            "field": "id",
+            "name": "ID",
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "type": "index-pattern",
+          },
+        ]
+      }
+      pagination={true}
+      responsive={true}
+      sorting={false}
+      tableLayout="fixed"
+    />
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiButtonEmpty
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Cancel"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+    <EuiButton
+      color="danger"
+      data-test-subj="confirmModalConfirmButton"
+      disabled={false}
+      fill={true}
+      onClick={[Function]}
+      type="submit"
+    >
+      <FormattedMessage
+        defaultMessage="Delete"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiModalFooter>
+</EuiModal>
 `;
 
 exports[`SavedObjectsTable duplicate should allow the user to choose on header when duplicating all 1`] = `

@@ -5,6 +5,7 @@
 
 import './data_explorer/commands';
 import './query_enhancements/commands';
+import './workspace/commands';
 
 Cypress.Commands.add('waitForLoader', (isEnhancement = false) => {
   const opts = { log: false };
