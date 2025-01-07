@@ -216,14 +216,14 @@ describe('#WorkspaceClient', () => {
     const { workspaceClient, httpSetupMock } = getWorkspaceClient();
     httpSetupMock.fetch.mockResolvedValue({
       success: true,
-      result: {},
+      successCount: 1,
     });
     const body = JSON.stringify({
-      objects: [{ id: 1, type: 'url' }],
+      objects: [{ id: 'url_id', type: 'url' }],
       targetWorkspace: 'workspace-1',
       includeReferencesDeep: false,
     });
-    await workspaceClient.copy([{ id: 1, type: 'url' }], 'workspace-1', false);
+    await workspaceClient.copy([{ id: 'url_id', type: 'url' }], 'workspace-1', false);
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_duplicate_saved_objects', {
       body,
       method: 'POST',

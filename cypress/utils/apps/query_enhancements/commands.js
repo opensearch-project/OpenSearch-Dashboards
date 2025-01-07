@@ -3,19 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-Cypress.Commands.add('setSingleLineQueryEditor', (value, submit = true) => {
-  const opts = { log: false };
-
+Cypress.Commands.add('setQueryEditor', (value, opts = {}, submit = true) => {
   Cypress.log({
-    name: 'setSingleLineQueryEditor',
+    name: 'setQueryEditor',
     displayName: 'set query',
     message: value,
   });
 
-  cy.getElementByTestId('osdQueryEditor__singleLine', opts).type(value, opts);
+  // On a new session, a syntax helper popover appears, which obstructs the typing within the query
+  // editor. Clicking on a random element removes the popover.
+  cy.getElementByTestId('headerGlobalNav').click();
+
+  // clear the editor first and then set
+  cy.get('.globalQueryEditor .react-monaco-editor-container')
+    .click()
+    .focused()
+    .type('{ctrl}a')
+    .type('{backspace}')
+    .type('{meta}a')
+    .type('{backspace}')
+    .type(value, opts);
 
   if (submit) {
-    cy.updateTopNav(opts);
+    cy.updateTopNav({ log: false });
   }
 });
 
@@ -34,6 +44,7 @@ Cypress.Commands.add('setQueryLanguage', (value) => {
 
 /**
  * Creates a new data source connection with basic auth
+ * It also saves the created data source's id to the alias @DATASOURCE_ID
  * @param {Object} options Configuration options for the data source
  * @param {string} options.name The name/title for the data source
  * @param {string} options.url The endpoint URL for the data source
@@ -74,6 +85,8 @@ Cypress.Commands.add('addDataSource', (options) => {
   // Wait for successful creation
   cy.wait('@createDataSourceRequest').then((interception) => {
     expect(interception.response.statusCode).to.equal(200);
+    // save the created data source ID as an alias
+    cy.wrap(interception.response.body.id).as('DATASOURCE_ID');
   });
 
   // Verify redirect to data sources list page
@@ -87,10 +100,88 @@ Cypress.Commands.add('deleteDataSourceByName', (dataSourceName) => {
   // Navigate to the dataSource Management page
   cy.visit('app/dataSources');
 
-  // Find the anchor text correpsonding to specified dataSource
+  // Find the anchor text corresponding to specified dataSource
   cy.get('a').contains(dataSourceName).click();
 
   // Delete the dataSource connection
   cy.getElementByTestId('editDatasourceDeleteIcon').click();
   cy.getElementByTestId('confirmModalConfirmButton').click();
+});
+
+// Deletes all data sources. This command should only be used for convenience during development
+// and should never be used in production
+Cypress.Commands.add('deleteAllDataSources', () => {
+  cy.visit('app/dataSources');
+  cy.waitForLoader(true);
+  cy.wait(2000);
+
+  cy.get('body').then(($body) => {
+    const hasEmptyState = $body.find('[data-test-subj="datasourceTableEmptyState"]').length > 0;
+    const hasDataSources = $body.find('[data-test-subj="checkboxSelectAll"]').length > 0;
+    cy.log('hasEmptyState');
+    cy.log(hasEmptyState);
+    cy.log('hasDataSources');
+    cy.log(hasDataSources);
+
+    if (hasEmptyState) {
+      cy.log('No data sources to delete');
+    } else if (hasDataSources) {
+      cy.log('Need to clean out data sources');
+      cy.getElementByTestId('checkboxSelectAll')
+        .should('exist')
+        .should('not.be.disabled')
+        .check({ force: true });
+
+      cy.getElementByTestId('deleteDataSourceConnections').should('be.visible').click();
+
+      cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
+    }
+  });
+});
+
+Cypress.Commands.add('setIndexAsDataset', (index, dataSourceName, language) => {
+  cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+  cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
+  cy.get(`[title="Indexes"]`).click();
+  cy.get(`[title="${dataSourceName}"]`).click();
+  // this element is sometimes dataSourceName masked by another element
+  cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+  cy.getElementByTestId('datasetSelectorNext').click();
+
+  if (language) {
+    cy.getElementByTestId('advancedSelectorLanguageSelect').select(language);
+  }
+
+  cy.getElementByTestId('advancedSelectorTimeFieldSelect').select('timestamp');
+  cy.getElementByTestId('advancedSelectorConfirmButton').click();
+
+  // verify that it has been selected
+  cy.getElementByTestId('datasetSelectorButton').should(
+    'contain.text',
+    `${dataSourceName}::${index}`
+  );
+});
+
+Cypress.Commands.add('setIndexPatternAsDataset', (indexPattern, dataSourceName) => {
+  cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+  cy.get(`[title="${dataSourceName}::${indexPattern}"]`).click();
+
+  // verify that it has been selected
+  cy.getElementByTestId('datasetSelectorButton').should(
+    'contain.text',
+    `${dataSourceName}::${indexPattern}`
+  );
+});
+
+Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
+  switch (type) {
+    case 'INDEX_PATTERN':
+      cy.setIndexPatternAsDataset(dataset, dataSourceName);
+      break;
+    case 'INDEXES':
+      cy.setIndexAsDataset(dataset, dataSourceName);
+      break;
+    default:
+      throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
+  }
 });

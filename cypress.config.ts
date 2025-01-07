@@ -21,6 +21,12 @@ module.exports = defineConfig({
       name: 'test_cluster',
       url: 'http://localhost:9200',
     },
+    S3_ENGINE: {
+      name: 'BasicS3Connection',
+      url: process.env.S3_CONNECTION_URL,
+      username: process.env.S3_CONNECTION_USERNAME,
+      password: process.env.S3_CONNECTION_PASSWORD,
+    },
     openSearchUrl: 'http://localhost:9200',
     SECURITY_ENABLED: false,
     AGGREGATION_VIEW: false,
@@ -32,6 +38,7 @@ module.exports = defineConfig({
     DATASOURCE_MANAGEMENT_ENABLED: false,
     ML_COMMONS_DASHBOARDS_ENABLED: true,
     WAIT_FOR_LOADER_BUFFER_MS: 0,
+    DISABLE_LOCAL_CLUSTER: false,
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
