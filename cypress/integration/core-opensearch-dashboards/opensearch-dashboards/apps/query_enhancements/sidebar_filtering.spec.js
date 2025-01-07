@@ -158,9 +158,7 @@ const checkFilteredFieldsForAllLanguages = (isIndexPattern = true) => {
       sidebarFiltering.checkSidebarFilterBarResults(search, assertion);
     });
   };
-  
-  // Check filtering results by query language
-  () => {
+  const checkFilteringResultsByQueryLanguage = () => {
     if (isIndexPattern) {
       fieldFiltering.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
       INDEX_PATTERN_LANGUAGES.slice(0, 2).forEach((lang) => {
@@ -177,6 +175,7 @@ const checkFilteredFieldsForAllLanguages = (isIndexPattern = true) => {
       checkSidebarFilterSearchResults();
     });
   }
+  checkFilteringResultsByQueryLanguage();
 };
 
 const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
@@ -189,8 +188,7 @@ const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
     sidebarFiltering.clickSidebarCollapseBtn(false);
     cy.getElementByTestId('sidebarPanel').should('be.visible');
   };
-  // Collapse and expand
-  () => {
+  const collapseAndExpandByLanguage = () => {
     if (isIndexPattern) {
       fieldFiltering.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
       INDEX_PATTERN_LANGUAGES.slice(0, 2).forEach((lang) => {
@@ -210,11 +208,12 @@ const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
       cy.getElementByTestId('sidebarPanel').should('be.visible');
     }
   }
+  collapseAndExpandByLanguage();
 };
 
 const checkSidebarPanelCollapsedState = (isIndexPattern = true) => {
   // Check state by language, according to data type
-  () => {
+  const checkStateByLanguage = () => {
     if (isIndexPattern) {
       fieldFiltering.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
       sidebarFiltering.clickSidebarCollapseBtn();
@@ -237,6 +236,7 @@ const checkSidebarPanelCollapsedState = (isIndexPattern = true) => {
       cy.getElementByTestId('sidebarPanel').should('not.be.visible');
     }
   };
+  checkStateByLanguage();
   // Clean state for the next test
   sidebarFiltering.clickSidebarCollapseBtn(false);
 };
