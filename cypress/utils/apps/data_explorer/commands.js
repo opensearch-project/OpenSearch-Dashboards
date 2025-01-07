@@ -17,32 +17,53 @@ Cypress.Commands.add('verifyTimeConfig', (start, end) => {
     .should('have.text', end);
 });
 
-Cypress.Commands.add('saveSearch', (name) => {
+Cypress.Commands.add('saveSearch', (name, saveAsNew = false) => {
   cy.log('in func save search');
   const opts = { log: false };
 
   cy.getElementByTestId('discoverSaveButton', opts).click();
   cy.getElementByTestId('savedObjectTitle').clear().type(name);
+
+  if (saveAsNew) {
+    cy.getElementByTestId('saveAsNewCheckbox').click();
+  }
+
   cy.getElementByTestId('confirmSaveSavedObjectButton').click({ force: true });
 
+  // if saving as new save search, you need to click confirm twice;
+  if (saveAsNew) {
+    cy.getElementByTestId('confirmSaveSavedObjectButton').click();
+  }
+
   // Wait for page to load
-  cy.waitForLoader();
+  cy.getElementByTestId('euiToastHeader').contains(/was saved/);
 });
 
-Cypress.Commands.add('loadSaveSearch', (name) => {
+Cypress.Commands.add('loadSaveSearch', (name, selectDuplicate = false) => {
   const opts = {
     log: false,
     force: true,
   };
 
   cy.getElementByTestId('discoverOpenButton', opts).click(opts);
-  cy.getElementByTestId(`savedObjectTitle${toTestId(name)}`).click();
+  if (selectDuplicate) {
+    cy.getElementByTestId(`savedObjectTitle${toTestId(name)}`)
+      .last()
+      .click();
+  } else {
+    cy.getElementByTestId(`savedObjectTitle${toTestId(name)}`)
+      .first()
+      .click();
+  }
 
-  cy.waitForLoader();
+  cy.get('h1').contains(name).should('be.visible');
 });
 
 Cypress.Commands.add('verifyHitCount', (count) => {
-  cy.getElementByTestId('discoverQueryHits').should('be.visible').should('have.text', count);
+  cy.getElementByTestId('discoverQueryHits')
+    .scrollIntoView()
+    .should('be.visible')
+    .should('have.text', count);
 });
 
 Cypress.Commands.add('waitForSearch', () => {
@@ -69,31 +90,40 @@ Cypress.Commands.add('verifyMarkCount', (count) => {
   cy.getElementByTestId('docTable').find('mark').should('have.length', count);
 });
 
-Cypress.Commands.add('submitFilterFromDropDown', (field, operator, value) => {
-  cy.getElementByTestId('addFilter').click();
-  cy.getElementByTestId('filterFieldSuggestionList')
-    .should('be.visible')
-    .click()
-    .type(`${field}{downArrow}{enter}`)
-    .trigger('blur', { force: true });
+Cypress.Commands.add(
+  'submitFilterFromDropDown',
+  (field, operator, value, isEnhancement = false) => {
+    if (isEnhancement) {
+      cy.getElementByTestId('showFilterActions').click();
+      cy.getElementByTestId('addFilters').click();
+    } else {
+      cy.getElementByTestId('addFilter').click();
+    }
 
-  cy.getElementByTestId('filterOperatorList')
-    .should('be.visible')
-    .click()
-    .type(`${operator}{downArrow}{enter}`)
-    .trigger('blur', { force: true });
-
-  if (value) {
-    cy.get('[data-test-subj^="filterParamsComboBox"]')
+    cy.getElementByTestId('filterFieldSuggestionList')
       .should('be.visible')
       .click()
-      .type(`${value}{downArrow}{enter}`)
+      .type(`${field}{downArrow}{enter}`)
       .trigger('blur', { force: true });
-  }
 
-  cy.getElementByTestId('saveFilter').click({ force: true });
-  cy.waitForLoader();
-});
+    cy.getElementByTestId('filterOperatorList')
+      .should('be.visible')
+      .click()
+      .type(`${operator}{downArrow}{enter}`)
+      .trigger('blur', { force: true });
+
+    if (value) {
+      cy.get('[data-test-subj^="filterParamsComboBox"]')
+        .should('be.visible')
+        .click()
+        .type(`${value}{downArrow}{enter}`)
+        .trigger('blur', { force: true });
+    }
+
+    cy.getElementByTestId('saveFilter').click({ force: true });
+    cy.waitForLoader(isEnhancement);
+  }
+);
 
 Cypress.Commands.add('saveQuery', (name, description) => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {

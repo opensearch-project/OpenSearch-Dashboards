@@ -9,7 +9,7 @@ import {
   START_TIME,
   END_TIME,
 } from '../../../../../utils/apps/constants';
-import { BASE_PATH, SECONDARY_ENGINE } from '../../../../../utils/constants';
+import { SECONDARY_ENGINE } from '../../../../../utils/constants';
 
 const randomString = Math.random().toString(36).substring(7);
 const workspace = `${WORKSPACE_NAME}-${randomString}`;
@@ -37,8 +37,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
 
     // Create and select index pattern for data_logs_small_time_1*
     cy.createWorkspaceIndexPatterns({
-      url: `${BASE_PATH}`,
-      workspaceName: `${workspace}`,
+      workspaceName: workspace,
       indexPattern: 'data_logs_small_time_1',
       timefieldName: 'timestamp',
       indexPatternHasTimefield: true,
@@ -46,13 +45,16 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
       isEnhancement: true,
     });
 
-    // Go to workspace home
-    cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${workspace}`);
-    cy.waitForLoader(true);
+    // Go to discover page
+    cy.navigateToWorkSpaceSpecificPage({
+      workspaceName: workspace,
+      page: 'discover',
+      isEnhancement: true,
+    });
   });
 
   after(() => {
-    cy.deleteWorkspaceByName(`${workspace}`);
+    cy.deleteWorkspaceByName(workspace);
     cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
     cy.deleteIndex('data_logs_small_time_1');
   });
@@ -63,7 +65,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setTopNavDate(START_TIME, END_TIME);
 
       const query = `_id:1`;
-      cy.setSingleLineQueryEditor(query);
+      cy.setQueryEditor(query);
       cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);
@@ -78,7 +80,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setTopNavDate(START_TIME, END_TIME);
 
       const query = `_id:1`;
-      cy.setSingleLineQueryEditor(query);
+      cy.setQueryEditor(query);
       cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);

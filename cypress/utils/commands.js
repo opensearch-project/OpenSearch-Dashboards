@@ -30,9 +30,36 @@ Cypress.Commands.add('getElementsByTestIds', (testIds, options = {}) => {
   return cy.get(selectors.join(','), options);
 });
 
-Cypress.Commands.add('getElementByDataTestId', (testId) => {
-  return cy.get(`[data-testid="${testId}"]`);
-});
+/**
+ * Find element from previous chained element with a data-test-subj id containing the testId.
+ * @param {string} subject DOM object to find within.
+ * @param {string} testId data-test-subj value.
+ * @param {object} options get options. Default: {}
+ * @example
+ * // returns all DOM elements that has a data-test-subj including the string 'table'
+ * cy.findElementsByTestIdLike('table')
+ */
+Cypress.Commands.add(
+  'findElementByTestIdLike',
+  { prevSubject: true },
+  (subject, partialTestId, options = {}) => {
+    return cy.wrap(subject).find(`[data-test-subj*="${partialTestId}"]`, options);
+  }
+);
+
+/**
+ * Find element from previous chained element by data-test-subj id.
+ * @param {string} subject DOM object to find within.
+ * @param {string} testId data-test-subj value.
+ * @param {object} options get options. Default: {}
+ */
+Cypress.Commands.add(
+  'findElementByTestId',
+  { prevSubject: true },
+  (subject, testId, options = {}) => {
+    return cy.wrap(subject).find(`[data-test-subj="${testId}"]`, options);
+  }
+);
 
 Cypress.Commands.add('whenTestIdNotFound', (testIds, callbackFn, options = {}) => {
   const selectors = [testIds].flat(Infinity).map((testId) => `[data-test-subj="${testId}"]`);
@@ -302,6 +329,8 @@ Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
 });
 
 Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
+  cy.intercept('POST', '/api/workspaces').as('createWorkspaceInterception');
+
   cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
     .should('be.visible')
     .click();
@@ -320,6 +349,11 @@ Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, w
     .trigger('click');
   cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button').click();
   cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
+
+  cy.wait('@createWorkspaceInterception').then((interception) => {
+    // save the created workspace ID as an alias
+    cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
+  });
   cy.contains(/successfully/);
 });
 
