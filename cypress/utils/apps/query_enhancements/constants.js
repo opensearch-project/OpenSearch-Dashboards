@@ -12,6 +12,9 @@ export const DEFAULT_TIME_INDEX_PATTERN_NAME = 'data_logs_small_time_1*';
 export const DEFAULT_NO_TIME_INDEX_PATTERN_NAME = 'data_logs_small_no_time_1*';
 export const INDEX_PATTERN_NAME = `${DATASOURCE_NAME}::${DEFAULT_TIME_INDEX_PATTERN_NAME}`;
 
+export const INDEX_PATTERN_LANGUAGES = ['DQL', 'Lucene', 'PPL', 'OpenSearch SQL'];
+export const INDEX_LANGUAGES = ['PPL', 'OpenSearch SQL'];
+
 export const DATASET_CONFIGS = {
   index_pattern: {
     type: 'index_pattern',
