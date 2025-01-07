@@ -28,10 +28,8 @@ export const sendQueryOnMultilineEditor = (query) => {
   export const clickSidebarCollapseBtn = (collapse = true) => {
     if (collapse) {
       cy.getElementByTestId('euiResizableButton').trigger('mouseover').click();
-      cy.get('.euiResizableToggleButton').click({ force: true });
-    } else {
-      cy.get('.euiResizableToggleButton').click({ force: true });
     }
+    cy.get('.euiResizableToggleButton').click({ force: true });
   };
   
   /**
