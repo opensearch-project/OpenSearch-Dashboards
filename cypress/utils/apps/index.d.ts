@@ -32,6 +32,6 @@ declare namespace Cypress {
      * @example
      * cy.updateTopNav()
      */
-    updateTopNav(): Chainable<any>;
+    updateTopNav(opts: Record<string, any>): Chainable<any>;
   }
 }
