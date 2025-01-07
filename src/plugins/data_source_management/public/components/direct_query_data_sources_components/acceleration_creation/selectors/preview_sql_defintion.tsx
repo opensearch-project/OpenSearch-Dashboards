@@ -64,9 +64,6 @@ export const PreviewSQLDefinition = ({
   const checkIfSQLWorkbenchPluginIsInstalled = () => {
     http
       .get('/api/status')
-      .then(function (response) {
-        return response;
-      })
       .then((data) => {
         for (let i = 0; i < data.status.statuses.length; ++i) {
           if (data.status.statuses[i].id.includes(queryWorkbenchPluginCheck)) {
