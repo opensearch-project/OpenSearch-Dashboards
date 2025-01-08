@@ -308,9 +308,15 @@ describe('fetchColumnValues', () => {
   });
 
   it('should return boolean values for boolean fields', async () => {
-    const result = await fetchColumnValues('test-table', 'boolean-column', mockServices, {
-      type: 'boolean',
-    } as IndexPatternField);
+    const result = await fetchColumnValues(
+      'test-table',
+      'boolean-column',
+      mockServices,
+      {
+        type: 'boolean',
+      } as IndexPatternField,
+      'INDEX_PATTERN'
+    );
 
     expect(result).toEqual(['true', 'false']);
   });
@@ -322,17 +328,29 @@ describe('fetchColumnValues', () => {
       }
     });
 
-    const result = await fetchColumnValues('test-table', 'test-column', mockServices, {
-      type: 'string',
-    } as IndexPatternField);
+    const result = await fetchColumnValues(
+      'test-table',
+      'test-column',
+      mockServices,
+      {
+        type: 'string',
+      } as IndexPatternField,
+      'INDEX_PATTERN'
+    );
 
     expect(result).toEqual([]);
   });
 
   it('should return empty array for unsupported field types', async () => {
-    const result = await fetchColumnValues('test-table', 'number-column', mockServices, {
-      type: 'number',
-    } as IndexPatternField);
+    const result = await fetchColumnValues(
+      'test-table',
+      'number-column',
+      mockServices,
+      {
+        type: 'number',
+      } as IndexPatternField,
+      'INDEX_PATTERN'
+    );
 
     expect(result).toEqual([]);
   });
@@ -350,9 +368,15 @@ describe('fetchColumnValues', () => {
 
     (mockHttp.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
-    const result = await fetchColumnValues('test-table', 'string-column', mockServices, {
-      type: 'string',
-    } as IndexPatternField);
+    const result = await fetchColumnValues(
+      'test-table',
+      'string-column',
+      mockServices,
+      {
+        type: 'string',
+      } as IndexPatternField,
+      'INDEX_PATTERN'
+    );
 
     expect(mockHttp.fetch).toHaveBeenCalledWith({
       method: 'POST',
@@ -375,14 +399,66 @@ describe('fetchColumnValues', () => {
     (mockHttp.fetch as jest.Mock).mockRejectedValue(new Error('SQL API Error'));
 
     await expect(
-      fetchColumnValues('test-table', 'string-column', mockServices, {
-        type: 'string',
-      } as IndexPatternField)
+      fetchColumnValues(
+        'test-table',
+        'string-column',
+        mockServices,
+        {
+          type: 'string',
+        } as IndexPatternField,
+        'INDEX_PATTERN'
+      )
     ).rejects.toThrow('SQL API Error');
   });
 
   it('should return empty array when field is undefined', async () => {
-    const result = await fetchColumnValues('test-table', 'string-column', mockServices, undefined);
+    const result = await fetchColumnValues(
+      'test-table',
+      'string-column',
+      mockServices,
+      undefined,
+      'INDEX_PATTERN'
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  it('should fetch values when datasetType is INDEXES', async () => {
+    const mockResponse = {
+      body: {
+        fields: [
+          {
+            values: ['value1', 'value2'],
+          },
+        ],
+      },
+    };
+
+    (mockHttp.fetch as jest.Mock).mockResolvedValue(mockResponse);
+
+    const result = await fetchColumnValues(
+      'test-table',
+      'string-column',
+      mockServices,
+      {
+        type: 'string',
+      } as IndexPatternField,
+      'INDEXES'
+    );
+
+    expect(result).toEqual(['value1', 'value2']);
+  });
+
+  it('should return empty array when datasetType is unsupported', async () => {
+    const result = await fetchColumnValues(
+      'test-table',
+      'string-column',
+      mockServices,
+      {
+        type: 'string',
+      } as IndexPatternField,
+      'S3'
+    );
 
     expect(result).toEqual([]);
   });

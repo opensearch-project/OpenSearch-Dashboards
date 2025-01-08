@@ -84,7 +84,6 @@ const rulesToVisit = new Set([
   OpenSearchSQLParser.RULE_predicate,
 ]);
 
-// TODO: double check symbol table
 class OpenSearchSqlSymbolTableVisitor
   extends OpenSearchSQLParserVisitor<{}>
   implements ISymbolTableVisitor {

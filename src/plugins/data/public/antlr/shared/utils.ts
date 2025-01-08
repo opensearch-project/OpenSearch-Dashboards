@@ -18,7 +18,7 @@ import { ParsingSubject } from './types';
 import { quotesRegex, SuggestionItemDetailsTags } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
-import { UI_SETTINGS } from '../../../common';
+import { DEFAULT_DATA, UI_SETTINGS } from '../../../common';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export interface IDataSourceRequestHandlerParams {
@@ -100,8 +100,13 @@ export const fetchColumnValues = async (
   table: string,
   column: string,
   services: IDataPluginServices,
-  fieldInOsd: IndexPatternField | undefined
+  fieldInOsd: IndexPatternField | undefined,
+  datasetType: string | undefined
 ): Promise<any[]> => {
+  if (!datasetType || !Object.values(DEFAULT_DATA.SET_TYPES).includes(datasetType)) {
+    return [];
+  }
+
   // default to true/false values for type boolean
   if (fieldInOsd?.type === 'boolean') {
     return ['true', 'false'];
