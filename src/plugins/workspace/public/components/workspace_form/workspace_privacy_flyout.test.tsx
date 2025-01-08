@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { WorkspacePrivacyFlyout } from './workspace_privacy_flyout';
 
 const setup = () => {

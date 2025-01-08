@@ -58,7 +58,7 @@ export const WorkspacePrivacyFlyout = ({ onClose }: WorkspacePrivacyFlyoutProps)
   ];
   return (
     <EuiFlyout
-      style={{ maxWidth: 431 }}
+      size="s"
       ownFocus
       onClose={onClose}
       aria-labelledby={WORKSPACE_PRIVACY_FLYOUT_TITLE_ID}
