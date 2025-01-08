@@ -10,7 +10,7 @@ import {
   START_TIME,
   END_TIME,
   INDEX_PATTERN_LANGUAGES,
-  INDEX_LANGUAGES
+  INDEX_LANGUAGES,
 } from '../../../../../utils/apps/constants';
 import * as fieldFiltering from '../../../../../integration/core-opensearch-dashboards/opensearch-dashboards/apps/query_enhancements/utils/field_display_filtering.js';
 import * as sidebarFiltering from '../../../../../integration/core-opensearch-dashboards/opensearch-dashboards/apps/query_enhancements/utils/sidebar_filtering.js';
@@ -43,7 +43,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (
   };
 
   const toggleFields = (fields) => {
-    fields.forEach(field => {
+    fields.forEach((field) => {
       cy.getElementByTestId(`fieldToggle-${field}`).click();
     });
   };
@@ -73,7 +73,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (
     },
 
     // Test language persistence
-    ...languages.map(language => () => {
+    ...languages.map((language) => () => {
       cy.setQueryLanguage(language);
       if (language !== 'OpenSearch SQL') {
         cy.setTopNavDate(START_TIME, END_TIME);
@@ -97,8 +97,8 @@ const addSidebarFieldsAndCheckDocTableColumns = (
       toggleFields(testFields);
       getDocTableHeaderByIndex(1).should('not.have.text', '_source');
       checkTableHeaders(testFields);
-    }
-  ]).each(fn => fn());
+    },
+  ]).each((fn) => fn());
 
   // Check default hits only for index pattern before running queries
   if (isIndexPattern) {
@@ -137,8 +137,8 @@ const addSidebarFieldsAndCheckDocTableColumns = (
         // No hits check for SQL query
         checkDocTableColumn(expectedValues, 2);
       });
-    }
-  ]).each(fn => fn());
+    },
+  ]).each((fn) => fn());
 
   // Cleanup
   toggleFields(testFields);
@@ -158,7 +158,8 @@ const checkFilteredFieldsForAllLanguages = (isIndexPattern = true) => {
       sidebarFiltering.checkSidebarFilterBarResults(search, assertion);
     });
   };
-  const checkFilteringResultsByQueryLanguage = () => {
+  // check filter results by query language
+  (() => {
     if (isIndexPattern) {
       fieldFiltering.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
       INDEX_PATTERN_LANGUAGES.slice(0, 2).forEach((lang) => {
@@ -174,8 +175,7 @@ const checkFilteredFieldsForAllLanguages = (isIndexPattern = true) => {
       cy.setQueryLanguage(lang);
       checkSidebarFilterSearchResults();
     });
-  }
-  checkFilteringResultsByQueryLanguage();
+  })();
 };
 
 const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
@@ -188,13 +188,14 @@ const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
     sidebarFiltering.clickSidebarCollapseBtn(false);
     cy.getElementByTestId('sidebarPanel').should('be.visible');
   };
-  const collapseAndExpandByLanguage = () => {
+  // Collapse and expand by language
+  (() => {
     if (isIndexPattern) {
       fieldFiltering.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
       INDEX_PATTERN_LANGUAGES.slice(0, 2).forEach((lang) => {
         cy.setQueryLanguage(lang);
         collapseAndExpand();
-      })
+      });
     } else {
       fieldFiltering.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
     }
@@ -207,8 +208,7 @@ const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
       cy.setQueryLanguage('DQL');
       cy.getElementByTestId('sidebarPanel').should('be.visible');
     }
-  }
-  collapseAndExpandByLanguage();
+  })();
 };
 
 const checkSidebarPanelCollapsedState = (isIndexPattern = true) => {
@@ -301,19 +301,41 @@ describe('sidebar spec', () => {
       const sqlQuery = 'SELECT * FROM data_logs_small_time_1 WHERE status_code = 200';
       const testFields = ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'];
       const expectedTimeValues = ['3.32', '2.8', '3.35', '1.68', '4.98'];
-      const nestedTestFields = ['personal.name', 'personal.age', 'personal.birthdate', 'personal.address.country'];
+      const nestedTestFields = [
+        'personal.name',
+        'personal.age',
+        'personal.birthdate',
+        'personal.address.country',
+      ];
       const expectedAgeValues = ['28', '55', '76', '56', '36'];
       it('index pattern: add field', () => {
         addSidebarFieldsAndCheckDocTableColumns(testFields, expectedTimeValues, pplQuery, sqlQuery);
       });
       it('index: add field', () => {
-        addSidebarFieldsAndCheckDocTableColumns(testFields, expectedTimeValues, pplQuery, sqlQuery, false);
+        addSidebarFieldsAndCheckDocTableColumns(
+          testFields,
+          expectedTimeValues,
+          pplQuery,
+          sqlQuery,
+          false
+        );
       });
       it('index pattern: add nested field', () => {
-        addSidebarFieldsAndCheckDocTableColumns(nestedTestFields, expectedAgeValues, pplQuery, sqlQuery);
+        addSidebarFieldsAndCheckDocTableColumns(
+          nestedTestFields,
+          expectedAgeValues,
+          pplQuery,
+          sqlQuery
+        );
       });
       it('index: add nested field', () => {
-        addSidebarFieldsAndCheckDocTableColumns(nestedTestFields, expectedAgeValues, pplQuery, sqlQuery, false);
+        addSidebarFieldsAndCheckDocTableColumns(
+          nestedTestFields,
+          expectedAgeValues,
+          pplQuery,
+          sqlQuery,
+          false
+        );
       });
     });
 
