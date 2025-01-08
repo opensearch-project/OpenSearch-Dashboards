@@ -89,6 +89,8 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
     })
   );
 
+const queryAssistantSupportedDatasetTypes = ['INDEXES', 'INDEX_PATTERN'];
+
 export const createQueryAssistExtension = (
   core: CoreSetup,
   data: DataPublicPluginSetup,
@@ -120,8 +122,13 @@ export const createQueryAssistExtension = (
         };
       }
     },
-    isEnabled$: () =>
-      getAvailableLanguages$(http, data).pipe(map((languages) => languages.length > 0)),
+    isEnabled$: (dependencies) => {
+      const query = dependencies.query;
+      if (!queryAssistantSupportedDatasetTypes.includes(query.dataset?.type || '')) {
+        return new BehaviorSubject(false);
+      }
+      return getAvailableLanguages$(http, data).pipe(map((languages) => languages.length > 0));
+    },
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
       return (

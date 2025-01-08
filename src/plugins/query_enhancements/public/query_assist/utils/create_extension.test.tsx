@@ -239,4 +239,22 @@ describe('CreateExtension', () => {
 
     expect(screen.getByText('QueryAssistSummary')).toBeInTheDocument();
   });
+
+  it('should return disabled when dataset is not supported', async () => {
+    httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
+    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
+    const isEnabled = await firstValueFrom(
+      extension.isEnabled$({
+        ...dependencies,
+        query: {
+          ...mockQueryWithIndexPattern,
+          dataset: {
+            ...mockQueryWithIndexPattern.dataset,
+            type: 'S3',
+          },
+        },
+      })
+    );
+    expect(isEnabled).toBeFalsy();
+  });
 });
