@@ -88,7 +88,10 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
     })
   );
 
-const queryAssistantSupportedDatasetTypes = ['INDEXES', 'INDEX_PATTERN'];
+const queryAssistantSupportedDatasetTypes = [
+  DEFAULT_DATA.SET_TYPES.INDEX,
+  DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+];
 
 export const createQueryAssistExtension = (
   core: CoreSetup,
