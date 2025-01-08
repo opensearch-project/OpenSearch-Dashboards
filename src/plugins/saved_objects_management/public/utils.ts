@@ -25,9 +25,10 @@ export function formatInspectUrl(
   const useUpdatedUX = !!coreStart.uiSettings.get('home:useNewHomePage');
   let finalEditUrl = editUrl;
   if (useUpdatedUX && finalEditUrl) {
-    finalEditUrl = finalEditUrl.replace(/^\/management\/opensearch-dashboards/, '/app');
+    finalEditUrl = finalEditUrl.replace(/^\/management\/opensearch-dashboards/, '');
   }
   if (finalEditUrl) {
+    finalEditUrl = `/app${finalEditUrl}`;
     const basePath = coreStart.http.basePath;
     let inAppUrl = basePath.prepend(finalEditUrl);
     const workspaceEnabled = coreStart.application.capabilities.workspaces.enabled;
