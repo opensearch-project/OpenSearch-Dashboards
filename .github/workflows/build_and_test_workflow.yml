@@ -62,17 +62,17 @@ jobs:
           disk-root: 'C:'
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup JDK (Windows only)
         if: matrix.os == 'windows-latest'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'adopt'
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -88,7 +88,7 @@ jobs:
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
@@ -133,10 +133,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -151,7 +151,7 @@ jobs:
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ hashFiles('**/yarn.lock') }}
@@ -161,6 +161,25 @@ jobs:
       - name: Run bootstrap
         run: yarn osd bootstrap
 
+      - name: Check for yarn.lock changes
+        run: |
+          if [[ `git status --porcelain yarn.lock` ]]; then
+            echo -e "\033[31mThe yarn.lock file is out of sync!\033[0m"
+            git diff
+            exit 1
+          fi
+
+      - name: Generate dev docs
+        run: yarn docs:generateDevDocs
+
+      - name: Check for dev docs changes
+        run: |
+          if [[ `git status --porcelain docs/_sidebar.md` ]]; then
+            echo -e "\033[31mThe dev docs are out of sync; run yarn docs:generateDevDocs and amend the PR.\033[0m"
+            git diff
+            exit 1
+          fi
+
       - name: Run linter
         id: linter
         run: yarn lint
@@ -168,6 +187,10 @@ jobs:
       - name: Validate NOTICE file
         id: notice-validate
         run: yarn notice:validate
+
+      - name: Validate licenses
+        id: i18n-licenses
+        run: yarn checkLicenses
 
       - name: Check i18n
         id: i18n-check
@@ -203,17 +226,17 @@ jobs:
           disk-root: 'C:'
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup JDK (Windows only)
         if: matrix.os == 'windows-latest'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'adopt'
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -229,7 +252,7 @@ jobs:
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
@@ -282,7 +305,7 @@ jobs:
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: failure-artifacts-ci${{ matrix.group }}
@@ -319,17 +342,17 @@ jobs:
           disk-root: 'C:'
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup JDK (Windows only)
         if: matrix.os == 'windows-latest'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'adopt'
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -345,7 +368,7 @@ jobs:
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
@@ -393,7 +416,7 @@ jobs:
         id: plugin-ftr-tests
         run: node scripts/functional_tests.js --config test/plugin_functional/config.ts
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: failure-artifacts-plugin-functional-${{ matrix.os }}
@@ -451,12 +474,12 @@ jobs:
           disk-root: 'C:'
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ./artifacts
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -472,7 +495,7 @@ jobs:
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
@@ -506,7 +529,7 @@ jobs:
       - name: Build `${{ matrix.name }}`
         run: yarn ${{ matrix.script }} --release
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: success()
         with:
           name: ${{ matrix.suffix }}-${{ env.VERSION }}
@@ -540,7 +563,7 @@ jobs:
           ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ./artifacts
 
@@ -548,7 +571,7 @@ jobs:
       - run: echo [NOTE] These tests will be ran using Linux x64 release builds without security
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -583,7 +606,7 @@ jobs:
         run: echo "BWC_VERSIONS=${{ matrix.version }}" >> $GITHUB_ENV
 
       - name: Download OpenSearch Dashboards
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         id: download
         with:
           name: linux-x64-${{ env.VERSION }}
@@ -595,7 +618,7 @@ jobs:
         run: |
           ./bwctest.sh -s false -o ${{ env.OPENSEARCH_URL }} -d ${{ steps.download.outputs.download-path }}/opensearch-dashboards-${{ env.VERSION }}-linux-x64.tar.gz
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() && steps.verify-opensearch-exists.outputs.version-exists == 'true' }}
         with:
           name: ${{ matrix.version }}-test-failures

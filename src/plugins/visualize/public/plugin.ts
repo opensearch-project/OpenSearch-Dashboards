@@ -42,6 +42,7 @@ import {
   ScopedHistory,
 } from 'opensearch-dashboards/public';
 
+import { WorkspaceAvailability } from '../../../../src/core/public';
 import {
   Storage,
   createOsdUrlTracker,
@@ -158,6 +159,7 @@ export class VisualizePlugin
       title: 'Visualize',
       order: 8000,
       euiIconType: 'inputOutput',
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       updater$: this.appStateUpdater.asObservable(),

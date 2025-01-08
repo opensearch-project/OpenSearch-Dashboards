@@ -34,12 +34,10 @@ import {
   SavedObjectsClientContract,
   SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsFindResult,
+  WorkspacePermissionMode,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
-import {
-  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-  WorkspacePermissionMode,
-} from '../../common/constants';
+import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
@@ -57,15 +55,6 @@ const generateSavedObjectsPermissionError = () =>
     new Error(
       i18n.translate('workspace.saved_objects.permission.invalidate', {
         defaultMessage: 'Invalid saved objects permission',
-      })
-    )
-  );
-
-const generateDataSourcePermissionError = () =>
-  SavedObjectsErrorHelpers.decorateForbiddenError(
-    new Error(
-      i18n.translate('workspace.saved_objects.data_source.invalidate', {
-        defaultMessage: 'Invalid data source permission, please associate it to current workspace',
       })
     )
   );
@@ -204,32 +193,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
     return hasPermission;
   }
-
-  // Data source is a workspace level object, validate if the request has access to the data source within the requested workspace.
-  private validateDataSourcePermissions = (
-    object: SavedObject,
-    request: OpenSearchDashboardsRequest
-  ) => {
-    const requestWorkspaceId = getWorkspaceState(request).requestWorkspaceId;
-    // Deny access if the object is a global data source (no workspaces assigned)
-    if (!object.workspaces || object.workspaces.length === 0) {
-      return false;
-    }
-    /**
-     * Allow access if no specific workspace is requested.
-     * This typically occurs when retrieving data sources or performing operations
-     * that don't require a specific workspace, such as pages within the
-     * Data Administration navigation group that include a data source picker.
-     */
-    if (!requestWorkspaceId) {
-      return true;
-    }
-    /*
-     * Allow access if the requested workspace matches one of the object's assigned workspaces
-     * This ensures that the user can only access data sources within their current workspace
-     */
-    return object.workspaces.includes(requestWorkspaceId);
-  };
 
   private getWorkspaceTypeEnabledClient(request: OpenSearchDashboardsRequest) {
     return this.getScopedClient?.(request, {
@@ -462,21 +425,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     ): Promise<SavedObject<T>> => {
       const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
 
-      if (validateIsWorkspaceDataSourceAndConnectionObjectType(objectToGet.type)) {
-        if (isDataSourceAdmin) {
-          ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
-          return objectToGet;
-        }
-        const hasPermission = this.validateDataSourcePermissions(
-          objectToGet,
-          wrapperOptions.request
-        );
-        if (!hasPermission) {
-          ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-          throw generateDataSourcePermissionError();
-        }
-      }
-
       if (
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           objectToGet,
@@ -502,34 +450,48 @@ export class WorkspaceSavedObjectsClientWrapper {
         wrapperOptions.request,
         getWorkspacesFromSavedObjects(objectToBulkGet.saved_objects)
       );
-
-      for (const object of objectToBulkGet.saved_objects) {
-        if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
-          const hasPermission = this.validateDataSourcePermissions(object, wrapperOptions.request);
-          if (!hasPermission) {
+      const processedObjects = await Promise.all(
+        objectToBulkGet.saved_objects.map(async (object) => {
+          try {
+            const hasPermission = await this.validateWorkspacesAndSavedObjectsPermissions(
+              object,
+              wrapperOptions.request,
+              [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
+              [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
+              false
+            );
+            if (hasPermission) {
+              ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
+              return object;
+            } else {
+              ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
+              return {
+                ...object,
+                workspaces: [],
+                attributes: {} as T,
+                error: {
+                  ...generateSavedObjectsPermissionError().output.payload,
+                  statusCode: 403,
+                },
+              };
+            }
+          } catch (error) {
             ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-            throw generateDataSourcePermissionError();
+            return {
+              ...object,
+              workspaces: [],
+              attributes: {} as T,
+              error: {
+                ...generateWorkspacePermissionError().output.payload,
+                statusCode: error.statusCode,
+                message: error.message,
+              },
+            };
           }
-        }
-
-        if (
-          !(await this.validateWorkspacesAndSavedObjectsPermissions(
-            object,
-            wrapperOptions.request,
-            [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
-            [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
-            false
-          ))
-        ) {
-          ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-          throw generateSavedObjectsPermissionError();
-        }
-      }
-      ACLAuditor?.increment(
-        ACLAuditorStateKey.VALIDATE_SUCCESS,
-        objectToBulkGet.saved_objects.length
+        })
       );
-      return objectToBulkGet;
+
+      return { saved_objects: processedObjects };
     };
 
     const findWithWorkspacePermissionControl = async <T = unknown>(

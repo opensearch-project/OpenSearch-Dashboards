@@ -4,10 +4,16 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, Logger, PrincipalType, ACL, DEFAULT_NAV_GROUPS } from '../../../../core/server';
+import {
+  IRouter,
+  Logger,
+  PrincipalType,
+  ACL,
+  DEFAULT_NAV_GROUPS,
+  WorkspacePermissionMode,
+} from '../../../../core/server';
 import { getUseCaseFeatureConfig } from '../../common/utils';
 import {
-  WorkspacePermissionMode,
   MAX_WORKSPACE_NAME_LENGTH,
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
 } from '../../common/constants';
@@ -114,6 +120,7 @@ export function registerRoutes({
   maxImportExportSize,
   permissionControlClient,
   isPermissionControlEnabled,
+  isDataSourceEnabled,
 }: {
   client: IWorkspaceClientImpl;
   logger: Logger;
@@ -121,6 +128,7 @@ export function registerRoutes({
   maxImportExportSize: number;
   permissionControlClient?: SavedObjectsPermissionControlContract;
   isPermissionControlEnabled: boolean;
+  isDataSourceEnabled: boolean;
 }) {
   router.post(
     {
@@ -336,5 +344,5 @@ export function registerRoutes({
   );
 
   // duplicate saved objects among workspaces
-  registerDuplicateRoute(router, logger, client, maxImportExportSize);
+  registerDuplicateRoute(router, logger, client, maxImportExportSize, isDataSourceEnabled);
 }
