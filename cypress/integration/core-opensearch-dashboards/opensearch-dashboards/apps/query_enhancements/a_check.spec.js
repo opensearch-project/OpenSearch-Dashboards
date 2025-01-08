@@ -5,14 +5,11 @@
 
 import { WORKSPACE_NAME, DATASOURCE_NAME } from '../../../../../utils/apps/constants';
 import { SECONDARY_ENGINE } from '../../../../../utils/constants';
-import { createOSDUtils } from '../../../../../utils/osd_utils';
 
 const randomString = Math.random().toString(36).substring(7);
 const workspace = `${WORKSPACE_NAME}-${randomString}`;
 
 describe('No Index Pattern Check Test', () => {
-  const osdUtils = createOSDUtils(cy);
-
   before(() => {
     // Load test data
     cy.setupTestData(
@@ -36,7 +33,7 @@ describe('No Index Pattern Check Test', () => {
     // Create workspace
     cy.deleteWorkspaceByName(workspace);
     cy.visit('/app/home');
-    osdUtils.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
+    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
     cy.wait(2000);
   });
 

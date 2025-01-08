@@ -3,14 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createOSDUtils } from '../osd_utils';
-
 const dataSourceTitle = Cypress.env('dataSourceTitle');
 
 export function createWorkspaceAndSampleData(url, workspaceName) {
   describe('setup workspace', () => {
-    const osdUtils = createOSDUtils(cy);
-
     describe('checking home page', () => {
       it('checking workspace initial page', () => {
         cy.visit(`${url}/app/home`);
@@ -21,7 +17,7 @@ export function createWorkspaceAndSampleData(url, workspaceName) {
     describe('creating workspace', () => {
       it('creating workspace with data source', () => {
         cy.visit(`${url}/app/home`);
-        osdUtils.createInitialWorkspaceWithDataSource(dataSourceTitle, workspaceName);
+        cy.osd.createInitialWorkspaceWithDataSource(dataSourceTitle, workspaceName);
         cy.wait(2000);
       });
     });
@@ -29,7 +25,7 @@ export function createWorkspaceAndSampleData(url, workspaceName) {
     describe('adding sample data to workspace', () => {
       it('add sample data to data source', () => {
         cy.visit(`${url}/app/workspace_list`);
-        osdUtils.openWorkspaceDashboard(workspaceName);
+        cy.osd.openWorkspaceDashboard(workspaceName);
         cy.openSampleDataPage();
         cy.addSampleDataToDataSource(dataSourceTitle);
       });

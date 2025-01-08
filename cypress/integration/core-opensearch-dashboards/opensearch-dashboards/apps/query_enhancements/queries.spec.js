@@ -10,14 +10,11 @@ import {
   END_TIME,
 } from '../../../../../utils/apps/constants';
 import { SECONDARY_ENGINE } from '../../../../../utils/constants';
-import { createOSDUtils } from '../../../../../utils/osd_utils';
 
 const randomString = Math.random().toString(36).substring(7);
 const workspace = `${WORKSPACE_NAME}-${randomString}`;
 
 describe('query enhancement queries', { scrollBehavior: false }, () => {
-  const osdUtils = createOSDUtils(cy);
-
   before(() => {
     // Load test data
     cy.setupTestData(
@@ -36,7 +33,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
     // Create workspace and set up index pattern
     cy.deleteWorkspaceByName(workspace);
     cy.visit('/app/home');
-    osdUtils.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
+    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
 
     // Create and select index pattern for data_logs_small_time_1*
     cy.createWorkspaceIndexPatterns({

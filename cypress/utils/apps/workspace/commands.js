@@ -3,16 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createOSDUtils } from '../../osd_utils';
-
 Cypress.Commands.add(
   // navigates to the workspace HomePage of a given workspace
   'navigateToWorkSpaceHomePage',
   (workspaceName) => {
-    const osdUtils = createOSDUtils(cy);
     // Selecting the correct workspace
     cy.visit('/app/workspace_list#');
-    osdUtils.openWorkspaceDashboard(workspaceName);
+    cy.osd.openWorkspaceDashboard(workspaceName);
     // wait until page loads
     cy.getElementByTestId('headerAppActionMenu').should('be.visible');
   }
