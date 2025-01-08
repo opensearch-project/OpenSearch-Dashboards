@@ -1,0 +1,2 @@
+fix:
+- Disable query assistant when dataset type is not supported ([#9157](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9157))
