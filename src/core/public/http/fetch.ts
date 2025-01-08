@@ -182,6 +182,9 @@ export class Fetch {
 
     try {
       response = await window.fetch(request);
+      if (fetchOptions.pureFetch) {
+        return { fetchOptions, request, response, body };
+      }
     } catch (err) {
       throw new HttpFetchError(err.message, err.name ?? 'Error', request);
     }
