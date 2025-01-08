@@ -1,0 +1,2 @@
+fix:
+- [Workspace][Bug] Fix inspect page url error. ([#8857](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8857))
