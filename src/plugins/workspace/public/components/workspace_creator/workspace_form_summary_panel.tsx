@@ -21,6 +21,7 @@ import { WorkspaceFormDataState } from '../workspace_form';
 import { WorkspaceUseCase } from '../../types';
 import { RightSidebarScrollField, RIGHT_SIDEBAR_SCROLL_KEY } from './utils';
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
+import { privacyType2TextMap, WorkspacePrivacyItemType } from '../workspace_form/constants';
 
 const SCROLL_FIELDS = {
   [RightSidebarScrollField.Name]: i18n.translate('workspace.form.summary.panel.name.title', {
@@ -48,6 +49,12 @@ const SCROLL_FIELDS = {
     'workspace.form.summary.panel.collaborators.title',
     {
       defaultMessage: 'Collaborators',
+    }
+  ),
+  [RightSidebarScrollField.PrivacyType]: i18n.translate(
+    'workspace.form.summary.panel.privacyType.title',
+    {
+      defaultMessage: 'Workspace privacy',
     }
   ),
 };
@@ -138,6 +145,7 @@ interface WorkspaceFormSummaryPanelProps {
   application: ApplicationStart;
   isSubmitting: boolean;
   dataSourceEnabled: boolean;
+  privacyType: WorkspacePrivacyItemType;
 }
 
 export const WorkspaceFormSummaryPanel = ({
@@ -147,9 +155,11 @@ export const WorkspaceFormSummaryPanel = ({
   application,
   isSubmitting,
   dataSourceEnabled,
+  privacyType,
 }: WorkspaceFormSummaryPanelProps) => {
   const useCase = availableUseCases.find((item) => item.id === formData.useCase);
   const useCaseIcon = useCase?.icon || 'logoOpenSearch';
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   return (
     <EuiCard
@@ -190,6 +200,12 @@ export const WorkspaceFormSummaryPanel = ({
           )}
         </FieldSummaryItem>
       )}
+      {isPermissionEnabled && (
+        <FieldSummaryItem field={RightSidebarScrollField.PrivacyType}>
+          {privacyType && <EuiText size="xs">{privacyType2TextMap[privacyType].title}</EuiText>}
+        </FieldSummaryItem>
+      )}
+
       <WorkspaceCreateActionPanel
         formData={formData}
         formId={formId}
