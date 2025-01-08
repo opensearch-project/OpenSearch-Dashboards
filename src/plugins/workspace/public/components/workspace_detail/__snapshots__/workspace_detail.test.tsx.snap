@@ -486,6 +486,77 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
             </div>
           </div>
         </div>
+        <div
+          class="euiDescribedFormGroup"
+          role="group"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <h3
+                class="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+              >
+                Workspace privacy
+              </h3>
+              <div
+                class="euiText euiText--small euiDescribedFormGroup__description"
+              >
+                <div
+                  class="euiTextColor euiTextColor--subdued"
+                >
+                  <span>
+                    Manage who can view or edit workspace and assign workspace administrators on the 
+                    <button
+                      class="euiLink euiLink--primary"
+                      type="button"
+                    >
+                      <span>
+                        Collaborators
+                      </span>
+                    </button>
+                     page.
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+            >
+              <div
+                class="euiFormRow euiFormRow--compressed"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    class="euiFormLabel euiFormRow__label"
+                    for="generated-id"
+                  >
+                    Private to collaborators
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiText euiText--extraSmall"
+                    id="generated-id"
+                  >
+                    <div
+                      class="euiTextColor euiTextColor--subdued"
+                    >
+                      Only collaborators can access the workspace.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </form>
     </div>
   </div>
