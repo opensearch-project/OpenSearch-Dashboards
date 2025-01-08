@@ -1,2 +1,2 @@
 chore:
-- Create namespaced OSD cypress util ([#9150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9150))
+- Create cypress command namespacing util ([#9150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9150))
