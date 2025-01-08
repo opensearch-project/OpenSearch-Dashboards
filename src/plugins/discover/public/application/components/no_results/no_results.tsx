@@ -300,7 +300,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
             </EuiText>
           }
         />
-        {tabs.length && (
+        {tabs.length > 0 && (
           <div
             className="discoverNoResults-sampleContainer"
             data-test-subj="discoverNoResultsSampleContainer"
