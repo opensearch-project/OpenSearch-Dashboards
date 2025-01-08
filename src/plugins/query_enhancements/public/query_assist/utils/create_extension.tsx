@@ -128,7 +128,7 @@ export const createQueryAssistExtension = (
     isEnabled$: (dependencies) => {
       const query = dependencies.query;
       if (!queryAssistantSupportedDatasetTypes.includes(query.dataset?.type || '')) {
-        return new BehaviorSubject(false);
+        return of(false);
       }
       return getAvailableLanguages$(http, data).pipe(map((languages) => languages.length > 0));
     },
