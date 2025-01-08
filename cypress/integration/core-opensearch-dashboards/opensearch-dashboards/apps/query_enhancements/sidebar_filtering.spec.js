@@ -170,7 +170,6 @@ const checkFilteredFieldsForAllLanguages = (isIndexPattern = true) => {
     } else {
       fieldFiltering.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
     }
-    fieldFiltering.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
     INDEX_LANGUAGES.forEach((lang) => {
       cy.setQueryLanguage(lang);
       checkSidebarFilterSearchResults();
@@ -213,32 +212,33 @@ const checkSidebarPanelCollapseAndExpandBehavior = (isIndexPattern = true) => {
 
 const checkSidebarPanelCollapsedState = (isIndexPattern = true) => {
   // Check state by language, according to data type
-  const checkStateByLanguage = () => {
-    if (isIndexPattern) {
-      fieldFiltering.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
-      sidebarFiltering.clickSidebarCollapseBtn();
-      INDEX_PATTERN_LANGUAGES.slice(0, 2).forEach((lang) => {
-        cy.setQueryLanguage(lang);
-        cy.getElementByTestId('sidebarPanel').should('not.be.visible');
-      });
-    } else {
-      fieldFiltering.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
-    }
-    INDEX_LANGUAGES.forEach((lang) => {
-      cy.setQueryLanguage(lang);
-      if (!isIndexPattern && lang === 'PPL') {
+  cy.wrap([
+    () => {
+      if (isIndexPattern) {
+        fieldFiltering.selectIndexPatternDataset(INDEX_PATTERN_NAME, 'DQL');
         sidebarFiltering.clickSidebarCollapseBtn();
+        INDEX_PATTERN_LANGUAGES.slice(0, 2).forEach((lang) => {
+          cy.setQueryLanguage(lang);
+          cy.getElementByTestId('sidebarPanel').should('not.be.visible');
+        });
+      } else {
+        fieldFiltering.selectIndexDataset(DATASOURCE_NAME, INDEX_NAME, 'PPL', 'timestamp');
+      }
+      INDEX_LANGUAGES.forEach((lang) => {
+        cy.setQueryLanguage(lang);
+        if (!isIndexPattern && lang === 'PPL') {
+          sidebarFiltering.clickSidebarCollapseBtn();
+          cy.getElementByTestId('sidebarPanel').should('not.be.visible');
+        }
+      });
+      if (isIndexPattern) {
+        cy.setQueryLanguage('DQL');
         cy.getElementByTestId('sidebarPanel').should('not.be.visible');
       }
-    });
-    if (isIndexPattern) {
-      cy.setQueryLanguage('DQL');
-      cy.getElementByTestId('sidebarPanel').should('not.be.visible');
-    }
-  };
-  checkStateByLanguage();
-  // Clean state for the next test
-  sidebarFiltering.clickSidebarCollapseBtn(false);
+    },
+    // Clean state for the next test
+    () => sidebarFiltering.clickSidebarCollapseBtn(false),
+  ]).each((fn) => fn());
 };
 
 describe('sidebar spec', () => {
