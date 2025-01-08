@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
 import {
@@ -123,7 +123,7 @@ export const createQueryAssistExtension = (
     isEnabled$: (dependencies) => {
       const query = dependencies.query;
       if (!queryAssistantSupportedDatasetTypes.includes(query.dataset?.type || '')) {
-        return new BehaviorSubject(false);
+        return of(false);
       }
       return getAvailableLanguages$(http, data).pipe(map((languages) => languages.length > 0));
     },
