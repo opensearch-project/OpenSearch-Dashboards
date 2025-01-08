@@ -164,35 +164,37 @@ export const WorkspaceCollaboratorTable = ({
   } = useOpenSearchDashboards();
 
   const items: PermissionSettingWithAccessLevelAndDisplayedType[] = useMemo(() => {
-    return permissionSettings.map((setting) => {
-      const collaborator = isWorkspacePermissionSetting(setting)
-        ? convertPermissionSettingToWorkspaceCollaborator(setting)
-        : undefined;
-      const basicSettings = {
-        ...setting,
-        // This is used for table display and search match.
-        displayedType: collaborator
-          ? getDisplayedType(displayedCollaboratorTypes, collaborator)
-          : undefined,
-        accessLevel: collaborator
-          ? WORKSPACE_ACCESS_LEVEL_NAMES[collaborator.accessLevel]
-          : undefined,
-      };
-      // Unique primary key and filter null value
-      if (setting.type === WorkspacePermissionItemType.User) {
-        return {
-          ...basicSettings,
-          // Id represents the index of the permission setting in the array, will use primaryId for displayed id
-          primaryId: setting.userId,
+    return permissionSettings
+      .map((setting) => {
+        const collaborator = isWorkspacePermissionSetting(setting)
+          ? convertPermissionSettingToWorkspaceCollaborator(setting)
+          : undefined;
+        const basicSettings = {
+          ...setting,
+          // This is used for table display and search match.
+          displayedType: collaborator
+            ? getDisplayedType(displayedCollaboratorTypes, collaborator)
+            : undefined,
+          accessLevel: collaborator
+            ? WORKSPACE_ACCESS_LEVEL_NAMES[collaborator.accessLevel]
+            : undefined,
         };
-      } else if (setting.type === WorkspacePermissionItemType.Group) {
-        return {
-          ...basicSettings,
-          primaryId: setting.group,
-        };
-      }
-      return basicSettings;
-    });
+        // Unique primary key and filter null value
+        if (setting.type === WorkspacePermissionItemType.User) {
+          return {
+            ...basicSettings,
+            // Id represents the index of the permission setting in the array, will use primaryId for displayed id
+            primaryId: setting.userId,
+          };
+        } else if (setting.type === WorkspacePermissionItemType.Group) {
+          return {
+            ...basicSettings,
+            primaryId: setting.group,
+          };
+        }
+        return basicSettings;
+      })
+      .filter((item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*'));
   }, [permissionSettings, displayedCollaboratorTypes]);
 
   const adminCollaboratorsNum = useMemo(() => {

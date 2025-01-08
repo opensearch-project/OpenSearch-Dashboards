@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPage, EuiPanel } from '@elastic/eui';
+import { EuiPage, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 import { useObservable } from 'react-use';
@@ -27,6 +27,7 @@ import {
 import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
 import { WorkspaceClient } from '../../workspace_client';
 import { WorkspacePrivacyFlyout } from '../workspace_form/workspace_privacy_flyout';
+import { WorkspaceCollaboratorPrivacySettingPanel } from '../workspace_form/workspace_collaborator_privacy_setting_panel';
 
 export const WorkspaceCollaborators = () => {
   const {
@@ -130,13 +131,20 @@ export const WorkspaceCollaborators = () => {
         ]}
         setMountPoint={application?.setAppRightControls}
       />
-      <EuiPanel>
-        <WorkspaceCollaboratorTable
+      <div>
+        <WorkspaceCollaboratorPrivacySettingPanel
           permissionSettings={permissionSettings}
-          displayedCollaboratorTypes={displayedCollaboratorTypes}
           handleSubmitPermissionSettings={handleSubmitPermissionSettings}
         />
-      </EuiPanel>
+        <EuiSpacer />
+        <EuiPanel>
+          <WorkspaceCollaboratorTable
+            permissionSettings={permissionSettings}
+            displayedCollaboratorTypes={displayedCollaboratorTypes}
+            handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+          />
+        </EuiPanel>
+      </div>
       {isPrivacyFlyoutVisible && (
         <WorkspacePrivacyFlyout onClose={() => setIsPrivacyFlyoutVisible(false)} />
       )}
