@@ -58,6 +58,7 @@ export const runSavedQueriesOldUITests = () => {
     });
 
     after(() => {
+      // No need to explicitly delete all saved queries as deleting the workspace will delete associated saved queries
       cy.deleteWorkspaceByName(workspaceName);
       // // TODO: Modify deleteIndex to handle an array of index and remove hard code
       cy.deleteDataSourceByName(datasourceName);
