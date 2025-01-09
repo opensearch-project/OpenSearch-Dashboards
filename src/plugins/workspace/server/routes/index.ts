@@ -343,5 +343,6 @@ export function registerRoutes({
     })
   );
 
+  // duplicate saved objects among workspaces
   registerDuplicateRoute(router, logger, client, maxImportExportSize, isDataSourceEnabled);
 }

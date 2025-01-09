@@ -256,7 +256,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
     if (isPermissionControlEnabled) this.setupPermission(core);
-
     const router = core.http.createRouter();
 
     registerRoutes({
