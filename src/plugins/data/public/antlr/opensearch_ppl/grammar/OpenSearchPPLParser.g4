@@ -168,12 +168,12 @@ mlArg
 fromClause
    : SOURCE EQUAL tableSourceClause
    | INDEX EQUAL tableSourceClause
-   // | SOURCE EQUAL tableFunction
-   // | INDEX EQUAL tableFunction
+   | SOURCE EQUAL tableFunction
+   | INDEX EQUAL tableFunction
    ;
 
 tableSourceClause
-   : tableSource // (COMMA tableSource)*
+   : tableSource (COMMA tableSource)*
    ;
 
 renameClasue
