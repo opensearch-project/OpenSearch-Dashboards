@@ -25,7 +25,11 @@ import {
 import { FormattedMessage } from 'react-intl';
 import { i18n } from '@osd/i18n';
 
-import { getDataSourcesList, fetchDataSourceConnections } from '../../utils';
+import {
+  getDataSourcesList,
+  fetchDirectQueryConnectionsByIDs,
+  convertDataSourcesToOpenSearchAndDataConnections,
+} from '../../utils';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
@@ -154,21 +158,23 @@ const convertConnectionsToOptions = ({
       }
 
       if (connection.connectionType === DataSourceConnectionType.DataConnection) {
-        if (showDirectQueryConnections) {
+        if (!showDirectQueryConnections) {
           return [connection];
         }
         return [];
       }
 
-      if (showDirectQueryConnections) {
-        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-          return [];
+      if (connection.connectionType === DataSourceConnectionType.OpenSearchConnection) {
+        if (showDirectQueryConnections) {
+          return [
+            connection,
+            ...(selectedConnectionIds.includes(connection.id)
+              ? connection.relatedConnections ?? []
+              : []),
+          ];
         }
-        return [
-          connection,
-          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
-        ];
       }
+
       return [connection];
     })
     .map((connection) =>
@@ -236,6 +242,46 @@ export const AssociationDataSourceModalContent = ({
     }
   }, [selectedConnectionIds, allConnections, handleAssignDataSourceConnections]);
 
+  const handleDirectQueryConnections = useCallback(
+    async (
+      openSearchConnections: DataSourceConnection[],
+      dataConnections: DataSourceConnection[]
+    ) => {
+      if (mode === AssociationDataSourceModalMode.OpenSearchConnections) {
+        return [...openSearchConnections, ...dataConnections];
+      }
+
+      const fetchDqcConnectionsPromises = openSearchConnections.map((ds) =>
+        fetchDirectQueryConnectionsByIDs([ds.id], http, notifications)
+          .then((directQueryConnections) => ({
+            id: ds.id,
+            relatedConnections: directQueryConnections,
+          }))
+          .catch(() => ({
+            id: ds.id,
+            relatedConnections: [],
+          }))
+      );
+      const dqcConnections = await Promise.all(fetchDqcConnectionsPromises);
+
+      const allConnectionsWithDQC = openSearchConnections
+        .filter((connection) => {
+          const filteredData = dqcConnections.find((c) => c.id === connection.id);
+          return filteredData && filteredData.relatedConnections.length > 0;
+        })
+        .map((connection) => {
+          const relatedDQC = dqcConnections.find((c) => c.id === connection.id);
+          return {
+            ...connection,
+            relatedConnections: relatedDQC?.relatedConnections,
+          } as DataSourceConnection;
+        });
+
+      return allConnectionsWithDQC;
+    },
+    [http, mode, notifications]
+  );
+
   useEffect(() => {
     setIsLoading(true);
     getDataSourcesList(savedObjects.client, ['*'])
@@ -244,11 +290,19 @@ export const AssociationDataSourceModalContent = ({
       )
       .then((connections) => {
         setAllConnections(connections);
-      })
-      .finally(() => {
+      } catch {
+        notifications?.toasts.addDanger(
+          i18n.translate('workspace.detail.dataSources.associateModal.fetchDataSourcesError', {
+            defaultMessage: 'Failed to get data sources',
+          })
+        );
+      } finally {
         setIsLoading(false);
-      });
-  }, [savedObjects.client, http, notifications, mode]);
+      }
+    };
+
+    fetchDataSourcesAndHandleRelatedConnections();
+  }, [savedObjects.client, notifications, http, mode, handleDirectQueryConnections]);
 
   useEffect(() => {
     setOptions(
@@ -261,7 +315,7 @@ export const AssociationDataSourceModalContent = ({
         mode,
       })
     );
-  }, [allConnections, excludedConnectionIds, selectedConnectionIds, mode, logos]);
+  }, [excludedConnectionIds, selectedConnectionIds, mode, allConnections, logos]);
 
   return (
     <>
