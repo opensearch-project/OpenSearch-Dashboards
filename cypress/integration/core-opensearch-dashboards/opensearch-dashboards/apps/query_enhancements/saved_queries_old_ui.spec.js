@@ -40,7 +40,7 @@ export const runSavedQueriesOldUITests = () => {
       // Add data source
       cy.addDataSource({
         name: datasourceName,
-        url: 'http://opensearch-node:9200',
+        url: SECONDARY_ENGINE.url,
         authType: 'no_auth',
       });
 
