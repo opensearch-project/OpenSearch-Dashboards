@@ -16,7 +16,13 @@ import {
   WorkspacePermissionSetting,
   WorkspaceFormDataState,
 } from './types';
-import { getNumberOfChanges, getNumberOfErrors, validateWorkspaceForm } from './utils';
+import {
+  convertPermissionsToPrivacyType,
+  getNumberOfChanges,
+  getNumberOfErrors,
+  getPermissionSettingsWithPrivacyType,
+  validateWorkspaceForm,
+} from './utils';
 import { WorkspacePermissionItemType } from './constants';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
@@ -69,6 +75,10 @@ export const useWorkspaceForm = ({
   const numberOfChanges = defaultValuesRef.current
     ? getNumberOfChanges(formData, defaultValuesRef.current)
     : 0;
+
+  const privacyType = useMemo(() => convertPermissionsToPrivacyType(permissionSettings), [
+    permissionSettings,
+  ]);
 
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
@@ -139,11 +149,21 @@ export const useWorkspaceForm = ({
     setColor(text);
   }, []);
 
+  const setPrivacyType = useCallback((newPrivacyType) => {
+    setPermissionSettings((prevPermissionSettings) => {
+      if (convertPermissionsToPrivacyType(prevPermissionSettings) === newPrivacyType) {
+        return prevPermissionSettings;
+      }
+      return getPermissionSettingsWithPrivacyType(prevPermissionSettings, newPrivacyType);
+    });
+  }, []);
+
   const handleResetForm = useCallback(() => {
     const resetValues = defaultValuesRef.current;
     setName(resetValues?.name ?? '');
     setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
+    setPermissionSettings(resetValues?.permissionSettings ?? []);
     setFeatureConfigs(resetValues?.features ?? []);
     setFormErrors({});
     setIsEditing(false);
@@ -154,12 +174,14 @@ export const useWorkspaceForm = ({
     formData,
     isEditing,
     formErrors,
+    privacyType,
     setIsEditing,
     applications,
     numberOfErrors,
     numberOfChanges,
     handleResetForm,
     setName,
+    setPrivacyType,
     setDescription,
     handleFormSubmit,
     handleColorChange,

@@ -110,11 +110,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                     Array [
                       Object {
                         "id": "connection1",
+                        "objectType": "data-connection",
                         "title": "Connection 1",
                         "type": "AWS CloudWatch",
                       },
                       Object {
                         "id": "connection2",
+                        "objectType": "data-connection",
                         "title": "Connection 2",
                         "type": "AWS Security Lake",
                       },
@@ -595,11 +597,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                         Array [
                           Object {
                             "id": "connection1",
+                            "objectType": "data-connection",
                             "title": "Connection 1",
                             "type": "AWS CloudWatch",
                           },
                           Object {
                             "id": "connection2",
+                            "objectType": "data-connection",
                             "title": "Connection 2",
                             "type": "AWS Security Lake",
                           },
@@ -2110,11 +2114,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                     Array [
                       Object {
                         "id": "connection1",
+                        "objectType": "data-connection",
                         "title": "Connection 1",
                         "type": "AWS CloudWatch",
                       },
                       Object {
                         "id": "connection2",
+                        "objectType": "data-connection",
                         "title": "Connection 2",
                         "type": "AWS Security Lake",
                       },
@@ -2595,11 +2601,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                         Array [
                           Object {
                             "id": "connection1",
+                            "objectType": "data-connection",
                             "title": "Connection 1",
                             "type": "AWS CloudWatch",
                           },
                           Object {
                             "id": "connection2",
+                            "objectType": "data-connection",
                             "title": "Connection 2",
                             "type": "AWS Security Lake",
                           },
