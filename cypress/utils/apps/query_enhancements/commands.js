@@ -68,8 +68,8 @@ Cypress.Commands.add('addDataSource', (options) => {
     cy.get('[name="password"]').type(credentials.password);
   }
 
-  // Submit form
-  cy.getElementByTestId('createDataSourceButton').click();
+  // Submit form. Adding 'force' as sometimes a popover hides the button
+  cy.getElementByTestId('createDataSourceButton').click({ force: true });
 
   // Wait for successful creation
   cy.wait('@createDataSourceRequest').then((interception) => {

@@ -2,49 +2,65 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  MiscUtils,
-  TestFixtureHandler,
-} from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-import { PATHS } from '../../../../../utils/constants';
 
-const miscUtils = new MiscUtils(cy);
-const testFixtureHandler = new TestFixtureHandler(cy, PATHS.ENGINE);
+import { WORKSPACE_NAME, DATASOURCE_NAME, START_TIME, END_TIME } from './constants';
+import { BASE_PATH, SECONDARY_ENGINE } from '../../../../../utils/constants';
 
-describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
+describe('query enhancement queries', { scrollBehavior: false }, () => {
   before(() => {
-    testFixtureHandler.importJSONMapping('cypress/fixtures/timestamp/mappings.json.txt');
-
-    testFixtureHandler.importJSONDoc('cypress/fixtures/timestamp/data_with_index_pattern.json.txt');
-
-    // Go to the Discover page
-    miscUtils.visitPage(`app/data-explorer/discover#/`);
-
-    cy.setAdvancedSetting({
-      defaultIndex: 'timestamp-*',
-    });
-
-    // Go to the Discover page
-    miscUtils.visitPage(
-      `app/data-explorer/discover#/?_g=(filters:!(),time:(from:'2018-09-19T13:31:44.000Z',to:'2019-09-24T01:31:44.000Z'))`
+    // Load test data
+    cy.setupTestData(
+      SECONDARY_ENGINE.url,
+      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.mapping.json'],
+      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.data.ndjson']
     );
 
-    cy.get(`[class~="datasetSelector__button"]`).click();
-    cy.get(`[data-test-subj="datasetOption-timestamp-*"]`).click();
+    // Add data source
+    cy.addDataSource({
+      name: `${DATASOURCE_NAME}`,
+      url: `${SECONDARY_ENGINE.url}`,
+      authType: 'no_auth',
+    });
 
-    cy.waitForLoaderNewHeader();
-    cy.waitForSearch();
+    // Create workspace and set up index pattern
+    cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
+    cy.visit('/app/home');
+    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${WORKSPACE_NAME}`);
+
+    // Create and select index pattern for data_logs_small_time_1*
+    cy.createWorkspaceIndexPatterns({
+      url: `${BASE_PATH}`,
+      workspaceName: `${WORKSPACE_NAME}`,
+      indexPattern: 'data_logs_small_time_1',
+      timefieldName: 'timestamp',
+      indexPatternHasTimefield: true,
+      dataSource: DATASOURCE_NAME,
+      isEnhancement: true,
+    });
+
+    // Go to workspace home
+    cy.navigateToWorkSpaceHomePage(`${BASE_PATH}`, `${WORKSPACE_NAME}`);
+    cy.setTopNavDate(START_TIME, END_TIME);
+    cy.waitForLoader(true);
+  });
+
+  after(() => {
+    cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
+    cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
+    cy.deleteIndex('data_logs_small_time_1');
   });
 
   describe('send queries', () => {
     it('with DQL', function () {
+      cy.setQueryLanguage('DQL');
+
       const query = `_id:1`;
       cy.setSingleLineQueryEditor(query);
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);
 
-      //query should persist across refresh
+      // query should persist across refresh
       cy.reload();
       cy.verifyHitCount(1);
     });
@@ -54,7 +70,7 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
 
       const query = `_id:1`;
       cy.setSingleLineQueryEditor(query);
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.waitForSearch();
       cy.verifyHitCount(1);
 
@@ -67,9 +83,9 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setQueryLanguage('OpenSearch SQL');
 
       // default SQL query should be set
-      cy.waitForLoaderNewHeader();
+      cy.waitForLoader(true);
       cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-        `SELECT * FROM timestamp-* LIMIT 10`
+        `SELECT * FROM data_logs_small_time_1* LIMIT 10`
       );
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
 
@@ -87,22 +103,17 @@ describe.skip('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setQueryLanguage('PPL');
 
       // default PPL query should be set
-      cy.waitForLoaderNewHeader();
-      cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(`source = timestamp-*`);
+      cy.waitForLoader(true);
+      cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
+        `source = data_logs_small_time_1*`
+      );
       cy.waitForSearch();
       cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
-      cy.get('[class="euiText euiText--small"]').then((text) => cy.log(text));
-      cy.verifyHitCount(4);
 
       //query should persist across refresh
       cy.reload();
-      cy.verifyHitCount(4);
-    });
-
-    after(() => {
-      cy.deleteIndex('timestamp-nanos');
-      cy.deleteIndex('timestamp-milis');
-      cy.deleteSavedObject('index-pattern', 'index-pattern:timestamp-*');
+      cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+      cy.verifyHitCount('10,000');
     });
   });
 });
