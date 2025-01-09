@@ -128,7 +128,7 @@ export const getSuggestions = async ({
     // check to see if field rule is a candidate. if so, suggest field names
     if (candidates.rules.has(DQLParser.RULE_field)) {
       completions.push(
-        ...fetchFieldSuggestions(indexPattern, (field: string) => {
+        ...formatFieldsToSuggestions(indexPattern, (field: string) => {
           const indexField = indexPattern.getFieldByName(field);
           if (indexField && ['boolean', 'string'].includes(indexField.type)) {
             return `${field} : `;
