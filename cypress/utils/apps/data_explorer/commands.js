@@ -125,6 +125,19 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add('saveQueryOldUI', (name, description = ' ') => {
+  cy.whenTestIdNotFound('saved-query-management-popover', () => {
+    cy.getElementByTestId('saved-query-management-popover-button').click();
+  });
+  cy.getElementByTestId('saved-query-management-save-button').click();
+
+  cy.getElementByTestId('saveQueryFormTitle').type(name);
+  cy.getElementByTestId('saveQueryFormDescription').type(description);
+
+  cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+  cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+});
+
 Cypress.Commands.add('saveQuery', (name, description) => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {
     cy.getElementByTestId('saved-query-management-popover-button').click();
@@ -135,7 +148,7 @@ Cypress.Commands.add('saveQuery', (name, description) => {
   cy.getElementByTestId('saveQueryFormDescription').type(description);
 });
 
-Cypress.Commands.add('loadSaveQuery', (name) => {
+Cypress.Commands.add('loadSaveQueryOldUI', (name) => {
   cy.getElementByTestId('saved-query-management-popover-button').click({
     force: true,
   });
@@ -143,7 +156,7 @@ Cypress.Commands.add('loadSaveQuery', (name) => {
   cy.get(`[data-test-subj~="load-saved-query-${name}-button"]`).should('be.visible').click();
 });
 
-Cypress.Commands.add('clearSaveQuery', () => {
+Cypress.Commands.add('clearSaveQueryOldUI', () => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {
     cy.getElementByTestId('saved-query-management-popover-button').click();
   });
@@ -151,7 +164,7 @@ Cypress.Commands.add('clearSaveQuery', () => {
   cy.getElementByTestId('saved-query-management-clear-button').click();
 });
 
-Cypress.Commands.add('deleteSaveQuery', (name) => {
+Cypress.Commands.add('deleteSaveQueryOldUI', (name) => {
   cy.getElementByTestId('saved-query-management-popover-button').click();
 
   cy.get(`[data-test-subj~="delete-saved-query-${name}-button"]`).click({

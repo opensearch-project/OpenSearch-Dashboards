@@ -100,12 +100,18 @@ Cypress.Commands.add('deleteDataSourceByName', (dataSourceName) => {
   // Navigate to the dataSource Management page
   cy.visit('app/dataSources');
 
+  // Wait til the page is loaded (waitForLoader and just getting an element doesn't work)
+  cy.wait(2000);
+
   // Find the anchor text corresponding to specified dataSource
-  cy.get('a').contains(dataSourceName).click();
+  cy.get('a').contains(dataSourceName).click({ force: true });
+
+  // Wait til the page is loaded (waitForLoader and just getting an element doesn't work)
+  cy.wait(2000);
 
   // Delete the dataSource connection
-  cy.getElementByTestId('editDatasourceDeleteIcon').click();
-  cy.getElementByTestId('confirmModalConfirmButton').click();
+  cy.getElementByTestId('editDatasourceDeleteIcon').click({ force: true });
+  cy.getElementByTestId('confirmModalConfirmButton').click({ force: true });
 });
 
 // Deletes all data sources. This command should only be used for convenience during development

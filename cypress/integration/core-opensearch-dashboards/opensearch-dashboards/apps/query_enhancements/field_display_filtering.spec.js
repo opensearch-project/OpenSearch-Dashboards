@@ -223,7 +223,7 @@ describe('filter for value spec', () => {
   });
 
   after(() => {
-    cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
+    cy.deleteWorkspaceByName(`${workspace}`);
     cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
     // TODO: Modify deleteIndex to handle an array of index and remove hard code
     cy.deleteIndex(INDEX_PATTERN_NAME);
