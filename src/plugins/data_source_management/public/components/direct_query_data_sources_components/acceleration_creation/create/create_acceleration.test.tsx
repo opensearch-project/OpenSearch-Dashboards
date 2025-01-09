@@ -26,6 +26,7 @@ const mockNotifications = {
   toasts: {
     addWarning: jest.fn(),
     addSuccess: jest.fn(),
+    addDanger: jest.fn(),
   },
 };
 
