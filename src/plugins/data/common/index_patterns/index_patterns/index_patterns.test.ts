@@ -33,6 +33,7 @@ import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
+import { UI_SETTINGS } from '../../constants';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -51,6 +52,7 @@ function setDocsourcePayload(id: string | null, providedPayload: any) {
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
   let savedObjectsClient: SavedObjectsClientCommon;
+  const uiSettingsGet = jest.fn();
 
   beforeEach(() => {
     const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
@@ -83,9 +85,12 @@ describe('IndexPatterns', () => {
         };
       });
 
+    uiSettingsGet.mockClear();
+    uiSettingsGet.mockReturnValue(Promise.resolve(false));
+
     indexPatterns = new IndexPatternsService({
       uiSettings: ({
-        get: () => Promise.resolve(false),
+        get: uiSettingsGet,
         getAll: () => {},
       } as any) as UiSettingsCommon,
       savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
@@ -248,5 +253,14 @@ describe('IndexPatterns', () => {
     };
 
     expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
+  });
+
+  test('correctly detects long-numerals support', async () => {
+    expect(await indexPatterns.isLongNumeralsSupported()).toBe(false);
+
+    uiSettingsGet.mockImplementation((key: string) =>
+      Promise.resolve(key === UI_SETTINGS.DATA_WITH_LONG_NUMERALS ? true : undefined)
+    );
+    expect(await indexPatterns.isLongNumeralsSupported()).toBe(true);
   });
 });

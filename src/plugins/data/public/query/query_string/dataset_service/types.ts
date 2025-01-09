@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EuiIconProps } from '@elastic/eui';
-import { Dataset, DatasetField, DatasetSearchOptions, DataStructure } from '../../../../common';
+import {
+  Dataset,
+  DatasetField,
+  DatasetSearchOptions,
+  DataStructure,
+  Query,
+  SavedObject,
+} from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 
 /**
@@ -16,6 +23,18 @@ export interface DataStructureFetchOptions {
   paginationToken?: string;
 }
 
+export interface DatasetIndexedView {
+  name: string;
+}
+
+export interface DatasetIndexedViewsService {
+  getIndexedViews: (dataset: Dataset) => Promise<DatasetIndexedView[]>;
+  /**
+   * Returns the data source saved object connected with the data connection object
+   */
+  getConnectedDataSource: (dataset: Dataset) => Promise<SavedObject>;
+}
+
 /**
  * Configuration for handling dataset operations.
  */
@@ -24,6 +43,13 @@ export interface DatasetTypeConfig {
   id: string;
   /** Human-readable title for the dataset type */
   title: string;
+  languageOverrides?: {
+    [language: string]: {
+      /** The override transfers the responsibility of handling the input from
+       * the language interceptor to the dataset type search strategy. */
+      hideDatePicker?: boolean;
+    };
+  };
   /** Metadata for UI representation */
   meta: {
     /** Icon to represent the dataset type */
@@ -32,10 +58,12 @@ export interface DatasetTypeConfig {
     tooltip?: string;
     /** Optional preference for search on page load else defaulted to true */
     searchOnLoad?: boolean;
-    /** Optional supportsTimeFilter determines if a time filter is needed */
+    /** Optional supportsTimeFilter determines if a time field is supported */
     supportsTimeFilter?: boolean;
     /** Optional isFieldLoadAsync determines if field loads are async */
     isFieldLoadAsync?: boolean;
+    /** Optional cacheOptions determines if the data structure is cacheable. Defaults to false */
+    cacheOptions?: boolean;
   };
   /**
    * Converts a DataStructure to a Dataset.
@@ -81,5 +109,13 @@ export interface DatasetTypeConfig {
   /**
    * Returns a list of sample queries for this dataset type
    */
-  getSampleQueries?: (dataset: Dataset, language: string) => any;
+  getSampleQueries?: (dataset?: Dataset, language?: string) => Promise<any> | any;
+  /**
+   * Service used for indexedViews related operations
+   */
+  indexedViewsService?: DatasetIndexedViewsService;
+  /**
+   * Returns the initial query that is added to the query editor when a dataset is selected.
+   */
+  getInitialQueryString?: (query: Query) => string | void;
 }

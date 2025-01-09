@@ -19,6 +19,17 @@ jest.mock('./query_editor_extension', () => ({
   )),
 }));
 
+const mockQuery = {
+  query: 'dummy query',
+  language: 'kuery',
+  dataset: {
+    id: 'db',
+    title: 'db',
+    type: 'index',
+    dataSource: { id: 'testId', type: 'DATA_SOURCE', title: 'testTitle' },
+  },
+};
+
 describe('QueryEditorExtensions', () => {
   const defaultProps: QueryEditorExtensionsProps = {
     componentContainer: document.createElement('div'),
@@ -28,6 +39,8 @@ describe('QueryEditorExtensions', () => {
     onSelectLanguage: jest.fn(),
     isCollapsed: false,
     setIsCollapsed: jest.fn(),
+    query: mockQuery,
+    bottomPanelContainer: document.createElement('div'),
   };
 
   beforeEach(() => {
@@ -78,6 +91,7 @@ describe('QueryEditorExtensions', () => {
           onSelectLanguage: expect.any(Function),
           isCollapsed: false,
           setIsCollapsed: expect.any(Function),
+          query: mockQuery,
         },
       }),
       expect.anything()

@@ -1,2 +1,0 @@
-fix:
-- Expose method to register search strategy routes in query enhancement ([#8245](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8245))
