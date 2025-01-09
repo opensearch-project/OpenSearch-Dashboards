@@ -125,4 +125,14 @@ describe('AddCollaboratorsModal', () => {
       expect(addCollaboratorsButton).not.toBeDisabled();
     });
   });
+
+  it('should show "Invalid Collaborator ID format" for "*" collaborator id', async () => {
+    render(<AddCollaboratorsModal {...defaultProps} />);
+    const collaboratorInput = screen.getByLabelText(defaultProps.inputLabel);
+    fireEvent.change(collaboratorInput, { target: { value: '*' } });
+
+    expect(screen.queryByText('Invalid Collaborator ID format')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Add collaborators' }));
+    expect(screen.getByText('Invalid Collaborator ID format')).toBeInTheDocument();
+  });
 });

@@ -81,6 +81,7 @@ const deleteFn = jest.fn().mockReturnValue({
 
 const submitFn = jest.fn();
 const onAppLeaveFn = jest.fn();
+const navigateToAppFn = jest.fn();
 
 const WorkspaceDetailPage = (props: any) => {
   const values = props.defaultValues || defaultValues;
@@ -97,9 +98,13 @@ const WorkspaceDetailPage = (props: any) => {
       application: {
         ...mockCoreStart.application,
         // applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
+        navigateToApp: navigateToAppFn,
         capabilities: {
           ...mockCoreStart.application.capabilities,
           dashboards: { isDashboardAdmin: true },
+          workspaces: {
+            permissionEnabled: true,
+          },
         },
       },
       workspaces: createWorkspacesSetupContractMockWithValue(),
@@ -274,5 +279,12 @@ describe('WorkspaceDetail', () => {
     );
     expect(alertSpy).toBeCalledTimes(0);
     alertSpy.mockRestore();
+  });
+
+  it('should navigate to collaborators page when clicking the collaborators link', async () => {
+    const { getByText } = render(WorkspaceDetailPage({}));
+    fireEvent.click(getByText('Collaborators'));
+
+    expect(navigateToAppFn).toHaveBeenCalledWith('workspace_collaborators');
   });
 });
