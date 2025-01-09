@@ -25,19 +25,19 @@ const fieldNameSuggestions: Array<{
   insertText?: string;
   detail: string;
 }> = [
-  { text: 'Carrier', type: 3, insertText: 'Carrier: ', detail: 'Field: keyword' },
-  { text: 'DestCityName', type: 3, insertText: 'DestCityName: ', detail: 'Field: keyword' },
-  { text: 'DestCountry', type: 3, insertText: 'DestCountry: ', detail: 'Field: keyword' },
-  { text: 'DestWeather', type: 3, insertText: 'DestWeather: ', detail: 'Field: keyword' },
-  { text: 'DistanceMiles', type: 3, insertText: 'DistanceMiles: ', detail: 'Field: float' },
-  { text: 'FlightDelay', type: 3, insertText: 'FlightDelay: ', detail: 'Field: boolean' },
-  { text: 'FlightNum', type: 3, insertText: 'FlightNum: ', detail: 'Field: keyword' },
-  { text: 'OriginWeather', type: 3, insertText: 'OriginWeather: ', detail: 'Field: keyword' },
-  { text: '_id', type: 3, insertText: '_id: ', detail: 'Field: _id' },
-  { text: '_index', type: 3, insertText: '_index: ', detail: 'Field: _index' },
-  { text: '_score', type: 3, insertText: '_score: ', detail: 'Field: number' },
-  { text: '_source', type: 3, insertText: '_source: ', detail: 'Field: _source' },
-  { text: '_type', type: 3, insertText: '_type: ', detail: 'Field: _type' },
+  { text: 'Carrier', type: 3, insertText: 'Carrier : ', detail: 'Field: keyword' },
+  { text: 'DestCityName', type: 3, insertText: 'DestCityName : ', detail: 'Field: keyword' },
+  { text: 'DestCountry', type: 3, insertText: 'DestCountry : ', detail: 'Field: keyword' },
+  { text: 'DestWeather', type: 3, insertText: 'DestWeather : ', detail: 'Field: keyword' },
+  { text: 'DistanceMiles', type: 3, insertText: 'DistanceMiles ', detail: 'Field: float' },
+  { text: 'FlightDelay', type: 3, insertText: 'FlightDelay : ', detail: 'Field: boolean' },
+  { text: 'FlightNum', type: 3, insertText: 'FlightNum : ', detail: 'Field: keyword' },
+  { text: 'OriginWeather', type: 3, insertText: 'OriginWeather : ', detail: 'Field: keyword' },
+  { text: '_id', type: 3, insertText: '_id : ', detail: 'Field: _id' },
+  { text: '_index', type: 3, insertText: '_index : ', detail: 'Field: _index' },
+  { text: '_score', type: 3, insertText: '_score ', detail: 'Field: number' },
+  { text: '_source', type: 3, insertText: '_source ', detail: 'Field: _source' },
+  { text: '_type', type: 3, insertText: '_type : ', detail: 'Field: _type' },
 ];
 
 const fieldNameWithNotSuggestions = fieldNameSuggestions.concat(notOperatorSuggestion);
@@ -50,19 +50,19 @@ const carrierValues = [
 ];
 
 const allCarrierValueSuggestions = [
-  { text: 'Logstash Airways', type: 13, detail: 'Value', insertText: 'Logstash Airways ' },
-  { text: 'BeatsWest', type: 13, detail: 'Value', insertText: 'BeatsWest ' },
+  { text: 'Logstash Airways', type: 13, detail: 'Value', insertText: '"Logstash Airways" ' },
+  { text: 'BeatsWest', type: 13, detail: 'Value', insertText: '"BeatsWest" ' },
   {
     text: 'OpenSearch Dashboards Airlines',
     type: 13,
     detail: 'Value',
-    insertText: 'OpenSearch Dashboards Airlines ',
+    insertText: '"OpenSearch Dashboards Airlines" ',
   },
-  { text: 'OpenSearch-Air', type: 13, detail: 'Value', insertText: 'OpenSearch-Air ' },
+  { text: 'OpenSearch-Air', type: 13, detail: 'Value', insertText: '"OpenSearch-Air" ' },
 ];
 
 const logCarrierValueSuggestion = [
-  { text: 'Logstash Airways', type: 13, detail: 'Value', insertText: 'Logstash Airways ' },
+  { text: 'Logstash Airways', type: 13, detail: 'Value', insertText: '"Logstash Airways" ' },
 ];
 
 const openCarrierValueSuggestion = [
@@ -70,9 +70,9 @@ const openCarrierValueSuggestion = [
     text: 'OpenSearch Dashboards Airlines',
     type: 13,
     detail: 'Value',
-    insertText: 'OpenSearch Dashboards Airlines ',
+    insertText: '"OpenSearch Dashboards Airlines" ',
   },
-  { text: 'OpenSearch-Air', type: 13, detail: 'Value', insertText: 'OpenSearch-Air ' },
+  { text: 'OpenSearch-Air', type: 13, detail: 'Value', insertText: '"OpenSearch-Air" ' },
 ];
 
 const addPositionToValue = (vals: any, start: number, end: number) =>
