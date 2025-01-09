@@ -22,7 +22,6 @@ import { SavedObjectsPermissionControlContract } from '../permission_control/cli
 import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
-import { IdentitySourceRegistry } from '../identity_service/identity_source_registry';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -122,7 +121,6 @@ export function registerRoutes({
   permissionControlClient,
   isPermissionControlEnabled,
   isDataSourceEnabled,
-  identitySourceRegistry,
 }: {
   client: IWorkspaceClientImpl;
   logger: Logger;
@@ -131,7 +129,6 @@ export function registerRoutes({
   permissionControlClient?: SavedObjectsPermissionControlContract;
   isPermissionControlEnabled: boolean;
   isDataSourceEnabled: boolean;
-  identitySourceRegistry: IdentitySourceRegistry;
 }) {
   router.post(
     {
@@ -347,44 +344,4 @@ export function registerRoutes({
   );
 
   registerDuplicateRoute(router, logger, client, maxImportExportSize, isDataSourceEnabled);
-
-  router.post(
-    {
-      path: `${WORKSPACES_API_BASE_URL}/identity/_users`,
-      validate: {
-        body: schema.object({
-          perPage: schema.number({ min: 0, defaultValue: 20 }),
-          page: schema.number({ min: 0, defaultValue: 1 }),
-        }),
-      },
-    },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const handler = identitySourceRegistry.getSourceHandler();
-      const result = handler.getUsers ? await handler.getUsers({}, req, context) : [];
-
-      return res.ok({
-        body: result,
-      });
-    })
-  );
-
-  router.post(
-    {
-      path: `${WORKSPACES_API_BASE_URL}/identity/_roles`,
-      validate: {
-        body: schema.object({
-          perPage: schema.number({ min: 0, defaultValue: 20 }),
-          page: schema.number({ min: 0, defaultValue: 1 }),
-        }),
-      },
-    },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const handler = identitySourceRegistry.getSourceHandler();
-
-      const result = handler.getRoles ? await handler.getRoles({}, req, context) : [];
-      return res.ok({
-        body: result,
-      });
-    })
-  );
 }

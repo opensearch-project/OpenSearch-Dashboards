@@ -14,7 +14,6 @@ import {
   WorkspaceFindOptions,
 } from '../../../core/server';
 import { PermissionModeId } from '../../../core/server';
-import { IdentitySourceRegistry } from './identity_service/identity_source_registry';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;
@@ -166,14 +165,8 @@ export type IResponse<T> =
 
 export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;
-  identitySourceRegistry: IdentitySourceRegistry;
 }
 
 export interface WorkspacePluginStart {
   client: IWorkspaceClientImpl;
-}
-
-export interface IdentityEntry {
-  name: string;
-  id: string;
 }
