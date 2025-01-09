@@ -187,7 +187,7 @@ export const formatFieldsToSuggestions = (
   return fieldSuggestions;
 };
 
-export const parseQuery = <
+const singleParseQuery = <
   A extends AutocompleteResultBase,
   L extends LexerType,
   P extends ParserType
@@ -202,8 +202,7 @@ export const parseQuery = <
   query,
   cursor,
   context,
-  previousResult,
-}: ParsingSubject<A, L, P>): AutocompleteResultBase => {
+}: ParsingSubject<A, L, P>): A => {
   const parser = createParser(Lexer, Parser, query);
   const { tokenStream } = parser;
   const errorListener = new GeneralErrorListener(tokenDictionary.SPACE);
@@ -243,122 +242,101 @@ export const parseQuery = <
     suggestKeywords,
   };
 
-  // console.clear();
-  // console.log('cursorTokenIndex', cursorTokenIndex);
-  // console.log('Formatted Token Stream:');
-  // let index = 0;
-  // try {
-  //   while (true) {
-  //     const token = tokenStream.get(index);
-  //     if (!token) break;
+  return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
+};
 
-  //     const isCurrentToken = index === cursorTokenIndex;
-  //     const tokenInfo = `Token ${index}: ${token.text} (Type: ${token.type})`;
-
-  //     if (isCurrentToken) {
-  //       console.log(`%c${tokenInfo}`, 'background-color: red; font-weight: bold;');
-  //     } else {
-  //       console.log(tokenInfo);
-  //     }
-
-  //     index++;
-  //   }
-  // } catch (error) {
-  //   console.error('Error while iterating through token stream:', error);
-  // }
-
-  const currentResult = enrichAutocompleteResult(
-    result,
-    rules,
-    tokenStream,
-    cursorTokenIndex,
-    cursor,
-    query
-  );
-
-  // combine previous and current result
-  const combinedResult: A = {};
-
-  // look at every field in both results then combine inside of combinedResult
-
-  if (previousResult) {
-    Object.keys({ ...currentResult, ...previousResult }).forEach((key) => {
-      const currentField = currentResult[key as keyof A];
-      const previousField = previousResult[key as keyof A];
-
-      if (currentField && previousField) {
-        combinedResult[key as keyof A] = {
-          ...currentField,
-          suggestKeywords: [
-            ...(previousField.suggestKeywords ?? []),
-            ...(currentField.suggestKeywords ?? []),
-          ],
-        };
-      } else if (currentField) {
-        combinedResult[key as keyof A] = currentField;
-      } else if (previousField) {
-        combinedResult[key as keyof A] = previousField;
-      }
-    });
-  }
-
-  // // combine previous and current result
-  // if (previousResultKeywords) {
-  //   // only need to modify initial results if there are context keywords
-  //   if (!currentResult?.suggestKeywords) {
-  //     // set initial keywords to be context keywords
-  //     currentResult.suggestKeywords = previousResultKeywords;
-  //   } else {
-  //     // merge initial and context keywords
-  //     const combined = [...currentResult.suggestKeywords, ...previousResultKeywords];
-
-  //     // ES6 magic to filter out duplicate objects based on id field
-  //     currentResult.suggestKeywords = combined.filter(
-  //       (item, index, self) => index === self.findIndex((other) => other.id === item.id)
-  //     );
-  //   }
-  // }
-
-  // return when we don't have any more rerun and combine rules
-  if (!currentResult?.rerunWithoutRules || currentResult.rerunWithoutRules.length === 0) {
-    return currentResult;
-  }
-
-  // pop the top/last rule in the rerun and combine list
-  const nextRuleToAvoid = currentResult.rerunWithoutRules.pop();
-  if (!nextRuleToAvoid) {
-    // rerunWithoutRules being undefined or empty should lead to early return up above
-    throw new Error('nextRuleToAvoid is undefined');
-  }
-
-  const nextRulesToVisit = new Set(
-    Array.from(rulesToVisit).filter((rule) => rule !== nextRuleToAvoid)
-  );
-
-  /**
-   * TODO:
-   *
-   * need to handle the issue where the previous results findings from things like
-   * if we should suggest operators, persist. rn only the keywords are persisting
-   * across runs
-   *
-   * might have to fix the issue in a way where we grab all characteristics across runs,
-   * this thing might break for ppl if we need characteristics from later runs, where we
-   * unlease descendants
-   */
-
-  // call parseQuery again without specified rule and with this run's result
-  return parseQuery({
+export const parseQuery = <
+  A extends AutocompleteResultBase,
+  L extends LexerType,
+  P extends ParserType
+>({
+  Lexer,
+  Parser,
+  tokenDictionary,
+  ignoredTokens,
+  rulesToVisit,
+  getParseTree,
+  enrichAutocompleteResult,
+  query,
+  cursor,
+  context,
+}: ParsingSubject<A, L, P>): AutocompleteResultBase => {
+  const result = singleParseQuery({
     Lexer,
     Parser,
     tokenDictionary,
     ignoredTokens,
-    rulesToVisit: nextRulesToVisit,
+    rulesToVisit,
     getParseTree,
     enrichAutocompleteResult,
     query,
     cursor,
     context,
-    previousResultKeywords: currentResult,
   });
+
+  if (!result.rerunWithoutRules) {
+    return result;
+  }
+
+  // go through each rule in list and run a singleParseQuery without it, combining results
+  result.rerunWithoutRules.forEach((rule) => {
+    const modifiedRulesToVisit = new Set(rulesToVisit);
+    modifiedRulesToVisit.delete(rule);
+
+    const nextResult = singleParseQuery({
+      Lexer,
+      Parser,
+      tokenDictionary,
+      ignoredTokens,
+      rulesToVisit: modifiedRulesToVisit,
+      getParseTree,
+      enrichAutocompleteResult,
+      query,
+      cursor,
+      context,
+    });
+
+    // combine result and nextResult
+    for (const [field, value] of Object.entries(result)) {
+      if (field === 'suggestColumns') {
+        // combine tables inside of suggestColumns
+        result.suggestColumns = {
+          tables: [
+            ...(result.suggestColumns?.tables ?? []),
+            ...(nextResult.suggestColumns?.tables ?? []),
+          ],
+        };
+        continue;
+      }
+
+      switch (typeof value) {
+        case 'boolean':
+          // if a boolean is true, keep overall result true
+          result[field as keyof A] ||= nextResult[field as keyof A];
+          break;
+        case 'undefined':
+          // use the latter result
+          result[field as keyof A] = nextResult[field as keyof A];
+          break;
+        case 'object':
+          if (Array.isArray(value)) {
+            // combine arrays
+            const combined = [
+              ...((result[field as keyof A] as any[]) ?? []),
+              ...((nextResult[field as keyof A] as any[]) ?? []),
+            ];
+            // ES6 magic to filter out duplicate objects based on id field
+            (result[field as keyof A] as any[]) = combined.filter(
+              (item, index, self) => index === self.findIndex((other) => other.id === item.id)
+            );
+            break;
+          }
+        default:
+          // use the initial result
+          break;
+      }
+    }
+  });
+
+  return result;
 };

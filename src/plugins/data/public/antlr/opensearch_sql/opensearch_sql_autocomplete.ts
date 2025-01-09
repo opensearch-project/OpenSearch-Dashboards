@@ -179,7 +179,7 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchSQLParser.RULE_predicate: {
-        rerunWithoutRules.push(ruleId);
+        rerunWithoutRules.push(ruleId); // rerun to fetch aggs by blocking pred
 
         const validIDToken = (token: Token) => {
           return (
@@ -189,7 +189,7 @@ export function processVisitedRules(
         };
 
         /**
-         * creates a list of the tokens from the start of the pedicate to the end
+         * create a list of the tokens from the start of the pedicate to the end
          * intentionally omit all tokens with type SPACE
          * now we know we only have "significant tokens"
          */

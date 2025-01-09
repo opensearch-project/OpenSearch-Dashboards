@@ -156,5 +156,4 @@ export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {
   query: string;
   cursor: CursorPosition;
   context?: ParserRuleContext;
-  previousResult?: A;
 }
