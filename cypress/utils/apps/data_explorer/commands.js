@@ -138,7 +138,7 @@ Cypress.Commands.add('saveQueryOldUI', (name, description = ' ') => {
   cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
 });
 
-Cypress.Commands.add('saveQuery', (name, description) => {
+Cypress.Commands.add('saveQuery', (name, description = ' ') => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {
     cy.getElementByTestId('saved-query-management-popover-button').click();
   });
@@ -146,6 +146,9 @@ Cypress.Commands.add('saveQuery', (name, description) => {
 
   cy.getElementByTestId('saveQueryFormTitle').type(name);
   cy.getElementByTestId('saveQueryFormDescription').type(description);
+
+  cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+  cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
 });
 
 Cypress.Commands.add('loadSaveQueryOldUI', (name) => {
