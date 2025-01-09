@@ -156,7 +156,7 @@ For example, if "userA' is added as a collaborator with "read and write" permiss
                         class="euiText euiText--small"
                         style="white-space: pre-line;"
                       >
-                        More information about collaborators (how to find ID, etc.
+                        Workspace collaborators include individual users and user groups who have been granted permission to access and interact with the workspace. The collaborators can have Read-only, Read and write, and Admin permission levels within the workspace. Access level to the workspace is defined by each collaborator's individual permission level, their group participation access level, and workspace privacy level. The least restrictive access permission will take precedence.
                       </div>
                       <div
                         class="euiSpacer euiSpacer--l"
@@ -333,7 +333,7 @@ For example, if "userA' is added as a collaborator with "read and write" permiss
                       class="euiText euiText--small"
                       style="white-space: pre-line;"
                     >
-                      More information about collaborators (how to find ID, etc.
+                      Workspace collaborators include individual users and user groups who have been granted permission to access and interact with the workspace. The collaborators can have Read-only, Read and write, and Admin permission levels within the workspace. Access level to the workspace is defined by each collaborator's individual permission level, their group participation access level, and workspace privacy level. The least restrictive access permission will take precedence.
                     </div>
                     <div
                       class="euiSpacer euiSpacer--l"

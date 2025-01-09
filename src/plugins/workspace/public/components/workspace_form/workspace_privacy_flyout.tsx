@@ -48,7 +48,7 @@ export const WorkspacePrivacyFlyout = ({ onClose }: WorkspacePrivacyFlyoutProps)
         defaultMessage: 'Collaborators',
       }),
       description: i18n.translate('workspace.forms.privacyFlyout.collaborator.description', {
-        defaultMessage: 'More information about collaborators (how to find ID, etc.',
+        defaultMessage: `Workspace collaborators include individual users and user groups who have been granted permission to access and interact with the workspace. The collaborators can have Read-only, Read and write, and Admin permission levels within the workspace. Access level to the workspace is defined by each collaborator's individual permission level, their group participation access level, and workspace privacy level. The least restrictive access permission will take precedence.`,
       }),
       linkText: i18n.translate('workspace.forms.privacyFlyout.collaborator.linkText', {
         defaultMessage: 'Learn more in documentation',
