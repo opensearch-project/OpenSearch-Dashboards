@@ -117,7 +117,12 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
 
         result = await workspaceClient.update(currentWorkspace.id, attributes, {
           dataSources: selectedDataSourceIds,
-          permissions: convertPermissionSettingsToPermissions(permissionSettings),
+          // If user updates workspace when permission is disabled, the permission settings will be cleared
+          ...(isPermissionEnabled
+            ? {
+                permissions: convertPermissionSettingsToPermissions(permissionSettings),
+              }
+            : {}),
         });
         setIsFormSubmitting(false);
         if (result?.success) {
@@ -141,7 +146,13 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
         return;
       }
     },
-    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient]
+    [
+      isFormSubmitting,
+      currentWorkspace,
+      notifications?.toasts,
+      workspaceClient,
+      isPermissionEnabled,
+    ]
   );
 
   if (!workspaces || !application || !http || !savedObjects || !currentWorkspaceFormData) {
