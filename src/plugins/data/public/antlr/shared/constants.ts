@@ -175,4 +175,7 @@ export const testingIndex = ({
       subType: undefined,
     },
   ],
+  getFieldByName: jest.fn((fieldName: string) => {
+    return testingIndex.fields.find((field) => field.name === fieldName);
+  }),
 } as unknown) as IndexPattern;
