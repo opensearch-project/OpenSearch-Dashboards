@@ -247,6 +247,7 @@ export function SavedQueryManagementComponent({
           label={i18n.translate('data.saved_query_management.open_query_item_label', {
             defaultMessage: 'Open query',
           })}
+          data-test-subj="saved-query-management-open-button"
           iconType="folderOpen"
           onClick={() => {
             closeMenuPopover();
