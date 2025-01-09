@@ -259,7 +259,7 @@ jobs:
           if [ "${{ matrix.SECURITY }}" = "true" ]; then
             sed -i -e 's/.*opensearch\.username\s*:.*/opensearch.username: "admin"/g' -e 's/.*opensearch\.password\s*:.*/opensearch.password: "dummy"/g' -e 's/.*opensearch\.ssl\.verificationMode\s*:.*/opensearch.ssl.verificationMode: none/g' config/opensearch_dashboards.yml
           fi
-          /bin/bash -c "node scripts/opensearch_dashboards --dev --no-base-path --no-watch --opensearch.ignoreVersionMismatch=true --opensearch.ssl.verificationMode=none --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false SECURITY_FLAG $WORKSPACE_FLAG $DATA_SOURCE_FLAG $QUERY_ENHANCEMENTS_FLAG USE_NEW_HOME_PAGE_FLAG & pid=\$!; sleep 30; disown \$pid"
+          /bin/bash -c "node scripts/opensearch_dashboards --dev --no-base-path --no-watch --opensearch.ignoreVersionMismatch=true --opensearch.ssl.verificationMode=none --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false $SECURITY_FLAG $WORKSPACE_FLAG $DATA_SOURCE_FLAG $QUERY_ENHANCEMENTS_FLAG USE_NEW_HOME_PAGE_FLAG & pid=\$!; sleep 30; disown \$pid"
 
 
       - name: Wait for 60 seconds

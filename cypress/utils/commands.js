@@ -383,3 +383,18 @@ Cypress.Commands.add('setupTestData', (endpoint, mappingFiles, dataFiles) => {
 
   return chain;
 });
+
+Cypress.Commands.add('login', () => {
+  // much faster than log in through UI
+  cy.request({
+    method: 'POST',
+    url: '/auth/login',
+    body: {
+      username: Cypress.env('username'),
+      password: Cypress.env('password'),
+    },
+    headers: {
+      'osd-xsrf': true,
+    },
+  });
+});

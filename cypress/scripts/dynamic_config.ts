@@ -20,8 +20,9 @@ const CONNECTION_RETRY_INTERVAL = 15000;
 const checkSecurity = async (config: Cypress.PluginConfigOptions) => {
   const startTime = Date.now();
   do {
+    const apiStatusUrl = new URL('/api/status', config.baseUrl);
     // Not catching to allow Cypress to fail
-    const resp = await fetch(config.baseUrl, { timeout: CONNECTION_TIMEOUT });
+    const resp = await fetch(apiStatusUrl, { timeout: CONNECTION_TIMEOUT });
 
     if (resp.status === 200) {
       console.log('OpenSearch Dashboards is configured without security.');
@@ -75,11 +76,17 @@ const checkPlugins = async (config: Cypress.PluginConfigOptions) => {
 
       json.status.statuses.forEach?.(({ id }: { id: string }) => {
         if (!id.startsWith('plugin:')) return;
+
+        // Convert names that are often in camel-case to SCREAMING_SNAKE_CASE
         const envName = id
           .replace(/^plugin:(.+?)(Dashboards)*@.*$/, '$1')
           .replace(/([A-Z])/g, '_$1')
+          .replace(/^_|_$/g, '')
           .toUpperCase();
+
         config.env[`${envName}_ENABLED`] = true;
+
+        console.log(`Feature by the name of "${envName}" is enabled.`);
       });
 
       return;
