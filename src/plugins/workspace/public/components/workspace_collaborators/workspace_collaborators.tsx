@@ -106,14 +106,14 @@ export const WorkspaceCollaborators = () => {
             description: i18n.translate('workspace.collaborators.description', {
               defaultMessage: 'Manage workspace access and permissions.',
             }),
+            links: {
+              label: i18n.translate('workspace.form.panels.collaborator.learnMore', {
+                defaultMessage: 'Learn more',
+              }),
+              controlType: 'link',
+              run: handleLearnMoreClick,
+            } as TopNavControlLinkData,
           } as TopNavControlDescriptionData,
-          {
-            label: i18n.translate('workspace.form.panels.collaborator.learnMore', {
-              defaultMessage: 'Learn more',
-            }),
-            controlType: 'link',
-            run: handleLearnMoreClick,
-          } as TopNavControlLinkData,
         ]}
         setMountPoint={application.setAppDescriptionControls}
       />
