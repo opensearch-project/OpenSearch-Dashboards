@@ -44,31 +44,31 @@ const PublicAPPInfoMap = new Map([
 
 const dataSourcesList = [
   {
-    id: 'id1',
-    title: 'ds1',
+    id: 'ds1',
+    title: 'Data Source 1',
     description: 'Description of data source 1',
     auth: '',
     dataSourceEngineType: '' as DataSourceEngineType,
     workspaces: [],
     // This is used for mocking saved object function
     get: () => {
-      return 'ds1';
+      return 'Data Source 1';
     },
   },
   {
-    id: 'id2',
-    title: 'ds2',
-    description: 'Description of data source 1',
+    id: 'ds2',
+    title: 'Data Source 2',
+    description: 'Description of data source 2',
     auth: '',
     dataSourceEngineType: '' as DataSourceEngineType,
     workspaces: [],
     get: () => {
-      return 'ds2';
+      return 'Data Source 2';
     },
   },
   {
-    id: 'id3',
-    title: 'dqs1',
+    id: 'ds3',
+    title: 'Data connection 1',
     description: 'Description of data connection 1',
     auth: '',
     dataSourceEngineType: '' as DataSourceEngineType,
@@ -81,35 +81,68 @@ const dataSourcesList = [
   },
 ];
 
+const directQueryConnectionsMock = [
+  {
+    id: 'ds1-dqc1',
+    name: 'dqc1',
+    parentId: 'ds1',
+    connectionType: DataSourceConnectionType.DirectQueryConnection,
+    type: 'Amazon S3',
+  },
+];
 const dataSourceConnectionsList = [
   {
-    id: 'id1',
-    name: 'ds1',
+    id: 'ds1',
+    name: 'Data Source 1',
     connectionType: DataSourceConnectionType.OpenSearchConnection,
     type: 'OpenSearch',
     relatedConnections: [],
   },
   {
-    id: 'id2',
-    name: 'ds2',
+    id: 'ds2',
+    name: 'Data Source 2',
     connectionType: DataSourceConnectionType.OpenSearchConnection,
     type: 'OpenSearch',
   },
+];
+
+const dataConnectionsList = [
   {
-    id: 'id3',
-    name: 'dqs1',
+    id: 'ds3',
+    name: 'Data connection 1',
     description: 'Description of data connection 1',
     connectionType: DataSourceConnectionType.DataConnection,
     type: 'AWS Security Lake',
   },
 ];
 
-const mockCoreStart = coreMock.createStart();
-jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passedDataSources) => {
-  return dataSourceConnectionsList.filter(({ id }) =>
-    passedDataSources.some((dataSource) => dataSource.id === id)
-  );
+jest.spyOn(utils, 'convertDataSourcesToOpenSearchAndDataConnections').mockReturnValue({
+  openSearchConnections: [...dataSourceConnectionsList],
+  dataConnections: [...dataConnectionsList],
 });
+
+jest.spyOn(utils, 'getDataSourcesList').mockResolvedValue(dataSourcesList);
+jest.spyOn(utils, 'fulfillRelatedConnections').mockReturnValue([
+  {
+    id: 'ds1',
+    name: 'Data Source 1',
+    type: 'OpenSearch',
+    connectionType: 0,
+    relatedConnections: [
+      {
+        id: 'ds1-dqc1',
+        name: 'dqc1',
+        type: 'Amazon S3',
+        connectionType: 1,
+        parentId: 'ds1',
+      },
+    ],
+  },
+]);
+
+jest.spyOn(utils, 'fetchDirectQueryConnectionsByIDs').mockResolvedValue(directQueryConnectionsMock);
+
+const mockCoreStart = coreMock.createStart();
 
 const WorkspaceCreator = ({
   isDashboardAdmin = false,
@@ -382,7 +415,7 @@ describe('WorkspaceCreator', () => {
       }),
       expect.objectContaining({
         dataConnections: [],
-        dataSources: ['id1'],
+        dataSources: ['ds1'],
       })
     );
     await waitFor(() => {
@@ -413,13 +446,14 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
-    fireEvent.click(getByTestId('workspace-creator-dqc-assign-button'));
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+    expect(
+      getByText(
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+      )
+    ).toBeInTheDocument();
+
     await waitFor(() => {
-      expect(
-        getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
-        )
-      ).toBeInTheDocument();
       expect(getByText(dataSourcesList[2].title)).toBeInTheDocument();
     });
     fireEvent.click(getByText(dataSourcesList[2].title));
@@ -431,7 +465,7 @@ describe('WorkspaceCreator', () => {
         name: 'test workspace name',
       }),
       expect.objectContaining({
-        dataConnections: ['id3'],
+        dataConnections: ['ds3'],
         dataSources: [],
       })
     );
