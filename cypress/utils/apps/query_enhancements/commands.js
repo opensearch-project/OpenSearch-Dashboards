@@ -127,10 +127,7 @@ Cypress.Commands.add('deleteAllDataSources', () => {
       cy.log('No data sources to delete');
     } else if (hasDataSources) {
       cy.log('Need to clean out data sources');
-      cy.getElementByTestId('checkboxSelectAll')
-        .should('exist')
-        .should('not.be.disabled')
-        .check({ force: true });
+      cy.getElementByTestId('checkboxSelectAll').should('exist').should('not.be.disabled').check();
 
       cy.getElementByTestId('deleteDataSourceConnections').should('be.visible').click();
 
