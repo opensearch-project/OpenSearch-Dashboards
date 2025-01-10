@@ -10,7 +10,6 @@ import { httpServerMock } from '../http/http_server.mocks';
 import { IReadOnlyService } from './types';
 import { httpServiceMock } from '../mocks';
 import { InternalHttpServiceSetupMock } from '../http/http_service.mock';
-import { IdentitySourceService } from './identity_source_service';
 
 describe('SecurityService', () => {
   let securityService: SecurityService;

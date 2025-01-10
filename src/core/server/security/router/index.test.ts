@@ -9,7 +9,7 @@ import { IRouter } from '../../http';
 import { mockRouter } from '../../http/router/router.mock';
 
 describe('Security router', () => {
-  let router: IRouter;
+  let router: jest.Mocked<IRouter>;
   let identitySourceService: jest.Mocked<IdentitySourceService>;
   let mockHandler: {
     getUsers?: jest.Mock;
@@ -30,7 +30,6 @@ describe('Security router', () => {
     identitySourceService = ({
       getIdentitySourceHandler: jest.fn().mockReturnValue(mockHandler),
     } as unknown) as jest.Mocked<IdentitySourceService>;
-
     registerRoutes({ router, identitySourceService });
   });
 
