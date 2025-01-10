@@ -7,7 +7,7 @@ import { IdentitySourceService } from '../identity_source_service';
 import { registerRoutes } from '.';
 import { IRouter } from '../../http';
 import { mockRouter } from '../../http/router/router.mock';
-import { OpenSearchDashboardsRequest, RequestHandlerContext } from 'opensearch-dashboards/server';
+import { OpenSearchDashboardsRequest } from 'opensearch-dashboards/server';
 import { coreMock, httpResourcesMock } from '../../mocks';
 
 describe('Security router', () => {
