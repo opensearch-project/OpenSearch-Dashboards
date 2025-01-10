@@ -1,0 +1,2 @@
+fix:
+- Visualization chart not expanded after legend toggle ([#9170](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9170))
