@@ -85,15 +85,11 @@ export const runSavedQueriesNewUITests = () => {
         cy.saveQuery(config.saveName);
       });
     });
+
     it('should see all saved queries', () => {
-      cy.getElementByTestId('saved-query-management-popover-button').click({
-        force: true,
-      });
+      cy.getElementByTestId('saved-query-management-popover-button').click();
 
       cy.getElementByTestId('saved-query-management-open-button').click();
-
-      //Wait for queries to load
-      cy.wait(2000);
 
       testConfigurations.forEach((config) => {
         cy.getElementByTestId('euiFlyoutCloseButton')

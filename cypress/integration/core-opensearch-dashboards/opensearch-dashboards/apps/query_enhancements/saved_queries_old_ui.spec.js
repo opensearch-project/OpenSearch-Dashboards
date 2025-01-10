@@ -85,13 +85,9 @@ export const runSavedQueriesOldUITests = () => {
         cy.saveQueryOldUI(config.saveName);
       });
     });
-    it('should see all saved queries', () => {
-      cy.getElementByTestId('saved-query-management-popover-button').click({
-        force: true,
-      });
 
-      //Wait for queries to load
-      cy.wait(2000);
+    it('should see all saved queries', () => {
+      cy.getElementByTestId('saved-query-management-popover-button').click();
 
       testConfigurations.forEach((config) => {
         cy.getElementByTestId('saved-query-management-popover')

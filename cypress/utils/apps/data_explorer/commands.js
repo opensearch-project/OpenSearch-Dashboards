@@ -134,7 +134,7 @@ Cypress.Commands.add('saveQueryOldUI', (name, description = ' ') => {
   cy.getElementByTestId('saveQueryFormTitle').type(name);
   cy.getElementByTestId('saveQueryFormDescription').type(description);
 
-  cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+  cy.getElementByTestId('savedQueryFormSaveButton').click();
   cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
 });
 
@@ -147,7 +147,7 @@ Cypress.Commands.add('saveQuery', (name, description = ' ') => {
   cy.getElementByTestId('saveQueryFormTitle').type(name);
   cy.getElementByTestId('saveQueryFormDescription').type(description);
 
-  cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+  cy.getElementByTestId('savedQueryFormSaveButton').click();
   cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
 });
 
