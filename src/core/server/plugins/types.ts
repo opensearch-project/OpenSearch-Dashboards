@@ -306,7 +306,6 @@ export const SharedGlobalConfigKeys = {
     'autocompleteTimeout',
     'dashboardAdmin',
     'futureNavigation',
-    'identity',
   ] as const,
   opensearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,

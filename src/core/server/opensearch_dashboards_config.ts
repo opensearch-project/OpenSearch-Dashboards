@@ -100,11 +100,6 @@ export const config = {
       }),
     }),
     futureNavigation: schema.boolean({ defaultValue: false }),
-    identity: schema.object({
-      source: schema.string({
-        defaultValue: 'local_cluster',
-      }),
-    }),
   }),
   deprecations,
 };

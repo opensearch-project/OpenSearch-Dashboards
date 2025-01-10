@@ -257,9 +257,6 @@ export default () =>
         users: Joi.array().items(Joi.string()).default([]),
       }),
       futureNavigation: Joi.boolean().default(false),
-      identity: Joi.object({
-        source: Joi.string().default('local_cluster'),
-      }),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,

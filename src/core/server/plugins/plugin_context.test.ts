@@ -109,9 +109,6 @@ describe('createPluginInitializerContext', () => {
         autocompleteTimeout: duration(1000),
         dashboardAdmin: { groups: [], users: [] },
         futureNavigation: false,
-        identity: {
-          source: 'local_cluster',
-        },
       },
       opensearch: {
         shardTimeout: duration(30, 's'),

@@ -24,7 +24,7 @@ export class SecurityService implements CoreService<InternalSecurityServiceSetup
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('security-service');
     this.readonlyService = new ReadonlyService();
-    this.identitySourceService = new IdentitySourceService(this.logger, coreContext.configService);
+    this.identitySourceService = new IdentitySourceService(this.logger);
   }
 
   public setup(setupDeps: SecuritySetupDeps) {
@@ -45,8 +45,8 @@ export class SecurityService implements CoreService<InternalSecurityServiceSetup
       readonlyService() {
         return securityService.readonlyService;
       },
-      registerSourceHandler(source: string, handler: IdentitySourceHandler) {
-        securityService.identitySourceService.registerSourceHandler(source, handler);
+      registerIdentitySourceHandler(source: string, handler: IdentitySourceHandler) {
+        securityService.identitySourceService.registerIdentitySourceHandler(source, handler);
       },
     };
   }

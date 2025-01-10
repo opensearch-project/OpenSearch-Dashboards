@@ -375,7 +375,3 @@
 
 # Set the value to true to enable the new UI for savedQueries in Discover
 # data.savedQueriesNewUI.enabled: true
-
-# This feature flag enables dynamic identity management by allowing the registration of customized getUsers and getRoles APIs for different identity sources.
-# By default, users and roles are retrieved through the identity source registered within the security-dashboard-plugin.
-# opensearchDashboards.identity.source: "local_cluster"

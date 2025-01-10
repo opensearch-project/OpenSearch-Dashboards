@@ -14,22 +14,70 @@ export function registerRoutes({
   router: IRouter;
   identitySourceService: IdentitySourceService;
 }) {
-  router.post(
+  router.get(
     {
-      path: 'identity/_users',
+      path: 'identity/{source}/_users',
       validate: {
-        body: schema.object({
+        params: schema.object({
+          source: schema.string(),
+        }),
+        query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
-          type: schema.maybe(schema.string()),
+          keyword: schema.maybe(schema.string()), // Optional search keyword
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { perPage, page, type } = req.body;
-      const handler = await identitySourceService.getSourceHandler();
-      const result = handler.getUsers
-        ? await handler.getUsers({ page, perPage, type }, req, context)
+      const handler = identitySourceService.getIdentitySourceHandler(req.params.source);
+      const result = handler.getUsers ? await handler.getUsers(req.query, req, context) : [];
+
+      return res.ok({
+        body: result,
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: 'identity/{source}/_roles',
+      validate: {
+        params: schema.object({
+          source: schema.string(),
+        }),
+        query: schema.object({
+          perPage: schema.number({ min: 0, defaultValue: 20 }),
+          page: schema.number({ min: 0, defaultValue: 1 }),
+          keyword: schema.maybe(schema.string()), // Optional search keyword
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const handler = identitySourceService.getIdentitySourceHandler(req.params.source);
+      const result = handler.getRoles ? await handler.getRoles(req.query, req, context) : [];
+
+      return res.ok({
+        body: result,
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: 'identity/{source}/_get_users_name',
+      validate: {
+        params: schema.object({
+          source: schema.string(),
+        }),
+        query: schema.object({
+          userIds: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const handler = identitySourceService.getIdentitySourceHandler(req.params.source);
+      const result = handler.getNamesWithIds
+        ? await handler.getNamesWithIds(req.query, req, context)
         : [];
 
       return res.ok({
@@ -38,24 +86,24 @@ export function registerRoutes({
     })
   );
 
-  router.post(
+  router.get(
     {
-      path: 'identity/_roles',
+      path: 'identity/{source}/_get_roles_name',
       validate: {
-        body: schema.object({
-          perPage: schema.number({ min: 0, defaultValue: 20 }),
-          page: schema.number({ min: 0, defaultValue: 1 }),
-          type: schema.maybe(schema.string()),
+        params: schema.object({
+          source: schema.string(),
+        }),
+        query: schema.object({
+          roleIds: schema.arrayOf(schema.string()),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { perPage, page, type } = req.body;
-      const handler = await identitySourceService.getSourceHandler();
-
-      const result = handler.getRoles
-        ? await handler.getRoles({ page, perPage, type }, req, context)
+      const handler = identitySourceService.getIdentitySourceHandler(req.params.source);
+      const result = handler.getRolesWithIds
+        ? await handler.getRolesWithIds(req.query, req, context)
         : [];
+
       return res.ok({
         body: result,
       });
