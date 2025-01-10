@@ -249,11 +249,9 @@ export const generateAllTestConfigurations = () => {
  * @param {QueryEnhancementLanguage} language - query language
  */
 export const setDatePickerDatesAndSearchIfRelevant = (language) => {
-  if (language === QueryLanguages.SQL.name) {
-    return;
+  if (language !== QueryLanguages.SQL.name) {
+    cy.setTopNavDate(START_TIME, END_TIME);
   }
-
-  cy.setTopNavDate(START_TIME, END_TIME);
 };
 
 /**
