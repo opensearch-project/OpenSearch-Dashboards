@@ -23,7 +23,7 @@ export function dashboardSanityTests() {
 
     after(() => {});
 
-    describe('checking home page', () => {
+    ifEnabled('WORKSPACE').not('checking home page', () => {
       beforeEach(() => {
         // Go to the home page
         miscUtils.visitPage('app/home#');
@@ -105,7 +105,7 @@ export function dashboardSanityTests() {
       });
     });
 
-    describe('adding sample data', () => {
+    ifEnabled('WORKSPACE').not('adding sample data', () => {
       before(() => {
         miscUtils.addSampleData();
       });

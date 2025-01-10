@@ -9,7 +9,7 @@ import { SECONDARY_ENGINE } from '../../../../../utils/constants';
 const randomString = Math.random().toString(36).substring(7);
 const workspace = `${WORKSPACE_NAME}-${randomString}`;
 
-ifEnabled('WORKSPACE').describe('No Index Pattern Check Test', () => {
+ifEnabled(['WORKSPACE', '!SECURITY']).describe('No Index Pattern Check Test', () => {
   before(() => {
     // Load test data
     cy.setupTestData(
