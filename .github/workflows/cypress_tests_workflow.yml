@@ -1,9 +1,16 @@
 
 name: Cypress 12 experimental tests
 
+# trigger on every commit push and PR for all branches except pushes for backport branches
 on:
   push:
-    branches: ['**']
+    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+'] # Run the functional test on push for only release branches
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
   pull_request:
     branches: ['**']
     paths-ignore:
@@ -250,14 +257,14 @@ jobs:
 
       - name: Run OSD
         run: |
-          SECURITY_FLAG=$([ "${{ matrix.SECURITY }}" = "true" ] && echo "--opensearch.hosts=https://localhost:9200 --opensearch.username=admin --opensearch.password=dummy" || echo "--opensearch.hosts=http://localhost:9200")
+          SECURITY_FLAG=$([ "${{ matrix.SECURITY }}" = "true" ] && echo "--opensearch.hosts=https://localhost:9200" || echo "--opensearch.hosts=http://localhost:9200")
           WORKSPACE_FLAG=$([ "${{ matrix.WORKSPACE }}" = "true" ] && echo "--workspace.enabled=true" || echo "--workspace.enabled=false")
           DATA_SOURCE_FLAG=$([ "${{ matrix.DATA_SOURCE }}" = "true" ] && echo "--data_source.enabled=true" || echo "--data_source.enabled=false")
           QUERY_ENHANCEMENTS_FLAG=$([ "${{ matrix.QUERY_ENHANCEMENTS }}" = "true" ] && echo "--uiSettings.overrides["query:enhancements:enabled"]=true" || echo "--uiSettings.overrides["query:enhancements:enabled"]=false")
           USE_NEW_HOME_PAGE_FLAG=$([ "${{ matrix.USE_NEW_HOME_PAGE }}" = "true" ] && echo "--uiSettings.overrides["home:useNewHomePage"]=true" || echo "--uiSettings.overrides["home:useNewHomePage"]=false")
 
           if [ "${{ matrix.SECURITY }}" = "true" ]; then
-            sed -i -e 's/.*opensearch\.username\s*:.*/opensearch.username: "admin"/g' -e 's/.*opensearch\.password\s*:.*/opensearch.password: "dummy"/g' -e 's/.*opensearch\.ssl\.verificationMode\s*:.*/opensearch.ssl.verificationMode: none/g' config/opensearch_dashboards.yml
+            sed -i -e 's/.*opensearch\.username\s*:.*/opensearch.username: "admin"/g' -e 's/.*opensearch\.password\s*:.*/opensearch.password: "dummy"/g' config/opensearch_dashboards.yml
           fi
           /bin/bash -c "node scripts/opensearch_dashboards --dev --no-base-path --no-watch --opensearch.ignoreVersionMismatch=true --opensearch.ssl.verificationMode=none --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false $SECURITY_FLAG $WORKSPACE_FLAG $DATA_SOURCE_FLAG $QUERY_ENHANCEMENTS_FLAG USE_NEW_HOME_PAGE_FLAG & pid=\$!; sleep 30; disown \$pid"
 
