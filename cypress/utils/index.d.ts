@@ -35,6 +35,31 @@ declare namespace Cypress {
     ): Chainable<S>;
 
     /**
+     * Find element from previous chained element with a data-test-subj id containing the testId.
+     * @param {string} subject DOM object to find within.
+     * @param {string} testId data-test-subj value.
+     * @param {object} options get options. Default: {}
+     * @example
+     * // returns all DOM elements that has a data-test-subj including the string 'table'
+     * cy.findElementsByTestIdLike('table')
+     */
+    findElementByTestIdLike<S = any>(
+      partialTestId: string,
+      options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
+    ): Chainable<S>;
+
+    /**
+     * Find element from previous chained element by data-test-subj id.
+     * @param {string} subject DOM object to find within.
+     * @param {string} testId data-test-subj value.
+     * @param {object} options get options. Default: {}
+     */
+    findElementByTestId<S = any>(
+      testId: string,
+      options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
+    ): Chainable<S>;
+
+    /**
      * Create an index
      * @example
      * cy.createIndex('indexID')
@@ -156,5 +181,14 @@ declare namespace Cypress {
      * cy.get('sourceSelector').drag('targetSelector')
      */
     drag<S = any>(targetSelector: string): Chainable<S>;
+
+    /**
+     * Creates workspace and attaches it to the provided data source
+     * It also saves the created workspace id as the alias @WORKSPACE_ID
+     */
+    createInitialWorkspaceWithDataSource<S = any>(
+      dataSourceTitle: string,
+      workspaceName: string
+    ): Chainable<S>;
   }
 }

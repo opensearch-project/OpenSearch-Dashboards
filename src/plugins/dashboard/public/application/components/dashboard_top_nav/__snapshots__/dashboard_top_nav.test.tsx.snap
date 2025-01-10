@@ -795,6 +795,10 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#workspace-privacy",
+                  },
                 },
               },
             },
@@ -1876,6 +1880,10 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
+                  },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#workspace-privacy",
                   },
                 },
               },
@@ -2959,6 +2967,10 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#workspace-privacy",
+                  },
                 },
               },
             },
@@ -4040,6 +4052,10 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
+                  },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#workspace-privacy",
                   },
                 },
               },
@@ -5123,6 +5139,10 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#workspace-privacy",
+                  },
                 },
               },
             },
@@ -6204,6 +6224,10 @@ exports[`Dashboard top nav render with all components 1`] = `
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
+                  },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#workspace-privacy",
                   },
                 },
               },
