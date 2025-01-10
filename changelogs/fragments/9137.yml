@@ -1,2 +1,2 @@
-refactor:
-- [Workspace] Add APIs for getting workspace users and roles ([#9137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9137))
+feat:
+- [Workspace] Add APIs for getting users and roles ([#9137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9137))
