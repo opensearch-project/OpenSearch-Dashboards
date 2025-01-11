@@ -101,7 +101,7 @@ Cypress.Commands.add('deleteDataSourceByName', (dataSourceName) => {
   cy.visit('app/dataSources');
 
   // Find the anchor text corresponding to specified dataSource
-  cy.get('a').contains(dataSourceName).click({ force: true });
+  cy.get('a').contains(dataSourceName).click();
 
   // Delete the dataSource connection
   cy.getElementByTestId('editDatasourceDeleteIcon').click();
@@ -127,7 +127,10 @@ Cypress.Commands.add('deleteAllDataSources', () => {
       cy.log('No data sources to delete');
     } else if (hasDataSources) {
       cy.log('Need to clean out data sources');
-      cy.getElementByTestId('checkboxSelectAll').should('exist').should('not.be.disabled').check();
+      cy.getElementByTestId('checkboxSelectAll')
+        .should('exist')
+        .should('not.be.disabled')
+        .check({ force: true });
 
       cy.getElementByTestId('deleteDataSourceConnections').should('be.visible').click();
 
