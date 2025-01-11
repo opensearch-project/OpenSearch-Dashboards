@@ -22,6 +22,7 @@ on:
 
 env:
   CYPRESS_BROWSER: 'chromium'
+  CYPRESS_username: 'admin'
   NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
   COVERAGE: true
   PROJECT_ARTIFACT_NAME: 'project-artifact'
@@ -91,7 +92,7 @@ jobs:
         run: yarn i18n:check
 
       - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
       # upload-artifact looses permissions; we need to tar it to maintain them
       - name: Archive content
@@ -222,17 +223,6 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Security setup
-        if: ${{ matrix.SECURITY == 'true' }}
-        # ToDo: make this branch specific
-        run: git clone https://github.com/opensearch-project/security-dashboards-plugin.git --depth 1 -- ./plugins/security-dashboards-plugin
-
-      - name: Run bootstrap
-        run: yarn osd bootstrap --single-version=loose
-
-      - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
-
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
@@ -243,34 +233,38 @@ jobs:
         run: |
           echo "OSD_VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
 
-      - name: Run OpenSearch
+      - name: Generate random password
+        run: |
+          CYPRESS_password=$(openssl rand -base64 20)
+          echo "CYPRESS_password=$CYPRESS_password" >> $GITHUB_ENV
+
+      - name: Setup OpenSearch and Dashboards
         run: |
           npm i osd-launcher -g
 
           if [ "${{ matrix.SECURITY }}" = "true" ]; then
-            osd-launcher -os ${{ env.OSD_VERSION }} -p dummy --destination ~/
+            osd-launcher -os ${{ env.OSD_VERSION }} -osd . -p ${{ env.CYPRESS_password }} --no-plugins --no-build --destination ~/
           else
-            osd-launcher -os ${{ env.OSD_VERSION }} --no-security --no-plugins -p dummy --destination ~/
+            osd-launcher -os ${{ env.OSD_VERSION }} -osd . --no-security --no-plugins --no-build --destination ~/
           fi
 
+      - name: Run OpenSearch
+        run: |
+          # Launch and forget
           /bin/bash -c ~/OpenSearch-v${{ env.OSD_VERSION }}/bin/opensearch &
 
       - name: Run OSD
         run: |
-          SECURITY_FLAG=$([ "${{ matrix.SECURITY }}" = "true" ] && echo "--opensearch.hosts=https://localhost:9200" || echo "--opensearch.hosts=http://localhost:9200")
           WORKSPACE_FLAG=$([ "${{ matrix.WORKSPACE }}" = "true" ] && echo "--workspace.enabled=true" || echo "--workspace.enabled=false")
           DATA_SOURCE_FLAG=$([ "${{ matrix.DATA_SOURCE }}" = "true" ] && echo "--data_source.enabled=true" || echo "--data_source.enabled=false")
           QUERY_ENHANCEMENTS_FLAG=$([ "${{ matrix.QUERY_ENHANCEMENTS }}" = "true" ] && echo "--uiSettings.overrides["query:enhancements:enabled"]=true" || echo "--uiSettings.overrides["query:enhancements:enabled"]=false")
           USE_NEW_HOME_PAGE_FLAG=$([ "${{ matrix.USE_NEW_HOME_PAGE }}" = "true" ] && echo "--uiSettings.overrides["home:useNewHomePage"]=true" || echo "--uiSettings.overrides["home:useNewHomePage"]=false")
 
-          if [ "${{ matrix.SECURITY }}" = "true" ]; then
-            sed -i -e 's/.*opensearch\.username\s*:.*/opensearch.username: "admin"/g' -e 's/.*opensearch\.password\s*:.*/opensearch.password: "dummy"/g' config/opensearch_dashboards.yml
-          fi
-          /bin/bash -c "node scripts/opensearch_dashboards --dev --no-base-path --no-watch --opensearch.ignoreVersionMismatch=true --opensearch.ssl.verificationMode=none --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false $SECURITY_FLAG $WORKSPACE_FLAG $DATA_SOURCE_FLAG $QUERY_ENHANCEMENTS_FLAG USE_NEW_HOME_PAGE_FLAG & pid=\$!; sleep 30; disown \$pid"
+          # Launch and forget
+          /bin/bash -c "node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true $WORKSPACE_FLAG $DATA_SOURCE_FLAG $QUERY_ENHANCEMENTS_FLAG $USE_NEW_HOME_PAGE_FLAG" &
 
-
-      - name: Wait for 60 seconds
-        run: sleep 60s
+      - name: Wait for 15 seconds
+        run: sleep 15s
         shell: bash
 
       - name: Run tests

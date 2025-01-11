@@ -19,8 +19,9 @@ const CONNECTION_RETRY_INTERVAL = 15000;
  */
 const checkSecurity = async (config: Cypress.PluginConfigOptions) => {
   const startTime = Date.now();
+  const apiStatusUrl = new URL('/api/status', config.baseUrl);
+
   do {
-    const apiStatusUrl = new URL('/api/status', config.baseUrl);
     // Not catching to allow Cypress to fail
     const resp = await fetch(apiStatusUrl, { timeout: CONNECTION_TIMEOUT });
 
@@ -44,7 +45,7 @@ const checkSecurity = async (config: Cypress.PluginConfigOptions) => {
       return;
     }
 
-    console.log('Waiting for OpenSearch Dashboards to be ready...');
+    console.log(`[${resp.status}] Waiting for OpenSearch Dashboards to be ready...`);
     await setTimeout(CONNECTION_RETRY_INTERVAL);
   } while (Date.now() - startTime < CONNECTION_TIMEOUT_TOTAL);
 
@@ -61,6 +62,9 @@ const checkPlugins = async (config: Cypress.PluginConfigOptions) => {
   if (config.env.SECURITY_ENABLED) {
     headers.Authorization =
       'Basic ' + Buffer.from(config.env.username + ':' + config.env.password).toString('base64');
+    console.log('Checking capabilities enabled on OpenSearch Dashboards with security...');
+  } else {
+    console.log('Checking capabilities enabled on OpenSearch Dashboards...');
   }
 
   do {
@@ -92,7 +96,7 @@ const checkPlugins = async (config: Cypress.PluginConfigOptions) => {
       return;
     }
 
-    console.log('Waiting for OpenSearch Dashboards to be ready...');
+    console.log(`[${resp.status}] Waiting for OpenSearch Dashboards to respond...`);
     await setTimeout(CONNECTION_RETRY_INTERVAL);
   } while (Date.now() - startTime < CONNECTION_TIMEOUT_TOTAL);
 
