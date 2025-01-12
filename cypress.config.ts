@@ -24,11 +24,11 @@ module.exports = defineConfig({
   env: {
     ENGINE: {
       name: 'default',
-      url: 'http://localhost:9200',
+      url: undefined,
     },
     SECONDARY_ENGINE: {
       name: 'test_cluster',
-      url: 'http://localhost:9200',
+      url: undefined,
     },
     S3_ENGINE: {
       name: 'BasicS3Connection',
