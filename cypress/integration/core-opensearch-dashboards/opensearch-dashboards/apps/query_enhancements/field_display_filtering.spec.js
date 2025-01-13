@@ -221,16 +221,6 @@ ifEnabled(['WORKSPACE', '!SECURITY']).describe('filter for value spec', () => {
     });
   });
 
-  beforeEach(() => {
-    cy.navigateToWorkSpaceSpecificPage({
-      url: BASE_PATH,
-      workspaceName: `${workspace}`,
-      page: 'discover',
-      isEnhancement: true,
-    });
-    cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
-  });
-
   after(() => {
     cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
     cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
@@ -247,6 +237,17 @@ ifEnabled(['WORKSPACE', '!SECURITY']).describe('filter for value spec', () => {
     describe(`filter actions in ${name}`, () => {
       Object.entries(DATASET_CONFIGS).forEach(([type, config]) => {
         describe(`${type} dataset`, () => {
+          beforeEach(() => {
+            cy.navigateToWorkSpaceSpecificPage({
+              url: BASE_PATH,
+              workspaceName: `${workspace}`,
+              page: 'discover',
+              isEnhancement: true,
+            });
+            cy.reload(true);
+            cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
+          });
+
           config.languages.forEach(({ name: language, isFilterButtonsEnabled }) => {
             it(`${language}`, () => {
               verifyFn(type, language, isFilterButtonsEnabled);

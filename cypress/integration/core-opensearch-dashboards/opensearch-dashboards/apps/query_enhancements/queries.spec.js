@@ -47,13 +47,6 @@ ifEnabled(['WORKSPACE', '!SECURITY']).describe(
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-
-      // Go to discover page
-      cy.navigateToWorkSpaceSpecificPage({
-        workspaceName: workspace,
-        page: 'discover',
-        isEnhancement: true,
-      });
     });
 
     after(() => {
@@ -63,6 +56,17 @@ ifEnabled(['WORKSPACE', '!SECURITY']).describe(
     });
 
     describe('send queries', () => {
+      beforeEach(() => {
+        // Go to discover page
+        cy.navigateToWorkSpaceSpecificPage({
+          workspaceName: workspace,
+          page: 'discover',
+          isEnhancement: true,
+        });
+
+        cy.reload(true);
+      });
+
       it('with DQL', function () {
         cy.setQueryLanguage('DQL');
         cy.setTopNavDate(START_TIME, END_TIME);
