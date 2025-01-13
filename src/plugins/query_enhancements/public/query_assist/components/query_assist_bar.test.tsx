@@ -28,7 +28,7 @@ jest.mock('../hooks', () => ({
   useGenerateQuery: jest.fn().mockReturnValue({ generateQuery: jest.fn(), loading: false }),
   useQueryAssist: jest
     .fn()
-    .mockReturnValue({ updateQuestion: jest.fn(), isQueryAssistCollapsed: false }),
+    .mockReturnValue({ updateQueryState: jest.fn(), isQueryAssistCollapsed: false }),
 }));
 
 jest.mock('./query_assist_input', () => ({
@@ -91,7 +91,10 @@ describe('QueryAssistBar', () => {
   });
 
   it('renders null if question assist is collapsed', () => {
-    useQueryAssist.mockReturnValueOnce({ updateQuestion: jest.fn(), isQueryAssistCollapsed: true });
+    useQueryAssist.mockReturnValueOnce({
+      updateQueryState: jest.fn(),
+      isQueryAssistCollapsed: true,
+    });
     const { component } = renderQueryAssistBar({
       dependencies: { ...dependencies, isCollapsed: false },
     });
