@@ -20,10 +20,11 @@ import {
 
 import { generateAllTestConfigurations } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
-// This spec assumes data.savedQueriesNewUI.enabled is true.
+// This spec assumes data.savedQueriesNewUI.enabled is false.
+// These tests will not be run until the older legacy tests are migrated https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9166#discussion_r1913687440
 
-export const runSavedQueriesNewUITests = () => {
-  describe('saved queries new UI', () => {
+export const runSavedQueriesPopoverUITests = () => {
+  describe.skip('saved queries popover UI', () => {
     before(() => {
       // Load test data
       cy.setupTestData(
@@ -82,18 +83,15 @@ export const runSavedQueriesNewUITests = () => {
 
         setSearchConfigurations(config);
         verifyDiscoverPageState(config);
-        cy.saveQuery(config.saveName);
+        cy.saveQuery(config.saveName, ' ', false);
       });
     });
 
     it('should see all saved queries', () => {
       cy.getElementByTestId('saved-query-management-popover-button').click();
 
-      cy.getElementByTestId('saved-query-management-open-button').click();
-
       testConfigurations.forEach((config) => {
-        cy.getElementByTestId('euiFlyoutCloseButton')
-          .parent()
+        cy.getElementByTestId('saved-query-management-popover')
           .contains(config.saveName)
           .should('exist');
       });
@@ -101,4 +99,4 @@ export const runSavedQueriesNewUITests = () => {
   });
 };
 
-runSavedQueriesNewUITests();
+runSavedQueriesPopoverUITests();

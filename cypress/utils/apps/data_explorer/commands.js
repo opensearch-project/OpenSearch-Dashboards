@@ -125,7 +125,8 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('saveQueryOldUI', (name, description = ' ') => {
+// eslint-disable-next-line no-unused-vars
+Cypress.Commands.add('saveQuery', (name, description = ' ', savedQueriesNewUIEnabled = true) => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {
     cy.getElementByTestId('saved-query-management-popover-button').click();
   });
@@ -138,20 +139,7 @@ Cypress.Commands.add('saveQueryOldUI', (name, description = ' ') => {
   cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
 });
 
-Cypress.Commands.add('saveQuery', (name, description = ' ') => {
-  cy.whenTestIdNotFound('saved-query-management-popover', () => {
-    cy.getElementByTestId('saved-query-management-popover-button').click();
-  });
-  cy.getElementByTestId('saved-query-management-save-button').click();
-
-  cy.getElementByTestId('saveQueryFormTitle').type(name);
-  cy.getElementByTestId('saveQueryFormDescription').type(description);
-
-  cy.getElementByTestId('savedQueryFormSaveButton').click();
-  cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
-});
-
-Cypress.Commands.add('loadSaveQueryOldUI', (name) => {
+Cypress.Commands.add('loadSaveQuery', (name) => {
   cy.getElementByTestId('saved-query-management-popover-button').click({
     force: true,
   });
@@ -159,7 +147,7 @@ Cypress.Commands.add('loadSaveQueryOldUI', (name) => {
   cy.get(`[data-test-subj~="load-saved-query-${name}-button"]`).should('be.visible').click();
 });
 
-Cypress.Commands.add('clearSaveQueryOldUI', () => {
+Cypress.Commands.add('clearSaveQuery', () => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {
     cy.getElementByTestId('saved-query-management-popover-button').click();
   });
@@ -167,7 +155,7 @@ Cypress.Commands.add('clearSaveQueryOldUI', () => {
   cy.getElementByTestId('saved-query-management-clear-button').click();
 });
 
-Cypress.Commands.add('deleteSaveQueryOldUI', (name) => {
+Cypress.Commands.add('deleteSaveQuery', (name) => {
   cy.getElementByTestId('saved-query-management-popover-button').click();
 
   cy.get(`[data-test-subj~="delete-saved-query-${name}-button"]`).click({

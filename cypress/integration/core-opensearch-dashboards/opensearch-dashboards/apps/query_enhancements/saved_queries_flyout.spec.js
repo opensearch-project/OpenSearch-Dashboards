@@ -20,10 +20,10 @@ import {
 
 import { generateAllTestConfigurations } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
-// This spec assumes data.savedQueriesNewUI.enabled is false.
+// This spec assumes data.savedQueriesNewUI.enabled is true.
 
-export const runSavedQueriesOldUITests = () => {
-  describe('saved queries old UI', () => {
+export const runSavedQueriesFlyoutUITests = () => {
+  describe('saved queries flyout UI', () => {
     before(() => {
       // Load test data
       cy.setupTestData(
@@ -82,15 +82,18 @@ export const runSavedQueriesOldUITests = () => {
 
         setSearchConfigurations(config);
         verifyDiscoverPageState(config);
-        cy.saveQueryOldUI(config.saveName);
+        cy.saveQuery(config.saveName);
       });
     });
 
     it('should see all saved queries', () => {
       cy.getElementByTestId('saved-query-management-popover-button').click();
 
+      cy.getElementByTestId('saved-query-management-open-button').click();
+
       testConfigurations.forEach((config) => {
-        cy.getElementByTestId('saved-query-management-popover')
+        cy.getElementByTestId('euiFlyoutCloseButton')
+          .parent()
           .contains(config.saveName)
           .should('exist');
       });
@@ -98,4 +101,4 @@ export const runSavedQueriesOldUITests = () => {
   });
 };
 
-runSavedQueriesOldUITests();
+runSavedQueriesFlyoutUITests();
