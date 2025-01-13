@@ -28,8 +28,8 @@ export class PPLQueryParser {
     if (this.timeCache._timeRange) {
       const [source, ...others] = query.split('|');
       const bounds = this.timeCache.getTimeBounds();
-      const from = moment(bounds.min).format('YYYY-MM-DD HH:mm:ss.SSS');
-      const to = moment(bounds.max).format('YYYY-MM-DD HH:mm:ss.SSS');
+      const from = moment.utc(bounds.min).format('YYYY-MM-DD HH:mm:ss.SSS');
+      const to = moment.utc(bounds.max).format('YYYY-MM-DD HH:mm:ss.SSS');
       const timeFilter = `where \`${timefield}\` >= '${from}' and \`${timefield}\` <= '${to}'`;
       if (others.length > 0) {
         return `${source.trim()} | ${timeFilter} | ${others.map((s) => s.trim()).join(' | ')}`;

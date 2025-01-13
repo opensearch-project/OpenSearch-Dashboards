@@ -60,7 +60,7 @@ test('it should parse url object with %timefield% with injecting time filter to 
   expect(result1.url).toEqual({
     body: {
       query:
-        "source=test_index | where `timestamp` >= '2025-01-08 13:03:30.981' and `timestamp` <= '2024-10-07 13:03:22.548'",
+        "source=test_index | where `timestamp` >= '2025-01-08 05:03:30.981' and `timestamp` <= '2024-10-07 05:03:22.548'",
     },
   });
 
@@ -74,7 +74,7 @@ test('it should parse url object with %timefield% with injecting time filter to 
   expect(result2.url).toEqual({
     body: {
       query:
-        "source=test_index | where `timestamp` >= '2025-01-08 13:03:30.981' and `timestamp` <= '2024-10-07 13:03:22.548' | stats count() as doc_count",
+        "source=test_index | where `timestamp` >= '2025-01-08 05:03:30.981' and `timestamp` <= '2024-10-07 05:03:22.548' | stats count() as doc_count",
     },
   });
 });
