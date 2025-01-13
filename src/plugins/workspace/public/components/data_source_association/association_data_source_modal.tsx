@@ -35,6 +35,7 @@ import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../..
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
 import { ConnectionTypeIcon } from '../workspace_form/connection_type_icon';
+import './association_data_source_modal.scss';
 
 const ConnectionIcon = ({
   connection: { connectionType, type },
@@ -358,6 +359,7 @@ export const AssociationDataSourceModalContent = ({
               'workspace.detail.dataSources.associateModal.searchPlaceholder',
               { defaultMessage: 'Search' }
             ),
+            compressed: true,
           }}
           options={options}
           onChange={handleSelectionChange}
@@ -376,8 +378,8 @@ export const AssociationDataSourceModalContent = ({
       <EuiModalFooter>
         <EuiSmallButton onClick={closeModal}>
           <FormattedMessage
-            id="workspace.detail.dataSources.associateModal.close.button"
-            defaultMessage="Close"
+            id="workspace.detail.dataSources.associateModal.cancel.button"
+            defaultMessage="Cancel"
           />
         </EuiSmallButton>
         <EuiSmallButton
