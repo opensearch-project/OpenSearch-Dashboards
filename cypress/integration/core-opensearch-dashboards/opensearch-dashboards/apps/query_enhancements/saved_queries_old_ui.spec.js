@@ -16,9 +16,9 @@ import {
   setSearchConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   verifyDiscoverPageState,
-} from './utils/saved_search';
+} from '../../../../../utils/apps/query_enhancements/saved_search';
 
-import { generateAllTestConfigurations } from './utils/saved_queries';
+import { generateAllTestConfigurations } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is false.
 

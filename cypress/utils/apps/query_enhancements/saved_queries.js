@@ -10,7 +10,7 @@ import {
   INDEX_WITH_TIME_1,
   QueryLanguages,
   WORKSPACE_NAME,
-} from '../../../../../../utils/apps/query_enhancements/constants';
+} from './constants';
 
 const randomString = Math.random().toString(36);
 
@@ -138,20 +138,20 @@ const getSampleTableData = (datasetType, language) => {
 };
 
 /**
- * The configurations needed for saved search tests
+ * The configurations needed for saved queries tests
  * @typedef {Object} SavedSearchTestConfig
  * @property {string} dataset - the dataset name to use
  * @property {QueryEnhancementDataset} datasetType - the type of dataset
  * @property {QueryEnhancementLanguage} language - the name of query language as it appears in the dashboard app
  * @property {string} apiLanguage - the name of query language as recognized by OpenSearch API
- * @property {string} saveName - the name to use when saving the saved search
+ * @property {string} saveName - the name to use when saving the saved query
  * @property {string} testName - the phrase to add to the test case's title
  * @property {boolean} filters - whether the language supports filtering
  * @property {boolean} histogram - whether the language supports histogram
  * @property {boolean} selectFields - whether the language supports selecting fields to view data
  * @property {boolean} sort - whether the language supports sorting by fields
- * @property {string} queryString - the query to use for saved search associated with the language
- * @property {number|undefined} hitCount - the hitCount of the applied search config, if relevant
+ * @property {string} queryString - the query to use for saved query associated with the language
+ * @property {number|undefined} hitCount - the hitCount of the applied query config, if relevant
  * @property {[[number,string]]|*[]} sampleTableData - an array of some table data to test against to ensure that sorting is working as expected
  */
 
