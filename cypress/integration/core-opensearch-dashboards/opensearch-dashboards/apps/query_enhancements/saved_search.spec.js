@@ -98,6 +98,7 @@ export const runSavedSearchTests = () => {
           if (startingLanguage !== config.language) return;
 
           it(`should successfully load a saved search for ${config.testName} starting from ${startingLanguage}`, () => {
+            // using a POST request to create a saved search to load
             postRequestSaveSearch(config);
 
             cy.navigateToWorkSpaceSpecificPage({
@@ -120,6 +121,18 @@ export const runSavedSearchTests = () => {
             verifyDiscoverPageState(config);
           });
         });
+
+      it(`should successfully update a saved search for ${config.testName}`, () => {
+        // using a POST request to create a saved search to load
+        postRequestSaveSearch(config);
+        updateSavedSearchAndSaveAndVerify(config, false);
+      });
+
+      it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
+        // using a POST request to create a saved search to load
+        postRequestSaveSearch(config);
+        updateSavedSearchAndSaveAndVerify(config, true);
+      });
     });
   });
 };
