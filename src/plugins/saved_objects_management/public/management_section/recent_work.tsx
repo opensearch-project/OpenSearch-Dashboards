@@ -241,7 +241,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                 ...recentAccessItem.meta,
                 workspaceName: findWorkspace?.name,
                 updatedAt: moment(obj?.updated_at).valueOf(),
-                link: href,
+                link: workspaceEnabled ? href : link,
                 label: label || obj.meta.title,
               };
             })
@@ -254,7 +254,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
     } finally {
       setIsLoading(false);
     }
-  }, [core.http, currentWorkspace, recentAccessed, workspaceList]);
+  }, [core.http, currentWorkspace, recentAccessed, workspaceList, workspaceEnabled]);
 
   useEffect(() => {
     // reset to allOption
