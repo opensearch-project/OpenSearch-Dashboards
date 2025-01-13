@@ -134,9 +134,7 @@ Cypress.Commands.add('bulkUploadDocs', (fixturePath, index) => {
 
 Cypress.Commands.add('importSavedObjects', (fixturePath, overwrite = true) => {
   const sendImportRequest = (ndjson) => {
-    const url = `${Cypress.config().baseUrl}/api/saved_objects/_import?${
-      overwrite ? `overwrite=true` : ''
-    }`;
+    const url = `/api/saved_objects/_import?${overwrite ? `overwrite=true` : ''}`;
 
     const formData = new FormData();
     formData.append('file', ndjson, 'savedObject.ndjson');
@@ -167,7 +165,7 @@ Cypress.Commands.add('importSavedObjects', (fixturePath, overwrite = true) => {
 });
 
 Cypress.Commands.add('deleteSavedObject', (type, id, options = {}) => {
-  const url = `${Cypress.config().baseUrl}/api/saved_objects/${type}/${id}`;
+  const url = `/api/saved_objects/${type}/${id}`;
 
   return cy.request({
     method: 'DELETE',
@@ -190,9 +188,7 @@ Cypress.Commands.add('deleteSavedObjectByType', (type, search) => {
     searchParams.set('search', search);
   }
 
-  const url = `${
-    Cypress.config().baseUrl
-  }/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+  const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
 
   return cy.request(url).then((response) => {
     console.log('response', response);
@@ -213,9 +209,7 @@ Cypress.Commands.add('ifDataSourceExists', (search) => {
     searchParams.set('search', search);
   }
 
-  const url = `${
-    Cypress.config().baseUrl
-  }/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+  const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
 
   return cy.request(url).then((response) => {
     console.log('response', response);
@@ -224,7 +218,7 @@ Cypress.Commands.add('ifDataSourceExists', (search) => {
 });
 
 Cypress.Commands.add('createIndexPattern', (id, attributes, header = {}) => {
-  const url = `${Cypress.config().baseUrl}/api/saved_objects/index-pattern/${id}`;
+  const url = `/api/saved_objects/index-pattern/${id}`;
 
   cy.request({
     method: 'POST',
@@ -242,7 +236,7 @@ Cypress.Commands.add('createIndexPattern', (id, attributes, header = {}) => {
 });
 
 Cypress.Commands.add('createDashboard', (attributes = {}, headers = {}) => {
-  const url = `${Cypress.config().baseUrl}/api/saved_objects/dashboard`;
+  const url = '/api/saved_objects/dashboard';
 
   cy.request({
     method: 'POST',
@@ -278,7 +272,7 @@ Cypress.Commands.add('deleteIndexPattern', (id, options = {}) =>
 );
 
 Cypress.Commands.add('setAdvancedSetting', (changes) => {
-  const url = `${Cypress.config().baseUrl}/api/opensearch-dashboards/settings`;
+  const url = '/api/opensearch-dashboards/settings';
   cy.log('setAdvancedSetting')
     .request({
       method: 'POST',
