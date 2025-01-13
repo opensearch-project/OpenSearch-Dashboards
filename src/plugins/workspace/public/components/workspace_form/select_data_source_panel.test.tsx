@@ -195,7 +195,7 @@ describe('SelectDataSourcePanel', () => {
         )
       ).toBeInTheDocument();
     });
-    fireEvent.click(getByText('Close'));
+    fireEvent.click(getByText('Cancel'));
     expect(
       queryByText(
         'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
