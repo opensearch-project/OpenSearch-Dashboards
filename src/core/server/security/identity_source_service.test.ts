@@ -15,8 +15,8 @@ describe('IdentitySourceService', () => {
     const service = new IdentitySourceService(logger);
 
     const mockHandler = {
-      getUsers: jest.fn(),
-      getRoles: jest.fn(),
+      getIdentityEntries: jest.fn(),
+      getIdentityEntriesByIds: jest.fn(),
     };
 
     service.registerIdentitySourceHandler(sourceA, mockHandler);
@@ -37,11 +37,11 @@ describe('IdentitySourceService', () => {
     const service = new IdentitySourceService(logger);
 
     const mockHandler1 = {
-      getRoles: jest.fn(),
+      getIdentityEntries: jest.fn(),
     };
 
     const mockHandler2 = {
-      getUsers: jest.fn(),
+      getIdentityEntriesByIds: jest.fn(),
     };
 
     service.registerIdentitySourceHandler(sourceA, mockHandler1);
@@ -56,11 +56,11 @@ describe('IdentitySourceService', () => {
     const service = new IdentitySourceService(logger);
 
     const mockHandler1 = {
-      getRoles: jest.fn(),
+      getIdentityEntries: jest.fn(),
     };
 
     const mockHandler2 = {
-      getUsers: jest.fn(),
+      getIdentityEntriesByIds: jest.fn(),
     };
 
     service.registerIdentitySourceHandler(sourceA, mockHandler1);

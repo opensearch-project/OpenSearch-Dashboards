@@ -50,7 +50,7 @@ describe('SecurityService', () => {
   describe('#identitySourceService', () => {
     it('should register identity source service and uses it', () => {
       const setupContext = securityService.setup({ http });
-      const mockIdentitySourceHandler = { getUsers: jest.fn() };
+      const mockIdentitySourceHandler = { getIdentityEntries: jest.fn() };
       const registerIdentitySourceHandlerMock = jest.fn();
       setupContext.registerIdentitySourceHandler = registerIdentitySourceHandlerMock;
       setupContext.registerIdentitySourceHandler('source1', mockIdentitySourceHandler);
