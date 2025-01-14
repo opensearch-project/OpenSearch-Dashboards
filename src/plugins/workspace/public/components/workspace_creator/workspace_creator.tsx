@@ -58,6 +58,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     navigationUI: NavigationPublicPluginStart['ui'];
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+  const [goToCollaborators, setGoToCollaborators] = useState(false);
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const { isOnlyAllowEssential, availableUseCases } = useFormAvailableUseCases({
@@ -145,7 +146,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               ?.features[0].id;
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
-              if (isPermissionEnabled) {
+              if (isPermissionEnabled && goToCollaborators) {
                 navigateToAppWithinWorkspace(
                   { application, http },
                   newWorkspaceId,
@@ -186,6 +187,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       isFormSubmitting,
       availableUseCases,
       isPermissionEnabled,
+      goToCollaborators,
     ]
   );
 
@@ -212,7 +214,8 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         <EuiPageContent
           verticalPosition="center"
           paddingSize="none"
-          color="subdued"
+          color="transparent"
+          hasBorder={false}
           hasShadow={false}
         >
           {isFormReadyToRender && (
@@ -225,6 +228,8 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               availableUseCases={availableUseCases}
               defaultValues={defaultWorkspaceFormValues}
               isSubmitting={isFormSubmitting}
+              goToCollaborators={goToCollaborators}
+              onGoToCollaboratorsChange={setGoToCollaborators}
             />
           )}
         </EuiPageContent>

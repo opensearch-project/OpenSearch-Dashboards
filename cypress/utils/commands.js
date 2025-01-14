@@ -30,9 +30,36 @@ Cypress.Commands.add('getElementsByTestIds', (testIds, options = {}) => {
   return cy.get(selectors.join(','), options);
 });
 
-Cypress.Commands.add('getElementByDataTestId', (testId) => {
-  return cy.get(`[data-testid="${testId}"]`);
-});
+/**
+ * Find element from previous chained element with a data-test-subj id containing the testId.
+ * @param {string} subject DOM object to find within.
+ * @param {string} testId data-test-subj value.
+ * @param {object} options get options. Default: {}
+ * @example
+ * // returns all DOM elements that has a data-test-subj including the string 'table'
+ * cy.findElementsByTestIdLike('table')
+ */
+Cypress.Commands.add(
+  'findElementByTestIdLike',
+  { prevSubject: true },
+  (subject, partialTestId, options = {}) => {
+    return cy.wrap(subject).find(`[data-test-subj*="${partialTestId}"]`, options);
+  }
+);
+
+/**
+ * Find element from previous chained element by data-test-subj id.
+ * @param {string} subject DOM object to find within.
+ * @param {string} testId data-test-subj value.
+ * @param {object} options get options. Default: {}
+ */
+Cypress.Commands.add(
+  'findElementByTestId',
+  { prevSubject: true },
+  (subject, testId, options = {}) => {
+    return cy.wrap(subject).find(`[data-test-subj="${testId}"]`, options);
+  }
+);
 
 Cypress.Commands.add('whenTestIdNotFound', (testIds, callbackFn, options = {}) => {
   const selectors = [testIds].flat(Infinity).map((testId) => `[data-test-subj="${testId}"]`);
@@ -104,9 +131,7 @@ Cypress.Commands.add('bulkUploadDocs', (fixturePath, index) => {
 
 Cypress.Commands.add('importSavedObjects', (fixturePath, overwrite = true) => {
   const sendImportRequest = (ndjson) => {
-    const url = `${Cypress.config().baseUrl}/api/saved_objects/_import?${
-      overwrite ? `overwrite=true` : ''
-    }`;
+    const url = `/api/saved_objects/_import?${overwrite ? `overwrite=true` : ''}`;
 
     const formData = new FormData();
     formData.append('file', ndjson, 'savedObject.ndjson');
@@ -137,7 +162,7 @@ Cypress.Commands.add('importSavedObjects', (fixturePath, overwrite = true) => {
 });
 
 Cypress.Commands.add('deleteSavedObject', (type, id, options = {}) => {
-  const url = `${Cypress.config().baseUrl}/api/saved_objects/${type}/${id}`;
+  const url = `/api/saved_objects/${type}/${id}`;
 
   return cy.request({
     method: 'DELETE',
@@ -160,9 +185,7 @@ Cypress.Commands.add('deleteSavedObjectByType', (type, search) => {
     searchParams.set('search', search);
   }
 
-  const url = `${
-    Cypress.config().baseUrl
-  }/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+  const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
 
   return cy.request(url).then((response) => {
     console.log('response', response);
@@ -183,9 +206,7 @@ Cypress.Commands.add('ifDataSourceExists', (search) => {
     searchParams.set('search', search);
   }
 
-  const url = `${
-    Cypress.config().baseUrl
-  }/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+  const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
 
   return cy.request(url).then((response) => {
     console.log('response', response);
@@ -194,7 +215,7 @@ Cypress.Commands.add('ifDataSourceExists', (search) => {
 });
 
 Cypress.Commands.add('createIndexPattern', (id, attributes, header = {}) => {
-  const url = `${Cypress.config().baseUrl}/api/saved_objects/index-pattern/${id}`;
+  const url = `/api/saved_objects/index-pattern/${id}`;
 
   cy.request({
     method: 'POST',
@@ -212,7 +233,7 @@ Cypress.Commands.add('createIndexPattern', (id, attributes, header = {}) => {
 });
 
 Cypress.Commands.add('createDashboard', (attributes = {}, headers = {}) => {
-  const url = `${Cypress.config().baseUrl}/api/saved_objects/dashboard`;
+  const url = '/api/saved_objects/dashboard';
 
   cy.request({
     method: 'POST',
@@ -248,7 +269,7 @@ Cypress.Commands.add('deleteIndexPattern', (id, options = {}) =>
 );
 
 Cypress.Commands.add('setAdvancedSetting', (changes) => {
-  const url = `${Cypress.config().baseUrl}/api/opensearch-dashboards/settings`;
+  const url = '/api/opensearch-dashboards/settings';
   cy.log('setAdvancedSetting')
     .request({
       method: 'POST',
@@ -302,6 +323,8 @@ Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
 });
 
 Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
+  cy.intercept('POST', '/api/workspaces').as('createWorkspaceInterception');
+
   cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
     .should('be.visible')
     .click();
@@ -320,6 +343,11 @@ Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, w
     .trigger('click');
   cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button').click();
   cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
+
+  cy.wait('@createWorkspaceInterception').then((interception) => {
+    // save the created workspace ID as an alias
+    cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
+  });
   cy.contains(/successfully/);
 });
 

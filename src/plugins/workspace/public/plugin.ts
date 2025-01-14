@@ -162,6 +162,12 @@ export class WorkspacePlugin
            */
           return { status: AppStatus.inaccessible };
         });
+      } else {
+        this.appUpdater$.next((app) => {
+          if (app.workspaceAvailability === WorkspaceAvailability.insideWorkspace) {
+            return { status: AppStatus.inaccessible };
+          }
+        });
       }
     });
 

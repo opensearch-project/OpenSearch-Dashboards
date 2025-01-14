@@ -11,16 +11,23 @@ import {
   getNumberOfErrors,
   isWorkspacePermissionSetting,
   getPermissionModeName,
+  getPermissionSettingsWithPrivacyType,
+  convertPermissionsToPrivacyType,
+  EMPTY_PERMISSIONS,
 } from './utils';
-import { WorkspacePermissionItemType, optionIdToWorkspacePermissionModesMap } from './constants';
+import {
+  WorkspacePermissionItemType,
+  optionIdToWorkspacePermissionModesMap,
+  WorkspacePrivacyItemType,
+} from './constants';
 import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceFormErrorCode } from './types';
 import { PermissionModeId, WorkspacePermissionMode } from '../../../../../core/public';
 
 describe('convertPermissionSettingsToPermissions', () => {
-  it('should return undefined if permission items not provided', () => {
-    expect(convertPermissionSettingsToPermissions(undefined)).toBeUndefined();
-    expect(convertPermissionSettingsToPermissions([])).toBeUndefined();
+  it('should return empty permission object if permission items are not provided', () => {
+    expect(convertPermissionSettingsToPermissions(undefined)).toBe(EMPTY_PERMISSIONS);
+    expect(convertPermissionSettingsToPermissions([])).toBe(EMPTY_PERMISSIONS);
   });
 
   it('should not add duplicate users and groups', () => {
@@ -404,6 +411,98 @@ describe('getNumberOfChanges', () => {
       )
     ).toEqual(1);
   });
+  it('should return consistent permissions changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          features: ['bar'],
+        },
+        {
+          name: 'foo',
+          features: ['bar'],
+        }
+      )
+    ).toEqual(0);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: '*',
+              modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+            },
+          ],
+        },
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: '*',
+              modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+            },
+          ],
+        }
+      )
+    ).toEqual(0);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: '*',
+              modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+            },
+          ],
+        },
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: '*',
+              modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.ReadAndWrite],
+            },
+          ],
+        }
+      )
+    ).toEqual(1);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: '*',
+              modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+            },
+          ],
+        },
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: 'user-id',
+              modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.ReadAndWrite],
+            },
+          ],
+        }
+      )
+    ).toEqual(1);
+  });
 });
 
 describe('isWorkspacePermissionSetting', () => {
@@ -494,5 +593,138 @@ describe('getPermissionModeName', () => {
   it('should return Read for a invalid WorkspacePermissionMode mode', () => {
     const result = getPermissionModeName([] as WorkspacePermissionMode[]);
     expect(result).toBe('Read only');
+  });
+});
+
+describe('convertPermissionsToPrivacyType', () => {
+  it('should return AnyoneCanEdit when LibraryWrite permission is present for *', () => {
+    const permissionSettings = [
+      {
+        id: 0,
+        type: WorkspacePermissionItemType.User,
+        userId: '*',
+        modes: [WorkspacePermissionMode.LibraryWrite],
+      },
+    ];
+    expect(convertPermissionsToPrivacyType(permissionSettings)).toEqual(
+      WorkspacePrivacyItemType.AnyoneCanEdit
+    );
+  });
+
+  it('should return AnyoneCanView when LibraryRead permission is present for *', () => {
+    const permissionSettings = [
+      {
+        id: 0,
+        type: WorkspacePermissionItemType.User,
+        userId: '*',
+        modes: [WorkspacePermissionMode.LibraryRead],
+      },
+    ];
+    expect(convertPermissionsToPrivacyType(permissionSettings)).toEqual(
+      WorkspacePrivacyItemType.AnyoneCanView
+    );
+  });
+
+  it('should return PrivateToCollaborators when no * permission is present', () => {
+    const permissionSettings = [
+      {
+        id: 0,
+        type: WorkspacePermissionItemType.User,
+        userId: 'user1',
+        modes: [WorkspacePermissionMode.LibraryRead],
+      },
+    ];
+    expect(convertPermissionsToPrivacyType(permissionSettings)).toEqual(
+      WorkspacePrivacyItemType.PrivateToCollaborators
+    );
+  });
+});
+
+describe('getPermissionSettingsWithPrivacyType', () => {
+  it('should update star user to read permission when privacyType is AnyoneCanView', () => {
+    const expectedPermissionSettings = [
+      {
+        id: 1,
+        type: WorkspacePermissionItemType.User,
+        userId: 'user1',
+        modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+      },
+      {
+        id: 3,
+        type: WorkspacePermissionItemType.User,
+        userId: '*',
+        modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+      },
+    ];
+    expect(
+      getPermissionSettingsWithPrivacyType(
+        [
+          expectedPermissionSettings[0],
+          {
+            id: 2,
+            type: WorkspacePermissionItemType.User,
+            userId: '*',
+            modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.ReadAndWrite],
+          },
+        ],
+        WorkspacePrivacyItemType.AnyoneCanView
+      )
+    ).toEqual(expectedPermissionSettings);
+  });
+
+  it('should update star user to read and write permission when privacyType is AnyoneCanEdit', () => {
+    const expectedPermissionSettings = [
+      {
+        id: 1,
+        type: WorkspacePermissionItemType.User,
+        userId: 'user1',
+        modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+      },
+      {
+        id: 3,
+        type: WorkspacePermissionItemType.User,
+        userId: '*',
+        modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.ReadAndWrite],
+      },
+    ];
+    expect(
+      getPermissionSettingsWithPrivacyType(
+        [
+          expectedPermissionSettings[0],
+          {
+            id: 2,
+            type: WorkspacePermissionItemType.User,
+            userId: '*',
+            modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+          },
+        ],
+        WorkspacePrivacyItemType.AnyoneCanEdit
+      )
+    ).toEqual(expectedPermissionSettings);
+  });
+
+  it('should remove * permission when privacyType is PrivateToCollaborators', () => {
+    const expectedPermissionSettings = [
+      {
+        id: 1,
+        type: WorkspacePermissionItemType.User,
+        userId: 'user1',
+        modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+      },
+    ];
+    expect(
+      getPermissionSettingsWithPrivacyType(
+        [
+          expectedPermissionSettings[0],
+          {
+            id: 2,
+            type: WorkspacePermissionItemType.User,
+            userId: '*',
+            modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+          },
+        ],
+        WorkspacePrivacyItemType.PrivateToCollaborators
+      )
+    ).toEqual(expectedPermissionSettings);
   });
 });

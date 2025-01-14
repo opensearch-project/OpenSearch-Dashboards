@@ -1,0 +1,2 @@
+fix:
+- Fix Unhandled Error Response of dev tool with MDS ([#9159](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9159))
