@@ -7,6 +7,12 @@ import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../core/server';
 import { IdentitySourceService } from '../identity_source_service';
 
+/**
+ * Registers routes for retrieving identity entries according to the type from identity sources.
+ *
+ * @param router - The router instance to register the routes.
+ * @param identitySourceService - The identity source service instance.
+ */
 export function registerRoutes({
   router,
   identitySourceService,
@@ -14,70 +20,27 @@ export function registerRoutes({
   router: IRouter;
   identitySourceService: IdentitySourceService;
 }) {
+  // Register a GET route for retrieving identity entries with pagination and filtering
   router.get(
     {
-      path: 'identity/{source}/_users',
+      path: 'identity/{source}/{type}/_entries',
       validate: {
         params: schema.object({
           source: schema.string(),
+          type: schema.string(),
         }),
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
-          keyword: schema.maybe(schema.string()), // Optional search keyword
+          keyword: schema.maybe(schema.string()),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const handler = identitySourceService.getIdentitySourceHandler(req.params.source);
-      const result = handler.getUsers ? await handler.getUsers(req.query, req, context) : [];
-
-      return res.ok({
-        body: result,
-      });
-    })
-  );
-
-  router.get(
-    {
-      path: 'identity/{source}/_roles',
-      validate: {
-        params: schema.object({
-          source: schema.string(),
-        }),
-        query: schema.object({
-          perPage: schema.number({ min: 0, defaultValue: 20 }),
-          page: schema.number({ min: 0, defaultValue: 1 }),
-          keyword: schema.maybe(schema.string()), // Optional search keyword
-        }),
-      },
-    },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const handler = identitySourceService.getIdentitySourceHandler(req.params.source);
-      const result = handler.getRoles ? await handler.getRoles(req.query, req, context) : [];
-
-      return res.ok({
-        body: result,
-      });
-    })
-  );
-
-  router.get(
-    {
-      path: 'identity/{source}/_get_users_name',
-      validate: {
-        params: schema.object({
-          source: schema.string(),
-        }),
-        query: schema.object({
-          userIds: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const handler = identitySourceService.getIdentitySourceHandler(req.params.source);
-      const result = handler.getNamesWithIds
-        ? await handler.getNamesWithIds(req.query, req, context)
+      const { source, type } = req.params;
+      const handler = identitySourceService.getIdentitySourceHandler(source);
+      const result = handler.getIdentityEntries
+        ? await handler.getIdentityEntries({ ...req.query, type }, req, context)
         : [];
 
       return res.ok({
@@ -86,22 +49,25 @@ export function registerRoutes({
     })
   );
 
-  router.get(
+  // Register a POST route for retrieving identity entries by IDs
+  router.post(
     {
-      path: 'identity/{source}/_get_roles_name',
+      path: 'identity/{source}/{type}/_entries',
       validate: {
         params: schema.object({
           source: schema.string(),
+          type: schema.string(),
         }),
-        query: schema.object({
-          roleIds: schema.arrayOf(schema.string()),
+        body: schema.object({
+          ids: schema.arrayOf(schema.string()),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const handler = identitySourceService.getIdentitySourceHandler(req.params.source);
-      const result = handler.getRolesWithIds
-        ? await handler.getRolesWithIds(req.query, req, context)
+      const { source, type } = req.params;
+      const handler = identitySourceService.getIdentitySourceHandler(source);
+      const result = handler.getIdentityEntriesByIds
+        ? await handler.getIdentityEntriesByIds({ ...req.body, type }, req, context)
         : [];
 
       return res.ok({

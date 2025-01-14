@@ -14,10 +14,8 @@ describe('Security router', () => {
   let router: jest.Mocked<IRouter>;
   let identitySourceService: jest.Mocked<IdentitySourceService>;
   let mockHandler: {
-    getUsers?: jest.Mock;
-    getRoles?: jest.Mock;
-    getNamesWithIds?: jest.Mock;
-    getRolesWithIds?: jest.Mock;
+    getIdentityEntries?: jest.Mock;
+    getIdentityEntriesByIds?: jest.Mock;
   };
   const context = { core: coreMock.createRequestHandlerContext() };
   const responseFactory = httpResourcesMock.createResponseFactory();
@@ -25,10 +23,8 @@ describe('Security router', () => {
   beforeEach(async () => {
     router = mockRouter.create();
     mockHandler = {
-      getUsers: jest.fn(),
-      getRoles: jest.fn(),
-      getNamesWithIds: jest.fn(),
-      getRolesWithIds: jest.fn(),
+      getIdentityEntries: jest.fn(),
+      getIdentityEntriesByIds: jest.fn(),
     };
 
     identitySourceService = ({
@@ -38,37 +34,26 @@ describe('Security router', () => {
   });
 
   it('registers the capabilities routes', async () => {
-    expect(router.get).toHaveBeenCalledTimes(4);
+    expect(router.get).toHaveBeenCalledTimes(1);
     expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: 'identity/{source}/_users',
+        path: 'identity/{source}/{type}/_entries',
       }),
       expect.any(Function)
     );
-    expect(router.get).toHaveBeenCalledWith(
+    expect(router.post).toHaveBeenCalledTimes(1);
+    expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: 'identity/{source}/_roles',
-      }),
-      expect.any(Function)
-    );
-    expect(router.get).toHaveBeenCalledWith(
-      expect.objectContaining({
-        path: 'identity/{source}/_get_users_name',
-      }),
-      expect.any(Function)
-    );
-    expect(router.get).toHaveBeenCalledWith(
-      expect.objectContaining({
-        path: 'identity/{source}/_get_roles_name',
+        path: 'identity/{source}/{type}/_entries',
       }),
       expect.any(Function)
     );
   });
 
-  it('should call the getUsers method of the source handler for identity/{source}/_users', async () => {
+  it('should call the getIdentityEntries method of the source handler for identity/{source}/{type}/_entries', async () => {
     const routeHandler = router.get.mock.calls[0][1];
     const mockRequest = {
-      params: { source: 'test' },
+      params: { source: 'test', type: 'users' },
       query: { perPage: 10, page: 1 },
     };
 
@@ -78,65 +63,27 @@ describe('Security router', () => {
       responseFactory
     );
 
-    expect(mockHandler.getUsers).toHaveBeenCalledWith(
-      { perPage: 10, page: 1 },
+    expect(mockHandler.getIdentityEntries).toHaveBeenCalledWith(
+      { perPage: 10, page: 1, type: 'users' },
       expect.anything(),
       expect.anything()
     );
   });
 
-  it('should call the getRoles method of the source handler for identity/{source}/_roles', async () => {
-    const routeHandler = router.get.mock.calls[1][1];
+  it('should call the getIdentityEntriesByIds method of the source handler for identity/{source}/{type}/_entries', async () => {
+    const routeHandler = router.post.mock.calls[0][1];
     const mockRequest = {
-      params: { source: 'test' },
-      query: { perPage: 10, page: 1 },
+      params: { source: 'test', type: 'users' },
+      body: { ids: ['id1', 'id2'] },
     };
     await routeHandler(
       context,
-      mockRequest as OpenSearchDashboardsRequest<unknown, unknown, unknown, 'get'>,
+      mockRequest as OpenSearchDashboardsRequest<unknown, unknown, unknown, 'post'>,
       responseFactory
     );
 
-    expect(mockHandler.getRoles).toHaveBeenCalledWith(
-      { perPage: 10, page: 1 },
-      expect.anything(),
-      expect.anything()
-    );
-  });
-
-  it('should call the getNamesWithIds method of the source handler for identity/{source}/_get_users_name', async () => {
-    const routeHandler = router.get.mock.calls[2][1];
-    const mockRequest = {
-      params: { source: 'test' },
-      query: { userIds: ['user_id_1'] },
-    };
-    await routeHandler(
-      context,
-      mockRequest as OpenSearchDashboardsRequest<unknown, unknown, unknown, 'get'>,
-      responseFactory
-    );
-
-    expect(mockHandler.getNamesWithIds).toHaveBeenCalledWith(
-      { userIds: ['user_id_1'] },
-      expect.anything(),
-      expect.anything()
-    );
-  });
-
-  it('should call the getRolesWithIds method of the source handler for identity/{source}/_get_roles_name', async () => {
-    const routeHandler = router.get.mock.calls[3][1];
-    const mockRequest = {
-      params: { source: 'test' },
-      query: { roleIds: ['role_id_1'] },
-    };
-    await routeHandler(
-      context,
-      mockRequest as OpenSearchDashboardsRequest<unknown, unknown, unknown, 'get'>,
-      responseFactory
-    );
-
-    expect(mockHandler.getRolesWithIds).toHaveBeenCalledWith(
-      { roleIds: ['role_id_1'] },
+    expect(mockHandler.getIdentityEntriesByIds).toHaveBeenCalledWith(
+      { ids: ['id1', 'id2'], type: 'users' },
       expect.anything(),
       expect.anything()
     );

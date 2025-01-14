@@ -30,26 +30,16 @@ export interface IdentityEntry {
 
 /**
  *  The identitySource handler primarily facilitates role-based authentication as the OpenSearch Security plugin employs this approach.
- *  In role-based authentication, there are two main concepts: user/role, and the handler is designed to primarily handle these terms.
+ *  In role-based authentication, there are two main types: internalusers/roles, and the handler is designed to primarily handle these terms.
  **/
 export interface IdentitySourceHandler {
-  getUsers?: (
-    params: { page?: number; perPage?: number; keyword?: string },
+  getIdentityEntries?: (
+    params: { page?: number; perPage?: number; keyword?: string; type: string },
     request: OpenSearchDashboardsRequest,
     context: RequestHandlerContext
   ) => Promise<IdentityEntry[]>;
-  getRoles?: (
-    params: { page?: number; perPage?: number; keyword?: string },
-    request: OpenSearchDashboardsRequest,
-    context: RequestHandlerContext
-  ) => Promise<IdentityEntry[]>;
-  getNamesWithIds?: (
-    params: { userIds: string[] },
-    request: OpenSearchDashboardsRequest,
-    context: RequestHandlerContext
-  ) => Promise<IdentityEntry[]>;
-  getRolesWithIds?: (
-    params: { roleIds: string[] },
+  getIdentityEntriesByIds?: (
+    params: { ids: string[]; type: string },
     request: OpenSearchDashboardsRequest,
     context: RequestHandlerContext
   ) => Promise<IdentityEntry[]>;
