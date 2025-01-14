@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ParseTree, TokenStream } from 'antlr4ng';
+import { ParseTree, Token, TokenStream } from 'antlr4ng';
 import * as c3 from 'antlr4-c3';
 import { ColumnAliasSymbol, TableSymbol } from './symbol_table';
 import {
@@ -179,6 +179,18 @@ export function processVisitedRules(
       }
       case OpenSearchSQLParser.RULE_predicate: {
         rerunAndCombine = true;
+
+        const validIDToken = (token: Token) => {
+          return (
+            token.type === OpenSearchSQLParser.ID ||
+            token.type === OpenSearchSQLParser.BACKTICK_QUOTE_ID
+          );
+        };
+
+        const removePotentialBackticks = (str: string): string => {
+          return str.replace(/^`?|\`?$/g, ''); // removes backticks only if they exist at the beginning and end
+        };
+
         /**
          * creates a list of the tokens from the start of the pedicate to the end
          * intentionally omit all tokens with type SPACE
@@ -187,14 +199,39 @@ export function processVisitedRules(
 
         const expressionStart = rule.startTokenIndex;
 
-        // from expressionStart to cursorTokenIndex, grab all the tokens and put them in a list. ignore the whitespace tokens
+        // from expressionStart to cursorTokenIndex, grab all the tokens and put them in a list.
+        // ignore whitespace tokens, and wrap up IDs into one token if dot separated
         const sigTokens = [];
         for (let i = expressionStart; i < cursorTokenIndex; i++) {
           const token = tokenStream.get(i);
-          if (token.type !== OpenSearchSQLParser.SPACE) {
-            sigTokens.push(token);
+          // remove spaces
+          if (token.type === OpenSearchSQLParser.SPACE) {
+            continue;
           }
+          // remove NOT, because it is irrelevant for suggestions and prevents IN suggestions
+          if (token.type === OpenSearchSQLParser.NOT) {
+            continue;
+          }
+          // chain together IDs on DOT
+          if (token.type === OpenSearchSQLParser.DOT) {
+            if (sigTokens.length < 1 || !validIDToken(sigTokens[sigTokens.length - 1])) {
+              continue;
+            }
+            i++;
+            const nextToken = tokenStream.get(i);
+            if (!validIDToken(nextToken)) {
+              continue;
+            }
+            sigTokens[sigTokens.length - 1].text +=
+              '.' + removePotentialBackticks(nextToken.text ?? '');
+            continue;
+          }
+          sigTokens.push(token);
         }
+
+        // catch columnName rule so try to match with it to suggest beyond it.
+        // this means it can include DOTs, be ID, or be BACKTICK_QUOTE_ID. we'll avoid
+        // matching with keywordsCanBeId and scalarFunctionName for now
 
         // if we don't have any tokens so far, suggest fields
         if (sigTokens.length === 0) {
@@ -203,7 +240,7 @@ export function processVisitedRules(
         }
 
         // if we have one token that is an ID, we have to suggest operators
-        if (sigTokens.length === 1 && sigTokens[0].type === OpenSearchSQLParser.ID) {
+        if (sigTokens.length === 1 && validIDToken(sigTokens[0])) {
           suggestColumnValuePredicate = ColumnValuePredicate.OPERATOR;
           break;
         }
@@ -212,11 +249,11 @@ export function processVisitedRules(
         // and should suggest values
         if (
           sigTokens.length === 2 &&
-          sigTokens[0].type === OpenSearchSQLParser.ID &&
+          validIDToken(sigTokens[0]) &&
           sigTokens[1].type === OpenSearchSQLParser.EQUAL_SYMBOL
         ) {
           suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
-          suggestValuesForColumn = sigTokens[0].text;
+          suggestValuesForColumn = removePotentialBackticks(sigTokens[0].text ?? '');
           break;
         }
 
@@ -224,7 +261,7 @@ export function processVisitedRules(
         // suggest LPAREN
         if (
           sigTokens.length === 2 &&
-          sigTokens[0].type === OpenSearchSQLParser.ID &&
+          validIDToken(sigTokens[0]) &&
           sigTokens[1].type === OpenSearchSQLParser.IN
         ) {
           suggestColumnValuePredicate = ColumnValuePredicate.LPAREN;
@@ -235,7 +272,7 @@ export function processVisitedRules(
         // value-term suggestion (comma/RPAREN)
         if (
           sigTokens.length >= 3 &&
-          sigTokens[0].type === OpenSearchSQLParser.ID &&
+          validIDToken(sigTokens[0]) &&
           sigTokens[1].type === OpenSearchSQLParser.IN &&
           sigTokens[2].type === OpenSearchSQLParser.LR_BRACKET &&
           sigTokens[sigTokens.length - 1].type !== OpenSearchSQLParser.RR_BRACKET
@@ -244,7 +281,9 @@ export function processVisitedRules(
             suggestColumnValuePredicate = ColumnValuePredicate.END_IN_TERM;
           } else {
             suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
-            suggestValuesForColumn = tokenStream.get(expressionStart).text;
+            suggestValuesForColumn = removePotentialBackticks(
+              tokenStream.get(expressionStart).text ?? ''
+            );
           }
           break;
         }
