@@ -19,6 +19,7 @@ import {
   verifyDiscoverPageState,
   verifySavedSearchInAssetsPage,
   postRequestSaveSearch,
+  updateSavedSearchAndSaveAndVerify,
 } from '../../../../../utils/apps/query_enhancements/saved_search';
 
 export const runSavedSearchTests = () => {
