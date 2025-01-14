@@ -35,9 +35,9 @@ describe('dataset selector', { scrollBehavior: false }, () => {
   });
   beforeEach(() => {
     // Create workspace
-    cy.deleteWorkspaceByName(`${workspace}`);
+    cy.deleteWorkspaceByName(workspace);
     cy.visit('/app/home');
-    cy.osd.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
+    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
     cy.navigateToWorkSpaceSpecificPage({
       workspaceName: workspace,
       page: 'discover',
