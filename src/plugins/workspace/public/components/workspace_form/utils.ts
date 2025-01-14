@@ -12,6 +12,7 @@ import {
   optionIdToWorkspacePermissionModesMap,
   permissionModeOptions,
   WorkspacePermissionItemType,
+  WorkspacePrivacyItemType,
 } from './constants';
 
 import {
@@ -36,6 +37,13 @@ export const isValidFormTextInput = (input?: string) => {
   const regex = /^[0-9a-zA-Z()_\[\]\-\s]+$/;
   return typeof input === 'string' && regex.test(input);
 };
+
+export const EMPTY_PERMISSIONS: SavedObjectPermissions = {
+  library_read: {},
+  library_write: {},
+  read: {},
+  write: {},
+} as const;
 
 export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   let numberOfErrors = 0;
@@ -104,7 +112,8 @@ export const convertPermissionSettingsToPermissions = (
   permissionItems: WorkspacePermissionSetting[] | undefined
 ) => {
   if (!permissionItems || permissionItems.length === 0) {
-    return undefined;
+    // Workspace object should always have permissions, set it as an empty object here instead of undefined.
+    return EMPTY_PERMISSIONS;
   }
   return permissionItems.reduce<SavedObjectPermissions>((previous, current) => {
     current.modes.forEach((mode) => {
@@ -333,5 +342,53 @@ export const getNumberOfChanges = (
   ) {
     count++;
   }
+  if (
+    convertPermissionsToPrivacyType(newFormData.permissionSettings ?? []) !==
+    convertPermissionsToPrivacyType(initialFormData.permissionSettings ?? [])
+  ) {
+    count++;
+  }
   return count;
+};
+
+export const convertPermissionsToPrivacyType = (
+  permissionSettings: WorkspaceFormDataState['permissionSettings']
+) => {
+  const modes = permissionSettings.find(
+    (item) => item.type === WorkspacePermissionItemType.User && item.userId === '*'
+  )?.modes;
+  if (modes?.includes(WorkspacePermissionMode.LibraryWrite)) {
+    return WorkspacePrivacyItemType.AnyoneCanEdit;
+  }
+  if (modes?.includes(WorkspacePermissionMode.LibraryRead)) {
+    return WorkspacePrivacyItemType.AnyoneCanView;
+  }
+  return WorkspacePrivacyItemType.PrivateToCollaborators;
+};
+
+export const getPermissionSettingsWithPrivacyType = (
+  permissionSettings: WorkspaceFormDataState['permissionSettings'],
+  privacyType: WorkspacePrivacyItemType
+): WorkspaceFormDataState['permissionSettings'] => {
+  const newSettings = permissionSettings.filter(
+    (item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*')
+  );
+
+  if (
+    privacyType === WorkspacePrivacyItemType.AnyoneCanView ||
+    privacyType === WorkspacePrivacyItemType.AnyoneCanEdit
+  ) {
+    newSettings.push({
+      id: generateNextPermissionSettingsId(permissionSettings),
+      type: WorkspacePermissionItemType.User,
+      userId: '*',
+      modes:
+        optionIdToWorkspacePermissionModesMap[
+          privacyType === WorkspacePrivacyItemType.AnyoneCanView
+            ? PermissionModeId.Read
+            : PermissionModeId.ReadAndWrite
+        ],
+    });
+  }
+  return newSettings;
 };

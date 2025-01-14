@@ -5,7 +5,12 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { WorkspaceOperationType } from './constants';
+import { PermissionModeId } from '../../../../../core/public';
+import {
+  optionIdToWorkspacePermissionModesMap,
+  WorkspaceOperationType,
+  WorkspacePrivacyItemType,
+} from './constants';
 import { WorkspaceFormSubmitData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { waitFor } from '@testing-library/dom';
@@ -151,6 +156,40 @@ describe('useWorkspaceForm', () => {
     });
     await waitFor(() => {
       expect(renderResult.result.current.formData.permissionSettings).toStrictEqual([]);
+    });
+  });
+
+  it('should return permissions settings after setPrivacyType called', async () => {
+    const onSubmitMock = jest.fn().mockResolvedValue({ success: true });
+    const { renderResult } = setup({
+      defaultValues: {
+        name: 'current-workspace-name',
+        features: ['use-case-observability'],
+      },
+      onSubmit: onSubmitMock,
+    });
+    act(() => {
+      renderResult.result.current.setPrivacyType(WorkspacePrivacyItemType.AnyoneCanEdit);
+    });
+    await waitFor(() => {
+      expect(renderResult.result.current.formData.permissionSettings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'user',
+            userId: '*',
+            modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.ReadAndWrite],
+          }),
+        ])
+      );
+    });
+
+    const oldPermissionSettings = renderResult.result.current.formData.permissionSettings;
+
+    act(() => {
+      renderResult.result.current.setPrivacyType(WorkspacePrivacyItemType.AnyoneCanEdit);
+    });
+    await waitFor(() => {
+      expect(renderResult.result.current.formData.permissionSettings).toBe(oldPermissionSettings);
     });
   });
 });
