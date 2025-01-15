@@ -30,6 +30,7 @@ import {
   getPreviousToken,
 } from './table';
 import { shouldSuggestTemplates } from './parse';
+import { removePotentialBackticks } from '../shared/utils';
 
 const tokenDictionary: TokenDictionary = {
   SPACE: OpenSearchSQLParser.SPACE,
@@ -187,10 +188,6 @@ export function processVisitedRules(
           );
         };
 
-        const removePotentialBackticks = (str: string): string => {
-          return str.replace(/^`?|\`?$/g, ''); // removes backticks only if they exist at the beginning and end
-        };
-
         /**
          * creates a list of the tokens from the start of the pedicate to the end
          * intentionally omit all tokens with type SPACE
@@ -223,7 +220,7 @@ export function processVisitedRules(
               continue;
             }
             sigTokens[sigTokens.length - 1].text +=
-              '.' + removePotentialBackticks(nextToken.text ?? '');
+              '.' + removePotentialBackticks(nextToken?.text ?? '');
             continue;
           }
           sigTokens.push(token);

@@ -26,6 +26,10 @@ export interface IDataSourceRequestHandlerParams {
   title: string;
 }
 
+export const removePotentialBackticks = (str: string): string => {
+  return str.replace(/^`?|\`?$/g, ''); // removes backticks only if they exist at the beginning and end
+};
+
 // Function to get raw suggestion data
 export const getRawSuggestionData$ = (
   queryString: QueryStringContract,

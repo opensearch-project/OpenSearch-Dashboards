@@ -4,7 +4,7 @@
  */
 
 import * as c3 from 'antlr4-c3';
-import { ParseTree, TokenStream } from 'antlr4ng';
+import { ParseTree, Token, TokenStream } from 'antlr4ng';
 import {
   AutocompleteData,
   AutocompleteResultBase,
@@ -16,6 +16,7 @@ import {
 } from '../shared/types';
 import { OpenSearchPPLLexer } from './.generated/OpenSearchPPLLexer';
 import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
+import { removePotentialBackticks } from '../shared/utils';
 
 // These are keywords that we do not want to show in autocomplete
 export function getIgnoredTokens(): number[] {
@@ -72,6 +73,8 @@ const tokenDictionary: any = {
   EQUAL: OpenSearchPPLParser.EQUAL,
   IN: OpenSearchPPLParser.IN,
   COMMA: OpenSearchPPLParser.COMMA,
+  BACKTICK_QUOTE: OpenSearchPPLParser.BQUOTA_STRING,
+  DOT: OpenSearchPPLParser.DOT,
 };
 
 const rulesToVisit = new Set([
@@ -167,13 +170,33 @@ export function processVisitedRules(
           break;
         }
 
+        const validIDToken = (token: Token) => {
+          return token.type === tokenDictionary.ID || token.type === tokenDictionary.BACKTICK_QUOTE;
+        };
+
         while (currentIndex > -1) {
           const token = tokenStream.get(currentIndex);
-          if (token.type === tokenDictionary.PIPE) {
+          if (!token || token.type === tokenDictionary.PIPE) {
             break;
           }
-          if (token.type === tokenDictionary.ID) {
-            suggestValuesForColumn = token.text;
+
+          // NOTE: according to grammar, backticks in PPL are only possible for fields
+          if (validIDToken(token)) {
+            let combinedText = token.text ?? '';
+
+            // stitch together IDs separated by DOTs
+            let lookBehindIndex = currentIndex;
+            while (lookBehindIndex > -1) {
+              lookBehindIndex--;
+              const prevToken = tokenStream.get(lookBehindIndex);
+              if (!prevToken || prevToken.type !== tokenDictionary.DOT) {
+                break;
+              }
+              lookBehindIndex--;
+              combinedText = `${tokenStream.get(lookBehindIndex).text ?? ''}.${combinedText}`;
+            }
+
+            suggestValuesForColumn = removePotentialBackticks(combinedText);
             break;
           }
           currentIndex--;
