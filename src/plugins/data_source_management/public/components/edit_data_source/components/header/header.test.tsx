@@ -133,6 +133,14 @@ describe('Datasource Management: Edit Datasource Header', () => {
     test('should render normally', () => {
       expect(component.find(setDefaultButtonIdentifier).exists()).toBe(true);
     });
+    test('should not change to default if onClickSetDefault returns false', async () => {
+      onClickSetDefault.mockReturnValue(false);
+      expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
+      component.find(setDefaultButtonIdentifier).first().simulate('click');
+      expect(onClickSetDefault).toHaveBeenCalled();
+      component.update();
+      expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
+    });
     test('default button should show as "Set as default" and should be clickable', () => {
       expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
       expect(component.find(setDefaultButtonIdentifier).first().prop('disabled')).toBe(false);

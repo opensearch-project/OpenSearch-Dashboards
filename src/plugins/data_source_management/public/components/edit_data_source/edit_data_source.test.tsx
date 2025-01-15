@@ -23,17 +23,10 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../../types';
-import { NotificationsStart } from 'opensearch-dashboards/public';
 const formIdentifier = 'EditDataSourceForm';
 const notFoundIdentifier = '[data-test-subj="dataSourceNotFound"]';
 
 describe('Datasource Management: Edit Datasource Wizard', () => {
-  const mockNotifications = ({
-    toasts: {
-      addSuccess: jest.fn(),
-      addDanger: jest.fn(),
-    },
-  } as unknown) as NotificationsStart;
   const mockedContext = {
     ...mockManagementPlugin.createDataSourceManagementContext(),
     application: { capabilities: { dataSource: { canManage: true } } },

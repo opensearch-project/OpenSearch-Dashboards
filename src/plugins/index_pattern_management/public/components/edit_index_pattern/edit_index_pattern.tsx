@@ -250,7 +250,7 @@ export const EditIndexPattern = withRouter(
           ...(Boolean(indexPattern.timeFieldName)
             ? [<EuiBadge color="warning">{timeFilterHeader}</EuiBadge>]
             : []),
-          ...tags.map((tag: any) => <EuiBadge color="warning">{tag.name}</EuiBadge>),
+          ...tags.map((tag: any) => <EuiBadge color="hollow">{tag.name}</EuiBadge>),
         ];
         const controls = components.map((component) => ({
           renderComponent: component,
