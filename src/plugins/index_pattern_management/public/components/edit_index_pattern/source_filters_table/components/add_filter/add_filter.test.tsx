@@ -35,14 +35,14 @@ import { AddFilter } from './add_filter';
 
 describe('AddFilter', () => {
   test('should render normally', () => {
-    const component = shallow(<AddFilter onAddFilter={() => {}} />);
+    const component = shallow(<AddFilter useUpdatedUX onAddFilter={() => {}} />);
 
     expect(component).toMatchSnapshot();
   });
 
   test('should allow adding a filter', async () => {
     const onAddFilter = jest.fn();
-    const component = shallow(<AddFilter onAddFilter={onAddFilter} />);
+    const component = shallow(<AddFilter useUpdatedUX onAddFilter={onAddFilter} />);
 
     component.find('EuiCompressedFieldText').simulate('change', { target: { value: 'tim*' } });
     component.find('EuiSmallButton').simulate('click');
@@ -52,7 +52,7 @@ describe('AddFilter', () => {
   });
 
   test('should ignore strings with just spaces', () => {
-    const component = shallow(<AddFilter onAddFilter={() => {}} />);
+    const component = shallow(<AddFilter useUpdatedUX onAddFilter={() => {}} />);
 
     // Set a value in the input field
     component.find('EuiCompressedFieldText').simulate('keypress', ' ');

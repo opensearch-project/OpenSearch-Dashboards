@@ -126,7 +126,7 @@ export class DataSourceManagementPlugin
       .getStartServices()
       .then(([coreStart]) => coreStart.savedObjects);
 
-    const column = new DataSourceColumn(savedObjectPromise);
+    const column = new DataSourceColumn(savedObjectPromise, uiSettings.get('home:useNewHomePage'));
     indexPatternManagement.columns.register(column);
 
     this.featureFlagStatus = !!dataSource;

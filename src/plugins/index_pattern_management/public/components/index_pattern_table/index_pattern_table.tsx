@@ -30,6 +30,7 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -199,7 +200,13 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         }
       ) => (
         <>
-          <EuiLink {...reactRouterNavigate(history, `patterns/${index.id}`)}>{name}</EuiLink>
+          <EuiButtonEmpty
+            size="xs"
+            {...reactRouterNavigate(history, `patterns/${index.id}`)}
+            {...(useUpdatedUX ? { textProps: { style: { fontWeight: 600 } } } : {})}
+          >
+            {name}
+          </EuiButtonEmpty>
           &emsp;
           <EuiBadgeGroup gutterSize="s">
             {index.tags &&
@@ -311,7 +318,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         data-test-subj="indexPatternTable"
         role="region"
         aria-label={ariaRegion}
-        paddingSize="m"
+        {...(useUpdatedUX ? { paddingSize: 'm' } : {})}
       >
         <EuiFlexGroup justifyContent="spaceBetween">
           {pageTitleAndDescription}

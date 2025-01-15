@@ -43,6 +43,7 @@ describe('Header', () => {
         history={(scopedHistoryMock.create() as unknown) as ScopedHistory}
         location={({} as unknown) as RouteComponentProps['location']}
         match={({} as unknown) as RouteComponentProps['match']}
+        useUpdatedUX
       />
     );
 

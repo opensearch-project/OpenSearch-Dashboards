@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart } from 'opensearch-dashboards/public';
-import { EuiBadge, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { IndexPatternTableColumn } from '../../../../index_pattern_management/public';
 import { getApplication, getDataSources } from '../utils';
@@ -38,22 +38,24 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
       const { title, id } = dataSource;
 
       return (
-        <EuiButtonEmpty
-          flush="left"
-          size="xs"
-          onClick={() =>
+        <EuiLink
+          onClick={() => {
             getApplication().navigateToApp('management', {
               path: `opensearch-dashboards/${DSM_APP_ID}/${encodeURIComponent(id)}`,
-            })
-          }
+            });
+          }}
+          style={this.useUpdatedUX ? { fontWeight: 'normal' } : {}}
         >
           {title}
-        </EuiButtonEmpty>
+        </EuiLink>
       );
     },
   };
 
-  constructor(private readonly savedObjectPromise: Promise<SavedObjectsStart>) {}
+  constructor(
+    private readonly savedObjectPromise: Promise<SavedObjectsStart>,
+    private readonly useUpdatedUX: boolean
+  ) {}
 
   public loadData = async () => {
     const savedObject = await this.savedObjectPromise;

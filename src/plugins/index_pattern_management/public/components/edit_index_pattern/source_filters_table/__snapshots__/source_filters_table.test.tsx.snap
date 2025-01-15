@@ -5,6 +5,7 @@ exports[`SourceFiltersTable should add a filter 1`] = `
   <header />
   <AddFilter
     onAddFilter={[Function]}
+    useUpdatedUX={false}
   />
   <eui-spacer
     size="l"
@@ -47,6 +48,7 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
   <header />
   <AddFilter
     onAddFilter={[Function]}
+    useUpdatedUX={false}
   />
   <eui-spacer
     size="l"
@@ -88,6 +90,7 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
   <header />
   <AddFilter
     onAddFilter={[Function]}
+    useUpdatedUX={false}
   />
   <eui-spacer
     size="l"
@@ -124,6 +127,7 @@ exports[`SourceFiltersTable should render normally 1`] = `
   <header />
   <AddFilter
     onAddFilter={[Function]}
+    useUpdatedUX={false}
   />
   <eui-spacer
     size="l"
@@ -173,6 +177,7 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
   <header />
   <AddFilter
     onAddFilter={[Function]}
+    useUpdatedUX={false}
   />
   <eui-spacer
     size="l"
@@ -208,6 +213,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
   <header />
   <AddFilter
     onAddFilter={[Function]}
+    useUpdatedUX={false}
   />
   <eui-spacer
     size="l"
@@ -248,6 +254,7 @@ exports[`SourceFiltersTable should update a filter 1`] = `
   <header />
   <AddFilter
     onAddFilter={[Function]}
+    useUpdatedUX={false}
   />
   <eui-spacer
     size="l"

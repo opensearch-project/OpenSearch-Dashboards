@@ -183,7 +183,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           return (
             <>
               {useUpdatedUX && <EuiSpacer size="m" />}
-              <Wrapper paddingSize="m">
+              <Wrapper {...(useUpdatedUX ? { paddingSize: 'm' } : {})}>
                 <EuiSpacer size="m" />
                 {getFilterSection(type)}
                 <EuiSpacer size="m" />
@@ -207,7 +207,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           return (
             <>
               {useUpdatedUX && <EuiSpacer size="m" />}
-              <Wrapper paddingSize="m">
+              <Wrapper {...(useUpdatedUX ? { paddingSize: 'm' } : {})}>
                 <EuiSpacer size="m" />
                 {getFilterSection(type)}
                 <EuiSpacer size="m" />
@@ -231,11 +231,12 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           return (
             <>
               {useUpdatedUX && <EuiSpacer size="m" />}
-              <Wrapper paddingSize="m">
+              <Wrapper {...(useUpdatedUX ? { paddingSize: 'm' } : {})}>
                 <EuiSpacer size="m" />
                 {getFilterSection(type)}
                 <EuiSpacer size="m" />
                 <SourceFiltersTable
+                  useUpdatedUX={useUpdatedUX}
                   saveIndexPattern={saveIndexPattern}
                   indexPattern={indexPattern}
                   filterFilter={fieldFilter}
