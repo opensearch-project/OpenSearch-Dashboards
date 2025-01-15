@@ -40,6 +40,12 @@ describe('AddFilter', () => {
     expect(component).toMatchSnapshot();
   });
 
+  test('should match snapshot when useUpdatedUX equal false', () => {
+    const component = shallow(<AddFilter useUpdatedUX={false} onAddFilter={() => {}} />);
+
+    expect(component).toMatchSnapshot();
+  });
+
   test('should allow adding a filter', async () => {
     const onAddFilter = jest.fn();
     const component = shallow(<AddFilter useUpdatedUX onAddFilter={onAddFilter} />);

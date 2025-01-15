@@ -49,4 +49,18 @@ describe('Header', () => {
 
     expect(component).toMatchSnapshot();
   });
+
+  test('should match snapshot when useUpdatedUX equal false', () => {
+    const component = renderWithIntl(
+      <Header.WrappedComponent
+        indexPatternId="test"
+        history={(scopedHistoryMock.create() as unknown) as ScopedHistory}
+        location={({} as unknown) as RouteComponentProps['location']}
+        match={({} as unknown) as RouteComponentProps['match']}
+        useUpdatedUX={false}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
 });
