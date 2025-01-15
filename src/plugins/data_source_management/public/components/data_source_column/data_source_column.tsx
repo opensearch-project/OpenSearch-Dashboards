@@ -39,11 +39,11 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
 
       return (
         <EuiLink
-          onClick={() => {
+          onClick={() =>
             getApplication().navigateToApp('management', {
               path: `opensearch-dashboards/${DSM_APP_ID}/${encodeURIComponent(id)}`,
-            });
-          }}
+            })
+          }
           style={this.useUpdatedUX ? { fontWeight: 'normal' } : {}}
         >
           {title}

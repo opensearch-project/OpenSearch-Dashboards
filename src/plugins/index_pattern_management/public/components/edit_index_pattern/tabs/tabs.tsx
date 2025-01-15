@@ -223,6 +223,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                   }}
                   onRemoveField={refreshFilters}
                   painlessDocLink={docLinks.links.noDocumentation.scriptedFields.painless}
+                  useUpdatedUX={useUpdatedUX}
                 />
               </Wrapper>
             </>
