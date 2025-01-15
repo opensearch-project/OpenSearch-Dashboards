@@ -91,7 +91,7 @@ export const WorkspacePrivacySettingPanel = ({
         checked={goToCollaborators}
         onChange={(event) => onGoToCollaboratorsChange(event.target.checked)}
         label={i18n.translate('workspace.form.panels.privacy.jumpToCollaborators.label', {
-          defaultMessage: 'Go to configure the collaborators right after creating the workspace.',
+          defaultMessage: 'Add collaborators after workspace creation.',
         })}
         data-test-subj="jumpToCollaboratorsCheckbox"
       />
