@@ -249,11 +249,9 @@ export const generateAllTestConfigurations = () => {
  * @param {QueryEnhancementLanguage} language - query language
  */
 export const setDatePickerDatesAndSearchIfRelevant = (language) => {
-  if (language === QueryLanguages.SQL.name) {
-    return;
+  if (language !== QueryLanguages.SQL.name) {
+    cy.setTopNavDate(START_TIME, END_TIME);
   }
-
-  cy.setTopNavDate(START_TIME, END_TIME);
 };
 
 /**
@@ -491,4 +489,46 @@ export const postRequestSaveSearch = (config) => {
       });
     });
   });
+};
+
+/**
+ * Loads a saved search and updates it and verify that it is correct
+ * @param {SavedSearchTestConfig} config - the relevant config for the test case
+ * @param {boolean} saveAsNew - flag to determine whether to overwrite the saved search (false) or save as a new saved search (true)
+ */
+export const updateSavedSearchAndSaveAndVerify = (config, saveAsNew) => {
+  const saveName = config.saveName;
+
+  cy.navigateToWorkSpaceSpecificPage({
+    workspaceName: workspaceName,
+    page: 'discover',
+    isEnhancement: true,
+  });
+  cy.loadSaveSearch(saveName);
+
+  // Change the dataset type to use
+  const [newDataset, newDatasetType] =
+    config.datasetType === DatasetTypes.INDEX_PATTERN.name
+      ? [INDEX_WITH_TIME_1, DatasetTypes.INDEXES.name]
+      : [INDEX_PATTERN_WITH_TIME, DatasetTypes.INDEX_PATTERN.name];
+  // If current language is PPL, update to OpenSearch SQL, else update to PPL
+  const newLanguage =
+    config.language === QueryLanguages.PPL.name ? QueryLanguages.SQL : QueryLanguages.PPL;
+  const newConfig = generateTestConfiguration(newDataset, newDatasetType, newLanguage);
+
+  cy.setDataset(newConfig.dataset, datasourceName, newConfig.datasetType);
+  cy.setQueryLanguage(newConfig.language);
+  setDatePickerDatesAndSearchIfRelevant(newConfig.language);
+  setSearchConfigurations({
+    ...newConfig,
+    // only select field if previous config did not select it, because otherwise it is already selected
+    selectFields: !config.selectFields ? newConfig.selectFields : false,
+  });
+  cy.saveSearch(saveName, saveAsNew);
+
+  // Load updated saved search and verify
+  cy.getElementByTestId('discoverNewButton').click();
+  cy.loadSaveSearch(saveName, saveAsNew);
+  setDatePickerDatesAndSearchIfRelevant(newConfig.language);
+  verifyDiscoverPageState(newConfig);
 };

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { EuiPage, EuiPanel } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiPage, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 import { useObservable } from 'react-use';
@@ -14,6 +14,7 @@ import { CoreStart } from '../../../../../core/public';
 import {
   NavigationPublicPluginStart,
   TopNavControlDescriptionData,
+  TopNavControlLinkData,
 } from '../../../../navigation/public';
 import { WorkspacePermissionSetting } from '../workspace_form/types';
 import { WorkspaceCollaboratorTable } from '../workspace_form/workspace_collaborator_table';
@@ -25,6 +26,8 @@ import {
 } from '../workspace_form';
 import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
 import { WorkspaceClient } from '../../workspace_client';
+import { WorkspacePrivacyFlyout } from '../workspace_form/workspace_privacy_flyout';
+import { WorkspaceCollaboratorPrivacySettingPanel } from '../workspace_form/workspace_collaborator_privacy_setting_panel';
 
 export const WorkspaceCollaborators = () => {
   const {
@@ -43,6 +46,7 @@ export const WorkspaceCollaborators = () => {
     workspaceClient: WorkspaceClient;
   }>();
 
+  const [isPrivacyFlyoutVisible, setIsPrivacyFlyoutVisible] = useState(false);
   const displayedCollaboratorTypes = useObservable(collaboratorTypes.getTypes$()) ?? [];
 
   const currentWorkspace = useObservable(
@@ -90,6 +94,10 @@ export const WorkspaceCollaborators = () => {
   if (!currentWorkspace || !isPermissionEnabled) {
     return null;
   }
+
+  const handleLearnMoreClick = (targetElement: HTMLElement) => {
+    setIsPrivacyFlyoutVisible((value) => !value);
+  };
   return (
     <EuiPage data-test-subj="workspace-collaborators-panel">
       <HeaderControl
@@ -98,6 +106,13 @@ export const WorkspaceCollaborators = () => {
             description: i18n.translate('workspace.collaborators.description', {
               defaultMessage: 'Manage workspace access and permissions.',
             }),
+            links: {
+              label: i18n.translate('workspace.form.panels.collaborator.learnMore', {
+                defaultMessage: 'Learn more',
+              }),
+              controlType: 'link',
+              run: handleLearnMoreClick,
+            } as TopNavControlLinkData,
           } as TopNavControlDescriptionData,
         ]}
         setMountPoint={application.setAppDescriptionControls}
@@ -116,13 +131,23 @@ export const WorkspaceCollaborators = () => {
         ]}
         setMountPoint={application?.setAppRightControls}
       />
-      <EuiPanel>
-        <WorkspaceCollaboratorTable
+      <div>
+        <WorkspaceCollaboratorPrivacySettingPanel
           permissionSettings={permissionSettings}
-          displayedCollaboratorTypes={displayedCollaboratorTypes}
           handleSubmitPermissionSettings={handleSubmitPermissionSettings}
         />
-      </EuiPanel>
+        <EuiSpacer />
+        <EuiPanel>
+          <WorkspaceCollaboratorTable
+            permissionSettings={permissionSettings}
+            displayedCollaboratorTypes={displayedCollaboratorTypes}
+            handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+          />
+        </EuiPanel>
+      </div>
+      {isPrivacyFlyoutVisible && (
+        <WorkspacePrivacyFlyout onClose={() => setIsPrivacyFlyoutVisible(false)} />
+      )}
     </EuiPage>
   );
 };

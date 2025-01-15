@@ -314,6 +314,7 @@ exports[`DataSourceTable should get datasources successful should render normall
               "show": false,
             },
             "name": "Description",
+            "render": [Function],
             "sortable": [Function],
             "truncateText": true,
           },
@@ -790,6 +791,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                   "show": false,
                 },
                 "name": "Description",
+                "render": [Function],
                 "sortable": [Function],
                 "truncateText": true,
               },
@@ -1536,7 +1538,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                               }
                             }
                             setScopeRow={false}
-                            textOnly={true}
+                            textOnly={false}
                             truncateText={true}
                           >
                             <td
@@ -1548,13 +1550,9 @@ exports[`DataSourceTable should get datasources successful should render normall
                               }
                             >
                               <div
-                                className="euiTableCellContent euiTableCellContent--truncateText"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <span
-                                  className="euiTableCellContent__text"
-                                >
-                                  alpha test datasource
-                                </span>
+                                alpha test datasource
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1587,7 +1585,16 @@ exports[`DataSourceTable should get datasources successful should render normall
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                0
+                                <EuiText
+                                  className=""
+                                  key=".0"
+                                >
+                                  <div
+                                    className="euiText euiText--medium"
+                                  >
+                                    —
+                                  </div>
+                                </EuiText>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1761,7 +1768,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                               }
                             }
                             setScopeRow={false}
-                            textOnly={true}
+                            textOnly={false}
                             truncateText={true}
                           >
                             <td
@@ -1773,13 +1780,9 @@ exports[`DataSourceTable should get datasources successful should render normall
                               }
                             >
                               <div
-                                className="euiTableCellContent euiTableCellContent--truncateText"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <span
-                                  className="euiTableCellContent__text"
-                                >
-                                  beta test datasource
-                                </span>
+                                beta test datasource
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1812,7 +1815,16 @@ exports[`DataSourceTable should get datasources successful should render normall
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                0
+                                <EuiText
+                                  className=""
+                                  key=".0"
+                                >
+                                  <div
+                                    className="euiText euiText--medium"
+                                  >
+                                    —
+                                  </div>
+                                </EuiText>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1986,7 +1998,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                               }
                             }
                             setScopeRow={false}
-                            textOnly={true}
+                            textOnly={false}
                             truncateText={true}
                           >
                             <td
@@ -1998,13 +2010,9 @@ exports[`DataSourceTable should get datasources successful should render normall
                               }
                             >
                               <div
-                                className="euiTableCellContent euiTableCellContent--truncateText"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <span
-                                  className="euiTableCellContent__text"
-                                >
-                                  test datasource2
-                                </span>
+                                test datasource2
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -2037,7 +2045,16 @@ exports[`DataSourceTable should get datasources successful should render normall
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                0
+                                <EuiText
+                                  className=""
+                                  key=".0"
+                                >
+                                  <div
+                                    className="euiText euiText--medium"
+                                  >
+                                    —
+                                  </div>
+                                </EuiText>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -2251,7 +2268,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                               }
                             }
                             setScopeRow={false}
-                            textOnly={true}
+                            textOnly={false}
                             truncateText={true}
                           >
                             <td
@@ -2263,13 +2280,9 @@ exports[`DataSourceTable should get datasources successful should render normall
                               }
                             >
                               <div
-                                className="euiTableCellContent euiTableCellContent--truncateText"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <span
-                                  className="euiTableCellContent__text"
-                                >
-                                  test datasource1
-                                </span>
+                                test datasource1
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -2302,7 +2315,16 @@ exports[`DataSourceTable should get datasources successful should render normall
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                0
+                                <EuiText
+                                  className=""
+                                  key=".0"
+                                >
+                                  <div
+                                    className="euiText euiText--medium"
+                                  >
+                                    —
+                                  </div>
+                                </EuiText>
                               </div>
                             </td>
                           </EuiTableRowCell>
