@@ -12,7 +12,7 @@ import {
   END_TIME,
   DATASET_CONFIGS,
 } from '../../../../../utils/apps/constants';
-import * as dataExplorer from '../../../../../integration/core-opensearch-dashboards/opensearch-dashboards/apps/query_enhancements/utils/field_display_filtering.js';
+import * as dataExplorer from '../../../../../utils/apps/query_enhancements/field_display_filtering.js';
 import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
 import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 
@@ -223,7 +223,7 @@ describe('filter for value spec', () => {
   });
 
   after(() => {
-    cy.deleteWorkspaceByName(`${WORKSPACE_NAME}`);
+    cy.deleteWorkspaceByName(`${workspace}`);
     cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
     // TODO: Modify deleteIndex to handle an array of index and remove hard code
     cy.deleteIndex(INDEX_PATTERN_NAME);

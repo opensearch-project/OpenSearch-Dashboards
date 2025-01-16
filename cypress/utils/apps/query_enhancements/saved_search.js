@@ -12,7 +12,7 @@ import {
   QueryLanguages,
   START_TIME,
   WORKSPACE_NAME,
-} from '../../../../../../utils/apps/query_enhancements/constants';
+} from './constants';
 
 const randomString = Math.random().toString(36);
 

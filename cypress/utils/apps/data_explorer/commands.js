@@ -125,7 +125,8 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('saveQuery', (name, description) => {
+// eslint-disable-next-line no-unused-vars
+Cypress.Commands.add('saveQuery', (name, description = ' ', savedQueriesNewUIEnabled = true) => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {
     cy.getElementByTestId('saved-query-management-popover-button').click();
   });
@@ -133,6 +134,9 @@ Cypress.Commands.add('saveQuery', (name, description) => {
 
   cy.getElementByTestId('saveQueryFormTitle').type(name);
   cy.getElementByTestId('saveQueryFormDescription').type(description);
+
+  cy.getElementByTestId('savedQueryFormSaveButton').click();
+  cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
 });
 
 Cypress.Commands.add('loadSaveQuery', (name) => {
