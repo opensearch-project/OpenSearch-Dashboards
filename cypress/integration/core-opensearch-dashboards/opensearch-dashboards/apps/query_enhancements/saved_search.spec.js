@@ -20,7 +20,7 @@ import {
   verifySavedSearchInAssetsPage,
   postRequestSaveSearch,
   updateSavedSearchAndSaveAndVerify,
-} from './utils/saved_search';
+} from '../../../../../utils/apps/query_enhancements/saved_search';
 
 export const runSavedSearchTests = () => {
   describe('saved search', () => {
