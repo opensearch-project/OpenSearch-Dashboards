@@ -8,17 +8,21 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   SECONDARY_ENGINE,
+  START_TIME,
+  END_TIME,
 } from '../../../../../utils/constants';
 
 import {
   workspaceName,
   datasourceName,
   setSearchConfigurations,
-  setDatePickerDatesAndSearchIfRelevant,
   verifyDiscoverPageState,
 } from '../../../../../utils/apps/query_enhancements/saved_search';
 
-import { generateAllTestConfigurations } from '../../../../../utils/apps/query_enhancements/saved_queries';
+import {
+  generateAllTestConfigurations,
+  setDatePickerDatesAndSearchIfRelevant,
+} from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is true.
 
@@ -40,7 +44,7 @@ export const runSavedQueriesFlyoutUITests = () => {
       // Add data source
       cy.addDataSource({
         name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+        url: 'http://opensearch-node:9200/',
         authType: 'no_auth',
       });
 
@@ -78,24 +82,36 @@ export const runSavedQueriesFlyoutUITests = () => {
         cy.setDataset(config.dataset, datasourceName, config.datasetType);
 
         cy.setQueryLanguage(config.language);
-        setDatePickerDatesAndSearchIfRelevant(config.language);
+        setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
 
         setSearchConfigurations(config);
         verifyDiscoverPageState(config);
-        cy.saveQuery(config.saveName);
+        cy.saveQuery(config.saveName, ' ', true, true, true);
       });
     });
 
     it('should see all saved queries', () => {
-      cy.getElementByTestId('saved-query-management-popover-button').click();
-
-      cy.getElementByTestId('saved-query-management-open-button').click();
-
       testConfigurations.forEach((config) => {
+        cy.getElementByTestId('discoverNewButton').click();
+        setDatePickerDatesAndSearchIfRelevant(
+          config.language,
+          'Aug 29, 2020 @ 00:00:00.000',
+          'Aug 30, 2020 @ 00:00:00.000'
+        );
+
+        cy.getElementByTestId('saved-query-management-popover-button').click();
+
+        cy.getElementByTestId('saved-query-management-open-button').click();
+
         cy.getElementByTestId('euiFlyoutCloseButton')
           .parent()
           .contains(config.saveName)
-          .should('exist');
+          .should('exist')
+          .click();
+
+        cy.getElementByTestId('open-query-action-button').click();
+
+        verifyDiscoverPageState(config);
       });
     });
   });

@@ -12,6 +12,16 @@ import {
   WORKSPACE_NAME,
 } from './constants';
 
+/**
+ * Sets the top nav date if it is relevant for the passed language
+ * @param {QueryEnhancementLanguage} language - query language
+ */
+export const setDatePickerDatesAndSearchIfRelevant = (language, startTime, endTime) => {
+  if (language !== QueryLanguages.SQL.name) {
+    cy.setTopNavDate(startTime, endTime);
+  }
+};
+
 const randomString = Math.random().toString(36);
 
 /**
