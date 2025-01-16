@@ -249,6 +249,7 @@ export const generateAllTestConfigurations = () => {
  * @param {QueryEnhancementLanguage} language - query language
  */
 export const setDatePickerDatesAndSearchIfRelevant = (language) => {
+  cy.log(`setDatePickerDatesAndSearchIfRelevant with language: ${language}`);
   if (language !== QueryLanguages.SQL.name) {
     cy.setTopNavDate(START_TIME, END_TIME);
   }
