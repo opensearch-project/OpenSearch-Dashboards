@@ -151,7 +151,8 @@ Cypress.Commands.add(
       cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
     }
 
-    cy.getElementByTestId('savedQueryFormSaveButton').click();
+    // The force is necessary as there is occasionally a popover that covers the button
+    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
     cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
   }
 );

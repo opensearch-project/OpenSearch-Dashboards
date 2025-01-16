@@ -16,12 +16,12 @@ import {
   workspaceName,
   datasourceName,
   setSearchConfigurations,
-  verifyDiscoverPageState,
 } from '../../../../../utils/apps/query_enhancements/saved_search';
 
 import {
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
+  verifyDiscoverPageState,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is true.
@@ -90,7 +90,7 @@ export const runSavedQueriesFlyoutUITests = () => {
       });
     });
 
-    it('should see all saved queries', () => {
+    it('should see and load all saved queries', () => {
       testConfigurations.forEach((config) => {
         cy.getElementByTestId('discoverNewButton').click();
         setDatePickerDatesAndSearchIfRelevant(
@@ -111,6 +111,8 @@ export const runSavedQueriesFlyoutUITests = () => {
 
         cy.getElementByTestId('open-query-action-button').click();
 
+        // wait for saved queries to load.
+        cy.wait(2000);
         verifyDiscoverPageState(config);
       });
     });

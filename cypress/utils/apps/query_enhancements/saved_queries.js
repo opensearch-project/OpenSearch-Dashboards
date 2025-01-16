@@ -10,7 +10,11 @@ import {
   INDEX_WITH_TIME_1,
   QueryLanguages,
   WORKSPACE_NAME,
+  START_TIME,
+  END_TIME,
 } from './constants';
+
+import { APPLIED_FILTERS } from './saved_search';
 
 /**
  * Sets the top nav date if it is relevant for the passed language
@@ -214,4 +218,43 @@ export const generateAllTestConfigurations = () => {
       return generateTestConfiguration(datasetToUse, dataset.name, language);
     })
   );
+};
+
+/**
+ * Verify that the discover page is in the correct state after loading a saved query have been run
+ * @param {SavedSearchTestConfig} testConfig - the relevant config for the test case
+ */
+export const verifyDiscoverPageState = ({
+  queryString,
+  language,
+  hitCount,
+  filters,
+  histogram,
+}) => {
+  if ([QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)) {
+    cy.getElementByTestId('osdQueryEditor__multiLine').contains(queryString);
+  } else {
+    cy.getElementByTestId('osdQueryEditor__singleLine').contains(queryString);
+  }
+  cy.getElementByTestId('queryEditorLanguageSelector').contains(language);
+
+  if (filters) {
+    cy.getElementByTestId(
+      `filter filter-enabled filter-key-${APPLIED_FILTERS.field} filter-value-${APPLIED_FILTERS.value} filter-unpinned `
+    ).should('exist');
+  }
+  if (hitCount) {
+    cy.verifyHitCount(hitCount);
+  }
+
+  if (histogram) {
+    // TODO: Uncomment this once bug is fixed, currently the interval is not saving
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9077
+    // cy.getElementByTestId('discoverIntervalSelect').should('have.value', 'w');
+  }
+
+  if (language !== QueryLanguages.SQL.name) {
+    cy.getElementByTestId('osdQueryEditorUpdateButton').contains(START_TIME).should('exist');
+    cy.getElementByTestId('osdQueryEditorUpdateButton').contains(END_TIME).should('exist');
+  }
 };

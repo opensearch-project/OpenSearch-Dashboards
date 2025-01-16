@@ -8,23 +8,27 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   SECONDARY_ENGINE,
+  START_TIME,
+  END_TIME,
 } from '../../../../../utils/constants';
 
 import {
   workspaceName,
   datasourceName,
   setSearchConfigurations,
-  setDatePickerDatesAndSearchIfRelevant,
-  verifyDiscoverPageState,
 } from '../../../../../utils/apps/query_enhancements/saved_search';
 
-import { generateAllTestConfigurations } from '../../../../../utils/apps/query_enhancements/saved_queries';
+import {
+  generateAllTestConfigurations,
+  setDatePickerDatesAndSearchIfRelevant,
+  verifyDiscoverPageState,
+} from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is false.
 // These tests will not be run until the older legacy tests are migrated https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9166#discussion_r1913687440
 
 export const runSavedQueriesPopoverUITests = () => {
-  describe.skip('saved queries popover UI', () => {
+  describe('saved queries popover UI', () => {
     before(() => {
       // Load test data
       cy.setupTestData(
@@ -41,7 +45,7 @@ export const runSavedQueriesPopoverUITests = () => {
       // Add data source
       cy.addDataSource({
         name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+        url: 'http://opensearch-node:9200/',
         authType: 'no_auth',
       });
 
@@ -79,21 +83,29 @@ export const runSavedQueriesPopoverUITests = () => {
         cy.setDataset(config.dataset, datasourceName, config.datasetType);
 
         cy.setQueryLanguage(config.language);
-        setDatePickerDatesAndSearchIfRelevant(config.language);
+        setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
 
         setSearchConfigurations(config);
         verifyDiscoverPageState(config);
-        cy.saveQuery(config.saveName, ' ', false);
+        cy.saveQuery(config.saveName, ' ', false, true, true);
       });
     });
 
-    it('should see all saved queries', () => {
-      cy.getElementByTestId('saved-query-management-popover-button').click();
-
+    it('should see and load all saved queries', () => {
       testConfigurations.forEach((config) => {
-        cy.getElementByTestId('saved-query-management-popover')
-          .contains(config.saveName)
-          .should('exist');
+        cy.getElementByTestId('discoverNewButton').click();
+        setDatePickerDatesAndSearchIfRelevant(
+          config.language,
+          'Aug 29, 2020 @ 00:00:00.000',
+          'Aug 30, 2020 @ 00:00:00.000'
+        );
+
+        cy.getElementByTestId('saved-query-management-popover-button').click();
+        cy.getElementByTestId('save-query-panel').contains(config.saveName).should('exist').click();
+
+        // wait for saved queries to load.
+        cy.wait(2000);
+        verifyDiscoverPageState(config);
       });
     });
   });
