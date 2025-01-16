@@ -244,6 +244,70 @@ describe('processVisitedRules', () => {
     });
 
     // NOTE: nested predicates don't need to be tested because nothing nested is suggested
+
+    it('RULE_predicate - should suggest values for column with dots in the name', () => {
+      const mockRules = new Map();
+      mockRules.set(OpenSearchSQLParser.RULE_predicate, { startTokenIndex: 0 });
+      const tokenStream = createTokenStream([
+        { type: OpenSearchSQLParser.ID, text: 'column' },
+        { type: OpenSearchSQLParser.DOT, text: '.' },
+        { type: OpenSearchSQLParser.ID, text: 'name' },
+        OpenSearchSQLParser.SPACE,
+        OpenSearchSQLParser.EQUAL_SYMBOL,
+        OpenSearchSQLParser.SPACE,
+      ]);
+
+      const result = processVisitedRules(mockRules, 6, tokenStream);
+      expect(result.suggestColumnValuePredicate).toBe(ColumnValuePredicate.VALUE);
+      expect(result.suggestValuesForColumn).toBe('column.name');
+    });
+
+    it('RULE_predicate - should suggest values for column with backticks in the name', () => {
+      const mockRules = new Map();
+      mockRules.set(OpenSearchSQLParser.RULE_predicate, { startTokenIndex: 0 });
+      const tokenStream = createTokenStream([
+        { type: OpenSearchSQLParser.BACKTICK_QUOTE_ID, text: '`column`' },
+        OpenSearchSQLParser.SPACE,
+        OpenSearchSQLParser.EQUAL_SYMBOL,
+        OpenSearchSQLParser.SPACE,
+      ]);
+
+      const result = processVisitedRules(mockRules, 4, tokenStream);
+      expect(result.suggestColumnValuePredicate).toBe(ColumnValuePredicate.VALUE);
+      expect(result.suggestValuesForColumn).toBe('column');
+    });
+
+    it('RULE_predicate - should suggest values for column with dots and backticks in the name', () => {
+      const mockRules = new Map();
+      mockRules.set(OpenSearchSQLParser.RULE_predicate, { startTokenIndex: 0 });
+      const tokenStream = createTokenStream([
+        { type: OpenSearchSQLParser.BACKTICK_QUOTE_ID, text: '`column`' },
+        { type: OpenSearchSQLParser.DOT, text: '.' },
+        { type: OpenSearchSQLParser.ID, text: '`name`' },
+        OpenSearchSQLParser.SPACE,
+        OpenSearchSQLParser.EQUAL_SYMBOL,
+        OpenSearchSQLParser.SPACE,
+      ]);
+
+      const result = processVisitedRules(mockRules, 6, tokenStream);
+      expect(result.suggestColumnValuePredicate).toBe(ColumnValuePredicate.VALUE);
+      expect(result.suggestValuesForColumn).toBe('column.name');
+    });
+
+    it('RULE_predicate - should suggest values for backticked column with dots inside', () => {
+      const mockRules = new Map();
+      mockRules.set(OpenSearchSQLParser.RULE_predicate, { startTokenIndex: 0 });
+      const tokenStream = createTokenStream([
+        { type: OpenSearchSQLParser.BACKTICK_QUOTE_ID, text: '`column.name`' },
+        OpenSearchSQLParser.SPACE,
+        OpenSearchSQLParser.EQUAL_SYMBOL,
+        OpenSearchSQLParser.SPACE,
+      ]);
+
+      const result = processVisitedRules(mockRules, 4, tokenStream);
+      expect(result.suggestColumnValuePredicate).toBe(ColumnValuePredicate.VALUE);
+      expect(result.suggestValuesForColumn).toBe('column.name');
+    });
   });
 });
 

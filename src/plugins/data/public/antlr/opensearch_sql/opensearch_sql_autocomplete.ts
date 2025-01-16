@@ -223,6 +223,11 @@ export function processVisitedRules(
               '.' + removePotentialBackticks(nextToken?.text ?? '');
             continue;
           }
+          if (validIDToken(token)) {
+            token.text = removePotentialBackticks(token.text ?? '');
+            sigTokens.push(token);
+            continue;
+          }
           sigTokens.push(token);
         }
 
