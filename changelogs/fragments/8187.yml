@@ -1,0 +1,2 @@
+feat:
+- Making local cluster state calls during health checks to avoid stressing cluster manager node ([#8187](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8187))
