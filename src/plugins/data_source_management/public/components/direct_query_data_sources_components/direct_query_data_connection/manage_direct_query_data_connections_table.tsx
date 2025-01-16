@@ -47,7 +47,10 @@ import { LoadingMask } from '../../loading_mask';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../../../constants';
 import { DatasourceTypeToDisplayName, DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../constants';
-import { DataConnectionType } from '../../../../../data_source/common';
+import {
+  DataConnectionType,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+} from '../../../../../data_source/common';
 
 interface DirectQueryDataConnectionsProps extends RouteComponentProps {
   featureFlagStatus: boolean;
@@ -179,6 +182,8 @@ export const ManageDirectQueryDataConnectionsTable = ({
           id: obj.id,
           title: obj.attributes.connectionId,
           type: obj.attributes.type,
+          // This represents this is data connection type saved object not data source type saved object
+          objectType: DATA_CONNECTION_SAVED_OBJECT_TYPE,
         }));
       } catch (error: any) {
         return [];
@@ -236,7 +241,13 @@ export const ManageDirectQueryDataConnectionsTable = ({
   const onDissociate = useCallback(
     async (item: DataSourceTableItem | DataSourceTableItem[]) => {
       const itemsToDissociate = Array<DataSourceTableItem>().concat(item);
-      const payload = itemsToDissociate.map((ds) => ({ id: ds.id, type: 'data-source' }));
+      const payload = itemsToDissociate.map((ds) => ({
+        id: ds.id,
+        type:
+          ds?.objectType === DATA_CONNECTION_SAVED_OBJECT_TYPE
+            ? DATA_CONNECTION_SAVED_OBJECT_TYPE
+            : 'data-source',
+      }));
       const confirmed = await overlays.openConfirm('', {
         title: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation', {
           defaultMessage:

@@ -20,6 +20,7 @@ import {
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
   DataConnectionType,
 } from '../../../../../data_source/common';
+import { waitFor } from '@testing-library/dom';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
 const tableIdentifier = 'EuiInMemoryTable';
@@ -278,6 +279,94 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
     });
     test('should render empty table', () => {
       expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('data source association', () => {
+    const mockDissociate = jest.fn();
+
+    beforeEach(async () => {
+      const mockedDataConnections = [
+        {
+          type: 'data-connection',
+          id: 'data-connection-id',
+          attributes: {
+            connectionId: 'cloudWatch',
+            type: 'AWS CloudWatch',
+          },
+        },
+      ];
+      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
+      spyOn(utils, 'fetchDataSourceConnections').and.returnValue(
+        Promise.resolve(getMappedDataSources)
+      );
+      spyOn(utils, 'getDataConnections').and.returnValue(Promise.resolve(mockedDataConnections));
+      spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
+      spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
+      const context = {
+        ...mockedContext,
+        application: {
+          ...mockedContext.application,
+          capabilities: {
+            ...mockedContext.application.capabilities,
+            dashboards: {
+              ...mockedContext.application.capabilities.dashboards,
+              isDashboardAdmin: true,
+            },
+          },
+        },
+        workspaces: {
+          ...mockedContext.workspaces,
+          client$: new BehaviorSubject({
+            ui: () => ({
+              DataSourceAssociation: undefined,
+            }),
+            dissociate: mockDissociate,
+          }),
+          currentWorkspace$: new BehaviorSubject({
+            id: 'workspace_id',
+            readonly: false,
+          }),
+        },
+        overlays: {
+          ...mockedContext.overlays,
+          openConfirm: jest.fn().mockResolvedValue(true),
+        },
+      };
+      await act(async () => {
+        component = await mount(
+          wrapWithIntl(
+            <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: context,
+            },
+          }
+        );
+      });
+      component.update();
+    });
+    test('should be able to pass data-connection type to dissociate data connection object', async () => {
+      const cloudWatchRow = component
+        .find('tr')
+        .filterWhere((tr) => tr.text().includes('cloudWatch'));
+      cloudWatchRow
+        .find('button[data-test-subj="dataSourcesManagement-dataSourceTable-dissociateButton"]')
+        .simulate('click');
+      component.update();
+      await waitFor(() => {
+        expect(mockDissociate).toHaveBeenCalledWith(
+          [{ id: 'data-connection-id', type: 'data-connection' }],
+          'workspace_id'
+        );
+      });
     });
   });
 });
