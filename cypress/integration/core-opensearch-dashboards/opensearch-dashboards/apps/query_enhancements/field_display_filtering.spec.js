@@ -40,7 +40,8 @@ const verifyTableFieldFilterActions = (datasetType, language, shouldExist) => {
   selectDataset(datasetType, language);
   setDateRange(datasetType, language);
 
-  cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+  // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+  cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3);
 
   const shouldText = shouldExist ? 'exist' : 'not.exist';
   dataExplorer.getDocTableField(0, 0).within(() => {
@@ -54,7 +55,8 @@ const verifyTableFieldFilterActions = (datasetType, language, shouldExist) => {
   }
 };
 const verifyExpandedTableFilterActions = (datasetType, language, isFilterButtonsEnabled) => {
-  // Check if the first expanded Doc Table Field's first row's Filter For, Filter Out and Exists Filter buttons are disabled.
+  // Check if the first expanded Doc Table Field's first row's Filter For, Filter Out and Exists Filter buttons are
+  // disabled.
   const verifyFirstExpandedFieldFilterForFilterOutFilterExistsButtons = () => {
     const shouldText = isFilterButtonsEnabled ? 'be.enabled' : 'be.disabled';
     dataExplorer.getExpandedDocTableRow(0, 0).within(() => {
@@ -65,12 +67,15 @@ const verifyExpandedTableFilterActions = (datasetType, language, isFilterButtons
   };
 
   /**
-   * Check the Filter For or Out buttons in the expandedDocumentRowNumberth field in the expanded Document filters the correct value.
+   * Check the Filter For or Out buttons in the expandedDocumentRowNumberth field in the expanded Document filters the
+   * correct value.
    * @param {string} filterButton For or Out
    * @param {number} docTableRowNumber Integer starts from 0 for the first row
    * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
-   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
-   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note
+   *   you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied.
+   *   Note you should add commas when necessary e.g. 9,999
    * @example verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField('for', 0, 0, '10,000', '1');
    */
   const verifyDocTableFirstExpandedFieldFirstRowFilterForOutButtonFiltersCorrectField = (
@@ -116,8 +121,10 @@ const verifyExpandedTableFilterActions = (datasetType, language, isFilterButtons
    * Check the first expanded Doc Table Field's first row's Exists Filter button filters the correct Field.
    * @param {number} docTableRowNumber Integer starts from 0 for the first row
    * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
-   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
-   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note
+   *   you should add commas when necessary e.g. 9,999
+   * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied.
+   *   Note you should add commas when necessary e.g. 9,999
    */
   const verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField = (
     docTableRowNumber,
@@ -153,7 +160,9 @@ const verifyExpandedTableFilterActions = (datasetType, language, isFilterButtons
   selectDataset(datasetType, language);
   setDateRange(datasetType, language);
 
-  cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+  // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+  cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3);
+
   dataExplorer.toggleDocTableRow(0);
   verifyFirstExpandedFieldFilterForFilterOutFilterExistsButtons();
   dataExplorer.verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
@@ -181,7 +190,7 @@ const verifyExpandedTableFilterActions = (datasetType, language, isFilterButtons
     );
   }
 };
-describe('filter for value spec', () => {
+ifEnabled(['WORKSPACE', '!SECURITY']).describe('filter for value spec', () => {
   before(() => {
     // Load test data
     cy.setupTestData(
@@ -212,16 +221,6 @@ describe('filter for value spec', () => {
     });
   });
 
-  beforeEach(() => {
-    cy.navigateToWorkSpaceSpecificPage({
-      url: BASE_PATH,
-      workspaceName: `${workspace}`,
-      page: 'discover',
-      isEnhancement: true,
-    });
-    cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
-  });
-
   after(() => {
     cy.deleteWorkspaceByName(`${workspace}`);
     cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
@@ -238,6 +237,17 @@ describe('filter for value spec', () => {
     describe(`filter actions in ${name}`, () => {
       Object.entries(DATASET_CONFIGS).forEach(([type, config]) => {
         describe(`${type} dataset`, () => {
+          beforeEach(() => {
+            cy.navigateToWorkSpaceSpecificPage({
+              url: BASE_PATH,
+              workspaceName: `${workspace}`,
+              page: 'discover',
+              isEnhancement: true,
+            });
+            cy.reload(true);
+            cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
+          });
+
           config.languages.forEach(({ name: language, isFilterButtonsEnabled }) => {
             it(`${language}`, () => {
               verifyFn(type, language, isFilterButtonsEnabled);

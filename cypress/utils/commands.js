@@ -10,13 +10,37 @@
 import { BASE_PATH } from './constants';
 import { TestFixtureHandler } from '../lib/test_fixture_handler';
 
+/**
+ * Send a request to OpenSearch
+ *
+ * @param {Partial<Cypress.RequestOptions>} requestOptions
+ */
+
+Cypress.Commands.add('sendOpenSearch', (requestOptions) => {
+  const opts = { ...requestOptions };
+
+  // If the url is a relative one, prefix OpenSearch URL; otherwise, the request is going to a secondary endpoint
+  if (opts.url[0] === '/') {
+    opts.url = new URL(opts.url, Cypress.env('openSearchUrl'));
+
+    if (Cypress.env('SECURITY_ENABLED')) {
+      opts.auth = {
+        username: Cypress.env('username'),
+        password: Cypress.env('password'),
+      };
+    }
+  }
+
+  return cy.request(requestOptions);
+});
+
 // This function does not delete all indices
 Cypress.Commands.add('deleteAllIndices', () => {
   cy.log('Deleting all indices');
-  cy.request(
-    'DELETE',
-    `${Cypress.env('openSearchUrl')}/index*,sample*,opensearch_dashboards*,test*,cypress*`
-  );
+  cy.sendOpenSearch({
+    method: 'DELETE',
+    url: '/index*,sample*,opensearch_dashboards*,test*,cypress*',
+  });
 });
 
 // --- Typed commands --
@@ -69,27 +93,27 @@ Cypress.Commands.add('whenTestIdNotFound', (testIds, callbackFn, options = {}) =
 });
 
 Cypress.Commands.add('createIndex', (index, policyID = null, settings = {}) => {
-  cy.request('PUT', `${Cypress.env('openSearchUrl')}/${index}`, settings);
+  cy.sendOpenSearch({ method: 'PUT', url: `/${index}`, body: settings });
   if (policyID != null) {
     const body = { policy_id: policyID };
 
-    cy.request('POST', `${Cypress.env('openSearchUrl')}${IM_API.ADD_POLICY_BASE}/${index}`, body);
+    cy.sendOpenSearch({ method: 'POST', url: `${IM_API.ADD_POLICY_BASE}/${index}`, body });
   }
 });
 
 Cypress.Commands.add('deleteIndex', (indexName, options = {}) => {
-  cy.request({
+  cy.sendOpenSearch({
     method: 'DELETE',
-    url: `${Cypress.env('openSearchUrl')}/${indexName}`,
+    url: `/${indexName}`,
     failOnStatusCode: false,
     ...options,
   });
 });
 
 Cypress.Commands.add('getIndices', (index = null, settings = {}) => {
-  cy.request({
+  cy.sendOpenSearch({
     method: 'GET',
-    url: `${Cypress.env('openSearchUrl')}/_cat/indices/${index ? index : ''}`,
+    url: `/_cat/indices/${index ? index : ''}`,
     failOnStatusCode: false,
     ...settings,
   });
@@ -123,9 +147,9 @@ Cypress.Commands.add('bulkUploadDocs', (fixturePath, index) => {
     sendBulkAPIRequest(ndjson);
   });
 
-  cy.request({
+  cy.sendOpenSearch({
     method: 'POST',
-    url: `${Cypress.env('openSearchUrl')}/_all/_refresh`,
+    url: `/_all/_refresh`,
   });
 });
 
@@ -195,7 +219,8 @@ Cypress.Commands.add('deleteSavedObjectByType', (type, search) => {
   });
 });
 
-// TODO: we should really make this a helper function that if the data source does not exist, it creates it so take what you have for the dataset selector spec and move it here
+// TODO: we should really make this a helper function that if the data source does not exist, it creates it so take
+// what you have for the dataset selector spec and move it here
 Cypress.Commands.add('ifDataSourceExists', (search) => {
   const searchParams = new URLSearchParams({
     fields: 'id',
@@ -250,11 +275,9 @@ Cypress.Commands.add('createDashboard', (attributes = {}, headers = {}) => {
 });
 
 Cypress.Commands.add('changeDefaultTenant', (attributes, header = {}) => {
-  const url = Cypress.env('openSearchUrl') + '/_plugins/_security/api/tenancy/config';
-
-  cy.request({
+  cy.sendOpenSearch({
     method: 'PUT',
-    url,
+    url: '/_plugins/_security/api/tenancy/config',
     headers: {
       'content-type': 'application/json;charset=UTF-8',
       'osd-xsrf': true,
@@ -382,4 +405,19 @@ Cypress.Commands.add('setupTestData', (endpoint, mappingFiles, dataFiles) => {
   });
 
   return chain;
+});
+
+Cypress.Commands.add('login', () => {
+  // much faster than log in through UI
+  cy.request({
+    method: 'POST',
+    url: '/auth/login',
+    body: {
+      username: Cypress.env('username'),
+      password: Cypress.env('password'),
+    },
+    headers: {
+      'osd-xsrf': true,
+    },
+  });
 });
