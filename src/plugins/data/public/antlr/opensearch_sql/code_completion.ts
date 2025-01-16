@@ -128,7 +128,7 @@ export const getSuggestions = async ({
         ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
           text: af,
           type: monaco.languages.CompletionItemKind.Function,
-          insertText: af,
+          insertText: `${af} `,
           detail: SuggestionItemDetailsTags.AggregateFunction,
         }))
       );
