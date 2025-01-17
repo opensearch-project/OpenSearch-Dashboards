@@ -23,6 +23,7 @@ import {
   setDatePickerDatesAndSearchIfRelevant,
   verifySavedQueryExistsAndHasCorrectStateWhenLoaded,
   verifyDiscoverPageState,
+  verifyValidSavedQueriesShownOnVisualize,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is false.
@@ -104,6 +105,16 @@ export const runSavedQueriesPopoverUITests = () => {
 
         verifySavedQueryExistsAndHasCorrectStateWhenLoaded(config, false);
       });
+    });
+
+    it('should only show DQL and Lucene saved Queries in Visualizations page', () => {
+      cy.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'visualize',
+        isEnhancement: true,
+      });
+
+      verifyValidSavedQueriesShownOnVisualize(false);
     });
   });
 };

@@ -259,6 +259,11 @@ export const verifyDiscoverPageState = ({
   }
 };
 
+/**
+ * Verify that the query specified in the config was saved and can be loaded correctly.
+ * @param {SavedSearchTestConfig} config - the relevant config for the test case
+ * @param {boolean} savedQueriesNewUIEnabled - Has this flag been enabled (default is true)
+ */
 export const verifySavedQueryExistsAndHasCorrectStateWhenLoaded = (
   config,
   savedQueriesNewUIEnabled = true
@@ -283,4 +288,30 @@ export const verifySavedQueryExistsAndHasCorrectStateWhenLoaded = (
   // wait for saved queries to load.
   cy.wait(2000);
   verifyDiscoverPageState(config);
+};
+
+/**
+ * Verify that only DQL and Lucene saved queries are shown in the Visualize page.
+ * @param {boolean} savedQueriesNewUIEnabled - Has this flag been enabled (default is true)
+ */
+export const verifyValidSavedQueriesShownOnVisualize = (
+  savedQueriesNewUIEnabled = true // eslint-disable-line no-unused-vars
+) => {
+  if (savedQueriesNewUIEnabled) {
+    // Currently functionality has not been implemented for savedQueriesNewUI
+  } else {
+    cy.getElementByTestId('createVisualizationPromptButton').click();
+    cy.getElementByTestId('visType-table').click();
+    cy.getElementByTestId('savedObjectFinderItemList')
+      .findElementByTestIdLike('savedObjectTitledata')
+      .click();
+
+    cy.getElementByTestId('showFilterActions').click();
+    cy.getElementByTestId('savedQueries').click();
+
+    cy.getElementByTestId('save-query-panel').contains('DQL');
+    cy.getElementByTestId('save-query-panel').contains('Lucene');
+    cy.getElementByTestId('save-query-panel').contains('OpenSearch SQL').should('not.exist');
+    cy.getElementByTestId('save-query-panel').contains('PPL').should('not.exist');
+  }
 };
