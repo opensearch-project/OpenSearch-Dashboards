@@ -325,7 +325,7 @@ export function OpenSavedQueryFlyout({
           <h3>Saved queries</h3>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="savedQueriesFlyoutBody">
         <EuiTabbedContent
           tabs={tabs}
           initialSelectedTab={tabs[0]}

@@ -111,6 +111,7 @@ export function SavedQueryCard({
                   <EuiButtonIcon
                     iconType="trash"
                     color="danger"
+                    data-test-subj="deleteSavedQueryButton"
                     onClick={() => {
                       setShowDeletionConfirmationModal(true);
                     }}
