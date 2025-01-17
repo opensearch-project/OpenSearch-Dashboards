@@ -528,6 +528,8 @@ export const updateSavedSearchAndSaveAndVerify = (config, saveAsNew) => {
 
   // Load updated saved search and verify
   cy.getElementByTestId('discoverNewButton').click();
+  // wait for the new tab to load
+  cy.getElementByTestId('docTableHeader').should('be.visible');
   cy.loadSaveSearch(saveName, saveAsNew);
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);
