@@ -66,7 +66,7 @@ export const registerDuplicateRoute = (
       if (!getTargetWorkspaceResult.success) {
         return res.badRequest({
           body: {
-            message: `Get target workspace ${targetWorkspace} error: ${getTargetWorkspaceResult.error}`,
+            message: `Get target workspace error: ${getTargetWorkspaceResult.error}`,
           },
         });
       }

@@ -209,9 +209,7 @@ describe(`duplicate saved objects among workspaces`, () => {
       })
       .expect(400);
 
-    expect(result.body.message).toMatchInlineSnapshot(
-      `"Get target workspace non-existen-workspace error: undefined"`
-    );
+    expect(result.body.message).toMatchInlineSnapshot(`"Get target workspace error: undefined"`);
   });
 
   it('duplicate unsupported objects', async () => {

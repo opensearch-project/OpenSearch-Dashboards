@@ -1,0 +1,2 @@
+fix:
+- Update workspace not found message to generic message ([#9189](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9189))
