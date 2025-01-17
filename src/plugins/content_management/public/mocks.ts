@@ -10,6 +10,7 @@ const createStartContract = (): jest.Mocked<ContentManagementPluginStart> => {
     registerContentProvider: jest.fn(),
     renderPage: jest.fn(),
     updatePageSection: jest.fn(),
+    getPage: jest.fn(),
   };
 };
 

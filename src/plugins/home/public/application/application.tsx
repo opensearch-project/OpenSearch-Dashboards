@@ -106,11 +106,15 @@ export const renderImportSampleDataApp = async (
 export const renderSearchUseCaseOverviewApp = async (
   element: HTMLElement,
   coreStart: CoreStart,
-  contentManagementStart: ContentManagementPluginStart
+  contentManagementStart: ContentManagementPluginStart,
+  navigation: NavigationPublicPluginStart
 ) => {
   render(
     <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
-      <SearchUseCaseOverviewApp contentManagement={contentManagementStart} />
+      <SearchUseCaseOverviewApp
+        contentManagement={contentManagementStart}
+        navigation={navigation}
+      />
     </OpenSearchDashboardsContextProvider>,
     element
   );
