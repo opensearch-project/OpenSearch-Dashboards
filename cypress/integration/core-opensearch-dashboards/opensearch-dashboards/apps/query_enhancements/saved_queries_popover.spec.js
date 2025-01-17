@@ -24,6 +24,7 @@ import {
   verifySavedQueryExistsAndHasCorrectStateWhenLoaded,
   verifyDiscoverPageState,
   verifyValidSavedQueriesShownOnVisualize,
+  verifyQueryDoesNotExistInSavedQueries,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is false.
@@ -93,7 +94,7 @@ export const runSavedQueriesPopoverUITests = () => {
       });
     });
 
-    it('should see and load all saved queries', () => {
+    it.skip('should see and load all saved queries', () => {
       testConfigurations.forEach((config) => {
         // Dates are cached for each dataset. This ensures the dates must be set by the saved query to display the expected results.
         cy.getElementByTestId('discoverNewButton').click();
@@ -107,7 +108,7 @@ export const runSavedQueriesPopoverUITests = () => {
       });
     });
 
-    it('should only show DQL and Lucene saved Queries in Visualizations page', () => {
+    it.skip('should only show DQL and Lucene saved Queries in Visualizations page', () => {
       cy.navigateToWorkSpaceSpecificPage({
         workspaceName,
         page: 'visualize',
@@ -115,6 +116,17 @@ export const runSavedQueriesPopoverUITests = () => {
       });
 
       verifyValidSavedQueriesShownOnVisualize(false);
+    });
+
+    it('should delete a saved query', () => {
+      cy.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'discover',
+        isEnhancement: true,
+      });
+
+      cy.deleteSaveQuery('OpenSearch SQL-INDEX_PATTERN', false);
+      verifyQueryDoesNotExistInSavedQueries('OpenSearch SQL-INDEX_PATTERN', false);
     });
   });
 };

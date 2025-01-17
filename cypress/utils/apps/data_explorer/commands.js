@@ -125,7 +125,6 @@ Cypress.Commands.add(
   }
 );
 
-// eslint-disable-next-line no-unused-vars
 Cypress.Commands.add(
   'saveQuery',
   (
@@ -173,13 +172,17 @@ Cypress.Commands.add('clearSaveQuery', () => {
   cy.getElementByTestId('saved-query-management-clear-button').click();
 });
 
-Cypress.Commands.add('deleteSaveQuery', (name) => {
-  cy.getElementByTestId('saved-query-management-popover-button').click();
+Cypress.Commands.add('deleteSaveQuery', (name, savedQueriesNewUIEnabled = true) => {
+  if (savedQueriesNewUIEnabled) {
+    // to be implemented.
+  } else {
+    cy.getElementByTestId('saved-query-management-popover-button').click();
 
-  cy.get(`[data-test-subj~="delete-saved-query-${name}-button"]`).click({
-    force: true,
-  });
-  cy.getElementByTestId('confirmModalConfirmButton').click();
+    cy.getElementByTestIdLike(`delete-saved-query-${name}-button`).click({
+      force: true,
+    });
+    cy.getElementByTestId('confirmModalConfirmButton').click();
+  }
 });
 
 Cypress.Commands.add('switchDiscoverTable', (name) => {

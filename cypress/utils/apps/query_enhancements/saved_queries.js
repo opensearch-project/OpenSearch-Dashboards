@@ -294,9 +294,7 @@ export const verifySavedQueryExistsAndHasCorrectStateWhenLoaded = (
  * Verify that only DQL and Lucene saved queries are shown in the Visualize page.
  * @param {boolean} savedQueriesNewUIEnabled - Has this flag been enabled (default is true)
  */
-export const verifyValidSavedQueriesShownOnVisualize = (
-  savedQueriesNewUIEnabled = true // eslint-disable-line no-unused-vars
-) => {
+export const verifyValidSavedQueriesShownOnVisualize = (savedQueriesNewUIEnabled = true) => {
   if (savedQueriesNewUIEnabled) {
     // Currently functionality has not been implemented for savedQueriesNewUI
   } else {
@@ -313,5 +311,25 @@ export const verifyValidSavedQueriesShownOnVisualize = (
     cy.getElementByTestId('save-query-panel').contains('Lucene');
     cy.getElementByTestId('save-query-panel').contains('OpenSearch SQL').should('not.exist');
     cy.getElementByTestId('save-query-panel').contains('PPL').should('not.exist');
+  }
+};
+
+/**
+ * Verify query does not exist in saved queries.
+ * @param {boolean} savedQueriesNewUIEnabled - Has this flag been enabled (default is true)
+ * @returns {string} Name of query to check.
+ */
+export const verifyQueryDoesNotExistInSavedQueries = (
+  deletedQueryName,
+  savedQueriesNewUIEnabled = true
+) => {
+  cy.reload();
+  if (savedQueriesNewUIEnabled) {
+    // oh nana
+  } else {
+    cy.getElementByTestId('saved-query-management-popover-button').click();
+    cy.getElementByTestId('osdSavedQueryManagementList')
+      .contains(deletedQueryName)
+      .should('not.exist');
   }
 };
