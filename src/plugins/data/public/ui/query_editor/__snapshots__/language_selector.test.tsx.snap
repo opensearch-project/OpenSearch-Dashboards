@@ -562,7 +562,8 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
               "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
             },
             "workspace": Object {
-              "acl": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/",
+              "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+              "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#workspace-privacy",
             },
           },
         },
@@ -1235,7 +1236,8 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
               "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
             },
             "workspace": Object {
-              "acl": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/",
+              "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+              "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#workspace-privacy",
             },
           },
         },
