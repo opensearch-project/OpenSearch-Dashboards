@@ -100,9 +100,27 @@ describe('createRecentNavLink', () => {
       },
       mockNavLinks,
       mockBasePath,
-      mockedNavigateToUrl
+      mockedNavigateToUrl,
+      true
     );
 
     expect(recentLink.href).toEqual('http://localhost/test/w/foo/app/foo');
+  });
+
+  it('create a recent link when workspace disabled', () => {
+    const recentLink = createRecentNavLink(
+      {
+        id: 'foo',
+        label: 'foo',
+        link: '/app/foo',
+        workspaceId: 'foo',
+      },
+      mockNavLinks,
+      mockBasePath,
+      mockedNavigateToUrl,
+      false
+    );
+
+    expect(recentLink.href).toEqual('http://localhost/test/app/foo');
   });
 });

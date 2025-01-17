@@ -8005,7 +8005,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                   Object {
                                     "aria-label": "dashboard, type: opensearchDashboards",
                                     "data-test-subj": "collapsibleNavAppLink--recent",
-                                    "href": "http://localhost/test/",
+                                    "href": "http://localhost/",
                                     "label": "dashboard",
                                     "onClick": [Function],
                                     "title": "dashboard, type: opensearchDashboards",
@@ -8028,7 +8028,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                   aria-label="dashboard, type: opensearchDashboards"
                                   color="subdued"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/test/"
+                                  href="http://localhost/"
                                   key="title-0"
                                   label="dashboard"
                                   onClick={[Function]}
@@ -8044,7 +8044,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                       aria-label="dashboard, type: opensearchDashboards"
                                       className="euiListGroupItem__button"
                                       data-test-subj="collapsibleNavAppLink--recent"
-                                      href="http://localhost/test/"
+                                      href="http://localhost/"
                                       onClick={[Function]}
                                       rel="noreferrer"
                                       title="dashboard, type: opensearchDashboards"

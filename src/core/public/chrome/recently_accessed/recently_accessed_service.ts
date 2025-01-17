@@ -29,11 +29,12 @@
  */
 
 import { Observable } from 'rxjs';
-
+import { map } from 'rxjs/operators';
 import { PersistedLog } from './persisted_log';
 import { createLogKey } from './create_log_key';
 import { HttpSetup } from '../../http';
 import { WorkspacesStart } from '../../workspace';
+import { InternalApplicationStart } from '../../application';
 
 /** @public */
 export interface ChromeRecentlyAccessedHistoryItem {
@@ -50,16 +51,18 @@ export interface ChromeRecentlyAccessedHistoryItem {
 interface StartDeps {
   http: HttpSetup;
   workspaces: WorkspacesStart;
+  application: InternalApplicationStart;
 }
 
 /** @internal */
 export class RecentlyAccessedService {
-  async start({ http, workspaces }: StartDeps): Promise<ChromeRecentlyAccessed> {
+  async start({ http, workspaces, application }: StartDeps): Promise<ChromeRecentlyAccessed> {
     const logKey = await createLogKey('recentlyAccessed', http.basePath.getBasePath());
     const history = new PersistedLog<ChromeRecentlyAccessedHistoryItem>(logKey, {
       maxLength: 20,
       isEqual: (oldItem, newItem) => oldItem.id === newItem.id,
     });
+    const workspaceEnabled = application.capabilities.workspaces.enabled;
 
     return {
       /** Adds a new item to the history. */
@@ -81,10 +84,16 @@ export class RecentlyAccessedService {
       },
 
       /** Gets the current array of history items. */
-      get: () => history.get(),
+      get: () => history.get().filter((item) => (workspaceEnabled ? !!item.workspaceId : true)),
 
       /** Gets an observable of the current array of history items. */
-      get$: () => history.get$(),
+      get$: () => {
+        return history.get$().pipe(
+          map((items) => {
+            return items.filter((item) => (workspaceEnabled ? !!item.workspaceId : true));
+          })
+        );
+      },
     };
   }
 }
