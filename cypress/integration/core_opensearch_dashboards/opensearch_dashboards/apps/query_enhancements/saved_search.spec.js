@@ -11,16 +11,22 @@ import {
   SECONDARY_ENGINE,
 } from '../../../../../utils/constants';
 import {
-  workspaceName,
-  datasourceName,
   generateAllTestConfigurations,
+  getRandomizedWorkspaceName,
+  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
+} from '../../../../../utils/apps/query_enhancements/shared';
+import {
   setSearchConfigurations,
   verifyDiscoverPageState,
   verifySavedSearchInAssetsPage,
   postRequestSaveSearch,
   updateSavedSearchAndSaveAndVerify,
-} from '../../../../../utils/apps/query_enhancements/saved_search';
+  generateSavedTestConfiguration,
+} from '../../../../../utils/apps/query_enhancements/saved';
+
+const workspaceName = getRandomizedWorkspaceName();
+const datasourceName = getRandomizedDatasourceName();
 
 export const runSavedSearchTests = () => {
   describe('saved search', () => {
@@ -65,7 +71,7 @@ export const runSavedSearchTests = () => {
       cy.deleteIndex(INDEX_WITH_TIME_2);
     });
 
-    generateAllTestConfigurations().forEach((config) => {
+    generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
       it(`should successfully create a saved search for ${config.testName}`, () => {
         cy.navigateToWorkSpaceSpecificPage({
           workspaceName,
@@ -86,7 +92,7 @@ export const runSavedSearchTests = () => {
         // the saved search does not appear. So adding this wait
         cy.wait(2000);
 
-        verifySavedSearchInAssetsPage(config);
+        verifySavedSearchInAssetsPage(config, workspaceName);
       });
 
       // We are starting from various languages
@@ -126,13 +132,13 @@ export const runSavedSearchTests = () => {
       it(`should successfully update a saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
-        updateSavedSearchAndSaveAndVerify(config, false);
+        updateSavedSearchAndSaveAndVerify(config, workspaceName, datasourceName, false);
       });
 
       it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
-        updateSavedSearchAndSaveAndVerify(config, true);
+        updateSavedSearchAndSaveAndVerify(config, workspaceName, datasourceName, true);
       });
     });
   });
