@@ -174,7 +174,16 @@ Cypress.Commands.add('clearSaveQuery', () => {
 
 Cypress.Commands.add('deleteSaveQuery', (name, savedQueriesNewUIEnabled = true) => {
   if (savedQueriesNewUIEnabled) {
-    // to be implemented.
+    cy.getElementByTestId('saved-query-management-popover-button').click();
+
+    cy.getElementByTestId('saved-query-management-open-button').click();
+    cy.getElementByTestId('euiFlyoutCloseButton')
+      .parent()
+      .contains(name)
+      .findElementByTestId('deleteSavedQueryButton')
+      .click();
+
+    cy.getElementByTestId('confirmModalConfirmButton').click();
   } else {
     cy.getElementByTestId('saved-query-management-popover-button').click();
 

@@ -325,7 +325,9 @@ export const verifyQueryDoesNotExistInSavedQueries = (
 ) => {
   cy.reload();
   if (savedQueriesNewUIEnabled) {
-    // oh nana
+    cy.getElementByTestId('saved-query-management-popover-button').click();
+    cy.getElementByTestId('saved-query-management-open-button').click();
+    cy.getElementByTestId('savedQueriesFlyoutBody').contains(deletedQueryName).should('not.exist');
   } else {
     cy.getElementByTestId('saved-query-management-popover-button').click();
     cy.getElementByTestId('osdSavedQueryManagementList')

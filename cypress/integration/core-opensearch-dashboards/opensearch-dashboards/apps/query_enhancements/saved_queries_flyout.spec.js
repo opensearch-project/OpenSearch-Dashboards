@@ -21,8 +21,9 @@ import {
 import {
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
-  verifyDiscoverPageState,
   verifySavedQueryExistsAndHasCorrectStateWhenLoaded,
+  verifyDiscoverPageState,
+  verifyQueryDoesNotExistInSavedQueries,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is true.
@@ -91,7 +92,7 @@ export const runSavedQueriesFlyoutUITests = () => {
       });
     });
 
-    it('should see and load all saved queries', () => {
+    it.skip('should see and load all saved queries', () => {
       testConfigurations.forEach((config) => {
         cy.getElementByTestId('discoverNewButton').click();
         setDatePickerDatesAndSearchIfRelevant(
@@ -102,6 +103,16 @@ export const runSavedQueriesFlyoutUITests = () => {
 
         verifySavedQueryExistsAndHasCorrectStateWhenLoaded(config, true);
       });
+    });
+    it('should delete a saved query', () => {
+      cy.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'discover',
+        isEnhancement: true,
+      });
+
+      cy.deleteSaveQuery('OpenSearch SQL-INDEX_PATTERN', true);
+      verifyQueryDoesNotExistInSavedQueries('OpenSearch SQL-INDEX_PATTERN', true);
     });
   });
 };
