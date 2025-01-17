@@ -9,22 +9,25 @@ import {
   INDEX_WITH_TIME_2,
   SECONDARY_ENGINE,
 } from '../../../../../utils/constants';
-
 import {
-  workspaceName,
-  datasourceName,
-  setSearchConfigurations,
+  getRandomizedWorkspaceName,
+  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
+  generateAllTestConfigurations,
+} from '../../../../../utils/apps/query_enhancements/shared';
+import {
+  generateSavedTestConfiguration,
+  setSearchConfigurations,
   verifyDiscoverPageState,
-} from '../../../../../utils/apps/query_enhancements/saved_search';
+} from '../../../../../utils/apps/query_enhancements/saved';
 
-import { generateAllTestConfigurations } from '../../../../../utils/apps/query_enhancements/saved_queries';
+const workspaceName = getRandomizedWorkspaceName();
+const datasourceName = getRandomizedDatasourceName();
 
 // This spec assumes data.savedQueriesNewUI.enabled is true.
-
 export const runSavedQueriesFlyoutUITests = () => {
   describe('saved queries flyout UI', () => {
-    before(() => {
+    beforeEach(() => {
       // Load test data
       cy.setupTestData(
         SECONDARY_ENGINE.url,
@@ -57,7 +60,7 @@ export const runSavedQueriesFlyoutUITests = () => {
       });
     });
 
-    after(() => {
+    afterEach(() => {
       // No need to explicitly delete all saved queries as deleting the workspace will delete associated saved queries
       cy.deleteWorkspaceByName(workspaceName);
       // // TODO: Modify deleteIndex to handle an array of index and remove hard code
@@ -66,8 +69,7 @@ export const runSavedQueriesFlyoutUITests = () => {
       cy.deleteIndex(INDEX_WITH_TIME_2);
     });
 
-    const testConfigurations = generateAllTestConfigurations();
-    testConfigurations.forEach((config) => {
+    generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
       it(`should successfully create a saved query for ${config.testName}`, () => {
         cy.navigateToWorkSpaceSpecificPage({
           workspaceName,
@@ -83,15 +85,10 @@ export const runSavedQueriesFlyoutUITests = () => {
         setSearchConfigurations(config);
         verifyDiscoverPageState(config);
         cy.saveQuery(config.saveName);
-      });
-    });
 
-    it('should see all saved queries', () => {
-      cy.getElementByTestId('saved-query-management-popover-button').click();
-
-      cy.getElementByTestId('saved-query-management-open-button').click();
-
-      testConfigurations.forEach((config) => {
+        // verify that it has been saved
+        cy.getElementByTestId('saved-query-management-popover-button').click();
+        cy.getElementByTestId('saved-query-management-open-button').click();
         cy.getElementByTestId('euiFlyoutCloseButton')
           .parent()
           .contains(config.saveName)

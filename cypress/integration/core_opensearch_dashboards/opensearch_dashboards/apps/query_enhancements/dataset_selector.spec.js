@@ -3,16 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  WORKSPACE_NAME,
-  DATASOURCE_NAME,
-  START_TIME,
-  END_TIME,
-} from '../../../../../utils/apps/constants';
+import { DATASOURCE_NAME, START_TIME, END_TIME } from '../../../../../utils/apps/constants';
 import { SECONDARY_ENGINE } from '../../../../../utils/constants';
+import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
 
-const randomString = Math.random().toString(36).substring(7);
-const workspace = `${WORKSPACE_NAME}-${randomString}`;
+const workspace = getRandomizedWorkspaceName();
 
 describe('dataset selector', { scrollBehavior: false }, () => {
   before(() => {

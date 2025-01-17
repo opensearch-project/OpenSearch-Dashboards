@@ -8,7 +8,9 @@ import {
   DSM_API,
   S3_CLUSTER,
 } from '../../../../../utils/apps/query_enhancements/constants';
-import { WORKSPACE_NAME } from '../../../../../utils/apps/constants';
+import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
+
+const workspace = getRandomizedWorkspaceName();
 
 let dataSourceId = '';
 const definedS3Variables = !S3_CLUSTER.url;
@@ -83,12 +85,12 @@ const definedS3Variables = !S3_CLUSTER.url;
     describe('Run S3 Query', () => {
       beforeEach(() => {
         // Create workspace
-        cy.deleteWorkspaceByName(WORKSPACE_NAME);
+        cy.deleteWorkspaceByName(workspace);
         cy.visit('/app/home');
-        cy.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, WORKSPACE_NAME);
+        cy.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, workspace);
       });
       afterEach(() => {
-        cy.deleteWorkspaceByName(WORKSPACE_NAME);
+        cy.deleteWorkspaceByName(workspace);
       });
 
       it('with SQL', function () {

@@ -19,7 +19,7 @@ declare namespace Cypress {
       value: string,
       isEnhancement?: boolean
     ): Chainable<any>;
-    saveQuery(name: string, description: string): Chainable<any>;
+    saveQuery(name: string, description?: string): Chainable<any>;
     loadSaveQuery(name: string): Chainable<any>;
     clearSaveQuery(): Chainable<any>;
     deleteSaveQuery(name: string): Chainable<any>;
