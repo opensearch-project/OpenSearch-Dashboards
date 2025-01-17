@@ -46,7 +46,7 @@ export const Header = ({
   isFormValid: boolean;
   onClickDeleteIcon: () => void;
   onClickTestConnection: () => void;
-  onClickSetDefault: () => void;
+  onClickSetDefault: () => Promise<boolean>;
   dataSourceName: string;
   isDefault: boolean;
   canManageDataSource: boolean;
@@ -70,9 +70,10 @@ export const Header = ({
   const renderDefaultIcon = () => {
     return (
       <EuiSmallButtonEmpty
-        onClick={() => {
-          onClickSetDefault();
-          setIsDefaultDataSourceState(!isDefaultDataSourceState);
+        onClick={async () => {
+          if (await onClickSetDefault()) {
+            setIsDefaultDataSourceState(!isDefaultDataSourceState);
+          }
         }}
         disabled={isDefaultDataSourceState}
         iconType={isDefaultDataSourceState ? 'starFilled' : 'starEmpty'}
