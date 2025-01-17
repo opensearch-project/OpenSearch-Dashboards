@@ -15,7 +15,7 @@ import {
   PopoverAnchorPosition,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import {
   IDataPluginServices,
@@ -74,6 +74,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const inputRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
+  const bottomPanelRef = useRef<HTMLDivElement>(null);
   const queryControlsContainer = useRef<HTMLDivElement>(null);
   // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8801
   const editorQuery = props.query; // local query state managed by the editor. Not to be confused by the app query state.
@@ -113,6 +114,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         headerRef.current &&
         bannerRef.current &&
         queryControlsContainer.current &&
+        bottomPanelRef.current &&
         query.language &&
         extensionMap &&
         Object.keys(extensionMap).length > 0
@@ -130,6 +132,9 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         componentContainer={headerRef.current}
         bannerContainer={bannerRef.current}
         queryControlsContainer={queryControlsContainer.current}
+        bottomPanelContainer={bottomPanelRef.current}
+        query={query}
+        fetchStatus={props.queryStatus?.status}
       />
     );
   };
@@ -434,7 +439,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         queryString={queryString}
         onClickRecentQuery={onClickRecentQuery}
       />
-
+      <div ref={bottomPanelRef} />
       {renderQueryEditorExtensions()}
     </div>
   );

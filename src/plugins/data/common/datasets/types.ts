@@ -247,6 +247,13 @@ export interface Dataset extends BaseDataset {
   timeFieldName?: string;
   /** Optional language to default to from the language selector */
   language?: string;
+  /** Optional reference to the source dataset. Example usage is for indexed views to store the
+   * reference to the table dataset
+   */
+  sourceDatasetRef?: {
+    id: string;
+    type: string;
+  };
 }
 
 export interface DatasetField {
