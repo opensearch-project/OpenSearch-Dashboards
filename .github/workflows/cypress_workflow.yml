@@ -264,39 +264,39 @@ jobs:
 
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - name: Upload FT repo screenshots
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure() && matrix.test_location == 'ftr'
         with:
-          name: ftr-cypress-screenshots
+          name: ftr-cypress-screenshots-${{ matrix.group }}
           path: ${{ env.FTR_PATH }}/cypress/screenshots
           retention-days: 1
 
       - name: Upload FT repo videos
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always() && matrix.test_location == 'ftr'
         with:
-          name: ftr-cypress-videos
+          name: ftr-cypress-videos-${{ matrix.group }}
           path: ${{ env.FTR_PATH }}/cypress/videos
           retention-days: 1
 
       - name: Upload FT repo results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always() && matrix.test_location == 'ftr'
         with:
-          name: ftr-cypress-results
+          name: ftr-cypress-results-${{ matrix.group }}
           path: ${{ env.FTR_PATH }}/cypress/results
           retention-days: 1
 
       - name: Upload Dashboards screenshots
         if: failure() && matrix.test_location == 'source'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dashboards-cypress-screenshots
           path: cypress/screenshots
           retention-days: 1
 
       - name: Upload Dashboards repo videos
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always() && matrix.test_location == 'source'
         with:
           name: dashboards-cypress-videos
@@ -304,7 +304,7 @@ jobs:
           retention-days: 1
 
       - name: Upload Dashboards repo results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always() && matrix.test_location == 'source'
         with:
           name: dashboards-cypress-results
@@ -345,6 +345,6 @@ jobs:
             '${{ env.SPEC }}'
             ```
 
-            #### Link to results: 
+            #### Link to results:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           edit-mode: replace
