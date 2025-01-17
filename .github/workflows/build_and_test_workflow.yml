@@ -282,7 +282,7 @@ jobs:
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: failure-artifacts-ci${{ matrix.group }}
@@ -393,7 +393,7 @@ jobs:
         id: plugin-ftr-tests
         run: node scripts/functional_tests.js --config test/plugin_functional/config.ts
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: failure-artifacts-plugin-functional-${{ matrix.os }}
@@ -506,7 +506,7 @@ jobs:
       - name: Build `${{ matrix.name }}`
         run: yarn ${{ matrix.script }} --release
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: success()
         with:
           name: ${{ matrix.suffix }}-${{ env.VERSION }}
@@ -583,7 +583,7 @@ jobs:
         run: |
           yarn test:bwc -s false -o ${{ env.OPENSEARCH_URL }} -d ${{ steps.download.outputs.download-path }}/opensearch-dashboards-${{ env.VERSION }}-linux-x64.tar.gz -v ${{ matrix.version }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() && steps.verify-opensearch-exists.outputs.version-exists == 'true' }}
         with:
           name: ${{ matrix.version }}-test-failures
