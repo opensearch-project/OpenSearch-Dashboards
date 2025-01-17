@@ -48,7 +48,10 @@ describe('processVisitedRules', () => {
     const mockRules = new Map();
     mockRules.set(OpenSearchPPLParser.RULE_statsFunctionName, {});
     mockRules.set(OpenSearchPPLParser.RULE_fieldExpression, {});
-    const tokenStream = createTokenStream([1]);
+    const tokenStream = createTokenStream([
+      { type: 1, text: 'SPACE' },
+      { type: 1, text: 'SPACE' },
+    ]);
 
     const result = processVisitedRules(mockRules, 2, tokenStream);
     expect(result.suggestAggregateFunctions).toBeDefined();
