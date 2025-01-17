@@ -14,6 +14,7 @@ import {
   WORKSPACE_TYPE,
   Logger,
   WorkspaceFindOptions,
+  SavedObjectsErrorHelpers,
 } from '../../../core/server';
 import { updateWorkspaceState, getWorkspaceState } from '../../../core/server/utils';
 import {
@@ -37,6 +38,10 @@ const WORKSPACE_ID_SIZE = 6;
 
 const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.error', {
   defaultMessage: 'workspace name has already been used, try with a different name',
+});
+
+const WORKSPACE_NOT_FOUND_ERROR = i18n.translate('workspace.notFound.error', {
+  defaultMessage: 'workspace not found',
 });
 
 export class WorkspaceClient implements IWorkspaceClientImpl {
@@ -86,6 +91,10 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     };
   }
   private formatError(error: Error | any): string {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return WORKSPACE_NOT_FOUND_ERROR;
+    }
+
     return error.message || error.error || 'Error';
   }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
