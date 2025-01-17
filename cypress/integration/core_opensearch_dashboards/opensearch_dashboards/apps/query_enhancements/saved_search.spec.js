@@ -117,7 +117,7 @@ export const runSavedSearchTests = () => {
             cy.setIndexPatternAsDataset(INDEX_PATTERN_WITH_TIME, datasourceName);
 
             cy.setQueryLanguage(startingLanguage);
-            cy.loadSaveSearch(config.saveName, false);
+            cy.loadSaveSearch(config.saveName);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             verifyDiscoverPageState(config);
           });

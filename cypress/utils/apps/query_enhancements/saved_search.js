@@ -497,14 +497,12 @@ export const postRequestSaveSearch = (config) => {
  * @param {boolean} saveAsNew - flag to determine whether to overwrite the saved search (false) or save as a new saved search (true)
  */
 export const updateSavedSearchAndSaveAndVerify = (config, saveAsNew) => {
-  const saveName = config.saveName;
-
   cy.navigateToWorkSpaceSpecificPage({
     workspaceName: workspaceName,
     page: 'discover',
     isEnhancement: true,
   });
-  cy.loadSaveSearch(saveName);
+  cy.loadSaveSearch(config.saveName);
 
   // Change the dataset type to use
   const [newDataset, newDatasetType] =
@@ -524,11 +522,14 @@ export const updateSavedSearchAndSaveAndVerify = (config, saveAsNew) => {
     // only select field if previous config did not select it, because otherwise it is already selected
     selectFields: !config.selectFields ? newConfig.selectFields : false,
   });
-  cy.saveSearch(saveName, saveAsNew);
+  const saveNameToUse = saveAsNew ? newConfig.saveName : config.saveName;
+  cy.saveSearch(saveNameToUse, saveAsNew);
 
   // Load updated saved search and verify
   cy.getElementByTestId('discoverNewButton').click();
-  cy.loadSaveSearch(saveName, saveAsNew);
+  // wait for the new tab to load
+  cy.getElementByTestId('docTableHeader').should('be.visible');
+  cy.loadSaveSearch(saveNameToUse);
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);
 };
