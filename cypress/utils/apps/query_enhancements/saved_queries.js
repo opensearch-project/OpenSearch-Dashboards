@@ -258,3 +258,29 @@ export const verifyDiscoverPageState = ({
     cy.getElementByTestId('osdQueryEditorUpdateButton').contains(END_TIME).should('exist');
   }
 };
+
+export const verifySavedQueryExistsAndHasCorrectStateWhenLoaded = (
+  config,
+  savedQueriesNewUIEnabled = true
+) => {
+  if (savedQueriesNewUIEnabled) {
+    cy.getElementByTestId('saved-query-management-popover-button').click();
+
+    cy.getElementByTestId('saved-query-management-open-button').click();
+
+    cy.getElementByTestId('euiFlyoutCloseButton')
+      .parent()
+      .contains(config.saveName)
+      .should('exist')
+      .click();
+
+    cy.getElementByTestId('open-query-action-button').click();
+  } else {
+    cy.getElementByTestId('saved-query-management-popover-button').click();
+    cy.getElementByTestId('save-query-panel').contains(config.saveName).should('exist').click();
+  }
+
+  // wait for saved queries to load.
+  cy.wait(2000);
+  verifyDiscoverPageState(config);
+};

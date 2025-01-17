@@ -22,6 +22,7 @@ import {
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   verifyDiscoverPageState,
+  verifySavedQueryExistsAndHasCorrectStateWhenLoaded,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is true.
@@ -99,21 +100,7 @@ export const runSavedQueriesFlyoutUITests = () => {
           'Aug 30, 2020 @ 00:00:00.000'
         );
 
-        cy.getElementByTestId('saved-query-management-popover-button').click();
-
-        cy.getElementByTestId('saved-query-management-open-button').click();
-
-        cy.getElementByTestId('euiFlyoutCloseButton')
-          .parent()
-          .contains(config.saveName)
-          .should('exist')
-          .click();
-
-        cy.getElementByTestId('open-query-action-button').click();
-
-        // wait for saved queries to load.
-        cy.wait(2000);
-        verifyDiscoverPageState(config);
+        verifySavedQueryExistsAndHasCorrectStateWhenLoaded(config, true);
       });
     });
   });

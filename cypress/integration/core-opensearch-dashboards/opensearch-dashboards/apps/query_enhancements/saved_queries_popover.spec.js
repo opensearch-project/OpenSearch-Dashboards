@@ -21,6 +21,7 @@ import {
 import {
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
+  verifySavedQueryExistsAndHasCorrectStateWhenLoaded,
   verifyDiscoverPageState,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
@@ -93,6 +94,7 @@ export const runSavedQueriesPopoverUITests = () => {
 
     it('should see and load all saved queries', () => {
       testConfigurations.forEach((config) => {
+        // Dates are cached for each dataset. This ensures the dates must be set by the saved query to display the expected results.
         cy.getElementByTestId('discoverNewButton').click();
         setDatePickerDatesAndSearchIfRelevant(
           config.language,
@@ -100,12 +102,7 @@ export const runSavedQueriesPopoverUITests = () => {
           'Aug 30, 2020 @ 00:00:00.000'
         );
 
-        cy.getElementByTestId('saved-query-management-popover-button').click();
-        cy.getElementByTestId('save-query-panel').contains(config.saveName).should('exist').click();
-
-        // wait for saved queries to load.
-        cy.wait(2000);
-        verifyDiscoverPageState(config);
+        verifySavedQueryExistsAndHasCorrectStateWhenLoaded(config, false);
       });
     });
   });
