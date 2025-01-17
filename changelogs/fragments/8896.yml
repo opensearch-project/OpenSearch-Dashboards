@@ -1,0 +1,2 @@
+feat:
+- Added framework to get default query string using dataset and language combination ([#8896](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8896))
