@@ -130,7 +130,19 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchPPLParser.RULE_fieldExpression: {
-        shouldSuggestColumns = true;
+        // get the last token that appears other than whitespace
+        const lastToken =
+          tokenStream.get(cursorTokenIndex - 1).type === tokenDictionary.SPACE
+            ? tokenStream.get(cursorTokenIndex - 2)
+            : tokenStream.get(cursorTokenIndex - 1);
+
+        if (
+          ![tokenDictionary.ID, tokenDictionary.BACKTICK_QUOTE, tokenDictionary.DOT].includes(
+            lastToken.type
+          )
+        ) {
+          shouldSuggestColumns = true;
+        }
         break;
       }
       case OpenSearchPPLParser.RULE_tableIdent: {

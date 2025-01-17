@@ -300,12 +300,14 @@ export const parseQuery = <
     for (const [field, value] of Object.entries(result)) {
       if (field === 'suggestColumns') {
         // combine tables inside of suggestColumns
-        result.suggestColumns = {
-          tables: [
-            ...(result.suggestColumns?.tables ?? []),
-            ...(nextResult.suggestColumns?.tables ?? []),
-          ],
-        };
+        if (result.suggestColumns || nextResult.suggestColumns) {
+          result.suggestColumns = {
+            tables: [
+              ...(result.suggestColumns?.tables ?? []),
+              ...(nextResult.suggestColumns?.tables ?? []),
+            ],
+          };
+        }
         continue;
       }
 
