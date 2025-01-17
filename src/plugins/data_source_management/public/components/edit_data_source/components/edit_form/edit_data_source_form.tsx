@@ -61,7 +61,7 @@ export interface EditDataSourceProps {
   handleSubmit: (formValues: DataSourceAttributes) => Promise<void>;
   handleTestConnection: (formValues: DataSourceAttributes) => Promise<void>;
   onDeleteDataSource?: () => Promise<void>;
-  onSetDefaultDataSource: () => Promise<void>;
+  onSetDefaultDataSource: () => Promise<boolean>;
   displayToastMessage: (info: DataSourceManagementToastMessageItem) => void;
   canManageDataSource: boolean;
 }
@@ -412,9 +412,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   setDefaultDataSource = async () => {
-    if (this.props.onSetDefaultDataSource) {
-      await this.props.onSetDefaultDataSource();
-    }
+    return await this.props.onSetDefaultDataSource();
   };
 
   onClickTestConnection = async () => {

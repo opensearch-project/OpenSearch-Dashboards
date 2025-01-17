@@ -96,7 +96,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   };
 
   const handleSetDefault = async () => {
-    await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID);
+    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID);
   };
 
   const isDefaultDataSource = getDefaultDataSourceId(uiSettings) === dataSourceID;
