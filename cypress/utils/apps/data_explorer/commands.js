@@ -30,31 +30,19 @@ Cypress.Commands.add('saveSearch', (name, saveAsNew = false) => {
 
   cy.getElementByTestId('confirmSaveSavedObjectButton').click({ force: true });
 
-  // if saving as new save search, you need to click confirm twice;
-  if (saveAsNew) {
-    cy.getElementByTestId('confirmSaveSavedObjectButton').click();
-  }
-
   // Wait for page to load
   cy.getElementByTestId('euiToastHeader').contains(/was saved/);
 });
 
-Cypress.Commands.add('loadSaveSearch', (name, selectDuplicate = false) => {
+Cypress.Commands.add('loadSaveSearch', (name) => {
   const opts = {
     log: false,
     force: true,
   };
 
   cy.getElementByTestId('discoverOpenButton', opts).click(opts);
-  if (selectDuplicate) {
-    cy.getElementByTestId(`savedObjectTitle${toTestId(name)}`)
-      .last()
-      .click();
-  } else {
-    cy.getElementByTestId(`savedObjectTitle${toTestId(name)}`)
-      .first()
-      .click();
-  }
+
+  cy.getElementByTestId(`savedObjectTitle${toTestId(name)}`).click();
 
   cy.get('h1').contains(name).should('be.visible');
 });
