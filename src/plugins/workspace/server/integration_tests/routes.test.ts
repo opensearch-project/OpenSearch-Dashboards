@@ -158,6 +158,14 @@ describe('workspace service api integration test', () => {
       );
       expect(getResult.body.result.name).toEqual(testWorkspace.name);
     });
+
+    it('get when workspace not found', async () => {
+      const workspaceId = 'non-exist workspace id';
+      const getResult = await osdTestServer.request.get(root, `/api/workspaces/${workspaceId}`);
+      expect(getResult.body.success).toEqual(false);
+      expect(getResult.body.error).toEqual('workspace not found');
+    });
+
     it('update', async () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
@@ -183,6 +191,23 @@ describe('workspace service api integration test', () => {
 
       expect(getResult.body.success).toEqual(true);
       expect(getResult.body.result.name).toEqual('updated');
+    });
+
+    it('update non exist workspace', async () => {
+      const workspaceId = 'non-exist workspace id';
+
+      const result = await osdTestServer.request
+        .put(root, `/api/workspaces/${workspaceId}`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'updated',
+          },
+        })
+        .expect(200);
+
+      expect(result.body.success).toEqual(false);
+      expect(result.body.error).toEqual('workspace not found');
     });
 
     it('update workspace failed when new name is duplicate', async () => {
@@ -286,6 +311,17 @@ describe('workspace service api integration test', () => {
         `Reserved workspace ${result.body.result.id} is not allowed to delete.`
       );
     });
+
+    it('delete non exist workspace', async () => {
+      const workspaceId = 'non-exist workspace id';
+      const result = await osdTestServer.request
+        .delete(root, `/api/workspaces/${workspaceId}`)
+        .expect(200);
+
+      expect(result.body.success).toEqual(false);
+      expect(result.body.error).toEqual('workspace not found');
+    });
+
     it('list', async () => {
       await osdTestServer.request
         .post(root, `/api/workspaces`)
@@ -504,7 +540,7 @@ describe('workspace service api integration test', () => {
         .expect(400);
 
       expect(result.body.message).toMatchInlineSnapshot(
-        `"Get target workspace test_workspace error: Saved object [workspace/test_workspace] not found"`
+        `"Get target workspace error: workspace not found"`
       );
     });
 
