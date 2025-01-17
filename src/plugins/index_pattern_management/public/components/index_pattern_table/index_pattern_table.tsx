@@ -38,6 +38,7 @@ import {
   EuiText,
   EuiBadgeGroup,
   EuiPageContent,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -199,7 +200,11 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+          <EuiButtonEmpty
+            size="xs"
+            {...reactRouterNavigate(history, `patterns/${index.id}`)}
+            {...(useUpdatedUX ? { textProps: { style: { fontWeight: 600 } } } : {})}
+          >
             {name}
           </EuiButtonEmpty>
           &emsp;
@@ -309,7 +314,12 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
 
   return (
     <>
-      <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
+      <EuiPageContent
+        data-test-subj="indexPatternTable"
+        role="region"
+        aria-label={ariaRegion}
+        {...(useUpdatedUX ? { paddingSize: 'm' } : {})}
+      >
         <EuiFlexGroup justifyContent="spaceBetween">
           {pageTitleAndDescription}
           {createButton}
