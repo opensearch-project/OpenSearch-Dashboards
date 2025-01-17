@@ -138,11 +138,11 @@ export class BundleRefsPlugin {
    * undefined is returned. Otherwise it returns the referenced bundleRef.
    */
   private async maybeReplaceImport(context: string, request: string, compiler: webpack.Compiler) {
+    const alias = Object.keys(compiler.options.resolve?.alias ?? {});
+    const isAliasRequest = alias.some((a) => request.startsWith(a));
+
     // For non-alias import path, ignore imports that have loaders defined or are not relative seeming
-    if (
-      !request.startsWith('opensearch-dashboards/') &&
-      (request.includes('!') || !request.startsWith('.'))
-    ) {
+    if (!isAliasRequest && (request.includes('!') || !request.startsWith('.'))) {
       return;
     }
 
