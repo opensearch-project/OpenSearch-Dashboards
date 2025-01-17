@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from '../../../../../../core/public';
 import {
-  connectStorageToQueryState,
+  useConnectStorageToQueryState,
   opensearchFilters,
   QueryStatus,
 } from '../../../../../data/public';
@@ -65,15 +65,14 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     ? getTopNavLinks(services, inspectorAdapters, savedSearch, isEnhancementsEnabled)
     : [];
 
-  connectStorageToQueryState(
-    services.data.query,
-    osdUrlStateStorage,
-    {
+  const syncConfig = useMemo(() => {
+    return {
       filters: opensearchFilters.FilterStateStore.APP_STATE,
       query: true,
-    },
-    uiSettings
-  );
+    };
+  }, []);
+
+  useConnectStorageToQueryState(services.data.query, osdUrlStateStorage, syncConfig);
 
   useEffect(() => {
     const subscription = data$.subscribe((queryData) => {

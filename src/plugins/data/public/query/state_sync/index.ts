@@ -29,5 +29,6 @@
  */
 
 export { connectToQueryState, connectStorageToQueryState } from './connect_to_query_state';
+export { useConnectStorageToQueryState } from './use_connect_to_query_state';
 export { syncQueryStateWithUrl } from './sync_state_with_url';
 export { QueryState, QueryStateChange } from './types';
