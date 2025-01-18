@@ -209,6 +209,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
             defaultMessage: `Language Toggle`,
           })}
           onClick={() => setIsCollapsed(!isCollapsed)}
+          data-test-subj="osdQueryEditorLanguageToggle"
         />
       </EuiFlexItem>
     );
