@@ -26,6 +26,8 @@ target
 /test/*/screenshots/failure
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
+cypress/videos/*
+cypress/screenshots/*
 /html_docs
 .eslintcache
 /data

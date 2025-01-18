@@ -280,7 +280,12 @@ export function useSaveQueryFormContent({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill disabled={hasErrors || !enabledSaveButton} onClick={onClickSave}>
+          <EuiButton
+            fill
+            disabled={hasErrors || !enabledSaveButton}
+            onClick={onClickSave}
+            data-test-subj="savedQueryFormSaveButton"
+          >
             {i18n.translate('data.search.searchBar.savedQueryFlyoutFormSaveButtonText', {
               defaultMessage: '{saveText}',
               values: { saveText: savedQuery ? 'Save changes' : 'Save' },

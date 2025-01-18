@@ -44,7 +44,7 @@ test('alias', () => {
   const { container } = render(<FilterLabel filter={filter} />);
   expect(container).toMatchInlineSnapshot(`
     <div>
-      
+
       geo.coordinates in US
     </div>
   `);
@@ -65,7 +65,7 @@ test('negated alias', () => {
       <span
         class="euiTextColor euiTextColor--danger"
       >
-         NOT 
+         NOT
       </span>
       geo.coordinates in US
     </div>
@@ -89,12 +89,13 @@ test('alias with warning status', () => {
       <span
         class="euiTextColor euiTextColor--danger"
       >
-         NOT 
+         NOT
       </span>
       geo.coordinates in US
-      : 
+      :
       <span
         class="globalFilterLabel__value"
+        data-test-subj="globalFilterLabelValue"
       >
         Warning
       </span>
@@ -119,12 +120,13 @@ test('alias with error status', () => {
       <span
         class="euiTextColor euiTextColor--danger"
       >
-         NOT 
+         NOT
       </span>
       geo.coordinates in US
-      : 
+      :
       <span
         class="globalFilterLabel__value"
+        data-test-subj="globalFilterLabelValue"
       >
         Error
       </span>
@@ -136,11 +138,12 @@ test('warning', () => {
   const { container } = render(<FilterLabel filter={phraseFilter} valueLabel={'Warning'} />);
   expect(container).toMatchInlineSnapshot(`
     <div>
-      
+
       machine.os
-      : 
+      :
       <span
         class="globalFilterLabel__value"
+        data-test-subj="globalFilterLabelValue"
       >
         Warning
       </span>
@@ -152,11 +155,12 @@ test('error', () => {
   const { container } = render(<FilterLabel filter={phraseFilter} valueLabel={'Error'} />);
   expect(container).toMatchInlineSnapshot(`
     <div>
-      
+
       machine.os
-      : 
+      :
       <span
         class="globalFilterLabel__value"
+        data-test-subj="globalFilterLabelValue"
       >
         Error
       </span>
