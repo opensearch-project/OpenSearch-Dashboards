@@ -187,8 +187,7 @@ export class DataPublicPlugin
     setUseNewSavedQueriesUI(useNewSavedQueriesUI);
 
     return {
-      // TODO: MQL
-      autocomplete: this.autocomplete.setup(core),
+      autocomplete: autoComplete,
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,

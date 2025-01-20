@@ -3,34 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// This file is used for both saved_search and saved_queries spec
+
 import {
   DatasetTypes,
-  DATASOURCE_NAME,
-  END_TIME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   QueryLanguages,
-  START_TIME,
-  WORKSPACE_NAME,
-} from '../../../../../../utils/apps/query_enhancements/constants';
-
-const randomString = Math.random().toString(36);
-
-/**
- * randomized workspace name
- * @constant
- * @type {string}
- * @default
- */
-export const workspaceName = `${WORKSPACE_NAME}-${randomString.substring(7)}`;
-
-/**
- * randomized datasource name
- * @constant
- * @type {string}
- * @default
- */
-export const datasourceName = `${DATASOURCE_NAME}-${randomString.substring(0, 18)}`;
+} from './constants';
+import { setDatePickerDatesAndSearchIfRelevant } from './shared';
 
 /**
  * The fields to select for saved search. Also takes shape of the API for saved search
@@ -176,8 +157,8 @@ const getSampleTableData = (datasetType, language) => {
 };
 
 /**
- * The configurations needed for saved search tests
- * @typedef {Object} SavedSearchTestConfig
+ * The configurations needed for saved search/queries tests
+ * @typedef {Object} SavedTestConfig
  * @property {string} dataset - the dataset name to use
  * @property {QueryEnhancementDataset} datasetType - the type of dataset
  * @property {QueryEnhancementLanguage} language - the name of query language as it appears in the dashboard app
@@ -194,13 +175,13 @@ const getSampleTableData = (datasetType, language) => {
  */
 
 /**
- * Returns the SavedSearchTestConfig for the provided dataset, datasetType, and language
+ * Returns the SavedTestConfig for the provided dataset, datasetType, and language
  * @param {string} dataset - the dataset name
  * @param {QueryEnhancementDataset} datasetType - the type of the dataset
  * @param {QueryEnhancementLanguageData} language - the relevant data for the query language to use
- * @returns {SavedSearchTestConfig}
+ * @returns {SavedTestConfig}
  */
-const generateTestConfiguration = (dataset, datasetType, language) => {
+export const generateSavedTestConfiguration = (dataset, datasetType, language) => {
   const baseConfig = {
     dataset,
     datasetType,
@@ -220,43 +201,8 @@ const generateTestConfiguration = (dataset, datasetType, language) => {
 };
 
 /**
- * Returns an array of test configurations for every query language + dataset permutation
- * @returns {SavedSearchTestConfig[]}
- */
-export const generateAllTestConfigurations = () => {
-  return Object.values(DatasetTypes).flatMap((dataset) =>
-    dataset.supportedLanguages.map((language) => {
-      let datasetToUse;
-      switch (dataset.name) {
-        case DatasetTypes.INDEX_PATTERN.name:
-          datasetToUse = INDEX_PATTERN_WITH_TIME;
-          break;
-        case DatasetTypes.INDEXES.name:
-          datasetToUse = INDEX_WITH_TIME_1;
-          break;
-        default:
-          throw new Error(
-            `generateAllTestConfigurations encountered unsupported dataset: ${dataset.name}`
-          );
-      }
-      return generateTestConfiguration(datasetToUse, dataset.name, language);
-    })
-  );
-};
-
-/**
- * Sets the top nav date if it is relevant for the passed language
- * @param {QueryEnhancementLanguage} language - query language
- */
-export const setDatePickerDatesAndSearchIfRelevant = (language) => {
-  if (language !== QueryLanguages.SQL.name) {
-    cy.setTopNavDate(START_TIME, END_TIME);
-  }
-};
-
-/**
  * Set the search configurations for the saved search
- * @param {SavedSearchTestConfig} testConfig - the relevant config for the test case
+ * @param {SavedTestConfig} testConfig - the relevant config for the test case
  */
 export const setSearchConfigurations = ({
   filters,
@@ -307,7 +253,7 @@ export const setSearchConfigurations = ({
 
 /**
  * Verify that the discover page is in the correct state after setSearchConfigurations have been run
- * @param {SavedSearchTestConfig} testConfig - the relevant config for the test case
+ * @param {SavedTestConfig} testConfig - the relevant config for the test case
  */
 export const verifyDiscoverPageState = ({
   dataset,
@@ -358,19 +304,23 @@ export const verifyDiscoverPageState = ({
 
 /**
  * After a saved search have been saved, verify the data in the assets page
- * @param {SavedSearchTestConfig} testConfig - the relevant config for the test case
+ * @param {SavedTestConfig} testConfig - the relevant config for the test case
+ * @param {string} workspaceName - name of workspace
  */
-export const verifySavedSearchInAssetsPage = ({
-  apiLanguage,
-  dataset,
-  saveName,
-  queryString,
-  datasetType,
-  histogram,
-  selectFields,
-  sort,
-  filters,
-}) => {
+export const verifySavedSearchInAssetsPage = (
+  {
+    apiLanguage,
+    dataset,
+    saveName,
+    queryString,
+    datasetType,
+    histogram,
+    selectFields,
+    sort,
+    filters,
+  },
+  workspaceName
+) => {
   cy.navigateToWorkSpaceSpecificPage({
     workspaceName: workspaceName,
     page: 'objects',
@@ -416,7 +366,7 @@ export const verifySavedSearchInAssetsPage = ({
 
 /**
  * Returns the API body that is needed when creating a saved search directly through an API call
- * @param {SavedSearchTestConfig} config - language + dataset permutation configuration
+ * @param {SavedTestConfig} config - language + dataset permutation configuration
  * @param {string} workspaceId - workspace ID
  * @param {string} datasourceId - datasource ID
  * @param {string} indexPatternId - index pattern ID
@@ -469,7 +419,7 @@ const getSavedObjectPostBody = (config, workspaceId, datasourceId, indexPatternI
 
 /**
  * send a POST request to API to create a saved search object
- * @param {SavedSearchTestConfig} config - the relevant config for the test case
+ * @param {SavedTestConfig} config - the relevant config for the test case
  */
 export const postRequestSaveSearch = (config) => {
   cy.get('@WORKSPACE_ID').then((workspaceId) => {
@@ -493,18 +443,23 @@ export const postRequestSaveSearch = (config) => {
 
 /**
  * Loads a saved search and updates it and verify that it is correct
- * @param {SavedSearchTestConfig} config - the relevant config for the test case
+ * @param {SavedTestConfig} config - the relevant config for the test case
+ * @param {string} workspaceName - the name of the workspace
+ * @param {string} datasourceName - the name of the datasource
  * @param {boolean} saveAsNew - flag to determine whether to overwrite the saved search (false) or save as a new saved search (true)
  */
-export const updateSavedSearchAndSaveAndVerify = (config, saveAsNew) => {
-  const saveName = config.saveName;
-
+export const updateSavedSearchAndSaveAndVerify = (
+  config,
+  workspaceName,
+  datasourceName,
+  saveAsNew
+) => {
   cy.navigateToWorkSpaceSpecificPage({
     workspaceName: workspaceName,
     page: 'discover',
     isEnhancement: true,
   });
-  cy.loadSaveSearch(saveName);
+  cy.loadSaveSearch(config.saveName);
 
   // Change the dataset type to use
   const [newDataset, newDatasetType] =
@@ -514,7 +469,7 @@ export const updateSavedSearchAndSaveAndVerify = (config, saveAsNew) => {
   // If current language is PPL, update to OpenSearch SQL, else update to PPL
   const newLanguage =
     config.language === QueryLanguages.PPL.name ? QueryLanguages.SQL : QueryLanguages.PPL;
-  const newConfig = generateTestConfiguration(newDataset, newDatasetType, newLanguage);
+  const newConfig = generateSavedTestConfiguration(newDataset, newDatasetType, newLanguage);
 
   cy.setDataset(newConfig.dataset, datasourceName, newConfig.datasetType);
   cy.setQueryLanguage(newConfig.language);
@@ -524,11 +479,14 @@ export const updateSavedSearchAndSaveAndVerify = (config, saveAsNew) => {
     // only select field if previous config did not select it, because otherwise it is already selected
     selectFields: !config.selectFields ? newConfig.selectFields : false,
   });
-  cy.saveSearch(saveName, saveAsNew);
+  const saveNameToUse = saveAsNew ? newConfig.saveName : config.saveName;
+  cy.saveSearch(saveNameToUse, saveAsNew);
 
   // Load updated saved search and verify
   cy.getElementByTestId('discoverNewButton').click();
-  cy.loadSaveSearch(saveName, saveAsNew);
+  // wait for the new tab to load
+  cy.getElementByTestId('docTableHeader').should('be.visible');
+  cy.loadSaveSearch(saveNameToUse);
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);
 };

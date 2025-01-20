@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WORKSPACE_NAME, DATASOURCE_NAME } from '../../../../../utils/apps/constants';
+import { DATASOURCE_NAME } from '../../../../../utils/apps/constants';
 import { SECONDARY_ENGINE } from '../../../../../utils/constants';
+import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
 
-const randomString = Math.random().toString(36).substring(7);
-const workspace = `${WORKSPACE_NAME}-${randomString}`;
+const workspace = getRandomizedWorkspaceName();
 
 describe('No Index Pattern Check Test', () => {
   before(() => {

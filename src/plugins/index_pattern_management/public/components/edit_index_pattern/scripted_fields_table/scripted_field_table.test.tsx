@@ -83,6 +83,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        useUpdatedUX
       />
     );
 
@@ -101,6 +102,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        useUpdatedUX
       />
     );
 
@@ -130,6 +132,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        useUpdatedUX
       />
     );
 
@@ -155,6 +158,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        useUpdatedUX
       />
     );
 
@@ -173,6 +177,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        useUpdatedUX
       />
     );
 
@@ -197,6 +202,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        useUpdatedUX
       />
     );
 
