@@ -506,7 +506,9 @@ export function Header({
     </EuiHeaderSectionItem>
   );
   const renderNewPrimaryHeaderRight = () => (
-    <HeaderNavControls navControls$={observables.navControlsNewPrimaryHeaderRight$} />
+    <EuiHeaderSectionItem>
+      <HeaderNavControls navControls$={observables.navControlsNewPrimaryHeaderRight$} />
+    </EuiHeaderSectionItem>
   );
 
   const leftControls = renderLeftControls();
