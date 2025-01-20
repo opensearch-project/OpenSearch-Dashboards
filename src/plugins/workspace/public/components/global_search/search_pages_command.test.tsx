@@ -42,13 +42,12 @@ describe('<SearchPagesCommand />', () => {
         },
         {
           id: 'foo-group-link3',
-          title: 'Foo Group Link 3',
-          hidden: true,
+          title: 'Foo Group Link 3'
         },
       ],
     },
     dataAdministration: {
-      id: 'dataAdministration',
+      id: 'dataAdministrations',
       title: 'Data Administration',
       description: 'Data Administration description',
       navLinks: [
