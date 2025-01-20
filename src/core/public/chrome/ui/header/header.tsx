@@ -108,6 +108,7 @@ export interface HeaderProps {
   navControlsExpandedCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsExpandedRight$: Observable<readonly ChromeNavControl[]>;
   navControlsLeftBottom$: Observable<readonly ChromeNavControl[]>;
+  navControlsNewPrimaryHeaderRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -504,6 +505,9 @@ export function Header({
       />
     </EuiHeaderSectionItem>
   );
+  const renderNewPrimaryHeaderRight = () => (
+    <HeaderNavControls navControls$={observables.navControlsNewPrimaryHeaderRight$} />
+  );
 
   const leftControls = renderLeftControls();
   const centerControls = renderCenterControls();
@@ -554,6 +558,8 @@ export function Header({
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
         {renderBreadcrumbs(false, false)}
+
+        {renderNewPrimaryHeaderRight()}
       </EuiHeader>
 
       {/* Secondary header */}
@@ -623,7 +629,10 @@ export function Header({
           {renderRecentItems()}
           {actionMenu}
         </EuiHeaderSection>
-        <EuiHeaderSection side="right">{rightControls}</EuiHeaderSection>
+        <EuiHeaderSection side="right">
+          {rightControls}
+          {renderNewPrimaryHeaderRight()}
+        </EuiHeaderSection>
       </EuiHeader>
       <div id="applicationHeaderFilterBar" />
     </div>
