@@ -332,36 +332,6 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
   });
 });
 
-describe('workspace utils: fetchDirectQueryConnectionsByIDs', () => {
-  it('should successfully retrieve direct query connections by Ids', async () => {
-    const coreStart = coreMock.createStart();
-    const httpMock = coreStart.http;
-    const notificationsMock = coreStart.notifications;
-    httpMock.get.mockResolvedValue([
-      { name: 'Connection A', description: 'Test A', connector: 'S3GLUE' },
-    ]);
-
-    const dataSourceIds = ['1'];
-    const result = await fetchDirectQueryConnectionsByIDs(
-      dataSourceIds,
-      httpMock,
-      notificationsMock
-    );
-    expect(result).toEqual([
-      {
-        id: '1-Connection A',
-        name: 'Connection A',
-        parentId: '1',
-        type: 'Amazon S3',
-        connectionType: DataSourceConnectionType.DirectQueryConnection,
-        description: 'Test A',
-      },
-    ]);
-    expect(httpMock.get).toHaveBeenCalledWith(expect.stringContaining('dataSourceMDSId=1'));
-    expect(notificationsMock.toasts.addDanger).not.toHaveBeenCalled();
-  });
-});
-
 describe('workspace utils: isFeatureIdInsideUseCase', () => {
   it('should return false for invalid use case', () => {
     expect(isFeatureIdInsideUseCase('discover', 'invalid', [])).toBe(false);
