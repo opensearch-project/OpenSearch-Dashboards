@@ -1,0 +1,2 @@
+fix:
+- DQL autocomplete better parsing and fixes ([#8931](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8931))

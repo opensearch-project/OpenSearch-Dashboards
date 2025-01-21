@@ -18,7 +18,7 @@ RPAREN: ')';
 
 // Literals
 PHRASE: '"' (~["\\])* '"'?;
-ID: [a-zA-Z0-9_*][a-zA-Z0-9_*.]*;
+ID: [a-zA-Z0-9_@*]+[a-zA-Z0-9_*.]*;
 
 // SKIP
 WS: [ \t\r\n]+ -> channel(HIDDEN);

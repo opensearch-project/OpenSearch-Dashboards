@@ -1,4 +1,4 @@
-// Generated from grammar/DQLParser.g4 by ANTLR 4.13.1
+// Generated from ./src/plugins/data/public/antlr/dql/grammar/DQLParser.g4 by ANTLR 4.13.1
 
 import * as antlr from "antlr4ng";
 import { Token } from "antlr4ng";
