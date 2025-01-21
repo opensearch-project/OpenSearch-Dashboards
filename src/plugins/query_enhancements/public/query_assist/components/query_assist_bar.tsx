@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
 import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { Dataset } from '../../../../data/common';
 import {
   IDataPluginServices,
@@ -20,6 +21,7 @@ import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
 import { useQueryAssist } from '../hooks';
+import { PPL_SUPPORT_DATASET_TYPES } from '../utils/constant';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
@@ -106,24 +108,47 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
 
   if (props.dependencies.isCollapsed) return null;
 
+  const { dependencies } = props;
+
+  const datasetSupported = PPL_SUPPORT_DATASET_TYPES.includes(
+    dependencies.query.dataset?.type || ''
+  );
+
   return (
     <EuiForm component="form" onSubmit={onSubmit} className="queryAssist queryAssist__form">
       <EuiFormRow fullWidth>
-        <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-          <EuiFlexItem>
-            <QueryAssistInput
-              inputRef={inputRef}
-              persistedLog={persistedLog}
-              isDisabled={loading}
-              selectedIndex={selectedIndex}
-              previousQuestion={previousQuestionRef.current}
-              error={agentError}
+        <>
+          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+            <EuiFlexItem>
+              <QueryAssistInput
+                inputRef={inputRef}
+                persistedLog={persistedLog}
+                isDisabled={loading || !datasetSupported}
+                selectedIndex={selectedIndex}
+                previousQuestion={previousQuestionRef.current}
+                error={agentError}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <QueryAssistSubmitButton isDisabled={loading || !datasetSupported} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {!datasetSupported && dependencies.query.dataset?.title ? (
+            <EuiCallOut
+              color="danger"
+              iconType="alert"
+              title={i18n.translate('queryEnhancements.query_assist_bar.unsupported.dataset', {
+                defaultMessage:
+                  'The selected datasource {datasource} is not supported for Amazon Q query assistance. Please select another data source that is compatible.',
+                values: {
+                  datasource: dependencies.query.dataset.title,
+                },
+              })}
+              size="s"
+              data-test-subj="queryAssistUnsupportedDataset"
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <QueryAssistSubmitButton isDisabled={loading} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          ) : null}
+        </>
       </EuiFormRow>
       <QueryAssistCallOut
         language={props.dependencies.language}
