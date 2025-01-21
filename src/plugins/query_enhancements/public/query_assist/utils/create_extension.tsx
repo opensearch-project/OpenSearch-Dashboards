@@ -69,7 +69,7 @@ export { clearCache };
  * @returns observable list of query assist agent configured languages in the
  * selected data source.
  */
-export const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
+const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
   data.query.queryString.getUpdates$().pipe(
     startWith(data.query.queryString.getQuery()),
     distinctUntilChanged(),
@@ -93,7 +93,7 @@ export const createQueryAssistExtension = (
   data: DataPublicPluginSetup,
   config: ConfigSchema['queryAssist'],
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>,
-  isShowQuerySummarySwitch$: BehaviorSubject<boolean>,
+  resultSummaryEnabled$: BehaviorSubject<boolean>,
   usageCollection?: UsageCollectionSetup
 ): QueryEditorExtensionConfig => {
   const http: HttpSetup = core.http;
@@ -125,7 +125,7 @@ export const createQueryAssistExtension = (
           http={http}
           data={data}
           isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
-          {...(config.summary.enabled && { isShowQuerySummarySwitch$ })}
+          {...(config.summary.enabled && { resultSummaryEnabled$ })}
           question$={question$}
         >
           <QueryAssistBar dependencies={dependencies} />
@@ -161,7 +161,7 @@ interface QueryAssistWrapperProps {
   data: DataPublicPluginSetup;
   invert?: boolean;
   isQuerySummaryCollapsed$?: BehaviorSubject<boolean>;
-  isShowQuerySummarySwitch$?: BehaviorSubject<boolean>;
+  resultSummaryEnabled$?: BehaviorSubject<boolean>;
   question$?: BehaviorSubject<string>;
 }
 
@@ -173,7 +173,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     props.question$?.next(newQuestion);
   };
   const question$ = props.question$;
-  props.isShowQuerySummarySwitch$?.next(visible);
+  props.resultSummaryEnabled$?.next(visible);
 
   useEffect(() => {
     const subscription = props.isQuerySummaryCollapsed$?.subscribe((isCollapsed) => {

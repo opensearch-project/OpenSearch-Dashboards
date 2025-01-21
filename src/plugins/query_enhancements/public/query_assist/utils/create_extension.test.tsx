@@ -25,7 +25,7 @@ const httpMock = coreSetupMock.http;
 const dataMock = dataPluginMock.createSetupContract();
 const queryStringMock = dataMock.query.queryString as jest.Mocked<QueryStringContract>;
 const mockIsQuerySummaryCollapsed$ = new BehaviorSubject(true);
-const mockIsShowQuerySummarySwitch$ = new BehaviorSubject(true);
+const mockresultSummaryEnabled$ = new BehaviorSubject(true);
 
 const mockQueryWithIndexPattern = {
   query: '',
@@ -77,7 +77,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
-      mockIsShowQuerySummarySwitch$
+      mockresultSummaryEnabled$
     );
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
     expect(isEnabled).toBeTruthy();
@@ -93,7 +93,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
-      mockIsShowQuerySummarySwitch$
+      mockresultSummaryEnabled$
     );
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
     expect(isEnabled).toBeFalsy();
@@ -109,7 +109,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
-      mockIsShowQuerySummarySwitch$
+      mockresultSummaryEnabled$
     );
     const meta = await extension.getDataStructureMeta?.('mock-data-source-id2');
     expect(meta).toMatchInlineSnapshot(`
@@ -134,7 +134,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
-      mockIsShowQuerySummarySwitch$
+      mockresultSummaryEnabled$
     );
     const metas = await Promise.all(
       Array.from({ length: 10 }, () => extension.getDataStructureMeta?.('mock-data-source-id2'))
@@ -151,7 +151,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
-      mockIsShowQuerySummarySwitch$
+      mockresultSummaryEnabled$
     );
     const component = extension.getComponent?.(dependencies);
 
@@ -171,7 +171,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
-      mockIsShowQuerySummarySwitch$
+      mockresultSummaryEnabled$
     );
     const banner = extension.getBanner?.({
       ...dependencies,
@@ -194,7 +194,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
-      mockIsShowQuerySummarySwitch$
+      mockresultSummaryEnabled$
     );
     const component = extension.getComponent?.(dependencies);
 
@@ -218,7 +218,7 @@ describe('CreateExtension', () => {
       dataMock,
       modifiedConfig,
       mockIsQuerySummaryCollapsed$,
-      mockIsShowQuerySummarySwitch$
+      mockresultSummaryEnabled$
     );
     const component = extension.getComponent?.(dependencies);
 
