@@ -191,7 +191,6 @@ export class SidecarService {
   private cleanupDom(): void {
     if (this.targetDomElement != null) {
       unmountComponentAtNode(this.targetDomElement);
-      this.targetDomElement.innerHTML = '';
     }
     this.activeSidecar = null;
   }
