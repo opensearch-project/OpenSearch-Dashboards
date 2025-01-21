@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
 import {
@@ -93,7 +93,7 @@ export const createQueryAssistExtension = (
   data: DataPublicPluginSetup,
   config: ConfigSchema['queryAssist'],
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>,
-  isASupportedLanguage$: BehaviorSubject<boolean>,
+  isShowQuerySummarySwitch$: BehaviorSubject<boolean>,
   usageCollection?: UsageCollectionSetup
 ): QueryEditorExtensionConfig => {
   const http: HttpSetup = core.http;
@@ -125,7 +125,7 @@ export const createQueryAssistExtension = (
           http={http}
           data={data}
           isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
-          isASupportedLanguage$={isASupportedLanguage$}
+          {...(config.summary.enabled && { isShowQuerySummarySwitch$ })}
           question$={question$}
         >
           <QueryAssistBar dependencies={dependencies} />
@@ -161,7 +161,7 @@ interface QueryAssistWrapperProps {
   data: DataPublicPluginSetup;
   invert?: boolean;
   isQuerySummaryCollapsed$?: BehaviorSubject<boolean>;
-  isASupportedLanguage$?: BehaviorSubject<boolean>;
+  isShowQuerySummarySwitch$?: BehaviorSubject<boolean>;
   question$?: BehaviorSubject<string>;
 }
 
@@ -173,7 +173,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     props.question$?.next(newQuestion);
   };
   const question$ = props.question$;
-  props.isASupportedLanguage$?.next(visible);
+  props.isShowQuerySummarySwitch$?.next(visible);
 
   useEffect(() => {
     const subscription = props.isQuerySummaryCollapsed$?.subscribe((isCollapsed) => {

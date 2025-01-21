@@ -37,7 +37,7 @@ export class QueryEnhancementsPlugin
   private readonly storage: DataStorage;
   private readonly config: ConfigSchema;
   private isQuerySummaryCollapsed$ = new BehaviorSubject<boolean>(false);
-  private isASupportedLanguage$ = new BehaviorSubject<boolean>(false);
+  private isShowQuerySummarySwitch$ = new BehaviorSubject<boolean>(false);
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -192,7 +192,7 @@ export class QueryEnhancementsPlugin
           data,
           this.config.queryAssist,
           this.isQuerySummaryCollapsed$,
-          this.isASupportedLanguage$,
+          this.isShowQuerySummarySwitch$,
           usageCollection
         ),
       },
@@ -202,8 +202,7 @@ export class QueryEnhancementsPlugin
 
     return {
       isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,
-      isASupportedLanguage$: this.isASupportedLanguage$,
-      isQuerySummaryEnabled: this.config.queryAssist.summary.enabled,
+      isShowQuerySummarySwitch$: this.isShowQuerySummarySwitch$,
     };
   }
 

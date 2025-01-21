@@ -11,8 +11,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 
 export interface QueryEnhancementsPluginSetup {
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>;
-  isASupportedLanguage$: BehaviorSubject<boolean>;
-  isQuerySummaryEnabled: boolean;
+  isShowQuerySummarySwitch$: BehaviorSubject<boolean>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
