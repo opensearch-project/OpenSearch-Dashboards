@@ -173,6 +173,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     props.question$?.next(newQuestion);
   };
   const question$ = props.question$;
+  props.isASupportedLanguage$?.next(visible);
 
   useEffect(() => {
     const subscription = props.isQuerySummaryCollapsed$?.subscribe((isCollapsed) => {
@@ -194,7 +195,6 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
 
     const subscription = getAvailableLanguages$(props.http, props.data).subscribe((languages) => {
       const available = languages.includes(props.dependencies.language);
-      props.isASupportedLanguage$?.next(available);
       if (mounted) setVisible(props.invert ? !available : available);
     });
 
