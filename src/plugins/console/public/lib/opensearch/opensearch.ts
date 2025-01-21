@@ -46,7 +46,8 @@ export async function send(
   method: string,
   path: string,
   data: any,
-  dataSourceId?: string
+  dataSourceId?: string,
+  withLongNumeralsSupport?: boolean
 ): Promise<HttpResponse> {
   return await http.post<HttpResponse>('/api/console/proxy', {
     query: {
@@ -57,7 +58,7 @@ export async function send(
     body: data,
     prependBasePath: true,
     asResponse: true,
-    withLongNumeralsSupport: true,
+    withLongNumeralsSupport,
   });
 }
 
