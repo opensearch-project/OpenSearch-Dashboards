@@ -43,6 +43,9 @@ const createSetupDatasetServiceMock = (): jest.Mocked<DatasetServiceContract> =>
     fetchOptions: jest.fn(),
     getRecentDatasets: jest.fn(),
     addRecentDataset: jest.fn(),
+    clearCache: jest.fn(),
+    getLastCacheTime: jest.fn(),
+    removeFromRecentDatasets: jest.fn(),
   };
 };
 

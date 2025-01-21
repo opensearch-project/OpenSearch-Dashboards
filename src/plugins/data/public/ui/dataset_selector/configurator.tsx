@@ -69,6 +69,7 @@ export const Configurator = ({
   const [selectedIndexedView, setSelectedIndexedView] = useState<string | undefined>();
   const [indexedViews, setIndexedViews] = useState<DatasetIndexedView[]>([]);
   const [isLoadingIndexedViews, setIsLoadingIndexedViews] = useState(false);
+  const [timeFieldsLoading, setTimeFieldsLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -91,23 +92,26 @@ export const Configurator = ({
 
   const submitDisabled = useMemo(() => {
     return (
-      timeFieldName === undefined &&
-      !(
-        languageService.getLanguage(language)?.hideDatePicker ||
-        dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-      ) &&
-      timeFields &&
-      timeFields.length > 0
+      timeFieldsLoading ||
+      (timeFieldName === undefined &&
+        !(dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) &&
+        timeFields &&
+        timeFields.length > 0)
     );
-  }, [dataset, language, timeFieldName, timeFields, languageService]);
+  }, [dataset, timeFieldName, timeFields, timeFieldsLoading]);
 
   useEffect(() => {
     const fetchFields = async () => {
-      const datasetFields = await queryString
-        .getDatasetService()
-        .getType(baseDataset.type)
-        ?.fetchFields(baseDataset);
+      const datasetType = queryString.getDatasetService().getType(baseDataset.type);
+      if (!datasetType) {
+        setTimeFields([]);
+        return;
+      }
 
+      setTimeFieldsLoading(true);
+      const datasetFields = await datasetType
+        .fetchFields(baseDataset)
+        .finally(() => setTimeFieldsLoading(false));
       const dateFields = datasetFields?.filter((field) => field.type === 'date');
       setTimeFields(dateFields || []);
     };
@@ -151,6 +155,16 @@ export const Configurator = ({
       dataSource: connectedDataSource ?? dataset.dataSource,
     };
   }, [indexedViewsService, selectedIndexedView, dataset]);
+
+  const shouldRenderDatePickerField = useCallback(() => {
+    const datasetType = queryString.getDatasetService().getType(dataset.type);
+
+    const supportsTimeField = datasetType?.meta?.supportsTimeFilter;
+    if (supportsTimeField !== undefined) {
+      return Boolean(supportsTimeField);
+    }
+    return true;
+  }, [dataset.type, queryString]);
 
   return (
     <>
@@ -256,7 +270,7 @@ export const Configurator = ({
               data-test-subj="advancedSelectorLanguageSelect"
             />
           </EuiFormRow>
-          {!languageService.getLanguage(language)?.hideDatePicker &&
+          {shouldRenderDatePickerField() &&
             (dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? (
               <EuiFormRow
                 label={i18n.translate(

@@ -1,0 +1,2 @@
+feat:
+- Support custom logic to insert time filter based on dataset type ([#8932](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8932))

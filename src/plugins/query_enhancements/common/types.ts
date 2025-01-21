@@ -4,7 +4,7 @@
  */
 
 import { CoreSetup } from 'opensearch-dashboards/public';
-import { PollQueryResultsParams } from '../../data/common';
+import { PollQueryResultsParams, TimeRange } from '../../data/common';
 
 export interface QueryAggConfig {
   [key: string]: {
@@ -26,7 +26,10 @@ export interface EnhancedFetchContext {
   http: CoreSetup['http'];
   path: string;
   signal?: AbortSignal;
-  body?: { pollQueryResultsParams: PollQueryResultsParams };
+  body?: {
+    pollQueryResultsParams?: PollQueryResultsParams;
+    timeRange?: TimeRange;
+  };
 }
 
 export interface QueryStatusOptions<T> {

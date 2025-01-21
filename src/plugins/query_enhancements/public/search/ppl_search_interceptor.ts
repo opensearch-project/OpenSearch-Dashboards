@@ -50,6 +50,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       signal,
       body: {
         pollQueryResultsParams: request.params?.pollQueryResultsParams,
+        timeRange: request.params?.body?.timeRange,
       },
     };
 
@@ -68,15 +69,33 @@ export class PPLSearchInterceptor extends SearchInterceptor {
         .getDatasetService()
         .getType(datasetType);
       strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
+
+      if (
+        dataset?.timeFieldName &&
+        datasetTypeConfig?.languageOverrides?.PPL?.hideDatePicker === false
+      ) {
+        request.params = {
+          ...request.params,
+          body: {
+            ...request.params.body,
+            timeRange: this.queryService.timefilter.timefilter.getTime(),
+          },
+        };
+      }
     }
 
     return this.runSearch(request, options.abortSignal, strategy);
   }
 
   private buildQuery() {
-    const query: Query = this.queryService.queryString.getQuery();
+    const { queryString } = this.queryService;
+    const query: Query = queryString.getQuery();
     const dataset = query.dataset;
     if (!dataset || !dataset.timeFieldName) return query;
+    const datasetService = queryString.getDatasetService();
+    if (datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker === false)
+      return query;
+
     const [baseQuery, ...afterPipeParts] = query.query.split('|');
     const afterPipe = afterPipeParts.length > 0 ? ` | ${afterPipeParts.join('|').trim()}` : '';
     const timeFilter = this.getTimeFilter(dataset.timeFieldName);
