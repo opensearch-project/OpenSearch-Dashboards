@@ -89,7 +89,7 @@ export function SavedQueryManagementComponent({
   const [activePage, setActivePage] = useState(0);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
   const {
-    services: { overlays },
+    services: { overlays, notifications },
   } = useOpenSearchDashboards();
 
   useEffect(() => {
@@ -253,6 +253,7 @@ export function SavedQueryManagementComponent({
               toMountPoint(
                 <OpenSavedQueryFlyout
                   savedQueryService={savedQueryService}
+                  notifications={notifications}
                   onClose={() => openSavedQueryFlyout?.close().then()}
                   onQueryOpen={onLoad}
                   handleQueryDelete={handleDelete}

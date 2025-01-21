@@ -21,15 +21,18 @@ import {
   EuiTablePagination,
   EuiTitle,
   Pager,
+  copyToClipboard,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { NotificationsStart } from 'opensearch-dashboards/public';
 import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 import { getQueryService } from '../../services';
 
 export interface OpenSavedQueryFlyoutProps {
   savedQueryService: SavedQueryService;
+  notifications?: NotificationsStart;
   onClose: () => void;
   onQueryOpen: (query: SavedQuery) => void;
   handleQueryDelete: (query: SavedQuery) => Promise<void>;
@@ -44,13 +47,21 @@ interface SavedQuerySearchableItem {
   savedQuery: SavedQuery;
 }
 
+enum OPEN_QUERY_TAB_ID {
+  SAVED_QUERIES = 'saved-queries',
+  QUERY_TEMPLATES = 'query-templates',
+}
+
 export function OpenSavedQueryFlyout({
   savedQueryService,
+  notifications,
   onClose,
   onQueryOpen,
   handleQueryDelete,
 }: OpenSavedQueryFlyoutProps) {
-  const [selectedTabId, setSelectedTabId] = useState<string>('mutable-saved-queries');
+  const [selectedTabId, setSelectedTabId] = useState<OPEN_QUERY_TAB_ID>(
+    OPEN_QUERY_TAB_ID.SAVED_QUERIES
+  );
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [hasTemplateQueries, setHasTemplateQueries] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -85,13 +96,13 @@ export function OpenSavedQueryFlyout({
       }
 
       // Set queries based on the current tab
-      if (currentTabIdRef.current === 'mutable-saved-queries') {
+      if (currentTabIdRef.current === OPEN_QUERY_TAB_ID.SAVED_QUERIES) {
         const allQueries = await savedQueryService.getAllSavedQueries();
         const mutableSavedQueries = allQueries.filter((q) => !q.attributes.isTemplate);
-        if (currentTabIdRef.current === 'mutable-saved-queries') {
+        if (currentTabIdRef.current === OPEN_QUERY_TAB_ID.SAVED_QUERIES) {
           setSavedQueries(mutableSavedQueries);
         }
-      } else if (currentTabIdRef.current === 'template-saved-queries') {
+      } else if (currentTabIdRef.current === OPEN_QUERY_TAB_ID.QUERY_TEMPLATES) {
         setSavedQueries(templateQueries);
       }
     } catch (e) {
@@ -111,6 +122,7 @@ export function OpenSavedQueryFlyout({
     fetchAllSavedQueriesForSelectedTab();
     setSearchQuery(EuiSearchBar.Query.MATCH_ALL);
     updatePageIndex(0);
+    setSelectedQuery(undefined);
   }, [selectedTabId, fetchAllSavedQueriesForSelectedTab, updatePageIndex]);
 
   useEffect(() => {
@@ -261,7 +273,7 @@ export function OpenSavedQueryFlyout({
 
   const tabs = [
     {
-      id: 'mutable-saved-queries',
+      id: OPEN_QUERY_TAB_ID.SAVED_QUERIES,
       name: 'Saved queries',
       content: flyoutBodyContent,
     },
@@ -269,11 +281,42 @@ export function OpenSavedQueryFlyout({
 
   if (hasTemplateQueries) {
     tabs.push({
-      id: 'template-saved-queries',
+      id: OPEN_QUERY_TAB_ID.QUERY_TEMPLATES,
       name: 'Templates',
       content: flyoutBodyContent,
     });
   }
+
+  const onQueryAction = useCallback(() => {
+    if (!selectedQuery) {
+      return;
+    }
+
+    if (selectedQuery?.attributes.isTemplate) {
+      copyToClipboard(selectedQuery.attributes.query.query as string);
+      notifications?.toasts.addSuccess({
+        title: i18n.translate('data.openSavedQueryFlyout.queryCopied.title', {
+          defaultMessage: 'Query copied',
+        }),
+        text: i18n.translate('data.openSavedQueryFlyout.queryCopied.text', {
+          defaultMessage: 'Paste the query in the editor to modify and run.',
+        }),
+      });
+    } else {
+      onQueryOpen({
+        ...selectedQuery,
+        attributes: {
+          ...selectedQuery.attributes,
+          query: {
+            ...selectedQuery.attributes.query,
+            dataset: queryStringManager.getQuery().dataset,
+          },
+        },
+      });
+    }
+
+    onClose();
+  }, [onClose, onQueryOpen, notifications, selectedQuery, queryStringManager]);
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -287,8 +330,8 @@ export function OpenSavedQueryFlyout({
           tabs={tabs}
           initialSelectedTab={tabs[0]}
           onTabClick={(tab) => {
-            setSelectedTabId(tab.id);
-            currentTabIdRef.current = tab.id;
+            setSelectedTabId(tab.id as OPEN_QUERY_TAB_ID);
+            currentTabIdRef.current = tab.id as OPEN_QUERY_TAB_ID;
           }}
         />
       </EuiFlyoutBody>
@@ -303,23 +346,10 @@ export function OpenSavedQueryFlyout({
             <EuiButton
               disabled={!selectedQuery}
               fill
-              onClick={() => {
-                if (selectedQuery) {
-                  onQueryOpen({
-                    ...selectedQuery,
-                    attributes: {
-                      ...selectedQuery.attributes,
-                      query: {
-                        ...selectedQuery.attributes.query,
-                        dataset: queryStringManager.getQuery().dataset,
-                      },
-                    },
-                  });
-                  onClose();
-                }
-              }}
+              onClick={onQueryAction}
+              data-testid="open-query-action-button"
             >
-              Open query
+              {selectedTabId === OPEN_QUERY_TAB_ID.SAVED_QUERIES ? 'Open' : 'Copy'} query
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
