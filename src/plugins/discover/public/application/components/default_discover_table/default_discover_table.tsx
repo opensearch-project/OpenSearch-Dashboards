@@ -186,6 +186,17 @@ const DefaultDiscoverTableUI = ({
   // Allow auto column-sizing using the initially rendered rows and then convert to fixed
   const tableLayoutRequestFrameRef = useRef<number>(0);
 
+  /* In asynchronous data loading, column metadata may arrive before the corresponding data, resulting in
+     layout being calculated for the new column definitions using the old data. To mitigate this issue, we
+     additionally trigger a recalculation when a change is observed in the index that the data attributes
+     itself to. This ensures a re-layout is performed when new data is loaded or the column definitions
+     change, effectively addressing the symptoms of the race condition.
+   */
+  const indexOfRenderedData = rows?.[0]?._index;
+  const timeFromFirstRow =
+    typeof indexPattern?.timeFieldName === 'string' &&
+    rows?.[0]?._source?.[indexPattern.timeFieldName];
+
   useEffect(() => {
     if (tableElement) {
       // Load the first batch of rows and adjust the columns to the contents
@@ -214,7 +225,7 @@ const DefaultDiscoverTableUI = ({
     }
 
     return () => cancelAnimationFrame(tableLayoutRequestFrameRef.current);
-  }, [columns, tableElement]);
+  }, [columns, tableElement, indexOfRenderedData, timeFromFirstRow]);
 
   return (
     indexPattern && (
