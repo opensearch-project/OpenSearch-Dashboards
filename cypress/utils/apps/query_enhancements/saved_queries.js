@@ -519,15 +519,15 @@ export const verifyQueryDoesNotExistInSavedQueries = (
     cy.getElementByTestId('saved-query-management-popover-button').click();
     cy.getElementByTestId('saved-query-management-open-button').click();
     cy.getElementByTestId('savedQueriesFlyoutBody').contains(deletedQueryName).should('not.exist');
+    // Two references to two buttons layered over each other.
+    cy.getElementByTestId('euiFlyoutCloseButton').first().click({ force: true });
   } else {
     cy.getElementByTestId('saved-query-management-popover-button').click();
     cy.getElementByTestId('osdSavedQueryManagementList')
       .contains(deletedQueryName)
       .should('not.exist');
+    cy.getElementByTestId('saved-query-management-popover-button').click();
   }
-
-  // Two references to two buttons layered over each other.
-  cy.getElementByTestId('euiFlyoutCloseButton').first().click({ force: true });
 };
 
 /**
@@ -538,13 +538,13 @@ export const verifyQueryDoesNotExistInSavedQueries = (
 export const updateAndVerifySavedQuery = (config, savedQueriesNewUIEnabled = true) => {
   // Create alternate config
   const alternateConfig = generateAlternateTestConfiguration(config);
-  cy.loadSaveQuery(config.saveName, true);
+  cy.loadSaveQuery(config.saveName, savedQueriesNewUIEnabled);
 
   // wait for saved query to load
   cy.wait(2000);
 
   if (alternateConfig.filters) {
-    cy.deleteAllFilters(savedQueriesNewUIEnabled);
+    cy.deleteAllFilters();
   }
 
   setDatePickerDatesAndSearchIfRelevant(config.language, ALTERNATE_START_TIME, ALTERNATE_END_TIME);
@@ -554,7 +554,7 @@ export const updateAndVerifySavedQuery = (config, savedQueriesNewUIEnabled = tru
   cy.updateSaveQuery('', false, true, true, savedQueriesNewUIEnabled);
 
   cy.reload();
-  cy.loadSaveQuery(config.saveName, true);
+  cy.loadSaveQuery(config.saveName, savedQueriesNewUIEnabled);
   // wait for saved query to load
   cy.wait(2000);
   verifyAlternateDiscoverPageState(alternateConfig);
@@ -587,5 +587,16 @@ export const validateSaveAsNewQueryMatchingNameHasError = (
     cy.contains(SAVE_QUERY_CONFLICT_NAME_ERROR_TEXT).should('be.visible');
     // Two references to two buttons layered over each other.
     cy.getElementByTestId('euiFlyoutCloseButton').first().click({ force: true });
+  } else {
+    cy.whenTestIdNotFound('saved-query-management-popover', () => {
+      cy.getElementByTestId('saved-query-management-popover-button').click();
+    });
+    cy.getElementByTestId('saved-query-management-save-as-new-button').click();
+    cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(matchingName);
+
+    cy.getElementByTestId('savedQueryFormSaveButton').click();
+
+    cy.contains(SAVE_QUERY_CONFLICT_NAME_ERROR_TEXT).should('be.visible');
+    cy.getElementByTestId('savedQueryFormCancelButton').click();
   }
 };

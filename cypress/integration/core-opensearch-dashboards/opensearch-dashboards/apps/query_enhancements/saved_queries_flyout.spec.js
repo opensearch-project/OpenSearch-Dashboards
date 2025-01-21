@@ -121,7 +121,7 @@ export const runSavedQueriesFlyoutUITests = () => {
         const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
         it(`should modify saved query: ${config.testName} and save as new query: ${saveAsNewQueryName}`, () => {
           if (config.filters) {
-            cy.deleteAllFilters(true);
+            cy.deleteAllFilters();
           }
           setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
 

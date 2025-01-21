@@ -15,16 +15,18 @@ import {
 import {
   workspaceName,
   datasourceName,
-  setSearchConfigurations,
 } from '../../../../../utils/apps/query_enhancements/saved_search';
 
 import {
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
-  verifySavedQueryExistsAndHasCorrectStateWhenLoaded,
   verifyDiscoverPageState,
   verifyValidSavedQueriesShownOnVisualize,
   verifyQueryDoesNotExistInSavedQueries,
+  setQueryConfigurations,
+  updateAndVerifySavedQuery,
+  SAVE_AS_NEW_QUERY_SUFFIX,
+  validateSaveAsNewQueryMatchingNameHasError,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is false.
@@ -75,58 +77,90 @@ export const runSavedQueriesPopoverUITests = () => {
     });
 
     const testConfigurations = generateAllTestConfigurations();
-    testConfigurations.forEach((config) => {
-      it(`should successfully create a saved query for ${config.testName}`, () => {
+
+    describe('should create initial saved queries', () => {
+      testConfigurations.forEach((config) => {
+        it(`should successfully create a saved query for ${config.testName}`, () => {
+          cy.navigateToWorkSpaceSpecificPage({
+            workspaceName,
+            page: 'discover',
+            isEnhancement: true,
+          });
+
+          cy.setDataset(config.dataset, datasourceName, config.datasetType);
+
+          cy.setQueryLanguage(config.language);
+          setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
+
+          setQueryConfigurations(config);
+          verifyDiscoverPageState(config);
+          cy.saveQuery(config.saveName, ' ', true, true, false);
+        });
+      });
+    });
+
+    describe('should test loading, saving and deleting saved queries', () => {
+      testConfigurations.forEach((config) => {
+        it(`should load saved query: ${config.testName}`, () => {
+          cy.getElementByTestId('discoverNewButton').click();
+          setDatePickerDatesAndSearchIfRelevant(
+            config.language,
+            'Aug 29, 2020 @ 00:00:00.000',
+            'Aug 30, 2020 @ 00:00:00.000'
+          );
+
+          cy.loadSaveQuery(config.saveName, false);
+          // wait for saved queries to load.
+          cy.wait(2000);
+          verifyDiscoverPageState(config);
+        });
+
+        it(`should update the loaded saved query: ${config.testName}`, () => {
+          updateAndVerifySavedQuery(config, false);
+        });
+
+        const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
+        it(`should modify saved query: ${config.testName} and save as new query: ${saveAsNewQueryName}`, () => {
+          if (config.filters) {
+            cy.deleteAllFilters();
+          }
+          setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
+
+          setQueryConfigurations(config);
+          verifyDiscoverPageState(config);
+          validateSaveAsNewQueryMatchingNameHasError(config.saveName, false);
+          cy.updateSaveQuery(saveAsNewQueryName, true, true, true, false);
+
+          cy.reload();
+          cy.getElementByTestId('discoverNewButton');
+          cy.loadSaveQuery(saveAsNewQueryName, false);
+          // wait for saved query to load
+          cy.wait(2000);
+          verifyDiscoverPageState(config);
+        });
+
+        it(`should delete the saved query: ${saveAsNewQueryName}`, () => {
+          cy.navigateToWorkSpaceSpecificPage({
+            workspaceName,
+            page: 'discover',
+            isEnhancement: true,
+          });
+
+          cy.deleteSaveQuery(saveAsNewQueryName, false);
+          verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName, false);
+        });
+      });
+    });
+    describe('should only show valid saved queries in theVisualization page', () => {
+      it('should only show DQL and Lucene saved Queries', () => {
         cy.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'discover',
+          page: 'visualize',
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, datasourceName, config.datasetType);
-
-        cy.setQueryLanguage(config.language);
-        setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
-
-        setSearchConfigurations(config);
-        verifyDiscoverPageState(config);
-        cy.saveQuery(config.saveName, ' ', false, true, true);
+        verifyValidSavedQueriesShownOnVisualize(false);
       });
-    });
-
-    it.skip('should see and load all saved queries', () => {
-      testConfigurations.forEach((config) => {
-        // Dates are cached for each dataset. This ensures the dates must be set by the saved query to display the expected results.
-        cy.getElementByTestId('discoverNewButton').click();
-        setDatePickerDatesAndSearchIfRelevant(
-          config.language,
-          'Aug 29, 2020 @ 00:00:00.000',
-          'Aug 30, 2020 @ 00:00:00.000'
-        );
-
-        verifySavedQueryExistsAndHasCorrectStateWhenLoaded(config, false);
-      });
-    });
-
-    it.skip('should only show DQL and Lucene saved Queries in Visualizations page', () => {
-      cy.navigateToWorkSpaceSpecificPage({
-        workspaceName,
-        page: 'visualize',
-        isEnhancement: true,
-      });
-
-      verifyValidSavedQueriesShownOnVisualize(false);
-    });
-
-    it('should delete a saved query', () => {
-      cy.navigateToWorkSpaceSpecificPage({
-        workspaceName,
-        page: 'discover',
-        isEnhancement: true,
-      });
-
-      cy.deleteSaveQuery('OpenSearch SQL-INDEX_PATTERN', false);
-      verifyQueryDoesNotExistInSavedQueries('OpenSearch SQL-INDEX_PATTERN', false);
     });
   });
 };

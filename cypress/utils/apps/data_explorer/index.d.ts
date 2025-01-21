@@ -21,9 +21,8 @@ declare namespace Cypress {
     ): Chainable<any>;
     /**
      * Deletes all filters in a Search.
-     * @param savedQueriesNewUIEnabled - Which UI to use. (defaults to true)
      */
-    deleteAllFilters(savedQueriesNewUIEnabled: boolean): void;
+    deleteAllFilters(): void;
     /**
      * Save a query.
      * @param name - Name of the query
@@ -36,8 +35,7 @@ declare namespace Cypress {
       name: string,
       description: string,
       includeFilters: boolean,
-      includeTimeFilter: boolean,
-      savedQueriesNewUIEnabled: boolean
+      includeTimeFilter: boolean
     ): Chainable<any>;
     /**
      * Update a saved query.

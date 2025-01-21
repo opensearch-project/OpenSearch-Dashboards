@@ -125,22 +125,14 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('deleteAllFilters', (savedQueriesNewUIEnabled = true) => {
-  if (savedQueriesNewUIEnabled) {
-    // the Close icon is from elastic.
-    cy.getElementsByTestIds('globalFilterBar').find('[class="euiBadge__iconButton"]').click();
-  }
+Cypress.Commands.add('deleteAllFilters', () => {
+  // the Close icon is from elastic.
+  cy.getElementsByTestIds('globalFilterBar').find('[class="euiBadge__iconButton"]').click();
 });
 
 Cypress.Commands.add(
   'saveQuery',
-  (
-    name,
-    description = ' ',
-    includeFilters = true,
-    includeTimeFilter = false,
-    savedQueriesNewUIEnabled = true // eslint-disable-line no-unused-vars
-  ) => {
+  (name, description = ' ', includeFilters = true, includeTimeFilter = false) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
       cy.getElementByTestId('saved-query-management-popover-button').click();
     });
@@ -170,40 +162,57 @@ Cypress.Commands.add(
     saveAsNewQuery = false,
     includeFilters = true,
     includeTimeFilter = false,
-    savedQueriesNewUIEnabled = true // eslint-disable-line no-unused-vars
+    savedQueriesNewUIEnabled = true
   ) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
       cy.getElementByTestId('saved-query-management-popover-button').click();
     });
-    cy.getElementByTestId('saved-query-management-save-button').click();
+    if (savedQueriesNewUIEnabled) {
+      cy.getElementByTestId('saved-query-management-save-button').click();
 
-    if (saveAsNewQuery) {
-      cy.getElementByTestId('saveAsNewQueryCheckbox')
-        .parent()
-        .find('[class="euiCheckbox__label"]')
-        .click();
-      cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
+      if (saveAsNewQuery) {
+        cy.getElementByTestId('saveAsNewQueryCheckbox')
+          .parent()
+          .find('[class="euiCheckbox__label"]')
+          .click();
+        cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
 
-      // Selecting the saveAsNewQuery element deselects the include time filter option.
+        // Selecting the saveAsNewQuery element deselects the include time filter option.
+        if (includeTimeFilter === true) {
+          cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+        }
+      } else if (saveAsNewQuery === false) {
+        // defaults to not selected.
+
+        if (includeTimeFilter !== true) {
+          cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+        }
+      }
+
+      if (includeFilters !== true) {
+        // Always defaults to selected.
+        cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+      }
+
+      // The force is necessary as there is occasionally a popover that covers the button
+      cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+      cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    } else {
+      if (saveAsNewQuery) {
+        cy.getElementByTestId('saved-query-management-save-as-new-button').click();
+        cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
+      } else {
+        cy.getElementByTestId('saved-query-management-save-changes-button').click();
+      }
       if (includeTimeFilter === true) {
         cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
       }
-    } else if (saveAsNewQuery === false) {
-      // defaults to not selected.
-
-      if (includeTimeFilter !== true) {
-        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+      if (includeFilters !== true) {
+        // Always defaults to selected.
+        cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
       }
+      cy.getElementByTestId('savedQueryFormSaveButton').click();
     }
-
-    if (includeFilters !== true) {
-      // Always defaults to selected.
-      cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
-    }
-
-    // The force is necessary as there is occasionally a popover that covers the button
-    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
   }
 );
 
