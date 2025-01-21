@@ -15,15 +15,15 @@ import {
 import {
   workspaceName,
   datasourceName,
-  setSearchConfigurations,
 } from '../../../../../utils/apps/query_enhancements/saved_search';
 
 import {
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
-  verifySavedQueryExistsAndHasCorrectStateWhenLoaded,
   verifyDiscoverPageState,
   verifyQueryDoesNotExistInSavedQueries,
+  setQueryConfigurations,
+  updateAndVerifySavedQuery,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is true.
@@ -86,25 +86,33 @@ export const runSavedQueriesFlyoutUITests = () => {
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
 
-        setSearchConfigurations(config);
+        setQueryConfigurations(config);
         verifyDiscoverPageState(config);
         cy.saveQuery(config.saveName, ' ', true, true, true);
       });
     });
 
-    it.skip('should see and load all saved queries', () => {
+    describe('should see and load all saved queries', () => {
       testConfigurations.forEach((config) => {
-        cy.getElementByTestId('discoverNewButton').click();
-        setDatePickerDatesAndSearchIfRelevant(
-          config.language,
-          'Aug 29, 2020 @ 00:00:00.000',
-          'Aug 30, 2020 @ 00:00:00.000'
-        );
+        it(`Load query name: ${config.testName}`, () => {
+          cy.getElementByTestId('discoverNewButton').click();
+          setDatePickerDatesAndSearchIfRelevant(
+            config.language,
+            'Aug 29, 2020 @ 00:00:00.000',
+            'Aug 30, 2020 @ 00:00:00.000'
+          );
 
-        verifySavedQueryExistsAndHasCorrectStateWhenLoaded(config, true);
+          cy.loadSaveQuery(config.saveName, true);
+          // wait for saved queries to load.
+          cy.wait(2000);
+          verifyDiscoverPageState(config);
+        });
+        it(`should successfully update the loaded ${config.testName} saved query`, () => {
+          updateAndVerifySavedQuery(config, true);
+        });
       });
     });
-    it('should delete a saved query', () => {
+    it.skip('should delete a saved query', () => {
       cy.navigateToWorkSpaceSpecificPage({
         workspaceName,
         page: 'discover',

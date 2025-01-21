@@ -125,14 +125,21 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add('deleteAllFilters', (savedQueriesNewUIEnabled = true) => {
+  if (savedQueriesNewUIEnabled) {
+    // the Close icon is from elastic.
+    cy.getElementsByTestIds('globalFilterBar').find('[class="euiBadge__iconButton"]').click();
+  }
+});
+
 Cypress.Commands.add(
   'saveQuery',
   (
     name,
     description = ' ',
-    savedQueriesNewUIEnabled = true, // eslint-disable-line no-unused-vars
     includeFilters = true,
-    includeTimeFilter = false
+    includeTimeFilter = false,
+    savedQueriesNewUIEnabled = true // eslint-disable-line no-unused-vars
   ) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
       cy.getElementByTestId('saved-query-management-popover-button').click();
@@ -156,12 +163,54 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('loadSaveQuery', (name) => {
-  cy.getElementByTestId('saved-query-management-popover-button').click({
-    force: true,
-  });
+Cypress.Commands.add(
+  'updateSaveQuery',
+  (
+    name = '',
+    saveAsNewQuery = false,
+    includeFilters = true,
+    includeTimeFilter = false,
+    savedQueriesNewUIEnabled = true // eslint-disable-line no-unused-vars
+  ) => {
+    cy.whenTestIdNotFound('saved-query-management-popover', () => {
+      cy.getElementByTestId('saved-query-management-popover-button').click();
+    });
+    cy.getElementByTestId('saved-query-management-save-button').click();
 
-  cy.get(`[data-test-subj~="load-saved-query-${name}-button"]`).should('be.visible').click();
+    if (saveAsNewQuery) {
+      cy.getElementByTestId('saveAsNewQueryCheckbox').check();
+      cy.getElementByTestId('saveQueryFormTitle').type(name);
+    } else if (saveAsNewQuery === true) {
+      cy.getElementByTestId('saveAsNewQueryCheckbox').uncheck();
+    }
+
+    if (includeFilters !== true) {
+      cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+    }
+
+    if (includeTimeFilter !== false) {
+      cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+    }
+
+    // The force is necessary as there is occasionally a popover that covers the button
+    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+  }
+);
+
+Cypress.Commands.add('loadSaveQuery', (name, savedQueriesNewUIEnabled = true) => {
+  if (savedQueriesNewUIEnabled) {
+    cy.getElementByTestId('saved-query-management-popover-button').click();
+
+    cy.getElementByTestId('saved-query-management-open-button').click();
+
+    cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
+
+    cy.getElementByTestId('open-query-action-button').click();
+  } else {
+    cy.getElementByTestId('saved-query-management-popover-button').click();
+    cy.getElementByTestId('save-query-panel').contains(name).should('exist').click();
+  }
 });
 
 Cypress.Commands.add('clearSaveQuery', () => {
