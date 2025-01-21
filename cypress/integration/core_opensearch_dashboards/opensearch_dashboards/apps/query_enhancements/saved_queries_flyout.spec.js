@@ -13,15 +13,8 @@ import {
 } from '../../../../../utils/constants';
 
 import {
-  workspaceName,
-  datasourceName,
-} from '../../../../../utils/apps/query_enhancements/saved_search';
-
-import {
   generateAllTestConfigurations,
-  setDatePickerDatesAndSearchIfRelevant,
   verifyDiscoverPageState,
-  verifyValidSavedQueriesShownOnVisualize,
   verifyQueryDoesNotExistInSavedQueries,
   setQueryConfigurations,
   updateAndVerifySavedQuery,
@@ -29,11 +22,18 @@ import {
   validateSaveAsNewQueryMatchingNameHasError,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
-// This spec assumes data.savedQueriesNewUI.enabled is false.
-// These tests will not be run until the older legacy tests are migrated https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9166#discussion_r1913687440
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasourceName,
+  setDatePickerDatesAndSearchIfRelevant,
+} from '../../../../../utils/apps/query_enhancements/shared';
 
-export const runSavedQueriesPopoverUITests = () => {
-  describe('saved queries popover UI', () => {
+const workspaceName = getRandomizedWorkspaceName();
+const datasourceName = getRandomizedDatasourceName();
+
+// This spec assumes data.savedQueriesNewUI.enabled is true.
+export const runSavedQueriesFlyoutUITests = () => {
+  describe('saved queries flyout UI', () => {
     before(() => {
       // Load test data
       cy.setupTestData(
@@ -50,7 +50,7 @@ export const runSavedQueriesPopoverUITests = () => {
       // Add data source
       cy.addDataSource({
         name: datasourceName,
-        url: 'http://opensearch-node:9200/',
+        url: SECONDARY_ENGINE.url,
         authType: 'no_auth',
       });
 
@@ -80,7 +80,7 @@ export const runSavedQueriesPopoverUITests = () => {
 
     describe('should create initial saved queries', () => {
       testConfigurations.forEach((config) => {
-        it(`should successfully create a saved query for ${config.testName}`, () => {
+        it(`should create saved query: ${config.testName}`, () => {
           cy.navigateToWorkSpaceSpecificPage({
             workspaceName,
             page: 'discover',
@@ -94,7 +94,8 @@ export const runSavedQueriesPopoverUITests = () => {
 
           setQueryConfigurations(config);
           verifyDiscoverPageState(config);
-          cy.saveQuery(config.saveName, ' ', true, true, false);
+
+          cy.saveQuery(config.saveName, ' ', true, true, true);
         });
       });
     });
@@ -109,14 +110,14 @@ export const runSavedQueriesPopoverUITests = () => {
             'Aug 30, 2020 @ 00:00:00.000'
           );
 
-          cy.loadSaveQuery(config.saveName, false);
+          cy.loadSaveQuery(config.saveName, true);
           // wait for saved queries to load.
           cy.wait(2000);
           verifyDiscoverPageState(config);
         });
 
         it(`should update the loaded saved query: ${config.testName}`, () => {
-          updateAndVerifySavedQuery(config, false);
+          updateAndVerifySavedQuery(config, true);
         });
 
         const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
@@ -128,12 +129,11 @@ export const runSavedQueriesPopoverUITests = () => {
 
           setQueryConfigurations(config);
           verifyDiscoverPageState(config);
-          validateSaveAsNewQueryMatchingNameHasError(config.saveName, false);
-          cy.updateSaveQuery(saveAsNewQueryName, true, true, true, false);
+          validateSaveAsNewQueryMatchingNameHasError(config.saveName);
+          cy.updateSaveQuery(saveAsNewQueryName, true, true, true, true);
 
           cy.reload();
-          cy.getElementByTestId('discoverNewButton');
-          cy.loadSaveQuery(saveAsNewQueryName, false);
+          cy.loadSaveQuery(saveAsNewQueryName, true);
           // wait for saved query to load
           cy.wait(2000);
           verifyDiscoverPageState(config);
@@ -146,23 +146,12 @@ export const runSavedQueriesPopoverUITests = () => {
             isEnhancement: true,
           });
 
-          cy.deleteSaveQuery(saveAsNewQueryName, false);
-          verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName, false);
+          cy.deleteSaveQuery(saveAsNewQueryName, true);
+          verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName, true);
         });
-      });
-    });
-    describe('should only show valid saved queries in theVisualization page', () => {
-      it('should only show DQL and Lucene saved Queries', () => {
-        cy.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'visualize',
-          isEnhancement: true,
-        });
-
-        verifyValidSavedQueriesShownOnVisualize(false);
       });
     });
   });
 };
 
-runSavedQueriesPopoverUITests();
+runSavedQueriesFlyoutUITests();
