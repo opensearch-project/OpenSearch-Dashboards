@@ -49,29 +49,24 @@ export const getRandomizedDatasourceName = () =>
  * @returns {object[]}
  */
 export const generateAllTestConfigurations = (generateTestConfigurationCallback) => {
-  return Object.values(DatasetTypes)
-    .flatMap((dataset) => {
-      // TODO: There is an issue in 2.x with selecting indices as dataset. Remove this line once that is fixed
-      if (dataset.name === DatasetTypes.INDEXES.name) return;
-
-      return dataset.supportedLanguages.map((language) => {
-        let datasetToUse;
-        switch (dataset.name) {
-          case DatasetTypes.INDEX_PATTERN.name:
-            datasetToUse = INDEX_PATTERN_WITH_TIME;
-            break;
-          case DatasetTypes.INDEXES.name:
-            datasetToUse = INDEX_WITH_TIME_1;
-            break;
-          default:
-            throw new Error(
-              `generateAllTestConfigurations encountered unsupported dataset: ${dataset.name}`
-            );
-        }
-        return generateTestConfigurationCallback(datasetToUse, dataset.name, language);
-      });
+  return Object.values(DatasetTypes).flatMap((dataset) =>
+    dataset.supportedLanguages.map((language) => {
+      let datasetToUse;
+      switch (dataset.name) {
+        case DatasetTypes.INDEX_PATTERN.name:
+          datasetToUse = INDEX_PATTERN_WITH_TIME;
+          break;
+        case DatasetTypes.INDEXES.name:
+          datasetToUse = INDEX_WITH_TIME_1;
+          break;
+        default:
+          throw new Error(
+            `generateAllTestConfigurations encountered unsupported dataset: ${dataset.name}`
+          );
+      }
+      return generateTestConfigurationCallback(datasetToUse, dataset.name, language);
     })
-    .filter((config) => !!config);
+  );
 };
 
 /**

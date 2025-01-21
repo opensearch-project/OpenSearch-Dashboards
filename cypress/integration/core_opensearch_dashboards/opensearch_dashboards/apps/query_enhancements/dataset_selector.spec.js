@@ -44,8 +44,7 @@ describe('dataset selector', { scrollBehavior: false }, () => {
     cy.deleteWorkspaceByName(`${workspace}`);
   });
 
-  // TODO: There is an issue selecting indexes in 2.x, but it works on main CI/CD
-  describe.skip('select indices', () => {
+  describe('select indices', () => {
     it('with SQL as default language', function () {
       cy.setIndexAsDataset('data_logs_small_time_1', DATASOURCE_NAME, 'OpenSearch SQL');
 

@@ -129,15 +129,13 @@ export const runSavedSearchTests = () => {
           });
         });
 
-      // TODO: There is an issue in 2.x with selecting indices as dataset. Remove the skip once its fixed
-      it.skip(`should successfully update a saved search for ${config.testName}`, () => {
+      it(`should successfully update a saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
         updateSavedSearchAndSaveAndVerify(config, workspaceName, datasourceName, false);
       });
 
-      // TODO: There is an issue in 2.x with selecting indices as dataset. Remove the skip once its fixed
-      it.skip(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
+      it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
         updateSavedSearchAndSaveAndVerify(config, workspaceName, datasourceName, true);
