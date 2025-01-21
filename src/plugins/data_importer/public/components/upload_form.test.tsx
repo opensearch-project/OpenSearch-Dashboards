@@ -1,37 +1,89 @@
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
-import { UploadFormComponent } from './upload_form_component';
-import { PreviewComponent } from './preview_component';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
+import { UploadForm } from './upload_form';
+import { HttpStart, NotificationsStart } from '../../../../core/public';
+import { PreviewComponent } from './preview_component'; // Adjust the path as necessary
 
-describe('UploadFormComponent', () => {
-  const props = {
-    indexName: '',
-    setIndexName: jest.fn(),
-    delimiter: ',',
-    setDelimiter: jest.fn(),
-    clusters: [],
-    cluster: '',
-    setCluster: jest.fn(),
-    file: null,
-    handleFileChange: jest.fn(),
-    handleSubmit: jest.fn(),
-    isLoading: false,
-    message: '',
-    indexOptions: [],
-  };
+const mockHttp: HttpStart = {
+  get: jest.fn(),
+  post: jest.fn(),
+  // ...other methods
+} as any;
 
-  it('renders form elements', () => {
-    render(<UploadFormComponent {...props} />);
-    expect(screen.getByLabelText(/Index Name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Delimiter/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/File/i)).toBeInTheDocument();
+const mockNotifications: NotificationsStart = {
+  toasts: {
+    addSuccess: jest.fn(),
+    addDanger: jest.fn(),
+    // ...other methods
+  },
+} as any;
+
+describe('UploadForm', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('calls handleSubmit on form submit', () => {
-    render(<UploadFormComponent {...props} />);
-    fireEvent.submit(screen.getByRole('button', { name: /Upload and Index/i }));
-    expect(props.handleSubmit).toHaveBeenCalled();
+  it('renders the form', () => {
+    const { getByText } = render(<UploadForm http={mockHttp} notifications={mockNotifications} />);
+    expect(getByText('Upload Form')).toBeInTheDocument();
+  });
+
+  it('handles file change', async () => {
+    const { getByLabelText } = render(
+      <UploadForm http={mockHttp} notifications={mockNotifications} />
+    );
+    const fileInput = getByLabelText('File') as HTMLInputElement;
+
+    const file = new File(['name,age\nJohn,30\nJane,25'], 'test.csv', { type: 'text/csv' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(fileInput.files?.[0]).toBe(file);
+    });
+  });
+
+  it('handles form submission', async () => {
+    (mockHttp.post as jest.Mock).mockResolvedValue({ documentsCount: 2, totalDocuments: 2 });
+
+    const { getByText, getByLabelText } = render(
+      <UploadForm http={mockHttp} notifications={mockNotifications} />
+    );
+    const fileInput = getByLabelText('File') as HTMLInputElement;
+    const indexNameInput = getByLabelText('Index Name') as HTMLInputElement;
+    const submitButton = getByText('Submit');
+
+    const file = new File(['name,age\nJohn,30\nJane,25'], 'test.csv', { type: 'text/csv' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+    fireEvent.change(indexNameInput, { target: { value: 'test-index' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockHttp.post).toHaveBeenCalledWith('/api/data_importer/upload', expect.any(Object));
+      expect(mockNotifications.toasts.addSuccess).toHaveBeenCalledWith(
+        'Successfully indexed documents'
+      );
+    });
+  });
+
+  it('handles form submission error', async () => {
+    (mockHttp.post as jest.Mock).mockRejectedValue(new Error('Upload failed'));
+
+    const { getByText, getByLabelText } = render(
+      <UploadForm http={mockHttp} notifications={mockNotifications} />
+    );
+    const fileInput = getByLabelText('File') as HTMLInputElement;
+    const indexNameInput = getByLabelText('Index Name') as HTMLInputElement;
+    const submitButton = getByText('Submit');
+
+    const file = new File(['name,age\nJohn,30\nJane,25'], 'test.csv', { type: 'text/csv' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+    fireEvent.change(indexNameInput, { target: { value: 'test-index' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockHttp.post).toHaveBeenCalledWith('/api/data_importer/upload', expect.any(Object));
+      expect(mockNotifications.toasts.addDanger).toHaveBeenCalledWith('Error: Upload failed');
+    });
   });
 });
 
