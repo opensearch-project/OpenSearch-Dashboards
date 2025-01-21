@@ -15,12 +15,12 @@ describe('No Index Pattern Check Test', () => {
     cy.setupTestData(
       SECONDARY_ENGINE.url,
       [
-        'cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.mapping.json',
-        'cypress/fixtures/query_enhancements/data-logs-2/data_logs_small_time_2.mapping.json',
+        'cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json',
+        'cypress/fixtures/query_enhancements/data_logs_2/data_logs_small_time_2.mapping.json',
       ],
       [
-        'cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.data.ndjson',
-        'cypress/fixtures/query_enhancements/data-logs-2/data_logs_small_time_2.data.ndjson',
+        'cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson',
+        'cypress/fixtures/query_enhancements/data_logs_2/data_logs_small_time_2.data.ndjson',
       ]
     );
 
