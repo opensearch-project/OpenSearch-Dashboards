@@ -96,6 +96,7 @@ async function mountDoc(update = false, indexPatternGetter: any = null) {
   };
   const indexPatternService = {
     get: indexPatternGetter ? indexPatternGetter : jest.fn(() => Promise.resolve(indexPattern)),
+    isLongNumeralsSupported: jest.fn(),
   } as any;
 
   const props = {

@@ -77,6 +77,7 @@ export function useOpenSearchDocSearch({
   useEffect(() => {
     async function requestData() {
       try {
+        const withLongNumeralsSupport = await indexPatternService.isLongNumeralsSupported();
         const indexPatternEntity = await indexPatternService.get(indexPatternId);
         setIndexPattern(indexPatternEntity);
 
@@ -90,7 +91,7 @@ export function useOpenSearchDocSearch({
               },
             },
             {
-              withLongNumeralsSupport: true,
+              withLongNumeralsSupport,
             }
           )
           .toPromise();

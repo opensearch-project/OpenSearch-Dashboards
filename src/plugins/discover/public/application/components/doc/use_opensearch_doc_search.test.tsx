@@ -38,20 +38,30 @@ import { DocProps } from './doc';
 import { Observable } from 'rxjs';
 
 const mockSearchResult = new Observable();
+const mockDataSearchSearch = jest.fn(() => {
+  return mockSearchResult;
+});
 
 jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: () => ({
     data: {
       search: {
-        search: jest.fn(() => {
-          return mockSearchResult;
-        }),
+        search: mockDataSearchSearch,
       },
     },
   }),
 }));
 
+const mockIndexPatternService = {
+  get: jest.fn(),
+  isLongNumeralsSupported: jest.fn(),
+} as any;
+
 describe('Test of <Doc /> helper / hook', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('buildSearchBody', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
@@ -78,21 +88,69 @@ describe('Test of <Doc /> helper / hook', () => {
     const indexPattern = {
       getComputedFields: () => [],
     };
-    const indexPatternService = {
-      get: jest.fn(() => Promise.resolve(indexPattern)),
-    } as any;
+    (mockIndexPatternService.get as jest.Mock).mockResolvedValue(indexPattern);
+
     const props = {
       id: '1',
       index: 'index1',
       indexPatternId: 'xyz',
-      indexPatternService,
+      indexPatternService: mockIndexPatternService,
     } as DocProps;
     let hook;
     await act(async () => {
       hook = renderHook((p: DocProps) => useOpenSearchDocSearch(p), { initialProps: props });
     });
+
     // @ts-ignore
     expect(hook.result.current).toEqual([OpenSearchRequestState.Loading, null, indexPattern]);
-    expect(indexPatternService.get).toHaveBeenCalled();
+    expect(mockIndexPatternService.get).toHaveBeenCalled();
+  });
+
+  test('useOpenSearchDocSearch using withLongNumeralsSupport when configured to', async () => {
+    (mockIndexPatternService.isLongNumeralsSupported as jest.Mock).mockReturnValue(
+      Promise.resolve(true)
+    );
+
+    const props = {
+      id: '1',
+      index: 'index1',
+      indexPatternId: 'xyz',
+      indexPatternService: mockIndexPatternService,
+    } as DocProps;
+
+    await act(async () => {
+      renderHook((p: DocProps) => useOpenSearchDocSearch(p), { initialProps: props });
+    });
+
+    expect(mockDataSearchSearch).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        withLongNumeralsSupport: true,
+      })
+    );
+  });
+
+  test('useOpenSearchDocSearch without withLongNumeralsSupport when configured not to', async () => {
+    (mockIndexPatternService.isLongNumeralsSupported as jest.Mock).mockReturnValue(
+      Promise.resolve(false)
+    );
+
+    const props = {
+      id: '1',
+      index: 'index1',
+      indexPatternId: 'xyz',
+      indexPatternService: mockIndexPatternService,
+    } as DocProps;
+
+    await act(async () => {
+      renderHook((p: DocProps) => useOpenSearchDocSearch(p), { initialProps: props });
+    });
+
+    expect(mockDataSearchSearch).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        withLongNumeralsSupport: false,
+      })
+    );
   });
 });
