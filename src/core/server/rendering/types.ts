@@ -135,6 +135,8 @@ export interface BrandingValidation {
   isLoadingLogoDarkmodeValid: boolean;
   isFaviconValid: boolean;
   isTitleValid: boolean;
+  isAILogoGrayUrlValid: boolean;
+  isAILogoGradientUrlValid: boolean;
 }
 
 /**
@@ -152,4 +154,6 @@ export interface BrandingAssignment {
   favicon?: string;
   applicationTitle?: string;
   useExpandedHeader?: boolean;
+  AILogoGrayUrl?: string;
+  AILogoGradientUrl?: string;
 }

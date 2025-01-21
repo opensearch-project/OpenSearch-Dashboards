@@ -85,6 +85,14 @@ export const config = {
       useExpandedHeader: schema.boolean({
         defaultValue: true,
       }),
+      AILogo: schema.object({
+        grayUrl: schema.string({
+          defaultValue: '/',
+        }),
+        gradientUrl: schema.string({
+          defaultValue: '/',
+        }),
+      }),
     }),
     survey: schema.object({
       url: schema.string({

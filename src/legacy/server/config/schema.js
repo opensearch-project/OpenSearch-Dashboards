@@ -248,6 +248,10 @@ export default () =>
         faviconUrl: Joi.any().default('/'),
         applicationTitle: Joi.any().default(''),
         useExpandedHeader: Joi.boolean().default(true),
+        AILogo: Joi.object({
+          grayUrl: Joi.any().default('/'),
+          gradientUrl: Joi.any().default('/'),
+        }),
       }),
       survey: Joi.object({
         url: Joi.any().default('/'),

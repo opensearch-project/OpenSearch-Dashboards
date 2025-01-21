@@ -6,6 +6,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
+    "AILogo": Object {},
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
     "loadingLogo": Object {},
@@ -58,6 +59,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
+    "AILogo": Object {},
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
     "loadingLogo": Object {},
@@ -110,6 +112,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
+    "AILogo": Object {},
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
     "loadingLogo": Object {},
@@ -162,6 +165,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
+    "AILogo": Object {},
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
     "loadingLogo": Object {},
@@ -218,6 +222,7 @@ Object {
   "basePath": "",
   "branch": Any<String>,
   "branding": Object {
+    "AILogo": Object {},
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/ui/default_branding",
     "loadingLogo": Object {},
@@ -270,6 +275,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
+    "AILogo": Object {},
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
     "loadingLogo": Object {},
@@ -322,6 +328,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
+    "AILogo": Object {},
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
     "loadingLogo": Object {},

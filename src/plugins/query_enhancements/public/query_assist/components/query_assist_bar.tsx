@@ -107,6 +107,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
               selectedIndex={selectedIndex}
               previousQuestion={previousQuestionRef.current}
               error={agentError}
+              branding={services.injectedMetadata?.getBranding()}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

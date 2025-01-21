@@ -11,6 +11,7 @@ import assistantMark from '../../assets/sparkle_mark.svg';
 import { getData } from '../../services';
 import { AgentError } from '../utils';
 import { WarningBadge } from './warning_badge';
+import { Branding } from '../../../../../core/public';
 
 interface QueryAssistInputProps {
   inputRef: React.RefObject<HTMLInputElement>;
@@ -20,6 +21,7 @@ interface QueryAssistInputProps {
   selectedIndex?: string;
   previousQuestion?: string;
   error?: AgentError;
+  branding?: Branding;
 }
 
 export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
@@ -29,6 +31,10 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState<number | null>(null);
   const [value, setValue] = useState(props.initialValue ?? '');
+
+  const markUrl = useMemo(() => {
+    return props.branding?.AILogo?.grayUrl ?? assistantMark;
+  }, [props.branding]);
 
   const sampleDataSuggestions = useMemo(() => {
     switch (props.selectedIndex) {
@@ -98,7 +104,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
                   defaultMessage: 'Select an index to ask a question',
                 }))
           }
-          prepend={<EuiIcon type={assistantMark} />}
+          prepend={<EuiIcon type={markUrl} />}
           append={<WarningBadge error={props.error} />}
           fullWidth
         />

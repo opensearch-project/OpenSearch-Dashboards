@@ -59,4 +59,9 @@ export interface Branding {
   applicationTitle?: string;
   /** Whether to use expanded menu (true) or condensed menu (false) */
   useExpandedHeader?: boolean;
+  /** AI logo that will be rendered on different AI features */
+  AILogo?: {
+    grayUrl?: string;
+    gradientUrl?: string;
+  };
 }

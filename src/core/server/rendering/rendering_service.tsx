@@ -166,6 +166,10 @@ export class RenderingService {
               faviconUrl: brandingAssignment.favicon,
               applicationTitle: brandingAssignment.applicationTitle,
               useExpandedHeader: brandingAssignment.useExpandedHeader,
+              AILogo: {
+                grayUrl: brandingAssignment.AILogoGrayUrl,
+                gradientUrl: brandingAssignment.AILogoGradientUrl,
+              },
             },
             survey: opensearchDashboardsConfig.survey.url,
           },
@@ -254,6 +258,15 @@ export class RenderingService {
     // use expanded menu by default unless explicitly set to false
     const { useExpandedHeader = true } = branding;
 
+    // assign AI logo grayUrl and gradientUrl based on brandingValidation function result
+    const AILogoGrayUrl = brandingValidation.isAILogoGrayUrlValid
+      ? branding.AILogo.grayUrl
+      : undefined;
+
+    const AILogoGradientUrl = brandingValidation.isAILogoGradientUrlValid
+      ? branding.AILogo.gradientUrl
+      : undefined;
+
     const brandingAssignment: BrandingAssignment = {
       logoDefault,
       logoDarkmode,
@@ -264,6 +277,8 @@ export class RenderingService {
       favicon,
       applicationTitle,
       useExpandedHeader,
+      AILogoGrayUrl,
+      AILogoGradientUrl,
     };
 
     return brandingAssignment;
@@ -301,6 +316,13 @@ export class RenderingService {
 
     const isFaviconValid = await this.isUrlValid(branding.faviconUrl, 'favicon');
 
+    const isAILogoGrayUrlValid = await this.isUrlValid(branding.AILogo.grayUrl, 'AI logo grayUrl');
+
+    const isAILogoGradientUrlValid = await this.isUrlValid(
+      branding.AILogo.gradientUrl,
+      'AI logo gradientUrl'
+    );
+
     const isTitleValid = this.isTitleValid(branding.applicationTitle, 'applicationTitle');
 
     const brandingValidation: BrandingValidation = {
@@ -312,6 +334,8 @@ export class RenderingService {
       isLoadingLogoDarkmodeValid,
       isFaviconValid,
       isTitleValid,
+      isAILogoGrayUrlValid,
+      isAILogoGradientUrlValid,
     };
 
     return brandingValidation;
