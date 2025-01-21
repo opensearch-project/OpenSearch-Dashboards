@@ -11,6 +11,7 @@ export const INDEX_NAME = 'data_logs_small_time_1';
 export const DEFAULT_TIME_INDEX_PATTERN_NAME = 'data_logs_small_time_1*';
 export const DEFAULT_NO_TIME_INDEX_PATTERN_NAME = 'data_logs_small_no_time_1*';
 export const INDEX_PATTERN_NAME = `${DATASOURCE_NAME}::${DEFAULT_TIME_INDEX_PATTERN_NAME}`;
+export const SAVE_QUERY_CONFLICT_NAME_ERROR_TEXT = 'Name conflicts with an existing saved query';
 
 export const DATASET_CONFIGS = {
   index_pattern: {

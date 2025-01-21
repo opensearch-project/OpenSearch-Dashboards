@@ -24,6 +24,8 @@ import {
   verifyQueryDoesNotExistInSavedQueries,
   setQueryConfigurations,
   updateAndVerifySavedQuery,
+  SAVE_AS_NEW_QUERY_SUFFIX,
+  validateSaveAsNewQueryMatchingNameHasError,
 } from '../../../../../utils/apps/query_enhancements/saved_queries';
 
 // This spec assumes data.savedQueriesNewUI.enabled is true.
@@ -73,28 +75,32 @@ export const runSavedQueriesFlyoutUITests = () => {
     });
 
     const testConfigurations = generateAllTestConfigurations();
-    testConfigurations.forEach((config) => {
-      it(`should successfully create a saved query for ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'discover',
-          isEnhancement: true,
+
+    describe('should create initial saved queries', () => {
+      testConfigurations.forEach((config) => {
+        it(`should create saved query: ${config.testName}`, () => {
+          cy.navigateToWorkSpaceSpecificPage({
+            workspaceName,
+            page: 'discover',
+            isEnhancement: true,
+          });
+
+          cy.setDataset(config.dataset, datasourceName, config.datasetType);
+
+          cy.setQueryLanguage(config.language);
+          setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
+
+          setQueryConfigurations(config);
+          verifyDiscoverPageState(config);
+
+          cy.saveQuery(config.saveName, ' ', true, true, true);
         });
-
-        cy.setDataset(config.dataset, datasourceName, config.datasetType);
-
-        cy.setQueryLanguage(config.language);
-        setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
-
-        setQueryConfigurations(config);
-        verifyDiscoverPageState(config);
-        cy.saveQuery(config.saveName, ' ', true, true, true);
       });
     });
 
-    describe('should see and load all saved queries', () => {
+    describe('should test loading, saving and deleting saved queries', () => {
       testConfigurations.forEach((config) => {
-        it(`Load query name: ${config.testName}`, () => {
+        it(`should load saved query: ${config.testName}`, () => {
           cy.getElementByTestId('discoverNewButton').click();
           setDatePickerDatesAndSearchIfRelevant(
             config.language,
@@ -107,20 +113,41 @@ export const runSavedQueriesFlyoutUITests = () => {
           cy.wait(2000);
           verifyDiscoverPageState(config);
         });
-        it(`should successfully update the loaded ${config.testName} saved query`, () => {
+
+        it(`should update the loaded saved query: ${config.testName}`, () => {
           updateAndVerifySavedQuery(config, true);
         });
-      });
-    });
-    it.skip('should delete a saved query', () => {
-      cy.navigateToWorkSpaceSpecificPage({
-        workspaceName,
-        page: 'discover',
-        isEnhancement: true,
-      });
 
-      cy.deleteSaveQuery('OpenSearch SQL-INDEX_PATTERN', true);
-      verifyQueryDoesNotExistInSavedQueries('OpenSearch SQL-INDEX_PATTERN', true);
+        const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
+        it(`should modify saved query: ${config.testName} and save as new query: ${saveAsNewQueryName}`, () => {
+          if (config.filters) {
+            cy.deleteAllFilters(true);
+          }
+          setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
+
+          setQueryConfigurations(config);
+          verifyDiscoverPageState(config);
+          validateSaveAsNewQueryMatchingNameHasError(config.saveName);
+          cy.updateSaveQuery(saveAsNewQueryName, true, true, true, true);
+
+          cy.reload();
+          cy.loadSaveQuery(saveAsNewQueryName, true);
+          // wait for saved query to load
+          cy.wait(2000);
+          verifyDiscoverPageState(config);
+        });
+
+        it(`should delete the saved query: ${saveAsNewQueryName}`, () => {
+          cy.navigateToWorkSpaceSpecificPage({
+            workspaceName,
+            page: 'discover',
+            isEnhancement: true,
+          });
+
+          cy.deleteSaveQuery(saveAsNewQueryName, true);
+          verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName, true);
+        });
+      });
     });
   });
 };

@@ -178,18 +178,27 @@ Cypress.Commands.add(
     cy.getElementByTestId('saved-query-management-save-button').click();
 
     if (saveAsNewQuery) {
-      cy.getElementByTestId('saveAsNewQueryCheckbox').check();
-      cy.getElementByTestId('saveQueryFormTitle').type(name);
-    } else if (saveAsNewQuery === true) {
-      cy.getElementByTestId('saveAsNewQueryCheckbox').uncheck();
+      cy.getElementByTestId('saveAsNewQueryCheckbox')
+        .parent()
+        .find('[class="euiCheckbox__label"]')
+        .click();
+      cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
+
+      // Selecting the saveAsNewQuery element deselects the include time filter option.
+      if (includeTimeFilter === true) {
+        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+      }
+    } else if (saveAsNewQuery === false) {
+      // defaults to not selected.
+
+      if (includeTimeFilter !== true) {
+        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+      }
     }
 
     if (includeFilters !== true) {
+      // Always defaults to selected.
       cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
-    }
-
-    if (includeTimeFilter !== false) {
-      cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
     }
 
     // The force is necessary as there is occasionally a popover that covers the button
