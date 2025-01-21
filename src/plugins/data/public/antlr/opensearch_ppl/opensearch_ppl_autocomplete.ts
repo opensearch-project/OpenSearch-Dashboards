@@ -130,6 +130,8 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchPPLParser.RULE_fieldExpression: {
+        if (cursorTokenIndex < 2) break; // should not happen due to grammar
+
         // get the last token that appears other than whitespace
         const lastToken =
           tokenStream.get(cursorTokenIndex - 1).type === tokenDictionary.SPACE
