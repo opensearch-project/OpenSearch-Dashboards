@@ -72,56 +72,6 @@ export const getExpandedDocTableRowFieldName = (docTableRowNumber, expandedDocum
 };
 
 /**
- * Select a language in the Dataset Selector for Index
- * @param {string} datasetLanguage Index supports "OpenSearch SQL" and "PPL"
- */
-export const selectIndexDatasetLanguage = (datasetLanguage) => {
-  cy.getElementByTestId('advancedSelectorLanguageSelect').select(datasetLanguage);
-  // TODO: There is no timestamp in 2.x, but this test passes on main CI/CD
-  // cy.getElementByTestId('advancedSelectorTimeFieldSelect').select('timestamp');
-  cy.getElementByTestId('advancedSelectorConfirmButton').click();
-};
-
-/**
- * Select an index dataset.
- * @param {string} indexClusterName Name of the cluster to be used for the Index.
- * @param {string} indexName Name of the index dataset to be used.
- * @param {string} datasetLanguage Index supports "OpenSearch SQL" and "PPL".
- */
-export const selectIndexDataset = (indexClusterName, indexName, datasetLanguage) => {
-  cy.getElementByTestId('datasetSelectorButton').click();
-  cy.getElementByTestId('datasetSelectorAdvancedButton').click();
-  cy.getElementByTestId('datasetExplorerWindow').contains('Indexes').click();
-  cy.getElementByTestId('datasetExplorerWindow').contains(indexClusterName).click();
-  cy.getElementByTestId('datasetExplorerWindow').contains(indexName).click();
-  cy.getElementByTestId('datasetSelectorNext').click();
-  selectIndexDatasetLanguage(datasetLanguage);
-};
-
-/**
- * Select a language in the Dataset Selector for Index Pattern
- * @param {string} datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
- */
-export const selectIndexPatternDatasetLanguage = (datasetLanguage) => {
-  cy.getElementByTestId('advancedSelectorLanguageSelect').select(datasetLanguage);
-  cy.getElementByTestId('advancedSelectorConfirmButton').click();
-};
-
-/**
- * Select an index pattern dataset.
- * @param {string} indexPatternName Name of the index pattern to be used.
- * @param {string} datasetLanguage Index Pattern supports "DQL", "Lucene", "OpenSearch SQL" and "PPL"
- */
-export const selectIndexPatternDataset = (indexPatternName, datasetLanguage) => {
-  cy.getElementByTestId('datasetSelectorButton').click();
-  cy.getElementByTestId('datasetSelectorAdvancedButton').click();
-  cy.getElementByTestId('datasetExplorerWindow').contains('Index Patterns').click();
-  cy.getElementByTestId('datasetExplorerWindow').contains(indexPatternName).click();
-  cy.getElementByTestId('datasetSelectorNext').click();
-  selectIndexPatternDatasetLanguage(datasetLanguage);
-};
-
-/**
  * Toggle expansion of row rowNumber of Doc Table.
  * @param {number} rowNumber rowNumber of Doc Table starts at 0 for row 1.
  */
