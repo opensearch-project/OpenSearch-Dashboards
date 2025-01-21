@@ -316,7 +316,7 @@ export class QueryStringManager {
 
     return {
       ...newQuery,
-      query: this.getInitialDatasetQueryString(newQuery, newDataset),
+      query: this.getInitialDatasetQueryString(newQuery),
     };
   };
 
