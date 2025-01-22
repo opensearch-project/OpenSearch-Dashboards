@@ -21,12 +21,22 @@ export function defineRoutes(router: IRouter) {
       validate: false,
     },
     async (context, request, response) => {
-      // Mock response for clusters
-      return response.ok({
-        body: {
-          clusters: ['local-cluster', 'cluster2'],
-        },
-      });
+      const client = context.core.opensearch.client.asCurrentUser;
+      try {
+        const clusters = await client.cluster.remoteInfo();
+        return response.ok({
+          body: {
+            clusters: Object.keys(clusters.body),
+          },
+        });
+      } catch (error: any) {
+        return response.custom({
+          statusCode: 500,
+          body: {
+            message: error.message || 'Internal server error',
+          },
+        });
+      }
     }
   );
 

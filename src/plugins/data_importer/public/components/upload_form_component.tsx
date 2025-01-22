@@ -9,6 +9,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
 
 interface UploadFormComponentProps {
@@ -55,7 +56,17 @@ export const UploadFormComponent = ({
         />
       </EuiFormRow>
 
-      <EuiFormRow label="Delimiter">
+      <EuiFormRow
+        label={
+          <>
+            Delimiter{' '}
+            <EuiIconTip
+              content="Select the delimiter used in your CSV file. Common delimiters include comma, tab, semicolon, and pipe."
+              position="right"
+            />
+          </>
+        }
+      >
         <EuiSelect
           options={[
             { value: ',', text: 'Comma (,)' },
@@ -69,14 +80,16 @@ export const UploadFormComponent = ({
         />
       </EuiFormRow>
 
-      {/* <EuiFormRow label="Cluster">
-        <EuiSelect
-          options={clusters.map((cluster) => ({ value: cluster, text: cluster }))}
-          value={cluster}
-          onChange={(e) => setCluster(e.target.value)}
-          required
-        />
-      </EuiFormRow> */}
+      {clusters.length > 0 && (
+        <EuiFormRow label="Cluster">
+          <EuiSelect
+            options={clusters.map((clu) => ({ value: clu, text: clu }))}
+            value={cluster}
+            onChange={(e) => setCluster(e.target.value)}
+            required
+          />
+        </EuiFormRow>
+      )}
 
       <EuiFormRow label="File">
         <EuiFilePicker

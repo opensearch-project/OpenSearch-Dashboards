@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiText,
   EuiTable,
@@ -8,7 +8,9 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiButton,
+  EuiFieldSearch,
 } from '@elastic/eui';
+import './preview_component.scss';
 
 interface PreviewComponentProps {
   previewData: any[];
@@ -21,12 +23,36 @@ export const PreviewComponent = ({
   visibleRows,
   loadMoreRows,
 }: PreviewComponentProps) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const totalRows = previewData.length;
+  const loadedRows = Math.min(visibleRows, totalRows);
+
+  const filteredData = previewData.filter((row) =>
+    Object.values(row).some(
+      (value) =>
+        typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
+
   return (
     <>
-      <EuiText>
-        <h3>Preview Data</h3>
-      </EuiText>
-      {previewData.length > 0 ? (
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <EuiText>
+          <h3>
+            Preview Data ({loadedRows}/{totalRows})
+          </h3>
+        </EuiText>
+        {totalRows > 0 && (
+          <EuiFieldSearch
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            isClearable
+            className="customSearchBar"
+          />
+        )}
+      </div>
+      {totalRows > 0 ? (
         <div style={{ height: 'calc(100% - 40px)', overflowY: 'auto' }}>
           <EuiTable>
             <EuiTableHeader>
@@ -36,7 +62,7 @@ export const PreviewComponent = ({
               ))}
             </EuiTableHeader>
             <EuiTableBody>
-              {previewData.slice(0, visibleRows).map((row, rowIndex) => (
+              {filteredData.slice(0, loadedRows).map((row, rowIndex) => (
                 <EuiTableRow key={rowIndex}>
                   <EuiTableRowCell>{rowIndex + 1}</EuiTableRowCell>
                   {Object.keys(row).map((field, colIndex) => (
@@ -52,7 +78,7 @@ export const PreviewComponent = ({
           <p>No data to display. Please upload a file to see the preview.</p>
         </EuiText>
       )}
-      {visibleRows < previewData.length && (
+      {loadedRows < totalRows && (
         <EuiButton onClick={loadMoreRows} style={{ marginTop: '20px' }}>
           Click to See More
         </EuiButton>
