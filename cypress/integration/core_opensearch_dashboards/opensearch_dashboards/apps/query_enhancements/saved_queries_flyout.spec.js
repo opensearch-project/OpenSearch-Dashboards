@@ -8,12 +8,9 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   SECONDARY_ENGINE,
-  START_TIME,
-  END_TIME,
 } from '../../../../../utils/constants';
 
 import {
-  generateAllTestConfigurations,
   verifyDiscoverPageState,
   verifyQueryDoesNotExistInSavedQueries,
   setQueryConfigurations,
@@ -26,7 +23,10 @@ import {
   getRandomizedWorkspaceName,
   getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
+  generateAllTestConfigurations,
 } from '../../../../../utils/apps/query_enhancements/shared';
+
+import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
 
 const workspaceName = getRandomizedWorkspaceName();
 const datasourceName = getRandomizedDatasourceName();
@@ -34,7 +34,7 @@ const datasourceName = getRandomizedDatasourceName();
 // This spec assumes data.savedQueriesNewUI.enabled is true.
 export const runSavedQueriesFlyoutUITests = () => {
   describe('saved queries flyout UI', () => {
-    before(() => {
+    beforeEach(() => {
       // Load test data
       cy.setupTestData(
         SECONDARY_ENGINE.url,
@@ -67,7 +67,7 @@ export const runSavedQueriesFlyoutUITests = () => {
       });
     });
 
-    after(() => {
+    afterEach(() => {
       // No need to explicitly delete all saved queries as deleting the workspace will delete associated saved queries
       cy.deleteWorkspaceByName(workspaceName);
       // // TODO: Modify deleteIndex to handle an array of index and remove hard code
@@ -76,7 +76,7 @@ export const runSavedQueriesFlyoutUITests = () => {
       cy.deleteIndex(INDEX_WITH_TIME_2);
     });
 
-    const testConfigurations = generateAllTestConfigurations();
+    const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
 
     describe('should create initial saved queries', () => {
       testConfigurations.forEach((config) => {
@@ -90,7 +90,7 @@ export const runSavedQueriesFlyoutUITests = () => {
           cy.setDataset(config.dataset, datasourceName, config.datasetType);
 
           cy.setQueryLanguage(config.language);
-          setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
+          setDatePickerDatesAndSearchIfRelevant(config.language);
 
           setQueryConfigurations(config);
           verifyDiscoverPageState(config);
@@ -112,7 +112,7 @@ export const runSavedQueriesFlyoutUITests = () => {
 
           cy.loadSaveQuery(config.saveName);
           // wait for saved queries to load.
-          cy.wait(2000);
+          cy.getElementByTestId('docTable').should('be.visible');
           verifyDiscoverPageState(config);
         });
 
@@ -125,7 +125,7 @@ export const runSavedQueriesFlyoutUITests = () => {
           if (config.filters) {
             cy.deleteAllFilters();
           }
-          setDatePickerDatesAndSearchIfRelevant(config.language, START_TIME, END_TIME);
+          setDatePickerDatesAndSearchIfRelevant(config.language);
 
           setQueryConfigurations(config);
           verifyDiscoverPageState(config);
@@ -135,7 +135,7 @@ export const runSavedQueriesFlyoutUITests = () => {
           cy.reload();
           cy.loadSaveQuery(saveAsNewQueryName);
           // wait for saved query to load
-          cy.wait(2000);
+          cy.getElementByTestId('docTable').should('be.visible');
           verifyDiscoverPageState(config);
         });
 
