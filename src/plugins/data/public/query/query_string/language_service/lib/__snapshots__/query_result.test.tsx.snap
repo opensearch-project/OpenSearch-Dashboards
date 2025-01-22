@@ -52,7 +52,7 @@ exports[`Query Result show error status with error message 2`] = `
         <strong>
           Message:
         </strong>
-
+         
       </p>
     </EuiText>
   </div>
