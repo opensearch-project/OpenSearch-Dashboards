@@ -505,7 +505,7 @@ export function Header({
       />
     </EuiHeaderSectionItem>
   );
-  const renderNewPrimaryHeaderRight = () => (
+  const renderHeaderRight = () => (
     <EuiHeaderSectionItem border="none">
       <HeaderNavControls navControls$={observables.navControlsNewPrimaryHeaderRight$} />
     </EuiHeaderSectionItem>
@@ -561,7 +561,7 @@ export function Header({
 
         {renderBreadcrumbs(false, false)}
 
-        {renderNewPrimaryHeaderRight()}
+        {renderHeaderRight()}
       </EuiHeader>
 
       {/* Secondary header */}
@@ -633,7 +633,7 @@ export function Header({
         </EuiHeaderSection>
         <EuiHeaderSection side="right">
           {rightControls}
-          {renderNewPrimaryHeaderRight()}
+          {renderHeaderRight()}
         </EuiHeaderSection>
       </EuiHeader>
       <div id="applicationHeaderFilterBar" />

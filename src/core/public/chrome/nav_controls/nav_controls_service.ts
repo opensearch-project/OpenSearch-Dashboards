@@ -65,7 +65,7 @@ export interface ChromeNavControls {
   /** Register a nav control to be presented on the left-bottom side of the left navigation. */
   registerLeftBottom(navControl: ChromeNavControl): void;
   /** Register a nav control to be presented on the right side of the new primary chrome header. */
-  registerNewPrimaryHeaderRight(navControl: ChromeNavControl): void;
+  registerHeaderRight(navControl: ChromeNavControl): void;
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
   /** @internal */
@@ -75,7 +75,7 @@ export interface ChromeNavControls {
   /** @internal */
   getLeftBottom$(): Observable<ChromeNavControl[]>;
   /** @internal */
-  getNewPrimaryHeaderRight$(): Observable<ChromeNavControl[]>;
+  getHeaderRight$(): Observable<ChromeNavControl[]>;
 }
 
 /** @internal */
@@ -122,7 +122,7 @@ export class NavControlsService {
           new Set([...navControlsLeftBottom$.value.values(), navControl])
         ),
 
-      registerNewPrimaryHeaderRight: (navControl: ChromeNavControl) =>
+      registerHeaderRight: (navControl: ChromeNavControl) =>
         navControlsNewPrimaryHeaderRight$.next(
           new Set([...navControlsNewPrimaryHeaderRight$.value.values(), navControl])
         ),
@@ -157,7 +157,7 @@ export class NavControlsService {
           map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
-      getNewPrimaryHeaderRight$: () =>
+      getHeaderRight$: () =>
         navControlsNewPrimaryHeaderRight$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
