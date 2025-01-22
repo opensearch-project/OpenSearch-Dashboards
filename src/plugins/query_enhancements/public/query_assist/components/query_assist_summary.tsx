@@ -30,6 +30,8 @@ import { QueryAssistContextType } from '../../../common/query_assist';
 import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
 import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
 import { FeedbackStatus } from '../../../common/query_assist';
+import { checkAgentsExist } from '../utils/get_is_summary_agent';
+import { DATA2SUMMARY_AGENT_CONFIG_ID } from '../utils/constant';
 
 export interface QueryContext {
   question: string;
@@ -70,6 +72,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const [loading, setLoading] = useState(false); // track loading state
   const [feedback, setFeedback] = useState(FeedbackStatus.NONE);
   const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
+  const [isSummaryAgentAvailable, setIsSummaryAgentAvailable] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
   const { question$, isQueryAssistCollapsed } = useQueryAssist();
   const METRIC_APP = `query-assist`;
@@ -206,6 +209,26 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     });
   }, [props.core]);
 
+  useEffect(() => {
+    setIsSummaryAgentAvailable(false);
+    const fetchSummaryAgent = async () => {
+      try {
+        const summaryAgentStatus = await checkAgentsExist(
+          props.http,
+          DATA2SUMMARY_AGENT_CONFIG_ID,
+          selectedDataset.current?.dataSource?.id
+        );
+        setIsSummaryAgentAvailable(summaryAgentStatus.exists);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+    };
+    if (isEnabledByCapability) {
+      fetchSummaryAgent();
+    }
+  }, [selectedDataset.current?.dataSource?.id, props.http, isEnabledByCapability]);
+
   const onFeedback = useCallback(
     (satisfied: boolean) => {
       if (feedback !== FeedbackStatus.NONE) return;
@@ -216,8 +239,15 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     [feedback, reportMetric]
   );
 
-  if (props.dependencies.isCollapsed || isQueryAssistCollapsed || !isEnabledByCapability)
+  if (
+    props.dependencies.isCollapsed ||
+    isQueryAssistCollapsed ||
+    !isEnabledByCapability ||
+    !isSummaryAgentAvailable
+  ) {
     return null;
+  }
+
   const isDarkMode = props.core.uiSettings.get('theme:darkMode');
   return (
     <EuiSplitPanel.Outer

@@ -182,7 +182,6 @@ export class QueryEnhancementsPlugin
       ],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
-
     data.__enhance({
       editor: {
         queryEditorExtension: createQueryAssistExtension(
@@ -201,10 +200,10 @@ export class QueryEnhancementsPlugin
 
   public start(
     core: CoreStart,
-    deps: QueryEnhancementsPluginStartDependencies
+    { data }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
     setStorage(this.storage);
-    setData(deps.data);
+    setData(data);
     return {};
   }
 
