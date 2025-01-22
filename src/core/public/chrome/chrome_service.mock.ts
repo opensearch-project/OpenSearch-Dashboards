@@ -75,10 +75,12 @@ const createStartContractMock = () => {
       registerCenter: jest.fn(),
       registerRight: jest.fn(),
       registerLeftBottom: jest.fn(),
+      registerPrimaryHeaderRight: jest.fn(),
       getLeft$: jest.fn(),
       getCenter$: jest.fn(),
       getRight$: jest.fn(),
       getLeftBottom$: jest.fn(),
+      getPrimaryHeaderRight$: jest.fn(),
     },
     navGroup: {
       getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
