@@ -168,8 +168,8 @@ describe('RecentlyAccessed#start()', () => {
     it('allows registration', async () => {
       const navControls = getStart();
       const nc = { mount: jest.fn() };
-      navControls.registerHeaderRight(nc);
-      expect(await navControls.getHeaderRight$().pipe(take(1)).toPromise()).toEqual([nc]);
+      navControls.registerPrimaryHeaderRight(nc);
+      expect(await navControls.getPrimaryHeaderRight$().pipe(take(1)).toPromise()).toEqual([nc]);
     });
 
     it('sorts controls by order property', async () => {
@@ -177,10 +177,10 @@ describe('RecentlyAccessed#start()', () => {
       const nc1 = { mount: jest.fn(), order: 10 };
       const nc2 = { mount: jest.fn(), order: 0 };
       const nc3 = { mount: jest.fn(), order: 20 };
-      navControls.registerHeaderRight(nc1);
-      navControls.registerHeaderRight(nc2);
-      navControls.registerHeaderRight(nc3);
-      expect(await navControls.getHeaderRight$().pipe(take(1)).toPromise()).toEqual([
+      navControls.registerPrimaryHeaderRight(nc1);
+      navControls.registerPrimaryHeaderRight(nc2);
+      navControls.registerPrimaryHeaderRight(nc3);
+      expect(await navControls.getPrimaryHeaderRight$().pipe(take(1)).toPromise()).toEqual([
         nc2,
         nc1,
         nc3,

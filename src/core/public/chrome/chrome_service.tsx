@@ -391,7 +391,7 @@ export class ChromeService {
           navControlsExpandedCenter$={navControls.getExpandedCenter$()}
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           navControlsLeftBottom$={navControls.getLeftBottom$()}
-          navControlsNewPrimaryHeaderRight$={navControls.getHeaderRight$()}
+          navControlsPrimaryHeaderRight$={navControls.getPrimaryHeaderRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}

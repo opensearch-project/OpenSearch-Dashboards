@@ -64,8 +64,8 @@ export interface ChromeNavControls {
   registerCenter(navControl: ChromeNavControl): void;
   /** Register a nav control to be presented on the left-bottom side of the left navigation. */
   registerLeftBottom(navControl: ChromeNavControl): void;
-  /** Register a nav control to be presented on the right side of the new primary chrome header. */
-  registerHeaderRight(navControl: ChromeNavControl): void;
+  /** Register a nav control to be presented on the right side of the primary chrome header. */
+  registerPrimaryHeaderRight(navControl: ChromeNavControl): void;
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
   /** @internal */
@@ -75,7 +75,7 @@ export interface ChromeNavControls {
   /** @internal */
   getLeftBottom$(): Observable<ChromeNavControl[]>;
   /** @internal */
-  getHeaderRight$(): Observable<ChromeNavControl[]>;
+  getPrimaryHeaderRight$(): Observable<ChromeNavControl[]>;
 }
 
 /** @internal */
@@ -91,7 +91,7 @@ export class NavControlsService {
       new Set()
     );
     const navControlsLeftBottom$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
-    const navControlsNewPrimaryHeaderRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(
+    const navControlsPrimaryHeaderRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(
       new Set()
     );
 
@@ -122,9 +122,9 @@ export class NavControlsService {
           new Set([...navControlsLeftBottom$.value.values(), navControl])
         ),
 
-      registerHeaderRight: (navControl: ChromeNavControl) =>
-        navControlsNewPrimaryHeaderRight$.next(
-          new Set([...navControlsNewPrimaryHeaderRight$.value.values(), navControl])
+      registerPrimaryHeaderRight: (navControl: ChromeNavControl) =>
+        navControlsPrimaryHeaderRight$.next(
+          new Set([...navControlsPrimaryHeaderRight$.value.values(), navControl])
         ),
 
       getLeft$: () =>
@@ -157,8 +157,8 @@ export class NavControlsService {
           map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
-      getHeaderRight$: () =>
-        navControlsNewPrimaryHeaderRight$.pipe(
+      getPrimaryHeaderRight$: () =>
+        navControlsPrimaryHeaderRight$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
