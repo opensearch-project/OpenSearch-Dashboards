@@ -207,7 +207,7 @@ export function processVisitedRules(
 
           // NOTE: according to grammar, backticks in PPL are only possible for fields
           if (validIDToken(token)) {
-            let combinedText = token.text ?? '';
+            let combinedText = removePotentialBackticks(token.text ?? '');
 
             // stitch together IDs separated by DOTs
             let lookBehindIndex = currentIndex;
@@ -218,7 +218,9 @@ export function processVisitedRules(
                 break;
               }
               lookBehindIndex--;
-              combinedText = `${tokenStream.get(lookBehindIndex).text ?? ''}.${combinedText}`;
+              combinedText = `${removePotentialBackticks(
+                tokenStream.get(lookBehindIndex).text ?? ''
+              )}.${combinedText}`;
             }
 
             suggestValuesForColumn = removePotentialBackticks(combinedText);

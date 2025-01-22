@@ -145,7 +145,7 @@ describe('processVisitedRules', () => {
       expect(result.suggestValuesForColumn).toBe('column');
     });
 
-    it.skip('RULE_literalValue - should suggest values for column with dots and backticks in the name', () => {
+    it('RULE_literalValue - should suggest values for column with dots and backticks in the name', () => {
       const mockRules = new Map();
       mockRules.set(OpenSearchPPLParser.RULE_literalValue, { startTokenIndex: 0 });
       const tokenStream = createTokenStream([
