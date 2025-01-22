@@ -464,6 +464,14 @@ describe('DataSourceTable', () => {
       expect(() => component).not.toThrow();
       expect(component).toMatchSnapshot();
       expect(utils.getDataSources).toHaveBeenCalled();
+
+      // assertion for three row and description placeholder to be visible
+      expect(component.find('.euiTableRow')).toHaveLength(3);
+      const descriptionPlaceholders = component.find('.euiText');
+      expect(descriptionPlaceholders).toHaveLength(6); // since both description and related connections have no values
+      descriptionPlaceholders.forEach((node) => {
+        expect(node.children().text()).toBe('—');
+      });
     });
   });
 });
