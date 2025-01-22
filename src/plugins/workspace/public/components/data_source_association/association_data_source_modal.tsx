@@ -290,6 +290,7 @@ export const AssociationDataSourceModalContent = ({
               'workspace.detail.dataSources.associateModal.searchPlaceholder',
               { defaultMessage: 'Search' }
             ),
+            compressed: true,
           }}
           options={options}
           onChange={handleSelectionChange}
