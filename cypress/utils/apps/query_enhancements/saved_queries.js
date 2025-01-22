@@ -15,7 +15,7 @@ import {
   SAVE_QUERY_CONFLICT_NAME_ERROR_TEXT,
 } from './constants';
 
-import { APPLIED_FILTERS } from './saved_search';
+import { APPLIED_FILTERS } from './saved';
 
 /**
  * Suffix when saving as new query.
@@ -482,63 +482,26 @@ export const setAlternateQueryConfigurations = ({ filters, queryString, histogra
 };
 
 /**
- * Verify that only DQL and Lucene saved queries are shown in the Visualize page.
- * @param {boolean} savedQueriesNewUIEnabled - Has this flag been enabled (default is true)
- */
-export const verifyValidSavedQueriesShownOnVisualize = (savedQueriesNewUIEnabled = true) => {
-  if (savedQueriesNewUIEnabled) {
-    // Currently functionality has not been implemented for savedQueriesNewUI
-  } else {
-    cy.getElementByTestId('createVisualizationPromptButton').click();
-    cy.getElementByTestId('visType-table').click();
-    cy.getElementByTestId('savedObjectFinderItemList')
-      .findElementByTestIdLike('savedObjectTitledata')
-      .click();
-
-    cy.getElementByTestId('showFilterActions').click();
-    cy.getElementByTestId('savedQueries').click();
-
-    cy.getElementByTestId('save-query-panel').contains('DQL');
-    cy.getElementByTestId('save-query-panel').contains('Lucene');
-    cy.getElementByTestId('save-query-panel').contains('OpenSearch SQL').should('not.exist');
-    cy.getElementByTestId('save-query-panel').contains('PPL').should('not.exist');
-  }
-};
-
-/**
  * Verify query does not exist in saved queries.
  * @param {string} deletedQueryName - Name of the query that should not exist.
- * @param {boolean} savedQueriesNewUIEnabled - Has this flag been enabled (default is true)
  */
-export const verifyQueryDoesNotExistInSavedQueries = (
-  deletedQueryName,
-  savedQueriesNewUIEnabled = true
-) => {
+export const verifyQueryDoesNotExistInSavedQueries = (deletedQueryName) => {
   cy.reload();
-  if (savedQueriesNewUIEnabled) {
-    cy.getElementByTestId('saved-query-management-popover-button').click();
-    cy.getElementByTestId('saved-query-management-open-button').click();
-    cy.getElementByTestId('savedQueriesFlyoutBody').contains(deletedQueryName).should('not.exist');
-    // Two references to two buttons layered over each other.
-    cy.getElementByTestId('euiFlyoutCloseButton').first().click({ force: true });
-  } else {
-    cy.getElementByTestId('saved-query-management-popover-button').click();
-    cy.getElementByTestId('osdSavedQueryManagementList')
-      .contains(deletedQueryName)
-      .should('not.exist');
-    cy.getElementByTestId('saved-query-management-popover-button').click();
-  }
+  cy.getElementByTestId('saved-query-management-popover-button').click();
+  cy.getElementByTestId('saved-query-management-open-button').click();
+  cy.getElementByTestId('savedQueriesFlyoutBody').contains(deletedQueryName).should('not.exist');
+  // Two references to two buttons layered over each other.
+  cy.getElementByTestId('euiFlyoutCloseButton').first().click({ force: true });
 };
 
 /**
  * Update and save the saved query with alternate config, then verify has been updated correctly.
  *  @param {SavedSearchTestConfig} config - the config for the test case to be updated
- * @param {boolean} savedQueriesNewUIEnabled - Has this flag been enabled (default is true)
  */
-export const updateAndVerifySavedQuery = (config, savedQueriesNewUIEnabled = true) => {
+export const updateAndVerifySavedQuery = (config) => {
   // Create alternate config
   const alternateConfig = generateAlternateTestConfiguration(config);
-  cy.loadSaveQuery(config.saveName, savedQueriesNewUIEnabled);
+  cy.loadSaveQuery(config.saveName);
 
   // wait for saved query to load
   cy.wait(2000);
@@ -551,10 +514,10 @@ export const updateAndVerifySavedQuery = (config, savedQueriesNewUIEnabled = tru
 
   setAlternateQueryConfigurations(alternateConfig);
   verifyAlternateDiscoverPageState(alternateConfig);
-  cy.updateSaveQuery('', false, true, true, savedQueriesNewUIEnabled);
+  cy.updateSaveQuery('', false, true, true);
 
   cy.reload();
-  cy.loadSaveQuery(config.saveName, savedQueriesNewUIEnabled);
+  cy.loadSaveQuery(config.saveName);
   // wait for saved query to load
   cy.wait(2000);
   verifyAlternateDiscoverPageState(alternateConfig);
@@ -563,40 +526,23 @@ export const updateAndVerifySavedQuery = (config, savedQueriesNewUIEnabled = tru
 /**
  * Save as new query, and validate that saving as an existing name leads to the correct error message.
  *  @param {string} matchingName - the name of an existing saved query
- * @param {boolean} savedQueriesNewUIEnabled - Has this flag been enabled (default is true)
  */
-export const validateSaveAsNewQueryMatchingNameHasError = (
-  matchingName,
-  savedQueriesNewUIEnabled = true
-) => {
-  if (savedQueriesNewUIEnabled) {
-    cy.whenTestIdNotFound('saved-query-management-popover', () => {
-      cy.getElementByTestId('saved-query-management-popover-button').click();
-    });
-    cy.getElementByTestId('saved-query-management-save-button').click();
+export const validateSaveAsNewQueryMatchingNameHasError = (matchingName) => {
+  cy.whenTestIdNotFound('saved-query-management-popover', () => {
+    cy.getElementByTestId('saved-query-management-popover-button').click();
+  });
+  cy.getElementByTestId('saved-query-management-save-button').click();
 
-    cy.getElementByTestId('saveAsNewQueryCheckbox')
-      .parent()
-      .find('[class="euiCheckbox__label"]')
-      .click();
-    cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(matchingName);
+  cy.getElementByTestId('saveAsNewQueryCheckbox')
+    .parent()
+    .find('[class="euiCheckbox__label"]')
+    .click();
+  cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(matchingName);
 
-    // The force is necessary as there is occasionally a popover that covers the button
-    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+  // The force is necessary as there is occasionally a popover that covers the button
+  cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
 
-    cy.contains(SAVE_QUERY_CONFLICT_NAME_ERROR_TEXT).should('be.visible');
-    // Two references to two buttons layered over each other.
-    cy.getElementByTestId('euiFlyoutCloseButton').first().click({ force: true });
-  } else {
-    cy.whenTestIdNotFound('saved-query-management-popover', () => {
-      cy.getElementByTestId('saved-query-management-popover-button').click();
-    });
-    cy.getElementByTestId('saved-query-management-save-as-new-button').click();
-    cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(matchingName);
-
-    cy.getElementByTestId('savedQueryFormSaveButton').click();
-
-    cy.contains(SAVE_QUERY_CONFLICT_NAME_ERROR_TEXT).should('be.visible');
-    cy.getElementByTestId('savedQueryFormCancelButton').click();
-  }
+  cy.contains(SAVE_QUERY_CONFLICT_NAME_ERROR_TEXT).should('be.visible');
+  // Two references to two buttons layered over each other.
+  cy.getElementByTestId('euiFlyoutCloseButton').first().click({ force: true });
 };

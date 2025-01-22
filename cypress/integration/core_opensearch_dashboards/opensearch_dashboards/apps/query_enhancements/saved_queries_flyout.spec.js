@@ -95,7 +95,7 @@ export const runSavedQueriesFlyoutUITests = () => {
           setQueryConfigurations(config);
           verifyDiscoverPageState(config);
 
-          cy.saveQuery(config.saveName, ' ', true, true, true);
+          cy.saveQuery(config.saveName, ' ', true, true);
         });
       });
     });
@@ -110,14 +110,14 @@ export const runSavedQueriesFlyoutUITests = () => {
             'Aug 30, 2020 @ 00:00:00.000'
           );
 
-          cy.loadSaveQuery(config.saveName, true);
+          cy.loadSaveQuery(config.saveName);
           // wait for saved queries to load.
           cy.wait(2000);
           verifyDiscoverPageState(config);
         });
 
         it(`should update the loaded saved query: ${config.testName}`, () => {
-          updateAndVerifySavedQuery(config, true);
+          updateAndVerifySavedQuery(config);
         });
 
         const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
@@ -130,10 +130,10 @@ export const runSavedQueriesFlyoutUITests = () => {
           setQueryConfigurations(config);
           verifyDiscoverPageState(config);
           validateSaveAsNewQueryMatchingNameHasError(config.saveName);
-          cy.updateSaveQuery(saveAsNewQueryName, true, true, true, true);
+          cy.updateSaveQuery(saveAsNewQueryName, true, true, true);
 
           cy.reload();
-          cy.loadSaveQuery(saveAsNewQueryName, true);
+          cy.loadSaveQuery(saveAsNewQueryName);
           // wait for saved query to load
           cy.wait(2000);
           verifyDiscoverPageState(config);
@@ -146,8 +146,8 @@ export const runSavedQueriesFlyoutUITests = () => {
             isEnhancement: true,
           });
 
-          cy.deleteSaveQuery(saveAsNewQueryName, true);
-          verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName, true);
+          cy.deleteSaveQuery(saveAsNewQueryName);
+          verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName);
         });
       });
     });

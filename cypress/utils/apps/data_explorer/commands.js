@@ -145,78 +145,50 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
   'updateSaveQuery',
-  (
-    name = '',
-    saveAsNewQuery = false,
-    includeFilters = true,
-    includeTimeFilter = false,
-    savedQueriesNewUIEnabled = true
-  ) => {
+  (name = '', saveAsNewQuery = false, includeFilters = true, includeTimeFilter = false) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
       cy.getElementByTestId('saved-query-management-popover-button').click();
     });
-    if (savedQueriesNewUIEnabled) {
-      cy.getElementByTestId('saved-query-management-save-button').click();
+    cy.getElementByTestId('saved-query-management-save-button').click();
 
-      if (saveAsNewQuery) {
-        cy.getElementByTestId('saveAsNewQueryCheckbox')
-          .parent()
-          .find('[class="euiCheckbox__label"]')
-          .click();
-        cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
+    if (saveAsNewQuery) {
+      cy.getElementByTestId('saveAsNewQueryCheckbox')
+        .parent()
+        .find('[class="euiCheckbox__label"]')
+        .click();
+      cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
 
-        // Selecting the saveAsNewQuery element deselects the include time filter option.
-        if (includeTimeFilter === true) {
-          cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
-        }
-      } else if (saveAsNewQuery === false) {
-        // defaults to not selected.
-
-        if (includeTimeFilter !== true) {
-          cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
-        }
-      }
-
-      if (includeFilters !== true) {
-        // Always defaults to selected.
-        cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
-      }
-
-      // The force is necessary as there is occasionally a popover that covers the button
-      cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-      cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
-    } else {
-      if (saveAsNewQuery) {
-        cy.getElementByTestId('saved-query-management-save-as-new-button').click();
-        cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
-      } else {
-        cy.getElementByTestId('saved-query-management-save-changes-button').click();
-      }
+      // Selecting the saveAsNewQuery element deselects the include time filter option.
       if (includeTimeFilter === true) {
         cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
       }
-      if (includeFilters !== true) {
-        // Always defaults to selected.
-        cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+    } else if (saveAsNewQuery === false) {
+      // defaults to not selected.
+
+      if (includeTimeFilter !== true) {
+        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
       }
-      cy.getElementByTestId('savedQueryFormSaveButton').click();
     }
+
+    if (includeFilters !== true) {
+      // Always defaults to selected.
+      cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+    }
+
+    // The force is necessary as there is occasionally a popover that covers the button
+    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
   }
 );
 
-Cypress.Commands.add('loadSaveQuery', (name, savedQueriesNewUIEnabled = true) => {
-  if (savedQueriesNewUIEnabled) {
-    cy.getElementByTestId('saved-query-management-popover-button').click();
+Cypress.Commands.add('loadSaveQuery', (name) => {
+  cy.getElementByTestId('saved-query-management-popover-button').click();
 
-    cy.getElementByTestId('saved-query-management-open-button').click();
+  cy.getElementByTestId('saved-query-management-open-button').click();
 
-    cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
+  cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
 
-    cy.getElementByTestId('open-query-action-button').click();
-  } else {
-    cy.getElementByTestId('saved-query-management-popover-button').click();
-    cy.getElementByTestId('save-query-panel').contains(name).should('exist').click();
-  }
+  cy.getElementByTestId('open-query-action-button').click();
 });
 
 Cypress.Commands.add('clearSaveQuery', () => {
@@ -227,26 +199,17 @@ Cypress.Commands.add('clearSaveQuery', () => {
   cy.getElementByTestId('saved-query-management-clear-button').click();
 });
 
-Cypress.Commands.add('deleteSaveQuery', (name, savedQueriesNewUIEnabled = true) => {
-  if (savedQueriesNewUIEnabled) {
-    cy.getElementByTestId('saved-query-management-popover-button').click();
+Cypress.Commands.add('deleteSaveQuery', (name) => {
+  cy.getElementByTestId('saved-query-management-popover-button').click();
 
-    cy.getElementByTestId('saved-query-management-open-button').click();
-    cy.getElementByTestId('euiFlyoutCloseButton')
-      .parent()
-      .contains(name)
-      .findElementByTestId('deleteSavedQueryButton')
-      .click();
+  cy.getElementByTestId('saved-query-management-open-button').click();
+  cy.getElementByTestId('euiFlyoutCloseButton')
+    .parent()
+    .contains(name)
+    .findElementByTestId('deleteSavedQueryButton')
+    .click();
 
-    cy.getElementByTestId('confirmModalConfirmButton').click();
-  } else {
-    cy.getElementByTestId('saved-query-management-popover-button').click();
-
-    cy.getElementByTestIdLike(`delete-saved-query-${name}-button`).click({
-      force: true,
-    });
-    cy.getElementByTestId('confirmModalConfirmButton').click();
-  }
+  cy.getElementByTestId('confirmModalConfirmButton').click();
 });
 
 Cypress.Commands.add('switchDiscoverTable', (name) => {
