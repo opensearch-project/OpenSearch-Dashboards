@@ -219,24 +219,20 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     return <QueryControls queryControls={queryControls} />;
   };
 
-  const fetchIndexPattern = async () => {
-    const dataset = queryString.getQuery().dataset;
-    if (!dataset) return undefined;
-    const indexPattern = await getIndexPatterns().get(dataset.id);
-    return indexPattern;
-  };
-
   const provideCompletionItems = async (
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> => {
-    const indexPattern = await fetchIndexPattern();
+    const dataset = queryString.getQuery().dataset;
+    const indexPattern = dataset ? await getIndexPatterns().get(dataset.id) : undefined;
+
     const suggestions = await services.data.autocomplete.getQuerySuggestions({
       query: inputRef.current?.getValue() ?? '',
-      selectionStart: model.getOffsetAt(position),
+      selectionStart: model.getOffsetAt(position), // not needed, position handles same thing. remove
       selectionEnd: model.getOffsetAt(position),
       language: queryRef.current.language,
       indexPattern,
+      datasetType: dataset?.type,
       position,
       services,
     });
@@ -264,7 +260,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
                   range: s.replacePosition ?? defaultRange,
                   detail: s.detail,
                   command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
-                  sortText: s.sortText, // when undefined, the falsy value will default to the label
+                  sortText: s.sortText ?? s.text, // when undefined, the falsy value will default to the label
                 };
               })
           : [],
@@ -310,7 +306,12 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     },
     footerItems: {
       start: [
-        <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterLineCount"
+        >
           {`${lineCount} ${lineCount === 1 ? 'line' : 'lines'}`}
         </EuiText>,
         <EuiText
@@ -330,6 +331,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           size="xs"
           onClick={toggleRecentQueries}
           className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterToggleRecentQueriesButton"
         >
           <EuiText size="xs" color="subdued">
             {'Recent queries'}
@@ -363,10 +365,20 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     prepend: props.prepend,
     footerItems: {
       start: [
-        <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterLineCount"
+        >
           {`${lineCount ?? 1} ${lineCount === 1 || !lineCount ? 'line' : 'lines'}`}
         </EuiText>,
-        <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterTimestamp"
+        >
           {query.dataset?.timeFieldName || ''}
         </EuiText>,
         <QueryResult queryStatus={props.queryStatus!} />,
@@ -379,6 +391,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           size="xs"
           onClick={toggleRecentQueries}
           className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterToggleRecentQueriesButton"
           flush="both"
         >
           <EuiText size="xs" color="subdued">
@@ -410,16 +423,20 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         ref={bannerRef}
         className={classNames('osdQueryEditor__banner', props.bannerClassName)}
       />
-      <div className="osdQueryEditor__topBar">
-        <div className="osdQueryEditor__input">
+      <div className="osdQueryEditor__topBar" data-test-subj="osdQueryEditorTopBar">
+        <div className="osdQueryEditor__input" data-test-subj="osdQueryEditorInput">
           {isCollapsed
             ? languageEditor.TopBar.Collapsed()
             : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
         </div>
         {languageSelector}
-        <div className="osdQueryEditor__querycontrols">
+        <div className="osdQueryEditor__querycontrols" data-test-subj="osdQueryEditorQueryControls">
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-            <div ref={queryControlsContainer} className="osdQueryEditor__extensionQueryControls" />
+            <div
+              ref={queryControlsContainer}
+              className="osdQueryEditor__extensionQueryControls"
+              data-test-subj="osdQueryEditorExtensionQueryControls"
+            />
             {renderQueryControls(languageEditor.TopBar.Controls)}
             {!languageEditor.TopBar.Expanded && renderToggleIcon()}
             {props.savedQueryManagement}
