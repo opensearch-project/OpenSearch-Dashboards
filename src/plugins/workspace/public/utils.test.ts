@@ -809,7 +809,7 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
     ]);
   });
 
-  it('should not merge data connection when mode is OpenSearchConnections', () => {
+  it('should return only OpenSearch connections when mode is OpenSearchConnections', () => {
     const dataSources = [
       {
         id: 'id1',
@@ -854,60 +854,7 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
     ]);
   });
 
-  it('should return only OpenSearch connections when mode is OpenSearchConnections', () => {
-    const dataSources = [
-      {
-        id: 'id1',
-        title: 'title1',
-        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
-        description: '',
-      },
-      {
-        id: 'id2',
-        title: 'title2',
-        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
-        description: '',
-      },
-    ];
-    const directQueryConnections = [
-      {
-        id: 'id3',
-        title: 'title3',
-        name: 'name1',
-        parentId: 'id1',
-        description: 'direct_query_connections_1',
-        type: 'Amazon S3',
-        connectionType: DataSourceConnectionType.DirectQueryConnection,
-      },
-    ];
-    const result = mergeDataSourcesWithConnections(
-      dataSources,
-      directQueryConnections,
-      AssociationDataSourceModalMode.OpenSearchConnections
-    );
-    expect(result).toStrictEqual([
-      {
-        connectionType: 0,
-        description: '',
-        id: 'id1',
-        name: 'title1',
-        relatedConnections: [],
-        type: 'OpenSearch',
-      },
-      {
-        connectionType: 0,
-        description: '',
-        id: 'id2',
-        name: 'title2',
-        relatedConnections: [],
-        type: 'OpenSearch',
-      },
-    ]);
-  });
-
-  it('should not merge data sources or data connections if no direct query connections', () => {
+  it('should not merge data sources if no direct query connections', () => {
     const dataSources = [
       {
         id: 'id1',
