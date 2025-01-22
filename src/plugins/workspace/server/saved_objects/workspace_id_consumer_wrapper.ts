@@ -126,9 +126,6 @@ export class WorkspaceIdConsumerWrapper {
       if (!object.workspaces || object.workspaces.length === 0) {
         return false;
       }
-      if (!!getWorkspaceState(request).isDashboardAdmin) {
-        return true;
-      }
     }
     /*
      * Allow access if the requested workspace matches one of the object's assigned workspaces

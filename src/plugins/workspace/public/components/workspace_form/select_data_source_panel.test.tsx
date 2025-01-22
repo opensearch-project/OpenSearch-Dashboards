@@ -14,30 +14,6 @@ import { DataSourceConnectionType } from '../../../common/types';
 
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
 
-//   {
-//     id: 'ds1-dqc1',
-//     name: 'dqc1',
-//     parentId: 'ds1',
-//     connectionType: DataSourceConnectionType.DirectQueryConnection,
-//     type: 'Amazon S3',
-//   },
-// ];
-// const dataSourceConnectionsMock = [
-//   {
-//     id: 'ds1',
-//     name: 'Data Source 1',
-//     connectionType: DataSourceConnectionType.OpenSearchConnection,
-//     type: 'OpenSearch',
-//     relatedConnections: [],
-//   },
-//   {
-//     id: 'ds2',
-//     name: 'Data Source 2',
-//     connectionType: DataSourceConnectionType.OpenSearchConnection,
-//     type: 'OpenSearch',
-//   },
-// ];
-
 const dataSources = [
   {
     id: 'ds1',
@@ -248,7 +224,7 @@ describe('SelectDataSourcePanel', () => {
           'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
         )
       ).toBeInTheDocument();
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByText('Close'));
     });
     expect(
       queryByText(
