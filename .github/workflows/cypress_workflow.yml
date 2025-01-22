@@ -185,13 +185,11 @@ jobs:
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
 
       - name: Get Cypress version
-        if: ${{ matrix.test_location == 'ftr' }}
         id: cypress_version
         run: |
           echo "name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
 
       - name: Cache Cypress
-        if: ${{ matrix.test_location == 'ftr' }}
         id: cache-cypress
         uses: actions/cache@v1
         with:
