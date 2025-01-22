@@ -10800,9 +10800,11 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
               <div
                 className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--right"
               >
-                <EuiHeaderSectionItem>
+                <EuiHeaderSectionItem
+                  border="none"
+                >
                   <div
-                    className="euiHeaderSectionItem euiHeaderSectionItem--borderLeft"
+                    className="euiHeaderSectionItem"
                   >
                     <HeaderNavControls
                       navControls$={
@@ -20629,9 +20631,11 @@ exports[`Header renders page header with application title 1`] = `
                 </EuiSimplifiedBreadcrumbs>
               </EuiHeaderBreadcrumbs>
             </HeaderBreadcrumbs>
-            <EuiHeaderSectionItem>
+            <EuiHeaderSectionItem
+              border="none"
+            >
               <div
-                className="euiHeaderSectionItem euiHeaderSectionItem--borderLeft"
+                className="euiHeaderSectionItem"
               >
                 <HeaderNavControls
                   navControls$={

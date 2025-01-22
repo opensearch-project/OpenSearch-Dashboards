@@ -506,7 +506,7 @@ export function Header({
     </EuiHeaderSectionItem>
   );
   const renderNewPrimaryHeaderRight = () => (
-    <EuiHeaderSectionItem>
+    <EuiHeaderSectionItem border="none">
       <HeaderNavControls navControls$={observables.navControlsNewPrimaryHeaderRight$} />
     </EuiHeaderSectionItem>
   );
