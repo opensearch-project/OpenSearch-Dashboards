@@ -26,9 +26,9 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
     });
 
     // Create workspace and set up index pattern
-    cy.deleteWorkspaceByName(`${workspace}`);
+    cy.deleteWorkspaceByName(workspace);
     cy.visit('/app/home');
-    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
+    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
 
     // Create and select index pattern for data_logs_small_time_1*
     cy.createWorkspaceIndexPatterns({
