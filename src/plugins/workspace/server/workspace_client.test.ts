@@ -15,7 +15,11 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
-import { SavedObjectsServiceStart, SavedObjectsClientContract } from '../../../core/server';
+import {
+  SavedObjectsServiceStart,
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+} from '../../../core/server';
 import { IRequestDetail } from './types';
 
 const coreSetup = coreMock.createSetup();
@@ -33,7 +37,8 @@ jest.mock('./utils', () => ({
     { type: 'data-connection', id: 'id1' },
     { type: 'data-connection', id: 'id2' },
   ]),
-  checkAndSetDefaultDataSource: (...args) => mockCheckAndSetDefaultDataSource(...args),
+  checkAndSetDefaultDataSource: (...args: [IUiSettingsClient, string[], boolean]) =>
+    mockCheckAndSetDefaultDataSource(...args),
 }));
 
 describe('#WorkspaceClient', () => {
@@ -123,6 +128,38 @@ describe('#WorkspaceClient', () => {
       ['id2'],
       false
     );
+  });
+
+  it('create# should call find when maximum workspaces are set', async () => {
+    const client = new WorkspaceClient(coreSetup, logger, {
+      maximum_workspaces: 1,
+    });
+    client?.setSavedObjects(savedObjects);
+
+    find.mockImplementation((findParams) => {
+      if (!findParams.search) {
+        return {
+          total: 1,
+        };
+      }
+
+      return {};
+    });
+
+    const createResult = await client.create(mockRequestDetail, {
+      name: mockWorkspaceName,
+      permissions: {},
+      dataSources: [],
+      dataConnections: [],
+    });
+
+    expect(createResult).toEqual({
+      success: false,
+      error: 'Maximum number of workspaces (1) reached',
+    });
+
+    expect(find).toHaveBeenCalledTimes(2);
+    find.mockClear();
   });
 
   it('update# should not call addToWorkspaces if no new data sources and data connections added', async () => {

@@ -31,9 +31,9 @@ describe('No Index Pattern Check Test', () => {
       authType: 'no_auth',
     });
     // Create workspace
-    cy.deleteWorkspaceByName(`${workspace}`);
+    cy.deleteWorkspaceByName(workspace);
     cy.visit('/app/home');
-    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
+    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
     cy.wait(2000);
   });
 
