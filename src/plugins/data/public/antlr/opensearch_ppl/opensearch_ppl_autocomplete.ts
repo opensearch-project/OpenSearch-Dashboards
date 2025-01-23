@@ -4,7 +4,7 @@
  */
 
 import * as c3 from 'antlr4-c3';
-import { ParseTree, TokenStream } from 'antlr4ng';
+import { ParseTree, Token, TokenStream } from 'antlr4ng';
 import {
   AutocompleteData,
   AutocompleteResultBase,
@@ -16,6 +16,7 @@ import {
 } from '../shared/types';
 import { OpenSearchPPLLexer } from './.generated/OpenSearchPPLLexer';
 import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
+import { removePotentialBackticks } from '../shared/utils';
 
 // These are keywords that we do not want to show in autocomplete
 export function getIgnoredTokens(): number[] {
@@ -36,16 +37,19 @@ export function getIgnoredTokens(): number[] {
     OpenSearchPPLParser.COMMA,
     OpenSearchPPLParser.PLUS,
     OpenSearchPPLParser.MINUS,
-    // OpenSearchPPLParser.EQUAL,
-    // OpenSearchPPLParser.NOT_EQUAL,
-    // OpenSearchPPLParser.LESS,
-    // OpenSearchPPLParser.NOT_LESS,
-    // OpenSearchPPLParser.GREATER,
-    // OpenSearchPPLParser.NOT_GREATER,
-    // OpenSearchPPLParser.OR,
-    // OpenSearchPPLParser.AND,
-    // OpenSearchPPLParser.XOR,
-    // OpenSearchPPLParser.NOT,
+    OpenSearchPPLParser.EQUAL,
+    OpenSearchPPLParser.NOT_EQUAL,
+    OpenSearchPPLParser.LESS,
+    OpenSearchPPLParser.NOT_LESS,
+    OpenSearchPPLParser.GREATER,
+    OpenSearchPPLParser.NOT_GREATER,
+    OpenSearchPPLParser.OR,
+    OpenSearchPPLParser.AND,
+    OpenSearchPPLParser.XOR,
+    OpenSearchPPLParser.NOT,
+    OpenSearchPPLParser.LT_PRTHS,
+    OpenSearchPPLParser.RT_PRTHS,
+    OpenSearchPPLParser.IN,
   ];
   for (let i = firstFunctionIndex; i <= lastFunctionIndex; i++) {
     if (!operatorsToInclude.includes(i)) {
@@ -64,6 +68,13 @@ const tokenDictionary: any = {
   CLOSING_BRACKET: OpenSearchPPLParser.RT_PRTHS,
   SEARCH: OpenSearchPPLParser.SEARCH,
   SOURCE: OpenSearchPPLParser.SOURCE,
+  PIPE: OpenSearchPPLParser.PIPE,
+  ID: OpenSearchPPLParser.ID,
+  EQUAL: OpenSearchPPLParser.EQUAL,
+  IN: OpenSearchPPLParser.IN,
+  COMMA: OpenSearchPPLParser.COMMA,
+  BACKTICK_QUOTE: OpenSearchPPLParser.BQUOTA_STRING,
+  DOT: OpenSearchPPLParser.DOT,
 };
 
 const rulesToVisit = new Set([
@@ -78,6 +89,11 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_multiFieldRelevanceFunctionName,
   OpenSearchPPLParser.RULE_positionFunctionName,
   OpenSearchPPLParser.RULE_evalFunctionName,
+  OpenSearchPPLParser.RULE_literalValue,
+  OpenSearchPPLParser.RULE_integerLiteral,
+  OpenSearchPPLParser.RULE_decimalLiteral,
+  OpenSearchPPLParser.RULE_keywordsCanBeId,
+  OpenSearchPPLParser.RULE_renameClasue,
 ]);
 
 export function processVisitedRules(
@@ -88,9 +104,16 @@ export function processVisitedRules(
   let suggestSourcesOrTables: OpenSearchPplAutocompleteResult['suggestSourcesOrTables'];
   let suggestAggregateFunctions = false;
   let shouldSuggestColumns = false;
+  let suggestValuesForColumn: string | undefined;
+  let suggestRenameAs = false;
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
+      case OpenSearchPPLParser.RULE_integerLiteral:
+      case OpenSearchPPLParser.RULE_decimalLiteral:
+      case OpenSearchPPLParser.RULE_keywordsCanBeId: {
+        break;
+      }
       case OpenSearchPPLParser.RULE_statsFunctionName: {
         suggestAggregateFunctions = true;
         break;
@@ -101,6 +124,84 @@ export function processVisitedRules(
       }
       case OpenSearchPPLParser.RULE_tableIdent: {
         suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
+        break;
+      }
+      case OpenSearchPPLParser.RULE_renameClasue: {
+        // if we're in the rename rule, we're either suggesting
+        // field first token
+        // 'as' second token
+        // nothing third token, because it should be user specified
+
+        const expressionStart = rule.startTokenIndex;
+        if (expressionStart === cursorTokenIndex) {
+          shouldSuggestColumns = true;
+          break;
+        }
+
+        if (expressionStart + 2 === cursorTokenIndex) {
+          suggestRenameAs = true;
+          break;
+        }
+
+        break;
+      }
+      case OpenSearchPPLParser.RULE_literalValue: {
+        // on its own, this rule would be triggered for relevance expressions and span. span
+        // has its own rule, and relevance ....
+        // todo: create span rule
+        // todo: check if relevance expressions have incorrect behavior here
+        let currentIndex = cursorTokenIndex - 1;
+
+        // get the last token that appears other than whitespace
+        const lastToken =
+          tokenStream.get(currentIndex).type === tokenDictionary.SPACE
+            ? tokenStream.get(currentIndex - 1)
+            : tokenStream.get(currentIndex);
+
+        // we only want to get the value if the very last token before WS is =, or
+        // if its paren/comma and we pass by IN later. we don't need to check that we pass IN
+        // because there is no valid syntax that will encounter the literal value rule with the
+        // tokens '(' or ','
+        if (
+          ![tokenDictionary.EQUAL, tokenDictionary.OPENING_BRACKET, tokenDictionary.COMMA].includes(
+            lastToken.type
+          )
+        ) {
+          break;
+        }
+
+        const validIDToken = (token: Token) => {
+          return token.type === tokenDictionary.ID || token.type === tokenDictionary.BACKTICK_QUOTE;
+        };
+
+        while (currentIndex > -1) {
+          const token = tokenStream.get(currentIndex);
+          if (!token || token.type === tokenDictionary.PIPE) {
+            break;
+          }
+
+          // NOTE: according to grammar, backticks in PPL are only possible for fields
+          if (validIDToken(token)) {
+            let combinedText = token.text ?? '';
+
+            // stitch together IDs separated by DOTs
+            let lookBehindIndex = currentIndex;
+            while (lookBehindIndex > -1) {
+              lookBehindIndex--;
+              const prevToken = tokenStream.get(lookBehindIndex);
+              if (!prevToken || prevToken.type !== tokenDictionary.DOT) {
+                break;
+              }
+              lookBehindIndex--;
+              combinedText = `${tokenStream.get(lookBehindIndex).text ?? ''}.${combinedText}`;
+            }
+
+            suggestValuesForColumn = removePotentialBackticks(combinedText);
+            break;
+          }
+          currentIndex--;
+        }
+        break;
       }
     }
   }
@@ -109,6 +210,8 @@ export function processVisitedRules(
     suggestSourcesOrTables,
     suggestAggregateFunctions,
     shouldSuggestColumns,
+    suggestValuesForColumn,
+    suggestRenameAs,
   };
 }
 
@@ -145,7 +248,7 @@ export function enrichAutocompleteResult(
   const result: OpenSearchPplAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
-    suggestColumns: shouldSuggestColumns ? ({ name: '' } as TableContextSuggestion) : undefined,
+    suggestColumns: shouldSuggestColumns ? ({} as TableContextSuggestion) : undefined,
   };
   return result;
 }

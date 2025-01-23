@@ -48,6 +48,7 @@ export type QuerySuggestionGetFn = (
 export interface QuerySuggestionGetFnArgs {
   language: string;
   indexPattern: IndexPattern | undefined;
+  datasetType?: string;
   query: string;
   selectionStart: number;
   selectionEnd: number;
