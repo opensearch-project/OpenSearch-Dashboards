@@ -310,7 +310,12 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     },
     footerItems: {
       start: [
-        <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterLineCount"
+        >
           {`${lineCount} ${lineCount === 1 ? 'line' : 'lines'}`}
         </EuiText>,
         <EuiText
@@ -330,6 +335,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           size="xs"
           onClick={toggleRecentQueries}
           className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterToggleRecentQueriesButton"
         >
           <EuiText size="xs" color="subdued">
             {'Recent queries'}
@@ -363,10 +369,20 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     prepend: props.prepend,
     footerItems: {
       start: [
-        <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterLineCount"
+        >
           {`${lineCount ?? 1} ${lineCount === 1 || !lineCount ? 'line' : 'lines'}`}
         </EuiText>,
-        <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterTimestamp"
+        >
           {query.dataset?.timeFieldName || ''}
         </EuiText>,
         <QueryResult queryStatus={props.queryStatus!} />,
@@ -379,6 +395,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           size="xs"
           onClick={toggleRecentQueries}
           className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterToggleRecentQueriesButton"
           flush="both"
         >
           <EuiText size="xs" color="subdued">
@@ -410,16 +427,20 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         ref={bannerRef}
         className={classNames('osdQueryEditor__banner', props.bannerClassName)}
       />
-      <div className="osdQueryEditor__topBar">
-        <div className="osdQueryEditor__input">
+      <div className="osdQueryEditor__topBar" data-test-subj="osdQueryEditorTopBar">
+        <div className="osdQueryEditor__input" data-test-subj="osdQueryEditorInput">
           {isCollapsed
             ? languageEditor.TopBar.Collapsed()
             : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
         </div>
         {languageSelector}
-        <div className="osdQueryEditor__querycontrols">
+        <div className="osdQueryEditor__querycontrols" data-test-subj="osdQueryEditorQueryControls">
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-            <div ref={queryControlsContainer} className="osdQueryEditor__extensionQueryControls" />
+            <div
+              ref={queryControlsContainer}
+              className="osdQueryEditor__extensionQueryControls"
+              data-test-subj="osdQueryEditorExtensionQueryControls"
+            />
             {renderQueryControls(languageEditor.TopBar.Controls)}
             {!languageEditor.TopBar.Expanded && renderToggleIcon()}
             {props.savedQueryManagement}
