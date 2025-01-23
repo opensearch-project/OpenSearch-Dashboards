@@ -1,0 +1,23 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "timestamp-nanos",
+    "source": {
+      "timestamp": "2019-01-01T12:10:30.123456789Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "timestamp-nanos",
+    "source": {
+      "timestamp": "2019-01-01T12:10:30.123498765Z"
+    },
+    "type": "_doc"
+  }
+}

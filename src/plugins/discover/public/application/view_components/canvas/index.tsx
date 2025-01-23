@@ -135,6 +135,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       hasShadow={false}
       paddingSize="s"
       className="dscCanvas"
+      data-test-subj="dscCanvas"
       borderRadius="l"
     >
       <TopNav
@@ -173,7 +174,12 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
                 <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
               </>
             ) : (
-              <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
+              <EuiPanel
+                hasShadow={false}
+                paddingSize="none"
+                className="dscCanvas_results"
+                data-test-subj="dscCanvasResults"
+              >
                 <MemoizedDiscoverChartContainer {...fetchState} />
                 <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
               </EuiPanel>

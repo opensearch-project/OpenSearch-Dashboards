@@ -123,6 +123,7 @@ describe('CreateExtension', () => {
     `);
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
       query: { dataSourceId: 'mock-data-source-id2' },
+      signal: new AbortController().signal,
     });
   });
 
