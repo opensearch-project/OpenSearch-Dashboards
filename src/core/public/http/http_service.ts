@@ -62,7 +62,15 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
       injectedMetadata.getServerBasePath(),
       clientBasePath
     );
+    const basePathWithoutClientBasePath = new BasePath(
+      injectedMetadata.getBasePath(),
+      injectedMetadata.getServerBasePath()
+    );
     const fetchService = new Fetch({ basePath, opensearchDashboardsVersion });
+    const fetchServiceWithoutClientBasePath = new Fetch({
+      basePath: basePathWithoutClientBasePath,
+      opensearchDashboardsVersion,
+    });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
     loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
 
@@ -78,6 +86,9 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
       patch: fetchService.patch.bind(fetchService),
       post: fetchService.post.bind(fetchService),
       put: fetchService.put.bind(fetchService),
+      getWithoutClient: fetchServiceWithoutClientBasePath.get.bind(
+        fetchServiceWithoutClientBasePath
+      ),
       ...loadingCount,
     };
 

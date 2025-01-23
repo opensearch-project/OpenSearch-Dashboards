@@ -67,6 +67,8 @@ export interface HttpSetup {
   post: HttpHandler;
   /** Makes an HTTP request with the PUT method. See {@link HttpHandler} for options. */
   put: HttpHandler;
+  /** Makes an HTTP request with the GET method. But without clientBasePath See {@link HttpHandler} for options. */
+  getWithoutClient: HttpHandler;
 
   /**
    * Adds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are
