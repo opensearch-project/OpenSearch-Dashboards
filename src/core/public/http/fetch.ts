@@ -40,6 +40,7 @@ import {
   HttpFetchOptions,
   HttpResponse,
   HttpFetchOptionsWithPath,
+  PrependOptions,
 } from './types';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
@@ -148,10 +149,19 @@ export class Fetch {
       }),
     };
 
-    const url = format({
-      pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
-      query: removedUndefined(query),
-    });
+    let url;
+    if (options.headers?.withoutClientBasePath) {
+      const theoptions: PrependOptions = { withoutClientBasePath: true };
+      url = format({
+        pathname: this.params.basePath.remove(options.path, theoptions),
+        query: removedUndefined(query),
+      });
+    } else {
+      url = format({
+        pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
+        query: removedUndefined(query),
+      });
+    }
 
     // Make sure the system request header is only present if `asSystemRequest` is true.
     if (asSystemRequest) {
