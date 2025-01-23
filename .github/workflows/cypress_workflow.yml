@@ -77,11 +77,11 @@ jobs:
           - group: 9
             config: standard
             test_location: ftr
-          # Query enhanced tests
+          # Dashboard tests with query enhanced
           - group: 10
             config: query_enhanced
-            test_location: ftr
-          # Dashboard tests
+            test_location: source
+          # Dashboard tests with no query enhanced
           - group: 11
             config: dashboard
             test_location: source
@@ -90,7 +90,7 @@ jobs:
       options: --user 1001
     env:
       START_CMD: ${{ matrix.config == 'query_enhanced' &&
-        'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --opensearch.ignoreVersionMismatch=true' ||
+        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true' ||
         matrix.config == 'dashboard' &&
         'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true' ||
         'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false' }}
@@ -171,18 +171,16 @@ jobs:
             FORMATTED_SPEC+="cypress/integration/core-opensearch-dashboards/opensearch-dashboards/${i},"
           done
           echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
+          echo "SPEC=${FORMATTED_SPEC}"
 
       # Setup spec files for Dashboards in-house cypress tests
       - name: Setup spec files for Dashboards tests
         if: ${{ inputs.specs == '' && matrix.test_location == 'source' }}
         shell: bash
         run: |
-          IFS="," read -a SPEC_ARRAY <<< $(yarn --silent osd:ciGroup${{ matrix.group }})
-          DASHBOARDS_SPEC=''
-          for i in "${SPEC_ARRAY[@]}"; do
-          DASHBOARDS_SPEC+="cypress/integration/core_opensearch_dashboards/${i},"
-          done
+          DASHBOARDS_SPEC="$(yarn --silent osd:ciGroup${{ matrix.group }})"
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
+          echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 
       - name: Get Cypress version
         id: cypress_version
@@ -201,8 +199,8 @@ jobs:
       - run: npx cypress cache path
 
       # Run tests based on configuration
-      - name: Run FT repo tests with no query enhancements
-        if: matrix.test_location == 'ftr' && matrix.config == 'standard'
+      - name: Run FT repo tests
+        if: matrix.test_location == 'ftr'
         uses: cypress-io/github-action@v2
         with:
           working-directory: ${{ env.FTR_PATH }}
@@ -211,39 +209,30 @@ jobs:
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       - name: Download OpenSearch
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced'
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
           url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
 
       - name: Extract OpenSearch
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced'
         run: |
           tar -xzf opensearch-*.tar.gz
           rm -f opensearch-*.tar.gz
         shell: bash
 
       - name: Remove security plugin
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced'
         run: |
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
         shell: bash
 
       - name: Run OpenSearch
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced'
         run: |
           /bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"
           sleep 30
         shell: bash
-
-      - name: Run FT repo tests with query enhancements
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
-        uses: cypress-io/github-action@v2
-        with:
-          working-directory: ${{ env.FTR_PATH }}
-          start: ${{ env.START_CMD }}
-          wait-on: 'http://localhost:9200, http://localhost:5601'
-          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       # Clear Cypress Cache before running Dashboards tests
       - name: Clear Cypress Cache
@@ -251,8 +240,16 @@ jobs:
         run: npx cypress cache clear
 
       # Run Dashboards Cypress tests within the source repo
-      - name: Run Dashboards Cypress tests
-        if: matrix.test_location == 'source'
+      - name: Run Dashboards Cypress tests with query enhancements
+        if: matrix.test_location == 'source' && matrix.config == 'query_enhanced'
+        uses: cypress-io/github-action@v6
+        with:
+          install-command: npx cypress install --force
+          start: ${{ env.START_CMD }}
+          wait-on: 'http://localhost:9200, http://localhost:5601'
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
+      - name: Run Dashboards Cypress tests without query enhancements
+        if: matrix.test_location == 'source' && matrix.config == 'dashboard'
         uses: cypress-io/github-action@v6
         with:
           install-command: npx cypress install --force

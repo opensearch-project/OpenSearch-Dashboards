@@ -36,10 +36,11 @@ const TableCellUI = ({
     <>
       <span
         className="osdDocTableCell__dataField"
+        data-test-subj="osdDocTableCellDataField"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
       />
-      <span className="osdDocTableCell__filter">
+      <span className="osdDocTableCell__filter" data-test-subj="osdDocTableCellFilter">
         <EuiToolTip
           content={i18n.translate('discover.filterForValue', {
             defaultMessage: 'Filter for value',

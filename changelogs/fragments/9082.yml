@@ -1,0 +1,2 @@
+test:
+- Re-enable dataset_selector.spec.js under workspace in ciGroup10 ([#9082](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9082))

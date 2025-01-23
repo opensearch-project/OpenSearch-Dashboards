@@ -55,6 +55,7 @@ export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounter
       <EuiFlexGroup
         gutterSize="s"
         className="dscResultCount"
+        data-test-subj="dscResultCount"
         responsive={false}
         justifyContent="center"
         alignItems="center"

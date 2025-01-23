@@ -225,6 +225,7 @@ export function SavedQueryManagementComponent({
           label={i18n.translate('data.saved_query_management.save_query_item_label', {
             defaultMessage: 'Save query',
           })}
+          data-test-subj="saved-query-management-save-button"
           iconType="save"
           onClick={() => {
             closeMenuPopover();
@@ -246,6 +247,7 @@ export function SavedQueryManagementComponent({
           label={i18n.translate('data.saved_query_management.open_query_item_label', {
             defaultMessage: 'Open query',
           })}
+          data-test-subj="saved-query-management-open-button"
           iconType="folderOpen"
           onClick={() => {
             closeMenuPopover();
@@ -274,13 +276,19 @@ export function SavedQueryManagementComponent({
       </EuiPopoverTitle>
       {savedQueries.length > 0 ? (
         <Fragment>
-          <EuiText size="s" color="subdued" className="osdSavedQueryManagement__text">
+          <EuiText
+            size="s"
+            color="subdued"
+            className="osdSavedQueryManagement__text"
+            data-test-subj="osdSavedQueryManagementText"
+          >
             <p>{savedQueryDescriptionText}</p>
           </EuiText>
           <div className="osdSavedQueryManagement__listWrapper">
             <EuiListGroup
               flush={true}
               className="osdSavedQueryManagement__list"
+              data-test-subj="osdSavedQueryManagementList"
               aria-labelledby={'savedQueryManagementPopoverTitle'}
             >
               {savedQueryRows()}
@@ -288,6 +296,7 @@ export function SavedQueryManagementComponent({
           </div>
           <EuiPagination
             className="osdSavedQueryManagement__pagination"
+            data-test-subj="osdSavedQueryManagementPagination"
             pageCount={Math.ceil(count / perPage)}
             activePage={activePage}
             onPageClick={goToPage}
@@ -295,7 +304,12 @@ export function SavedQueryManagementComponent({
         </Fragment>
       ) : (
         <Fragment>
-          <EuiText size="s" color="subdued" className="osdSavedQueryManagement__text">
+          <EuiText
+            size="s"
+            color="subdued"
+            className="osdSavedQueryManagement__text"
+            data-test-subj="osdSavedQueryManagementNoSavedQueryText"
+          >
             <p>{noSavedQueriesDescriptionText}</p>
           </EuiText>
           <EuiSpacer size="s" />

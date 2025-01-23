@@ -56,7 +56,7 @@ export function DocViewTable({
   }
 
   return (
-    <table className="table table-condensed osdDocViewerTable">
+    <table className="table table-condensed osdDocViewerTable" data-test-subj="osdDocViewerTable">
       <tbody>
         {Object.keys(flattened)
           .sort()

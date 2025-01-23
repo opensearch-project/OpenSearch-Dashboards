@@ -198,6 +198,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           <EuiFlexGroup
             alignItems="center"
             className="dscHistogram__header--partial"
+            data-test-subj="dscHistogramHeader"
             responsive={false}
             gutterSize="xs"
           >

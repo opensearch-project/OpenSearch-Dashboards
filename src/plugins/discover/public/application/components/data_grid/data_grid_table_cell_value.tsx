@@ -36,7 +36,10 @@ export function fetchSourceTypeDataCell(
     <EuiDescriptionList type="inline" compressed className="source">
       {keys.map((key, index) => (
         <Fragment key={key}>
-          <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
+          <EuiDescriptionListTitle
+            className="osdDescriptionListFieldTitle"
+            data-test-subj="dscDataGridTableCellListFieldTitle"
+          >
             {key + ':'}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription

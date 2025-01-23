@@ -129,8 +129,8 @@ export const SurroundingDocsView = ({ id, indexPattern }: SurroundingDocsViewPar
         indexPatterns={[indexPattern]}
         useDefaultBehaviors={true}
       />
-      <EuiPage className="discover.context.appPage">
-        <EuiPageContent paddingSize="s" className="dscDocsContent">
+      <EuiPage className="discover.context.appPage" data-test-subj="discoverAppPage">
+        <EuiPageContent paddingSize="s" className="dscDocsContent" data-test-subj="dscDocsContent">
           {contextAppMemoized}
         </EuiPageContent>
       </EuiPage>

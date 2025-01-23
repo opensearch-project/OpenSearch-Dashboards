@@ -152,6 +152,7 @@ export const DatasetExplorer = ({
       <EuiModalBody>
         <div
           className="datasetExplorer"
+          data-test-subj="datasetExplorerWindow"
           style={{
             gridTemplateColumns: `repeat(${
               columnCount - 1
@@ -168,7 +169,11 @@ export const DatasetExplorer = ({
                   isFinal ? ' datasetExplorer__column--leaf' : ''
                 }`}
               >
-                <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+                <EuiTitle
+                  size="xxs"
+                  className="datasetExplorer__columnTitle"
+                  data-test-subj="datasetExplorerColumnTitle"
+                >
                   <h3>{current.columnHeader}</h3>
                 </EuiTitle>
                 {current.multiSelect ? (
@@ -209,6 +214,7 @@ export const DatasetExplorer = ({
                     })}
                     height="full"
                     className="datasetExplorer__selectable"
+                    data-test-subj="datasetExplorerSelectable"
                   >
                     {(list, search) => (
                       <>
@@ -251,16 +257,29 @@ export const DatasetExplorer = ({
 };
 
 const EmptyColumn = () => (
-  <div className="datasetExplorer__column datasetExplorer__column--empty" />
+  <div
+    className="datasetExplorer__column datasetExplorer__column--empty"
+    data-test-subj="datasetExplorerEmptyColumn"
+  />
 );
 
 const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
   isLoading ? (
-    <div className="datasetExplorer__column">
-      <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+    <div className="datasetExplorer__column" data-test-subj="datasetExplorerLoadingColumn">
+      <EuiTitle
+        size="xxs"
+        className="datasetExplorer__columnTitle"
+        data-test-subj="datasetExplorerLoadingColumnTitle"
+      >
         <h3>...</h3>
       </EuiTitle>
-      <EuiSelectable options={[]} singleSelection className="datasetExplorer__selectable" isLoading>
+      <EuiSelectable
+        options={[]}
+        singleSelection
+        className="datasetExplorer__selectable"
+        isLoading
+        data-test-subj="datasetExplorerSelectable"
+      >
         {(list) => <>{list}</>}
       </EuiSelectable>
     </div>
