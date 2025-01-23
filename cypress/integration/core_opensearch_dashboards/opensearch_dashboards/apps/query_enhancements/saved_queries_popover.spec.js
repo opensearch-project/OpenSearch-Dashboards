@@ -51,7 +51,7 @@ export const runSavedQueriesPopoverUITests = () => {
       // Create workspace
       cy.deleteWorkspaceByName(workspaceName);
       cy.visit('/app/home');
-      cy.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
