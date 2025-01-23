@@ -315,7 +315,10 @@ export function DiscoverFieldSearch({
 
   if (isEnhancementsEnabledOverride) {
     return (
-      <div className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdDiscoverSideBar__wrap">
+      <div
+        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdDiscoverSideBar__wrap"
+        data-test-subj="osdDiscoverSideBarWrapper"
+      >
         {compressedFieldSearch}
         {fieldPopover}
       </div>

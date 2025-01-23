@@ -134,7 +134,7 @@ export function SavedQueryCard({
       >
         <EuiFlexGroup gutterSize="s" alignItems="flexStart">
           <EuiFlexItem>
-            <div className="editor-container">
+            <div className="editor-container" data-test-subj="editorContainer">
               <MonacoEditor
                 height={editorHeight}
                 language={savedQuery.attributes.query.language} // Change to the appropriate language
@@ -149,7 +149,11 @@ export function SavedQueryCard({
               />
               {shouldTruncate && (
                 <div className={isTruncated ? 'read-more-wrap' : ''}>
-                  <EuiLink className="read-more-btn" onClick={toggleView}>
+                  <EuiLink
+                    className="read-more-btn"
+                    onClick={toggleView}
+                    data-test-subj="readMoreButton"
+                  >
                     {i18n.translate('data.saved_query.view_more_label', {
                       defaultMessage: '{viewMoreLabel}',
                       values: {
