@@ -261,7 +261,7 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const recentlyAccessed = await this.recentlyAccessed.start({ http, workspaces });
+    const recentlyAccessed = await this.recentlyAccessed.start({ http, workspaces, application });
     const docTitle = this.docTitle.start({ document: window.document });
     const navGroup = await this.navGroup.start({
       navLinks,
@@ -392,6 +392,7 @@ export class ChromeService {
           navControlsExpandedCenter$={navControls.getExpandedCenter$()}
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           navControlsLeftBottom$={navControls.getLeftBottom$()}
+          navControlsPrimaryHeaderRight$={navControls.getPrimaryHeaderRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}

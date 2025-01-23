@@ -6,12 +6,13 @@
 import { firstValueFrom } from '@osd/std';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
 import { QueryEditorExtensionDependencies, QueryStringContract } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { ConfigSchema } from '../../../common/config';
 import { clearCache, createQueryAssistExtension } from './create_extension';
+import { ResultStatus } from '../../../../discover/public';
 
 const coreSetupMock = coreMock.createSetup({
   pluginStartDeps: {
@@ -23,6 +24,8 @@ const coreSetupMock = coreMock.createSetup({
 const httpMock = coreSetupMock.http;
 const dataMock = dataPluginMock.createSetupContract();
 const queryStringMock = dataMock.query.queryString as jest.Mocked<QueryStringContract>;
+const mockIsQuerySummaryCollapsed$ = new BehaviorSubject(true);
+const mockresultSummaryEnabled$ = new BehaviorSubject(true);
 
 const mockQueryWithIndexPattern = {
   query: '',
@@ -54,6 +57,8 @@ describe('CreateExtension', () => {
     onSelectLanguage: jest.fn(),
     isCollapsed: false,
     setIsCollapsed: jest.fn(),
+    query: mockQueryWithIndexPattern,
+    fetchStatus: ResultStatus.NO_RESULTS,
   };
   afterEach(() => {
     jest.clearAllMocks();
@@ -67,7 +72,13 @@ describe('CreateExtension', () => {
 
   it('should be enabled if at least one language is configured', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
+    const extension = createQueryAssistExtension(
+      coreSetupMock,
+      dataMock,
+      config,
+      mockIsQuerySummaryCollapsed$,
+      mockresultSummaryEnabled$
+    );
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
     expect(isEnabled).toBeTruthy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
@@ -77,7 +88,13 @@ describe('CreateExtension', () => {
 
   it('should be disabled when there is an error', async () => {
     httpMock.get.mockRejectedValueOnce(new Error('network failure'));
-    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
+    const extension = createQueryAssistExtension(
+      coreSetupMock,
+      dataMock,
+      config,
+      mockIsQuerySummaryCollapsed$,
+      mockresultSummaryEnabled$
+    );
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
     expect(isEnabled).toBeFalsy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
@@ -87,7 +104,13 @@ describe('CreateExtension', () => {
 
   it('creates data structure meta', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
+    const extension = createQueryAssistExtension(
+      coreSetupMock,
+      dataMock,
+      config,
+      mockIsQuerySummaryCollapsed$,
+      mockresultSummaryEnabled$
+    );
     const meta = await extension.getDataStructureMeta?.('mock-data-source-id2');
     expect(meta).toMatchInlineSnapshot(`
       Object {
@@ -105,7 +128,13 @@ describe('CreateExtension', () => {
 
   it('does not send multiple requests for the same data source', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
+    const extension = createQueryAssistExtension(
+      coreSetupMock,
+      dataMock,
+      config,
+      mockIsQuerySummaryCollapsed$,
+      mockresultSummaryEnabled$
+    );
     const metas = await Promise.all(
       Array.from({ length: 10 }, () => extension.getDataStructureMeta?.('mock-data-source-id2'))
     );
@@ -116,7 +145,13 @@ describe('CreateExtension', () => {
 
   it('should render the component if language is supported', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
+    const extension = createQueryAssistExtension(
+      coreSetupMock,
+      dataMock,
+      config,
+      mockIsQuerySummaryCollapsed$,
+      mockresultSummaryEnabled$
+    );
     const component = extension.getComponent?.(dependencies);
 
     if (!component) throw new Error('QueryEditorExtensions Component is undefined');
@@ -130,7 +165,13 @@ describe('CreateExtension', () => {
 
   it('should render the banner if language is not supported', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
+    const extension = createQueryAssistExtension(
+      coreSetupMock,
+      dataMock,
+      config,
+      mockIsQuerySummaryCollapsed$,
+      mockresultSummaryEnabled$
+    );
     const banner = extension.getBanner?.({
       ...dependencies,
       language: 'DQL',
@@ -147,7 +188,13 @@ describe('CreateExtension', () => {
 
   it('should not render the summary panel if it is not enabled', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
+    const extension = createQueryAssistExtension(
+      coreSetupMock,
+      dataMock,
+      config,
+      mockIsQuerySummaryCollapsed$,
+      mockresultSummaryEnabled$
+    );
     const component = extension.getComponent?.(dependencies);
 
     if (!component) throw new Error('QueryEditorExtensions Component is undefined');
@@ -165,7 +212,13 @@ describe('CreateExtension', () => {
       supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
       summary: { enabled: true },
     };
-    const extension = createQueryAssistExtension(coreSetupMock, dataMock, modifiedConfig);
+    const extension = createQueryAssistExtension(
+      coreSetupMock,
+      dataMock,
+      modifiedConfig,
+      mockIsQuerySummaryCollapsed$,
+      mockresultSummaryEnabled$
+    );
     const component = extension.getComponent?.(dependencies);
 
     if (!component) throw new Error('QueryEditorExtensions Component is undefined');

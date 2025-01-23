@@ -23,7 +23,6 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../../types';
-
 const formIdentifier = 'EditDataSourceForm';
 const notFoundIdentifier = '[data-test-subj="dataSourceNotFound"]';
 
@@ -139,6 +138,19 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       });
       expect(uiSettings.set).toHaveBeenCalled();
     });
+
+    test('should not set default data source if no permission', async () => {
+      spyOn(uiSettings, 'set').and.returnValue(Promise.resolve(false));
+      await act(async () => {
+        // @ts-ignore
+        const result = await component.find(formIdentifier).first().prop('onSetDefaultDataSource')(
+          mockDataSourceAttributesWithAuth
+        );
+        expect(result).toBe(false);
+      });
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+
     test('should delete datasource successfully', async () => {
       spyOn(utils, 'deleteDataSourceById').and.returnValue({});
       spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});

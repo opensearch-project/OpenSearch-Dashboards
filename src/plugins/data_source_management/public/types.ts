@@ -55,6 +55,8 @@ export interface DataSourceTableItem {
   description?: string;
   sort?: string;
   relatedConnections?: DataSourceTableItem[];
+  // This is used to identify the type of the data connection saved object
+  objectType?: string;
 }
 
 /**

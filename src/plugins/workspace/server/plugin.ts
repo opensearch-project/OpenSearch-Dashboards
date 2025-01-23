@@ -54,6 +54,12 @@ import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consume
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 import { uiSettings } from './ui_settings';
 import { RepositoryWrapper } from './saved_objects/repository_wrapper';
+import { DataSourcePluginSetup } from '../../data_source/server';
+import { ConfigSchema } from '../config';
+
+export interface WorkspacePluginDependencies {
+  dataSource: DataSourcePluginSetup;
+}
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -63,6 +69,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private workspaceSavedObjectsClientWrapper?: WorkspaceSavedObjectsClientWrapper;
   private workspaceUiSettingsClientWrapper?: WorkspaceUiSettingsClientWrapper;
+  private workspaceConfig$: Observable<ConfigSchema>;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -210,17 +217,22 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
+    this.workspaceConfig$ = initializerContext.config.create();
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, deps: WorkspacePluginDependencies) {
     this.logger.debug('Setting up Workspaces service');
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
+    const workspaceConfig = await this.workspaceConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
+    const isDataSourceEnabled = !!deps.dataSource;
 
     // setup new ui_setting user's default workspace
     core.uiSettings.register(uiSettings);
 
-    this.client = new WorkspaceClient(core, this.logger);
+    this.client = new WorkspaceClient(core, this.logger, {
+      maximum_workspaces: workspaceConfig.maximum_workspaces,
+    });
 
     await this.client.setup(core);
 
@@ -259,6 +271,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       maxImportExportSize,
       permissionControlClient: this.permissionControl,
       isPermissionControlEnabled,
+      isDataSourceEnabled,
     });
 
     core.capabilities.registerProvider(() => ({
