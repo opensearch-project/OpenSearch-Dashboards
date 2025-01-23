@@ -43,7 +43,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   );
   const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
-  const { updateQuestion, isQueryAssistCollapsed } = useQueryAssist();
+  const { updateQuestion } = useQueryAssist();
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
@@ -93,7 +93,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     }
   };
 
-  if (props.dependencies.isCollapsed || isQueryAssistCollapsed) return null;
+  if (props.dependencies.isCollapsed) return null;
 
   return (
     <EuiForm component="form" onSubmit={onSubmit} className="queryAssist queryAssist__form">

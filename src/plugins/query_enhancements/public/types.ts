@@ -5,11 +5,14 @@
 
 import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import { DataSourcePluginStart } from 'src/plugins/data_source/public';
+import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface QueryEnhancementsPluginSetup {}
+export interface QueryEnhancementsPluginSetup {
+  isQuerySummaryCollapsed$: BehaviorSubject<boolean>;
+  resultSummaryEnabled$: BehaviorSubject<boolean>;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginStart {}

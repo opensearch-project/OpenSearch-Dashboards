@@ -125,7 +125,7 @@ describe('query assist summary', () => {
     feedback,
     isSummaryAgentAvailable = false,
     isAssistantEnabledByCapability = true,
-    isQueryAssistCollapsed = COLLAPSED.NO
+    isQuerySummaryCollapsed = COLLAPSED.NO
   ) => {
     React.useState.mockImplementationOnce(() => [summary, setSummary]);
     React.useState.mockImplementationOnce(() => [loading, setLoading]);
@@ -141,7 +141,7 @@ describe('query assist summary', () => {
     useQueryAssist.mockImplementationOnce(() => ({
       question: 'question',
       question$,
-      isQueryAssistCollapsed,
+      isQuerySummaryCollapsed,
     }));
   };
 

@@ -9,8 +9,7 @@ export interface QueryAssistContextValue {
   question: string;
   question$: BehaviorSubject<string>;
   updateQuestion: (question: string) => void;
-  isQueryAssistCollapsed: boolean;
-  updateIsQueryAssistCollapsed: (isCollapsed: boolean) => void;
+  isQuerySummaryCollapsed: boolean;
 }
 export const QueryAssistContext = React.createContext<QueryAssistContextValue>(
   {} as QueryAssistContextValue
