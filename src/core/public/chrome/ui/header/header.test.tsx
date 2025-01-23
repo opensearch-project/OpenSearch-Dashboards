@@ -72,6 +72,7 @@ function mockProps() {
     navControlsRight$: new BehaviorSubject([]),
     navControlsExpandedCenter$: new BehaviorSubject([]),
     navControlsExpandedRight$: new BehaviorSubject([]),
+    navControlsPrimaryHeaderRight$: new BehaviorSubject([]),
     basePath: http.basePath,
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
@@ -226,7 +227,7 @@ describe('Header', () => {
     expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeFalsy();
     expect(component.find('HeaderBadge').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerLeftControl"]').exists()).toBeFalsy();
-    expect(component.find('HeaderNavControls').exists()).toBeFalsy();
+    expect(component.find('HeaderNavControls')).toHaveLength(1);
     expect(component.find('[data-test-subj="headerCenterControl"]').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
     expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
