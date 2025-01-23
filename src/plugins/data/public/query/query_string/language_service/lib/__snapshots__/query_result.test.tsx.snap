@@ -16,6 +16,7 @@ exports[`Query Result show error status with error message 2`] = `
       <EuiText
         className="editor__footerItem"
         color="danger"
+        data-test-subj="editorFooterItem"
         size="xs"
       >
         Error
@@ -35,6 +36,7 @@ exports[`Query Result show error status with error message 2`] = `
   </EuiPopoverTitle>
   <div
     className="eui-textBreakWord"
+    data-test-subj="textBreakWord"
     style={
       Object {
         "maxHeight": "250px",
