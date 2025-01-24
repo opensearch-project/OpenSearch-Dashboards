@@ -296,7 +296,16 @@ export const parseQuery = <
       context,
     });
 
-    // combine result and nextResult
+    // combine results from result and nextResult
+    // the combination logic is as follows:
+    // Array: it will combine the results of the array
+    // Boolean: we're operating under the assumption that it is a flag, so it needs to
+    //    be kept 'on' in the combined result
+    // Undefined: we're looking at the type in the initial result, so we default to the
+    //    latter result
+    // Any other type: we know this field isn't undefined, but the combination behavior
+    //    is not significant yet, so we default to the initial result. More types could
+    //    be added later if needed, but this is kept unobtrusive.
     for (const [field, value] of Object.entries(result)) {
       if (field === 'suggestColumns') {
         // combine tables inside of suggestColumns
