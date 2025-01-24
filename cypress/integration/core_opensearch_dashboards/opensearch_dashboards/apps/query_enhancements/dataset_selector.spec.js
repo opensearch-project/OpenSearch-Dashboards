@@ -13,8 +13,8 @@ describe('dataset selector', { scrollBehavior: false }, () => {
   before(() => {
     cy.setupTestData(
       SECONDARY_ENGINE.url,
-      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.mapping.json'],
-      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.data.ndjson']
+      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
+      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
     );
 
     // Add data source
@@ -30,9 +30,9 @@ describe('dataset selector', { scrollBehavior: false }, () => {
   });
   beforeEach(() => {
     // Create workspace
-    cy.deleteWorkspaceByName(`${workspace}`);
+    cy.deleteWorkspaceByName(workspace);
     cy.visit('/app/home');
-    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
+    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
     cy.navigateToWorkSpaceSpecificPage({
       workspaceName: workspace,
       page: 'discover',

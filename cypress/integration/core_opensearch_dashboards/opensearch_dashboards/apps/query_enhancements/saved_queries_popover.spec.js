@@ -33,12 +33,12 @@ export const runSavedQueriesPopoverUITests = () => {
       cy.setupTestData(
         SECONDARY_ENGINE.url,
         [
-          `cypress/fixtures/query_enhancements/data-logs-1/${INDEX_WITH_TIME_1}.mapping.json`,
-          `cypress/fixtures/query_enhancements/data-logs-2/${INDEX_WITH_TIME_2}.mapping.json`,
+          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
+          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
         ],
         [
-          `cypress/fixtures/query_enhancements/data-logs-1/${INDEX_WITH_TIME_1}.data.ndjson`,
-          `cypress/fixtures/query_enhancements/data-logs-2/${INDEX_WITH_TIME_2}.data.ndjson`,
+          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`,
+          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.data.ndjson`,
         ]
       );
       // Add data source
@@ -51,7 +51,7 @@ export const runSavedQueriesPopoverUITests = () => {
       // Create workspace
       cy.deleteWorkspaceByName(workspaceName);
       cy.visit('/app/home');
-      cy.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),

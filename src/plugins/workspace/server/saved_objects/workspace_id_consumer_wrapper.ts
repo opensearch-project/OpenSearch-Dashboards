@@ -221,7 +221,6 @@ export class WorkspaceIdConsumerWrapper {
         }
 
         const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
-
         if (
           workspaces?.length === 1 &&
           !this.validateObjectInAWorkspace(objectToGet, workspaces[0], wrapperOptions.request)

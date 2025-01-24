@@ -10,7 +10,7 @@ const { TestDataGenerator } = require('./test_data_generator');
 
 // Need to update different path for multiple clusters
 const DEFAULT_PATH =
-  './cypress/fixtures/dashboard/opensearch_dashboards/query_enhancement/data-logs-1';
+  './cypress/fixtures/dashboard/opensearch_dashboards/query_enhancement/data_logs_1';
 
 // Helper function to parse integer
 function parseInteger(value) {
