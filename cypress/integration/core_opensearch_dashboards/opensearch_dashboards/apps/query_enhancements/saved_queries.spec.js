@@ -31,6 +31,73 @@ import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_
 const workspaceName = getRandomizedWorkspaceName();
 const datasourceName = getRandomizedDatasourceName();
 
+const createSavedQuery = (config) => {
+  cy.navigateToWorkSpaceSpecificPage({
+    workspaceName,
+    page: 'discover',
+    isEnhancement: true,
+  });
+
+  cy.setDataset(config.dataset, datasourceName, config.datasetType);
+
+  cy.setQueryLanguage(config.language);
+  setDatePickerDatesAndSearchIfRelevant(config.language);
+
+  setQueryConfigurations(config);
+  verifyDiscoverPageState(config);
+
+  cy.saveQuery(config.saveName, ' ', true, true);
+};
+
+const loadSavedQuery = (config) => {
+  cy.navigateToWorkSpaceSpecificPage({
+    workspaceName,
+    page: 'discover',
+    isEnhancement: true,
+  });
+
+  cy.getElementByTestId('discoverNewButton').click();
+  setDatePickerDatesAndSearchIfRelevant(
+    config.language,
+    'Aug 29, 2020 @ 00:00:00.000',
+    'Aug 30, 2020 @ 00:00:00.000'
+  );
+
+  cy.loadSaveQuery(config.saveName);
+  // wait for saved queries to load.
+  cy.getElementByTestId('docTable').should('be.visible');
+  verifyDiscoverPageState(config);
+};
+
+const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
+  if (config.filters) {
+    cy.deleteAllFilters();
+  }
+  setDatePickerDatesAndSearchIfRelevant(config.language);
+
+  setQueryConfigurations(config);
+  verifyDiscoverPageState(config);
+  validateSaveAsNewQueryMatchingNameHasError(config.saveName);
+  cy.updateSaveQuery(saveAsNewQueryName, true, true, true);
+
+  cy.reload();
+  cy.loadSaveQuery(saveAsNewQueryName);
+  // wait for saved query to load
+  cy.getElementByTestId('docTable').should('be.visible');
+  verifyDiscoverPageState(config);
+};
+
+const deleteSavedQuery = (saveAsNewQueryName) => {
+  cy.navigateToWorkSpaceSpecificPage({
+    workspaceName,
+    page: 'discover',
+    isEnhancement: true,
+  });
+
+  cy.deleteSaveQuery(saveAsNewQueryName);
+  verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName);
+};
+
 // This spec assumes data.savedQueriesNewUI.enabled is true.
 export const runSavedQueriesUITests = () => {
   describe('saved queries UI', () => {
@@ -78,77 +145,15 @@ export const runSavedQueriesUITests = () => {
 
     const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
 
-    describe('should create initial saved queries', () => {
-      testConfigurations.forEach((config) => {
-        it(`should create saved query: ${config.testName}`, () => {
-          cy.navigateToWorkSpaceSpecificPage({
-            workspaceName,
-            page: 'discover',
-            isEnhancement: true,
-          });
-
-          cy.setDataset(config.dataset, datasourceName, config.datasetType);
-
-          cy.setQueryLanguage(config.language);
-          setDatePickerDatesAndSearchIfRelevant(config.language);
-
-          setQueryConfigurations(config);
-          verifyDiscoverPageState(config);
-
-          cy.saveQuery(config.saveName, ' ', true, true);
-        });
-      });
-    });
-
-    describe('should test loading, saving and deleting saved queries', () => {
-      testConfigurations.forEach((config) => {
-        it(`should load saved query: ${config.testName}`, () => {
-          cy.getElementByTestId('discoverNewButton').click();
-          setDatePickerDatesAndSearchIfRelevant(
-            config.language,
-            'Aug 29, 2020 @ 00:00:00.000',
-            'Aug 30, 2020 @ 00:00:00.000'
-          );
-
-          cy.loadSaveQuery(config.saveName);
-          // wait for saved queries to load.
-          cy.getElementByTestId('docTable').should('be.visible');
-          verifyDiscoverPageState(config);
-        });
-
-        it(`should update the loaded saved query: ${config.testName}`, () => {
-          updateAndVerifySavedQuery(config);
-        });
+    testConfigurations.forEach((config) => {
+      it(`should create, load, update, modify and delete the saved query: ${config.testName}`, () => {
+        createSavedQuery(config);
+        loadSavedQuery(config);
+        updateAndVerifySavedQuery(config);
 
         const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
-        it(`should modify saved query: ${config.testName} and save as new query: ${saveAsNewQueryName}`, () => {
-          if (config.filters) {
-            cy.deleteAllFilters();
-          }
-          setDatePickerDatesAndSearchIfRelevant(config.language);
-
-          setQueryConfigurations(config);
-          verifyDiscoverPageState(config);
-          validateSaveAsNewQueryMatchingNameHasError(config.saveName);
-          cy.updateSaveQuery(saveAsNewQueryName, true, true, true);
-
-          cy.reload();
-          cy.loadSaveQuery(saveAsNewQueryName);
-          // wait for saved query to load
-          cy.getElementByTestId('docTable').should('be.visible');
-          verifyDiscoverPageState(config);
-        });
-
-        it(`should delete the saved query: ${saveAsNewQueryName}`, () => {
-          cy.navigateToWorkSpaceSpecificPage({
-            workspaceName,
-            page: 'discover',
-            isEnhancement: true,
-          });
-
-          cy.deleteSaveQuery(saveAsNewQueryName);
-          verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName);
-        });
+        modifyAndVerifySavedQuery(config, saveAsNewQueryName);
+        deleteSavedQuery(saveAsNewQueryName);
       });
     });
   });
