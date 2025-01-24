@@ -964,7 +964,7 @@ describe('workspace utils: fetchDataSourceConnections', () => {
     ]);
     expect(httpMock.get).toHaveBeenCalledWith(
       expect.stringContaining('dataSourceMDSId=id1'),
-      expect.objectContaining({ withoutClientBasePath: true })
+      expect.objectContaining({ prependOptions: { withoutClientBasePath: true } })
     );
     expect(notificationsMock.toasts.addDanger).not.toHaveBeenCalled();
   });
