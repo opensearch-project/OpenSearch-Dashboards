@@ -19527,22 +19527,18 @@ exports[`Header renders page header with application title 1`] = `
     <div
       id="globalHeaderBars"
     >
-      <div>
+      <div
+        style={
+          Object {
+            "paddingRight": 640,
+          }
+        }
+      >
         <EuiHeader
           className="primaryHeader newTopNavHeader"
-          style={
-            Object {
-              "paddingRight": 640,
-            }
-          }
         >
           <div
             className="euiHeader euiHeader--default euiHeader--static primaryHeader newTopNavHeader"
-            style={
-              Object {
-                "paddingRight": 640,
-              }
-            }
           >
             <EuiHeaderSectionItemButton
               aria-controls="mockId"
