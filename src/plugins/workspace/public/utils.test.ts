@@ -962,7 +962,10 @@ describe('workspace utils: fetchDataSourceConnections', () => {
         ],
       },
     ]);
-    expect(httpMock.get).toHaveBeenCalledWith(expect.stringContaining('dataSourceMDSId=id1'));
+    expect(httpMock.get).toHaveBeenCalledWith(
+      expect.stringContaining('dataSourceMDSId=id1'),
+      expect.objectContaining({ prependOptions: { withoutClientBasePath: true } })
+    );
     expect(notificationsMock.toasts.addDanger).not.toHaveBeenCalled();
   });
   it('should not retrieve direct query connections if mode is opensearch connection', async () => {
