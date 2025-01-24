@@ -148,12 +148,11 @@ export class Fetch {
       }),
     };
 
-    const prependOptions = options.withoutClientBasePath
-      ? { withoutClientBasePath: options.withoutClientBasePath }
-      : undefined;
     const url = format({
       pathname: shouldPrependBasePath
-        ? this.params.basePath.prepend(options.path, prependOptions)
+        ? this.params.basePath.prepend(options.path, {
+            withoutClientBasePath: options.withoutClientBasePath,
+          })
         : options.path,
       query: removedUndefined(query),
     });
