@@ -32,8 +32,8 @@ const workspaceName = getRandomizedWorkspaceName();
 const datasourceName = getRandomizedDatasourceName();
 
 // This spec assumes data.savedQueriesNewUI.enabled is true.
-export const runSavedQueriesFlyoutUITests = () => {
-  describe('saved queries flyout UI', () => {
+export const runSavedQueriesUITests = () => {
+  describe('saved queries UI', () => {
     beforeEach(() => {
       // Load test data
       cy.setupTestData(
@@ -154,4 +154,4 @@ export const runSavedQueriesFlyoutUITests = () => {
   });
 };
 
-runSavedQueriesFlyoutUITests();
+runSavedQueriesUITests();
