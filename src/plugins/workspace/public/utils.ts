@@ -273,7 +273,7 @@ export const getDataSourcesList = (
 
 export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
   const endpoint = `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceId}`;
-  const res = await http.get(endpoint, { headers: { withoutClientBasePath: true } });
+  const res = await http.get(endpoint, { withoutClientBasePath: true });
   const directQueryConnections: DataSourceConnection[] = res.map(
     (dataConnection: DirectQueryDatasourceDetails) => ({
       id: `${dataSourceId}-${dataConnection.name}`,
