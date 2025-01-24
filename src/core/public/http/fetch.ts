@@ -150,9 +150,7 @@ export class Fetch {
 
     const url = format({
       pathname: shouldPrependBasePath
-        ? this.params.basePath.prepend(options.path, {
-            withoutClientBasePath: options.withoutClientBasePath,
-          })
+        ? this.params.basePath.prepend(options.path, options.PrependOptions)
         : options.path,
       query: removedUndefined(query),
     });
