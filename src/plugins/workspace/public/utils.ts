@@ -25,7 +25,11 @@ import {
   DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 
-import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
+import {
+  WORKSPACE_DETAIL_APP_ID,
+  USE_CASE_PREFIX,
+  AssociationDataSourceModalMode,
+} from '../common/constants';
 import { getUseCaseFeatureConfig } from '../common/utils';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
@@ -333,17 +337,25 @@ export const fulfillRelatedConnections = (
 // Helper function to merge data sources with direct query connections
 export const mergeDataSourcesWithConnections = (
   dataSources: DataSource[] | DataConnection[],
-  directQueryConnections: DataSourceConnection[]
+  directQueryConnections: DataSourceConnection[],
+  mode: AssociationDataSourceModalMode
 ): DataSourceConnection[] => {
   const {
     openSearchConnections,
     dataConnections,
   } = convertDataSourcesToOpenSearchAndDataConnections(dataSources);
-  const result = [
-    ...fulfillRelatedConnections(openSearchConnections, directQueryConnections),
-    ...directQueryConnections,
-    ...dataConnections,
-  ].sort((a, b) => a.name.localeCompare(b.name));
+  let result;
+  // if the mode is set to OpenSearchConnections, then only display OpenSearch connections
+  if (mode === AssociationDataSourceModalMode.OpenSearchConnections) {
+    result = openSearchConnections.sort((a, b) => a.name.localeCompare(b.name));
+  } else {
+    // if the mode is set to DirectQueryConnections, then will display Direct Query connections and data connections
+    result = [
+      ...fulfillRelatedConnections(openSearchConnections, directQueryConnections),
+      ...directQueryConnections,
+      ...dataConnections,
+    ].sort((a, b) => a.name.localeCompare(b.name));
+  }
 
   return result;
 };
@@ -520,38 +532,19 @@ export const fetchDataSourceConnectionsByDataSourceIds = async (
 export const fetchDataSourceConnections = async (
   dataSources: DataSource[],
   http: HttpSetup | undefined,
-  notifications: NotificationsStart | undefined
+  notifications: NotificationsStart | undefined,
+  mode: AssociationDataSourceModalMode
 ) => {
   try {
-    const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
-      // Only data source saved object type needs to fetch data source connections, data connection type object not.
-      dataSources.filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE).map((ds) => ds.id),
-      http
-    );
-    return mergeDataSourcesWithConnections(dataSources, directQueryConnections);
-  } catch (error) {
-    notifications?.toasts.addDanger(
-      i18n.translate('workspace.detail.dataSources.error.message', {
-        defaultMessage: 'Cannot fetch direct query connections',
-      })
-    );
-    return [];
-  }
-};
-
-export const fetchDirectQueryConnectionsByIDs = async (
-  dataSourceIds: string[],
-  http: HttpSetup | undefined,
-  notifications: NotificationsStart | undefined
-) => {
-  try {
-    const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
-      // Only data source saved object type needs to fetch data source connections, data connection type object not.
-      dataSourceIds,
-      http
-    );
-
-    return directQueryConnections.sort((a, b) => a.name.localeCompare(b.name));
+    let directQueryConnections: DataSourceConnection[] = [];
+    if (mode === AssociationDataSourceModalMode.DirectQueryConnections) {
+      directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
+        // Only data source saved object type needs to fetch data source connections, data connection type object not.
+        dataSources.filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE).map((ds) => ds.id),
+        http
+      );
+    }
+    return mergeDataSourcesWithConnections(dataSources, directQueryConnections, mode);
   } catch (error) {
     notifications?.toasts.addDanger(
       i18n.translate('workspace.detail.dataSources.error.message', {
