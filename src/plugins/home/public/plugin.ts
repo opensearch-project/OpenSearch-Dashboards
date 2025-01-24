@@ -197,7 +197,7 @@ export class HomePublicPlugin
         mount: async (params: AppMountParameters) => {
           const [
             coreStart,
-            { contentManagement: contentManagementStart },
+            { contentManagement: contentManagementStart, navigation },
           ] = await core.getStartServices();
           setCommonService();
 
@@ -205,7 +205,8 @@ export class HomePublicPlugin
           return await renderSearchUseCaseOverviewApp(
             params.element,
             coreStart,
-            contentManagementStart
+            contentManagementStart,
+            navigation
           );
         },
       });

@@ -9,6 +9,9 @@
 
 import { BASE_PATH } from './constants';
 import { TestFixtureHandler } from '../lib/test_fixture_handler';
+import initCommandNamespace from './command_namespace';
+
+initCommandNamespace(cy, 'osd');
 
 // This function does not delete all indices
 Cypress.Commands.add('deleteAllIndices', () => {
@@ -131,9 +134,7 @@ Cypress.Commands.add('bulkUploadDocs', (fixturePath, index) => {
 
 Cypress.Commands.add('importSavedObjects', (fixturePath, overwrite = true) => {
   const sendImportRequest = (ndjson) => {
-    const url = `${Cypress.config().baseUrl}/api/saved_objects/_import?${
-      overwrite ? `overwrite=true` : ''
-    }`;
+    const url = `/api/saved_objects/_import?${overwrite ? `overwrite=true` : ''}`;
 
     const formData = new FormData();
     formData.append('file', ndjson, 'savedObject.ndjson');
@@ -164,7 +165,7 @@ Cypress.Commands.add('importSavedObjects', (fixturePath, overwrite = true) => {
 });
 
 Cypress.Commands.add('deleteSavedObject', (type, id, options = {}) => {
-  const url = `${Cypress.config().baseUrl}/api/saved_objects/${type}/${id}`;
+  const url = `/api/saved_objects/${type}/${id}`;
 
   return cy.request({
     method: 'DELETE',
@@ -187,9 +188,7 @@ Cypress.Commands.add('deleteSavedObjectByType', (type, search) => {
     searchParams.set('search', search);
   }
 
-  const url = `${
-    Cypress.config().baseUrl
-  }/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+  const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
 
   return cy.request(url).then((response) => {
     console.log('response', response);
@@ -210,9 +209,7 @@ Cypress.Commands.add('ifDataSourceExists', (search) => {
     searchParams.set('search', search);
   }
 
-  const url = `${
-    Cypress.config().baseUrl
-  }/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+  const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
 
   return cy.request(url).then((response) => {
     console.log('response', response);
@@ -221,7 +218,7 @@ Cypress.Commands.add('ifDataSourceExists', (search) => {
 });
 
 Cypress.Commands.add('createIndexPattern', (id, attributes, header = {}) => {
-  const url = `${Cypress.config().baseUrl}/api/saved_objects/index-pattern/${id}`;
+  const url = `/api/saved_objects/index-pattern/${id}`;
 
   cy.request({
     method: 'POST',
@@ -239,7 +236,7 @@ Cypress.Commands.add('createIndexPattern', (id, attributes, header = {}) => {
 });
 
 Cypress.Commands.add('createDashboard', (attributes = {}, headers = {}) => {
-  const url = `${Cypress.config().baseUrl}/api/saved_objects/dashboard`;
+  const url = '/api/saved_objects/dashboard';
 
   cy.request({
     method: 'POST',
@@ -275,7 +272,7 @@ Cypress.Commands.add('deleteIndexPattern', (id, options = {}) =>
 );
 
 Cypress.Commands.add('setAdvancedSetting', (changes) => {
-  const url = `${Cypress.config().baseUrl}/api/opensearch-dashboards/settings`;
+  const url = '/api/opensearch-dashboards/settings';
   cy.log('setAdvancedSetting')
     .request({
       method: 'POST',
@@ -328,9 +325,8 @@ Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
   cy.contains(/successfully/);
 });
 
-Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
+cy.osd.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
   cy.intercept('POST', '/api/workspaces').as('createWorkspaceInterception');
-
   cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
     .should('be.visible')
     .click();
@@ -357,7 +353,7 @@ Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, w
   cy.contains(/successfully/);
 });
 
-Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
+cy.osd.add('openWorkspaceDashboard', (workspaceName) => {
   cy.getElementByTestId('workspace-select-button').should('exist').click();
   cy.getElementByTestId('workspace-menu-manage-button').should('exist').click();
   cy.get('.euiBasicTable')

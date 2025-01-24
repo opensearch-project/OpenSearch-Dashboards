@@ -3,24 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  WORKSPACE_NAME,
-  DATASOURCE_NAME,
-  START_TIME,
-  END_TIME,
-} from '../../../../../utils/apps/constants';
+import { DATASOURCE_NAME, START_TIME, END_TIME } from '../../../../../utils/apps/constants';
 import { SECONDARY_ENGINE } from '../../../../../utils/constants';
+import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
 
-const randomString = Math.random().toString(36).substring(7);
-const workspace = `${WORKSPACE_NAME}-${randomString}`;
+const workspace = getRandomizedWorkspaceName();
 
 describe('query enhancement queries', { scrollBehavior: false }, () => {
   before(() => {
     // Load test data
     cy.setupTestData(
       SECONDARY_ENGINE.url,
-      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.mapping.json'],
-      ['cypress/fixtures/query_enhancements/data-logs-1/data_logs_small_time_1.data.ndjson']
+      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
+      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
     );
 
     // Add data source
@@ -31,9 +26,9 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
     });
 
     // Create workspace and set up index pattern
-    cy.deleteWorkspaceByName(`${workspace}`);
+    cy.deleteWorkspaceByName(workspace);
     cy.visit('/app/home');
-    cy.createInitialWorkspaceWithDataSource(`${DATASOURCE_NAME}`, `${workspace}`);
+    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
 
     // Create and select index pattern for data_logs_small_time_1*
     cy.createWorkspaceIndexPatterns({

@@ -11,15 +11,22 @@ import {
   SECONDARY_ENGINE,
 } from '../../../../../utils/constants';
 import {
-  workspaceName,
-  datasourceName,
   generateAllTestConfigurations,
+  getRandomizedWorkspaceName,
+  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
+} from '../../../../../utils/apps/query_enhancements/shared';
+import {
   setSearchConfigurations,
   verifyDiscoverPageState,
   verifySavedSearchInAssetsPage,
   postRequestSaveSearch,
-} from './utils/saved_search';
+  updateSavedSearchAndSaveAndVerify,
+  generateSavedTestConfiguration,
+} from '../../../../../utils/apps/query_enhancements/saved';
+
+const workspaceName = getRandomizedWorkspaceName();
+const datasourceName = getRandomizedDatasourceName();
 
 export const runSavedSearchTests = () => {
   describe('saved search', () => {
@@ -28,12 +35,12 @@ export const runSavedSearchTests = () => {
       cy.setupTestData(
         SECONDARY_ENGINE.url,
         [
-          `cypress/fixtures/query_enhancements/data-logs-1/${INDEX_WITH_TIME_1}.mapping.json`,
-          `cypress/fixtures/query_enhancements/data-logs-2/${INDEX_WITH_TIME_2}.mapping.json`,
+          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
+          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
         ],
         [
-          `cypress/fixtures/query_enhancements/data-logs-1/${INDEX_WITH_TIME_1}.data.ndjson`,
-          `cypress/fixtures/query_enhancements/data-logs-2/${INDEX_WITH_TIME_2}.data.ndjson`,
+          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`,
+          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.data.ndjson`,
         ]
       );
       // Add data source
@@ -46,7 +53,7 @@ export const runSavedSearchTests = () => {
       // Create workspace
       cy.deleteWorkspaceByName(workspaceName);
       cy.visit('/app/home');
-      cy.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
@@ -64,7 +71,7 @@ export const runSavedSearchTests = () => {
       cy.deleteIndex(INDEX_WITH_TIME_2);
     });
 
-    generateAllTestConfigurations().forEach((config) => {
+    generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
       it(`should successfully create a saved search for ${config.testName}`, () => {
         cy.navigateToWorkSpaceSpecificPage({
           workspaceName,
@@ -85,7 +92,7 @@ export const runSavedSearchTests = () => {
         // the saved search does not appear. So adding this wait
         cy.wait(2000);
 
-        verifySavedSearchInAssetsPage(config);
+        verifySavedSearchInAssetsPage(config, workspaceName);
       });
 
       // We are starting from various languages
@@ -98,6 +105,7 @@ export const runSavedSearchTests = () => {
           if (startingLanguage !== config.language) return;
 
           it(`should successfully load a saved search for ${config.testName} starting from ${startingLanguage}`, () => {
+            // using a POST request to create a saved search to load
             postRequestSaveSearch(config);
 
             cy.navigateToWorkSpaceSpecificPage({
@@ -115,11 +123,23 @@ export const runSavedSearchTests = () => {
             cy.setIndexPatternAsDataset(INDEX_PATTERN_WITH_TIME, datasourceName);
 
             cy.setQueryLanguage(startingLanguage);
-            cy.loadSaveSearch(config.saveName, false);
+            cy.loadSaveSearch(config.saveName);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             verifyDiscoverPageState(config);
           });
         });
+
+      it(`should successfully update a saved search for ${config.testName}`, () => {
+        // using a POST request to create a saved search to load
+        postRequestSaveSearch(config);
+        updateSavedSearchAndSaveAndVerify(config, workspaceName, datasourceName, false);
+      });
+
+      it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
+        // using a POST request to create a saved search to load
+        postRequestSaveSearch(config);
+        updateSavedSearchAndSaveAndVerify(config, workspaceName, datasourceName, true);
+      });
     });
   });
 };
