@@ -187,8 +187,8 @@ Cypress.Commands.add('loadSaveQuery', (name) => {
   cy.getElementByTestId('saved-query-management-open-button').click();
 
   cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
-
-  cy.getElementByTestId('open-query-action-button').click();
+  // click button through popover
+  cy.getElementByTestId('open-query-action-button').click({ force: true });
 });
 
 Cypress.Commands.add('clearSaveQuery', () => {
