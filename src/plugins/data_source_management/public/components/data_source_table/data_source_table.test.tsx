@@ -13,7 +13,11 @@ import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { ScopedHistory, WorkspaceObject } from 'opensearch-dashboards/public';
 import { scopedHistoryMock } from '../../../../../core/public/mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
-import { getMappedDataSources, mockManagementPlugin } from '../../mocks';
+import {
+  getMappedDataSources,
+  getMappedDataSourcesWithEmptyDescription,
+  mockManagementPlugin,
+} from '../../mocks';
 import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 
@@ -427,6 +431,47 @@ describe('DataSourceTable', () => {
       // reset to original value
       mockedContext.workspaces.currentWorkspace$ = currentWorkspace$;
       mockedContext.application.capabilities = capabilities;
+    });
+  });
+
+  describe('should handle datasources with empty description correctly', () => {
+    beforeEach(async () => {
+      spyOn(utils, 'getDataSources').and.returnValue(
+        Promise.resolve(getMappedDataSourcesWithEmptyDescription)
+      );
+      spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
+      await act(async () => {
+        component = await mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+    });
+
+    it('should render normally', () => {
+      expect(() => component).not.toThrow();
+      expect(component).toMatchSnapshot();
+      expect(utils.getDataSources).toHaveBeenCalled();
+
+      // assertion for three row and description placeholder to be visible
+      expect(component.find('.euiTableRow')).toHaveLength(3);
+      const descriptionPlaceholders = component.find('.euiText');
+      expect(descriptionPlaceholders).toHaveLength(6); // since both description and related connections have no values
+      descriptionPlaceholders.forEach((node) => {
+        expect(node.children().text()).toBe('—');
+      });
     });
   });
 });

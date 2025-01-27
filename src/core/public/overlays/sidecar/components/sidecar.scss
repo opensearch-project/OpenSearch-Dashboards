@@ -29,7 +29,8 @@
   }
 
   &.osdSidecarFlyout--dockedTakeover {
-    width: 100vw !important;
+    left: 0;
+    right: 0;
     bottom: 0;
     flex-direction: column;
     padding-top: 8px;

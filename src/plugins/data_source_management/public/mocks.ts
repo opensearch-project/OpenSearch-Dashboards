@@ -289,6 +289,33 @@ export const getMappedDataSources = [
   },
 ];
 
+export const getMappedDataSourcesWithEmptyDescription = [
+  {
+    id: 'test-null',
+    type: 'OpenSearch',
+    title: 'test-null',
+    connectionType: 'OpenSearchConnection',
+    description: null,
+    relatedConnections: directQueryConnections,
+  },
+  {
+    id: 'test-undefined',
+    type: 'OpenSearch',
+    title: 'test-undefined',
+    connectionType: 'OpenSearchConnection',
+    description: undefined,
+    relatedConnections: directQueryConnections,
+  },
+  {
+    id: 'test-no-description',
+    type: 'OpenSearch',
+    title: 'test-no-description',
+    connectionType: 'OpenSearchConnection',
+    // no description
+    relatedConnections: directQueryConnections,
+  },
+];
+
 export const fetchDataSourceMetaData = {
   dataSourceVersion: '2.11.0',
   installedPlugins: ['opensearch-ml', 'opensearch-sql'],

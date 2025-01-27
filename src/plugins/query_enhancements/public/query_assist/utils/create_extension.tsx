@@ -27,20 +27,28 @@ const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const pendingRequests: Map<string | undefined, Promise<string[]>> = new Map();
 
   return [
-    async (http: HttpSetup, dataSourceId: string | undefined) => {
+    async (http: HttpSetup, dataSourceId: string | undefined, timeout?: number) => {
       const cached = availableLanguagesByDataSource.get(dataSourceId);
       if (cached !== undefined) return cached;
 
       const pendingRequest = pendingRequests.get(dataSourceId);
       if (pendingRequest !== undefined) return pendingRequest;
 
+      const controller = timeout ? new AbortController() : undefined;
+      const timeoutId = timeout ? setTimeout(() => controller?.abort(), timeout) : undefined;
+
       const languagesPromise = http
         .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
           query: { dataSourceId },
+          signal: controller?.signal,
         })
         .then((response) => response.configuredLanguages)
         .catch(() => [])
-        .finally(() => pendingRequests.delete(dataSourceId));
+        .finally(() => {
+          pendingRequests.delete(dataSourceId);
+          if (timeoutId) clearTimeout(timeoutId);
+        });
+
       pendingRequests.set(dataSourceId, languagesPromise);
 
       const languages = await languagesPromise;
@@ -94,9 +102,9 @@ export const createQueryAssistExtension = (
     id: 'query-assist',
     order: 1000,
     getDataStructureMeta: async (dataSourceId) => {
-      const isEnabled = await getAvailableLanguagesForDataSource(http, dataSourceId).then(
-        (languages) => languages.length > 0
-      );
+      // [TODO] - The timmeout exists because the loading of the Datasource menu is prevented until this request completes. This if a single cluster is down the request holds the whole menu level in a loading state. We should make this call non blocking and load the datasource meta in the background.
+      const isEnabled = await getAvailableLanguagesForDataSource(http, dataSourceId, 3000) // 3s timeout for quick check
+        .then((languages) => languages.length > 0);
       if (isEnabled) {
         return {
           type: DATA_STRUCTURE_META_TYPES.FEATURE,

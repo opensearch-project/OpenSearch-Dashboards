@@ -312,6 +312,7 @@ const FieldList = ({
         onClick={() => setExpanded(!expanded)}
         size="xs"
         className="dscSideBar_fieldGroup"
+        data-test-subj="dscSideBarFieldGroupButton"
         aria-label={title}
         isLoading={!!selectedIndexPattern.fieldsLoading}
       >

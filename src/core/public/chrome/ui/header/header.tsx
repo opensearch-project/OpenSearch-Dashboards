@@ -502,6 +502,7 @@ export function Header({
         renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
         loadingCount$={observables.loadingCount$}
+        workspaceEnabled={application.capabilities.workspaces.enabled}
       />
     </EuiHeaderSectionItem>
   );
@@ -553,8 +554,8 @@ export function Header({
   );
 
   const renderPageHeader = () => (
-    <div>
-      <EuiHeader className="primaryHeader newTopNavHeader" style={sidecarPaddingStyle}>
+    <div style={sidecarPaddingStyle}>
+      <EuiHeader className="primaryHeader newTopNavHeader">
         {renderNavToggle()}
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
