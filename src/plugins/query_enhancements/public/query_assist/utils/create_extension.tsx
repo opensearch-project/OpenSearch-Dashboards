@@ -93,6 +93,7 @@ export const createQueryAssistExtension = (
   data: DataPublicPluginSetup,
   config: ConfigSchema['queryAssist'],
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>,
+  isSummaryAgentAvailable$: BehaviorSubject<boolean>,
   resultSummaryEnabled$: BehaviorSubject<boolean>,
   usageCollection?: UsageCollectionSetup
 ): QueryEditorExtensionConfig => {
@@ -125,6 +126,7 @@ export const createQueryAssistExtension = (
           http={http}
           data={data}
           isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
+          isSummaryAgentAvailable$={isSummaryAgentAvailable$}
           {...(config.summary.enabled && { resultSummaryEnabled$ })}
           question$={question$}
         >
@@ -162,6 +164,7 @@ interface QueryAssistWrapperProps {
   invert?: boolean;
   isQuerySummaryCollapsed$?: BehaviorSubject<boolean>;
   resultSummaryEnabled$?: BehaviorSubject<boolean>;
+  isSummaryAgentAvailable$?: BehaviorSubject<boolean>;
   question$?: BehaviorSubject<string>;
 }
 
@@ -169,6 +172,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
   const [visible, setVisible] = useState(false);
   const [question, setQuestion] = useState('');
   const [isQuerySummaryCollapsed, setIsQuerySummaryCollapsed] = useState(true);
+  const [isSummaryAgentAvailable, setIsSummaryAgentAvailable] = useState(false);
   const updateQuestion = (newQuestion: string) => {
     props.question$?.next(newQuestion);
   };
@@ -178,6 +182,11 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     const subscription = props.isQuerySummaryCollapsed$?.subscribe((isCollapsed) => {
       setIsQuerySummaryCollapsed(isCollapsed);
     });
+    const isSummaryAgentAvailableSubscription = props.isSummaryAgentAvailable$?.subscribe(
+      (isAvailable) => {
+        setIsSummaryAgentAvailable(isAvailable);
+      }
+    );
     const questionSubscription = props.question$?.subscribe((newQuestion) => {
       setQuestion(newQuestion);
     });
@@ -185,6 +194,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     return () => {
       questionSubscription?.unsubscribe();
       subscription?.unsubscribe();
+      isSummaryAgentAvailableSubscription?.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -216,6 +226,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
           question$,
           updateQuestion,
           isQuerySummaryCollapsed,
+          isSummaryAgentAvailable,
         }}
       >
         {props.children}
