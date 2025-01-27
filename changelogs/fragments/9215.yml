@@ -1,0 +1,2 @@
+test:
+- Add tests for language-specific display ([#9215](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9215))
