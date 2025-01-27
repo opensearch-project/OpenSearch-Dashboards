@@ -502,6 +502,7 @@ export function Header({
         renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
         loadingCount$={observables.loadingCount$}
+        workspaceEnabled={application.capabilities.workspaces.enabled}
       />
     </EuiHeaderSectionItem>
   );
