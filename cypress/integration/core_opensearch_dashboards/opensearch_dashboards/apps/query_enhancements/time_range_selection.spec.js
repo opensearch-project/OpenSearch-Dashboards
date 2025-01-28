@@ -56,7 +56,7 @@ export const runTimeRangeSelectionTests = () => {
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      // // TODO: Modify deleteIndex to handle an array of index and remove hard code
+      // TODO: Modify deleteIndex to handle an array of index and remove hard code
       cy.deleteDataSourceByName(datasourceName);
       cy.deleteIndex(INDEX_WITH_TIME_1);
       cy.deleteIndex(INDEX_WITH_TIME_2);
