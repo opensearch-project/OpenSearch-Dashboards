@@ -5,6 +5,19 @@
 
 import { QueryLanguages } from './constants';
 
+const visualizationTitlesWithNoInspectOptions = [
+  '[Flights]Controls',
+  '[Flights]MarkdownInstructions',
+  '[Flights]Delays&Cancellations',
+];
+
+const visualizationTitlesWithInspectOptions = [
+  '[Flights]AirlineCarrier',
+  '[Flights]FlightCountandAverageTicketPrice',
+  '[Flights]TotalFlights',
+  '[Flights]AverageTicketPrice',
+];
+
 /**
  * Gets Date and returns string of date in format Jan 24, 2025 @ 16:20:08.000
  * @param {Date} date - date to format
@@ -162,7 +175,7 @@ const flattenObjectAndFormatValues = (obj, parentKey, properties = {}) => {
 const flattenArrayAndFormatValues = (arr, rowNumber) => {
   const properties = {};
   arr.forEach((field) => {
-    if (field.type === 'nested') {
+    if (field.type === 'nested' || field.type === 'array') {
       flattenObjectAndFormatValues(field.values[rowNumber][0], field.name, properties);
     } else {
       cy.log(field.values[rowNumber], typeof field.values[rowNumber]);
@@ -172,6 +185,12 @@ const flattenArrayAndFormatValues = (arr, rowNumber) => {
   return properties;
 };
 
+/**
+ * Get an object with flattened fields and values from the first row of the intercepted response body.
+ * @param {object} interceptedRequest - The intercepted request to parse.
+ * @param {string} language - Query language.
+ * @returns {object} Flattened fields and values from the first row.
+ */
 export const getFlattenedFieldsWithValue = (interceptedRequest, language) => {
   // SQL and PPL uses a different api schema
   if (language !== QueryLanguages.SQL.name && language !== QueryLanguages.PPL.name) {
@@ -187,4 +206,45 @@ export const getFlattenedFieldsWithValue = (interceptedRequest, language) => {
 
     return flattenArrayAndFormatValues(interceptedRequest.response.body.body.fields, 0);
   }
+};
+
+/**
+ * In the Flights dashboard, verify that the visualizations identified as not having an inspect option do not have the option.
+ */
+export const verifyVisualizationsWithNoInspectOption = () => {
+  visualizationTitlesWithNoInspectOptions.forEach((visualizationTitle) => {
+    cy.log(visualizationTitle);
+    const title = cy.getElementByTestIdLike(`embeddablePanelHeading-${visualizationTitle}`);
+    const icon = title.parent().findElementByTestId('embeddablePanelToggleMenuIcon');
+
+    cy.log(title, icon);
+    cy.getElementByTestIdLike(`embeddablePanelHeading-${visualizationTitle}`)
+      .parent()
+      .findElementByTestId('embeddablePanelToggleMenuIcon')
+      .click();
+
+    cy.getElementByTestId('embeddablePanelAction-openInspector').should('not.exist');
+  });
+};
+
+/**
+ * In the Flights dashboard, verify that the visualizations identified as having an inspect option have the option.
+ */
+export const verifyVisualizationsWithInspectOption = () => {
+  visualizationTitlesWithInspectOptions.forEach((visualizationTitle) => {
+    cy.getElementByTestIdLike(`embeddablePanelHeading-${visualizationTitle}`)
+      .parent()
+      .findElementByTestId('embeddablePanelToggleMenuIcon')
+      .click();
+
+    cy.getElementByTestId('embeddablePanelAction-openInspector').should('exist').click();
+    cy.getElementByTestId('inspectorPanel').findElementByTestId('inspectorTable').should('exist');
+    cy.getElementByTestId('inspectorPanel')
+      .findElementByTestId('inspectorViewChooser')
+      .should('exist')
+      .click();
+    cy.getElementByTestId('inspectorViewChooserRequests').click();
+    cy.getElementByTestId('inspectorRequestDetailStatistics').should('exist');
+    cy.getElementByTestId('euiFlyoutCloseButton').click();
+  });
 };

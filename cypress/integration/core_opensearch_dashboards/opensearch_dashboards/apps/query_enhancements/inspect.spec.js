@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_PATTERN_WITH_TIME, INDEX_WITH_TIME_1 } from '../../../../../utils/apps/constants.js';
+import {
+  INDEX_PATTERN_WITH_TIME,
+  INDEX_WITH_TIME_1,
+  QueryLanguages,
+} from '../../../../../utils/apps/constants.js';
 import * as docTable from '../../../../../utils/apps/query_enhancements/doc_table.js';
 import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants.js';
 import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
@@ -16,10 +20,14 @@ import {
 import {
   generateInspectTestConfiguration,
   getFlattenedFieldsWithValue,
+  verifyVisualizationsWithNoInspectOption,
+  verifyVisualizationsWithInspectOption,
 } from '../../../../../utils/apps/query_enhancements/inspect.js';
 
 const workspaceName = getRandomizedWorkspaceName();
 const datasourceName = getRandomizedDatasourceName();
+
+const NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD = 17;
 
 describe('inspect spec', () => {
   beforeEach(() => {
@@ -73,6 +81,7 @@ describe('inspect spec', () => {
       setDatePickerDatesAndSearchIfRelevant(config.language);
 
       cy.intercept('POST', '**/search/*').as('docTablePostRequest');
+
       cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
       docTable.toggleDocTableRow(0);
 
@@ -81,11 +90,53 @@ describe('inspect spec', () => {
           interceptedDocTableResponse,
           config.language
         );
+
         cy.log(flattenedFieldsWithValues);
+
         for (const [key, value] of Object.entries(flattenedFieldsWithValues)) {
+          // For SQL and PPL, this number is not accurate.
+          if (
+            key === 'event_sequence_number' &&
+            (config.language === QueryLanguages.SQL.name ||
+              config.language === QueryLanguages.PPL.name)
+          ) {
+            cy.log(`Skipped for ${key}`);
+            continue;
+          }
           docTable.getExpandedDocTableRowFieldValue(key).should('have.text', value);
         }
       });
     });
+  });
+
+  it('should test visualizations inspect', () => {
+    cy.navigateToWorkSpaceSpecificPage({
+      url: BASE_PATH,
+      workspaceName: workspaceName,
+      page: 'import_sample_data',
+      isEnhancement: true,
+    });
+
+    cy.getElementByTestId('addSampleDataSetflights').click();
+    cy.getElementByTestId('sampleDataSetInstallToast').should('exist');
+
+    cy.navigateToWorkSpaceSpecificPage({
+      url: BASE_PATH,
+      workspaceName: workspaceName,
+      page: 'dashboards',
+      isEnhancement: true,
+    });
+
+    cy.getElementByTestIdLike(
+      'dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'
+    ).click();
+
+    cy.getElementByTestId('visualizationLoader').should(
+      'have.length',
+      NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD
+    );
+
+    verifyVisualizationsWithNoInspectOption();
+    verifyVisualizationsWithInspectOption();
   });
 });
