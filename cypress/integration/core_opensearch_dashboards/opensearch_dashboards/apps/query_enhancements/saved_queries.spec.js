@@ -57,6 +57,8 @@ const loadSavedQuery = (config) => {
   });
 
   cy.getElementByTestId('discoverNewButton').click();
+  cy.setDataset(config.dataset, datasourceName, config.datasetType);
+  cy.setQueryLanguage(config.language);
   setDatePickerDatesAndSearchIfRelevant(
     config.language,
     'Aug 29, 2020 @ 00:00:00.000',
