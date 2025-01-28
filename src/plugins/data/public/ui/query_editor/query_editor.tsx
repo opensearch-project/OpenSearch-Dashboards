@@ -80,6 +80,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const editorQuery = props.query; // local query state managed by the editor. Not to be confused by the app query state.
 
   const queryString = getQueryService().queryString;
+  const timefilter = getQueryService().timefilter.timefilter;
   const languageManager = queryString.getLanguageService();
   const extensionMap = languageManager.getQueryEditorExtensionMap();
   const services = props.opensearchDashboards.services;
@@ -297,7 +298,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           query: editor.getValue(),
         };
 
-        onSubmit(newQuery);
+        onSubmit(newQuery, timefilter.getTime());
       });
 
       return () => {
@@ -354,11 +355,11 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
       editor.addCommand(monaco.KeyCode.Enter, () => {
         const newQuery = {
-          ...query,
+          ...queryRef.current,
           query: editor.getValue(),
         };
 
-        onSubmit(newQuery);
+        onSubmit(newQuery, timefilter.getTime());
       });
     },
     provideCompletionItems,

@@ -149,7 +149,9 @@ export class Fetch {
     };
 
     const url = format({
-      pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
+      pathname: shouldPrependBasePath
+        ? this.params.basePath.prepend(options.path, options.prependOptions)
+        : options.path,
       query: removedUndefined(query),
     });
 

@@ -9,6 +9,9 @@
 
 import { BASE_PATH } from './constants';
 import { TestFixtureHandler } from '../lib/test_fixture_handler';
+import initCommandNamespace from './command_namespace';
+
+initCommandNamespace(cy, 'osd');
 
 // This function does not delete all indices
 Cypress.Commands.add('deleteAllIndices', () => {
@@ -23,6 +26,10 @@ Cypress.Commands.add('deleteAllIndices', () => {
 
 Cypress.Commands.add('getElementByTestId', (testId, options = {}) => {
   return cy.get(`[data-test-subj="${testId}"]`, options);
+});
+
+Cypress.Commands.add('getElementByTestIdLike', (testId, options = {}) => {
+  return cy.get(`[data-test-subj*="${testId}"]`, options);
 });
 
 Cypress.Commands.add('getElementsByTestIds', (testIds, options = {}) => {
@@ -322,9 +329,8 @@ Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
   cy.contains(/successfully/);
 });
 
-Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
+cy.osd.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
   cy.intercept('POST', '/api/workspaces').as('createWorkspaceInterception');
-
   cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
     .should('be.visible')
     .click();
@@ -351,7 +357,7 @@ Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, w
   cy.contains(/successfully/);
 });
 
-Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
+cy.osd.add('openWorkspaceDashboard', (workspaceName) => {
   cy.getElementByTestId('workspace-select-button').should('exist').click();
   cy.getElementByTestId('workspace-menu-manage-button').should('exist').click();
   cy.get('.euiBasicTable')

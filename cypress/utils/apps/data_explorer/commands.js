@@ -113,26 +113,82 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('saveQuery', (name, description = ' ') => {
-  cy.whenTestIdNotFound('saved-query-management-popover', () => {
-    cy.getElementByTestId('saved-query-management-popover-button').click();
-  });
-  cy.getElementByTestId('saved-query-management-save-button').click();
-
-  cy.getElementByTestId('saveQueryFormTitle').type(name);
-  cy.getElementByTestId('saveQueryFormDescription').type(description);
-
-  // putting force: true as this button is sometimes masked by a popup element
-  cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-  cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+Cypress.Commands.add('deleteAllFilters', () => {
+  // the Close icon is from elastic.
+  cy.getElementsByTestIds('globalFilterBar').find('[class="euiBadge__iconButton"]').click();
 });
 
-Cypress.Commands.add('loadSaveQuery', (name) => {
-  cy.getElementByTestId('saved-query-management-popover-button').click({
-    force: true,
-  });
+Cypress.Commands.add(
+  'saveQuery',
+  (name, description = ' ', includeFilters = true, includeTimeFilter = false) => {
+    cy.whenTestIdNotFound('saved-query-management-popover', () => {
+      cy.getElementByTestId('saved-query-management-popover-button').click();
+    });
+    cy.getElementByTestId('saved-query-management-save-button').click();
 
-  cy.get(`[data-test-subj~="load-saved-query-${name}-button"]`).should('be.visible').click();
+    cy.getElementByTestId('saveQueryFormTitle').type(name);
+    cy.getElementByTestId('saveQueryFormDescription').type(description);
+
+    if (includeFilters !== true) {
+      cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+    }
+
+    if (includeTimeFilter !== false) {
+      cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+    }
+
+    // The force is necessary as there is occasionally a popover that covers the button
+    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+  }
+);
+
+Cypress.Commands.add(
+  'updateSaveQuery',
+  (name = '', saveAsNewQuery = false, includeFilters = true, includeTimeFilter = false) => {
+    cy.whenTestIdNotFound('saved-query-management-popover', () => {
+      cy.getElementByTestId('saved-query-management-popover-button').click();
+    });
+    cy.getElementByTestId('saved-query-management-save-button').click();
+
+    if (saveAsNewQuery) {
+      cy.getElementByTestId('saveAsNewQueryCheckbox')
+        .parent()
+        .find('[class="euiCheckbox__label"]')
+        .click();
+      cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
+
+      // Selecting the saveAsNewQuery element deselects the include time filter option.
+      if (includeTimeFilter === true) {
+        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+      }
+    } else if (saveAsNewQuery === false) {
+      // defaults to not selected.
+
+      if (includeTimeFilter !== true) {
+        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+      }
+    }
+
+    if (includeFilters !== true) {
+      // Always defaults to selected.
+      cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+    }
+
+    // The force is necessary as there is occasionally a popover that covers the button
+    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+  }
+);
+
+Cypress.Commands.add('loadSaveQuery', (name) => {
+  cy.getElementByTestId('saved-query-management-popover-button').click();
+
+  cy.getElementByTestId('saved-query-management-open-button').click();
+
+  cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
+  // click button through popover
+  cy.getElementByTestId('open-query-action-button').click({ force: true });
 });
 
 Cypress.Commands.add('clearSaveQuery', () => {
@@ -146,9 +202,13 @@ Cypress.Commands.add('clearSaveQuery', () => {
 Cypress.Commands.add('deleteSaveQuery', (name) => {
   cy.getElementByTestId('saved-query-management-popover-button').click();
 
-  cy.get(`[data-test-subj~="delete-saved-query-${name}-button"]`).click({
-    force: true,
-  });
+  cy.getElementByTestId('saved-query-management-open-button').click();
+  cy.getElementByTestId('euiFlyoutCloseButton')
+    .parent()
+    .contains(name)
+    .findElementByTestId('deleteSavedQueryButton')
+    .click();
+
   cy.getElementByTestId('confirmModalConfirmButton').click();
 });
 

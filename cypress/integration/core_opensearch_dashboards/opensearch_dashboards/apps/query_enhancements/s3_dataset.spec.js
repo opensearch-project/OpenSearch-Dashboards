@@ -87,7 +87,7 @@ const definedS3Variables = !S3_CLUSTER.url;
         // Create workspace
         cy.deleteWorkspaceByName(workspace);
         cy.visit('/app/home');
-        cy.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, workspace);
+        cy.osd.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, WORKSPACE_NAME);
       });
       afterEach(() => {
         cy.deleteWorkspaceByName(workspace);

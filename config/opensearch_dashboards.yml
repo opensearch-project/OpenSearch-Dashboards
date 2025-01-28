@@ -353,6 +353,10 @@
 #   overrides:
 #     "home:useNewHomePage": true
 
+# Set a maximum number of workspaces
+# by default, there is no limit.
+# workspace.maximum_workspaces: 100
+
 # Optional settings to specify saved object types to be deleted during migration.
 # This feature can help address compatibility issues that may arise during the migration of saved objects, such as types defined by legacy applications.
 # Please note, using this feature carries a risk. Deleting saved objects during migration could potentially lead to unintended data loss. Use with caution.

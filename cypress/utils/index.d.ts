@@ -25,6 +25,15 @@ declare namespace Cypress {
       options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
     ): Chainable<S>;
     /**
+     * Get an element which contains testId
+     * @example
+     * cy.getElementByTestIdLike('query')
+     */
+    getElementByTestIdLike<S = any>(
+      testId: string,
+      options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
+    ): Chainable<S>;
+    /**
      * Get an element by its test id
      * @example
      * cy.getElementByTestId('query')
@@ -182,13 +191,21 @@ declare namespace Cypress {
      */
     drag<S = any>(targetSelector: string): Chainable<S>;
 
-    /**
-     * Creates workspace and attaches it to the provided data source
-     * It also saves the created workspace id as the alias @WORKSPACE_ID
-     */
-    createInitialWorkspaceWithDataSource<S = any>(
-      dataSourceTitle: string,
-      workspaceName: string
-    ): Chainable<S>;
+    // osd namespace
+    osd: {
+      /**
+       * Creates workspace and attaches it to the provided data source
+       * It also saves the created workspace id as the alias @WORKSPACE_ID
+       */
+      createInitialWorkspaceWithDataSource<S = any>(
+        dataSourceTitle: string,
+        workspaceName: string
+      ): Chainable<S>;
+
+      /**
+       * Opens workspace dashboard
+       */
+      openWorkspaceDashboard<S = any>(workspaceName: string): Chainable<S>;
+    };
   }
 }

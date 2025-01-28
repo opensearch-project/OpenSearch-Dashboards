@@ -9,7 +9,7 @@ Cypress.Commands.add(
   (workspaceName) => {
     // Selecting the correct workspace
     cy.visit('/app/workspace_list#');
-    cy.openWorkspaceDashboard(workspaceName);
+    cy.osd.openWorkspaceDashboard(workspaceName);
     // wait until page loads
     cy.getElementByTestId('headerAppActionMenu').should('be.visible');
   }
