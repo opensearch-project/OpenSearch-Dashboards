@@ -325,7 +325,7 @@ export function OpenSavedQueryFlyout({
           <h3>Saved queries</h3>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="savedQueriesFlyoutBody">
         <EuiTabbedContent
           tabs={tabs}
           initialSelectedTab={tabs[0]}
@@ -348,6 +348,7 @@ export function OpenSavedQueryFlyout({
               fill
               onClick={onQueryAction}
               data-testid="open-query-action-button"
+              data-test-subj="open-query-action-button"
             >
               {selectedTabId === OPEN_QUERY_TAB_ID.SAVED_QUERIES ? 'Open' : 'Copy'} query
             </EuiButton>
