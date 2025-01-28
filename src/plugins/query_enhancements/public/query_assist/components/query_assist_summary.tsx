@@ -74,7 +74,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
   const [isSummaryAgentAvailable, setIsSummaryAgentAvailable] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
-  const { question$, isQueryAssistCollapsed } = useQueryAssist();
+  const { question$, isQuerySummaryCollapsed } = useQueryAssist();
   const METRIC_APP = `query-assist`;
   const afterFeedbackTip = i18n.translate('queryEnhancements.queryAssist.summary.afterFeedback', {
     defaultMessage:
@@ -241,7 +241,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
 
   if (
     props.dependencies.isCollapsed ||
-    isQueryAssistCollapsed ||
+    isQuerySummaryCollapsed ||
     !isEnabledByCapability ||
     !isSummaryAgentAvailable
   ) {
