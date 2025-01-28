@@ -128,7 +128,7 @@ export const getSuggestions = async ({
         ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
           text: af,
           type: monaco.languages.CompletionItemKind.Function,
-          insertText: af,
+          insertText: `${af} `,
           detail: SuggestionItemDetailsTags.AggregateFunction,
         }))
       );
@@ -167,7 +167,7 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
   query: string,
   cursor: CursorPosition
 ): OpenSearchSqlAutocompleteResult => {
-  const initialResult = parseQuery({
+  return parseQuery({
     Lexer: openSearchSqlAutocompleteData.Lexer,
     Parser: openSearchSqlAutocompleteData.Parser,
     tokenDictionary: openSearchSqlAutocompleteData.tokenDictionary,
@@ -178,39 +178,4 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
     query,
     cursor,
   });
-
-  if (!initialResult?.rerunAndCombine) {
-    return initialResult;
-  }
-
-  // rerun with no preferred rules and specified context to grab missing lexer tokens
-  const contextResult = parseQuery({
-    Lexer: openSearchSqlAutocompleteData.Lexer,
-    Parser: openSearchSqlAutocompleteData.Parser,
-    tokenDictionary: openSearchSqlAutocompleteData.tokenDictionary,
-    ignoredTokens: openSearchSqlAutocompleteData.ignoredTokens,
-    rulesToVisit: new Set(),
-    getParseTree: openSearchSqlAutocompleteData.getParseTree,
-    enrichAutocompleteResult: openSearchSqlAutocompleteData.enrichAutocompleteResult,
-    query,
-    cursor,
-  });
-
-  // only need to modify initial results if there are context keywords
-  if (contextResult?.suggestKeywords) {
-    if (!initialResult?.suggestKeywords) {
-      // set initial keywords to be context keywords
-      initialResult.suggestKeywords = contextResult.suggestKeywords;
-    } else {
-      // merge initial and context keywords
-      const combined = [...initialResult.suggestKeywords, ...contextResult.suggestKeywords];
-
-      // ES6 magic to filter out duplicate objects based on id field
-      initialResult.suggestKeywords = combined.filter(
-        (item, index, self) => index === self.findIndex((other) => other.id === item.id)
-      );
-    }
-  }
-
-  return initialResult;
 };

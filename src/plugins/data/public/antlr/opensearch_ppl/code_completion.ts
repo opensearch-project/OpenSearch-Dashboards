@@ -65,18 +65,10 @@ export const getSuggestions = async ({
         ...PPL_AGGREGATE_FUNCTIONS.map((af) => ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
-          insertText: af + '(${1:expr}) ',
+          insertText: af + ' ',
           detail: SuggestionItemDetailsTags.AggregateFunction,
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         }))
       );
-      // separately include count as there will be nothing within the parens
-      finalSuggestions.push({
-        text: `count()`,
-        type: monaco.languages.CompletionItemKind.Function,
-        insertText: 'count() ',
-        detail: SuggestionItemDetailsTags.AggregateFunction,
-      });
     }
 
     if (suggestions.suggestSourcesOrTables) {
