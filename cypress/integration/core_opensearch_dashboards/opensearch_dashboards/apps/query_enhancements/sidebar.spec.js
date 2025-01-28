@@ -4,6 +4,7 @@
  */
 
 import {
+  DatasetTypes,
   INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
   SECONDARY_ENGINE,
@@ -173,7 +174,7 @@ export const runSideBarTests = () => {
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         beforeEach(() => {
-          if (config.datasetType === 'INDEX_PATTERN') {
+          if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
             cy.createWorkspaceIndexPatterns({
               workspaceName: workspaceName,
               indexPattern: INDEX_WITH_TIME_1,
@@ -199,7 +200,7 @@ export const runSideBarTests = () => {
             testData.simpleFields.expectedValues,
             testData.pplQuery(config.dataset),
             testData.sqlQuery(config.dataset),
-            config.datasetType === 'INDEX_PATTERN',
+            cconfig.datasetType === DatasetTypes.INDEX_PATTERN.name,
             config
           );
         });
@@ -210,7 +211,7 @@ export const runSideBarTests = () => {
             testData.nestedFields.expectedValues,
             testData.pplQuery(config.dataset),
             testData.sqlQuery(config.dataset),
-            config.datasetType === 'INDEX_PATTERN',
+            config.datasetType === DatasetTypes.INDEX_PATTERN.name,
             config
           );
         });

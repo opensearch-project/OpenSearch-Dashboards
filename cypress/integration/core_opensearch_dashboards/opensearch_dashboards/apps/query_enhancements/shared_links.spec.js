@@ -4,6 +4,7 @@
  */
 
 import {
+  DatasetTypes,
   INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
   SECONDARY_ENGINE,
@@ -88,7 +89,7 @@ export const runSharedLinksTests = () => {
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         beforeEach(() => {
-          if (config.datasetType === 'INDEX_PATTERN') {
+          if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
             cy.createWorkspaceIndexPatterns({
               workspaceName: workspaceName,
               indexPattern: INDEX_WITH_TIME_1,
