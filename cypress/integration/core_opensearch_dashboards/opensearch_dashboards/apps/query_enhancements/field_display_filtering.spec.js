@@ -8,7 +8,7 @@ import {
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
 } from '../../../../../utils/apps/constants';
-import * as dataExplorer from '../../../../../utils/apps/query_enhancements/field_display_filtering.js';
+import * as dataExplorer from '../../../../../utils/apps/query_enhancements/doc_table.js';
 import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
 import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 import {
@@ -32,7 +32,7 @@ describe('filter for value spec', () => {
     // Add data source
     cy.addDataSource({
       name: DATASOURCE_NAME,
-      url: `${SECONDARY_ENGINE.url}`,
+      url: 'http://opensearch-node:9200/',
       authType: 'no_auth',
     });
     // Create workspace
