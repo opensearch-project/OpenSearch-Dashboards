@@ -10,6 +10,7 @@ import {
   INDEX_WITH_TIME_2,
   QueryLanguages,
   SECONDARY_ENGINE,
+  START_TIME,
 } from '../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
@@ -104,15 +105,16 @@ export const runSavedSearchTests = () => {
       loadSavedSearchFromDashboards(config, workspaceName);
 
       // verify that there are results
-      cy.getElementByTestId('docTableField').should('be.visible');
+      const expectedHitCount = getExpectedHitCount(config.datasetType, config.language);
+      cy.getElementByTestId('osdDocTablePagination').contains(new RegExp(`of ${expectedHitCount}`));
 
-      // set a date where there should be no results
+      // set a date where there should different number of results
       setDatePickerDatesAndSearchIfRelevant(
         config.language,
-        'Jan 1, 2024 @ 00:00:00.000',
-        'Jan 2, 2024 @ 00:00:00.000'
+        START_TIME,
+        'Oct 1, 2022 @ 00:00:00.000'
       );
-      cy.get('p').contains('No results found').should('be.visible');
+      cy.getElementByTestId('osdDocTablePagination').contains(/of 15/);
     });
 
     it('Show valid saved searches', () => {
