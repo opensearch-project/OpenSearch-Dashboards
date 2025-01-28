@@ -1477,10 +1477,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@npm:@opensearch-project/oui@1.17.0":
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.17.0.tgz#8a09f9f03f82eaf9404e59ac961b663748baba68"
-  integrity sha512-lr8S88sOUrMElO4w38laRsASLcCvXuASLVFZG7giFL31O6AkwGbII/Dux5jH26OdQ9T7CshPDZ5y/h3pyuSbUQ==
+"@elastic/eui@npm:@opensearch-project/oui@1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.18.0.tgz#0d2b5d7e59eda992eec428be6f57e1bd4fba4aee"
+  integrity sha512-FfgLmwmfIoKIC9h+si+0sFLZBRErZw81k8/jTKW2aF151ZZjBr0DOwUk+DOh4QjwwoB8XeRXxVmVe3KaUiDnEg==
   dependencies:
     "@types/chroma-js" "^2.4.0"
     "@types/react-beautiful-dnd" "^13.1.3"
