@@ -1,0 +1,2 @@
+test:
+- Add tests for saved searches in dashboards ([#9288](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9288))
