@@ -77,13 +77,17 @@ jobs:
           - group: 9
             config: standard
             test_location: ftr
-          # Dashboard tests with query enhanced
+          # Dashboard tests with query enhanced - group 1
           - group: 10
             config: query_enhanced
             test_location: source
           # Dashboard tests with no query enhanced
           - group: 11
             config: dashboard
+            test_location: source
+          # Dashboard tests with query enhanced - group 2
+          - group: 12
+            config: query_enhanced
             test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
