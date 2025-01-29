@@ -66,7 +66,7 @@ export class QueryEnhancementsPlugin
         usageCollector: data.search.usageCollector,
       }),
       getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
-      fields: { filterable: false, visualizable: false },
+      fields: { sortable: false, filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
           defaultMessage: 'PPL documentation',
@@ -132,7 +132,7 @@ export class QueryEnhancementsPlugin
       }),
       getQueryString: (currentQuery: Query) =>
         `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
-      fields: { filterable: false, visualizable: false },
+      fields: { sortable: false, filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
           defaultMessage: 'SQL documentation',
