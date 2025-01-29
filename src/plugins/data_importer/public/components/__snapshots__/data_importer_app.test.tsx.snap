@@ -1,0 +1,248 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`App should render with MDS 1`] = `
+<BrowserRouter
+  basename="dataImporter"
+>
+  <I18nProvider>
+    <mockConstructor
+      appName="dataImporter"
+      useDefaultBehaviors={true}
+    />
+    <EuiPage>
+      <EuiPageSideBar>
+        <ImportTypeSelector
+          initialSelection="file"
+          updateSelection={[Function]}
+        />
+        <EuiTitle
+          size="xs"
+        >
+          <span>
+            Data Source Options
+          </span>
+        </EuiTitle>
+        <EuiFieldText
+          onChange={[Function]}
+          placeholder="Index name"
+        />
+        <EuiSpacer
+          size="m"
+        />
+        <div>
+          <[object Object]
+            componentConfig={
+              Object {
+                "fullWidth": true,
+                "notifications": Object {
+                  "toasts": Object {
+                    "add": [MockFunction],
+                    "addDanger": [MockFunction],
+                    "addError": [MockFunction],
+                    "addInfo": [MockFunction],
+                    "addSuccess": [MockFunction],
+                    "addWarning": [MockFunction],
+                    "get$": [MockFunction],
+                    "remove": [MockFunction],
+                  },
+                },
+                "onSelectedDataSources": [Function],
+                "savedObjects": Object {
+                  "bulkCreate": [MockFunction],
+                  "bulkGet": [MockFunction],
+                  "bulkUpdate": [MockFunction],
+                  "create": [MockFunction],
+                  "delete": [MockFunction],
+                  "find": [MockFunction],
+                  "get": [MockFunction],
+                  "setCurrentWorkspace": [MockFunction],
+                  "update": [MockFunction],
+                },
+                "selectedOption": undefined,
+              }
+            }
+            componentType="DataSourceSelectable"
+            dataSourceManagement={
+              Object {
+                "dataSourceSelection": DataSourceSelectionService {
+                  "getSelection$": [Function],
+                  "getSelectionValue": [Function],
+                  "remove": [Function],
+                  "removedComponentIds": Array [],
+                  "selectDataSource": [Function],
+                  "selectedDataSource$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Map {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+                "getDefaultDataSourceId": [Function],
+                "getDefaultDataSourceId$": [Function],
+                "registerAuthenticationMethod": [Function],
+                "ui": Object {
+                  "DataSourceSelector": [Function],
+                  "getDataSourceMenu": [MockFunction] {
+                    "calls": Array [
+                      Array [],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": <div>
+                          DataSourceMenu
+                        </div>,
+                      },
+                    ],
+                  },
+                },
+              }
+            }
+          />
+          <EuiSpacer
+            size="m"
+          />
+        </div>
+        <EuiButton
+          fullWidth={true}
+          onClick={[Function]}
+        >
+          Import
+        </EuiButton>
+      </EuiPageSideBar>
+      <EuiPageBody
+        component="main"
+      >
+        <EuiPageHeader>
+          <EuiTitle
+            size="l"
+          >
+            <h1>
+              <FormattedMessage
+                defaultMessage="{name}"
+                id="dataImporter.helloWorldText"
+                values={
+                  Object {
+                    "name": "Data Importer Plugin",
+                  }
+                }
+              />
+            </h1>
+          </EuiTitle>
+        </EuiPageHeader>
+        <EuiPageContent>
+          <EuiPageContentHeader>
+            <EuiTitle>
+              <h2>
+                <FormattedMessage
+                  defaultMessage="Import Data from File"
+                  id="dataImporter.congratulationsTitle"
+                  values={Object {}}
+                />
+              </h2>
+            </EuiTitle>
+          </EuiPageContentHeader>
+          <ImportFileContentBody
+            enabledFileTypes={
+              Array [
+                "csv",
+                "json",
+                "ndjson",
+              ]
+            }
+            onFileUpdate={[Function]}
+          />
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
+  </I18nProvider>
+</BrowserRouter>
+`;
+
+exports[`App should render without MDS 1`] = `
+<BrowserRouter
+  basename="dataImporter"
+>
+  <I18nProvider>
+    <mockConstructor
+      appName="dataImporter"
+      useDefaultBehaviors={true}
+    />
+    <EuiPage>
+      <EuiPageSideBar>
+        <ImportTypeSelector
+          initialSelection="file"
+          updateSelection={[Function]}
+        />
+        <EuiTitle
+          size="xs"
+        >
+          <span>
+            Data Source Options
+          </span>
+        </EuiTitle>
+        <EuiFieldText
+          onChange={[Function]}
+          placeholder="Index name"
+        />
+        <EuiSpacer
+          size="m"
+        />
+        <EuiButton
+          fullWidth={true}
+          onClick={[Function]}
+        >
+          Import
+        </EuiButton>
+      </EuiPageSideBar>
+      <EuiPageBody
+        component="main"
+      >
+        <EuiPageHeader>
+          <EuiTitle
+            size="l"
+          >
+            <h1>
+              <FormattedMessage
+                defaultMessage="{name}"
+                id="dataImporter.helloWorldText"
+                values={
+                  Object {
+                    "name": "Data Importer Plugin",
+                  }
+                }
+              />
+            </h1>
+          </EuiTitle>
+        </EuiPageHeader>
+        <EuiPageContent>
+          <EuiPageContentHeader>
+            <EuiTitle>
+              <h2>
+                <FormattedMessage
+                  defaultMessage="Import Data from File"
+                  id="dataImporter.congratulationsTitle"
+                  values={Object {}}
+                />
+              </h2>
+            </EuiTitle>
+          </EuiPageContentHeader>
+          <ImportFileContentBody
+            enabledFileTypes={
+              Array [
+                "csv",
+                "json",
+                "ndjson",
+              ]
+            }
+            onFileUpdate={[Function]}
+          />
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
+  </I18nProvider>
+</BrowserRouter>
+`;
