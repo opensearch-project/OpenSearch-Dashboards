@@ -4,13 +4,13 @@
  */
 
 import { EuiBasicTable, EuiFieldSearch, EuiLink, EuiText } from '@elastic/eui';
-import React, { useRef, useState } from 'react';
-import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { DataStructure } from '../../../common';
-import { getQueryService } from '../../services';
-import { DatasetTypeConfig, DataStructureFetchOptions } from '../../query';
+import { FormattedMessage } from '@osd/i18n/react';
+import React, { useRef, useState } from 'react';
 import { IDataPluginServices } from '../..';
+import { DataStructure } from '../../../common';
+import { DatasetTypeConfig, DataStructureFetchOptions } from '../../query';
+import { getQueryService } from '../../services';
 
 interface DatasetTableProps {
   services: IDataPluginServices;
@@ -86,7 +86,27 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
       <EuiBasicTable
         items={dataStructures}
         itemId="id"
-        columns={[{ field: 'title', name: 'Name' }]}
+        columns={[
+          {
+            field: 'title',
+            name: 'Name',
+            textOnly: true,
+            render: (title: string, item: DataStructure) => {
+              return (
+                <>
+                  <EuiText size="s" className="datasetTable__itemTitle">
+                    {title}
+                  </EuiText>
+                  {item.description && (
+                    <EuiText size="s" color="subdued" className="datasetTable__itemDescription">
+                      {item.description}
+                    </EuiText>
+                  )}
+                </>
+              );
+            },
+          },
+        ]}
         loading={loading}
         isSelectable
         selection={{ onSelectionChange }}
