@@ -1,0 +1,36 @@
+name: Performance Testing
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install Chrome
+        run: sudo apt-get install -y google-chrome-stable
+
+      - name: Build OpenSearch Dashboards
+        run: yarn build
+
+      - name: Start OpenSearch Dashboards
+        run: yarn start & yarn wait-on http://localhost:5601
+
+      - name: Check Chrome Path
+        run: node -e "console.log(require('puppeteer').executablePath())"
+
+      - name: Run Lighthouse CI
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN || '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' }}
+        run: yarn lhci autorun
