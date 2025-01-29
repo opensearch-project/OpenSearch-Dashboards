@@ -5,7 +5,6 @@ module.exports = {
       startServerCommand: 'yarn start',
       numberOfRuns: 3,
       settings: {
-        chromePath: require('puppeteer').executablePath(),
         chromeFlags: '--no-sandbox --disable-gpu',
       },
     },
