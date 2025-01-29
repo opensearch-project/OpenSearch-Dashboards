@@ -17,12 +17,7 @@ import {
 import { API } from '../../../common';
 import { ConfigSchema } from '../../../common/config';
 import assistantMark from '../../assets/sparkle_mark.svg';
-import {
-  QueryAssistBanner,
-  QueryAssistBar,
-  QueryAssistSummary,
-  QueryAssistButton,
-} from '../components';
+import { QueryAssistBanner, QueryAssistBar, QueryAssistSummary } from '../components';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { QueryAssistContext } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
@@ -32,20 +27,28 @@ const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const pendingRequests: Map<string | undefined, Promise<string[]>> = new Map();
 
   return [
-    async (http: HttpSetup, dataSourceId: string | undefined) => {
+    async (http: HttpSetup, dataSourceId: string | undefined, timeout?: number) => {
       const cached = availableLanguagesByDataSource.get(dataSourceId);
       if (cached !== undefined) return cached;
 
       const pendingRequest = pendingRequests.get(dataSourceId);
       if (pendingRequest !== undefined) return pendingRequest;
 
+      const controller = timeout ? new AbortController() : undefined;
+      const timeoutId = timeout ? setTimeout(() => controller?.abort(), timeout) : undefined;
+
       const languagesPromise = http
         .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
           query: { dataSourceId },
+          signal: controller?.signal,
         })
         .then((response) => response.configuredLanguages)
         .catch(() => [])
-        .finally(() => pendingRequests.delete(dataSourceId));
+        .finally(() => {
+          pendingRequests.delete(dataSourceId);
+          if (timeoutId) clearTimeout(timeoutId);
+        });
+
       pendingRequests.set(dataSourceId, languagesPromise);
 
       const languages = await languagesPromise;
@@ -89,18 +92,19 @@ export const createQueryAssistExtension = (
   core: CoreSetup,
   data: DataPublicPluginSetup,
   config: ConfigSchema['queryAssist'],
+  isQuerySummaryCollapsed$: BehaviorSubject<boolean>,
+  resultSummaryEnabled$: BehaviorSubject<boolean>,
   usageCollection?: UsageCollectionSetup
 ): QueryEditorExtensionConfig => {
   const http: HttpSetup = core.http;
-  const isQueryAssistCollapsed$ = new BehaviorSubject<boolean>(false);
   const question$ = new BehaviorSubject('');
   return {
     id: 'query-assist',
     order: 1000,
     getDataStructureMeta: async (dataSourceId) => {
-      const isEnabled = await getAvailableLanguagesForDataSource(http, dataSourceId).then(
-        (languages) => languages.length > 0
-      );
+      // [TODO] - The timmeout exists because the loading of the Datasource menu is prevented until this request completes. This if a single cluster is down the request holds the whole menu level in a loading state. We should make this call non blocking and load the datasource meta in the background.
+      const isEnabled = await getAvailableLanguagesForDataSource(http, dataSourceId, 3000) // 3s timeout for quick check
+        .then((languages) => languages.length > 0);
       if (isEnabled) {
         return {
           type: DATA_STRUCTURE_META_TYPES.FEATURE,
@@ -120,7 +124,8 @@ export const createQueryAssistExtension = (
           dependencies={dependencies}
           http={http}
           data={data}
-          isQueryAssistCollapsed$={isQueryAssistCollapsed$}
+          isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
+          {...(config.summary.enabled && { resultSummaryEnabled$ })}
           question$={question$}
         >
           <QueryAssistBar dependencies={dependencies} />
@@ -147,18 +152,6 @@ export const createQueryAssistExtension = (
         </QueryAssistWrapper>
       );
     },
-    getSearchBarButton: (dependencies) => {
-      return (
-        <QueryAssistWrapper
-          dependencies={dependencies}
-          http={http}
-          data={data}
-          isQueryAssistCollapsed$={isQueryAssistCollapsed$}
-        >
-          <QueryAssistButton dependencies={dependencies} />
-        </QueryAssistWrapper>
-      );
-    },
   };
 };
 
@@ -167,26 +160,23 @@ interface QueryAssistWrapperProps {
   http: HttpSetup;
   data: DataPublicPluginSetup;
   invert?: boolean;
-  isQueryAssistCollapsed$?: BehaviorSubject<boolean>;
+  isQuerySummaryCollapsed$?: BehaviorSubject<boolean>;
+  resultSummaryEnabled$?: BehaviorSubject<boolean>;
   question$?: BehaviorSubject<string>;
 }
 
 const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
   const [visible, setVisible] = useState(false);
   const [question, setQuestion] = useState('');
-  const [isQueryAssistCollapsed, setIsQueryAssistCollapsed] = useState(true);
+  const [isQuerySummaryCollapsed, setIsQuerySummaryCollapsed] = useState(true);
   const updateQuestion = (newQuestion: string) => {
     props.question$?.next(newQuestion);
   };
   const question$ = props.question$;
 
-  const updateIsQueryAssistCollapsed = (isCollapsed: boolean) => {
-    props.isQueryAssistCollapsed$?.next(isCollapsed);
-  };
-
   useEffect(() => {
-    const subscription = props.isQueryAssistCollapsed$?.subscribe((isCollapsed) => {
-      setIsQueryAssistCollapsed(isCollapsed);
+    const subscription = props.isQuerySummaryCollapsed$?.subscribe((isCollapsed) => {
+      setIsQuerySummaryCollapsed(isCollapsed);
     });
     const questionSubscription = props.question$?.subscribe((newQuestion) => {
       setQuestion(newQuestion);
@@ -204,7 +194,11 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
 
     const subscription = getAvailableLanguages$(props.http, props.data).subscribe((languages) => {
       const available = languages.includes(props.dependencies.language);
-      if (mounted) setVisible(props.invert ? !available : available);
+      if (mounted) {
+        const isVisible = props.invert ? !available : available;
+        setVisible(isVisible);
+        props.resultSummaryEnabled$?.next(isVisible);
+      }
     });
 
     return () => {
@@ -221,8 +215,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
           question,
           question$,
           updateQuestion,
-          isQueryAssistCollapsed,
-          updateIsQueryAssistCollapsed,
+          isQuerySummaryCollapsed,
         }}
       >
         {props.children}

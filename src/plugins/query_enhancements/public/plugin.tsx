@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
+import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { DataStorage } from '../../data/common';
 import {
@@ -35,6 +36,8 @@ export class QueryEnhancementsPlugin
     > {
   private readonly storage: DataStorage;
   private readonly config: ConfigSchema;
+  private isQuerySummaryCollapsed$ = new BehaviorSubject<boolean>(false);
+  private resultSummaryEnabled$ = new BehaviorSubject<boolean>(false);
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -182,13 +185,14 @@ export class QueryEnhancementsPlugin
       ],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
-
     data.__enhance({
       editor: {
         queryEditorExtension: createQueryAssistExtension(
           core,
           data,
           this.config.queryAssist,
+          this.isQuerySummaryCollapsed$,
+          this.resultSummaryEnabled$,
           usageCollection
         ),
       },
@@ -196,15 +200,18 @@ export class QueryEnhancementsPlugin
 
     queryString.getDatasetService().registerType(s3TypeConfig);
 
-    return {};
+    return {
+      isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,
+      resultSummaryEnabled$: this.resultSummaryEnabled$,
+    };
   }
 
   public start(
     core: CoreStart,
-    deps: QueryEnhancementsPluginStartDependencies
+    { data }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
     setStorage(this.storage);
-    setData(deps.data);
+    setData(data);
     return {};
   }
 

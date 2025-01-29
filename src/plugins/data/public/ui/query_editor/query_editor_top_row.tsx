@@ -357,6 +357,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
           className="osdQueryEditor__datePicker"
+          data-test-subj="osdQueryEditorDatePicker"
           compressed={true}
         />
       </EuiFlexItem>
@@ -369,7 +370,11 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
   const datePicker = (
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={false} className="osdQueryEditor--updateButtonWrapper">
+      <EuiFlexItem
+        grow={false}
+        className="osdQueryEditor--updateButtonWrapper"
+        data-test-subj="osdQueryEditorUpdateButton"
+      >
         {renderUpdateButton()}
       </EuiFlexItem>
     </EuiFlexGroup>
