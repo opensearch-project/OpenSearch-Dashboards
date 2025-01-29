@@ -31,6 +31,6 @@ jobs:
         run: node -e "console.log(require('puppeteer').executablePath())"
 
       - name: Run Lighthouse CI
-        env:
-          LHCI_GITHUB_APP_TOKEN: ''
+        # env:
+        #   # LHCI_GITHUB_APP_TOKEN: ''
         run: yarn lhci autorun
