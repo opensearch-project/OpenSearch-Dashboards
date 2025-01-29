@@ -1,0 +1,2 @@
+chore:
+- Disable sorting on Discover table columns header for PPL and SQL ([#9263](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9263))
