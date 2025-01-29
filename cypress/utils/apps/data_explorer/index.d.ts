@@ -19,7 +19,40 @@ declare namespace Cypress {
       value: string,
       isEnhancement?: boolean
     ): Chainable<any>;
-    saveQuery(name: string, description?: string): Chainable<any>;
+    /**
+     * Deletes all filters in a Search.
+     */
+    deleteAllFilters(): void;
+    /**
+     * Save a query.
+     * @param name - Name of the query
+     * @param description - Description of the query
+     * @param includeFilters - Save filters
+     * @param includeTimeFilter - Save Time filter
+     */
+    saveQuery(
+      name: string,
+      description?: string,
+      includeFilters?: boolean,
+      includeTimeFilter?: boolean
+    ): Chainable<any>;
+    /**
+     * Update a saved query.
+     * @param name - Name of saved query if saved as new query.
+     * @param saveAsNewQuery - Save as a new query.
+     * @param includeFilters - Save filters.
+     * @param includeTimeFilter - Save Time filter.
+     */
+    updateSaveQuery(
+      name: string,
+      saveAsNewQuery: boolean,
+      includeFilters?: boolean,
+      includeTimeFilter?: boolean
+    ): void;
+    /**
+     * Load a saved query.
+     * @param name - Name of saved query.
+     */
     loadSaveQuery(name: string): Chainable<any>;
     clearSaveQuery(): Chainable<any>;
     deleteSaveQuery(name: string): Chainable<any>;

@@ -10,6 +10,8 @@ import {
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   QueryLanguages,
+  START_TIME,
+  END_TIME,
 } from './constants';
 import { setDatePickerDatesAndSearchIfRelevant } from './shared';
 
@@ -55,7 +57,7 @@ export const APPLIED_FILTERS = {
  * @param {QueryEnhancementLanguage} language - the name of query language
  * @returns {string}
  */
-const getQueryString = (dataset, language) => {
+export const getQueryString = (dataset, language) => {
   switch (language) {
     case QueryLanguages.DQL.name:
       return 'bytes_transferred > 9950';
@@ -76,7 +78,7 @@ const getQueryString = (dataset, language) => {
  * @param {QueryEnhancementLanguage} language - the query language name
  * @returns {number|undefined}
  */
-const getExpectedHitCount = (datasetType, language) => {
+export const getExpectedHitCount = (datasetType, language) => {
   switch (datasetType) {
     case DatasetTypes.INDEX_PATTERN.name:
       switch (language) {
@@ -117,7 +119,7 @@ const getExpectedHitCount = (datasetType, language) => {
  * @param {QueryEnhancementLanguage} language - the query language name
  * @returns {[[number,string]]|*[]} An array of table data. For each element, 0th index is the index of the table cell, and 1st index is the value in that table cell
  */
-const getSampleTableData = (datasetType, language) => {
+export const getSampleTableData = (datasetType, language) => {
   switch (datasetType) {
     case DatasetTypes.INDEX_PATTERN.name:
       switch (language) {
@@ -165,6 +167,8 @@ const getSampleTableData = (datasetType, language) => {
  * @property {string} apiLanguage - the name of query language as recognized by OpenSearch API
  * @property {string} saveName - the name to use when saving the saved search
  * @property {string} testName - the phrase to add to the test case's title
+ * @property {string} startTime - the absolute start time for the query in the form e.g. Jan 1, 2020 @ 15:17:18.005
+ * @property {string} endTime - the absolute end time for the query in the form e.g. Jan 1, 2020 @ 15:17:18.005
  * @property {boolean} filters - whether the language supports filtering
  * @property {boolean} histogram - whether the language supports histogram
  * @property {boolean} selectFields - whether the language supports selecting fields to view data
@@ -189,6 +193,8 @@ export const generateSavedTestConfiguration = (dataset, datasetType, language) =
     apiLanguage: language.apiName,
     saveName: `${language.name}-${datasetType}`,
     testName: `${language.name}-${datasetType}`,
+    startTime: START_TIME,
+    endTime: END_TIME,
     ...language.supports,
   };
 

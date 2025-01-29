@@ -25,6 +25,15 @@ declare namespace Cypress {
       options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
     ): Chainable<S>;
     /**
+     * Get an element which contains testId
+     * @example
+     * cy.getElementByTestIdLike('query')
+     */
+    getElementByTestIdLike<S = any>(
+      testId: string,
+      options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
+    ): Chainable<S>;
+    /**
      * Get an element by its test id
      * @example
      * cy.getElementByTestId('query')
