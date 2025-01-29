@@ -57,8 +57,10 @@ const loadSavedQuery = (config) => {
   });
 
   cy.getElementByTestId('discoverNewButton').click();
+  // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
   cy.setDataset(config.dataset, datasourceName, config.datasetType);
   cy.setQueryLanguage(config.language);
+
   setDatePickerDatesAndSearchIfRelevant(
     config.language,
     'Aug 29, 2020 @ 00:00:00.000',
