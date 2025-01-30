@@ -139,28 +139,36 @@ Cypress.Commands.add('deleteAllDataSources', () => {
   });
 });
 
-Cypress.Commands.add('setIndexAsDataset', (index, dataSourceName, language) => {
-  cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
-  cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
-  cy.get(`[title="Indexes"]`).click();
-  cy.get(`[title="${dataSourceName}"]`).click();
-  // this element is sometimes dataSourceName masked by another element
-  cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
-  cy.getElementByTestId('datasetSelectorNext').click();
+Cypress.Commands.add(
+  'setIndexAsDataset',
+  (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
+    cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
+    cy.get(`[title="Indexes"]`).click();
+    cy.get(`[title="${dataSourceName}"]`).click();
+    // this element is sometimes dataSourceName masked by another element
+    cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+    cy.getElementByTestId('datasetSelectorNext').click();
 
-  if (language) {
-    cy.getElementByTestId('advancedSelectorLanguageSelect').select(language);
+    if (language) {
+      cy.getElementByTestId('advancedSelectorLanguageSelect').select(language);
+    }
+
+    cy.getElementByTestId('advancedSelectorTimeFieldSelect').select(timeFieldName);
+
+    if (finalAction === 'submit') {
+      cy.getElementByTestId('advancedSelectorConfirmButton').click();
+
+      // verify that it has been selected
+      cy.getElementByTestId('datasetSelectorButton').should(
+        'contain.text',
+        `${dataSourceName}::${index}`
+      );
+    } else {
+      cy.get('[type="button"]').contains('Cancel').click();
+    }
   }
-
-  cy.getElementByTestId('advancedSelectorTimeFieldSelect').select('timestamp');
-  cy.getElementByTestId('advancedSelectorConfirmButton').click();
-
-  // verify that it has been selected
-  cy.getElementByTestId('datasetSelectorButton').should(
-    'contain.text',
-    `${dataSourceName}::${index}`
-  );
-});
+);
 
 Cypress.Commands.add('setIndexPatternAsDataset', (indexPattern, dataSourceName) => {
   cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
@@ -172,6 +180,36 @@ Cypress.Commands.add('setIndexPatternAsDataset', (indexPattern, dataSourceName) 
     `${dataSourceName}::${indexPattern}`
   );
 });
+
+Cypress.Commands.add(
+  'setIndexPatternFromAdvancedSelector',
+  (indexPattern, dataSourceName, language, finalAction = 'submit') => {
+    cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
+    cy.get(`[title="Index Patterns"]`).click();
+
+    cy.get(`[title="${dataSourceName}::${indexPattern}"]`)
+      .should('be.visible')
+      .click({ force: true });
+    cy.getElementByTestId('datasetSelectorNext').click();
+
+    if (language) {
+      cy.getElementByTestId('advancedSelectorLanguageSelect').select(language);
+    }
+
+    if (finalAction === 'submit') {
+      cy.getElementByTestId('advancedSelectorConfirmButton').click();
+
+      // verify that it has been selected
+      cy.getElementByTestId('datasetSelectorButton').should(
+        'contain.text',
+        `${dataSourceName}::${indexPattern}`
+      );
+    } else {
+      cy.get('[type="button"]').contains('Cancel').click();
+    }
+  }
+);
 
 Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
   switch (type) {

@@ -3,111 +3,137 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DATASOURCE_NAME, START_TIME, END_TIME } from '../../../../../utils/apps/constants';
-import { SECONDARY_ENGINE } from '../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
+import {
+  INDEX_PATTERN_WITH_TIME,
+  INDEX_WITH_TIME_1,
+  INDEX_WITH_TIME_2,
+  SECONDARY_ENGINE,
+} from '../../../../../utils/constants';
 
-const workspace = getRandomizedWorkspaceName();
+import {
+  generateAllTestConfigurations,
+  getRandomizedWorkspaceName,
+  getRandomizedDatasourceName,
+  setDatePickerDatesAndSearchIfRelevant,
+  getDefaultQuery,
+} from '../../../../../utils/apps/query_enhancements/shared';
 
-describe('dataset selector', { scrollBehavior: false }, () => {
-  before(() => {
-    cy.setupTestData(
-      SECONDARY_ENGINE.url,
-      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
-      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
-    );
+import { verifyDiscoverPageState } from '../../../../../utils/apps/query_enhancements/saved';
 
-    // Add data source
-    cy.addDataSource({
-      name: `${DATASOURCE_NAME}`,
-      url: `${SECONDARY_ENGINE.url}`,
-      authType: 'no_auth',
-    });
-  });
-  after(() => {
-    cy.deleteDataSourceByName(`${DATASOURCE_NAME}`);
-    cy.deleteIndex('data_logs_small_time_1');
-  });
-  beforeEach(() => {
-    // Create workspace
-    cy.deleteWorkspaceByName(workspace);
-    cy.visit('/app/home');
-    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
-    cy.navigateToWorkSpaceSpecificPage({
-      workspaceName: workspace,
-      page: 'discover',
-      isEnhancement: true,
-    });
-  });
+import {
+  generateDatasetSelectorTestConfiguration,
+  verifyBaseState,
+  setUpBaseState,
+} from '../../../../../utils/apps/query_enhancements/dataset_selector';
 
-  afterEach(() => {
-    cy.deleteWorkspaceByName(`${workspace}`);
-  });
+const workspaceName = getRandomizedWorkspaceName();
+const dataSourceName = getRandomizedDatasourceName();
 
-  describe('select indices', () => {
-    it('with SQL as default language', function () {
-      cy.setIndexAsDataset('data_logs_small_time_1', DATASOURCE_NAME, 'OpenSearch SQL');
-
-      // SQL should already be selected
-      cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'OpenSearch SQL');
-      cy.waitForLoader(true);
-
-      // SQL query should be executed and sending back result
-      cy.get(`[data-test-subj="queryResultCompleteMsg"]`).should('be.visible');
-
-      // Switch language to PPL
-      cy.setQueryLanguage('PPL');
-      cy.setTopNavDate(START_TIME, END_TIME);
-
-      cy.waitForLoader(true);
-      cy.get(`[data-test-subj="queryResultCompleteMsg"]`).should('be.visible');
-    });
-
-    it('with PPL as default language', function () {
-      cy.setIndexAsDataset('data_logs_small_time_1', DATASOURCE_NAME, 'PPL');
-
-      // PPL should already be selected
-      cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'PPL');
-
-      cy.setTopNavDate(START_TIME, END_TIME);
-
-      cy.waitForLoader(true);
-
-      // Query should finish running with timestamp and finish time in the footer
-      cy.getElementByTestId('queryResultCompleteMsg').should('be.visible');
-      cy.getElementByTestId('queryEditorFooterTimestamp').should('contain', 'timestamp');
-
-      // Switch language to SQL
-      cy.setQueryLanguage('OpenSearch SQL');
-
-      cy.waitForLoader(true);
-      cy.getElementByTestId('queryResultCompleteMsg').should('be.visible');
-      cy.getElementByTestId('queryEditorFooterTimestamp').should('contain', 'timestamp');
-    });
-  });
-
-  describe('index pattern', () => {
-    it('create index pattern and select it', function () {
-      // Create and select index pattern for data_logs_small_time_1*
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspace,
-        indexPattern: 'data_logs_small_time_1',
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
+export const runDatasetSelectorTests = () => {
+  describe('dataset selector', { scrollBehavior: false }, () => {
+    beforeEach(() => {
+      // Load test data
+      cy.setupTestData(
+        SECONDARY_ENGINE.url,
+        [
+          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
+          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
+        ],
+        [
+          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`,
+          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.data.ndjson`,
+        ]
+      );
+      // Add data source
+      cy.addDataSource({
+        name: dataSourceName,
+        url: SECONDARY_ENGINE.url,
+        authType: 'no_auth',
       });
 
-      cy.navigateToWorkSpaceHomePage(workspace);
+      // Create workspace
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.visit('/app/home');
+      cy.osd.createInitialWorkspaceWithDataSource(dataSourceName, workspaceName);
+      cy.createWorkspaceIndexPatterns({
+        workspaceName: workspaceName,
+        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
+        timefieldName: 'timestamp',
+        dataSource: dataSourceName,
+        isEnhancement: true,
+      });
+    });
 
-      cy.waitForLoader(true);
-      cy.setIndexPatternAsDataset('data_logs_small_time_1*', DATASOURCE_NAME);
-      // setting OpenSearch SQL as the code following it does not work if this test is isolated
-      cy.setQueryLanguage('OpenSearch SQL');
+    afterEach(() => {
+      cy.deleteWorkspaceByName(workspaceName);
+      // TODO: Modify deleteIndex to handle an array of index and remove hard code
+      cy.deleteDataSourceByName(dataSourceName);
+      cy.deleteIndex(INDEX_WITH_TIME_1);
+      cy.deleteIndex(INDEX_WITH_TIME_2);
+    });
 
-      cy.waitForLoader(true);
-      cy.waitForSearch();
-      cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+    generateAllTestConfigurations(generateDatasetSelectorTestConfiguration).forEach((config) => {
+      it(`should be able to select and load ${config.testName} dataset-language combination using advanced dataset selector`, () => {
+        cy.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+
+        if (config.datasetType === 'INDEX_PATTERN') {
+          cy.setIndexPatternFromAdvancedSelector(config.dataset, dataSourceName, config.language);
+        } else {
+          cy.setIndexAsDataset(config.dataset, dataSourceName, config.language);
+        }
+        setDatePickerDatesAndSearchIfRelevant(config.language);
+
+        verifyDiscoverPageState({
+          dataset: config.dataset,
+          queryString: getDefaultQuery(config.dataset, config.language),
+          language: config.language,
+          hitCount: config.hitCount,
+        });
+
+        // verify time field is present in the result
+        cy.getElementByTestId('docTableHeaderField').contains('Time');
+      });
+
+      it(`select the ${config.testName} dataset-language combination and cancelling the workflow restores the original state`, () => {
+        cy.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+
+        // Setup the base state
+        setUpBaseState(INDEX_PATTERN_WITH_TIME, dataSourceName);
+
+        // Verify if the base state is setup properly
+        verifyBaseState(INDEX_PATTERN_WITH_TIME);
+
+        // Try setting the dataset-language combination but click on cancel
+        if (config.datasetType === 'INDEX_PATTERN') {
+          cy.setIndexPatternFromAdvancedSelector(
+            config.dataset,
+            dataSourceName,
+            config.language,
+            'cancel'
+          );
+        } else {
+          cy.setIndexAsDataset(
+            config.dataset,
+            dataSourceName,
+            config.language,
+            'timestamp',
+            'cancel'
+          );
+        }
+
+        // Verify if the base state is retained
+        verifyBaseState(INDEX_PATTERN_WITH_TIME);
+      });
     });
   });
-});
+};
+
+runDatasetSelectorTests();
