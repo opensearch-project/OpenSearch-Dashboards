@@ -47,7 +47,7 @@ describe('inspect spec', () => {
     // Create workspace
     cy.deleteWorkspaceByName(workspaceName);
     cy.visit('/app/home');
-    cy.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+    cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
     cy.wait(2000);
     cy.createWorkspaceIndexPatterns({
       workspaceName: workspaceName,
