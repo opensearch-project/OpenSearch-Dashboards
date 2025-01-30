@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  LATEST_VERSION: '2.17.0'
+
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
@@ -25,6 +28,28 @@ jobs:
 
       - name: Run bootstrap
         run: yarn osd bootstrap
+
+      - name: Download OpenSearch
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
+
+      - name: Extract OpenSearch
+        run: |
+          tar -xzf opensearch-*.tar.gz
+          rm -f opensearch-*.tar.gz
+        shell: bash
+
+      - name: Remove security plugin
+        run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
+        shell: bash
+
+      - name: Run OpenSearch
+        run: |
+          /bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"
+          sleep 30
+        shell: bash
 
       - name: Install Lighthouse CI
         run: yarn global add @lhci/cli
