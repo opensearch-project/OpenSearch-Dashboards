@@ -1,4 +1,4 @@
-name: Lighthouse CI
+name: Performance Testing
 
 on:
   pull_request:
@@ -12,14 +12,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Install Lighthouse CI
+        run: yarn global add @lhci/cli
 
       - name: Build OpenSearch Dashboards
         run: yarn build
 
       - name: Start OpenSearch Dashboards
-        run: yarn start --no-base-path & npx wait-on http://localhost:5601
+        run: yarn start --no-base-path & yarn wait-on http://localhost:5601
 
       - name: Run Lighthouse CI
         run: yarn lhci autorun || echo "Lighthouse assertion failed, check results"
@@ -32,7 +40,6 @@ jobs:
           lhci upload --target=temporary-public-storage | tee lhci_output.txt
           REPORT_URL=$(grep -o 'https://storage.googleapis.com/lighthouse-infrastructure-.*' lhci_output.txt | head -n 1)
           echo "🔗 [View Full Lighthouse Report]($REPORT_URL)" >> comment.txt
-
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
