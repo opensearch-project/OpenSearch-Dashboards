@@ -22,6 +22,8 @@ import {
   getFlattenedFieldsWithValue,
   verifyVisualizationsWithNoInspectOption,
   verifyVisualizationsWithInspectOption,
+  visualizationTitlesWithNoInspectOptions,
+  visualizationTitlesWithInspectOptions,
 } from '../../../../../utils/apps/query_enhancements/inspect.js';
 
 const workspaceName = getRandomizedWorkspaceName();
@@ -136,7 +138,7 @@ describe('inspect spec', () => {
       NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD
     );
 
-    verifyVisualizationsWithNoInspectOption();
-    verifyVisualizationsWithInspectOption();
+    verifyVisualizationsWithNoInspectOption(visualizationTitlesWithNoInspectOptions);
+    verifyVisualizationsWithInspectOption(visualizationTitlesWithInspectOptions);
   });
 });

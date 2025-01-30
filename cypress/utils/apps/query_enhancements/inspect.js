@@ -4,72 +4,20 @@
  */
 
 import { QueryLanguages } from './constants';
+import { formatValue } from './shared';
 
-const visualizationTitlesWithNoInspectOptions = [
+export const visualizationTitlesWithNoInspectOptions = [
   '[Flights]Controls',
   '[Flights]MarkdownInstructions',
   '[Flights]Delays&Cancellations',
 ];
 
-const visualizationTitlesWithInspectOptions = [
+export const visualizationTitlesWithInspectOptions = [
   '[Flights]AirlineCarrier',
   '[Flights]FlightCountandAverageTicketPrice',
   '[Flights]TotalFlights',
   '[Flights]AverageTicketPrice',
 ];
-
-/**
- * Gets Date and returns string of date in format Jan 24, 2025 @ 16:20:08.000
- * @param {Date} date - date to format
- * @returns {string} - in the format e.g. Jan 24, 2025 @ 16:20:08.000
- */
-function formatDate(date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  const month = months[date.getMonth()];
-  const day = date.getDate().toString();
-  const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
-  const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
-
-  return `${month} ${day}, ${year} @ ${hours}:${minutes}:${seconds}.${milliseconds}`;
-}
-
-/**
- * Format value to the corresponding string expected in the UI.
- * Formats commas in numbers, and dates.
- * @param {string} value - field value to be formatted.
- * @returns {string}
- */
-const formatValue = (value) => {
-  switch (typeof value) {
-    case 'number':
-      return value.toLocaleString();
-    case 'string':
-      // SQL and PPL date string uses format YYYY-MM-DD HH:MM:SS.SSS, we want to convert to ISO date.
-      const potentialDate = new Date(value.replace(' ', 'T'));
-      if (potentialDate instanceof Date && !isNaN(potentialDate)) {
-        return formatDate(potentialDate);
-      }
-    default:
-      return value;
-  }
-};
 
 /**
  * Returns the SavedSearchTestConfig for the provided dataset, datasetType, and language
@@ -88,19 +36,22 @@ export const generateInspectTestConfiguration = (dataset, datasetType, language)
 };
 
 /**
- * Flatten the object in the format e.g. {
-                        "FlightNum": "SYS76NQ",
-                        "DistanceKilometers": 7030.318886915258,
-                        "timestamp": "2025-01-27T16:06:01",
-                        "DestLocation": {
-                            "lat": "38.94449997",
-                            "lon": "-77.45580292"
-                        },
-                    } and format the values.
- * @param {object} obj - Object to be flattened.
- * @param {string?} parentKey - Starting prefix which will be prepended to all properties. Leave blank if not needed.
- * @param {object?} properties - Object to be modified.
- * @returns {object}
+ * Recursively flattens a nested object structure into dot notation and formats all values
+ * @param {object} obj - Object to be flattened
+ * @param {string} [parentKey] - Key prefix for nested properties
+ * @param {object} [properties={}] - Accumulator for flattened properties
+ * @returns {object} Flattened object with formatted values
+ * @example
+ * const input = {
+ *   FlightNum: "SYS76NQ",
+ *   DestLocation: { lat: "38.94449997", lon: "-77.45580292" }
+ * };
+ * flattenObjectAndFormatValues(input)
+ * // Returns: {
+ * //   FlightNum: "SYS76NQ",
+ * //   "DestLocation.lat": "38.94449997",
+ * //   "DestLocation.lon": "-77.45580292"
+ * // }
  */
 
 const flattenObjectAndFormatValues = (obj, parentKey, properties = {}) => {
@@ -120,8 +71,12 @@ const flattenObjectAndFormatValues = (obj, parentKey, properties = {}) => {
 };
 
 /**
- * Flatten the array in the format e.g. [
-    {
+ * Flattens an array of field definitions and extracts values for a specific row
+ * @param {[object]} arr - Array of field definitions to be flattened
+ * @param {number} rowNumber - Number for the specific row to be extracted.
+ * @returns {object} Flattened object with formatted values
+ * @example
+ * const input = [{
         "name": "FlightNum",
         "type": "string",
         "values": [
@@ -149,28 +104,17 @@ const flattenObjectAndFormatValues = (obj, parentKey, properties = {}) => {
                     "email": "Lula_Bartell65@hotmail.com"
                 }
             ],
-            [
-                {
-                    "address": [
-                        {
-                            "country": "USA",
-                            "coordinates": [
-                                {
-                                    "lon": -118.2437,
-                                    "lat": 34.0522
-                                }
-                            ]
-                        }
-                    ],
-                    "email": "Carolyne43@yahoo.com"
-                }
-            ]
         ]
     }
-] and format the values.
- * @param {object} arr - Array to be flattened (contains objects).
- * @param {number} rowNumber - The rowNumberth row to get all values from. (Starts from 0.)
- * @returns {object}
+];
+ * flattenObjectAndFormatValues(input)
+ * // Returns: {
+ * //   FlightNum: "9HY9SWR",
+ * //   "personal.address.country": "USA",
+ * //   "personal.address.coordinates.lon": "-87.6298",
+ * //   "personal.address.coordinates.lat": "41.8781",
+ * //   "personal.email": "Lula_Bartell65@hotmail.com"
+ * // }
  */
 const flattenArrayAndFormatValues = (arr, rowNumber) => {
   const properties = {};
@@ -209,9 +153,13 @@ export const getFlattenedFieldsWithValue = (interceptedRequest, language) => {
 };
 
 /**
- * In the Flights dashboard, verify that the visualizations identified as not having an inspect option do not have the option.
+ * Verifies that specified visualizations in a dashboard do not have inspect options
+ * Tests each visualization in visualizationTitlesWithNoInspectOptions array
+ * @param {[string]} visualizationTitlesWithNoInspectOptions - array of titles of visualizations to check.
  */
-export const verifyVisualizationsWithNoInspectOption = () => {
+export const verifyVisualizationsWithNoInspectOption = (
+  visualizationTitlesWithNoInspectOptions
+) => {
   visualizationTitlesWithNoInspectOptions.forEach((visualizationTitle) => {
     cy.log(visualizationTitle);
     const title = cy.getElementByTestIdLike(`embeddablePanelHeading-${visualizationTitle}`);
@@ -228,9 +176,11 @@ export const verifyVisualizationsWithNoInspectOption = () => {
 };
 
 /**
- * In the Flights dashboard, verify that the visualizations identified as having an inspect option have the option.
+ * Verifies that specified visualizations in a dashboard has inspect options and the corresponding data and request tables
+ * Tests each visualization in visualizationTitlesWithInspectOptions array
+ * @param {[string]} visualizationTitlesWithInspectOptions - array of titles of visualizations to check.
  */
-export const verifyVisualizationsWithInspectOption = () => {
+export const verifyVisualizationsWithInspectOption = (visualizationTitlesWithInspectOptions) => {
   visualizationTitlesWithInspectOptions.forEach((visualizationTitle) => {
     cy.getElementByTestIdLike(`embeddablePanelHeading-${visualizationTitle}`)
       .parent()
