@@ -32,7 +32,7 @@ describe('filter for value spec', () => {
     // Add data source
     cy.addDataSource({
       name: DATASOURCE_NAME,
-      url: 'http://opensearch-node:9200/',
+      url: SECONDARY_ENGINE.url,
       authType: 'no_auth',
     });
     // Create workspace
