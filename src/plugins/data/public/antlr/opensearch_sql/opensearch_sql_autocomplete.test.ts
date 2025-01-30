@@ -244,6 +244,70 @@ describe('processVisitedRules', () => {
     });
 
     // NOTE: nested predicates don't need to be tested because nothing nested is suggested
+
+    it('RULE_predicate - should suggest values for column with dots in the name', () => {
+      const mockRules = new Map();
+      mockRules.set(OpenSearchSQLParser.RULE_predicate, { startTokenIndex: 0 });
+      const tokenStream = createTokenStream([
+        { type: OpenSearchSQLParser.ID, text: 'column' },
+        { type: OpenSearchSQLParser.DOT, text: '.' },
+        { type: OpenSearchSQLParser.ID, text: 'name' },
+        OpenSearchSQLParser.SPACE,
+        OpenSearchSQLParser.EQUAL_SYMBOL,
+        OpenSearchSQLParser.SPACE,
+      ]);
+
+      const result = processVisitedRules(mockRules, 6, tokenStream);
+      expect(result.suggestColumnValuePredicate).toBe(ColumnValuePredicate.VALUE);
+      expect(result.suggestValuesForColumn).toBe('column.name');
+    });
+
+    it('RULE_predicate - should suggest values for column with backticks in the name', () => {
+      const mockRules = new Map();
+      mockRules.set(OpenSearchSQLParser.RULE_predicate, { startTokenIndex: 0 });
+      const tokenStream = createTokenStream([
+        { type: OpenSearchSQLParser.BACKTICK_QUOTE_ID, text: '`column`' },
+        OpenSearchSQLParser.SPACE,
+        OpenSearchSQLParser.EQUAL_SYMBOL,
+        OpenSearchSQLParser.SPACE,
+      ]);
+
+      const result = processVisitedRules(mockRules, 4, tokenStream);
+      expect(result.suggestColumnValuePredicate).toBe(ColumnValuePredicate.VALUE);
+      expect(result.suggestValuesForColumn).toBe('column');
+    });
+
+    it('RULE_predicate - should suggest values for column with dots and backticks in the name', () => {
+      const mockRules = new Map();
+      mockRules.set(OpenSearchSQLParser.RULE_predicate, { startTokenIndex: 0 });
+      const tokenStream = createTokenStream([
+        { type: OpenSearchSQLParser.BACKTICK_QUOTE_ID, text: '`column`' },
+        { type: OpenSearchSQLParser.DOT, text: '.' },
+        { type: OpenSearchSQLParser.ID, text: '`name`' },
+        OpenSearchSQLParser.SPACE,
+        OpenSearchSQLParser.EQUAL_SYMBOL,
+        OpenSearchSQLParser.SPACE,
+      ]);
+
+      const result = processVisitedRules(mockRules, 6, tokenStream);
+      expect(result.suggestColumnValuePredicate).toBe(ColumnValuePredicate.VALUE);
+      expect(result.suggestValuesForColumn).toBe('column.name');
+    });
+
+    it('RULE_predicate - should suggest values for backticked column with dots inside', () => {
+      const mockRules = new Map();
+      mockRules.set(OpenSearchSQLParser.RULE_predicate, { startTokenIndex: 0 });
+      const tokenStream = createTokenStream([
+        { type: OpenSearchSQLParser.BACKTICK_QUOTE_ID, text: '`column.name`' },
+        OpenSearchSQLParser.SPACE,
+        OpenSearchSQLParser.EQUAL_SYMBOL,
+        OpenSearchSQLParser.SPACE,
+      ]);
+
+      const result = processVisitedRules(mockRules, 4, tokenStream);
+      expect(result.suggestColumnValuePredicate).toBe(ColumnValuePredicate.VALUE);
+      expect(result.suggestValuesForColumn).toBe('column.name');
+    });
   });
 });
 
@@ -274,7 +338,7 @@ describe('enrichAutocompleteResult', () => {
   it('should correctly enrich the autocomplete result with additional suggestions', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = null;
+    const tokenStream = (null as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
     const query = 'SELECT * FROM table';
@@ -295,9 +359,9 @@ describe('enrichAutocompleteResult', () => {
   it('should handle suggestions for columns and templates', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = {
+    const tokenStream = ({
       getText: jest.fn().mockReturnValue('column_name'),
-    };
+    } as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
     const query = 'SELECT column_name FROM table';
@@ -318,7 +382,7 @@ describe('enrichAutocompleteResult', () => {
   it('should handle errors gracefully and return base result', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = null;
+    const tokenStream = (null as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
     const query = 'SELECT * FROM table';

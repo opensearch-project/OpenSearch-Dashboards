@@ -272,10 +272,12 @@ export const verifyDiscoverPageState = ({
   sampleTableData,
 }) => {
   cy.getElementByTestId('datasetSelectorButton').contains(dataset);
-  if ([QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)) {
-    cy.getElementByTestId('osdQueryEditor__multiLine').contains(queryString);
-  } else {
-    cy.getElementByTestId('osdQueryEditor__singleLine').contains(queryString);
+  if (queryString) {
+    if ([QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)) {
+      cy.getElementByTestId('osdQueryEditor__multiLine').contains(queryString);
+    } else {
+      cy.getElementByTestId('osdQueryEditor__singleLine').contains(queryString);
+    }
   }
   cy.getElementByTestId('queryEditorLanguageSelector').contains(language);
 
@@ -303,9 +305,11 @@ export const verifyDiscoverPageState = ({
     }
   }
   // verify first row to ensure sorting is working, but ignore the timestamp field as testing environment might have differing timezones
-  sampleTableData.forEach(([index, value]) => {
-    cy.getElementByTestId('osdDocTableCellDataField').eq(index).contains(value);
-  });
+  if (sampleTableData) {
+    sampleTableData.forEach(([index, value]) => {
+      cy.getElementByTestId('osdDocTableCellDataField').eq(index).contains(value);
+    });
+  }
 };
 
 /**
@@ -495,4 +499,34 @@ export const updateSavedSearchAndSaveAndVerify = (
   cy.loadSaveSearch(saveNameToUse);
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);
+};
+
+/**
+ * Navigates to dashboard page, clicks new dashboard, and open up the saved search panel
+ * @param {string} workspaceName - name of workspace
+ */
+export const navigateToDashboardAndOpenSavedSearchPanel = (workspaceName) => {
+  cy.navigateToWorkSpaceSpecificPage({
+    workspaceName,
+    page: 'dashboards',
+    isEnhancement: true,
+  });
+  cy.getElementByTestId('newItemButton').click();
+  // using DQL as it supports date picker
+  setDatePickerDatesAndSearchIfRelevant(QueryLanguages.DQL.name);
+  cy.getElementByTestId('dashboardAddPanelButton').click();
+  cy.getElementByTestId('savedObjectFinderFilterButton').click();
+  cy.getElementByTestId('savedObjectFinderFilter-search').click();
+};
+
+/**
+ * Navigates to dashboard page and loads a saved search as a new dashboard
+ * @param {SavedTestConfig} config - the relevant config for the test case
+ * @param {string} workspaceName - name of workspace
+ */
+export const loadSavedSearchFromDashboards = (config, workspaceName) => {
+  navigateToDashboardAndOpenSavedSearchPanel(workspaceName);
+  cy.getElementByTestId(`savedObjectTitle${config.saveName}`).click();
+  cy.getElementByTestId('addObjectToContainerSuccess').should('be.visible');
+  cy.getElementByTestId('euiFlyoutCloseButton').click();
 };

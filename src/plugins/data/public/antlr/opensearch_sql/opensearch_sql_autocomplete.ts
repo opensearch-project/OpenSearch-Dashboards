@@ -134,7 +134,7 @@ export function processVisitedRules(
   let shouldSuggestColumnAliases = false;
   let suggestValuesForColumn: string | undefined;
   let suggestColumnValuePredicate: ColumnValuePredicate | undefined;
-  let rerunAndCombine = false;
+  const rerunWithoutRules: number[] = [];
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
@@ -179,7 +179,7 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchSQLParser.RULE_predicate: {
-        rerunAndCombine = true;
+        rerunWithoutRules.push(ruleId); // rerun to fetch aggs by blocking pred
 
         const validIDToken = (token: Token) => {
           return (
@@ -189,7 +189,7 @@ export function processVisitedRules(
         };
 
         /**
-         * creates a list of the tokens from the start of the pedicate to the end
+         * create a list of the tokens from the start of the pedicate to the end
          * intentionally omit all tokens with type SPACE
          * now we know we only have "significant tokens"
          */
@@ -221,6 +221,11 @@ export function processVisitedRules(
             }
             sigTokens[sigTokens.length - 1].text +=
               '.' + removePotentialBackticks(nextToken?.text ?? '');
+            continue;
+          }
+          if (validIDToken(token)) {
+            token.text = removePotentialBackticks(token.text ?? '');
+            sigTokens.push(token);
             continue;
           }
           sigTokens.push(token);
@@ -291,7 +296,7 @@ export function processVisitedRules(
   }
 
   return {
-    rerunAndCombine,
+    rerunWithoutRules,
     suggestViewsOrTables,
     suggestAggregateFunctions,
     suggestScalarFunctions,
