@@ -1,0 +1,2 @@
+chore:
+- Updates the cross-spawn dependency in the yarn.lock ([#9302](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9302))
