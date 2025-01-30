@@ -517,6 +517,9 @@ export class ApplicationService {
       if (!confirmed) {
         return false;
       }
+      if (action?.callback) {
+        action.callback();
+      }
     }
     return true;
   }

@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiSmallButton, EuiFlexGroup, EuiFlexItem, EuiSmallButtonEmpty } from '@elastic/eui';
+import {
+  EuiSmallButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSmallButtonEmpty,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useState, useCallback } from 'react';
 import type { ApplicationStart } from 'opensearch-dashboards/public';
@@ -35,12 +41,15 @@ export const WorkspaceCreateActionPanel = ({
 
   return (
     <>
+      <EuiHorizontalRule margin="s" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiSmallButtonEmpty
             data-test-subj="workspaceForm-bottomBar-cancelButton"
             onClick={showCancelModal}
             disabled={isSubmitting}
+            iconType="cross"
+            flush="left"
           >
             {i18n.translate('workspace.form.right.sidebar.buttons.cancelText', {
               defaultMessage: 'Cancel',

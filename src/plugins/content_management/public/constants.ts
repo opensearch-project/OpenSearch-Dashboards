@@ -8,7 +8,6 @@ import {
   ALL_USE_CASE_ID,
   SEARCH_USE_CASE_ID,
   OBSERVABILITY_USE_CASE_ID,
-  SECURITY_ANALYTICS_USE_CASE_ID,
 } from '../../../core/public';
 
 // central place for all content ids rendered by content management
@@ -17,8 +16,8 @@ import {
 export const ANALYTICS_ALL_OVERVIEW_PAGE_ID = `${ALL_USE_CASE_ID}_overview`;
 export const ESSENTIAL_OVERVIEW_PAGE_ID = `${ESSENTIAL_USE_CASE_ID}_overview`;
 export const SEARCH_OVERVIEW_PAGE_ID = `${SEARCH_USE_CASE_ID}_overview`;
-export const OBSERVABILITY_OVERVIEW_PAGE_ID = `${OBSERVABILITY_USE_CASE_ID}_overview`;
-export const SECURITY_ANALYTICS_OVERVIEW_PAGE_ID = `${SECURITY_ANALYTICS_USE_CASE_ID}_overview`;
+export const OBSERVABILITY_OVERVIEW_PAGE_ID = `${OBSERVABILITY_USE_CASE_ID}-overview`;
+export const SECURITY_ANALYTICS_OVERVIEW_PAGE_ID = `sa_overview`;
 export const HOME_PAGE_ID = 'osd_homepage';
 
 // section ids

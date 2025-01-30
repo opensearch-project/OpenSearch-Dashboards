@@ -24,13 +24,13 @@ export const getStartedCards: GetStartCard[] = [
   {
     id: 'get_start_discover',
     title: i18n.translate('workspace.essential_overview.discover.card.title', {
-      defaultMessage: 'Discover insights',
+      defaultMessage: 'Explore data',
     }),
     description: i18n.translate('workspace.essential_overview.discover.card.description', {
-      defaultMessage: 'Explore data interactively to uncover insights.',
+      defaultMessage: 'Explore data to uncover insights.',
     }),
     footer: (
-      <EuiI18n token="workspace.essential_overview.discover.card.footer" default="with Discover" />
+      <EuiI18n token="workspace.essential_overview.discover.card.footer" default="Discover" />
     ),
     navigateAppId: DISCOVER_APP_ID,
     order: 20,
@@ -41,14 +41,10 @@ export const getStartedCards: GetStartCard[] = [
       defaultMessage: 'Visualize data',
     }),
     description: i18n.translate('workspace.essential_overview.visualize.card.description', {
-      defaultMessage:
-        'Unlock insightful data exploration with visualization and aggregation tools.',
+      defaultMessage: 'Gain deeper insights by visualizing and aggregating your data.',
     }),
     footer: (
-      <EuiI18n
-        token="workspace.essential_overview.visualize.card.footer"
-        default="with Visualize"
-      />
+      <EuiI18n token="workspace.essential_overview.visualize.card.footer" default="Visualize" />
     ),
     navigateAppId: VISUALIZE_APP_ID,
     order: 30,
@@ -56,16 +52,14 @@ export const getStartedCards: GetStartCard[] = [
   {
     id: 'get_start_dashboards',
     title: i18n.translate('workspace.essential_overview.dashboards.card.title', {
-      defaultMessage: 'View the big picture',
+      defaultMessage: 'Explore your data at a glance',
     }),
     description: i18n.translate('workspace.essential_overview.dashboards.card.description', {
-      defaultMessage: 'Gain clarity and visibility with dynamic data visualization tools.',
+      defaultMessage:
+        'Monitor and understand your data connections using dynamic data visualization tools.',
     }),
     footer: (
-      <EuiI18n
-        token="workspace.essential_overview.dashboards.card.footer"
-        default="with Dashboards"
-      />
+      <EuiI18n token="workspace.essential_overview.dashboards.card.footer" default="Dashboards" />
     ),
     navigateAppId: DASHBOARDS_APP_ID,
     order: 40,

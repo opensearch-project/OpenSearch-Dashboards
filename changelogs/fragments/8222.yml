@@ -1,0 +1,2 @@
+fix:
+- Update data explorer ui to use compressed components ([#8222](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8222))

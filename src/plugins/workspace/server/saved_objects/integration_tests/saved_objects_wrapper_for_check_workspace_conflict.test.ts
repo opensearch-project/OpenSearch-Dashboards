@@ -7,7 +7,10 @@ import { SavedObject } from 'src/core/types';
 import { isEqual } from 'lodash';
 import packageInfo from '../../../../../../package.json';
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
+import {
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+} from '../../../../data_source/common';
 
 const dashboard: Omit<SavedObject, 'id'> = {
   type: 'dashboard',
@@ -19,6 +22,14 @@ const dataSource: Omit<SavedObject, 'id'> = {
   type: DATA_SOURCE_SAVED_OBJECT_TYPE,
   attributes: {
     title: 'test data source',
+  },
+  references: [],
+};
+
+const dataConnection: Omit<SavedObject, 'id'> = {
+  type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+  attributes: {
+    title: 'test data connection',
   },
   references: [],
 };
@@ -190,6 +201,22 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         }
       `);
 
+      const createDataConnectionResult = await osdTestServer.request
+        .post(root, `/api/saved_objects/${dataConnection.type}`)
+        .send({
+          attributes: dataConnection.attributes,
+          workspaces: [createdFooWorkspace.id],
+        })
+        .expect(400);
+
+      expect(createDataConnectionResult.body).toMatchInlineSnapshot(`
+      Object {
+        "error": "Bad Request",
+        "message": "Unsupported type in workspace: 'data-connection' is not allowed to be created in workspace.",
+        "statusCode": 400,
+      }
+    `);
+
       const createConfigResult = await osdTestServer.request
         .post(root, `/api/saved_objects/config`)
         .send({
@@ -319,7 +346,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
     it('bulk create with disallowed types in workspace', async () => {
       await clearFooAndBar();
 
-      // import advanced settings and data sources should throw error
+      // import advanced settings, data sources and data connection should throw error
       const createResultFoo = await osdTestServer.request
         .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
         .send([
@@ -329,6 +356,10 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
           },
           {
             ...advancedSettings,
+            id: packageInfo.version,
+          },
+          {
+            ...dataConnection,
             id: packageInfo.version,
           },
         ])
@@ -344,6 +375,13 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         expect.objectContaining({
           message:
             "Unsupported type in workspace: 'config' is not allowed to be imported in workspace.",
+          statusCode: 400,
+        })
+      );
+      expect(createResultFoo.body.saved_objects[2].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'data-connection' is not allowed to be imported in workspace.",
           statusCode: 400,
         })
       );

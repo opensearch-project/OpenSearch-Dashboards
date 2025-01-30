@@ -29,6 +29,8 @@
  */
 import {
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHeader,
   EuiHeaderProps,
   EuiHeaderSection,
@@ -43,7 +45,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
-import React, { createRef, useMemo, useState } from 'react';
+import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
@@ -59,6 +61,7 @@ import type { Logos } from '../../../../common/types';
 import { WorkspaceObject, WorkspacesStart } from '../../../../public/workspace';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
+import { useObservableValue } from '../../../utils';
 import { getOsdSidecarPaddingStyle, ISidecarConfig } from '../../../overlays';
 import {
   ChromeBranding,
@@ -122,6 +125,14 @@ export interface HeaderProps {
   useUpdatedHeader?: boolean;
 }
 
+const hasValue = (value: any) => {
+  if (Array.isArray(value) && value.length === 0) {
+    return false;
+  }
+
+  return Boolean(value);
+};
+
 export function Header({
   http,
   opensearchDashboardsVersion,
@@ -142,14 +153,45 @@ export function Header({
   const isVisible = useObservable(observables.isVisible$, false);
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isNavOpenState, setIsNavOpenState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
-  const currentWorkspace = useObservable(observables.currentWorkspace$, undefined);
+
+  const currentLeftControls = useObservableValue(application.currentLeftControls$);
+  const navControlsLeft = useObservable(observables.navControlsLeft$);
+
+  const currentCenterControls = useObservableValue(application.currentCenterControls$);
+  const navControlsExpandedCenter = useObservable(observables.navControlsExpandedCenter$);
+  const navControlsCenter = useObservable(observables.navControlsCenter$);
+
+  const currentRightControls = useObservableValue(application.currentRightControls$);
+  const navControlsExpandedRight = useObservable(observables.navControlsExpandedRight$);
+  const navControlsRight = useObservable(observables.navControlsRight$);
+
+  const currentActionMenu = useObservableValue(application.currentActionMenu$);
+
+  const currentBadgeControls = useObservableValue(application.currentBadgeControls$);
+  const observableBadge = useObservable(observables.badge$);
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
+
+  const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
+
+  const setIsNavOpen = useCallback(
+    (value) => {
+      /**
+       * When use updated header, we will regard the lock state as source of truth
+       */
+      if (useUpdatedHeader) {
+        onIsLockedUpdate(value);
+      } else {
+        setIsNavOpenState(value);
+      }
+    },
+    [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
+  );
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
@@ -187,7 +229,7 @@ export function Header({
         },
         {
           items: [
-            <EuiShowFor sizes={['m', 'l', 'xl']}>
+            <EuiShowFor sizes={['m', 'l', 'xl', 'xxl', 'xxxl']}>
               <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
             </EuiShowFor>,
           ],
@@ -195,7 +237,7 @@ export function Header({
         },
         {
           items: [
-            <EuiHideFor sizes={['m', 'l', 'xl']}>
+            <EuiHideFor sizes={['m', 'l', 'xl', 'xxl', 'xxxl']}>
               <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
             </EuiHideFor>,
             <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />,
@@ -206,14 +248,14 @@ export function Header({
     />
   );
 
-  const renderBreadcrumbs = (renderFullLength?: boolean, dropHomeFromBreadcrumb?: boolean) => (
+  const renderBreadcrumbs = (renderFullLength?: boolean, hideTrailingSeparator?: boolean) => (
     <HeaderBreadcrumbs
       appTitle$={observables.appTitle$}
       breadcrumbs$={observables.breadcrumbs$}
       breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
       useUpdatedHeader={useUpdatedHeader}
       renderFullLength={renderFullLength}
-      dropHomeFromBreadcrumb={dropHomeFromBreadcrumb}
+      hideTrailingSeparator={hideTrailingSeparator}
     />
   );
 
@@ -272,7 +314,8 @@ export function Header({
             })}
         {renderNavToggleWithExtraProps({
           flush: 'both',
-          className: 'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l',
+          className:
+            'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl',
           isSmallScreen: true,
         })}
       </>
@@ -281,93 +324,149 @@ export function Header({
     );
   };
 
-  const renderLeftControls = () => (
-    <>
-      {useUpdatedHeader && (
-        <EuiHeaderSectionItem border="none">
-          <HeaderControlsContainer
-            data-test-subj="headerLeftControl"
-            controls$={application.currentLeftControls$}
-          />
-        </EuiHeaderSectionItem>
-      )}
+  const renderLeftControls = () => {
+    const hasLeftControls = hasValue(currentLeftControls);
+    const hasNavControlsLeft = hasValue(navControlsLeft);
 
-      {/* Nav controls left */}
-      <EuiHeaderSectionItem border={useUpdatedHeader ? 'none' : 'right'}>
-        <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
+    if (!hasLeftControls && !hasNavControlsLeft && useUpdatedHeader) {
+      return null;
+    }
+
+    return (
+      <>
+        {useUpdatedHeader && (
+          <EuiHeaderSectionItem border="none">
+            <HeaderControlsContainer
+              data-test-subj="headerLeftControl"
+              controls$={application.currentLeftControls$}
+            />
+          </EuiHeaderSectionItem>
+        )}
+
+        {/* Nav controls left */}
+
+        <EuiHeaderSectionItem border={useUpdatedHeader ? 'none' : 'right'}>
+          <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
+        </EuiHeaderSectionItem>
+      </>
+    );
+  };
+
+  const renderCenterControls = () => {
+    const hasCenterControls = hasValue(currentCenterControls);
+    const hasNavControlsExpandedCenter = hasValue(navControlsExpandedCenter);
+    const hasNavControlsCenter = hasValue(navControlsCenter);
+
+    if (
+      !hasCenterControls &&
+      !hasNavControlsExpandedCenter &&
+      !hasNavControlsCenter &&
+      useUpdatedHeader
+    ) {
+      return null;
+    }
+
+    return (
+      <>
+        {useUpdatedHeader && (
+          <EuiHeaderSectionItem border="none">
+            <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
+          </EuiHeaderSectionItem>
+        )}
+
+        {useUpdatedHeader && (
+          <EuiHeaderSectionItem border="none">
+            <HeaderControlsContainer
+              data-test-subj="headerCenterControl"
+              controls$={application.currentCenterControls$}
+            />
+          </EuiHeaderSectionItem>
+        )}
+
+        <EuiHeaderSectionItem border={useUpdatedHeader ? 'none' : 'left'}>
+          <HeaderNavControls navControls$={observables.navControlsCenter$} />
+        </EuiHeaderSectionItem>
+      </>
+    );
+  };
+
+  const renderRightControls = () => {
+    const hasNavControlsExpandedRight = hasValue(navControlsExpandedRight);
+    const hasRightControls = hasValue(currentRightControls);
+    const hasNavControlsRight = hasValue(navControlsRight);
+
+    if (
+      !hasRightControls &&
+      !hasNavControlsExpandedRight &&
+      !hasNavControlsRight &&
+      useUpdatedHeader
+    ) {
+      return null;
+    }
+
+    return (
+      <>
+        {useUpdatedHeader && (
+          <EuiHeaderSectionItem border="none">
+            <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />
+          </EuiHeaderSectionItem>
+        )}
+
+        {useUpdatedHeader && (
+          <EuiHeaderSectionItem border="none">
+            <HeaderControlsContainer
+              data-test-subj="headerRightControl"
+              controls$={application.currentRightControls$}
+            />
+          </EuiHeaderSectionItem>
+        )}
+
+        <EuiHeaderSectionItem border={useUpdatedHeader ? 'none' : 'left'}>
+          <HeaderNavControls side="right" navControls$={observables.navControlsRight$} />
+        </EuiHeaderSectionItem>
+      </>
+    );
+  };
+  const renderActionMenu = () => {
+    const hasActionMenu = hasValue(currentActionMenu);
+
+    if (!hasActionMenu && useUpdatedHeader) {
+      return null;
+    }
+
+    return (
+      <EuiHeaderSectionItem border="none" className="headerAppActionMenuSection">
+        <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
       </EuiHeaderSectionItem>
-    </>
-  );
+    );
+  };
 
-  const renderCenterControls = () => (
-    <>
-      {useUpdatedHeader && (
+  const renderBadge = () => {
+    const hasBadge = hasValue(observableBadge);
+    const hasCurrentBadgeControls = hasValue(currentBadgeControls);
+
+    if (!hasBadge && !hasCurrentBadgeControls && useUpdatedHeader) {
+      return null;
+    }
+
+    return (
+      <>
+        {useUpdatedHeader && (
+          <EuiHeaderSectionItem border="none">
+            <HeaderControlsContainer
+              data-test-subj="headerBadgeControl"
+              controls$={application.currentBadgeControls$}
+            />
+          </EuiHeaderSectionItem>
+        )}
+
+        {/* Nav controls badge */}
         <EuiHeaderSectionItem border="none">
-          <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
+          <HeaderBadge badge$={observables.badge$} />
         </EuiHeaderSectionItem>
-      )}
-
-      {useUpdatedHeader && (
-        <EuiHeaderSectionItem border="none">
-          <HeaderControlsContainer
-            data-test-subj="headerCenterControl"
-            controls$={application.currentCenterControls$}
-          />
-        </EuiHeaderSectionItem>
-      )}
-
-      <EuiHeaderSectionItem border={useUpdatedHeader ? 'none' : 'left'}>
-        <HeaderNavControls navControls$={observables.navControlsCenter$} />
-      </EuiHeaderSectionItem>
-    </>
-  );
-
-  const renderRightControls = () => (
-    <>
-      {useUpdatedHeader && (
-        <EuiHeaderSectionItem border="none">
-          <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />
-        </EuiHeaderSectionItem>
-      )}
-
-      {useUpdatedHeader && (
-        <EuiHeaderSectionItem border="none">
-          <HeaderControlsContainer
-            data-test-subj="headerRightControl"
-            controls$={application.currentRightControls$}
-          />
-        </EuiHeaderSectionItem>
-      )}
-
-      <EuiHeaderSectionItem border={useUpdatedHeader ? 'none' : 'left'}>
-        <HeaderNavControls side="right" navControls$={observables.navControlsRight$} />
-      </EuiHeaderSectionItem>
-    </>
-  );
-
-  const renderActionMenu = () => (
-    <EuiHeaderSectionItem border="none" className="headerAppActionMenuSection">
-      <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
-    </EuiHeaderSectionItem>
-  );
-
-  const renderBadge = () => (
-    <>
-      {useUpdatedHeader && (
-        <EuiHeaderSectionItem border="none">
-          <HeaderControlsContainer
-            data-test-subj="headerBadgeControl"
-            controls$={application.currentBadgeControls$}
-          />
-        </EuiHeaderSectionItem>
-      )}
-
-      {/* Nav controls badge */}
-      <EuiHeaderSectionItem border="none">
-        <HeaderBadge badge$={observables.badge$} />
-      </EuiHeaderSectionItem>
-    </>
-  );
+      </>
+    );
+  };
 
   const renderHelp = () => (
     <EuiHeaderSectionItem border="left">
@@ -390,11 +489,18 @@ export function Header({
         recentlyAccessed$={observables.recentlyAccessed$}
         workspaceList$={observables.workspaceList$}
         navigateToUrl={application.navigateToUrl}
-        renderBreadcrumbs={renderBreadcrumbs(true, false)}
+        renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
+        loadingCount$={observables.loadingCount$}
       />
     </EuiHeaderSectionItem>
   );
+
+  const leftControls = renderLeftControls();
+  const centerControls = renderCenterControls();
+  const rightControls = renderRightControls();
+  const actionMenu = renderActionMenu();
+  const badge = renderBadge();
 
   const renderLegacyHeader = () => (
     <EuiHeader position="fixed" className="primaryHeader" style={sidecarPaddingStyle}>
@@ -403,7 +509,7 @@ export function Header({
           {renderNavToggle()}
         </EuiHeaderSectionItem>
 
-        {renderLeftControls()}
+        {leftControls}
 
         {/* Home loader left */}
         <EuiHeaderSectionItem border="right">
@@ -420,12 +526,12 @@ export function Header({
       </EuiHeaderSection>
 
       {renderBreadcrumbs()}
-      {renderBadge()}
+      {badge}
 
       <EuiHeaderSection side="right">
-        {renderActionMenu()}
-        {renderCenterControls()}
-        {renderRightControls()}
+        {actionMenu}
+        {centerControls}
+        {rightControls}
         {renderHelp()}
       </EuiHeaderSection>
     </EuiHeader>
@@ -438,27 +544,44 @@ export function Header({
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
-        {renderBreadcrumbs(false, !!currentWorkspace)}
+        {renderBreadcrumbs(false, false)}
       </EuiHeader>
 
       {/* Secondary header */}
       <EuiHeader className="newTopNavHeader">
-        <EuiHeaderSection side="left">
-          <EuiHeaderSectionItem border="none" data-test-subj="headerApplicationTitle">
-            <EuiTitle size="l" className="newTopNavHeaderTitle">
-              {breadcrumbs && <h1>{breadcrumbs[breadcrumbs.length - 1]?.text}</h1>}
-            </EuiTitle>
-          </EuiHeaderSectionItem>
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          className="secondaryPageHeaderFlexGroup"
+        >
+          {/* Left Section */}
+          <EuiHeaderSection side="left">
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
+                <EuiHeaderSectionItem border="none" data-test-subj="headerApplicationTitle">
+                  <EuiTitle size="l" className="newTopNavHeaderTitle">
+                    {breadcrumbs && <h1>{breadcrumbs[breadcrumbs.length - 1]?.text}</h1>}
+                  </EuiTitle>
+                </EuiHeaderSectionItem>
+              </EuiFlexItem>
 
-          {renderBadge()}
-          {renderLeftControls()}
-        </EuiHeaderSection>
+              {badge && <EuiFlexItem>{badge}</EuiFlexItem>}
 
-        <EuiHeaderSection side="right">
-          {renderCenterControls()}
-          {renderActionMenu()}
-          {renderRightControls()}
-        </EuiHeaderSection>
+              {leftControls && <EuiFlexItem>{leftControls}</EuiFlexItem>}
+            </EuiFlexGroup>
+          </EuiHeaderSection>
+
+          {/* Right Section */}
+          <EuiHeaderSection side="right">
+            <EuiFlexGroup gutterSize="s">
+              {centerControls && <EuiFlexItem>{centerControls}</EuiFlexItem>}
+
+              {actionMenu && <EuiFlexItem>{actionMenu}</EuiFlexItem>}
+
+              {rightControls && <EuiFlexItem> {rightControls}</EuiFlexItem>}
+            </EuiFlexGroup>
+          </EuiHeaderSection>
+        </EuiFlexGroup>
       </EuiHeader>
 
       <EuiHeader className="newTopNavHeader">
@@ -485,9 +608,9 @@ export function Header({
         {renderNavToggle()}
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
-          {renderActionMenu()}
+          {actionMenu}
         </EuiHeaderSection>
-        <EuiHeaderSection side="right">{renderRightControls()}</EuiHeaderSection>
+        <EuiHeaderSection side="right">{rightControls}</EuiHeaderSection>
       </EuiHeader>
       <div id="applicationHeaderFilterBar" />
     </div>
@@ -510,13 +633,11 @@ export function Header({
             appId$={application.currentAppId$}
             collapsibleNavHeaderRender={collapsibleNavHeaderRender}
             id={navId}
-            isLocked={isLocked}
             navLinks$={observables.navLinks$}
             isNavOpen={isNavOpen}
             basePath={basePath}
             navigateToApp={application.navigateToApp}
             navigateToUrl={application.navigateToUrl}
-            onIsLockedUpdate={onIsLockedUpdate}
             closeNav={() => {
               setIsNavOpen(false);
               if (toggleCollapsibleNavRef.current) {

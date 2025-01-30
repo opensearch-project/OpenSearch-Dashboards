@@ -602,6 +602,7 @@ export interface AppLeaveConfirmAction {
   type: AppLeaveActionType.confirm;
   text: string;
   title?: string;
+  callback?: () => void;
 }
 
 /**
@@ -624,8 +625,9 @@ export interface AppLeaveActionFactory {
    *
    * @param text The text to display in the confirmation message
    * @param title (optional) title to display in the confirmation message
+   * @param callback (optional) function to execute in the confirmation message
    */
-  confirm(text: string, title?: string): AppLeaveConfirmAction;
+  confirm(text: string, title?: string, callback?: () => void): AppLeaveConfirmAction;
   /**
    * Returns a default action, resulting on executing the default behavior when
    * the user tries to leave an application

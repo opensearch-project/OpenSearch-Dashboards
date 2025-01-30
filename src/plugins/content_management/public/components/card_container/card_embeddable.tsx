@@ -36,7 +36,7 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
 
     const cardProps: EuiCardProps = {
       ...this.input.cardProps,
-      title: (this.input?.getTitle?.() || this.input?.title) ?? '',
+      title: this.input?.getTitle?.() || this.input?.title || '',
       description: (
         <EuiToolTip position="top" content={this.input?.toolTipContent}>
           <>{this.input.description}</>

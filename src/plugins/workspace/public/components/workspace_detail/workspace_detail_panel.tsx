@@ -5,14 +5,13 @@
 
 import React from 'react';
 import {
-  EuiLink,
   EuiText,
   EuiCopy,
   EuiBadge,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
-  EuiColorPickerSwatch,
+  EuiIcon,
 } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
@@ -24,8 +23,8 @@ const detailUseCase = i18n.translate('workspace.detail.useCase', {
   defaultMessage: 'Use case',
 });
 
-const detailOwner = i18n.translate('workspace.detail.owner', {
-  defaultMessage: 'Owner',
+const detailOwners = i18n.translate('workspace.detail.owners', {
+  defaultMessage: 'Owners',
 });
 
 const detailLastUpdated = i18n.translate('workspace.detail.lastUpdated', {
@@ -36,28 +35,18 @@ const detailID = i18n.translate('workspace.detail.id', {
   defaultMessage: 'ID',
 });
 
-const workspaceOverview = i18n.translate('workspace.detail.workspaceOverview', {
-  defaultMessage: 'Workspace overview',
-});
-
-const overview = i18n.translate('workspace.detail.overview', {
-  defaultMessage: 'Overview',
-});
-
 function getOwners(currentWorkspace: WorkspaceAttributeWithPermission) {
   const { groups = [], users = [] } = currentWorkspace?.permissions?.write || {};
   return [...groups, ...users];
 }
 
 interface WorkspaceDetailPanelProps {
-  useCaseUrl: string;
   handleBadgeClick: () => void;
   currentUseCase: WorkspaceUseCase | undefined;
   currentWorkspace: WorkspaceObject;
   dateFormat: string;
 }
 export const WorkspaceDetailPanel = ({
-  useCaseUrl,
   currentUseCase,
   handleBadgeClick,
   currentWorkspace,
@@ -73,18 +62,21 @@ export const WorkspaceDetailPanel = ({
       <EuiFlexItem>
         <EuiText>
           <h4>{detailUseCase}</h4>
-          <p style={{ display: 'flex', alignItems: 'center' }}>
-            <EuiColorPickerSwatch
-              style={{ width: '14px', height: '14px', marginRight: '8px' }}
-              color={currentWorkspace.color}
-            />
-            {currentUseCase?.title}
-          </p>
+          {currentUseCase && (
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              {currentUseCase.icon && (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={currentUseCase.icon} color={currentWorkspace.color} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>{currentUseCase.title}</EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText>
-          <h4>{detailOwner}</h4>
+          <h4>{detailOwners}</h4>
           <p style={{ display: 'inline-flex' }}>
             {owners?.at(0)}&nbsp;&nbsp;
             {owners && owners.length > 1 && (
@@ -110,7 +102,12 @@ export const WorkspaceDetailPanel = ({
           <h4>{detailID}</h4>
           <p>
             {currentWorkspace.id}
-            <EuiCopy textToCopy={currentWorkspace.id}>
+            <EuiCopy
+              beforeMessage={i18n.translate('workspace.detail.workspaceIdCopy.beforeMessage', {
+                defaultMessage: 'Copy',
+              })}
+              textToCopy={currentWorkspace.id}
+            >
               {(copy) => (
                 <EuiButtonIcon
                   aria-label="copy"
@@ -122,16 +119,6 @@ export const WorkspaceDetailPanel = ({
                 />
               )}
             </EuiCopy>
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText>
-          <h4>{workspaceOverview}</h4>
-          <p>
-            <EuiLink href={useCaseUrl} external={true} style={{ fontWeight: 'normal' }}>
-              {overview}
-            </EuiLink>
           </p>
         </EuiText>
       </EuiFlexItem>

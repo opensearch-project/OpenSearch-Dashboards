@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiConfirmModal, EuiSearchBarProps, EuiSmallButton } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { EuiConfirmModal, EuiInMemoryTable, EuiSearchBarProps, EuiSmallButton } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
@@ -25,6 +25,7 @@ export const WorkspaceDetailConnectionTable = ({
 }: WorkspaceDetailConnectionTableProps) => {
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const tableRef = useRef<EuiInMemoryTable<DataSourceConnection>>();
 
   useEffect(() => {
     // Reset selected items when connectionType changes
@@ -35,7 +36,8 @@ export const WorkspaceDetailConnectionTable = ({
     return dataSourceConnections.filter((dsc) =>
       connectionType === AssociationDataSourceModalMode.OpenSearchConnections
         ? dsc.connectionType === DataSourceConnectionType.OpenSearchConnection
-        : dsc?.relatedConnections && dsc.relatedConnections?.length > 0
+        : dsc.connectionType === DataSourceConnectionType.DataConnection ||
+          (dsc?.relatedConnections && dsc.relatedConnections?.length > 0)
     );
   }, [connectionType, dataSourceConnections]);
 
@@ -48,7 +50,8 @@ export const WorkspaceDetailConnectionTable = ({
             data-test-subj="workspace-detail-dataSources-table-bulkRemove"
           >
             {i18n.translate('workspace.detail.dataSources.table.remove.button', {
-              defaultMessage: 'Remove {numberOfSelect} association(s)',
+              defaultMessage:
+                'Remove {numberOfSelect, plural, one {# association} other {# associations}}',
               values: { numberOfSelect: selectedItems.length },
             })}
           </EuiSmallButton>,
@@ -98,17 +101,20 @@ export const WorkspaceDetailConnectionTable = ({
           }}
           /* Unmount table after connection type */
           key={connectionType}
+          ref={tableRef}
         />
       }
       {modalVisible && (
         <EuiConfirmModal
           data-test-subj="workspaceForm-cancelModal"
           title={i18n.translate('workspace.detail.dataSources.modal.title', {
-            defaultMessage: 'Remove data source(s)',
+            defaultMessage:
+              'Remove {numberOfSelect, plural, one {# association} other {# associations}}',
+            values: { numberOfSelect: selectedItems.length },
           })}
           onCancel={() => {
             setModalVisible(false);
-            setSelectedItems([]);
+            tableRef.current?.setSelection([]);
           }}
           onConfirm={() => {
             setModalVisible(false);
@@ -118,7 +124,9 @@ export const WorkspaceDetailConnectionTable = ({
             defaultMessage: 'Cancel',
           })}
           confirmButtonText={i18n.translate('workspace.detail.dataSources.Modal.confirmButton', {
-            defaultMessage: 'Remove data source(s)',
+            defaultMessage:
+              'Remove {numberOfSelect, plural, one {# association} other {# associations}}',
+            values: { numberOfSelect: selectedItems.length },
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"

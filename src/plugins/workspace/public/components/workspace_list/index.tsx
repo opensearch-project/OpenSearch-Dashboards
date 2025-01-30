@@ -317,17 +317,19 @@ export const WorkspaceListInner = ({
     };
 
     return (
-      <>
-        <EuiButton color="danger" iconType="trash" onClick={onClick}>
-          Delete {selection.length} Workspace
-        </EuiButton>
-        {deletedWorkspaces && deletedWorkspaces.length > 0 && (
-          <DeleteWorkspaceModal
-            selectedWorkspaces={deletedWorkspaces}
-            onClose={() => setDeletedWorkspaces([])}
-          />
-        )}
-      </>
+      isDashboardAdmin && (
+        <>
+          <EuiButton color="danger" iconType="trash" onClick={onClick}>
+            Delete {selection.length} Workspace
+          </EuiButton>
+          {deletedWorkspaces && deletedWorkspaces.length > 0 && (
+            <DeleteWorkspaceModal
+              selectedWorkspaces={deletedWorkspaces}
+              onClose={() => setDeletedWorkspaces([])}
+            />
+          )}
+        </>
+      )
     );
   };
 
@@ -601,9 +603,9 @@ export const WorkspaceListInner = ({
           direction: initialSortDirection,
         },
       }}
-      isSelectable={selectable}
+      isSelectable={selectable && !!isDashboardAdmin}
       search={searchable ? search : undefined}
-      selection={selectable ? selectionValue : undefined}
+      selection={selectable && !!isDashboardAdmin ? selectionValue : undefined}
     />
   );
 
