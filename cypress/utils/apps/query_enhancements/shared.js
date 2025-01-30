@@ -72,9 +72,34 @@ export const generateAllTestConfigurations = (generateTestConfigurationCallback)
 /**
  * Sets the top nav date if it is relevant for the passed language
  * @param {QueryEnhancementLanguage} language - query language
+ * @param {string=} start - start datetime string
+ * @param {string=} end - end datetime string
  */
-export const setDatePickerDatesAndSearchIfRelevant = (language) => {
+export const setDatePickerDatesAndSearchIfRelevant = (
+  language,
+  start = START_TIME,
+  end = END_TIME
+) => {
   if (language !== QueryLanguages.SQL.name) {
-    cy.setTopNavDate(START_TIME, END_TIME);
+    cy.setTopNavDate(start, end);
+  }
+};
+
+/**
+ * Returns the default query for a given dataset and language combination
+ * @param {string} datasetName - the dataset name
+ * @param {QueryEnhancementLanguage} - the name of the query language
+ * @returns {string}
+ */
+export const getDefaultQuery = (datasetName, language) => {
+  switch (language) {
+    case QueryLanguages.DQL.name:
+      return '';
+    case QueryLanguages.Lucene.name:
+      return '';
+    case QueryLanguages.PPL.name:
+      return `source = ${datasetName}`;
+    case QueryLanguages.SQL.name:
+      return `SELECT * FROM ${datasetName} LIMIT 10`;
   }
 };

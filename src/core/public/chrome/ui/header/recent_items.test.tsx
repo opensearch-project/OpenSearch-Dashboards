@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { applicationServiceMock, httpServiceMock } from '../../../mocks';
 import { SavedObjectWithMetadata } from './recent_items';
 import { RecentItems } from './recent_items';
+import { createRecentNavLink } from './nav_link';
 
 jest.mock('./nav_link', () => ({
   createRecentNavLink: jest.fn().mockImplementation(() => {
@@ -170,5 +171,27 @@ describe('Recent items', () => {
   it('should show not display item if it is in a workspace which is not available', () => {
     render(<RecentItems {...defaultMockProps} recentlyAccessed$={mockRecentlyAccessed$} />);
     expect(screen.queryByText('visualizeMock')).not.toBeInTheDocument();
+  });
+
+  it('workspace feature flag should be passed to createRecentNavLink correctly', async () => {
+    jest.clearAllMocks();
+    const { getByTestId, findByText, getByText } = render(
+      <RecentItems
+        {...defaultMockProps}
+        workspaceEnabled
+        recentlyAccessed$={mockRecentlyAccessed$}
+        workspaceList$={mockWorkspaceList$}
+      />
+    );
+    fireEvent.click(getByTestId('recentItemsSectionButton'));
+    await findByText('Recent assets');
+    fireEvent.click(getByText('visualizeMock'));
+    expect(createRecentNavLink).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      true
+    );
   });
 });

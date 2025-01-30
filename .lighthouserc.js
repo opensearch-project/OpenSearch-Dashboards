@@ -26,6 +26,3 @@ module.exports = {
     },
   },
 };
-
-// target: 'filesystem',
-// outputDir: process.env.LHCI_BASELINE ? './lhci-baseline' : './lhci-reports',
