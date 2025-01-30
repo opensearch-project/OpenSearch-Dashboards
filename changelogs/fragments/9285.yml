@@ -1,0 +1,2 @@
+test:
+- [Cypress][TESTID-147] Add tests for table canvas in discover ([#9285](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9285))
