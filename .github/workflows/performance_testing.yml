@@ -10,15 +10,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Set up Node.js 18
-        uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v2
         with:
-          node-version: 18
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
 
       - name: Install Lighthouse CI
         run: yarn global add @lhci/cli
