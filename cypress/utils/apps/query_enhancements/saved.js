@@ -272,10 +272,12 @@ export const verifyDiscoverPageState = ({
   sampleTableData,
 }) => {
   cy.getElementByTestId('datasetSelectorButton').contains(dataset);
-  if ([QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)) {
-    cy.getElementByTestId('osdQueryEditor__multiLine').contains(queryString);
-  } else {
-    cy.getElementByTestId('osdQueryEditor__singleLine').contains(queryString);
+  if (queryString) {
+    if ([QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)) {
+      cy.getElementByTestId('osdQueryEditor__multiLine').contains(queryString);
+    } else {
+      cy.getElementByTestId('osdQueryEditor__singleLine').contains(queryString);
+    }
   }
   cy.getElementByTestId('queryEditorLanguageSelector').contains(language);
 
@@ -303,9 +305,11 @@ export const verifyDiscoverPageState = ({
     }
   }
   // verify first row to ensure sorting is working, but ignore the timestamp field as testing environment might have differing timezones
-  sampleTableData.forEach(([index, value]) => {
-    cy.getElementByTestId('osdDocTableCellDataField').eq(index).contains(value);
-  });
+  if (sampleTableData) {
+    sampleTableData.forEach(([index, value]) => {
+      cy.getElementByTestId('osdDocTableCellDataField').eq(index).contains(value);
+    });
+  }
 };
 
 /**
