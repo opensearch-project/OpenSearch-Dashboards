@@ -55,8 +55,8 @@ jobs:
       - name: Install Lighthouse CI
         run: yarn global add @lhci/cli
 
-      - name: Build OpenSearch Dashboards
-        run: yarn build
+      - name: Run bootstrap
+        run: yarn osd bootstrap
 
       - name: Start OpenSearch Dashboards
         run: |
