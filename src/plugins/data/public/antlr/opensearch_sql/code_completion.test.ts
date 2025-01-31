@@ -120,7 +120,7 @@ describe('sql code_completion', () => {
       });
     });
 
-    it.skip('should suggest aggregate functions when appropriate', async () => {
+    it('should suggest aggregate functions when appropriate', async () => {
       const result = await getSimpleSuggestions('SELECT * FROM test-index WHERE ');
 
       SQL_SYMBOLS.AGREGATE_FUNCTIONS.forEach((func) => {

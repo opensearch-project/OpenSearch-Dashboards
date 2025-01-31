@@ -187,7 +187,7 @@ export const formatFieldsToSuggestions = (
   return fieldSuggestions;
 };
 
-export const parseQuery = <
+const singleParseQuery = <
   A extends AutocompleteResultBase,
   L extends LexerType,
   P extends ParserType
@@ -202,7 +202,7 @@ export const parseQuery = <
   query,
   cursor,
   context,
-}: ParsingSubject<A, L, P>) => {
+}: ParsingSubject<A, L, P>): A => {
   const parser = createParser(Lexer, Parser, query);
   const { tokenStream } = parser;
   const errorListener = new GeneralErrorListener(tokenDictionary.SPACE);
@@ -243,4 +243,111 @@ export const parseQuery = <
   };
 
   return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
+};
+
+export const parseQuery = <
+  A extends AutocompleteResultBase,
+  L extends LexerType,
+  P extends ParserType
+>({
+  Lexer,
+  Parser,
+  tokenDictionary,
+  ignoredTokens,
+  rulesToVisit,
+  getParseTree,
+  enrichAutocompleteResult,
+  query,
+  cursor,
+  context,
+}: ParsingSubject<A, L, P>): AutocompleteResultBase => {
+  const result = singleParseQuery({
+    Lexer,
+    Parser,
+    tokenDictionary,
+    ignoredTokens,
+    rulesToVisit,
+    getParseTree,
+    enrichAutocompleteResult,
+    query,
+    cursor,
+    context,
+  });
+
+  if (!result.rerunWithoutRules) {
+    return result;
+  }
+
+  // go through each rule in list and run a singleParseQuery without it, combining results
+  result.rerunWithoutRules.forEach((rule) => {
+    const modifiedRulesToVisit = new Set(rulesToVisit);
+    modifiedRulesToVisit.delete(rule);
+
+    const nextResult = singleParseQuery({
+      Lexer,
+      Parser,
+      tokenDictionary,
+      ignoredTokens,
+      rulesToVisit: modifiedRulesToVisit,
+      getParseTree,
+      enrichAutocompleteResult,
+      query,
+      cursor,
+      context,
+    });
+
+    // combine results from result and nextResult
+    // the combination logic is as follows:
+    // Array: it will combine the results of the array
+    // Boolean: we're operating under the assumption that it is a flag, so it needs to
+    //    be kept 'on' in the combined result
+    // Undefined: we're looking at the type in the initial result, so we default to the
+    //    latter result
+    // Any other type: we know this field isn't undefined, but the combination behavior
+    //    is not significant yet, so we default to the initial result. More types could
+    //    be added later if needed, but this is kept unobtrusive.
+    for (const [field, value] of Object.entries(result)) {
+      if (field === 'suggestColumns') {
+        // combine tables inside of suggestColumns
+        if (result.suggestColumns || nextResult.suggestColumns) {
+          result.suggestColumns = {
+            tables: [
+              ...(result.suggestColumns?.tables ?? []),
+              ...(nextResult.suggestColumns?.tables ?? []),
+            ],
+          };
+        }
+        continue;
+      }
+
+      switch (typeof value) {
+        case 'boolean':
+          // if a boolean is true, keep overall result true
+          result[field as keyof A] ||= nextResult[field as keyof A];
+          break;
+        case 'undefined':
+          // use the latter result
+          result[field as keyof A] = nextResult[field as keyof A];
+          break;
+        case 'object':
+          if (Array.isArray(value)) {
+            // combine arrays
+            const combined = [
+              ...((result[field as keyof A] as any[]) ?? []),
+              ...((nextResult[field as keyof A] as any[]) ?? []),
+            ];
+            // ES6 magic to filter out duplicate objects based on id field
+            (result[field as keyof A] as any[]) = combined.filter(
+              (item, index, self) => index === self.findIndex((other) => other.id === item.id)
+            );
+            break;
+          }
+        default:
+          // use the initial result
+          break;
+      }
+    }
+  });
+
+  return result;
 };
