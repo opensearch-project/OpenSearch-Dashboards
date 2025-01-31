@@ -7,6 +7,7 @@ import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
 
 export const PPL_AGGREGATE_FUNCTIONS = [
   'avg',
+  'count',
   'sum',
   'min',
   'max',
