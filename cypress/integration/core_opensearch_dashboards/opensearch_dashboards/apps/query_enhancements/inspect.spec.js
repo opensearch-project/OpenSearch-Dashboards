@@ -50,7 +50,6 @@ describe('inspect spec', () => {
     cy.deleteWorkspaceByName(workspaceName);
     cy.visit('/app/home');
     cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
-    cy.wait(2000);
     cy.createWorkspaceIndexPatterns({
       workspaceName: workspaceName,
       indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
@@ -93,10 +92,8 @@ describe('inspect spec', () => {
           config.language
         );
 
-        cy.log(flattenedFieldsWithValues);
-
         for (const [key, value] of Object.entries(flattenedFieldsWithValues)) {
-          // For SQL and PPL, this number is not accurate.
+          // For SQL and PPL, this number is not accurate. https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9305
           if (
             key === 'event_sequence_number' &&
             (config.language === QueryLanguages.SQL.name ||

@@ -37,7 +37,6 @@ describe('filter for value spec', () => {
     cy.deleteWorkspaceByName(workspaceName);
     cy.visit('/app/home');
     cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
-    cy.wait(2000);
     cy.createWorkspaceIndexPatterns({
       workspaceName: workspaceName,
       indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
