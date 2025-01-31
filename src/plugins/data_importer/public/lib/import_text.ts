@@ -21,7 +21,7 @@ export async function importText(
     delimiter,
   };
 
-  return await http.post<ImportResponse>('/api/static_data_ingestion/_import_text', {
+  return await http.post<ImportResponse>('/api/data_importer/_import_text', {
     body: JSON.stringify({ text }),
     query,
   });

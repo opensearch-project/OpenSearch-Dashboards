@@ -21,7 +21,7 @@ export async function importFile(
     delimiter,
   };
 
-  return await http.post<ImportResponse>('/api/static_data_ingestion/_import_file', {
+  return await http.post<ImportResponse>('/api/data_importer/_import_file', {
     body: formData,
     headers: {
       'Content-Type': undefined,

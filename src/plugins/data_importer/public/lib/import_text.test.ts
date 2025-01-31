@@ -75,7 +75,7 @@ describe('importText()', () => {
       selectedDataSourceId: 'datasource-json',
     },
   ])(
-    'should call /api/static_data_ingestion/_import_text with the correct args for a $textFormat file',
+    'should call /api/data_importer/_import_text with the correct args for a $textFormat file',
     async ({ text, textFormat, indexName, delimiter, selectedDataSourceId }) => {
       const response = await importText(
         httpMock,
@@ -88,7 +88,7 @@ describe('importText()', () => {
 
       expect(response.success).toBe(true);
       expect(response.message.total).toBe(5);
-      expect(httpMock.post).toBeCalledWith('/api/static_data_ingestion/_import_text', {
+      expect(httpMock.post).toBeCalledWith('/api/data_importer/_import_text', {
         query: {
           indexName,
           delimiter,

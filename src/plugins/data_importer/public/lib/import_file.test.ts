@@ -61,7 +61,7 @@ describe('importFile()', () => {
       delimiter: undefined,
     },
   ])(
-    'should call /api/static_data_ingestion/_import_file with the correct args',
+    'should call /api/data_importer/_import_file with the correct args',
     async ({ file, indexName, delimiter, selectedDataSourceId }) => {
       const response = await importFile(httpMock, file, indexName, delimiter, selectedDataSourceId);
       expect(response.success).toBe(true);
@@ -69,7 +69,7 @@ describe('importFile()', () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      expect(httpMock.post).toBeCalledWith('/api/static_data_ingestion/_import_file', {
+      expect(httpMock.post).toBeCalledWith('/api/data_importer/_import_file', {
         query: {
           indexName,
           delimiter,
