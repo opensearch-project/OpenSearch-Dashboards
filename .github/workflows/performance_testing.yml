@@ -58,7 +58,9 @@ jobs:
         run: yarn build
 
       - name: Start OpenSearch Dashboards
-        run: yarn start --no-base-path & yarn wait-on http://localhost:5601
+        run: |
+          yarn wait-on http://localhost:9200 
+          yarn start --no-base-path & yarn wait-on http://localhost:5601
 
       - name: Run Lighthouse CI
         run: yarn lhci autorun || echo "Lighthouse assertion failed, check results"
