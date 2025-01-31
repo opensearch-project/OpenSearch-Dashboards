@@ -4,22 +4,28 @@
  */
 
 import {
-  DATASOURCE_NAME,
+  START_TIME,
+  END_TIME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
+  QueryLanguages,
 } from '../../../../../utils/apps/constants';
 import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
 import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
-import { generateHistogramInteractionTestConfiguration } from '../../../../../utils/apps/query_enhancements/histogram_interaction';
+import { generateHistogramTestConfigurations } from '../../../../../utils/apps/query_enhancements/histogram_interaction';
+import { DatasetTypes } from '../../../../../utils/apps/query_enhancements/constants';
+
 const workspace = getRandomizedWorkspaceName();
+const datasource = getRandomizedDatasourceName();
 
 describe('histogram interaction', { testIsolation: true }, () => {
-  beforeEach(() => {
+  before(() => {
     // Load test data
     cy.setupTestData(
       SECONDARY_ENGINE.url,
@@ -29,21 +35,20 @@ describe('histogram interaction', { testIsolation: true }, () => {
 
     // Add data source
     cy.addDataSource({
-      name: DATASOURCE_NAME,
+      name: datasource,
       url: `${SECONDARY_ENGINE.url}`,
       authType: 'no_auth',
     });
     // Create workspace
     cy.deleteWorkspaceByName(workspace);
     cy.visit('/app/home');
-    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
-    cy.wait(2000);
+    cy.osd.createInitialWorkspaceWithDataSource(datasource, workspace);
     cy.createWorkspaceIndexPatterns({
       workspaceName: workspace,
       indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
       timefieldName: 'timestamp',
       indexPatternHasTimefield: true,
-      dataSource: DATASOURCE_NAME,
+      dataSource: datasource,
       isEnhancement: true,
     });
     cy.navigateToWorkSpaceSpecificPage({
@@ -55,81 +60,75 @@ describe('histogram interaction', { testIsolation: true }, () => {
     cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
   });
 
-  afterEach(() => {
+  beforeEach(() => {
+    cy.navigateToWorkSpaceSpecificPage({
+      url: BASE_PATH,
+      workspaceName: workspace,
+      page: 'discover',
+      isEnhancement: true,
+    });
+    cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
+  });
+
+  after(() => {
     cy.deleteWorkspaceByName(workspace);
-    cy.deleteDataSourceByName(DATASOURCE_NAME);
+    cy.deleteDataSourceByName(datasource);
     // TODO: Modify deleteIndex to handle an array of index and remove hard code
     cy.deleteIndex(INDEX_WITH_TIME_1);
   });
 
-  generateAllTestConfigurations(generateHistogramInteractionTestConfiguration).forEach((config) => {
-    const selectLangs = () => {
-      let langs = [];
-      if (config.datasetType === 'INDEXES') {
-        langs = ['PPL'];
-      } else {
-        langs = ['DQL', 'Lucene', 'PPL'];
-        langs.splice(langs.indexOf(config.language), 1); // remove current lang to iterate over the other two only
-      }
-      return langs;
-    };
-
+  generateAllTestConfigurations(generateHistogramTestConfigurations).forEach((config) => {
     it(`check histogram visibility for ${config.testName}`, () => {
-      cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+      cy.setDataset(config.dataset, datasource, config.datasetType);
       cy.setQueryLanguage(config.language);
       setDatePickerDatesAndSearchIfRelevant(config.language);
-      const assertionByLang = {
-        DQL: 'be.visible',
-        Lucene: 'be.visible',
-        'OpenSearch SQL': 'not.exist',
-        PPL: 'be.visible',
-      };
-      const assertion = assertionByLang[config.language];
-      cy.getElementByTestId('dscChartChartheader').should(assertion);
-      cy.getElementByTestId('discoverChart').should(assertion);
-      // check interval selection persistence
-      // skipping SQL because it has no histogram, and PPL for indeces because permutations are unnecesary
-      if (
-        config.language !== 'OpenSearch SQL' &&
-        !(config.datasetType === 'INDEXES' && config.language === 'PPL')
-      ) {
+      if (config.isHistogramVisible) {
+        cy.getElementByTestId('dscChartChartheader').should('be.visible');
+        cy.getElementByTestId('discoverChart').should('be.visible');
+      } else {
+        cy.getElementByTestId('dscChartChartheader').should('not.exist');
+        cy.getElementByTestId('discoverChart').should('not.exist');
+      }
+      // check interval selection persistence across language changes.
+      // Only need to check for INDEX_PATTERNS because INDEXES
+      // only supports SQL & PPL, and only one of the two supports histogram.
+      if (config.isHistogramVisible && config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
         cy.getElementByTestId('discoverIntervalSelect').select('Week');
-        cy.getElementByTestId('discoverIntervalDateRange')
-          .should('be.visible')
-          .then(($range) => {
-            cy.wrap($range)
-              .invoke('text')
-              .then(($originalRangeTxt) => {
-                selectLangs().forEach((lang) => {
-                  cy.setQueryLanguage(lang);
-                  cy.wait(1000); // wait for the text update, if any
-                  cy.getElementByTestId('discoverIntervalDateRange').then(($currentRange) => {
-                    cy.wrap($currentRange)
-                      .invoke('text')
-                      .then(($currentRangeTxt) => {
-                        expect($currentRangeTxt).to.equal($originalRangeTxt);
-                      });
-                    // TO DO: interact with the inner histogram
-                  });
-                });
-              });
-          });
+        cy.getElementByTestId('discoverIntervalDateRange').contains(
+          `${START_TIME} - ${END_TIME} per`
+        );
+        for (const language of DatasetTypes.INDEX_PATTERN.supportedLanguages) {
+          if (language.name === QueryLanguages.SQL.name) continue;
+          cy.setQueryLanguage(language.name);
+          cy.wait(1000); // wait a bit to ensure data is loaded
+          if (language.supports.histogram) {
+            cy.getElementByTestId('discoverIntervalSelect').select('Week');
+            cy.getElementByTestId('discoverIntervalDateRange').contains(
+              `${START_TIME} - ${END_TIME} per`
+            );
+          }
+        }
       }
     });
 
     it(`check the Auto interval value for ${config.testName}`, () => {
-      if (config.language !== 'OpenSearch SQL') {
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.setQueryLanguage(config.language);
-        setDatePickerDatesAndSearchIfRelevant(config.language);
-        selectLangs().forEach((lang) => {
+      if (!config.isHistogramVisible) return;
+      cy.setDataset(config.dataset, datasource, config.datasetType);
+      cy.setQueryLanguage(config.language);
+      setDatePickerDatesAndSearchIfRelevant(config.language);
+      const intervals = ['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
+      cy.getElementByTestId('discoverIntervalSelect').should('have.value', intervals[0]);
+      intervals.forEach((interval) => {
+        cy.getElementByTestId('discoverIntervalSelect').select(interval);
+        cy.wait(1000); // adding a wait here to ensure the data has been updated
+        config.langPermutation.forEach((lang) => {
+          if (lang === QueryLanguages.SQL.name) return;
           cy.setQueryLanguage(lang);
-          cy.wait(1000);
-          cy.getElementByTestId('discoverIntervalSelect').should('have.value', 'auto');
+          cy.getElementByTestId('discoverIntervalSelect').should('have.value', interval);
           cy.getElementByTestId('discoverIntervalDateRange').should('be.visible');
-          // TO DO: check histogram visualization
         });
-      }
+      });
+      // TODO: check histogram visualization
     });
 
     it(`check the time range selection for ${config.testName}`, () => {
@@ -159,21 +158,22 @@ describe('histogram interaction', { testIsolation: true }, () => {
           .find('button')
           .click({ force: true }); // reset state
       };
-      cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+      cy.setDataset(config.dataset, datasource, config.datasetType);
       cy.setQueryLanguage(config.language);
-      if (config.language !== 'OpenSearch SQL') {
+      if (config.isHistogramVisible) {
         if (config.language !== 'PPL') {
           // remove after the bug is fixed
           cy.setTopNavDate(START_DATE, END_DATE);
-          cy.wait(1000);
+          cy.wait(1000); // adding a wait here to ensure the data has been updated
           checkIntervals();
           cy.getElementByTestId('discoverQueryHits').then(($hits) => {
             const hitsTxt = $hits.text();
-            const langs = selectLangs();
+            const langs = config.langPermutation;
             langs.splice(langs.indexOf('PPL'), 1); // remove after the bug is fixed
             langs.forEach((lang) => {
+              if (lang === QueryLanguages.SQL.name) return;
               cy.setQueryLanguage(lang);
-              cy.wait(1000);
+              cy.wait(1000); // adding a wait here to ensure the data has been updated
               cy.getElementByTestId('discoverQueryHits').should('have.text', hitsTxt);
               checkIntervals();
             });
@@ -185,39 +185,37 @@ describe('histogram interaction', { testIsolation: true }, () => {
     });
 
     it(`check collapse/expand functionality and state persistence for ${config.testName}`, () => {
-      if (config.language !== 'OpenSearch SQL') {
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.setQueryLanguage(config.language);
-        setDatePickerDatesAndSearchIfRelevant(config.language);
+      if (!config.isHistogramVisible) return;
+      cy.setDataset(config.dataset, datasource, config.datasetType);
+      cy.setQueryLanguage(config.language);
+      setDatePickerDatesAndSearchIfRelevant(config.language);
 
-        cy.getElementByTestId('dscChartChartheader').should('be.visible');
-        cy.getElementByTestId('discoverChart').should('be.visible');
-        cy.getElementByTestId('histogramCollapseBtn').should('be.visible').click();
-        cy.getElementByTestId('dscChartChartheader').should('be.visible');
-        cy.getElementByTestId('discoverChart').should('not.exist');
+      cy.getElementByTestId('dscChartChartheader').should('be.visible');
+      cy.getElementByTestId('discoverChart').should('be.visible');
+      cy.getElementByTestId('histogramCollapseBtn').should('be.visible').click();
+      cy.getElementByTestId('dscChartChartheader').should('be.visible');
+      cy.getElementByTestId('discoverChart').should('not.exist');
 
-        const langs = selectLangs();
-        const permutation = {
-          collapse: 'not.exist',
-          expand: 'be.visible',
-        };
-        Object.keys(permutation).forEach((perm) => {
-          langs.forEach((lang) => {
-            cy.setQueryLanguage(lang);
-            cy.getElementByTestId('dscChartChartheader').should('be.visible');
-            cy.getElementByTestId('discoverChart').should(permutation[perm]);
-            // Uncomment after reload bug is fixed
-            //cy.reload(); // should not remove cache for the test to be meaningful
-            //cy.getElementByTestId('discoverChart').should(permutation[perm]);
-            //cy.getElementByTestId('histogramCollapseBtn').should(permutation[perm]);
-          });
-          if (perm === 'collapse') {
-            // start again from the beginning and expand again
-            cy.setQueryLanguage(config.language);
-            cy.getElementByTestId('histogramCollapseBtn').should('be.visible').click();
-          }
+      const permutation = {
+        collapse: 'not.exist',
+        expand: 'be.visible',
+      };
+      Object.keys(permutation).forEach((perm) => {
+        config.langPermutation.forEach((lang) => {
+          cy.setQueryLanguage(lang);
+          cy.getElementByTestId('dscChartChartheader').should('be.visible');
+          cy.getElementByTestId('discoverChart').should(permutation[perm]);
+          // Uncomment after reload bug is fixed
+          //cy.reload(); // should not remove cache for the test to be meaningful
+          //cy.getElementByTestId('discoverChart').should(permutation[perm]);
+          //cy.getElementByTestId('histogramCollapseBtn').should(permutation[perm]);
         });
-      }
+        if (perm === 'collapse') {
+          // start again from the beginning and expand again
+          cy.setQueryLanguage(config.language);
+          cy.getElementByTestId('histogramCollapseBtn').should('be.visible').click();
+        }
+      });
     });
   });
 });
