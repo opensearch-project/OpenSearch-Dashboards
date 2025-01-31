@@ -53,7 +53,7 @@ jobs:
         shell: bash
 
       - name: Install Lighthouse CI
-        run: yarn global add @lhci/cli
+        run: yarn add --dev @lhci/cli
 
       - name: Run bootstrap
         run: yarn osd bootstrap
