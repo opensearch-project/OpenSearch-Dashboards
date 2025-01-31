@@ -3,11 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  DATASOURCE_NAME,
-  INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-} from '../../../../../utils/apps/constants';
+import { INDEX_PATTERN_WITH_TIME, INDEX_WITH_TIME_1 } from '../../../../../utils/apps/constants';
 import * as docTable from '../../../../../utils/apps/query_enhancements/doc_table.js';
 import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../utils/apps/query_enhancements/field_display_filtering.js';
 import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
@@ -15,10 +11,12 @@ import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
 
-const workspace = getRandomizedWorkspaceName();
+const workspaceName = getRandomizedWorkspaceName();
+const datasourceName = getRandomizedDatasourceName();
 
 describe('filter for value spec', () => {
   beforeEach(() => {
@@ -31,27 +29,27 @@ describe('filter for value spec', () => {
 
     // Add data source
     cy.addDataSource({
-      name: DATASOURCE_NAME,
+      name: datasourceName,
       url: SECONDARY_ENGINE.url,
       authType: 'no_auth',
     });
     // Create workspace
-    cy.deleteWorkspaceByName(workspace);
+    cy.deleteWorkspaceByName(workspaceName);
     cy.visit('/app/home');
-    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
+    cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
     cy.wait(2000);
     cy.createWorkspaceIndexPatterns({
-      workspaceName: workspace,
+      workspaceName: workspaceName,
       indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
       timefieldName: 'timestamp',
       indexPatternHasTimefield: true,
-      dataSource: DATASOURCE_NAME,
+      dataSource: datasourceName,
       isEnhancement: true,
     });
 
     cy.navigateToWorkSpaceSpecificPage({
       url: BASE_PATH,
-      workspaceName: workspace,
+      workspaceName: workspaceName,
       page: 'discover',
       isEnhancement: true,
     });
@@ -59,8 +57,8 @@ describe('filter for value spec', () => {
   });
 
   afterEach(() => {
-    cy.deleteWorkspaceByName(workspace);
-    cy.deleteDataSourceByName(DATASOURCE_NAME);
+    cy.deleteWorkspaceByName(workspaceName);
+    cy.deleteDataSourceByName(datasourceName);
     // TODO: Modify deleteIndex to handle an array of index and remove hard code
     cy.deleteIndex(INDEX_WITH_TIME_1);
   });
@@ -68,7 +66,7 @@ describe('filter for value spec', () => {
   generateAllTestConfigurations(generateFieldDisplayFilteringTestConfiguration).forEach(
     (config) => {
       it(`filter actions in table field for ${config.testName}`, () => {
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.setDataset(config.dataset, datasourceName, config.datasetType);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
@@ -189,7 +187,7 @@ describe('filter for value spec', () => {
           );
         };
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.setDataset(config.dataset, datasourceName, config.datasetType);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
