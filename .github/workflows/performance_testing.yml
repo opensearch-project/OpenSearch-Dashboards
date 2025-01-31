@@ -63,6 +63,10 @@ jobs:
           yarn wait-on http://localhost:9200 
           yarn start --no-base-path & yarn wait-on http://localhost:5601
 
+      - name: Mock data
+        run: |
+          curl 'http://localhost:5601/api/sample_data/ecommerce' -X 'POST' -H 'osd-version: 3.0.0' -H 'osd-xsrf: osd-fetch'
+
       - name: Run Lighthouse CI
         run: yarn lhci autorun || echo "Lighthouse assertion failed, check results"
 
