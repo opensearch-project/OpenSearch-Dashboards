@@ -48,7 +48,7 @@ jobs:
 
       - name: Run OpenSearch
         run: |
-          /bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"
+          /bin/bash -c "./opensearch-3.0.0/opensearch-tar-install.sh &"
           sleep 30
         shell: bash
 
