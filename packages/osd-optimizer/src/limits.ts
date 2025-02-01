@@ -29,6 +29,7 @@
  */
 
 import Fs from 'fs';
+import path from 'path';
 
 import dedent from 'dedent';
 import Yaml from 'js-yaml';
@@ -37,6 +38,7 @@ import { createFailError, ToolingLog } from '@osd/dev-utils';
 import { OptimizerConfig, getMetrics, Limits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
+const DELTA_FILE_PATH = path.resolve(__dirname, '../bundle_size_variations.yml');
 const DEFAULT_BUDGET = 15000;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
@@ -90,6 +92,42 @@ export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerCo
   log.success('limits.yml file valid');
 }
 
+interface Metric {
+  group: string;
+  id: string;
+  value: number;
+  limit?: number;
+}
+
+const updateBundleSizeVariation = (log: ToolingLog, metric: Metric) => {
+  if (metric.limit != null && metric.value > metric.limit) {
+    const delta = metric.value - metric.limit;
+    const deltaPercentage = (delta / metric.limit) * 100;
+
+    if (deltaPercentage > 20) {
+      log.warning(
+        `Metric [${metric.group}] for [${metric.id}] exceeds the limit by more than ${deltaPercentage}%`
+      );
+
+      // Read existing data from the file if it exists
+      let existingData: { [key: string]: any } = {};
+      if (Fs.existsSync(DELTA_FILE_PATH)) {
+        const fileContent = Fs.readFileSync(DELTA_FILE_PATH, 'utf-8');
+        existingData = Yaml.load(fileContent) as { [key: string]: any };
+      }
+
+      // Update the data with the new metric
+      existingData[metric.id] = {
+        delta,
+        deltaPercentage,
+      };
+
+      // Write the updated data back to the file
+      Fs.writeFileSync(DELTA_FILE_PATH, Yaml.dump(existingData));
+    }
+  }
+};
+
 export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
   const metrics = getMetrics(log, config);
 
@@ -102,6 +140,9 @@ export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
         existingLimit != null && existingLimit >= metric.value
           ? existingLimit
           : metric.value + DEFAULT_BUDGET;
+
+      // Update the bundle size variation file for bundles that exceed the limit by more than 20%.
+      updateBundleSizeVariation(log, metric);
     }
   }
 

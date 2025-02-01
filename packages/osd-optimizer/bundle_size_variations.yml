@@ -1,0 +1,30 @@
+core:
+  delta: 282239
+  deltaPercentage: 40.747943393883745
+dashboard:
+  delta: 305275
+  deltaPercentage: 81.56610120582364
+data:
+  delta: 1512159
+  deltaPercentage: 128.79489780535107
+devTools:
+  delta: 12394
+  deltaPercentage: 31.958948969856372
+discover:
+  delta: 658643
+  deltaPercentage: 626.402084700467
+home:
+  delta: 19149
+  deltaPercentage: 45.96385108374739
+management:
+  delta: 120423
+  deltaPercentage: 261.1532789729355
+navigation:
+  delta: 11166
+  deltaPercentage: 29.845240959024938
+savedObjectsManagement:
+  delta: 260319
+  deltaPercentage: 259.01614877167844
+visDefaultEditor:
+  delta: 279443
+  deltaPercentage: 556.9034238112321
