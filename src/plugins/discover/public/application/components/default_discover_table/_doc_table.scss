@@ -128,10 +128,16 @@ doc-table {
 }
 
 .osd-table {
+  border-collapse: separate;
+
+  tr:first-child td {
+    border-top: none;
+  }
+
   thead {
     position: sticky;
     top: 0;
-    background-color: white;
+    background-color: $euiColorEmptyShade;
     z-index: 1;
   }
 
