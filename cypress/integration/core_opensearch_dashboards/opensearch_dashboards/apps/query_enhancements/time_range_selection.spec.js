@@ -4,27 +4,27 @@
  */
 
 import {
+  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
-  SECONDARY_ENGINE,
+  PATHS,
 } from '../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
 } from '../../../../../utils/apps/query_enhancements/shared';
 import { generateTimeRangeTestConfiguration } from '../../../../../utils/apps/query_enhancements/time_range_selection';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 export const runTimeRangeSelectionTests = () => {
   describe('Time Range Selection Tests', () => {
     beforeEach(() => {
       // Load test data
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
@@ -35,31 +35,30 @@ export const runTimeRangeSelectionTests = () => {
         ]
       );
       // Add data source
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
       // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
+      cy.deleteAllWorkspaces();
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
-        dataSource: datasourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
     });
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITH_TIME_2);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_2);
     });
 
     generateAllTestConfigurations(generateTimeRangeTestConfiguration).forEach((config) => {
@@ -70,7 +69,7 @@ export const runTimeRangeSelectionTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, datasourceName, config.datasetType);
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         cy.setQueryLanguage(config.language.name);
 
@@ -91,7 +90,7 @@ export const runTimeRangeSelectionTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, datasourceName, config.datasetType);
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         cy.setQueryLanguage(config.language.name);
 
@@ -112,7 +111,7 @@ export const runTimeRangeSelectionTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, datasourceName, config.datasetType);
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         cy.setQueryLanguage(config.language.name);
 
@@ -129,4 +128,4 @@ export const runTimeRangeSelectionTests = () => {
   });
 };
 
-runTimeRangeSelectionTests();
+prepareTestSuite('Time Range Selection', runTimeRangeSelectionTests);

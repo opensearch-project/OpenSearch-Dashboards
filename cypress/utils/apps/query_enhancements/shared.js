@@ -5,7 +5,6 @@
 
 import {
   DatasetTypes,
-  DATASOURCE_NAME,
   END_TIME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
@@ -26,13 +25,6 @@ const getRandomString = () => Math.random().toString(36);
  */
 export const getRandomizedWorkspaceName = () =>
   `${WORKSPACE_NAME}-${getRandomString().substring(7)}`;
-
-/**
- * Returns a randomized datasource name
- * @returns {string}
- */
-export const getRandomizedDatasourceName = () =>
-  `${DATASOURCE_NAME}-${getRandomString().substring(0, 18)}`;
 
 /**
  * Callback for generateAllTestConfigurations

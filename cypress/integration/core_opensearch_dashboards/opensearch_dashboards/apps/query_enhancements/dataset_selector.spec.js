@@ -4,16 +4,16 @@
  */
 
 import {
+  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
-  SECONDARY_ENGINE,
+  PATHS,
 } from '../../../../../utils/constants';
 
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
   getDefaultQuery,
 } from '../../../../../utils/apps/query_enhancements/shared';
@@ -25,16 +25,16 @@ import {
   verifyBaseState,
   setUpBaseState,
 } from '../../../../../utils/apps/query_enhancements/dataset_selector';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const dataSourceName = getRandomizedDatasourceName();
 
 export const runDatasetSelectorTests = () => {
   describe('dataset selector', { scrollBehavior: false }, () => {
     beforeEach(() => {
       // Load test data
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
@@ -45,31 +45,30 @@ export const runDatasetSelectorTests = () => {
         ]
       );
       // Add data source
-      cy.addDataSource({
-        name: dataSourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
       // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
+      cy.deleteAllWorkspaces();
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(dataSourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
-        dataSource: dataSourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
     });
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(dataSourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITH_TIME_2);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_2);
     });
 
     generateAllTestConfigurations(generateDatasetSelectorTestConfiguration).forEach((config) => {
@@ -81,9 +80,9 @@ export const runDatasetSelectorTests = () => {
         });
 
         if (config.datasetType === 'INDEX_PATTERN') {
-          cy.setIndexPatternFromAdvancedSelector(config.dataset, dataSourceName, config.language);
+          cy.setIndexPatternFromAdvancedSelector(config.dataset, DATASOURCE_NAME, config.language);
         } else {
-          cy.setIndexAsDataset(config.dataset, dataSourceName, config.language);
+          cy.setIndexAsDataset(config.dataset, DATASOURCE_NAME, config.language);
         }
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
@@ -106,7 +105,7 @@ export const runDatasetSelectorTests = () => {
         });
 
         // Setup the base state
-        setUpBaseState(INDEX_PATTERN_WITH_TIME, dataSourceName);
+        setUpBaseState(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME);
 
         // Verify if the base state is setup properly
         verifyBaseState(INDEX_PATTERN_WITH_TIME);
@@ -115,14 +114,14 @@ export const runDatasetSelectorTests = () => {
         if (config.datasetType === 'INDEX_PATTERN') {
           cy.setIndexPatternFromAdvancedSelector(
             config.dataset,
-            dataSourceName,
+            DATASOURCE_NAME,
             config.language,
             'cancel'
           );
         } else {
           cy.setIndexAsDataset(
             config.dataset,
-            dataSourceName,
+            DATASOURCE_NAME,
             config.language,
             'timestamp',
             'cancel'
@@ -136,4 +135,4 @@ export const runDatasetSelectorTests = () => {
   });
 };
 
-runDatasetSelectorTests();
+prepareTestSuite('Dataset Selector', runDatasetSelectorTests);

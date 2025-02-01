@@ -11,7 +11,11 @@ Cypress.Commands.add(
     cy.visit('/app/workspace_list#');
     cy.osd.openWorkspaceDashboard(workspaceName);
     // wait until page loads
-    cy.getElementByTestId('headerAppActionMenu').should('be.visible');
+    if (Cypress.env('SOURCE_CODE') === 'osd') {
+      cy.getElementByTestId('headerAppActionMenu').should('be.visible');
+    } else {
+      cy.getElementByTestId('breadcrumbs').should('be.visible');
+    }
   }
 );
 

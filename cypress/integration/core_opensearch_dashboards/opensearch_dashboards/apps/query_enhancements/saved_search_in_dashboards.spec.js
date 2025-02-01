@@ -5,16 +5,16 @@
 
 import {
   DatasetTypes,
+  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   QueryLanguages,
-  SECONDARY_ENGINE,
+  PATHS,
   START_TIME,
 } from '../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
 import {
@@ -24,16 +24,16 @@ import {
   loadSavedSearchFromDashboards,
   navigateToDashboardAndOpenSavedSearchPanel,
 } from '../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 export const runSavedSearchTests = () => {
   describe('saved search in dashboards', () => {
     beforeEach(() => {
       // Load test data
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
@@ -44,31 +44,30 @@ export const runSavedSearchTests = () => {
         ]
       );
       // Add data source
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
       // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
+      cy.deleteAllWorkspaces();
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
-        dataSource: datasourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
     });
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      // // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITH_TIME_2);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_2);
     });
 
     it('Load a saved search', () => {
@@ -153,4 +152,4 @@ export const runSavedSearchTests = () => {
   });
 };
 
-runSavedSearchTests();
+prepareTestSuite('Saved Search in Dashboards', runSavedSearchTests);
