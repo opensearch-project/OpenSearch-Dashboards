@@ -39,7 +39,6 @@ import { OptimizerConfig, getMetrics, Limits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
 const DELTA_FILE_PATH = path.resolve(__dirname, '../bundle_size_variations.yml');
-const DEFAULT_BUDGET = 15000;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
@@ -102,7 +101,7 @@ interface Metric {
 const updateBundleSizeVariation = (log: ToolingLog, metric: Metric) => {
   if (metric.limit != null && metric.value > metric.limit) {
     const delta = metric.value - metric.limit;
-    const deltaPercentage = (delta / metric.limit) * 100;
+    const deltaPercentage = Math.round((delta / metric.limit) * 100 * 100) / 100;
 
     if (deltaPercentage > 20) {
       log.warning(
@@ -118,7 +117,6 @@ const updateBundleSizeVariation = (log: ToolingLog, metric: Metric) => {
 
       // Update the data with the new metric
       existingData[metric.id] = {
-        delta,
         deltaPercentage,
       };
 
@@ -137,9 +135,7 @@ export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
     if (metric.group === 'page load bundle size') {
       const existingLimit = config.limits.pageLoadAssetSize?.[metric.id];
       pageLoadAssetSize[metric.id] =
-        existingLimit != null && existingLimit >= metric.value
-          ? existingLimit
-          : metric.value + DEFAULT_BUDGET;
+        existingLimit != null && existingLimit >= metric.value ? existingLimit : metric.value;
 
       // Update the bundle size variation file for bundles that exceed the limit by more than 20%.
       updateBundleSizeVariation(log, metric);
