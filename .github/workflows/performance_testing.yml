@@ -58,27 +58,27 @@ jobs:
       - name: Run bootstrap
         run: yarn osd bootstrap
 
-      # - name: Start OpenSearch Dashboards
-      #   run: |
-      #     yarn wait-on http://localhost:9200
-      #     yarn start --no-base-path & yarn wait-on http://localhost:5601
-
-      - name: Wait for OpenSearch to be ready
-        run: |
-          until curl -s http://localhost:9200 >/dev/null; do
-            echo "Waiting for OpenSearch..."
-            sleep 10
-          done
-          echo "OpenSearch is up!"
-
       - name: Start OpenSearch Dashboards
         run: |
-          yarn start --no-base-path & 
-          until curl -s http://localhost:5601 >/dev/null; do
-            echo "Waiting for OpenSearch Dashboards..."
-            sleep 10
-          done
-          echo "OpenSearch Dashboards is up!"
+          yarn wait-on http://localhost:9200
+          yarn start --no-base-path & yarn wait-on http://localhost:5601
+
+      # - name: Wait for OpenSearch to be ready
+      #   run: |
+      #     until curl -s http://localhost:9200 >/dev/null; do
+      #       echo "Waiting for OpenSearch..."
+      #       sleep 10
+      #     done
+      #     echo "OpenSearch is up!"
+
+      # - name: Start OpenSearch Dashboards
+      #   run: |
+      #     yarn start --no-base-path &
+      #     until curl -s http://localhost:5601 >/dev/null; do
+      #       echo "Waiting for OpenSearch Dashboards..."
+      #       sleep 10
+      #     done
+      #     echo "OpenSearch Dashboards is up!"
 
       - name: Mock data
         run: |

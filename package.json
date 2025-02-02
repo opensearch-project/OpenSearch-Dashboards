@@ -253,6 +253,7 @@
     "tslib": "^2.0.0",
     "type-detect": "^4.0.8",
     "uuid": "3.3.2",
+    "wait-on": "^8.0.2",
     "whatwg-fetch": "^3.0.0",
     "yauzl": "^2.10.0"
   },
