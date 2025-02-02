@@ -86,6 +86,7 @@ jobs:
       #       sleep 10
       #     done
       #     echo "OpenSearch Dashboards is up!"
+      #
 
       - name: Mock data
         run: |
