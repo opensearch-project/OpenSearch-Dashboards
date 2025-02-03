@@ -9,7 +9,7 @@ Cypress.Commands.add(
   (workspaceName) => {
     // Selecting the correct workspace
     cy.visit('/app/workspace_list#');
-    cy.osd.openWorkspaceDashboard(workspaceName);
+    cy.openWorkspaceDashboard(workspaceName);
     // wait until page loads
     if (Cypress.env('SOURCE_CODE') === 'osd') {
       cy.getElementByTestId('headerAppActionMenu').should('be.visible');

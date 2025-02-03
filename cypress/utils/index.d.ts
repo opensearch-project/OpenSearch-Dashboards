@@ -78,6 +78,11 @@ declare namespace Cypress {
      */
     deleteWorkspace<S = any>(workspaceName: string): Chainable<S>;
 
+    /**
+     * Opens workspace dashboard
+     */
+    openWorkspaceDashboard<S = any>(workspaceName: string): Chainable<S>;
+
     // osd namespace
     osd: {
       /**
@@ -88,11 +93,6 @@ declare namespace Cypress {
         dataSourceTitle: string,
         workspaceName: string
       ): Chainable<S>;
-
-      /**
-       * Opens workspace dashboard
-       */
-      openWorkspaceDashboard<S = any>(workspaceName: string): Chainable<S>;
 
       /**
        * Delete an index

@@ -54,6 +54,18 @@ Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
   cy.contains(/successfully/);
 });
 
+Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
+  cy.getElementByTestId('workspace-select-button').should('exist').click();
+  cy.getElementByTestId('workspace-menu-manage-button').should('exist').click();
+  cy.get('.euiBasicTable')
+    .find('tr')
+    .filter((index, row) => {
+      return Cypress.$(row).find('td').text().includes(workspaceName);
+    })
+    .find('a.euiLink')
+    .click();
+});
+
 // OSD-specific commands
 
 cy.osd.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
@@ -82,18 +94,6 @@ cy.osd.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceNa
     cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
   });
   cy.contains(/successfully/);
-});
-
-cy.osd.add('openWorkspaceDashboard', (workspaceName) => {
-  cy.getElementByTestId('workspace-select-button').should('exist').click();
-  cy.getElementByTestId('workspace-menu-manage-button').should('exist').click();
-  cy.get('.euiBasicTable')
-    .find('tr')
-    .filter((index, row) => {
-      return Cypress.$(row).find('td').text().includes(workspaceName);
-    })
-    .find('a.euiLink')
-    .click();
 });
 
 cy.osd.add('deleteIndex', (indexName, options = {}) => {
