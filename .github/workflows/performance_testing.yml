@@ -65,10 +65,10 @@ jobs:
       #   run: |
       #     yarn start --no-base-path
 
-      # - name: Start OpenSearch Dashboards
-      #   run: |
-      #     yarn wait-on http://localhost:9200
-      #     yarn start --no-base-path & yarn wait-on http://localhost:5601
+      - name: Start OpenSearch Dashboards
+        run: |
+          yarn wait-on http://localhost:9200
+          yarn start --no-base-path & yarn wait-on http://localhost:5601
 
       # - name: Wait for OpenSearch to be ready
       #   run: |
