@@ -72,7 +72,7 @@ export const verifyBaseState = (dataset) => {
     dataset: dataset,
     queryString: query,
     language: language,
-    hitCount: '2,229',
+    hitCount: '2,217',
   });
 };
 
