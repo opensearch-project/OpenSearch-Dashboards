@@ -3,7 +3,87 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-Cypress.Commands.add('setQueryEditor', (value, opts = {}, submit = true) => {
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000;
+
+const forceFocusEditor = () => {
+  return cy
+    .get('.globalQueryEditor .react-monaco-editor-container')
+    .click({ force: true })
+    .wait(200) // Give editor time to register focus
+    .get('.inputarea')
+    .focus()
+    .wait(200); // Wait for focus to take effect
+};
+
+const clearMonacoEditor = () => {
+  return cy
+    .get('.globalQueryEditor .react-monaco-editor-container')
+    .should('exist')
+    .should('be.visible')
+    .then(() => {
+      // First ensure we have focus
+      return forceFocusEditor().then(() => {
+        // Try different key combinations for selection
+        return cy
+          .get('.inputarea')
+          .type('{ctrl}a', { force: true })
+          .wait(100)
+          .type('{backspace}', { force: true })
+          .wait(100)
+          .type('{meta}a', { force: true })
+          .wait(100)
+          .type('{backspace}', { force: true });
+      });
+    });
+};
+
+const isEditorEmpty = () => {
+  return cy
+    .get('.globalQueryEditor .react-monaco-editor-container')
+    .find('.view-line')
+    .invoke('text')
+    .then((text) => text.trim() === '');
+};
+
+Cypress.Commands.add('clearQueryEditor', () => {
+  const clearWithRetry = (attempt = 1) => {
+    cy.log(`Attempt ${attempt} to clear editor`);
+
+    return forceFocusEditor()
+      .then(() => clearMonacoEditor())
+      .then(() => {
+        return isEditorEmpty().then((isEmpty) => {
+          cy.log(`is editor empty: ${isEmpty}`);
+
+          if (isEmpty) {
+            return; // Editor is cleared, we're done
+          }
+
+          if (attempt < MAX_RETRIES) {
+            cy.log(`Editor not cleared, retrying... (attempt ${attempt})`);
+            cy.wait(RETRY_DELAY); // Wait before next attempt
+            return clearWithRetry(attempt + 1);
+          } else {
+            cy.log('Failed to clear editor after all attempts');
+            // Instead of throwing error, try one last time with extra waiting
+            return cy.wait(2000).then(forceFocusEditor).then(clearMonacoEditor);
+          }
+        });
+      });
+  };
+
+  return clearWithRetry();
+});
+
+Cypress.Commands.add('setQueryEditor', (value, options = {}) => {
+  const defaults = {
+    submit: true,
+  };
+
+  // Extract our command-specific options
+  const { submit = defaults.submit, ...typeOptions } = options;
+
   Cypress.log({
     name: 'setQueryEditor',
     displayName: 'set query',
@@ -15,14 +95,16 @@ Cypress.Commands.add('setQueryEditor', (value, opts = {}, submit = true) => {
   cy.getElementByTestId('headerGlobalNav').click();
 
   // clear the editor first and then set
-  cy.get('.globalQueryEditor .react-monaco-editor-container')
-    .click()
-    .focused()
-    .type('{ctrl}a')
-    .type('{backspace}')
-    .type('{meta}a')
-    .type('{backspace}')
-    .type(value, opts);
+  clearMonacoEditor().then(() => {
+    return cy
+      .get('.inputarea')
+      .should('be.visible')
+      .wait(200)
+      .type(value, {
+        force: true,
+        ...typeOptions, // Pass through all other options to type command
+      });
+  });
 
   if (submit) {
     cy.updateTopNav({ log: false });
