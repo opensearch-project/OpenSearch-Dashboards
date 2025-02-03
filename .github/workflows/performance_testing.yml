@@ -61,15 +61,6 @@ jobs:
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
-      # - name: Start OpenSearch Dashboards
-      #   run: |
-      #     yarn start --no-base-path
-
-      # - name: Start OpenSearch Dashboards
-      #   run: |
-      #     yarn wait-on http://localhost:9200
-      #     yarn start --no-base-path & yarn wait-on http://localhost:5601
-
       - name: Wait for OpenSearch to be ready
         run: |
           until curl -s http://localhost:9200 >/dev/null; do
@@ -99,7 +90,7 @@ jobs:
         run: |
           echo "🚦 **Lighthouse CI Report**" > comment.txt
           echo "" >> comment.txt
-          lhci upload --target=temporary-public-storage | tee lhci_output.txt
+          yarn lhci upload --target=temporary-public-storage | tee lhci_output.txt
           REPORT_URL=$(grep -o 'https://storage.googleapis.com/lighthouse-infrastructure-.*' lhci_output.txt | head -n 1)
           echo "🔗 [View Full Lighthouse Report]($REPORT_URL)" >> comment.txt
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
