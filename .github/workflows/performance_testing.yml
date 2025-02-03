@@ -61,9 +61,9 @@ jobs:
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
-      - name: Start OpenSearch Dashboards
-        run: |
-          yarn start --no-base-path & yarn wait-on http://localhost:5601
+      # - name: Start OpenSearch Dashboards
+      #   run: |
+      #     yarn start --no-base-path
 
       # - name: Start OpenSearch Dashboards
       #   run: |
