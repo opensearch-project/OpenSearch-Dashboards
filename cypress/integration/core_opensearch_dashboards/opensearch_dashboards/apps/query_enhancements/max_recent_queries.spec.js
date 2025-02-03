@@ -13,8 +13,13 @@ import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
+  generateAllTestConfigurations,
 } from '../../../../../utils/apps/query_enhancements/shared';
-import { generateMaxQueriesTestConfiguration } from '../../../../../utils/apps/query_enhancements/max_recent_queries';
+import {
+  generateMaxRecentQueriesTestConfiguration,
+  BaseQuery,
+  TestQueries,
+} from '../../../../../utils/apps/query_enhancements/max_recent_queries';
 
 const workspace = getRandomizedWorkspaceName();
 
@@ -63,13 +68,17 @@ describe('filter for value spec', { testIsolation: true }, () => {
     cy.deleteIndex(INDEX_WITH_TIME_1);
   });
 
-  generateMaxQueriesTestConfiguration().forEach((config) => {
+  generateAllTestConfigurations(generateMaxRecentQueriesTestConfiguration).forEach((config) => {
+    if (config.language !== 'PPL' && config.language !== 'OpenSearch SQL') return;
+
     it(`check max queries for ${config.testName}`, () => {
       cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
       cy.setQueryLanguage(config.language);
       setDatePickerDatesAndSearchIfRelevant(config.language);
-      const currentBaseQuery = config.baseQuery;
-      config.testQueries.forEach((query) => {
+      cy.log(BaseQuery[config.datasetType].toString());
+      cy.log(config.language);
+      const currentBaseQuery = BaseQuery[config.datasetType][config.language];
+      TestQueries.forEach((query) => {
         cy.setQueryEditor(currentBaseQuery + query, {}, true);
       });
       cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
@@ -77,7 +86,7 @@ describe('filter for value spec', { testIsolation: true }, () => {
       });
       // only 10 of the 11 queries should be displayed
       cy.getElementByTestIdLike('row-').should('have.length', 10);
-      const reverseList = [...config.testQueries].reverse();
+      const reverseList = [...TestQueries].reverse();
       cy.getElementByTestIdLike('row-').each(($row, rowIndex) => {
         expect($row.text()).to.contain(currentBaseQuery + reverseList[rowIndex]);
       });
@@ -87,7 +96,7 @@ describe('filter for value spec', { testIsolation: true }, () => {
       cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
       cy.setQueryLanguage(config.language);
       setDatePickerDatesAndSearchIfRelevant(config.language);
-      const query = config.baseQuery + 'status_code = 504';
+      const query = BaseQuery[config.datasetType][config.language] + 'status_code = 504';
       cy.setQueryEditor(query, {}, true);
       cy.setQueryEditor(query, {}, true);
       cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({

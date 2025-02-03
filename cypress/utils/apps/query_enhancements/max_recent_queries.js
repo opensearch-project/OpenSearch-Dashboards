@@ -16,48 +16,54 @@ export const MaxQueriesDataTypes = {
   },
 };
 
+export const BaseQuery = {
+  INDEX_PATTERN: {
+    'OpenSearch SQL': `SELECT * FROM ${INDEX_PATTERN_WITH_TIME} WHERE `,
+    PPL: `source = ${INDEX_PATTERN_WITH_TIME} | where `,
+  },
+  INDEXES: {
+    'OpenSearch SQL': `SELECT * FROM ${INDEX_WITH_TIME_1} WHERE `,
+    PPL: `source = ${INDEX_WITH_TIME_1} | where `,
+  },
+};
+
+export const TestQueries = [
+  'bytes_transferred > 0',
+  'bytes_transferred < 8000',
+  'bytes_transferred > 8000',
+  'status_code = 404',
+  'status_code = 501',
+  'status_code = 503',
+  'status_code = 400',
+  'status_code = 401',
+  'status_code = 403',
+  'status_code = 200',
+  'event_sequence_number > 10000000',
+];
+
 /**
- * Test confuguration for max recent queries
- * @returns {object[]}
+ * The configurations needed for field display filtering tests
+ * @typedef {Object} MaxRecentQueriesFilteringTestConfig
+ * @property {string} dataset - the dataset name to use
+ * @property {QueryEnhancementDataset} datasetType - the type of dataset
+ * @property {QueryEnhancementLanguage} language - the name of query language as it appears in the dashboard app
+ * @property {string} testName - the phrase to add to the test case's title
  */
-export const generateMaxQueriesTestConfiguration = () => {
-  return Object.values(MaxQueriesDataTypes).flatMap((dataset) =>
-    dataset.supportedLanguages.map((language) => {
-      let datasetToUse;
-      switch (dataset.name) {
-        case MaxQueriesDataTypes.INDEX_PATTERN.name:
-          datasetToUse = INDEX_PATTERN_WITH_TIME;
-          break;
-        case MaxQueriesDataTypes.INDEXES.name:
-          datasetToUse = INDEX_WITH_TIME_1;
-          break;
-        default:
-          throw new Error(`Unsupported dataset: ${dataset.name}`);
-      }
-      const baseQuery = {
-        'OpenSearch SQL': `SELECT * FROM ${datasetToUse} WHERE `,
-        PPL: `source = ${datasetToUse} | where `,
-      };
-      return {
-        dataset: datasetToUse,
-        datasetType: dataset.name,
-        language: language.name,
-        baseQuery: baseQuery[language.name],
-        testQueries: [
-          'bytes_transferred > 0',
-          'bytes_transferred < 8000',
-          'bytes_transferred > 8000',
-          'status_code = 404',
-          'status_code = 501',
-          'status_code = 503',
-          'status_code = 400',
-          'status_code = 401',
-          'status_code = 403',
-          'status_code = 200',
-          'event_sequence_number > 10000000',
-        ],
-        testName: `${language.name} and ${dataset.name}`,
-      };
-    })
-  );
+
+/**
+ * Returns the SavedSearchTestConfig for the provided dataset, datasetType, and language
+ * @param {string} dataset - the dataset name
+ * @param {QueryEnhancementDataset} datasetType - the type of the dataset
+ * @param {QueryEnhancementLanguageData} language - the relevant data for the query language to use
+ * @returns {MaxRecentQueriesFilteringTestConfig}
+ */
+export const generateMaxRecentQueriesTestConfiguration = (dataset, datasetType, language) => {
+  console.log(MaxQueriesDataTypes[datasetType].name);
+  console.log(MaxQueriesDataTypes[datasetType].toString());
+  return {
+    dataset,
+    datasetType: MaxQueriesDataTypes[datasetType].name,
+    language: language.name,
+    testName: `dataset: ${datasetType} and language: ${language.name}`,
+  };
 };
