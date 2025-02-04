@@ -109,6 +109,17 @@ declare namespace Cypress {
         mappingFiles: string[],
         dataFiles: string[]
       ): Chainable<S>;
+
+      addDataSource(opts: {
+        name: string;
+        url: string;
+        auth_type?: string;
+        credentials?: { username: string; password: string };
+      }): Chainable<any>;
+
+      deleteDataSourceByName(dataSourceName: string): Chainable<any>;
+
+      deleteAllDataSources(): Chainable<any>;
     };
   }
 }

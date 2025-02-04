@@ -39,19 +39,5 @@ declare namespace Cypress {
     setQuickSelectTime(direction: string, time: number, timeUnit: string): Chainable<any>;
 
     setRelativeTopNavDate(time: number, timeUnit: string): Chainable<any>;
-
-    // osd namespace
-    osd: {
-      addDataSource(opts: {
-        name: string;
-        url: string;
-        auth_type?: string;
-        credentials?: { username: string; password: string };
-      }): Chainable<any>;
-
-      deleteDataSourceByName(dataSourceName: string): Chainable<any>;
-
-      deleteAllDataSources(): Chainable<any>;
-    };
   }
 }

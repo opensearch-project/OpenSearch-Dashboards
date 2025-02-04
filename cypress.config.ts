@@ -39,7 +39,7 @@ module.exports = defineConfig({
     ML_COMMONS_DASHBOARDS_ENABLED: true,
     WAIT_FOR_LOADER_BUFFER_MS: 0,
     DISABLE_LOCAL_CLUSTER: false,
-    SOURCE_CODE: 'osd',
+    CYPRESS_RUNTIME_ENV: 'osd',
   },
   e2e: {
     baseUrl: 'http://localhost:5601',

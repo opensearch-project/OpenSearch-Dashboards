@@ -22,7 +22,7 @@ const loginMethods = [
  * @param {PrepareTestSuiteCallback} runTestSuiteCallback - function that run's the test suite's tests
  */
 export const prepareTestSuite = (testSuiteName, runTestSuiteCallback) => {
-  if (Cypress.env('SOURCE_CODE') === 'osd') {
+  if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'osd') {
     runTestSuiteCallback();
   } else {
     loginMethods.forEach(({ name, method }) => {
