@@ -119,3 +119,5 @@ jobs:
           fi
 
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
