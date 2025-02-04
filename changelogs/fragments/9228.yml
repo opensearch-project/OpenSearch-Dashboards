@@ -1,2 +1,0 @@
-refactor:
-- Move query assistant summary toggle to AI assistant dropdown list ([#9228](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9228))

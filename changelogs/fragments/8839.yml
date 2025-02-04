@@ -1,2 +1,0 @@
-fix:
-- Fix a typo while inspecting values for large numerals in OSD and the JS client ([#8839](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8839))

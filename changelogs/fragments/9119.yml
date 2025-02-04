@@ -1,2 +1,0 @@
-test:
-- Add cypress integration test for the new Data Explorer UI's Filtering. ([#9119](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9119))

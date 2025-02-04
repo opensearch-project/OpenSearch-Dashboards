@@ -1,5 +1,0 @@
-fix:
-- Fix a typo while inspecting values for large numerals in OSD and the JS client ([#8837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8837))
-
-feat:
-- Add setting to turn extending numeric precision on or off ([#8837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8837))

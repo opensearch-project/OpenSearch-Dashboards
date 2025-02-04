@@ -1,2 +1,0 @@
-fix:
-- Support imports without extensions in cypress webpack build ([#8993](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8993))

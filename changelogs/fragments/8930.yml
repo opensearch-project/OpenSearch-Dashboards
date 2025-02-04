@@ -1,2 +1,0 @@
-fix:
-- Update saved search initialization logic to use current query instead of default query ([#8930](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8930))

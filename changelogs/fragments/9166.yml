@@ -1,2 +1,0 @@
-test:
-- Add cypress integration test for the old and new UI view saved queries. ([#9166](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9166))

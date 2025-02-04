@@ -1,2 +1,0 @@
-fix:
-- Fix set as default error in data source and index pattern ([#9187](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9187))

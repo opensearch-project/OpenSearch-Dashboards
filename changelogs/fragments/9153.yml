@@ -1,2 +1,0 @@
-fix:
-- 0 rendered in discover when there are no results ([#9153](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9153))

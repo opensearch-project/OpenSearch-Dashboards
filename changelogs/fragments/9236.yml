@@ -1,2 +1,0 @@
-fix:
-- Solve console error on the page when the data source has an empty description ([#9236](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9236))

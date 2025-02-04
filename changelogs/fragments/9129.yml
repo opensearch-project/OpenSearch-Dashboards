@@ -1,2 +1,0 @@
-test:
-- Make createWorkspaceIndexPatterns to handle no default cluster and clean up ([#9129](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9129))

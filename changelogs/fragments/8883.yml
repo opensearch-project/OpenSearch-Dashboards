@@ -1,2 +1,0 @@
-fix:
-- Retain currently selected dataset when opening saved query without dataset info ([#8883](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8883))

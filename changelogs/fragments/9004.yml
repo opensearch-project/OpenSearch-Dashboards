@@ -1,2 +1,0 @@
-fix:
-- Fix workspace page hanging with none collaborators for non dashboard admin ([#9004](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9004))

@@ -1,2 +1,0 @@
-refactor:
-- [Workspace] add missing method for workspace client interface ([#9070](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9070))

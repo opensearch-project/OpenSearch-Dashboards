@@ -1,2 +1,0 @@
-fix:
-- Fix cypress version error on ciGroup11 ([#9209](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9209))

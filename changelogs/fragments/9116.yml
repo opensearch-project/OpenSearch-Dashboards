@@ -1,2 +1,0 @@
-fix:
-- Hide collaborators page on nav when newHomePage is disabled ([#9116](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9116))

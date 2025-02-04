@@ -1,2 +1,0 @@
-fix:
-- Decouple data$ updates to prevent rows clearing on hook re-render ([#8806](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8806))

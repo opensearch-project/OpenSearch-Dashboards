@@ -1,2 +1,0 @@
-fix:
-- [Workspace] Unable to copy assets to a workspace without assigning related data source ([#7690](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7690))
