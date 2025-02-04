@@ -27,8 +27,8 @@ const queriesTestSuite = () => {
 
       // Add data source
       cy.osd.addDataSource({
-        name: `${DATASOURCE_NAME}`,
-        url: `${PATHS.SECONDARY_ENGINE}`,
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
@@ -66,7 +66,7 @@ const queriesTestSuite = () => {
         cy.setQueryLanguage('DQL');
         cy.setTopNavDate(START_TIME, END_TIME);
 
-        const query = `_id:1`;
+        const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
         cy.waitForLoader(true);
         cy.waitForSearch();
@@ -81,7 +81,7 @@ const queriesTestSuite = () => {
         cy.setQueryLanguage('Lucene');
         cy.setTopNavDate(START_TIME, END_TIME);
 
-        const query = `_id:1`;
+        const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
         cy.waitForLoader(true);
         cy.waitForSearch();

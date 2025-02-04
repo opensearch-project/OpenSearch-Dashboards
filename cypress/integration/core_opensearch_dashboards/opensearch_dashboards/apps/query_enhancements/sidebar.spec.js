@@ -4,6 +4,7 @@
  */
 
 import {
+  DatasetTypes,
   INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
   PATHS,
@@ -14,7 +15,7 @@ import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
-import { getDocTableField } from '../../../../../utils/apps/query_enhancements/field_display_filtering';
+import { getDocTableField } from '../../../../../utils/apps/query_enhancements/doc_table';
 import * as sideBar from '../../../../../utils/apps/query_enhancements/sidebar';
 import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
 import { prepareTestSuite } from '../../../../../utils/helpers';
@@ -84,7 +85,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (
     cy.wait('@query').then(() => {
       checkTableHeaders(testFields);
       if (isIndexPattern) {
-        cy.getElementByTestId('discoverQueryHits').should('have.text', '1,152');
+        cy.getElementByTestId('discoverQueryHits').should('have.text', '1,125');
       }
       checkDocTableColumn(expectedValues, 2);
     });
@@ -133,11 +134,11 @@ export const runSideBarTests = () => {
       sqlQuery: (dataset) => `SELECT * FROM ${dataset} WHERE status_code = 200`,
       simpleFields: {
         fields: ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'],
-        expectedValues: ['3.32', '2.8', '3.35', '1.68', '4.98'],
+        expectedValues: ['3.91', '4.82', '1.72', '4.08', '3.97'],
       },
       nestedFields: {
         fields: ['personal.name', 'personal.age', 'personal.birthdate', 'personal.address.country'],
-        expectedValues: ['28', '55', '76', '56', '36'],
+        expectedValues: ['28', '52', '65', '21', '79'],
       },
     };
 
@@ -173,7 +174,7 @@ export const runSideBarTests = () => {
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         beforeEach(() => {
-          if (config.datasetType === 'INDEX_PATTERN') {
+          if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
             cy.createWorkspaceIndexPatterns({
               workspaceName: workspaceName,
               indexPattern: INDEX_WITH_TIME_1,
@@ -199,7 +200,7 @@ export const runSideBarTests = () => {
             testData.simpleFields.expectedValues,
             testData.pplQuery(config.dataset),
             testData.sqlQuery(config.dataset),
-            config.datasetType === 'INDEX_PATTERN',
+            cconfig.datasetType === DatasetTypes.INDEX_PATTERN.name,
             config
           );
         });
@@ -210,7 +211,7 @@ export const runSideBarTests = () => {
             testData.nestedFields.expectedValues,
             testData.pplQuery(config.dataset),
             testData.sqlQuery(config.dataset),
-            config.datasetType === 'INDEX_PATTERN',
+            config.datasetType === DatasetTypes.INDEX_PATTERN.name,
             config
           );
         });
