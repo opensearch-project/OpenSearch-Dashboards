@@ -1,2 +1,0 @@
-fix:
-- Search on page load out of sync state when clicking submit. ([#8871](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8871))
