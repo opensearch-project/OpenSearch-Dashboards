@@ -1,2 +1,0 @@
-fix:
-- DQC can not be assigned to a workspace due to validation ([#9259](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9259))

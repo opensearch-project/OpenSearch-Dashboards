@@ -1,2 +1,0 @@
-test:
-- Remove head 10 for PPL default query to unblock cypress test failures ([#8827](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8827))
