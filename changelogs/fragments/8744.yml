@@ -1,2 +1,0 @@
-chore:
-- Revert back to using the official release of `vega-interpreter` ([#8744](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8744))
