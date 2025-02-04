@@ -19,11 +19,11 @@ import {
   generateMaxRecentQueriesTestConfiguration,
   BaseQuery,
   TestQueries,
-} from '../../../../../utils/apps/query_enhancements/max_recent_queries';
+} from '../../../../../utils/apps/query_enhancements/recent_queries';
 
 const workspace = getRandomizedWorkspaceName();
 
-describe('filter for value spec', { testIsolation: true }, () => {
+describe('recent queries spec', { testIsolation: true }, () => {
   const index = INDEX_PATTERN_WITH_TIME.replace('*', '');
   beforeEach(() => {
     // Load test data
@@ -75,8 +75,6 @@ describe('filter for value spec', { testIsolation: true }, () => {
       cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
       cy.setQueryLanguage(config.language);
       setDatePickerDatesAndSearchIfRelevant(config.language);
-      cy.log(BaseQuery[config.datasetType].toString());
-      cy.log(config.language);
       const currentBaseQuery = BaseQuery[config.datasetType][config.language];
       TestQueries.forEach((query) => {
         cy.setQueryEditor(currentBaseQuery + query, {}, true);
@@ -103,6 +101,51 @@ describe('filter for value spec', { testIsolation: true }, () => {
         force: true,
       });
       cy.contains(query).should('have.length', 1);
+    });
+
+    it(`check running and copying recent queries for ${config.testName}`, () => {
+      const checkRowText = (rowIndex, expectedQuery) => {
+        cy.getElementByTestIdLike('row-').each(($row, $index) => {
+          if ($index === rowIndex) {
+            expect($row.text()).to.include(expectedQuery);
+          }
+        });
+      };
+      cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+      cy.setQueryLanguage(config.language);
+      setDatePickerDatesAndSearchIfRelevant(config.language);
+      // Precondition: run some queries first
+      const currentBaseQuery = BaseQuery[config.datasetType][config.language];
+      const queries = [...TestQueries].splice(0, 3);
+      queries.forEach((query) => {
+        cy.setQueryEditor(currentBaseQuery + query, {}, true);
+      });
+      cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
+        force: true,
+      });
+      const expectedQuery = currentBaseQuery + queries[0];
+      checkRowText(2, expectedQuery);
+      cy.getElementByTestId('action-run').eq(2).click({ force: true });
+      cy.wait(2000);
+      checkRowText(0, expectedQuery);
+
+      cy.getElementByTestIdLike('row-')
+        .eq(1)
+        .then(($row) => {
+          cy.get('[aria-label="Copy recent query"]').eq(1).click({ force: true });
+          cy.wait(1000);
+          const regex = {
+            PPL: /.*?(source .*? 8000)(?:.*)/s,
+            'OpenSearch SQL': /.*?(SELECT .*? 8000)(?:.*)/s,
+          };
+          const expectedQuery = $row.text().replace(regex[config.language], '$1');
+          // necessary for hiding the syntax helper message box (again)
+          cy.getElementByTestId('languageReferenceButton').click();
+          cy.window()
+            .its('navigator.clipboard')
+            .then(($clip) => $clip.readText())
+            .should('eq', expectedQuery);
+        });
     });
   });
 });

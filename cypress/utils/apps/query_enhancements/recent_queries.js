@@ -5,7 +5,7 @@
 
 import { INDEX_PATTERN_WITH_TIME, INDEX_WITH_TIME_1, QueryLanguages } from './constants';
 
-export const MaxQueriesDataTypes = {
+export const RecentQueriesDataTypes = {
   INDEX_PATTERN: {
     name: 'INDEX_PATTERN',
     supportedLanguages: [QueryLanguages.SQL, QueryLanguages.PPL],
@@ -58,11 +58,9 @@ export const TestQueries = [
  * @returns {MaxRecentQueriesFilteringTestConfig}
  */
 export const generateMaxRecentQueriesTestConfiguration = (dataset, datasetType, language) => {
-  console.log(MaxQueriesDataTypes[datasetType].name);
-  console.log(MaxQueriesDataTypes[datasetType].toString());
   return {
     dataset,
-    datasetType: MaxQueriesDataTypes[datasetType].name,
+    datasetType: RecentQueriesDataTypes[datasetType].name,
     language: language.name,
     testName: `dataset: ${datasetType} and language: ${language.name}`,
   };
