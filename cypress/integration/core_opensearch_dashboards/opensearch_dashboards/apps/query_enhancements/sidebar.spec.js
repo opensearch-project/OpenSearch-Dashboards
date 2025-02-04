@@ -15,7 +15,7 @@ import {
   getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
-import { getDocTableField } from '../../../../../utils/apps/query_enhancements/field_display_filtering';
+import { getDocTableField } from '../../../../../utils/apps/query_enhancements/doc_table';
 import * as sideBar from '../../../../../utils/apps/query_enhancements/sidebar';
 import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
 
