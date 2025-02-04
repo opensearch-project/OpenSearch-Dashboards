@@ -1,2 +1,0 @@
-fix:
-- Upgrade actions/upload-artifact to v4 ([#8855](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8855))

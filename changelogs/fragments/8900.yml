@@ -1,2 +1,0 @@
-feat:
-- Optimize recent items and filter out items whose workspace is deleted ([#8900](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8900))
