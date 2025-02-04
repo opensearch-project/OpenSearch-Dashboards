@@ -40,7 +40,7 @@ No, all are welcome and encouraged to attend. Attending the Backlog & Triage mee
 
 ### What if I have an issue that is almost a duplicate, should I open a new one to be triaged?
 
-You can always open an [issue](ttps://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose) including one that you think may be a duplicate. However, in cases where you believe there is an important distinction to be made between an existing issue and your newly created one, you are encouraged to attend the triaging meeting to explain.
+You can always open an [issue](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose) including one that you think may be a duplicate. However, in cases where you believe there is an important distinction to be made between an existing issue and your newly created one, you are encouraged to attend the triaging meeting to explain.
 
 ### What if I have follow-up questions on an issue?
 
