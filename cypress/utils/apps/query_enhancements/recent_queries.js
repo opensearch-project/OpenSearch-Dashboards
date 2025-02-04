@@ -42,8 +42,8 @@ export const TestQueries = [
 ];
 
 /**
- * The configurations needed for field display filtering tests
- * @typedef {Object} MaxRecentQueriesFilteringTestConfig
+ * The configurations needed for recent queries tests
+ * @typedef {Object} RecentQueriesFilteringTestConfig
  * @property {string} dataset - the dataset name to use
  * @property {QueryEnhancementDataset} datasetType - the type of dataset
  * @property {QueryEnhancementLanguage} language - the name of query language as it appears in the dashboard app
@@ -55,9 +55,9 @@ export const TestQueries = [
  * @param {string} dataset - the dataset name
  * @param {QueryEnhancementDataset} datasetType - the type of the dataset
  * @param {QueryEnhancementLanguageData} language - the relevant data for the query language to use
- * @returns {MaxRecentQueriesFilteringTestConfig}
+ * @returns {RecentQueriesFilteringTestConfig}
  */
-export const generateMaxRecentQueriesTestConfiguration = (dataset, datasetType, language) => {
+export const generateRecentQueriesTestConfiguration = (dataset, datasetType, language) => {
   return {
     dataset,
     datasetType: RecentQueriesDataTypes[datasetType].name,

@@ -16,7 +16,7 @@ import {
   generateAllTestConfigurations,
 } from '../../../../../utils/apps/query_enhancements/shared';
 import {
-  generateMaxRecentQueriesTestConfiguration,
+  generateRecentQueriesTestConfiguration,
   BaseQuery,
   TestQueries,
 } from '../../../../../utils/apps/query_enhancements/recent_queries';
@@ -68,7 +68,7 @@ describe('recent queries spec', { testIsolation: true }, () => {
     cy.deleteIndex(INDEX_WITH_TIME_1);
   });
 
-  generateAllTestConfigurations(generateMaxRecentQueriesTestConfiguration).forEach((config) => {
+  generateAllTestConfigurations(generateRecentQueriesTestConfiguration).forEach((config) => {
     if (config.language !== 'PPL' && config.language !== 'OpenSearch SQL') return;
 
     it(`check max queries for ${config.testName}`, () => {
