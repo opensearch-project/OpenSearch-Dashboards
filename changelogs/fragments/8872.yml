@@ -1,2 +1,0 @@
-fix:
-- Remove filter out serverless cluster and add support to extract index name ([#8872](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8872))

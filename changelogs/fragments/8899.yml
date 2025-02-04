@@ -1,2 +1,0 @@
-fix:
-- Only support copy action for query templates ([#8899](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8899))
