@@ -85,29 +85,30 @@ jobs:
       - name: Run Lighthouse CI
         run: yarn lhci autorun || echo "Lighthouse assertion failed, check results"
 
-      - name: Post Lighthouse Report to PR
-        if: always()
+      - name: Run Lighthouse CI
         run: |
-          echo "🚦 **Lighthouse CI Report**" > comment.txt
-          echo "" >> comment.txt
+          yarn lhci autorun --json | tee lhci_output.json || true
 
-          # Run Lighthouse and capture failures
-          yarn lhci autorun --json > lhci_output.json || true
+          # Validate JSON output
+          if [ ! -s lhci_output.json ]; then
+            echo "❌ Lighthouse output is empty or invalid."
+            cat lhci_output.json  # Print for debugging
+            exit 1
+          fi
 
-          # Extract failed assertions
-          FAILURES=$(jq -r '[.assertionResults[] | select(.status=="fail") | 
-            {metric: .auditId, reason: .explanation}]' lhci_output.json)
+          # Extract failed assertions safely
+          FAILURES=$(jq -r 'if .assertionResults then [.assertionResults[] | select(.status=="fail") | {metric: .auditId, reason: .explanation}] else [] end' lhci_output.json)
 
           if [[ "$FAILURES" == "[]" ]]; then
-            echo "✅ All Lighthouse metrics passed!" >> comment.txt
+            echo "✅ All Lighthouse metrics passed!" > comment.txt
           else
-            echo "❌ **Failed Lighthouse Metrics:**" >> comment.txt
+            echo "❌ **Failed Lighthouse Metrics:**" > comment.txt
             echo '```json' >> comment.txt
             echo "$FAILURES" >> comment.txt
             echo '```' >> comment.txt
           fi
 
-          # Ensure correct extraction of the report URL
+          # Upload and extract report URL
           yarn lhci upload --target=temporary-public-storage | tee lhci_output.txt
           REPORT_URL=$(grep -Eo 'https://storage.googleapis.com/lighthouse-infrastructure-[^\s]+' lhci_output.txt | head -n 1)
 
@@ -118,5 +119,3 @@ jobs:
           fi
 
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
