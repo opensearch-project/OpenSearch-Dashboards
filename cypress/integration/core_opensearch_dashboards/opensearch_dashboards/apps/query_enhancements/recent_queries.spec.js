@@ -79,6 +79,7 @@ describe('recent queries spec', { testIsolation: true }, () => {
       TestQueries.forEach((query) => {
         cy.setQueryEditor(currentBaseQuery + query, {}, true);
       });
+      // syntax helper might show up above, so forcing the click makes sense here
       cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
         force: true,
       });
@@ -134,12 +135,12 @@ describe('recent queries spec', { testIsolation: true }, () => {
         .then(($row) => {
           cy.get('[aria-label="Copy recent query"]').eq(1).click({ force: true });
           cy.wait(1000);
-          const regex = {
+          const queryRegex = {
             PPL: /.*?(source .*? 8000)(?:.*)/s,
             'OpenSearch SQL': /.*?(SELECT .*? 8000)(?:.*)/s,
           };
-          const expectedQuery = $row.text().replace(regex[config.language], '$1');
-          // necessary for hiding the syntax helper message box (again)
+          const expectedQuery = $row.text().replace(queryRegex[config.language], '$1');
+          // necessary for focusing on the element we just clicked
           cy.getElementByTestId('languageReferenceButton').click();
           cy.window()
             .its('navigator.clipboard')
