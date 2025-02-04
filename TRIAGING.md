@@ -1,6 +1,6 @@
 <img src="https://opensearch.org/assets/img/opensearch-logo-themed.svg" height="64px">
 
-The maintainers of the OpenSearch-Dashboards Repo seek to promote an inclusive and engaged community of contributors. In order to facilitate this, weekly triage meetings are open-to-all and attendance is encouraged for anyone who hopes to contribute, discuss an issue, or learn more about the project. To learn more about contributing to the OpenSearch-security Repo visit the [Contributing](./CONTRIBUTING.md) documentation.
+The maintainers of the OpenSearch-Dashboards Repo seek to promote an inclusive and engaged community of contributors. In order to facilitate this, weekly triage meetings are open-to-all and attendance is encouraged for anyone who hopes to contribute, discuss an issue, or learn more about the project. To learn more about contributing visit the [Contributing](./CONTRIBUTING.md) documentation.
 
 ### Do I need to attend for my issue to be addressed/triaged?
 
