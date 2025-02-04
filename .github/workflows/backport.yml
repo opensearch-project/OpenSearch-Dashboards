@@ -38,6 +38,6 @@ jobs:
         with:
           github_token: ${{ steps.github_app_token.outputs.token }}
           head_template: backport/backport-<%= number %>-to-<%= base %>
-          files_to_skip: "CHANGELOG.md"
+          files_to_skip: 'CHANGELOG.md'
           labels_template: "<%= JSON.stringify([...labels, 'autocut']) %>"
-          failure_labels: "failed backport"
+          failure_labels: 'failed backport'

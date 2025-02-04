@@ -90,9 +90,33 @@ jobs:
         run: |
           echo "🚦 **Lighthouse CI Report**" > comment.txt
           echo "" >> comment.txt
+
+          # Run Lighthouse and capture failures
+          yarn lhci autorun --json > lhci_output.json || true
+
+          # Extract failed assertions
+          FAILURES=$(jq -r '[.assertionResults[] | select(.status=="fail") | 
+            {metric: .auditId, reason: .explanation}]' lhci_output.json)
+
+          if [[ "$FAILURES" == "[]" ]]; then
+            echo "✅ All Lighthouse metrics passed!" >> comment.txt
+          else
+            echo "❌ **Failed Lighthouse Metrics:**" >> comment.txt
+            echo '```json' >> comment.txt
+            echo "$FAILURES" >> comment.txt
+            echo '```' >> comment.txt
+          fi
+
+          # Ensure correct extraction of the report URL
           yarn lhci upload --target=temporary-public-storage | tee lhci_output.txt
-          REPORT_URL=$(grep -o 'https://storage.googleapis.com/lighthouse-infrastructure-.*' lhci_output.txt | head -n 1)
-          echo "🔗 [View Full Lighthouse Report]($REPORT_URL)" >> comment.txt
+          REPORT_URL=$(grep -Eo 'https://storage.googleapis.com/lighthouse-infrastructure-[^\s]+' lhci_output.txt | head -n 1)
+
+          if [[ -n "$REPORT_URL" ]]; then
+            echo "🔗 [View Full Lighthouse Report]($REPORT_URL)" >> comment.txt
+          else
+            echo "⚠️ Lighthouse report link not found. Check workflow logs." >> comment.txt
+          fi
+
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
