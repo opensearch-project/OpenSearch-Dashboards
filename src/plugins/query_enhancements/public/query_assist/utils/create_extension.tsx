@@ -21,6 +21,7 @@ import { QueryAssistBanner, QueryAssistBar, QueryAssistSummary } from '../compon
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { QueryAssistContext } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
+import { PPL_SUPPORT_DATASET_TYPES } from './constant';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -79,7 +80,7 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
       if (
         query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH && // datasource is MDS OpenSearch
         query.dataset?.dataSource?.type !== 'DATA_SOURCE' && // datasource is MDS OpenSearch when using indexes
-        query.dataset?.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN // dataset is index pattern
+        !PPL_SUPPORT_DATASET_TYPES.includes(query.dataset?.type || '')
       )
         return [];
 

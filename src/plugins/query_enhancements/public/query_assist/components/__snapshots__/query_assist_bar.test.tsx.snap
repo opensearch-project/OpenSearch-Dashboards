@@ -14,7 +14,6 @@ exports[`QueryAssistBar matches snapshot 1`] = `
       >
         <div
           class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-          id="generated-id"
         >
           <div
             class="euiFlexItem"
