@@ -3,49 +3,54 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SECONDARY_ENGINE, INDEX_WITH_TIME_1 } from '../../../../../utils/constants';
-import {
-  getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
-} from '../../../../../utils/apps/query_enhancements/shared';
+import { DATASOURCE_NAME, PATHS, INDEX_WITH_TIME_1 } from '../../../../../utils/constants';
+import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const dataSourceName = getRandomizedDatasourceName();
 
-describe('No Index Pattern Check Test', () => {
-  before(() => {
-    // Load test data
-    cy.setupTestData(
-      SECONDARY_ENGINE.url,
-      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
-      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
-    );
+const noIndexPatternTestSuite = () => {
+  describe('No Index Pattern Check Test', () => {
+    beforeEach(() => {
+      // Load test data
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
+        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
+        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
+      );
 
-    // Add data source
-    cy.addDataSource({
-      name: dataSourceName,
-      url: SECONDARY_ENGINE.url,
-      authType: 'no_auth',
+      // Add data source
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
+        authType: 'no_auth',
+      });
+      // Create workspace
+      cy.deleteAllWorkspaces();
+      cy.visit('/app/home');
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+      cy.wait(2000);
     });
-    // Create workspace
-    cy.deleteWorkspaceByName(workspaceName);
-    cy.visit('/app/home');
-    cy.osd.createInitialWorkspaceWithDataSource(dataSourceName, workspaceName);
-    cy.wait(2000);
-  });
 
-  after(() => {
-    cy.deleteWorkspaceByName(workspaceName);
-    // TODO: Modify deleteIndex to handle an array of index and remove hard code
-    cy.deleteDataSourceByName(dataSourceName);
-    cy.deleteIndex(INDEX_WITH_TIME_1);
-  });
+    afterEach(() => {
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+    });
 
-  describe('empty state', () => {
-    it('no index pattern', function () {
-      // Go to the Discover page
-      cy.waitForLoader(true);
-      cy.getElementByTestId('discoverNoIndexPatterns');
+    describe('empty state', () => {
+      it('no index pattern', function () {
+        // Go to the Discover page
+        cy.navigateToWorkSpaceSpecificPage({
+          workspaceName: workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+        cy.waitForLoader(true);
+        cy.getElementByTestId('discoverNoIndexPatterns').should('be.visible');
+      });
     });
   });
-});
+};
+
+prepareTestSuite('a_check', noIndexPatternTestSuite);

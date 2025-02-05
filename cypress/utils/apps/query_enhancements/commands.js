@@ -42,103 +42,6 @@ Cypress.Commands.add('setQueryLanguage', (value) => {
   });
 });
 
-/**
- * Creates a new data source connection with basic auth
- * It also saves the created data source's id to the alias @DATASOURCE_ID
- * @param {Object} options Configuration options for the data source
- * @param {string} options.name The name/title for the data source
- * @param {string} options.url The endpoint URL for the data source
- * @param {string} options.authType The authentication type (e.g. 'no_auth', 'basic_auth', etc.)
- * @param {Object} [options.credentials] Optional credentials for auth types that require them
- * @param {string} [options.credentials.username] Username for basic auth
- * @param {string} [options.credentials.password] Password for basic auth
- */
-Cypress.Commands.add('addDataSource', (options) => {
-  const { name, url, authType = 'no_auth', credentials = {} } = options;
-
-  // Visit the create data source page
-  cy.visit('app/management/opensearch-dashboards/dataSources/create');
-
-  // Intercept the create request to verify success
-  cy.intercept('POST', '/api/saved_objects/data-source').as('createDataSourceRequest');
-
-  // Select OpenSearch card
-  cy.getElementByTestId('datasource_card_opensearch').click();
-
-  // Fill in basic info
-  cy.get('[name="dataSourceTitle"]').type(name);
-  cy.get('[name="endpoint"]').type(url);
-
-  // Select auth type
-  cy.getElementByTestId('createDataSourceFormAuthTypeSelect').click();
-  cy.get(`button[id="${authType}"]`).click();
-
-  // Handle credentials if provided and required
-  if (authType === 'basic_auth' && credentials.username && credentials.password) {
-    cy.get('[name="username"]').type(credentials.username);
-    cy.get('[name="password"]').type(credentials.password);
-  }
-
-  // Submit form. Adding 'force' as sometimes a popover hides the button
-  cy.getElementByTestId('createDataSourceButton').click({ force: true });
-
-  // Wait for successful creation
-  cy.wait('@createDataSourceRequest').then((interception) => {
-    expect(interception.response.statusCode).to.equal(200);
-    // save the created data source ID as an alias
-    cy.wrap(interception.response.body.id).as('DATASOURCE_ID');
-  });
-
-  // Verify redirect to data sources list page
-  cy.location('pathname', { timeout: 6000 }).should(
-    'include',
-    'app/management/opensearch-dashboards/dataSources'
-  );
-});
-
-Cypress.Commands.add('deleteDataSourceByName', (dataSourceName) => {
-  // Navigate to the dataSource Management page
-  cy.visit('app/dataSources');
-
-  // Find the anchor text corresponding to specified dataSource
-  cy.get('a').contains(dataSourceName).click();
-
-  // Delete the dataSource connection
-  cy.getElementByTestId('editDatasourceDeleteIcon').click();
-  cy.getElementByTestId('confirmModalConfirmButton').click();
-});
-
-// Deletes all data sources. This command should only be used for convenience during development
-// and should never be used in production
-Cypress.Commands.add('deleteAllDataSources', () => {
-  cy.visit('app/dataSources');
-  cy.waitForLoader(true);
-  cy.wait(2000);
-
-  cy.get('body').then(($body) => {
-    const hasEmptyState = $body.find('[data-test-subj="datasourceTableEmptyState"]').length > 0;
-    const hasDataSources = $body.find('[data-test-subj="checkboxSelectAll"]').length > 0;
-    cy.log('hasEmptyState');
-    cy.log(hasEmptyState);
-    cy.log('hasDataSources');
-    cy.log(hasDataSources);
-
-    if (hasEmptyState) {
-      cy.log('No data sources to delete');
-    } else if (hasDataSources) {
-      cy.log('Need to clean out data sources');
-      cy.getElementByTestId('checkboxSelectAll')
-        .should('exist')
-        .should('not.be.disabled')
-        .check({ force: true });
-
-      cy.getElementByTestId('deleteDataSourceConnections').should('be.visible').click();
-
-      cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
-    }
-  });
-});
-
 Cypress.Commands.add(
   'setIndexAsDataset',
   (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
@@ -181,6 +84,19 @@ Cypress.Commands.add('setIndexPatternAsDataset', (indexPattern, dataSourceName) 
   );
 });
 
+Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
+  switch (type) {
+    case 'INDEX_PATTERN':
+      cy.setIndexPatternAsDataset(dataset, dataSourceName);
+      break;
+    case 'INDEXES':
+      cy.setIndexAsDataset(dataset, dataSourceName);
+      break;
+    default:
+      throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
+  }
+});
+
 Cypress.Commands.add(
   'setIndexPatternFromAdvancedSelector',
   (indexPattern, dataSourceName, language, finalAction = 'submit') => {
@@ -210,19 +126,6 @@ Cypress.Commands.add(
     }
   }
 );
-
-Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
-  switch (type) {
-    case 'INDEX_PATTERN':
-      cy.setIndexPatternAsDataset(dataset, dataSourceName);
-      break;
-    case 'INDEXES':
-      cy.setIndexAsDataset(dataset, dataSourceName);
-      break;
-    default:
-      throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
-  }
-});
 
 Cypress.Commands.add('setQuickSelectTime', (direction, time, timeUnit) => {
   cy.getElementByTestId('superDatePickerToggleQuickMenuButton').click();

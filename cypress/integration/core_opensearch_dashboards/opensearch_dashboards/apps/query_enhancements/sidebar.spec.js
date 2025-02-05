@@ -7,20 +7,20 @@ import {
   DatasetTypes,
   INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
-  SECONDARY_ENGINE,
+  PATHS,
+  DATASOURCE_NAME,
 } from '../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
 import { getDocTableField } from '../../../../../utils/apps/query_enhancements/doc_table';
 import * as sideBar from '../../../../../utils/apps/query_enhancements/sidebar';
 import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 const addSidebarFieldsAndCheckDocTableColumns = (
   testFields,
@@ -143,25 +143,25 @@ export const runSideBarTests = () => {
     };
 
     beforeEach(() => {
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
       );
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
       cy.window().then((win) => {
         win.localStorage.clear();
         win.sessionStorage.clear();
@@ -179,7 +179,7 @@ export const runSideBarTests = () => {
               workspaceName: workspaceName,
               indexPattern: INDEX_WITH_TIME_1,
               timefieldName: 'timestamp',
-              dataSource: datasourceName,
+              dataSource: DATASOURCE_NAME,
               isEnhancement: true,
             });
           }
@@ -188,7 +188,7 @@ export const runSideBarTests = () => {
             page: 'discover',
             isEnhancement: true,
           });
-          cy.setDataset(config.dataset, datasourceName, config.datasetType);
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           sideBar.removeAllSelectedFields();
@@ -200,7 +200,7 @@ export const runSideBarTests = () => {
             testData.simpleFields.expectedValues,
             testData.pplQuery(config.dataset),
             testData.sqlQuery(config.dataset),
-            cconfig.datasetType === DatasetTypes.INDEX_PATTERN.name,
+            config.datasetType === DatasetTypes.INDEX_PATTERN.name,
             config
           );
         });
@@ -228,4 +228,4 @@ export const runSideBarTests = () => {
   });
 };
 
-runSideBarTests();
+prepareTestSuite('Sidebar', runSideBarTests);

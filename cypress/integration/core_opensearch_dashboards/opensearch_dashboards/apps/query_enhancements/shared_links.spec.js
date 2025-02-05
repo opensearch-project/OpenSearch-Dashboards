@@ -7,11 +7,11 @@ import {
   DatasetTypes,
   INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
-  SECONDARY_ENGINE,
+  PATHS,
+  DATASOURCE_NAME,
 } from '../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   setHistogramIntervalIfRelevant,
@@ -20,9 +20,9 @@ import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/con
 import { selectFieldFromSidebar } from '../../../../../utils/apps/query_enhancements/sidebar';
 import { verifyShareUrl } from '../../../../../utils/apps/query_enhancements/shared_links';
 import { setSort } from '../../../../../utils/apps/query_enhancements/table';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 const generateShareUrlsTestConfiguration = (dataset, datasetType, language) => {
   const baseConfig = {
@@ -62,25 +62,25 @@ export const runSharedLinksTests = () => {
       filter: ['category', 'Network'],
     };
     beforeEach(() => {
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
       );
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
     });
 
     generateAllTestConfigurations(generateShareUrlsTestConfiguration, {
@@ -94,7 +94,7 @@ export const runSharedLinksTests = () => {
               workspaceName: workspaceName,
               indexPattern: INDEX_WITH_TIME_1,
               timefieldName: 'timestamp',
-              dataSource: datasourceName,
+              dataSource: DATASOURCE_NAME,
               isEnhancement: true,
             });
           }
@@ -109,7 +109,7 @@ export const runSharedLinksTests = () => {
 
         it(`should handle shared document links correctly for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, datasourceName, config.datasetType);
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
@@ -154,7 +154,7 @@ export const runSharedLinksTests = () => {
 
         it(`should persist state in shared links for ${config.testName}`, () => {
           // Set dataset and language
-          cy.setDataset(config.dataset, datasourceName, config.datasetType);
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
@@ -182,7 +182,7 @@ export const runSharedLinksTests = () => {
           cy.getElementByTestId('copyShareUrlButton')
             .invoke('attr', 'data-share-url')
             .then((url) => {
-              verifyShareUrl(url, config, testData, datasourceName, queryString);
+              verifyShareUrl(url, config, testData, DATASOURCE_NAME, queryString);
             });
 
           // Test short url
@@ -199,7 +199,7 @@ export const runSharedLinksTests = () => {
             })
             .then((response) => {
               const redirectUrl = response.headers.location;
-              verifyShareUrl(redirectUrl, config, testData, datasourceName, queryString);
+              verifyShareUrl(redirectUrl, config, testData, DATASOURCE_NAME, queryString);
             });
 
           // Test saved object url
@@ -230,4 +230,4 @@ export const runSharedLinksTests = () => {
   });
 };
 
-runSharedLinksTests();
+prepareTestSuite('Shared Links', runSharedLinksTests);
