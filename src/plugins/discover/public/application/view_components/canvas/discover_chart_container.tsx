@@ -21,8 +21,13 @@ import { SearchData } from '../utils/use_search';
 import { DiscoverChart } from '../../components/chart/chart';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { getNewDiscoverSetting, setNewDiscoverSetting } from '../../components/utils/local_storage';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 
-export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
+interface Props extends SearchData {
+  rows?: OpenSearchSearchHit[];
+}
+
+export const DiscoverChartContainer = ({ hits, bucketInterval, chartData, rows }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { uiSettings, data, core, storage } = services;
   const { indexPattern, savedSearch } = useDiscoverContext();
@@ -83,6 +88,7 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
 
   return (
     <DiscoverChart
+      rows={rows}
       bucketInterval={bucketInterval}
       chartData={chartData}
       config={uiSettings}

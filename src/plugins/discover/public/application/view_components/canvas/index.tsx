@@ -170,7 +170,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
             (fetchState.status === ResultStatus.ERROR && !!rows?.length)) &&
             (isEnhancementsEnabled ? (
               <>
-                <MemoizedDiscoverChartContainer {...fetchState} />
+                <MemoizedDiscoverChartContainer {...fetchState} rows={rows} />
                 <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
               </>
             ) : (
@@ -180,7 +180,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
                 className="dscCanvas_results"
                 data-test-subj="dscCanvasResults"
               >
-                <MemoizedDiscoverChartContainer {...fetchState} />
+                <MemoizedDiscoverChartContainer {...fetchState} rows={rows} />
                 <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
               </EuiPanel>
             ))}

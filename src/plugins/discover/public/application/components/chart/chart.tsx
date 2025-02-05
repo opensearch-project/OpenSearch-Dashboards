@@ -19,6 +19,8 @@ import { DiscoverServices } from '../../../build_services';
 import { Chart } from './utils';
 import { useDiscoverContext } from '../../view_components/context';
 import { setInterval, useDispatch, useSelector } from '../../utils/state_management';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { DownloadCsvButton } from './download_csv_button';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
@@ -32,6 +34,7 @@ interface DiscoverChartProps {
   services: DiscoverServices;
   isEnhancementsEnabled: boolean;
   discoverOptions: any;
+  rows?: OpenSearchSearchHit[];
 }
 
 export const DiscoverChart = ({
@@ -46,8 +49,9 @@ export const DiscoverChart = ({
   showResetButton = false,
   isEnhancementsEnabled,
   discoverOptions,
+  rows,
 }: DiscoverChartProps) => {
-  const { refetch$ } = useDiscoverContext();
+  const { indexPattern, refetch$ } = useDiscoverContext();
   const { from, to } = data.query.timefilter.timefilter.getTime();
   const timeRange = {
     from: dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
@@ -94,6 +98,13 @@ export const DiscoverChart = ({
     </div>
   );
 
+  const exportAsCsvButtonFlexItem =
+    rows?.length && indexPattern ? (
+      <EuiFlexItem grow={false}>
+        <DownloadCsvButton indexPattern={indexPattern} rows={rows} />
+      </EuiFlexItem>
+    ) : null;
+
   const toggleLabel = i18n.translate('discover.histogram.collapse', {
     defaultMessage: 'Toggle histogram',
   });
@@ -123,6 +134,7 @@ export const DiscoverChart = ({
       <EuiFlexItem grow={true} style={{ justifyContent: 'flex-start' }}>
         {isTimeBased && timeChartHeader}
       </EuiFlexItem>
+      {exportAsCsvButtonFlexItem}
     </EuiFlexGroup>
   );
 
@@ -133,6 +145,7 @@ export const DiscoverChart = ({
         <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem grow={false}>{isTimeBased && timeChartHeader}</EuiFlexItem>
+      {exportAsCsvButtonFlexItem}
     </EuiFlexGroup>
   );
 
