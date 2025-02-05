@@ -24,9 +24,12 @@ import { TimefilterContract } from '../timefilter';
 import { ISearchInterceptor } from '../../search';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useSyncQueryStateWithUrl } from './use_sync_state_with_url';
-import { syncQueryStateWithUrl } from './sync_state_with_url';
+import * as SyncQueryStateWithUrl from './sync_state_with_url';
 
-jest.mock('./sync_state_with_url');
+const mockStopSync = jest.fn();
+const mockSyncQueryStateWithUrl = jest.fn().mockReturnValue({
+  stop: mockStopSync,
+});
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
@@ -103,6 +106,10 @@ describe('use_sync_query_state_with_url', () => {
 
     gF = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
     aF = getFilter(FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
+
+    jest
+      .spyOn(SyncQueryStateWithUrl, 'syncQueryStateWithUrl')
+      .mockImplementation(mockSyncQueryStateWithUrl);
   });
   afterEach(() => {
     filterManagerChangeSub.unsubscribe();
@@ -117,6 +124,16 @@ describe('use_sync_query_state_with_url', () => {
       result.current.startSyncingQueryStateWithUrl();
     });
 
-    expect(syncQueryStateWithUrl).toHaveBeenCalledTimes(1);
+    expect(mockSyncQueryStateWithUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it('Should call stop callback when hook unmount', () => {
+    const { unmount } = renderHook(() =>
+      useSyncQueryStateWithUrl(queryServiceStart, osdUrlStateStorage)
+    );
+
+    unmount();
+
+    expect(mockStopSync).toHaveBeenCalledTimes(1);
   });
 });
