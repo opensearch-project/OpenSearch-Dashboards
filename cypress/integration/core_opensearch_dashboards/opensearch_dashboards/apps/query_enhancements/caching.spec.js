@@ -1,0 +1,89 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { INDEX_PATTERN_WITH_TIME, INDEX_WITH_TIME_1 } from '../../../../../utils/apps/constants.js';
+import { SECONDARY_ENGINE, BASE_PATH, DATASOURCE_NAME } from '../../../../../utils/constants.js';
+import { DatasetTypes } from '../../../../../utils/apps/query_enhancements/constants.js';
+import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
+import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared.js';
+
+const workspaceName = getRandomizedWorkspaceName();
+
+describe('caching spec', () => {
+  beforeEach(() => {
+    // Load test data
+    cy.setupTestData(
+      SECONDARY_ENGINE.url,
+      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
+      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
+    );
+
+    // Add data source
+    cy.addDataSource({
+      name: DATASOURCE_NAME,
+      url: SECONDARY_ENGINE.url,
+      authType: 'no_auth',
+    });
+    // Create workspace
+    cy.deleteWorkspaceByName(workspaceName);
+    cy.visit('/app/home');
+    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+    cy.wait(2000);
+    cy.createWorkspaceIndexPatterns({
+      workspaceName: workspaceName,
+      indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
+      timefieldName: 'timestamp',
+      indexPatternHasTimefield: true,
+      dataSource: DATASOURCE_NAME,
+      isEnhancement: true,
+    });
+
+    cy.navigateToWorkSpaceSpecificPage({
+      url: BASE_PATH,
+      workspaceName: workspaceName,
+      page: 'discover',
+      isEnhancement: true,
+    });
+    cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
+  });
+
+  afterEach(() => {
+    cy.deleteWorkspaceByName(workspaceName);
+    cy.deleteDataSourceByName(DATASOURCE_NAME);
+    // TODO: Modify deleteIndex to handle an array of index and remove hard code
+    cy.deleteIndex(INDEX_WITH_TIME_1);
+  });
+
+  it('should validate index pattern refresh', () => {
+    const alternativeIndexPatternName = 'data';
+    const alternativeIndexPattern = alternativeIndexPatternName + '*';
+
+    cy.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, DatasetTypes.INDEX_PATTERN.name);
+    cy.createWorkspaceIndexPatterns({
+      workspaceName: workspaceName,
+      indexPattern: alternativeIndexPatternName,
+      timefieldName: 'timestamp',
+      indexPatternHasTimefield: true,
+      dataSource: DATASOURCE_NAME,
+      isEnhancement: true,
+    });
+    cy.navigateToWorkSpaceSpecificPage({
+      url: BASE_PATH,
+      workspaceName: workspaceName,
+      page: 'discover',
+      isEnhancement: true,
+    });
+
+    cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectorAdvancedButton').click();
+    cy.intercept('GET', '**/api/saved_objects/_find?fields*').as('getIndexPatternRequest');
+    cy.get(`[title="Index Patterns"]`).click();
+
+    cy.wait('@getIndexPatternRequest').then((interceptedResponse) => {
+      const secondIndexPattern = interceptedResponse.response.body.saved_objects[1];
+      cy.wrap(secondIndexPattern.attributes.title).should('eq', alternativeIndexPattern);
+    });
+  });
+});
