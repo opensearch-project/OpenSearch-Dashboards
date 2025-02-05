@@ -6,7 +6,8 @@
 import { i18n } from '@osd/i18n';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { useObservable } from 'react-use';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
 import {
@@ -172,7 +173,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
   const [visible, setVisible] = useState(false);
   const [question, setQuestion] = useState('');
   const [isQuerySummaryCollapsed, setIsQuerySummaryCollapsed] = useState(true);
-  const [isSummaryAgentAvailable, setIsSummaryAgentAvailable] = useState(false);
+  const isSummaryAgentAvailable = useObservable(props.isSummaryAgentAvailable$ ?? of(false), false);
   const updateQuestion = (newQuestion: string) => {
     props.question$?.next(newQuestion);
   };
@@ -182,11 +183,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     const subscription = props.isQuerySummaryCollapsed$?.subscribe((isCollapsed) => {
       setIsQuerySummaryCollapsed(isCollapsed);
     });
-    const isSummaryAgentAvailableSubscription = props.isSummaryAgentAvailable$?.subscribe(
-      (isAvailable) => {
-        setIsSummaryAgentAvailable(isAvailable);
-      }
-    );
+
     const questionSubscription = props.question$?.subscribe((newQuestion) => {
       setQuestion(newQuestion);
     });
@@ -194,7 +191,6 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     return () => {
       questionSubscription?.unsubscribe();
       subscription?.unsubscribe();
-      isSummaryAgentAvailableSubscription?.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
