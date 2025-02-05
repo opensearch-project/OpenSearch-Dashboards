@@ -25,7 +25,7 @@ const workspace = getRandomizedWorkspaceName();
 
 describe('recent queries spec', { testIsolation: true }, () => {
   const index = INDEX_PATTERN_WITH_TIME.replace('*', '');
-  beforeEach(() => {
+  before(() => {
     // Load test data
     cy.setupTestData(
       SECONDARY_ENGINE.url,
@@ -61,7 +61,17 @@ describe('recent queries spec', { testIsolation: true }, () => {
     cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
   });
 
-  afterEach(() => {
+  beforeEach(() => {
+    cy.navigateToWorkSpaceSpecificPage({
+      url: BASE_PATH,
+      workspaceName: workspace,
+      page: 'discover',
+      isEnhancement: true,
+    });
+    cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
+  });
+
+  after(() => {
     cy.deleteWorkspaceByName(workspace);
     cy.deleteDataSourceByName(DATASOURCE_NAME);
     // TODO: Modify deleteIndex to handle an array of index and remove hard code
@@ -79,10 +89,7 @@ describe('recent queries spec', { testIsolation: true }, () => {
       TestQueries.forEach((query) => {
         cy.setQueryEditor(currentBaseQuery + query, {}, true);
       });
-      // syntax helper might show up above, so forcing the click makes sense here
-      cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
-        force: true,
-      });
+      cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({ force: true });
       // only 10 of the 11 queries should be displayed
       cy.getElementByTestIdLike('row-').should('have.length', 10);
       const reverseList = [...TestQueries].reverse();
@@ -98,20 +105,11 @@ describe('recent queries spec', { testIsolation: true }, () => {
       const query = BaseQuery[config.datasetType][config.language] + 'status_code = 504';
       cy.setQueryEditor(query, {}, true);
       cy.setQueryEditor(query, {}, true);
-      cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
-        force: true,
-      });
+      cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({ force: true });
       cy.contains(query).should('have.length', 1);
     });
 
     it(`check running and copying recent queries for ${config.testName}`, () => {
-      const checkRowText = (rowIndex, expectedQuery) => {
-        cy.getElementByTestIdLike('row-').each(($row, $index) => {
-          if ($index === rowIndex) {
-            expect($row.text()).to.include(expectedQuery);
-          }
-        });
-      };
       cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
       cy.setQueryLanguage(config.language);
       setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -121,27 +119,35 @@ describe('recent queries spec', { testIsolation: true }, () => {
       queries.forEach((query) => {
         cy.setQueryEditor(currentBaseQuery + query, {}, true);
       });
-      cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
-        force: true,
-      });
+      cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({ force: true });
       const expectedQuery = currentBaseQuery + queries[0];
-      checkRowText(2, expectedQuery);
-      cy.getElementByTestId('action-run').eq(2).click({ force: true });
+      cy.getElementByTestIdLike('row-')
+        .eq(2)
+        .focus()
+        .then(($row) => {
+          expect($row.text()).to.include(expectedQuery);
+        });
+      cy.getElementByTestId('action-run').eq(2).focus().click();
       cy.wait(2000);
-      checkRowText(0, expectedQuery);
-
+      cy.getElementByTestIdLike('row-')
+        .eq(0)
+        .focus()
+        .then(($row) => {
+          expect($row.text()).to.include(expectedQuery);
+        });
       cy.getElementByTestIdLike('row-')
         .eq(1)
+        .focus()
         .then(($row) => {
-          cy.get('[aria-label="Copy recent query"]').eq(1).click({ force: true });
-          cy.wait(1000);
+          cy.get('[aria-label="Copy recent query"]').eq(1).click();
+          cy.wait(2000); // Give the clipboard some time to update
           const queryRegex = {
             PPL: /.*?(source .*? 8000)(?:.*)/s,
             'OpenSearch SQL': /.*?(SELECT .*? 8000)(?:.*)/s,
           };
           const expectedQuery = $row.text().replace(queryRegex[config.language], '$1');
-          // necessary for focusing on the element we just clicked
-          cy.getElementByTestId('languageReferenceButton').click();
+          cy.window().focus();
+          cy.get('[aria-label="Copy recent query"]').eq(1).focus();
           cy.window()
             .its('navigator.clipboard')
             .then(($clip) => $clip.readText())

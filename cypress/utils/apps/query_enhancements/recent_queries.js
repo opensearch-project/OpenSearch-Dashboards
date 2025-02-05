@@ -28,7 +28,7 @@ export const BaseQuery = {
 };
 
 export const TestQueries = [
-  'bytes_transferred > 0',
+  'bytes_transferred >',
   'bytes_transferred < 8000',
   'bytes_transferred > 8000',
   'status_code = 404',
