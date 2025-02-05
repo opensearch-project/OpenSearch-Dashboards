@@ -4,25 +4,25 @@
  */
 
 import {
+  DATASOURCE_NAME,
   DatasetTypes,
   INDEX_WITH_TIME_1,
   INDEX_WITHOUT_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
   INDEX_PATTERN_WITH_NO_TIME_1,
-  SECONDARY_ENGINE,
+  PATHS,
 } from '../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   generateAllTestConfigurations,
   generateIndexPatternTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
 import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/constants';
 import { selectFieldFromSidebar } from '../../../../../utils/apps/query_enhancements/sidebar';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 const generateTableTestConfiguration = (dataset, datasetType, language) => {
   const baseConfig = {
@@ -40,8 +40,8 @@ const generateTableTestConfiguration = (dataset, datasetType, language) => {
 export const runTableTests = () => {
   describe('discover table tests', () => {
     beforeEach(() => {
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.mapping.json`,
@@ -51,19 +51,19 @@ export const runTableTests = () => {
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.data.ndjson`,
         ]
       );
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
-      cy.deleteWorkspaceByName(workspaceName);
+      cy.deleteAllWorkspaces();
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      cy.deleteDataSourceByName(datasourceName);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
       cy.window().then((win) => {
         win.localStorage.clear();
         win.sessionStorage.clear();
@@ -81,7 +81,7 @@ export const runTableTests = () => {
               workspaceName: workspaceName,
               indexPattern: INDEX_WITH_TIME_1,
               timefieldName: 'timestamp',
-              dataSource: datasourceName,
+              dataSource: DATASOURCE_NAME,
               isEnhancement: true,
             });
           }
@@ -92,12 +92,12 @@ export const runTableTests = () => {
           });
         });
         afterEach(() => {
-          cy.deleteIndex(INDEX_WITH_TIME_1);
+          cy.osd.deleteIndex(INDEX_WITH_TIME_1);
         });
 
         it(`should allow expand multiple documents for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, datasourceName, config.datasetType);
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           // expanding a document in the table
@@ -143,7 +143,7 @@ export const runTableTests = () => {
               indexPattern: INDEX_WITHOUT_TIME_1,
               timefieldName: '',
               indexPatternHasTimefield: false,
-              dataSource: datasourceName,
+              dataSource: DATASOURCE_NAME,
               isEnhancement: true,
             });
           }
@@ -154,14 +154,14 @@ export const runTableTests = () => {
           });
         });
         afterEach(() => {
-          cy.deleteIndex(INDEX_WITHOUT_TIME_1);
+          cy.osd.deleteIndex(INDEX_WITHOUT_TIME_1);
         });
         // TODO: Currently sort is not applicable for nested field. Should include and test nested field if sort can support.
         const testFields = ['category', 'response_time'];
 
         it(`sort for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, datasourceName, config.datasetType);
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           // Add fields
           testFields.forEach((field) => {
@@ -193,4 +193,4 @@ export const runTableTests = () => {
   });
 };
 
-runTableTests();
+prepareTestSuite('Table', runTableTests);
