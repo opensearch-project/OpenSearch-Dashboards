@@ -1,2 +1,0 @@
-fix:
-- Fix Discover query editor enter shortcuts reverting date range ([#9248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9248))
