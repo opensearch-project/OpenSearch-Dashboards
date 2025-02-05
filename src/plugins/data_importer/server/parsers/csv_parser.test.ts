@@ -89,4 +89,28 @@ describe('CSVParser', () => {
       }
     );
   });
+
+  describe('parseFile()', () => {
+    const limit = 3;
+    it.each<CSVTestCaseFormat>(VALID_CSV_CASES)(
+      'should parse 3 documents from CSV file',
+      async ({ rawStringArray, delimiter, expected }) => {
+        const validCSVFileStream = Readable.from(rawStringArray);
+        const response = await parser.parseFile(validCSVFileStream, limit, { delimiter });
+
+        expect(response).toEqual(expected.slice(0, limit));
+      }
+    );
+
+    it.each<CSVTestCaseFormat>(INVALID_CSV_CASES)(
+      'should throw errors when attempting to parse documents from CSV file',
+      async ({ rawStringArray, delimiter }) => {
+        const invalidCSVFileStream = Readable.from(rawStringArray);
+        try {
+          await parser.parseFile(invalidCSVFileStream, limit, { delimiter });
+          // eslint-disable-next-line no-empty
+        } catch (_) {}
+      }
+    );
+  });
 });

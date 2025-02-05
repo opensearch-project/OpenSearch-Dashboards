@@ -70,4 +70,19 @@ describe('JSONParser', () => {
       ).rejects.toThrow();
     });
   });
+
+  describe('parseFile()', () => {
+    const limit = 3;
+    it('should parse the document', async () => {
+      const validJsonFileStream = Readable.from([JSON.stringify(validJson)]);
+      const response = await parser.parseFile(validJsonFileStream, limit, {});
+
+      expect(response).toEqual([validJson]);
+    });
+
+    it('should throw an error when attempting to parse the document', async () => {
+      const invalidJsonFileStream = Readable.from([invalidJsonString]);
+      expect(parser.parseFile(invalidJsonFileStream, limit, {})).rejects.toThrow();
+    });
+  });
 });

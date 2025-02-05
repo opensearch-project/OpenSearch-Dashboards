@@ -4,14 +4,14 @@
  */
 
 import { HttpStart } from '../../../../core/public';
-import { ImportResponse } from '../types';
+import { PreviewResponse } from '../types';
 
-export async function importFile(
+export async function previewFile(
   http: HttpStart,
   file: File,
-  indexName: string,
   createMode: boolean,
   fileExtension: string,
+  indexName: string,
   delimiter?: string,
   selectedDataSourceId?: string
 ) {
@@ -19,13 +19,13 @@ export async function importFile(
   formData.append('file', file);
   const query = {
     indexName,
-    createMode,
     fileExtension,
+    createMode,
     ...(selectedDataSourceId && { dataSource: selectedDataSourceId }),
     delimiter,
   };
 
-  return await http.post<ImportResponse>('/api/data_importer/_import_file', {
+  return await http.post<PreviewResponse>('/api/data_importer/_preview', {
     body: formData,
     headers: {
       'Content-Type': undefined,

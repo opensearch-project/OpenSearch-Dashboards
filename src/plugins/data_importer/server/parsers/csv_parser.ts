@@ -5,7 +5,7 @@
 
 import { parseStream, parseString } from 'fast-csv';
 import { Readable } from 'stream';
-import { IFileParser, IngestOptions, ValidationOptions } from '../types';
+import { IFileParser, IngestOptions, ParseOptions, ValidationOptions } from '../types';
 
 export class CSVParser implements IFileParser {
   public async validateText(text: string, options: ValidationOptions) {
@@ -84,5 +84,35 @@ export class CSVParser implements IFileParser {
       total: numDocuments,
       message: `Indexed ${numDocuments} documents`,
     };
+  }
+
+  public async parseFile(file: Readable, limit: number, options: ParseOptions) {
+    const { delimiter } = options;
+
+    const documents: Array<Record<string, any>> = [];
+    await new Promise<void>((resolve, reject) => {
+      parseStream(file, { headers: true, delimiter })
+        .validate((row: any) => {
+          for (const key in row) {
+            if (!!!key) {
+              return false;
+            }
+          }
+          return true;
+        })
+        .on('data', (row) => {
+          if (documents.length >= limit) {
+            resolve();
+            file.destroy();
+            return;
+          }
+          documents.push(row);
+        })
+        .on('data-invalid', () => reject('Invalid row'))
+        .on('error', (error) => reject(error))
+        .on('end', () => resolve());
+    });
+
+    return documents;
   }
 }
