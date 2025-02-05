@@ -31,6 +31,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Joshua Li                 | [joshuali925](https://github.com/joshuali925)       | Amazon      |
 | Huy Nguyen                | [huyaboo](https://github.com/huyaboo)               | Amazon      |
 | Hailong Cui               | [Hailong-am](https://github.com/Hailong-am)         | Amazon      |
+| Justin Kim                | [angle943](https://github.com/angle943)             | Amazon      |
 
 ## Emeritus
 
