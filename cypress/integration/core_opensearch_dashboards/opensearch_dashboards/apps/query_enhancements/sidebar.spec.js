@@ -200,7 +200,7 @@ export const runSideBarTests = () => {
             testData.simpleFields.expectedValues,
             testData.pplQuery(config.dataset),
             testData.sqlQuery(config.dataset),
-            cconfig.datasetType === DatasetTypes.INDEX_PATTERN.name,
+            config.datasetType === DatasetTypes.INDEX_PATTERN.name,
             config
           );
         });

@@ -102,7 +102,9 @@ const inspectTestSuite = () => {
               cy.log(`Skipped for ${key}`);
               continue;
             }
-            docTable.getExpandedDocTableRowFieldValue(key).should('have.text', value);
+            docTable
+              .getExpandedDocTableRowFieldValue(key)
+              .should('have.text', value === null ? ' - ' : value);
           }
         });
       });
