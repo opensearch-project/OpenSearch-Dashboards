@@ -1,2 +1,0 @@
-fix:
-- Cleanup OsdUrlStateStorage subscription in TopNav ([#9167](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9167))

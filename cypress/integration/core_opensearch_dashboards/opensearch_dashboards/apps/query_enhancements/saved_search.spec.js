@@ -8,12 +8,12 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   QueryLanguages,
-  SECONDARY_ENGINE,
+  PATHS,
+  DATASOURCE_NAME,
 } from '../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
 import {
@@ -24,16 +24,16 @@ import {
   updateSavedSearchAndSaveAndVerify,
   generateSavedTestConfiguration,
 } from '../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
-export const runSavedSearchTests = () => {
+const runSavedSearchTests = () => {
   describe('saved search', () => {
     beforeEach(() => {
       // Load test data
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
@@ -44,31 +44,30 @@ export const runSavedSearchTests = () => {
         ]
       );
       // Add data source
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
       // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
+      cy.deleteAllWorkspaces();
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
-        dataSource: datasourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
     });
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      // // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITH_TIME_2);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_2);
     });
 
     generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
@@ -79,7 +78,7 @@ export const runSavedSearchTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, datasourceName, config.datasetType);
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -120,7 +119,7 @@ export const runSavedSearchTests = () => {
             // This means that we are only testing loading a saved search
             // starting from an INDEX_PATTERN dataset, but I think testing where the
             // start is a permutation of other dataset is overkill
-            cy.setIndexPatternAsDataset(INDEX_PATTERN_WITH_TIME, datasourceName);
+            cy.setIndexPatternAsDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME);
 
             cy.setQueryLanguage(startingLanguage);
             cy.loadSaveSearch(config.saveName);
@@ -132,16 +131,16 @@ export const runSavedSearchTests = () => {
       it(`should successfully update a saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
-        updateSavedSearchAndSaveAndVerify(config, workspaceName, datasourceName, false);
+        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
       });
 
       it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
-        updateSavedSearchAndSaveAndVerify(config, workspaceName, datasourceName, true);
+        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, true);
       });
     });
   });
 };
 
-runSavedSearchTests();
+prepareTestSuite('Saved Search', runSavedSearchTests);

@@ -9,9 +9,13 @@ Cypress.Commands.add(
   (workspaceName) => {
     // Selecting the correct workspace
     cy.visit('/app/workspace_list#');
-    cy.osd.openWorkspaceDashboard(workspaceName);
+    cy.openWorkspaceDashboard(workspaceName);
     // wait until page loads
-    cy.getElementByTestId('headerAppActionMenu').should('be.visible');
+    if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'osd') {
+      cy.getElementByTestId('headerAppActionMenu').should('be.visible');
+    } else {
+      cy.getElementByTestId('breadcrumbs').should('be.visible');
+    }
   }
 );
 

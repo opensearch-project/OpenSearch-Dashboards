@@ -51,6 +51,7 @@ export interface LanguageConfig {
     bodyProps: any
   ) => EditorInstance<any, any, any>;
   fields?: {
+    sortable?: boolean;
     filterable?: boolean;
     visualizable?: boolean;
   };

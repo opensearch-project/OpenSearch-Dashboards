@@ -94,6 +94,7 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_decimalLiteral,
   OpenSearchPPLParser.RULE_keywordsCanBeId,
   OpenSearchPPLParser.RULE_renameClasue,
+  OpenSearchPPLParser.RULE_logicalExpression,
 ]);
 
 export function processVisitedRules(
@@ -105,7 +106,8 @@ export function processVisitedRules(
   let suggestAggregateFunctions = false;
   let shouldSuggestColumns = false;
   let suggestValuesForColumn: string | undefined;
-  let suggestRenameAs = false;
+  let suggestRenameAs: boolean = false;
+  const rerunWithoutRules: number[] = [];
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
@@ -114,12 +116,35 @@ export function processVisitedRules(
       case OpenSearchPPLParser.RULE_keywordsCanBeId: {
         break;
       }
+      case OpenSearchPPLParser.RULE_logicalExpression: {
+        if (!rule.ruleList.includes(OpenSearchPPLParser.RULE_pplCommands)) {
+          // if our rule's parents doesn't include pplCommands, it must come through the 'commands' rule. this means
+          // we'd want the preferred rule descendant of logicalExpression to be active, so we rerun the completion
+          // engine's parse without this preferred rule blocking those descendants
+          rerunWithoutRules.push(ruleId);
+        }
+        break;
+      }
       case OpenSearchPPLParser.RULE_statsFunctionName: {
         suggestAggregateFunctions = true;
         break;
       }
       case OpenSearchPPLParser.RULE_fieldExpression: {
-        shouldSuggestColumns = true;
+        if (cursorTokenIndex < 2) break; // should not happen due to grammar
+
+        // get the last token that appears other than whitespace
+        const lastToken =
+          tokenStream.get(cursorTokenIndex - 1).type === tokenDictionary.SPACE
+            ? tokenStream.get(cursorTokenIndex - 2)
+            : tokenStream.get(cursorTokenIndex - 1);
+
+        if (
+          ![tokenDictionary.ID, tokenDictionary.BACKTICK_QUOTE, tokenDictionary.DOT].includes(
+            lastToken.type
+          )
+        ) {
+          shouldSuggestColumns = true;
+        }
         break;
       }
       case OpenSearchPPLParser.RULE_tableIdent: {
@@ -182,7 +207,7 @@ export function processVisitedRules(
 
           // NOTE: according to grammar, backticks in PPL are only possible for fields
           if (validIDToken(token)) {
-            let combinedText = token.text ?? '';
+            let combinedText = removePotentialBackticks(token.text ?? '');
 
             // stitch together IDs separated by DOTs
             let lookBehindIndex = currentIndex;
@@ -193,7 +218,9 @@ export function processVisitedRules(
                 break;
               }
               lookBehindIndex--;
-              combinedText = `${tokenStream.get(lookBehindIndex).text ?? ''}.${combinedText}`;
+              combinedText = `${removePotentialBackticks(
+                tokenStream.get(lookBehindIndex).text ?? ''
+              )}.${combinedText}`;
             }
 
             suggestValuesForColumn = removePotentialBackticks(combinedText);
@@ -212,6 +239,7 @@ export function processVisitedRules(
     shouldSuggestColumns,
     suggestValuesForColumn,
     suggestRenameAs,
+    rerunWithoutRules,
   };
 }
 

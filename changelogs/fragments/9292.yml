@@ -1,0 +1,2 @@
+test:
+- Add cypress integration test for the inspect functionality in the Discover and Dashboards pages. ([#9292](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9292))
