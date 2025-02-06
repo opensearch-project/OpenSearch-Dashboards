@@ -33,7 +33,6 @@ const workspaceName = getRandomizedWorkspaceName();
 const runSavedSearchTests = () => {
   describe('Export as CSV', () => {
     beforeEach(() => {
-      // cy.clock(now.toDate());
       // Load test data
       cy.osd.setupTestData(
         PATHS.SECONDARY_ENGINE,
