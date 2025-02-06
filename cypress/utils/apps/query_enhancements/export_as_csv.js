@@ -60,7 +60,7 @@ export const getQueriedCountForLanguage = (language) => {
     case QueryLanguages.SQL.name:
       return 10;
     case QueryLanguages.PPL.name:
-      return 10000;
+      return 1000;
   }
 };
 

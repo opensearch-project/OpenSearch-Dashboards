@@ -10,6 +10,7 @@ import {
   DATASOURCE_NAME,
   INDEX_WITHOUT_TIME_1,
   DatasetTypes,
+  QueryLanguages,
 } from '../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
@@ -107,6 +108,11 @@ const runSavedSearchTests = () => {
           if (config.hasTime) {
             setDatePickerDatesAndSearchIfRelevant(language.name);
           }
+
+          // For PPL, it is by default fetching 10,000 rows, which slows down the tests
+          if (language.name === QueryLanguages.PPL.name) {
+            cy.setQueryEditor(`source = ${config.dataset} | head 1000`, {}, true);
+          }
           // Intentionally waiting for query to complete. When changing languages there is no good way to determine that the data has loaded
           cy.wait(2000);
 
@@ -114,6 +120,9 @@ const runSavedSearchTests = () => {
             .should('exist')
             .contains(`Download ${getQueriedCountForLanguage(language)} documents as CSV`)
             .click();
+
+          // wait for file to be downloaded
+          cy.wait(2000);
 
           cy.readFile(
             path.join(
@@ -137,7 +146,7 @@ const runSavedSearchTests = () => {
           cy.getElementByTestId('dscDownloadCsvButton').click();
 
           // wait for file to be downloaded
-          cy.wait(4000);
+          cy.wait(2000);
 
           cy.readFile(
             path.join(
