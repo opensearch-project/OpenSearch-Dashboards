@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBasicTable, EuiFieldSearch, EuiLink, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiFieldSearch, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useRef, useState } from 'react';
@@ -98,8 +98,10 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
                     {title}
                   </EuiText>
                   {item.description && (
-                    <EuiText size="s" color="subdued" className="datasetTable__itemDescription">
-                      {item.description}
+                    <EuiText size="xs" className="eui-textTruncate">
+                      <EuiTextColor color="subdued" className="datasetTable__itemDescription">
+                        {item.description}
+                      </EuiTextColor>
                     </EuiText>
                   )}
                 </>
