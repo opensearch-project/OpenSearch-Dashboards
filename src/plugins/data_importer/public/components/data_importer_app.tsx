@@ -21,6 +21,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiBasicTable,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { extname } from 'path';
 import {
@@ -88,6 +90,9 @@ export const DataImporterPluginApp = ({
   const [delimiter, setDelimiter] = useState<string | undefined>(
     dataType === CSV_FILE_TYPE ? CSV_SUPPORTED_DELIMITERS[0] : undefined
   );
+  const [filePreviewData, setFilePreviewData] = useState<any[]>([]);
+  const [filePreviewColumns, setFilePreviewColumns] = useState<any[]>([]);
+  const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
 
   const onImportTypeChange = (type: ImportChoices) => {
     if (type === IMPORT_CHOICE_FILE) {
@@ -111,6 +116,31 @@ export const DataImporterPluginApp = ({
 
   const onFileInput = (file?: File) => {
     setInputFile(file);
+    if (file) {
+      setIsLoadingPreview(true);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result as string;
+        const rows = text.split('\n').map((row) => row.split(','));
+        const columns = rows[0].map((header, index) => ({
+          field: `column_${index}`,
+          name: header,
+        }));
+        const data = rows.slice(1, 11).map((row) =>
+          row.reduce((acc: { [key: string]: string }, value, index) => {
+            acc[`column_${index}`] = value;
+            return acc;
+          }, {})
+        );
+        setFilePreviewColumns(columns);
+        setFilePreviewData(data);
+        setIsLoadingPreview(false);
+      };
+      reader.readAsText(file);
+    } else {
+      setFilePreviewColumns([]);
+      setFilePreviewData([]);
+    }
   };
 
   const onTextInput = (text: string) => {
@@ -405,10 +435,11 @@ export const DataImporterPluginApp = ({
                     )}
                     {importType === IMPORT_CHOICE_FILE && inputFile && (
                       <div>
-                        {/* Add your preview table component here */}
-                        <EuiText>
-                          <p>Preview of the uploaded file will be shown here.</p>
-                        </EuiText>
+                        {isLoadingPreview ? (
+                          <EuiLoadingSpinner size="xl" />
+                        ) : (
+                          <EuiBasicTable items={filePreviewData} columns={filePreviewColumns} />
+                        )}
                       </div>
                     )}
                   </EuiFlexItem>
