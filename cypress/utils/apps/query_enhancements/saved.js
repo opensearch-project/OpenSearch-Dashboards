@@ -83,9 +83,9 @@ export const getExpectedHitCount = (datasetType, language) => {
     case DatasetTypes.INDEX_PATTERN.name:
       switch (language) {
         case QueryLanguages.DQL.name:
-          return 23;
+          return 26;
         case QueryLanguages.Lucene.name:
-          return 23;
+          return 26;
         case QueryLanguages.SQL.name:
           return undefined;
         case QueryLanguages.PPL.name:
