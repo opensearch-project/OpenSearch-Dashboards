@@ -18,6 +18,9 @@ import {
   EuiPageSideBar,
   EuiFieldText,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { extname } from 'path';
 import {
@@ -69,7 +72,8 @@ export const DataImporterPluginApp = ({
   dataSourceEnabled,
   dataSourceManagement,
 }: DataImporterPluginAppProps) => {
-  const DataSourceMenu = dataSourceManagement?.ui.getDataSourceMenu<DataSourceSelectableConfig>();
+  const DataSourceMenuComponent =
+    dataSourceManagement?.ui.getDataSourceMenu<DataSourceSelectableConfig>() || (() => null);
   const [indexName, setIndexName] = useState<string>();
   const [importType, setImportType] = useState<ImportChoices>(IMPORT_CHOICE_FILE);
   const [disableImport, setDisableImport] = useState<boolean>();
@@ -241,18 +245,24 @@ export const DataImporterPluginApp = ({
   const renderDataSourceComponent = useMemo(() => {
     return (
       <div>
-        <DataSourceMenu
-          dataSourceManagement={dataSourceManagement}
-          componentType={'DataSourceSelectable'}
-          componentConfig={{
-            fullWidth: true,
-            savedObjects: savedObjects.client,
-            notifications,
-            onSelectedDataSources: onDataSourceSelect,
-            selectedOption: selectedDataSource,
-          }}
-        />
-        <EuiSpacer size="m" />
+        {DataSourceMenuComponent && (
+          <>
+            <DataSourceMenuComponent
+              componentType={'DataSourceSelectable'}
+              componentConfig={{
+                fullWidth: true,
+                savedObjects: savedObjects.client,
+                notifications,
+                onSelectedDataSources: onDataSourceSelect,
+                onManageDataSource: () => {}, // Add a proper handler if needed
+              }}
+              onManageDataSource={function (): void {
+                throw new Error('Function not implemented.');
+              }}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
       </div>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -320,48 +330,89 @@ export const DataImporterPluginApp = ({
               <EuiPageHeader>
                 <EuiTitle size="l">
                   <h1>
-                    <FormattedMessage
-                      id="dataImporter.mainTitle"
-                      defaultMessage="{title}"
-                      values={{ title: PLUGIN_NAME_AS_TITLE }}
-                    />
+                    <FormattedMessage id="dataImporter.mainTitle" defaultMessage="Data Importer" />
                   </h1>
                 </EuiTitle>
               </EuiPageHeader>
               <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      {importType === IMPORT_CHOICE_TEXT && (
-                        <FormattedMessage
-                          id="dataImporter.textTitle"
-                          defaultMessage="Import Data"
-                        />
-                      )}
-                      {importType === IMPORT_CHOICE_FILE && (
-                        <FormattedMessage
-                          id="dataImporter.fileTitle"
-                          defaultMessage="Import Data from File"
-                        />
-                      )}
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
-                {importType === IMPORT_CHOICE_TEXT && (
-                  <ImportTextContentBody
-                    onTextChange={onTextInput}
-                    enabledFileTypes={config.enabledFileTypes}
-                    initialFileType={dataType!}
-                    characterLimit={config.maxTextCount}
-                    onFileTypeChange={onDataTypeChange}
-                  />
-                )}
-                {importType === IMPORT_CHOICE_FILE && (
-                  <ImportFileContentBody
-                    enabledFileTypes={config.enabledFileTypes}
-                    onFileUpdate={onFileInput}
-                  />
-                )}
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={1}>
+                    <EuiPageContentHeader>
+                      <EuiTitle>
+                        <h2>
+                          <FormattedMessage
+                            id="dataImporter.importFormTitle"
+                            defaultMessage="Import Data"
+                          />
+                        </h2>
+                      </EuiTitle>
+                    </EuiPageContentHeader>
+                    <ImportTypeSelector
+                      updateSelection={onImportTypeChange}
+                      initialSelection={importType}
+                    />
+                    {showDelimiterChoice && (
+                      <DelimiterSelect
+                        onDelimiterChange={onDelimiterChange}
+                        initialDelimiter={delimiter}
+                      />
+                    )}
+                    <EuiTitle size="xs">
+                      <span>
+                        {i18n.translate('dataImporter.dataSource', {
+                          defaultMessage: 'Data Source Options',
+                        })}
+                      </span>
+                    </EuiTitle>
+                    <EuiFieldText placeholder="Index name" onChange={onIndexNameChange} />
+                    <EuiSpacer size="m" />
+                    {dataSourceEnabled && renderDataSourceComponent}
+                    <ImportFileContentBody
+                      enabledFileTypes={config.enabledFileTypes}
+                      onFileUpdate={onFileInput}
+                    />
+                    <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
+                      Import
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={2}>
+                    <EuiPageContentHeader>
+                      <EuiTitle>
+                        <h2>
+                          {importType === IMPORT_CHOICE_TEXT && (
+                            <FormattedMessage
+                              id="dataImporter.textTitle"
+                              defaultMessage="Paste Text Data"
+                            />
+                          )}
+                          {importType === IMPORT_CHOICE_FILE && (
+                            <FormattedMessage
+                              id="dataImporter.fileTitle"
+                              defaultMessage="Preview Data"
+                            />
+                          )}
+                        </h2>
+                      </EuiTitle>
+                    </EuiPageContentHeader>
+                    {importType === IMPORT_CHOICE_TEXT && (
+                      <ImportTextContentBody
+                        onTextChange={onTextInput}
+                        enabledFileTypes={config.enabledFileTypes}
+                        initialFileType={dataType!}
+                        characterLimit={config.maxTextCount}
+                        onFileTypeChange={onDataTypeChange}
+                      />
+                    )}
+                    {importType === IMPORT_CHOICE_FILE && inputFile && (
+                      <div>
+                        {/* Add your preview table component here */}
+                        <EuiText>
+                          <p>Preview of the uploaded file will be shown here.</p>
+                        </EuiText>
+                      </div>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiPageContent>
             </EuiPageBody>
           </EuiPage>
