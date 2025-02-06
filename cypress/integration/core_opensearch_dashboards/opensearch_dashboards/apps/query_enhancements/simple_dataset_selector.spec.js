@@ -8,11 +8,11 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_NO_TIME,
   INDEX_WITHOUT_TIME_1,
-  SECONDARY_ENGINE,
+  PATHS,
+  DATASOURCE_NAME,
 } from '../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   getDefaultQuery,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
@@ -21,17 +21,17 @@ import {
   generateSimpleDatasetSelectorTestConfigurations,
   validateItemsInSimpleDatasetSelectorDropDown,
 } from '../../../../../utils/apps/query_enhancements/simple_dataset_selector';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
 
 export const runSimpleDatasetSelectorTests = () => {
   describe('simple dataset selector selecting an index pattern', () => {
     beforeEach(() => {
       // Load test data
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.mapping.json`,
@@ -42,28 +42,28 @@ export const runSimpleDatasetSelectorTests = () => {
         ]
       );
       // Add data source
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
       // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
+      cy.deleteAllWorkspaces();
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
-        dataSource: datasourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_NO_TIME.replace('*', ''),
         timefieldName: '',
-        dataSource: datasourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
         indexPatternHasTimefield: false,
       });
@@ -71,10 +71,9 @@ export const runSimpleDatasetSelectorTests = () => {
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITHOUT_TIME_1);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteIndex(INDEX_WITHOUT_TIME_1);
     });
 
     generateSimpleDatasetSelectorTestConfigurations([
@@ -102,7 +101,7 @@ export const runSimpleDatasetSelectorTests = () => {
         cy.setQueryLanguage(config.language);
 
         // Select the index pattern
-        cy.setIndexPatternAsDataset(config.indexPattern, datasourceName);
+        cy.setIndexPatternAsDataset(config.indexPattern, DATASOURCE_NAME);
 
         // Verify if the language is unchanged, we get a default query populated, and correct dataset is set
         verifyDiscoverPageState({
@@ -129,8 +128,8 @@ export const runSimpleDatasetSelectorTests = () => {
   describe('filtering index pattern in simple dataset selector', () => {
     beforeEach(() => {
       // Load test data
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.mapping.json`,
@@ -141,23 +140,23 @@ export const runSimpleDatasetSelectorTests = () => {
         ]
       );
       // Add data source
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
       // Create workspace
       cy.deleteWorkspaceByName(workspaceName);
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
 
       for (let i = 1; i <= noIndexPatterns; i++) {
         cy.createWorkspaceIndexPatterns({
           workspaceName: workspaceName,
           indexPattern: INDEX_PATTERN_WITH_TIME.slice(0, i),
           timefieldName: 'timestamp',
-          dataSource: datasourceName,
+          dataSource: DATASOURCE_NAME,
           isEnhancement: true,
         });
       }
@@ -165,10 +164,9 @@ export const runSimpleDatasetSelectorTests = () => {
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITHOUT_TIME_1);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteIndex(INDEX_WITHOUT_TIME_1);
     });
 
     it('validate filtering index pattern in simple dataset selector', () => {
@@ -188,4 +186,4 @@ export const runSimpleDatasetSelectorTests = () => {
   });
 };
 
-runSimpleDatasetSelectorTests();
+prepareTestSuite('Simple Dataset Selector', runSimpleDatasetSelectorTests);

@@ -25,7 +25,7 @@ export function createWorkspaceAndSampleData(url, workspaceName) {
     describe('adding sample data to workspace', () => {
       it('add sample data to data source', () => {
         cy.visit(`${url}/app/workspace_list`);
-        cy.osd.openWorkspaceDashboard(workspaceName);
+        cy.openWorkspaceDashboard(workspaceName);
         cy.openSampleDataPage();
         cy.addSampleDataToDataSource(dataSourceTitle);
       });

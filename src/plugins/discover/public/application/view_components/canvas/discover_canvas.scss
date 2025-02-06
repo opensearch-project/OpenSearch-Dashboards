@@ -6,6 +6,8 @@
   /* stylelint-disable-next-line */
   container-name: canvas;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 
   &_results {
     margin-left: $euiSizeM;

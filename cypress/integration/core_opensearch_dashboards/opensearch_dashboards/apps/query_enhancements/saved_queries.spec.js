@@ -4,10 +4,11 @@
  */
 
 import {
+  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
-  SECONDARY_ENGINE,
+  PATHS,
 } from '../../../../../utils/constants';
 
 import {
@@ -21,15 +22,14 @@ import {
 
 import {
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateAllTestConfigurations,
 } from '../../../../../utils/apps/query_enhancements/shared';
 
 import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 const createSavedQuery = (config) => {
   cy.navigateToWorkSpaceSpecificPage({
@@ -38,7 +38,7 @@ const createSavedQuery = (config) => {
     isEnhancement: true,
   });
 
-  cy.setDataset(config.dataset, datasourceName, config.datasetType);
+  cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
   cy.setQueryLanguage(config.language);
   setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -58,7 +58,7 @@ const loadSavedQuery = (config) => {
 
   cy.getElementByTestId('discoverNewButton').click();
   // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
-  cy.setDataset(config.dataset, datasourceName, config.datasetType);
+  cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
   cy.setQueryLanguage(config.language);
 
   setDatePickerDatesAndSearchIfRelevant(
@@ -102,13 +102,12 @@ const deleteSavedQuery = (saveAsNewQueryName) => {
   verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName);
 };
 
-// This spec assumes data.savedQueriesNewUI.enabled is true.
-export const runSavedQueriesUITests = () => {
+const runSavedQueriesUITests = () => {
   describe('saved queries UI', () => {
     beforeEach(() => {
       // Load test data
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
@@ -119,21 +118,21 @@ export const runSavedQueriesUITests = () => {
         ]
       );
       // Add data source
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
       // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
+      cy.deleteAllWorkspaces();
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
-        dataSource: datasourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
     });
@@ -141,10 +140,9 @@ export const runSavedQueriesUITests = () => {
     afterEach(() => {
       // No need to explicitly delete all saved queries as deleting the workspace will delete associated saved queries
       cy.deleteWorkspaceByName(workspaceName);
-      // // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITH_TIME_2);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_2);
     });
 
     const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
@@ -163,4 +161,4 @@ export const runSavedQueriesUITests = () => {
   });
 };
 
-runSavedQueriesUITests();
+prepareTestSuite('Saved Queries', runSavedQueriesUITests);

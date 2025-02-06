@@ -4,6 +4,7 @@
  */
 
 import {
+  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
@@ -13,22 +14,21 @@ import {
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
 import {
   generateDisplayTestConfiguration,
   getLanguageReferenceTestText,
 } from '../../../../../utils/apps/query_enhancements/language_specific_display';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 export const runDisplayTests = () => {
   describe('Language-Specific Display', () => {
     beforeEach(() => {
       // Load test data
-      cy.setupTestData(
+      cy.osd.setupTestData(
         SECONDARY_ENGINE.url,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
@@ -40,31 +40,30 @@ export const runDisplayTests = () => {
         ]
       );
       // Add data source
-      cy.addDataSource({
-        name: datasourceName,
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
         url: SECONDARY_ENGINE.url,
         authType: 'no_auth',
       });
 
       // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
+      cy.deleteAllWorkspaces();
       cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
-        dataSource: datasourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
     });
 
     afterEach(() => {
       cy.deleteWorkspaceByName(workspaceName);
-      // // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITH_TIME_2);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_2);
     });
 
     generateAllTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
@@ -75,7 +74,7 @@ export const runDisplayTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, datasourceName, config.datasetType);
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -163,4 +162,4 @@ export const runDisplayTests = () => {
   });
 };
 
-runDisplayTests();
+prepareTestSuite('Language Specific Display', runDisplayTests);
