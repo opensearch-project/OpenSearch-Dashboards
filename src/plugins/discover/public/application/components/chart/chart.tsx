@@ -27,7 +27,7 @@ interface DiscoverChartProps {
   chartData?: Chart;
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
-  hits: number;
+  hits?: number;
   resetQuery: () => void;
   showResetButton?: boolean;
   isTimeBased?: boolean;
@@ -74,18 +74,22 @@ export const DiscoverChart = ({
     [data]
   );
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const histogramIsApplicable = isTimeBased && !!chartData?.values.length;
+  const showHistogram = histogramIsApplicable && (!isEnhancementsEnabled || !isCollapsed);
 
-  const hitsCounter = (
-    <div className="dscChart__hitsCounter" data-test-subj="dscChartHitsCounter">
-      <HitsCounter
-        hits={hits > 0 ? hits : 0}
-        showResetButton={showResetButton}
-        onResetQuery={resetQuery}
-      />
-    </div>
-  );
+  const hitsCounterFlexItem = hits ? (
+    <EuiFlexItem grow={false}>
+      <div className="dscChart__hitsCounter" data-test-subj="dscChartHitsCounter">
+        <HitsCounter
+          hits={hits > 0 ? hits : 0}
+          showResetButton={showResetButton}
+          onResetQuery={resetQuery}
+        />
+      </div>
+    </EuiFlexItem>
+  ) : null;
 
-  const timeChartHeader = (
+  const timeChartHeader = histogramIsApplicable ? (
     <div className="dscChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
       <TimechartHeader
         bucketInterval={bucketInterval}
@@ -96,7 +100,7 @@ export const DiscoverChart = ({
         stateInterval={interval || ''}
       />
     </div>
-  );
+  ) : null;
 
   const exportAsCsvButtonFlexItem =
     rows?.length && indexPattern ? (
@@ -109,18 +113,20 @@ export const DiscoverChart = ({
     defaultMessage: 'Toggle histogram',
   });
 
-  const toggle = (
-    <EuiToolTip content={toggleLabel}>
-      <EuiButtonIcon
-        aria-expanded={isCollapsed}
-        aria-label={toggleLabel}
-        data-test-subj="histogramCollapseBtn"
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-        iconSize={'s'}
-      />
-    </EuiToolTip>
-  );
+  const toggleFlexItem = histogramIsApplicable ? (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip content={toggleLabel}>
+        <EuiButtonIcon
+          aria-expanded={isCollapsed}
+          aria-label={toggleLabel}
+          data-test-subj="histogramCollapseBtn"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+          iconSize={'s'}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  ) : null;
 
   const queryEnhancedHistogramHeader = (
     <EuiFlexGroup
@@ -129,10 +135,10 @@ export const DiscoverChart = ({
       className="dscChart__chartheader"
       data-test-subj="dscChartChartheader"
     >
-      <EuiFlexItem grow={false}>{toggle}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{hitsCounter}</EuiFlexItem>
+      {toggleFlexItem}
+      {hitsCounterFlexItem}
       <EuiFlexItem grow={true} style={{ justifyContent: 'flex-start' }}>
-        {isTimeBased && timeChartHeader}
+        {timeChartHeader}
       </EuiFlexItem>
       {exportAsCsvButtonFlexItem}
     </EuiFlexGroup>
@@ -141,15 +147,13 @@ export const DiscoverChart = ({
   const histogramHeader = (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexGroup direction="row" gutterSize="s">
-        <EuiFlexItem grow={true}>{hitsCounter}</EuiFlexItem>
+        {hitsCounterFlexItem}
         <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem grow={false}>{isTimeBased && timeChartHeader}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{timeChartHeader}</EuiFlexItem>
       {exportAsCsvButtonFlexItem}
     </EuiFlexGroup>
   );
-
-  const showHistogram = !isEnhancementsEnabled || !isCollapsed;
 
   return (
     <EuiFlexGroup
@@ -159,7 +163,7 @@ export const DiscoverChart = ({
       data-test-subj="dscChartWrapper"
     >
       {isEnhancementsEnabled ? queryEnhancedHistogramHeader : histogramHeader}
-      {isTimeBased && chartData && showHistogram && (
+      {showHistogram && (
         <EuiFlexItem grow={false}>
           <section
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {

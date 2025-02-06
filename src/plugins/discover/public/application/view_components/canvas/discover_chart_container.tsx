@@ -39,8 +39,6 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData, rows }
     indexPattern,
   ]);
 
-  if (!hits) return null;
-
   const discoverOptions = (
     <EuiPopover
       button={
