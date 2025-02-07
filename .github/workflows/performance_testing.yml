@@ -159,4 +159,4 @@ jobs:
           GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN  }}
 
       - name: Cleanup Lighthouse Reports
-        run: rm -f .lhci_output.json .lighthouseci
+        run: rm -f .lhci_output.txt .lighthouseci
