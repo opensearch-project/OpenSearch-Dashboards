@@ -196,6 +196,7 @@
     "chokidar": "^3.4.2",
     "color": "1.0.3",
     "commander": "^3.0.2",
+    "copy-paste": "^1.5.3",
     "core-js": "^3.6.5",
     "deep-freeze-strict": "^1.1.1",
     "del": "^6.1.1",
