@@ -88,7 +88,7 @@ jobs:
       - name: Process Lighthouse Results
         uses: treosh/lighthouse-ci-action@v10
         with:
-          configPath: './lighthouserc.js' # Your LHCI config file
+          configPath: './.lighthouserc.js' # Your LHCI config file
           uploadArtifacts: true # Uploads reports to GitHub Actions
           temporaryPublicStorage: true # Stores reports temporarily
 
