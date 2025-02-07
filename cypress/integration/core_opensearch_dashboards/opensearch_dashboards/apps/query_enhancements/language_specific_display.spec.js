@@ -118,6 +118,11 @@ export const runDisplayTests = () => {
           cy.getElementByTestId('dscTimechart').should('be.visible');
         }
 
+        // testing whether sort appears or not
+        cy.getElementByTestId('docTableHeaderFieldSort_timestamp').should(
+          config.sort ? 'exist' : 'not.exist'
+        );
+
         // testing the language information popup button
         cy.getElementByTestId('languageReferenceButton').click();
         cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
