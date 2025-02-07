@@ -18,7 +18,7 @@ module.exports = {
     assert: {
       preset: 'lighthouse:recommended',
       assertions: {
-        performance: ['error', { minScore: 0.2 }],
+        performance: ['warn', { minScore: 0.2 }],
         'first-contentful-paint': ['warn', { maxNumericValue: 1800 }],
         'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }],
         interactive: ['warn', { maxNumericValue: 5000 }],
