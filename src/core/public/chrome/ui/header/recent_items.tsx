@@ -73,7 +73,12 @@ const bulkGetDetail = (savedObjects: Array<Pick<SavedObject, 'type' | 'id'>>, ht
         .get<SavedObjectWithMetadata>(
           `/api/opensearch-dashboards/management/saved_objects/${encodeURIComponent(
             obj.type
-          )}/${encodeURIComponent(obj.id)}`
+          )}/${encodeURIComponent(obj.id)}`,
+          {
+            prependOptions: {
+              withoutClientBasePath: true,
+            },
+          }
         )
         .catch((error) => ({
           id: obj.id,
