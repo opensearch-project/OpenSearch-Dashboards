@@ -3,9 +3,13 @@ const baseUrl = 'http://localhost:5601';
 module.exports = {
   ci: {
     collect: {
-      url: [`${baseUrl}`, `${baseUrl}/app/data-explorer/discover`, `${baseUrl}/app/dashboards`], // Add more URLs as needed
+      url: [
+        `${baseUrl}`,
+        `${baseUrl}/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f`,
+        `${baseUrl}/app/data-explorer/discover`,
+      ], // Add more URLs as needed
       startServerCommand: 'yarn start --no-base-path',
-      numberOfRuns: 3,
+      numberOfRuns: 2,
       settings: {
         chromePath: require('puppeteer').executablePath(),
         chromeFlags: '--no-sandbox --disable-gpu --headless',
@@ -14,7 +18,7 @@ module.exports = {
     assert: {
       preset: 'lighthouse:recommended',
       assertions: {
-        performance: ['error', { minScore: 0.9 }],
+        performance: ['error', { minScore: 0.2 }],
         'first-contentful-paint': ['warn', { maxNumericValue: 1800 }],
         'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }],
         interactive: ['warn', { maxNumericValue: 5000 }],

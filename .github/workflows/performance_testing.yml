@@ -85,19 +85,24 @@ jobs:
       - name: Run Lighthouse CI
         run: yarn lhci autorun || echo "Lighthouse assertion failed, check results"
 
-      - name: Run Lighthouse CI
+      - name: Process Lighthouse Results
         run: |
-          yarn lhci autorun --json | tee lhci_output.json || true
-
           # Validate JSON output
-          if [ ! -s lhci_output.json ]; then
-            echo "❌ Lighthouse output is empty or invalid."
-            cat lhci_output.json  # Print for debugging
+          if [ ! -s .lighthouseci/assertion-results.json ]; then
+            echo "❌ Lighthouse assertion results are empty or invalid."
+            cat .lighthouseci/assertion-results.json  # Print for debugging
+            exit 1
+          fi
+
+          # Ensure JSON is properly formatted
+          if ! jq empty .lighthouseci/assertion-results.json; then
+            echo "❌ Invalid JSON format in Lighthouse assertion results."
+            cat .lighthouseci/assertion-results.json  # Print for debugging
             exit 1
           fi
 
           # Extract failed assertions safely
-          FAILURES=$(jq -r 'if .assertionResults then [.assertionResults[] | select(.status=="fail") | {metric: .auditId, reason: .explanation}] else [] end' lhci_output.json)
+          FAILURES=$(jq -r '[.[] | select(.passed==false) | {metric: .auditId, reason: .auditTitle, url: .url}]' .lighthouseci/assertion-results.json)
 
           if [[ "$FAILURES" == "[]" ]]; then
             echo "✅ All Lighthouse metrics passed!" > comment.txt
@@ -108,16 +113,37 @@ jobs:
             echo '```' >> comment.txt
           fi
 
-          # Upload and extract report URL
+          # Upload and extract report URLs
           yarn lhci upload --target=temporary-public-storage | tee lhci_output.txt
-          REPORT_URL=$(grep -Eo 'https://storage.googleapis.com/lighthouse-infrastructure-[^\s]+' lhci_output.txt | head -n 1)
+          REPORT_URLS=$(grep -Eo 'https://storage.googleapis.com/lighthouse-infrastructure-[^\s]+' lhci_output.txt)
 
-          if [[ -n "$REPORT_URL" ]]; then
-            echo "🔗 [View Full Lighthouse Report]($REPORT_URL)" >> comment.txt
+          # Map URLs to report URLs
+          URL_REPORT_MAP=$(jq -n --argjson failures "$FAILURES" --arg report_urls "$REPORT_URLS" '
+            $failures | map(.url) as $urls |
+            $report_urls | split("\n") as $reports |
+            reduce range(0; $urls | length) as $i (
+              {};
+              .[$urls[$i]] = $reports[$i]
+            )
+          ')
+
+          # Append report URLs to failed assertions
+          FAILURES_WITH_REPORTS=$(jq --argjson url_report_map "$URL_REPORT_MAP" '
+            map(. + {reportUrl: $url_report_map[.url]})
+          ' <<< "$FAILURES")
+
+          if [[ "$FAILURES_WITH_REPORTS" == "[]" ]]; then
+            echo "✅ All Lighthouse metrics passed!" > comment.txt
           else
-            echo "⚠️ Lighthouse report link not found. Check workflow logs." >> comment.txt
+            echo "❌ **Failed Lighthouse Metrics:**" > comment.txt
+            echo '```json' >> comment.txt
+            echo "$FAILURES_WITH_REPORTS" >> comment.txt
+            echo '```' >> comment.txt
           fi
 
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Delete lhci_output.json .lighthouseci
+        run: rm -f .lhci_output.json .lighthouseci
