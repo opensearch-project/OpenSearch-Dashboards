@@ -36,11 +36,11 @@ export const runSavedSearchTests = () => {
         PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
-          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
+          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_2}.mapping.json`,
         ],
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`,
-          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.data.ndjson`,
+          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_2}.data.ndjson`,
         ]
       );
       // Add data source
@@ -113,7 +113,7 @@ export const runSavedSearchTests = () => {
         START_TIME,
         'Oct 1, 2022 @ 00:00:00.000'
       );
-      cy.getElementByTestId('osdDocTablePagination').contains(/of 13/);
+      cy.getElementByTestId('osdDocTablePagination').contains(/of 11/);
     });
 
     it('Show valid saved searches', () => {
