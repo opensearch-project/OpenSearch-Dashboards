@@ -62,7 +62,7 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
 
       if (hasValidMapping || isValue) {
         if (!flat[key]) {
-          flat[key] = val;
+          flat[key] = Array.isArray(val) ? val.concat([]) : val;
         } else if (Array.isArray(flat[key])) {
           flat[key].push(val);
         } else {
