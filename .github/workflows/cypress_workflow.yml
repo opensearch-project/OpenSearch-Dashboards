@@ -89,6 +89,10 @@ jobs:
           - group: 12
             config: query_enhanced
             test_location: source
+          # Dashboard tests with query enhanced - group 3
+          - group: 13
+            config: query_enhanced
+            test_location: source  
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
