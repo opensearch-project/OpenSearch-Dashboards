@@ -20,9 +20,7 @@ export const DELIMITER = '::';
 
 export const indexTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX,
-  title: i18n.translate('data.datasetType.indexes', {
-    defaultMessage: 'Indexes',
-  }),
+  title: 'Indexes',
   meta: {
     icon: { type: 'logoOpenSearch' },
     tooltip: 'OpenSearch Indexes',
@@ -57,9 +55,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
         return {
           ...dataStructure,
           hasNext: false,
-          columnHeader: i18n.translate('data.dataset.columnHeader.indexes', {
-            defaultMessage: 'Indexes',
-          }),
+          columnHeader: 'Indexes',
           children: indices.map((indexName) => ({
             id: `${dataStructure.id}::${indexName}`,
             title: indexName,
@@ -72,9 +68,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
         const dataSources = await fetchDataSources(services.savedObjects.client);
         return {
           ...dataStructure,
-          columnHeader: i18n.translate('data.dataset.columnHeader.dataSources', {
-            defaultMessage: 'Data Sources',
-          }),
+          columnHeader: 'Data sources',
           hasNext: true,
           children: dataSources,
         };
