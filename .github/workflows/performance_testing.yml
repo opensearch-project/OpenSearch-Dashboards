@@ -85,7 +85,7 @@ jobs:
       - name: Run Lighthouse CI
         run: yarn lhci autorun || echo "Lighthouse assertion failed, check results"
 
-      - name: Process Lighthouse Results
+      - name: Post Lighthouse Results into comment
         run: |
           # Validate JSON output
           if [ ! -s .lighthouseci/assertion-results.json ]; then
