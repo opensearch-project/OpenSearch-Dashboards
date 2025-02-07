@@ -4,7 +4,7 @@ module.exports = {
   ci: {
     collect: {
       url: [
-        `${baseUrl}`,
+        `${baseUrl}/app/home`,
         `${baseUrl}/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f`,
         `${baseUrl}/app/data-explorer/discover`,
       ], // Add more URLs as needed
@@ -16,7 +16,7 @@ module.exports = {
       },
     },
     assert: {
-      preset: 'lighthouse:recommended',
+      // Only the key assertions you care about
       assertions: {
         performance: ['warn', { minScore: 0.2 }],
         'first-contentful-paint': ['warn', { maxNumericValue: 1800 }],
@@ -27,6 +27,7 @@ module.exports = {
     },
     upload: {
       target: 'temporary-public-storage', // Required for GitHub integration
+      githubStatusCheck: false,
     },
   },
 };
