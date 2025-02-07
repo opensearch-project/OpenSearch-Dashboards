@@ -35,6 +35,7 @@ export const pplSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
+        request.body.fetch_size = await context.core.uiSettings.client.get('discover:sampleSize');
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
         const rawResponse: any = await pplFacet.describeQuery(context, request);

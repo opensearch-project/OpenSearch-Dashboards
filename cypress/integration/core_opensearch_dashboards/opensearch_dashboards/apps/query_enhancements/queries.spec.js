@@ -94,7 +94,7 @@ const queriesTestSuite = () => {
         // Default SQL query should be set
         cy.waitForLoader(true);
         cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-          `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`
+          `SELECT * FROM ${INDEX_WITH_TIME_1}`
         );
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
 

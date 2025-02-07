@@ -147,7 +147,7 @@ export const getDefaultQuery = (datasetName, language) => {
     case QueryLanguages.PPL.name:
       return `source = ${datasetName}`;
     case QueryLanguages.SQL.name:
-      return `SELECT * FROM ${datasetName} LIMIT 10`;
+      return `SELECT * FROM ${datasetName}`;
   }
 };
 

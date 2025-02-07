@@ -43,6 +43,7 @@ export class Facet {
       const { format, lang } = request.body;
       const params = {
         body: {
+          fetch_size: request.body.fetch_size,
           query: query.query,
           ...(meta?.name && { datasource: meta.name }),
           ...(meta?.sessionId && {

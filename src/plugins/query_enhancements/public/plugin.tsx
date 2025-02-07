@@ -130,8 +130,7 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) =>
-        `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
+      getQueryString: (currentQuery: Query) => `SELECT * FROM ${currentQuery.dataset?.title}`,
       fields: { sortable: false, filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {

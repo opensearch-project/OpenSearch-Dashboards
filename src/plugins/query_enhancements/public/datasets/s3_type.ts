@@ -140,7 +140,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicSQLQuery', {
               defaultMessage: 'Sample query for SQL',
             }),
-            query: `SELECT * FROM ${dataset.title} LIMIT 10`,
+            query: `SELECT * FROM ${dataset.title}`,
           },
         ];
     }
