@@ -33,7 +33,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { Query } from '../../../common/query';
 import { ISearchInterceptor } from '../../search';
 import { DataStorage, DEFAULT_DATA } from 'src/plugins/data/common';
-import { waitFor } from '@testing-library/react';
+
 describe('QueryStringManager', () => {
   let service: QueryStringManager;
   let storage: DataStorage;
@@ -51,11 +51,6 @@ describe('QueryStringManager', () => {
       mockSearchInterceptor,
       coreMock.createStart().notifications
     );
-  });
-
-  afterEach(() => {
-    window.localStorage.clear();
-    window.sessionStorage.clear();
   });
 
   test('getUpdates$ is a cold emits only after query changes', () => {
@@ -113,6 +108,7 @@ describe('QueryStringManager', () => {
   test('clearQueryHistory clears the query history', () => {
     service.addToQueryHistory({ query: 'test query 1', language: 'sql' });
     service.addToQueryHistory({ query: 'test query 2', language: 'sql' });
+    expect(service.getQueryHistory()).toHaveLength(2);
 
     service.clearQueryHistory();
     expect(service.getQueryHistory()).toHaveLength(0);
