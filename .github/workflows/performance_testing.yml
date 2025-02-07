@@ -82,12 +82,19 @@ jobs:
         run: |
           curl 'http://localhost:5601/api/sample_data/ecommerce' -X 'POST' -H 'osd-version: 3.0.0' -H 'osd-xsrf: osd-fetch'
 
+      # - name: Run Lighthouse CI
+      #   run: |
+      #     export LHCI_GITHUB_APP_TOKEN=${{ secrets.GITHUB_TOKEN }}
+      #     yarn lhci autorun --verbose || echo "Lighthouse assertion failed, check results"
+      #   env:
+      #     LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run Lighthouse CI
         run: |
-          export LHCI_GITHUB_APP_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           yarn lhci autorun --verbose || echo "Lighthouse assertion failed, check results"
         env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify Lighthouse Results
         run: |
@@ -149,7 +156,7 @@ jobs:
           # Post comment on PR
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
         env:
-          LHCI_GITHUB_APP_TOKEN: ${{  secrets.GITHUB_TOKEN  }}
+          GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN  }}
 
       - name: Cleanup Lighthouse Reports
         run: rm -f .lhci_output.json .lighthouseci
