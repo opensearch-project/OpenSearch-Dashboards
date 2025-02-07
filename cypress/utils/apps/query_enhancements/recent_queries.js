@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_PATTERN_WITH_TIME, INDEX_WITH_TIME_1, QueryLanguages } from './constants';
+import { QueryLanguages } from './constants';
 
 export const RecentQueriesDataTypes = {
   INDEX_PATTERN: {
@@ -18,12 +18,24 @@ export const RecentQueriesDataTypes = {
 
 export const BaseQuery = {
   INDEX_PATTERN: {
-    'OpenSearch SQL': `SELECT * FROM ${INDEX_PATTERN_WITH_TIME} WHERE `,
-    PPL: `source = ${INDEX_PATTERN_WITH_TIME} | where `,
+    'OpenSearch SQL': {
+      query: `SELECT * FROM `,
+      where: ' WHERE ',
+    },
+    PPL: {
+      query: `source = `,
+      where: ' | where ',
+    },
   },
   INDEXES: {
-    'OpenSearch SQL': `SELECT * FROM ${INDEX_WITH_TIME_1} WHERE `,
-    PPL: `source = ${INDEX_WITH_TIME_1} | where `,
+    'OpenSearch SQL': {
+      query: `SELECT * FROM `,
+      where: ' WHERE ',
+    },
+    PPL: {
+      query: `source = `,
+      where: ' | where ',
+    },
   },
 };
 
@@ -40,6 +52,11 @@ export const TestQueries = [
   'status_code = 200',
   'event_sequence_number > 10000000',
 ];
+
+export const QueryRegex = {
+  PPL: /.*?(source .*? 8000)(?:.*)/s,
+  'OpenSearch SQL': /.*?(SELECT .*? 8000)(?:.*)/s,
+};
 
 /**
  * The configurations needed for recent queries tests
@@ -58,10 +75,22 @@ export const TestQueries = [
  * @returns {RecentQueriesFilteringTestConfig}
  */
 export const generateRecentQueriesTestConfiguration = (dataset, datasetType, language) => {
+  if (language.name !== 'PPL' && language.name !== 'OpenSearch SQL') {
+    return; // undefined
+  }
+  const oppositeLang = {
+    PPL: 'OpenSearch SQL',
+    'OpenSearch SQL': 'PPL',
+  };
+  const defaultQuery = language.name === 'PPL' ? '' : ' LIMIT 10';
+  const customDatasetType = RecentQueriesDataTypes[datasetType].name;
   return {
     dataset,
-    datasetType: RecentQueriesDataTypes[datasetType].name,
+    datasetType: customDatasetType,
     language: language.name,
+    oppositeLang: oppositeLang[language.name],
+    alternativeDataset: '.opensearch-sap-log-types-config',
+    defaultQuery: defaultQuery,
     testName: `dataset: ${datasetType} and language: ${language.name}`,
   };
 };
