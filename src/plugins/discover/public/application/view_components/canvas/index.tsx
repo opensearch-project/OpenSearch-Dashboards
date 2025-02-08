@@ -13,6 +13,7 @@ import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
 import { DiscoverNoResults } from '../../components/no_results/no_results';
 import { DiscoverNoIndexPatterns } from '../../components/no_index_patterns/no_index_patterns';
+import { DiscoverNoDatasources } from '../../components/no_datasources/no_datasources';
 import { DiscoverUninitialized } from '../../components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../components/loading_spinner/loading_spinner';
 import { setColumns, useDispatch, useSelector } from '../../utils/state_management';
@@ -41,6 +42,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       data,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
+  const { dataSources } = data;
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
 
@@ -58,12 +60,28 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   );
   const dispatch = useDispatch();
   const prevIndexPattern = useRef(indexPattern);
-
+  const [dataSourcesExist, setDataSourcesExist] = useState(null);
   const [fetchState, setFetchState] = useState<SearchData>({
     status: data$.getValue().status,
     hits: 0,
     bucketInterval: {},
   });
+
+  useEffect(() => {
+    let isMounted = true;
+    const subscription = dataSources.dataSourceService
+      .getDataSources$()
+      .subscribe((currentDataSources) => {
+        if (isMounted) {
+          setDataSourcesExist(Object.values(currentDataSources));
+        }
+      });
+
+    return () => {
+      subscription.unsubscribe();
+      isMounted = false;
+    };
+  }, [dataSources]);
 
   const onQuerySubmit = useCallback(
     (payload, isUpdate) => {
@@ -127,6 +145,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     }
   };
   const showSaveQuery = !!capabilities.discover?.saveQuery;
+  const showNoDatasources = !Array.isArray(dataSourcesExist) || dataSourcesExist.length === 0;
 
   return (
     <EuiPanel
@@ -146,6 +165,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
           optionalRef,
         }}
         showSaveQuery={showSaveQuery}
+        showNoDatasources={showNoDatasources}
       />
 
       {indexPattern ? (
@@ -188,7 +208,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       ) : (
         <>
           <EuiSpacer size="xxl" />
-          <DiscoverNoIndexPatterns />
+          {!showNoDatasources ? <DiscoverNoIndexPatterns /> : <DiscoverNoDatasources />}
         </>
       )}
     </EuiPanel>
