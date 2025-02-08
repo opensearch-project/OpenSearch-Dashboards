@@ -27,6 +27,10 @@ Cypress.Commands.add(
       page: 'indexPatterns',
       isEnhancement,
     });
+
+    // adding a wait here as sometimes the button doesn't click below
+    cy.wait(2000);
+
     cy.getElementByTestId('createIndexPatternButton').click();
     cy.osd.waitForLoader(isEnhancement);
 

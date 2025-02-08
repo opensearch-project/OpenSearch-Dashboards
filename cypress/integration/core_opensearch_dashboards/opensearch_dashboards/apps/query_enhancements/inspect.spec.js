@@ -118,7 +118,11 @@ const inspectTestSuite = () => {
         isEnhancement: true,
       });
 
-      cy.getElementByTestId('addSampleDataSetflights').click();
+      // adding a wait here as sometimes the button doesn't click below
+      cy.wait(3000);
+
+      cy.getElementByTestId('addSampleDataSetflights').should('be.visible').click();
+
       cy.getElementByTestId('sampleDataSetInstallToast').should('exist');
 
       cy.osd.navigateToWorkSpaceSpecificPage({
