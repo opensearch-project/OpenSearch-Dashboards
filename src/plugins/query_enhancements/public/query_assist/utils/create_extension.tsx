@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
 import {
@@ -21,6 +21,7 @@ import { QueryAssistBanner, QueryAssistBar, QueryAssistSummary } from '../compon
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { QueryAssistContext } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
+import { QUERY_ASSISTANT_SUPPORT_DATASET_TYPES } from './constant';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -79,7 +80,7 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
       if (
         query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH && // datasource is MDS OpenSearch
         query.dataset?.dataSource?.type !== 'DATA_SOURCE' && // datasource is MDS OpenSearch when using indexes
-        query.dataset?.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN // dataset is index pattern
+        !QUERY_ASSISTANT_SUPPORT_DATASET_TYPES.includes(query.dataset?.type || '')
       )
         return [];
 
@@ -115,8 +116,13 @@ export const createQueryAssistExtension = (
         };
       }
     },
-    isEnabled$: () =>
-      getAvailableLanguages$(http, data).pipe(map((languages) => languages.length > 0)),
+    isEnabled$: (dependencies) => {
+      const query = dependencies.query;
+      if (!QUERY_ASSISTANT_SUPPORT_DATASET_TYPES.includes(query.dataset?.type || '')) {
+        return of(false);
+      }
+      return getAvailableLanguages$(http, data).pipe(map((languages) => languages.length > 0));
+    },
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
       return (
