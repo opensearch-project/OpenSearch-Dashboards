@@ -18,6 +18,7 @@ import {
 } from '../../../../../utils/apps/query_enhancements/shared';
 import { prepareTestSuite } from '../../../../../utils/helpers';
 import {
+  downloadCsvAndVerify,
   generateExportAsCsvIndexPatternTestConfigurations,
   getFirstRowForDownloadWithFields,
   getFirstRowTimeForSourceDownload,
@@ -25,8 +26,6 @@ import {
   getHeadersForSourceDownload,
   getQueriedCountForLanguage,
 } from '../../../../../utils/apps/query_enhancements/export_as_csv';
-import moment from 'moment';
-import path from 'path';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -115,21 +114,8 @@ const runSavedSearchTests = () => {
           // Intentionally waiting for query to complete. When changing languages there is no good way to determine that the data has loaded
           cy.wait(2000);
 
-          cy.getElementByTestId('dscDownloadCsvButton')
-            .should('exist')
-            .contains(`Download ${getQueriedCountForLanguage(language)} documents as CSV`)
-            .click();
-
-          // wait for file to be downloaded
-          cy.wait(2000);
-
-          cy.readFile(
-            path.join(
-              Cypress.config('downloadsFolder'),
-              `opensearch_export_${moment().format('YYYY-MM-DD')}.csv`
-            )
-            // eslint-disable-next-line no-loop-func
-          ).then((csvString) => {
+          // eslint-disable-next-line no-loop-func
+          downloadCsvAndVerify(getQueriedCountForLanguage(language), (csvString) => {
             const { data } = Papa.parse(csvString);
             cy.wrap(data).should('have.length', getQueriedCountForLanguage(language) + 1);
             cy.wrap(data[0]).should('deep.equal', getHeadersForSourceDownload(config.hasTime));
@@ -142,18 +128,8 @@ const runSavedSearchTests = () => {
           cy.getElementByTestId('fieldToggle-bytes_transferred').click();
           cy.getElementByTestId('fieldToggle-personal.name').click();
 
-          cy.getElementByTestId('dscDownloadCsvButton').click();
-
-          // wait for file to be downloaded
-          cy.wait(2000);
-
-          cy.readFile(
-            path.join(
-              Cypress.config('downloadsFolder'),
-              `opensearch_export_${moment().format('YYYY-MM-DD')}.csv`
-            )
-            // eslint-disable-next-line no-loop-func
-          ).then((csvString) => {
+          // eslint-disable-next-line no-loop-func
+          downloadCsvAndVerify(getQueriedCountForLanguage(language), (csvString) => {
             const { data } = Papa.parse(csvString);
             cy.wrap(data).should('have.length', getQueriedCountForLanguage(language) + 1);
             cy.wrap(data[0]).should('deep.equal', getHeadersForDownloadWithFields(config.hasTime));
@@ -168,6 +144,79 @@ const runSavedSearchTests = () => {
           cy.getElementByTestId('fieldToggle-personal.name').click();
         }
       });
+    });
+
+    it('Should be able to export from a filtered result and have the correct number of rows', () => {
+      const config = {
+        dataset: `${INDEX_WITH_TIME_1}*`,
+      };
+      const language = QueryLanguages.DQL;
+      const expectedCount = 54;
+
+      cy.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'discover',
+        isEnhancement: true,
+      });
+
+      cy.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
+
+      cy.setQueryLanguage(language.name);
+      setDatePickerDatesAndSearchIfRelevant(language.name);
+      cy.setQueryEditor(`bytes_transferred > 9950`, {}, true);
+
+      // eslint-disable-next-line no-loop-func
+      downloadCsvAndVerify(expectedCount, (csvString) => {
+        const { data } = Papa.parse(csvString);
+        cy.wrap(data).should('have.length', expectedCount + 1);
+      });
+    });
+
+    it('Should be able to change the number of rows setting and have it download correct amount', () => {
+      const config = {
+        dataset: `${INDEX_WITH_TIME_1}*`,
+      };
+      const language = QueryLanguages.DQL;
+      const expectedCount = 95;
+
+      cy.visit('/app/settings');
+      cy.getElementByTestId('settingsSearchBar').should('be.visible').type('Number of rows');
+      cy.getElementByTestId('advancedSetting-editField-discover:sampleSize')
+        .clear()
+        .type(expectedCount.toString())
+        .type('{rightArrow}{backspace}');
+
+      // force: true because sometimes it is hidden by a popup
+      cy.getElementByTestId('advancedSetting-saveButton').click({ force: true });
+
+      cy.getElementByTestId('advancedSetting-saveButton').should('not.exist');
+
+      cy.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'discover',
+        isEnhancement: true,
+      });
+
+      cy.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
+
+      cy.setQueryLanguage(language.name);
+      setDatePickerDatesAndSearchIfRelevant(language.name);
+
+      // eslint-disable-next-line no-loop-func
+      downloadCsvAndVerify(expectedCount, (csvString) => {
+        const { data } = Papa.parse(csvString);
+        cy.wrap(data).should('have.length', expectedCount + 1);
+      });
+
+      // cleanup
+      cy.visit('/app/settings');
+      cy.getElementByTestId('settingsSearchBar').should('be.visible').type('Number of rows');
+      cy.getElementByTestId('advancedSetting-resetField-discover:sampleSize').click();
+
+      // force: true because sometimes it is hidden by a popup
+      cy.getElementByTestId('advancedSetting-saveButton').click({ force: true });
+
+      cy.getElementByTestId('advancedSetting-saveButton').should('not.exist');
     });
   });
 };

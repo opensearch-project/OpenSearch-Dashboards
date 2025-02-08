@@ -4,6 +4,8 @@
  */
 
 import { DatasetTypes, INDEX_WITH_TIME_1, INDEX_WITHOUT_TIME_1, QueryLanguages } from './constants';
+import path from 'path';
+import moment from 'moment';
 
 /**
  * The configurations needed for saved search/queries tests
@@ -127,4 +129,33 @@ export const getFirstRowForDownloadWithFields = (language, hasTime) => {
   } else {
     return ['4,406', 'Allison Bins'];
   }
+};
+
+/**
+ * Callback for downloadCsvAndVerify
+ * @callback readCsvCallback
+ * @param {string} csvString - the string of the parsed CSV
+ */
+
+/**
+ * Verifies the correct text on download CSV button as well as click it to download it
+ * @param {number} queriedCount - number of rows it should download
+ * @param {readCsvCallback} readCsvCallback - callback for what to do with the downloaded CSV
+ */
+export const downloadCsvAndVerify = (queriedCount, readCsvCallback) => {
+  cy.getElementByTestId('dscDownloadCsvButton')
+    .should('exist')
+    .contains(`Download ${queriedCount} documents as CSV`)
+    .click();
+
+  // wait for file to be downloaded
+  cy.wait(2000);
+
+  cy.readFile(
+    path.join(
+      Cypress.config('downloadsFolder'),
+      `opensearch_export_${moment().format('YYYY-MM-DD')}.csv`
+    )
+    // eslint-disable-next-line no-loop-func
+  ).then(readCsvCallback);
 };
