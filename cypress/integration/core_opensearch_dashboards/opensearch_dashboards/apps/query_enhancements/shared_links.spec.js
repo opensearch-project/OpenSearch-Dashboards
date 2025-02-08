@@ -18,7 +18,10 @@ import {
 } from '../../../../../utils/apps/query_enhancements/shared';
 import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/constants';
 import { selectFieldFromSidebar } from '../../../../../utils/apps/query_enhancements/sidebar';
-import { verifyShareUrl } from '../../../../../utils/apps/query_enhancements/shared_links';
+import {
+  verifyShareUrl,
+  openShareMenuWithRetry,
+} from '../../../../../utils/apps/query_enhancements/shared_links';
 import { setSort } from '../../../../../utils/apps/query_enhancements/table';
 import { prepareTestSuite } from '../../../../../utils/helpers';
 
@@ -178,7 +181,7 @@ export const runSharedLinksTests = () => {
           });
 
           // Test snapshot url
-          cy.getElementByTestId('shareTopNavButton').click();
+          openShareMenuWithRetry();
           cy.getElementByTestId('copyShareUrlButton')
             .invoke('attr', 'data-share-url')
             .then((url) => {
@@ -207,7 +210,7 @@ export const runSharedLinksTests = () => {
           cy.getElementByTestId('exportAsSavedObject').find('input').should('be.disabled');
           cy.saveSearch(config.saveName);
           cy.waitForLoader(true);
-          cy.getElementByTestId('shareTopNavButton').click();
+          openShareMenuWithRetry();
           cy.getElementByTestId('exportAsSavedObject').find('input').should('not.be.disabled');
           cy.getElementByTestId('exportAsSavedObject').click();
           // Get saved search ID
