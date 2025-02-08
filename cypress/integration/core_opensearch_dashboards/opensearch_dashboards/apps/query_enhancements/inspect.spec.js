@@ -11,7 +11,6 @@ import {
 } from '../../../../../utils/apps/constants.js';
 import * as docTable from '../../../../../utils/apps/query_enhancements/doc_table.js';
 import { PATHS, BASE_PATH } from '../../../../../utils/constants.js';
-import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
@@ -66,7 +65,7 @@ const inspectTestSuite = () => {
         page: 'discover',
         isEnhancement: true,
       });
-      cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
+      cy.getElementByTestId('discoverNewButton').click();
     });
 
     afterEach(() => {
