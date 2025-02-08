@@ -96,7 +96,7 @@ jobs:
       - name: Run Lighthouse CI
         run: |
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          yarn lhci autorun --verbose || echo "Lighthouse assertion failed, check results"
+          yarn lhci autorun --verbose | tee lhci_output.txt
         continue-on-error: true
 
       - name: Verify Lighthouse Results
@@ -124,19 +124,23 @@ jobs:
           # Extract failed assertions
           FAILURES=$(jq -r '[.[] | select(.passed==false) | {metric: .auditId, reason: .auditTitle, url: .url}]' .lighthouseci/assertion-results.json)
 
-          # Upload reports and extract report URLs
-          yarn lhci upload --target=temporary-public-storage | tee lhci_output.txt
-          REPORT_URLS=$(grep -Eo 'https://storage.googleapis.com/lighthouse-infrastructure-[^\s]+' lhci_output.txt)
+          REPORT_URLS=$(grep -Eo 'https://storage.googleapis.com[^ ]+' lhci_output.txt)
+
+          REPORT_URLS_ARRAY=$(echo "$REPORT_URLS" | tr ' ' '\n' | jq -R . | jq -s .)
+
+          UNIQUE_FAILURE_URLS=$(echo "$FAILURES" | jq '[.[] | .url] | unique')
 
           # Map URLs to reports
-          URL_REPORT_MAP=$(jq -n --argjson failures "$FAILURES" --arg report_urls "$REPORT_URLS" '
-            $failures | map(.url) as $urls |
-            $report_urls | split("\n") as $reports |
-            reduce range(0; $urls | length) as $i (
-              {};
-              .[$urls[$i]] = $reports[$i]
-            )
-          ')
+            URL_REPORT_MAP=$(jq -n --argjson failures "$UNIQUE_FAILURE_URLS" --argjson report_urls "$REPORT_URLS_ARRAY" '
+              reduce range(0; ($failures | length)) as $i (
+                {};
+                if $i < ($report_urls | length) then
+                  .[$failures[$i]] = $report_urls[$i]
+                else
+                  .[$failures[$i]] = null
+                end
+              )
+            ')
 
           # Append report URLs to failed assertions
           FAILURES_WITH_REPORTS=$(jq --argjson url_report_map "$URL_REPORT_MAP" '
@@ -147,11 +151,6 @@ jobs:
           if [[ "$FAILURES_WITH_REPORTS" == "[]" ]]; then
             echo "✅ **All Lighthouse metrics passed!** 🎉" > comment.txt
           else
-            echo "❌ **Failed Lighthouse Metrics:**" > comment.txt
-            echo "" >> comment.txt
-            echo "| Metric | Issue | Page URL | Report |" >> comment.txt
-            echo "|--------|-------|----------|--------|" >> comment.txt
-            
             echo "$FAILURES_WITH_REPORTS" | jq -r '.[] | "| \(.metric) | \(.reason) | \(.url) | [Report](\(.reportUrl)) |"' >> comment.txt
           fi
 
@@ -162,4 +161,4 @@ jobs:
           GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN  }}
 
       - name: Cleanup Lighthouse Reports
-        run: rm -f .lhci_output.txt .lighthouseci
+        run: rm -f .lhci_output.txt && rm -rf .lighthouseci
