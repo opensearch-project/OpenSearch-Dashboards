@@ -63,7 +63,7 @@ export const runTimeRangeSelectionTests = () => {
 
     generateAllTestConfigurations(generateTimeRangeTestConfiguration).forEach((config) => {
       it(`Time Range Selection using the quick select menu ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -84,7 +84,7 @@ export const runTimeRangeSelectionTests = () => {
       });
 
       it(`Time Range Selection using the relative time select menu ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -105,7 +105,7 @@ export const runTimeRangeSelectionTests = () => {
       });
 
       it(`Time Range Selection using the absolute time select menu ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,

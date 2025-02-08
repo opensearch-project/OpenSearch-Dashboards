@@ -165,7 +165,7 @@ cy.osd.add('deleteAllDataSources', () => {
   }
 
   cy.visit('app/dataSources');
-  cy.waitForLoader(true);
+  cy.osd.waitForLoader(true);
   cy.wait(2000);
 
   cy.get('body').then(($body) => {
@@ -190,4 +190,60 @@ cy.osd.add('deleteAllDataSources', () => {
       cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
     }
   });
+});
+
+cy.osd.add(
+  // navigates to the workspace HomePage of a given workspace
+  'navigateToWorkSpaceHomePage',
+  (workspaceName) => {
+    // Selecting the correct workspace
+    cy.visit('/app/workspace_list#');
+    cy.openWorkspaceDashboard(workspaceName);
+    // wait until page loads
+    if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'osd') {
+      cy.getElementByTestId('headerAppActionMenu').should('be.visible');
+    } else {
+      cy.getElementByTestId('breadcrumbs').should('be.visible');
+    }
+  }
+);
+
+cy.osd.add(
+  //navigate to workspace specific pages
+  'navigateToWorkSpaceSpecificPage',
+  (opts) => {
+    const { workspaceName, page, isEnhancement = false } = opts;
+    // Navigating to the WorkSpace Home Page
+    cy.osd.navigateToWorkSpaceHomePage(workspaceName);
+
+    // Check for toggleNavButton and handle accordingly
+    // If collapsibleNavShrinkButton is shown which means toggleNavButton is already clicked, try clicking the app link directly
+    // Using collapsibleNavShrinkButton is more robust than using toggleNavButton due to another toggleNavButton item on discover page
+    cy.get('body').then(($body) => {
+      const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
+
+      if (shrinkButton.length === 0) {
+        cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
+      }
+
+      cy.getElementByTestId(`collapsibleNavAppLink-${page}`).should('be.visible').click();
+    });
+
+    cy.osd.waitForLoader(isEnhancement);
+  }
+);
+
+cy.osd.add('waitForLoader', (isEnhancement = false) => {
+  const opts = { log: false };
+
+  Cypress.log({
+    name: 'waitForPageLoad',
+    displayName: 'wait',
+    message: 'page load',
+  });
+
+  // Use recentItemsSectionButton for query enhancement, otherwise use homeIcon
+  cy.getElementByTestId(isEnhancement ? 'recentItemsSectionButton' : 'homeIcon', opts).should(
+    'be.visible'
+  );
 });

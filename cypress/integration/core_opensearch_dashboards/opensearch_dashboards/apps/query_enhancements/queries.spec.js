@@ -48,7 +48,7 @@ const queriesTestSuite = () => {
       });
 
       // Go to discover page
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
         page: 'discover',
         isEnhancement: true,
@@ -68,7 +68,7 @@ const queriesTestSuite = () => {
 
         const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.waitForSearch();
         cy.verifyHitCount(1);
 
@@ -83,7 +83,7 @@ const queriesTestSuite = () => {
 
         const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.waitForSearch();
         cy.verifyHitCount(1);
 
@@ -96,7 +96,7 @@ const queriesTestSuite = () => {
         cy.setQueryLanguage('OpenSearch SQL');
 
         // Default SQL query should be set
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
           `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`
         );
@@ -127,7 +127,7 @@ const queriesTestSuite = () => {
         cy.setTopNavDate(START_TIME, END_TIME);
 
         // Default PPL query should be set
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
           `source = ${INDEX_WITH_TIME_1}*`
         );

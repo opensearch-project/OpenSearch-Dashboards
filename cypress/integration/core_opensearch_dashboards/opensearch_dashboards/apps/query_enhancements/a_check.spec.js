@@ -41,12 +41,12 @@ const noIndexPatternTestSuite = () => {
     describe('empty state', () => {
       it('no index pattern', function () {
         // Go to the Discover page
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName: workspaceName,
           page: 'discover',
           isEnhancement: true,
         });
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId('discoverNoIndexPatterns').should('be.visible');
       });
     });

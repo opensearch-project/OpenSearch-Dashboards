@@ -60,7 +60,7 @@ const inspectTestSuite = () => {
         isEnhancement: true,
       });
 
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'discover',
@@ -111,7 +111,7 @@ const inspectTestSuite = () => {
     });
 
     it('should test visualizations inspect', () => {
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'import_sample_data',
@@ -121,7 +121,7 @@ const inspectTestSuite = () => {
       cy.getElementByTestId('addSampleDataSetflights').click();
       cy.getElementByTestId('sampleDataSetInstallToast').should('exist');
 
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'dashboards',

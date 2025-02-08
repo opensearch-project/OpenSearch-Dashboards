@@ -91,7 +91,7 @@ export const runSimpleDatasetSelectorTests = () => {
       } Indexpattern when original language was ${
         config.language
       } from the simple dataset selector`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -170,7 +170,7 @@ export const runSimpleDatasetSelectorTests = () => {
     });
 
     it('validate filtering index pattern in simple dataset selector', () => {
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName,
         page: 'discover',
         isEnhancement: true,

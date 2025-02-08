@@ -331,7 +331,7 @@ export const verifySavedSearchInAssetsPage = (
   },
   workspaceName
 ) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName: workspaceName,
     page: 'objects',
     isEnhancement: true,
@@ -464,7 +464,7 @@ export const updateSavedSearchAndSaveAndVerify = (
   datasourceName,
   saveAsNew
 ) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName: workspaceName,
     page: 'discover',
     isEnhancement: true,
@@ -506,7 +506,7 @@ export const updateSavedSearchAndSaveAndVerify = (
  * @param {string} workspaceName - name of workspace
  */
 export const navigateToDashboardAndOpenSavedSearchPanel = (workspaceName) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'dashboards',
     isEnhancement: true,

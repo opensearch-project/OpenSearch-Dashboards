@@ -32,7 +32,7 @@ import { prepareTestSuite } from '../../../../../utils/helpers';
 const workspaceName = getRandomizedWorkspaceName();
 
 const createSavedQuery = (config) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'discover',
     isEnhancement: true,
@@ -50,7 +50,7 @@ const createSavedQuery = (config) => {
 };
 
 const loadSavedQuery = (config) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'discover',
     isEnhancement: true,
@@ -67,7 +67,7 @@ const loadSavedQuery = (config) => {
     'Aug 30, 2020 @ 00:00:00.000'
   );
 
-  cy.loadSaveQuery(config.saveName);
+  cy.loadSavedQuery(config.saveName);
   // wait for saved queries to load.
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
@@ -82,17 +82,17 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
   validateSaveAsNewQueryMatchingNameHasError(config.saveName);
-  cy.updateSaveQuery(saveAsNewQueryName, true, true, true);
+  cy.updateSavedQuery(saveAsNewQueryName, true, true, true);
 
   cy.reload();
-  cy.loadSaveQuery(saveAsNewQueryName);
+  cy.loadSavedQuery(saveAsNewQueryName);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
 };
 
 const deleteSavedQuery = (saveAsNewQueryName) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'discover',
     isEnhancement: true,

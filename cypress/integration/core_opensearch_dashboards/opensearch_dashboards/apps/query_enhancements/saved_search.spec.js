@@ -72,7 +72,7 @@ const runSavedSearchTests = () => {
 
     generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
       it(`should successfully create a saved search for ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -107,7 +107,7 @@ const runSavedSearchTests = () => {
             // using a POST request to create a saved search to load
             postRequestSaveSearch(config);
 
-            cy.navigateToWorkSpaceSpecificPage({
+            cy.osd.navigateToWorkSpaceSpecificPage({
               workspaceName,
               page: 'discover',
               isEnhancement: true,

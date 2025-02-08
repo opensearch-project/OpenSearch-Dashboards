@@ -68,7 +68,7 @@ export const runDisplayTests = () => {
 
     generateAllTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
       it(`should correctly display all UI components for ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,

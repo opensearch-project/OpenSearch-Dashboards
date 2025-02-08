@@ -120,6 +120,29 @@ declare namespace Cypress {
       deleteDataSourceByName(dataSourceName: string): Chainable<any>;
 
       deleteAllDataSources(): Chainable<any>;
+
+      /**
+       * Navigates to the workspace HomePage of a given workspace
+       * @param workspaceName - The name of the workspace to navigate to
+       */
+      navigateToWorkSpaceHomePage(workspaceName: string): Chainable<any>;
+
+      /**
+       * Navigates to workspace specific pages
+       * @param opts - Navigation options
+       */
+      navigateToWorkSpaceSpecificPage(opts: {
+        workspaceName: string;
+        page: string;
+        isEnhancement?: boolean;
+      }): Chainable<any>;
+
+      /**
+       * Wait for Dashboards page to load
+       * @example
+       * cy.osd.waitForLoader()
+       */
+      waitForLoader(isEnhancement?: boolean): Chainable<any>;
     };
   }
 }

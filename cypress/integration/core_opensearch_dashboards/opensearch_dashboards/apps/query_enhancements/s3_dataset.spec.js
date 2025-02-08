@@ -109,7 +109,7 @@ const s3DatasetTestSuite = () => {
 
           cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
           cy.getElementByTestId('advancedSelectorConfirmButton').click();
-          cy.waitForLoader(true);
+          cy.osd.waitForLoader(true);
           cy.waitForSearch();
 
           cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'OpenSearch SQL');
@@ -133,7 +133,7 @@ const s3DatasetTestSuite = () => {
 
           cy.getElementByTestId('advancedSelectorLanguageSelect').select('PPL');
           cy.getElementByTestId('advancedSelectorConfirmButton').click();
-          cy.waitForLoader(true);
+          cy.osd.waitForLoader(true);
           cy.waitForSearch();
 
           cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'PPL');
