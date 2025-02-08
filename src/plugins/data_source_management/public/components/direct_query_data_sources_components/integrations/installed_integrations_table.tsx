@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
-  EuiButton,
+  EuiSmallButton,
   EuiIcon,
   EuiText,
   EuiFlyout,
@@ -73,9 +73,9 @@ const AddIntegrationButton = ({
   toggleFlyout: () => void;
 }) => {
   return (
-    <EuiButton fill={fill} onClick={toggleFlyout}>
+    <EuiSmallButton fill={fill} onClick={toggleFlyout}>
       Add Integrations
-    </EuiButton>
+    </EuiSmallButton>
   );
 };
 

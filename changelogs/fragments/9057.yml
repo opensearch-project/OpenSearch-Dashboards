@@ -1,0 +1,2 @@
+refactor:
+- Update data source details tabs to use small buttons ([#9057](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9057))
