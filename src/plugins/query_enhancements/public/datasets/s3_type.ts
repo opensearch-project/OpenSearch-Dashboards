@@ -15,6 +15,7 @@ import {
   DataStructureCustomMeta,
   Dataset,
   DatasetField,
+  Query,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices, OSD_FIELD_TYPES } from '../../../data/public';
 import {
@@ -131,7 +132,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicPPLQuery', {
               defaultMessage: 'Sample query for PPL',
             }),
-            query: `source = ${dataset.title}`,
+            query: `source = ${dataset.title} | head 10`,
           },
         ];
       case 'SQL':
@@ -140,9 +141,18 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicSQLQuery', {
               defaultMessage: 'Sample query for SQL',
             }),
-            query: `SELECT * FROM ${dataset.title}`,
+            query: `SELECT * FROM ${dataset.title} LIMIT 10`,
           },
         ];
+    }
+  },
+
+  getInitialQueryString: (query: Query) => {
+    switch (query.language) {
+      case 'PPL':
+        return `source = ${query.dataset?.title} | head 10`;
+      case 'SQL':
+        return `SELECT * FROM ${query.dataset?.title} LIMIT 10`;
     }
   },
 };
