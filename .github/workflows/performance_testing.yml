@@ -86,17 +86,10 @@ jobs:
         run: |
           curl 'http://localhost:5601/api/sample_data/ecommerce' -X 'POST' -H 'osd-version: 3.0.0' -H 'osd-xsrf: osd-fetch'
 
-      # - name: Run Lighthouse CI
-      #   run: |
-      #     export LHCI_GITHUB_APP_TOKEN=${{ secrets.GITHUB_TOKEN }}
-      #     yarn lhci autorun --verbose || echo "Lighthouse assertion failed, check results"
-      #   env:
-      #     LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Run Lighthouse CI
         run: |
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          yarn lhci autorun --verbose | tee lhci_output.txt
+          yarn lhci autorun --verbose
         continue-on-error: true
 
       - name: Verify Lighthouse Results
@@ -121,44 +114,39 @@ jobs:
             exit 1
           fi
 
-          # Extract failed assertions
-          FAILURES=$(jq -r '[.[] | select(.passed==false) | {metric: .auditId, reason: .auditTitle, url: .url}]' .lighthouseci/assertion-results.json)
+            FAILURES=$(jq -r '[.[] | select(.passed==false) | {metric: .auditId, reason: .auditTitle, url: .url}]' .lighthouseci/assertion-results.json)
 
-          REPORT_URLS=$(grep -Eo 'https://storage.googleapis.com[^ ]+' lhci_output.txt)
+            UNIQUE_FAILURE_URLS=$(echo "$FAILURES" | jq '[.[] | .url] | unique')
 
-          REPORT_URLS_ARRAY=$(echo "$REPORT_URLS" | tr ' ' '\n' | jq -R . | jq -s .)
+            # Load the URL to report mapping from links.json
+            URL_REPORT_MAP=$(jq -c '.' .lighthouseci/links.json)
 
-          UNIQUE_FAILURE_URLS=$(echo "$FAILURES" | jq '[.[] | .url] | unique')
-
-          # Map URLs to reports
-            URL_REPORT_MAP=$(jq -n --argjson failures "$UNIQUE_FAILURE_URLS" --argjson report_urls "$REPORT_URLS_ARRAY" '
-              reduce range(0; ($failures | length)) as $i (
-                {};
-                if $i < ($report_urls | length) then
-                  .[$failures[$i]] = $report_urls[$i]
-                else
-                  .[$failures[$i]] = null
-                end
-              )
-            ')
-
-          # Append report URLs to failed assertions
-          FAILURES_WITH_REPORTS=$(jq --argjson url_report_map "$URL_REPORT_MAP" '
+            # Append report URLs to failed assertions
+            FAILURES_WITH_REPORTS=$(jq --argjson url_report_map "$URL_REPORT_MAP" '
             map(. + {reportUrl: $url_report_map[.url]})
-          ' <<< "$FAILURES")
+            ' <<< "$FAILURES")
 
-          # Format PR comment
-          if [[ "$FAILURES_WITH_REPORTS" == "[]" ]]; then
-            echo "✅ **All Lighthouse metrics passed!** 🎉" > comment.txt
-          else
-            echo "$FAILURES_WITH_REPORTS" | jq -r '.[] | "| \(.metric) | \(.reason) | \(.url) | [Report](\(.reportUrl)) |"' >> comment.txt
-          fi
+            # Check if there are failures before posting a comment
+            if [[ "$FAILURES_WITH_REPORTS" == "[]" ]]; then
+            echo "✅ **All Lighthouse metrics passed!** 🎉"
+            exit 0
+            fi
 
-          # Post comment on PR
-          gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
+            COMMENT="### ⚡ Lighthouse CI Performance Issues ⚡
+
+            | Metric | Expected Value | Current Value | Page URL | Report |
+            |--------|---------------|--------------|----------|--------|"
+
+            while IFS= read -r line; do
+                COMMENT+="\n| $(echo "$line" | jq -r '.metric') | $(echo "$line" | jq -r '.expected') | $(echo "$line" | jq -r '.actual') | $(echo "$line" | jq -r '.url') | [Report]($(echo "$line" | jq -r '.reportUrl')) |"
+            done <<< "$(echo "$FAILURES_WITH_REPORTS" | jq -c '.[]')"
+
+            echo -e "$COMMENT" > comment.txt
+
+            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN  }}
 
       - name: Cleanup Lighthouse Reports
-        run: rm -f .lhci_output.txt && rm -rf .lighthouseci
+        run: rm -f comment.txt && rm -rf .lighthouseci
