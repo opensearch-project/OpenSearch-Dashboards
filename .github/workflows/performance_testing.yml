@@ -114,7 +114,7 @@ jobs:
             exit 1
           fi
 
-            FAILURES=$(jq -r '[.[] | select(.passed==false) | {metric: .auditId, reason: .auditTitle, url: .url}]' .lighthouseci/assertion-results.json)
+            FAILURES=$(jq -r '[.[] | select(.passed==false) | {metric: .auditId, expected: (.expected // "N/A"), actual: (.actual // "N/A"), url: .url}]' .lighthouseci/assertion-results.json)
 
             UNIQUE_FAILURE_URLS=$(echo "$FAILURES" | jq '[.[] | .url] | unique')
 
