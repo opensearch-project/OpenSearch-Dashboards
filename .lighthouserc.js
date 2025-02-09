@@ -7,22 +7,34 @@ module.exports = {
         `${baseUrl}/app/home`,
         `${baseUrl}/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f`,
         `${baseUrl}/app/data-explorer/discover`,
+        `${baseUrl}/app/visualize`,
       ], // Add more URLs as needed
       startServerCommand: 'yarn start --no-base-path',
       numberOfRuns: 2,
       settings: {
         chromePath: require('puppeteer').executablePath(),
         chromeFlags: '--no-sandbox --disable-gpu --headless',
+        formFactor: 'desktop', // This will enforce the desktop view
+        viewport: {
+          width: 1280, // Optional: Set a specific width
+          height: 800, // Optional: Set a specific height
+        },
+        screenEmulation: {
+          // Disable mobile emulation
+          disabled: true,
+        },
       },
     },
     assert: {
-      // Only the key assertions you care about
+      // Only the key assertions
       assertions: {
-        performance: ['warn', { minScore: 0.2 }],
-        'first-contentful-paint': ['warn', { maxNumericValue: 1800 }],
-        'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }],
-        interactive: ['warn', { maxNumericValue: 5000 }],
-        'total-blocking-time': ['warn', { maxNumericValue: 300 }],
+        performance: ['warn', { minScore: 0.2 }], // Aggregates all key metrics into a single score.
+        'first-contentful-paint': ['warn', { maxNumericValue: 1800 }], //	Indicates how fast the page starts loading.
+        'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }], // Critical for user-perceived load speed.
+        interactive: ['warn', { maxNumericValue: 5000 }], // Affects usability—page is responsive to user input.
+        'total-blocking-time': ['warn', { maxNumericValue: 300 }], // Higher TBT makes the page feel sluggish.
+        'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }], // Prevents janky UI movements during load.
+        'speed-index': ['warn', { maxNumericValue: 4300 }], // Lower speed index = better perceived performance.
       },
     },
     upload: {

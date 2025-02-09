@@ -1,0 +1,38 @@
+{
+  "http://localhost:5601/app/home": {
+    "performance": 0.2,
+    "first-contentful-paint": 1800,
+    "largest-contentful-paint": 2500,
+    "interactive": 5000,
+    "total-blocking-time": 300,
+    "cumulative-layout-shift": 0.1,
+    "speed-index": 4300
+  },
+  "http://localhost:5601/app/data-explorer/discover": {
+    "performance": 0.2,
+    "first-contentful-paint": 1800,
+    "largest-contentful-paint": 2400,
+    "interactive": 5000,
+    "total-blocking-time": 300,
+    "cumulative-layout-shift": 0.1,
+    "speed-index": 4300
+  },
+  "http://localhost:5601/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f": {
+    "performance": 0.2,
+    "first-contentful-paint": 1800,
+    "interactive": 5000,
+    "largest-contentful-paint": 2600,
+    "total-blocking-time": 300,
+    "cumulative-layout-shift": 0.1,
+    "speed-index": 4300
+  },
+  "http://localhost:5601//app/visualize": {
+    "performance": 0.2,
+    "first-contentful-paint": 1800,
+    "interactive": 5000,
+    "largest-contentful-paint": 2600,
+    "total-blocking-time": 300,
+    "cumulative-layout-shift": 0.1,
+    "speed-index": 4300
+  }
+}
