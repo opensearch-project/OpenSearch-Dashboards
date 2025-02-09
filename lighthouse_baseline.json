@@ -17,7 +17,7 @@
     "cumulative-layout-shift": 0.1,
     "speed-index": 4300
   },
-  "http://localhost:5601/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f": {
+  "http://localhost:5601/app/dashboards": {
     "performance": 0.2,
     "first-contentful-paint": 1800,
     "interactive": 5000,
@@ -26,7 +26,7 @@
     "cumulative-layout-shift": 0.1,
     "speed-index": 4300
   },
-  "http://localhost:5601//app/visualize": {
+  "http://localhost:5601/app/visualize": {
     "performance": 0.2,
     "first-contentful-paint": 1800,
     "interactive": 5000,
