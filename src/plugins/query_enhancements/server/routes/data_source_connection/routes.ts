@@ -116,7 +116,7 @@ export function registerDataSourceConnectionsRoutes(
           ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
           : defaultClient.asScoped(request).callAsCurrentUser;
 
-        const resp = await client('enhancements.deleteJob', {
+        await client('enhancements.deleteJob', {
           queryId: request.query.queryId,
         });
         return response.noContent();

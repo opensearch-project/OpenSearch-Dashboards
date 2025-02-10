@@ -21,6 +21,8 @@ export const DS_API = {
 };
 export const DSM_API = '/internal/data-source-management/fetchDataSourceMetaData';
 
+export const DELETE_API = '/api/enhancements/jobs';
+
 export const INDEX_WITH_TIME_1 = 'data_logs_small_time_1';
 export const INDEX_WITHOUT_TIME_1 = 'data_logs_small_no_time_1';
 export const INDEX_WITH_TIME_2 = 'data_logs_small_time_2';

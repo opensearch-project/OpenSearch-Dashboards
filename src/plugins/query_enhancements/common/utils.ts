@@ -73,7 +73,7 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
           try {
             await http.fetch({
               method: 'DELETE',
-              path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
+              path: API.DATA_SOURCE.ASYNC_JOBS,
               query: {
                 id: query.dataset?.dataSource?.id,
                 queryId: context.body?.pollQueryResultsParams.queryId,
