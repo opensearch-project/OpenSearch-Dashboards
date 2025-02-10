@@ -352,16 +352,16 @@ export class SearchSource {
 
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
+    const indexPattern = this.getField('index');
 
     let response;
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
+      searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
       response = await this.legacyFetch(searchRequest, options);
     } else if (this.isUnsupportedRequest(searchRequest)) {
       response = await this.fetchExternalSearch(searchRequest, options);
     } else {
-      const indexPattern = this.getField('index');
       searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
-
       response = await this.fetchSearch(searchRequest, options);
     }
 
