@@ -58,3 +58,61 @@ export const verifyShareUrl = (url, config, testData, datasourceName, queryStrin
     expect(g).to.include(`to:'${formatDateForUrl(END_TIME)}'`);
   }
 };
+
+/**
+ * Opens the share menu with retry mechanism to handle potential timing issues
+ * @param {number} maxAttempts Maximum number of attempts to open the menu (default: 3)
+ * @throws {Error} If menu fails to open after maximum attempts
+ *
+ * @example
+ * // Open share menu with default 3 retries
+ * openShareMenuWithRetry();
+ *
+ * // Open share menu with custom 5 retries
+ * openShareMenuWithRetry(5);
+ *
+ * TODO:
+ * Investigate long-term solutions for share menu flakiness
+ */
+export const openShareMenuWithRetry = (maxAttempts = 3) => {
+  const attemptToOpenMenu = (attempt = 1) => {
+    // Check if menu is already open
+    cy.get('body').then(($body) => {
+      const menuExists = $body.find('[data-test-subj="shareContextMenu"]').length > 0;
+
+      if (menuExists) {
+        // Menu is already open, no action needed
+        return;
+      }
+
+      if (attempt > maxAttempts) {
+        throw new Error(`Failed to open share menu after ${maxAttempts} attempts`);
+      }
+
+      // Click the share button
+      cy.getElementByTestId('shareTopNavButton').click();
+
+      // Wait for animation and verify menu appears
+      cy.wait(1000); // Give time for animation
+
+      // Check if menu appeared
+      cy.get('body').then(($updatedBody) => {
+        const menuOpened = $updatedBody.find('[data-test-subj="shareContextMenu"]').length > 0;
+
+        if (!menuOpened) {
+          // Menu didn't appear, retry
+          cy.log(`Share menu didn't appear on attempt ${attempt}, retrying...`);
+          attemptToOpenMenu(attempt + 1);
+        }
+      });
+    });
+  };
+
+  // Start the retry process
+  attemptToOpenMenu();
+
+  // Once menu is open, verify expected elements are present
+  cy.getElementByTestId('shareContextMenu').should('exist');
+  cy.getElementByTestId('exportAsSnapshot').should('exist');
+  cy.getElementByTestId('exportAsSavedObject').should('exist');
+};
