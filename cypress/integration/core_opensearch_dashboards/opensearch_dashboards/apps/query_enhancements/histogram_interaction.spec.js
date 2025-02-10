@@ -26,7 +26,7 @@ const workspace = getRandomizedWorkspaceName();
 
 const runHistogramInteractionTests = () => {
   describe('histogram interaction', { testIsolation: true }, () => {
-    before(() => {
+    beforeEach(() => {
       // Load test data
       cy.osd.setupTestData(
         PATHS.SECONDARY_ENGINE,
@@ -61,17 +61,7 @@ const runHistogramInteractionTests = () => {
       cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
     });
 
-    beforeEach(() => {
-      cy.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
-        workspaceName: workspace,
-        page: 'discover',
-        isEnhancement: true,
-      });
-      cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
-    });
-
-    after(() => {
+    afterEach(() => {
       cy.deleteWorkspaceByName(workspace);
       cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
       // TODO: Modify deleteIndex to handle an array of index and remove hard code
