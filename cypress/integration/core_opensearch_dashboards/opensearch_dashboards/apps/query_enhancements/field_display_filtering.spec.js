@@ -7,7 +7,6 @@ import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../utils/apps/co
 import * as docTable from '../../../../../utils/apps/query_enhancements/doc_table.js';
 import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../utils/apps/query_enhancements/field_display_filtering.js';
 import { PATHS, BASE_PATH } from '../../../../../utils/constants';
-import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
@@ -53,7 +52,7 @@ const fieldDisplayFilteringTestSuite = () => {
         page: 'discover',
         isEnhancement: true,
       });
-      cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
+      cy.getElementByTestId('discoverNewButton').click();
     });
 
     afterEach(() => {
