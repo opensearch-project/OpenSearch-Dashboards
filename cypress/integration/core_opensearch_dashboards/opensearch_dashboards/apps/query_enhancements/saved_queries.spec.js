@@ -98,7 +98,7 @@ const deleteSavedQuery = (saveAsNewQueryName) => {
     isEnhancement: true,
   });
 
-  cy.deleteSaveQuery(saveAsNewQueryName);
+  cy.deleteSavedQuery(saveAsNewQueryName);
   verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName);
 };
 

@@ -9,7 +9,7 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   QueryLanguages,
-  SECONDARY_ENGINE,
+  PATHS,
 } from '../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
@@ -29,7 +29,7 @@ export const runDisplayTests = () => {
     beforeEach(() => {
       // Load test data
       cy.osd.setupTestData(
-        SECONDARY_ENGINE.url,
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_2}.mapping.json`,
@@ -42,7 +42,7 @@ export const runDisplayTests = () => {
       // Add data source
       cy.osd.addDataSource({
         name: DATASOURCE_NAME,
-        url: SECONDARY_ENGINE.url,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
@@ -77,6 +77,18 @@ export const runDisplayTests = () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         cy.setQueryLanguage(config.language);
+
+        // Sometimes the syntax highlighter opens automatically. Closing it here if it does that
+        cy.get('body').then(($body) => {
+          const popovers = $body.find('.euiPopoverTitle');
+
+          for (const popover of popovers) {
+            if (popover.textContent === 'Syntax options') {
+              cy.getElementByTestId('languageReferenceButton').click();
+            }
+          }
+        });
+
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         // testing the query editor
