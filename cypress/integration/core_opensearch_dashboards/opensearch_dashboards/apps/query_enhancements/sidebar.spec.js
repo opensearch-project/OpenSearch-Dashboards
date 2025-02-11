@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DatasetTypes, PATHS, BASE_PATH } from '../../../../../utils/constants';
+
 import {
-  DatasetTypes,
-  INDEX_WITH_TIME_1,
-  INDEX_PATTERN_WITH_TIME_1,
-  PATHS,
   DATASOURCE_NAME,
-} from '../../../../../utils/constants';
+  INDEX_PATTERN_WITH_TIME_1,
+  INDEX_WITH_TIME_1,
+} from '../../../../../utils/apps/query_enhancements/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
@@ -17,7 +17,7 @@ import {
 } from '../../../../../utils/apps/query_enhancements/shared';
 import { getDocTableField } from '../../../../../utils/apps/query_enhancements/doc_table';
 import * as sideBar from '../../../../../utils/apps/query_enhancements/sidebar';
-import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
+import { generateSideBarTestConfiguration } from '../../../../../utils/apps/query_enhancements/sidebar';
 import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
@@ -127,6 +127,32 @@ const checkSidebarPanelBehavior = () => {
   checkPanelVisibility(true);
 };
 
+const verifyFieldShowDetailsShowsTopValuesAndViewVisualization = (
+  config,
+  field,
+  isAggregatable
+) => {
+  const aggregatableShouldText = isAggregatable ? 'be.visible' : 'not.exist';
+  const aggregatableShouldNotText = isAggregatable ? 'not.exist' : 'be.visible';
+
+  setDatePickerDatesAndSearchIfRelevant(config.language);
+  sideBar.showSidebarFieldDetails(field);
+  // Either the field details text for each top value should exist, or there should be a field Visualize error.
+  cy.getElementsByTestIds(['dscFieldDetailsText', 'fieldVisualizeError']).should(
+    'have.length.above',
+    0
+  );
+  if (config.visualizeButton) {
+    cy.getElementByTestId(`fieldVisualize-${field}`).should('be.visible').click();
+    cy.getElementByTestId('visualizationLoader').should(aggregatableShouldText);
+    cy.getElementByTestId('globalToastList')
+      .contains(`Saved field "${field}" is invalid for use with`)
+      .should(aggregatableShouldNotText);
+  } else {
+    cy.getElementByTestId(`fieldVisualize-${field}`).should('not.exist');
+  }
+};
+
 export const runSideBarTests = () => {
   describe('sidebar spec', () => {
     const testData = {
@@ -150,7 +176,7 @@ export const runSideBarTests = () => {
       );
       cy.osd.addDataSource({
         name: DATASOURCE_NAME,
-        url: PATHS.SECONDARY_ENGINE,
+        url: 'http://opensearch-node:9200/',
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
@@ -168,7 +194,7 @@ export const runSideBarTests = () => {
       });
     });
 
-    generateAllTestConfigurations(generateSavedTestConfiguration, {
+    generateAllTestConfigurations(generateSideBarTestConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
@@ -222,6 +248,36 @@ export const runSideBarTests = () => {
 
         it('handles panel collapse/expand correctly', () => {
           checkSidebarPanelBehavior();
+        });
+
+        it('fields should have top values', () => {
+          const testData = {
+            testAggregatableFields: ['bytes_transferred'],
+            testNestedFields: ['personal.address.country'],
+          };
+
+          testData.testAggregatableFields.forEach((aggregatableField) => {
+            verifyFieldShowDetailsShowsTopValuesAndViewVisualization(
+              config,
+              aggregatableField,
+              true
+            );
+          });
+
+          cy.navigateToWorkSpaceSpecificPage({
+            url: BASE_PATH,
+            workspaceName: workspaceName,
+            page: 'discover',
+            isEnhancement: true,
+          });
+          cy.getElementByTestId('discoverNewButton').click();
+          // Setting the dataset and query language again to ensure the date picker is not missing
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.setQueryLanguage(config.language);
+
+          testData.testNestedFields.forEach((nestedField) => {
+            verifyFieldShowDetailsShowsTopValuesAndViewVisualization(config, nestedField, false);
+          });
         });
       });
     });

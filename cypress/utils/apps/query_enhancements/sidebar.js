@@ -64,6 +64,17 @@ export const selectFieldFromSidebar = (field) => {
 };
 
 /**
+ * Shows Top Values of the field in a popover by clicking field show details button.
+ * @param {string} field Field name to show top values
+ * @example
+ * // View Top Values of the timestamp field.
+ * selectFieldFromSidebar('timestamp')
+ */
+export const showSidebarFieldDetails = (field) => {
+  cy.getElementByTestId(`field-${field}-showDetails`).click();
+};
+
+/**
  * The configurations needed for side bar tests
  * @typedef {Object} SideBarTestConfig
  * @property {string} dataset - the dataset name to use
@@ -85,5 +96,6 @@ export const generateSideBarTestConfiguration = (dataset, datasetType, language)
     datasetType,
     language: language.name,
     testName: `dataset: ${datasetType} and language: ${language.name}`,
+    visualizeButton: language.supports.visualizeButton,
   };
 };
