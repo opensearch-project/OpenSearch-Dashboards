@@ -74,16 +74,16 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
     },
     async (context, request, res) => {
       const { data_source_id: dataSourceId } = request.query;
-      const callMsearch = getCallMsearchWithOpenSearchClient({
-        opensearchClient:
-          dataSourceId && context.dataSource
-            ? await context.dataSource.opensearch.getClient(dataSourceId)
-            : context.core.opensearch.client.asCurrentUser,
-        globalConfig$: deps.globalConfig$,
-        uiSettings: context.core.uiSettings.client,
-      });
 
       try {
+        const callMsearch = getCallMsearchWithOpenSearchClient({
+          opensearchClient:
+            dataSourceId && context.dataSource
+              ? await context.dataSource.opensearch.getClient(dataSourceId)
+              : context.core.opensearch.client.asCurrentUser,
+          globalConfig$: deps.globalConfig$,
+          uiSettings: context.core.uiSettings.client,
+        });
         const response = await callMsearch({ body: request.body });
         return res.ok(response);
       } catch (err) {
