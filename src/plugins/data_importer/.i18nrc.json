@@ -1,0 +1,7 @@
+{
+  "prefix": "dataUploader",
+  "paths": {
+    "dataUploader": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
