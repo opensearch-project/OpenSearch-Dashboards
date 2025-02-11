@@ -13,14 +13,13 @@ The following instructions demonstrate how to set up a development environment f
 ```bash
 curl -o- https://raw.githubusercontent.com/opensearch-project/OpenSearch-Dashboards/main/dev-tools/install-docker-dev.sh | bash
 ```
-
-1. Open VS Code or [install it](https://code.visualstudio.com/download), if it's not already installed.
+3. Open VS Code or [install it](https://code.visualstudio.com/download), if it's not already installed.
 
    - Make sure VS Code has the extensions `Dev Containers` and `Docker` installed. If not, go to `Extensions` tab, search and install them.
 
-2. Under the Discover tab, click `Open Folder`, and open the `opensearch-dashboards-docker-dev` folder that we just created.
+4. Under the Discover tab, click `Open Folder`, and open the `opensearch-dashboards-docker-dev` folder that we just created.
 
-3. Open the `opensearch-dashboards-docker-dev` folder in VS Code integrated terminal, set environment variable for the fork repository URL by running the command below.
+5. Open the `opensearch-dashboards-docker-dev` folder in VS Code integrated terminal, set environment variable for the fork repository URL by running the command below.
    - If fork repo has not been created: Go to [OpenSearch Dashboards github page](https://github.com/opensearch-project/OpenSearch-Dashboards) and under fork, select create a new fork, and then copy the https link of the fork url and use it in the above command. The command needs to be re-run every time it re-start the docker compose file in a new terminal.
 
 ```bash
@@ -118,7 +117,7 @@ This Alternative Docker Development Environment Setup allows the creation of a D
 Follow the Docker Development Environment Setup, but with the following deviations:
 
 1. Once you open the `/docker-workspace/OpenSearch-Dashboards` fetch the latest version of main.
-2. Add the following to `OpenSearch-Dashboards`.
+2. Add the following to `OpenSearch-Dashboards/config/opensearch_dashboards.yml`.
 
 ```yml
 workspace.enabled: true
