@@ -6,7 +6,6 @@
 import { INDEX_PATTERN_WITH_TIME, INDEX_WITH_TIME_1 } from '../../../../../utils/apps/constants.js';
 import { PATHS, BASE_PATH, DATASOURCE_NAME } from '../../../../../utils/constants.js';
 import { DatasetTypes } from '../../../../../utils/apps/query_enhancements/constants.js';
-import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared.js';
 import { prepareTestSuite } from '../../../../../utils/helpers';
 
@@ -48,7 +47,7 @@ const cachingTestSuite = () => {
         page: 'discover',
         isEnhancement: true,
       });
-      cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
+      cy.getElementByTestId('discoverNewButton').click();
     });
 
     afterEach(() => {
