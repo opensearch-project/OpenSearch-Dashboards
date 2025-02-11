@@ -87,6 +87,12 @@ async function delayedFetch(
   const key = dataSourceId ?? '';
 
   const i = requestsToFetch[key]?.length ?? 0;
+  /**
+   * The internal msearch API accepts only one data source per request.
+   * To search requests with different options across multiple data sources,
+   * they need to be grouped by data source and processed separately.
+   * After processing, the grouped arrays are cleared.
+   */
   requestsToFetch[key] = [...(requestsToFetch[key] ?? []), restRequest];
   requestOptions[key] = [...(requestOptions[key] ?? []), options];
 
