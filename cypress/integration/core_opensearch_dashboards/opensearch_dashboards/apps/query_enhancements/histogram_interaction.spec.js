@@ -153,7 +153,7 @@ const runHistogramInteractionTests = () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.setQueryLanguage(config.language);
         if (config.isHistogramVisible) {
-          // related bug
+          // TODO: related bug
           // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9294
           if (config.language !== 'PPL') {
             // remove after the bug is fixed
@@ -199,7 +199,7 @@ const runHistogramInteractionTests = () => {
             cy.setQueryLanguage(lang);
             cy.getElementByTestId('dscChartChartheader').should('be.visible');
             cy.getElementByTestId('discoverChart').should(permutation[perm]);
-            // Uncomment after reload bug is fixed
+            // TODO: Uncomment after reload bug is fixed
             //cy.reload(); // should not remove cache for the test to be meaningful
             //cy.getElementByTestId('discoverChart').should(permutation[perm]);
             //cy.getElementByTestId('histogramCollapseBtn').should(permutation[perm]);
