@@ -37,24 +37,23 @@ describe('Security router', () => {
     expect(router.get).toHaveBeenCalledTimes(1);
     expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: 'identity/{source}/{type}/_entries',
+        path: 'identity/_entries',
       }),
       expect.any(Function)
     );
     expect(router.post).toHaveBeenCalledTimes(1);
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: 'identity/{source}/{type}/_entries',
+        path: 'identity/_entries',
       }),
       expect.any(Function)
     );
   });
 
-  it('should call the getIdentityEntries method of the source handler for identity/{source}/{type}/_entries', async () => {
+  it('should call the getIdentityEntries method of the source handler for identity/_entries', async () => {
     const routeHandler = router.get.mock.calls[0][1];
     const mockRequest = {
-      params: { source: 'test', type: 'users' },
-      query: { perPage: 10, page: 1 },
+      query: { perPage: 10, page: 1, source: 'test', type: 'users' },
     };
 
     await routeHandler(
@@ -64,17 +63,16 @@ describe('Security router', () => {
     );
 
     expect(mockHandler.getIdentityEntries).toHaveBeenCalledWith(
-      { perPage: 10, page: 1, type: 'users' },
+      { perPage: 10, page: 1, source: 'test', type: 'users' },
       expect.anything(),
       expect.anything()
     );
   });
 
-  it('should call the getIdentityEntriesByIds method of the source handler for identity/{source}/{type}/_entries', async () => {
+  it('should call the getIdentityEntriesByIds method of the source handler for identity/_entries', async () => {
     const routeHandler = router.post.mock.calls[0][1];
     const mockRequest = {
-      params: { source: 'test', type: 'users' },
-      body: { ids: ['id1', 'id2'] },
+      body: { ids: ['id1', 'id2'], source: 'test', type: 'users' },
     };
     await routeHandler(
       context,
@@ -83,7 +81,7 @@ describe('Security router', () => {
     );
 
     expect(mockHandler.getIdentityEntriesByIds).toHaveBeenCalledWith(
-      { ids: ['id1', 'id2'], type: 'users' },
+      { ids: ['id1', 'id2'], source: 'test', type: 'users' },
       expect.anything(),
       expect.anything()
     );

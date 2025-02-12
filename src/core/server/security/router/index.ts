@@ -23,13 +23,11 @@ export function registerRoutes({
   // Register a GET route for retrieving identity entries with pagination and filtering
   router.get(
     {
-      path: 'identity/{source}/{type}/_entries',
+      path: 'identity/_entries',
       validate: {
-        params: schema.object({
+        query: schema.object({
           source: schema.string(),
           type: schema.string(),
-        }),
-        query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
           keyword: schema.maybe(schema.string()),
@@ -37,10 +35,9 @@ export function registerRoutes({
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { source, type } = req.params;
-      const handler = identitySourceService.getIdentitySourceHandler(source);
+      const handler = identitySourceService.getIdentitySourceHandler(req.query.source);
       const result = handler.getIdentityEntries
-        ? await handler.getIdentityEntries({ ...req.query, type }, req, context)
+        ? await handler.getIdentityEntries(req.query, req, context)
         : [];
 
       return res.ok({
@@ -52,22 +49,19 @@ export function registerRoutes({
   // Register a POST route for retrieving identity entries by IDs
   router.post(
     {
-      path: 'identity/{source}/{type}/_entries',
+      path: 'identity/_entries',
       validate: {
-        params: schema.object({
+        body: schema.object({
           source: schema.string(),
           type: schema.string(),
-        }),
-        body: schema.object({
           ids: schema.arrayOf(schema.string()),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { source, type } = req.params;
-      const handler = identitySourceService.getIdentitySourceHandler(source);
+      const handler = identitySourceService.getIdentitySourceHandler(req.body.source);
       const result = handler.getIdentityEntriesByIds
-        ? await handler.getIdentityEntriesByIds({ ...req.body, type }, req, context)
+        ? await handler.getIdentityEntriesByIds(req.body, req, context)
         : [];
 
       return res.ok({
