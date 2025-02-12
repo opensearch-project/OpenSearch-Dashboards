@@ -136,6 +136,7 @@ export interface FieldEditorState {
   errors?: string[];
   format: any;
   spec: IndexPatternField['spec'];
+  dataSourceId?: string;
 }
 
 export interface FieldEdiorProps {
@@ -176,6 +177,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       isSaving: false,
       format: props.indexPattern.getFormatterForField(spec),
       spec: { ...spec },
+      dataSourceId: indexPattern.dataSourceRef?.id,
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -799,6 +801,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         script: field.script as string,
         indexPatternTitle: indexPattern.title,
         http: this.context.services.http,
+        dataSourceId: this.state.dataSourceId,
       });
 
       if (!isValid) {

@@ -122,6 +122,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
       query,
       additionalFields: this.state.additionalFields.map((option: AdditionalField) => option.value),
       http: this.context.services.http,
+      dataSourceId: indexPattern.dataSourceRef?.id,
     });
 
     if (scriptResponse.status !== 200) {
