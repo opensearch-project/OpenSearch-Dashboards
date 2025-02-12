@@ -128,9 +128,11 @@ export const EditIndexPattern = withRouter(
       setTags(indexPatternTags);
     }, [defaultIndex, indexPattern, indexPatternManagementStart.list]);
 
-    const setDefaultPattern = useCallback(() => {
-      uiSettings.set('defaultIndex', indexPattern.id);
-      setDefaultIndex(indexPattern.id || '');
+    const setDefaultPattern = useCallback(async () => {
+      const isSuccess = await uiSettings.set('defaultIndex', indexPattern.id);
+      if (isSuccess) {
+        setDefaultIndex(indexPattern.id || '');
+      }
     }, [uiSettings, indexPattern.id]);
 
     const refreshFields = () => {

@@ -45,6 +45,7 @@ export interface Props {
   buttonSize?: EuiHeaderSectionItemButtonProps['size'];
   http: HttpStart;
   loadingCount$: Rx.Observable<number>;
+  workspaceEnabled?: boolean;
 }
 
 interface SavedObjectMetadata {
@@ -72,7 +73,12 @@ const bulkGetDetail = (savedObjects: Array<Pick<SavedObject, 'type' | 'id'>>, ht
         .get<SavedObjectWithMetadata>(
           `/api/opensearch-dashboards/management/saved_objects/${encodeURIComponent(
             obj.type
-          )}/${encodeURIComponent(obj.id)}`
+          )}/${encodeURIComponent(obj.id)}`,
+          {
+            prependOptions: {
+              withoutClientBasePath: true,
+            },
+          }
         )
         .catch((error) => ({
           id: obj.id,
@@ -112,6 +118,7 @@ export const RecentItems = ({
   buttonSize = 's',
   http,
   loadingCount$,
+  workspaceEnabled,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPreferencesPopoverOpen, setIsPreferencesPopoverOpen] = useState(false);
@@ -143,6 +150,9 @@ export const RecentItems = ({
           }}
           iconType="managementApp"
           data-test-subj="preferencesSettingButton"
+          aria-label={i18n.translate('core.header.recent.preferences.buttonAriaLabel', {
+            defaultMessage: 'Preferences setting',
+          })}
         />
       }
       isOpen={isPreferencesPopoverOpen}
@@ -296,7 +306,8 @@ export const RecentItems = ({
                       item,
                       navLinks.filter((link) => !link.hidden),
                       basePath,
-                      navigateToUrl
+                      navigateToUrl,
+                      !!workspaceEnabled
                     ).href
                   )
                 }

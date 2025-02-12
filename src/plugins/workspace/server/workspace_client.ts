@@ -14,6 +14,7 @@ import {
   WORKSPACE_TYPE,
   Logger,
   WorkspaceFindOptions,
+  SavedObjectsErrorHelpers,
 } from '../../../core/server';
 import { updateWorkspaceState, getWorkspaceState } from '../../../core/server/utils';
 import {
@@ -32,6 +33,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
+import { ConfigSchema } from '../config';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -39,15 +41,25 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
   defaultMessage: 'workspace name has already been used, try with a different name',
 });
 
+const WORKSPACE_NOT_FOUND_ERROR = i18n.translate('workspace.notFound.error', {
+  defaultMessage: 'workspace not found',
+});
+
+interface ConfigType {
+  maximum_workspaces?: ConfigSchema['maximum_workspaces'];
+}
+
 export class WorkspaceClient implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
   private logger: Logger;
   private savedObjects?: SavedObjectsServiceStart;
   private uiSettings?: UiSettingsServiceStart;
+  private config?: ConfigType;
 
-  constructor(core: CoreSetup, logger: Logger) {
+  constructor(core: CoreSetup, logger: Logger, config?: ConfigType) {
     this.setupDep = core;
     this.logger = logger;
+    this.config = config;
   }
 
   private getScopedClientWithoutPermission(
@@ -86,6 +98,10 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     };
   }
   private formatError(error: Error | any): string {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return WORKSPACE_NOT_FOUND_ERROR;
+    }
+
     return error.message || error.error || 'Error';
   }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
@@ -106,15 +122,30 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       const { permissions, dataSources, dataConnections, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
-      const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
-        {
-          type: WORKSPACE_TYPE,
-          search: `"${attributes.name}"`,
-          searchFields: ['name'],
-        }
-      );
+      const clientWithoutPermission = this.getScopedClientWithoutPermission(requestDetail);
+      const existingWorkspaceRes = await clientWithoutPermission?.find({
+        type: WORKSPACE_TYPE,
+        search: `"${attributes.name}"`,
+        searchFields: ['name'],
+      });
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
+      }
+
+      if (this.config?.maximum_workspaces) {
+        const workspaces = await clientWithoutPermission?.find({
+          type: WORKSPACE_TYPE,
+        });
+        if (workspaces && workspaces.total >= this.config.maximum_workspaces) {
+          throw new Error(
+            i18n.translate('workspace.maximum.error', {
+              defaultMessage: 'Maximum number of workspaces ({length}) reached',
+              values: {
+                length: this.config.maximum_workspaces,
+              },
+            })
+          );
+        }
       }
 
       const promises = [];

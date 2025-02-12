@@ -175,6 +175,7 @@ export function useSaveQueryFormContent({
             id="save-as-new-query"
             onChange={(event) => setSaveAsNew?.(event.target.checked)}
             checked={saveAsNew}
+            data-test-subj="saveAsNewQueryCheckbox"
             label={i18n.translate('data.search.searchBar.SaveAsNewLabelText', {
               defaultMessage: 'Save as new query',
             })}
@@ -280,7 +281,12 @@ export function useSaveQueryFormContent({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill disabled={hasErrors || !enabledSaveButton} onClick={onClickSave}>
+          <EuiButton
+            fill
+            disabled={hasErrors || !enabledSaveButton}
+            onClick={onClickSave}
+            data-test-subj="savedQueryFormSaveButton"
+          >
             {i18n.translate('data.search.searchBar.savedQueryFlyoutFormSaveButtonText', {
               defaultMessage: '{saveText}',
               values: { saveText: savedQuery ? 'Save changes' : 'Save' },

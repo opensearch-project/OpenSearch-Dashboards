@@ -482,13 +482,14 @@ export class WorkspacePlugin
           const { renderUseCaseOverviewApp } = await import('./application');
           const [
             coreStart,
-            { contentManagement: contentManagementStart },
+            { contentManagement: contentManagementStart, navigation: navigationStart },
           ] = await core.getStartServices();
           const services = {
             ...coreStart,
             workspaceClient,
             dataSourceManagement,
             contentManagement: contentManagementStart,
+            navigationUI: navigationStart.ui,
           };
 
           return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_PAGE_ID);
@@ -517,13 +518,14 @@ export class WorkspacePlugin
           const { renderUseCaseOverviewApp } = await import('./application');
           const [
             coreStart,
-            { contentManagement: contentManagementStart },
+            { contentManagement: contentManagementStart, navigation: navigationStart },
           ] = await core.getStartServices();
           const services = {
             ...coreStart,
             workspaceClient,
             dataSourceManagement,
             contentManagement: contentManagementStart,
+            navigationUI: navigationStart.ui,
           };
 
           return renderUseCaseOverviewApp(params, services, ANALYTICS_ALL_OVERVIEW_PAGE_ID);

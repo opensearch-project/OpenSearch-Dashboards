@@ -9,8 +9,14 @@ const { join } = require('path');
 const { TestDataGenerator } = require('./test_data_generator');
 
 // Need to update different path for multiple clusters
-const DEFAULT_PATH =
-  './cypress/fixtures/dashboard/opensearch_dashboards/query_enhancement/data-logs-1';
+const DEFAULT_PATH = './fixtures/query_enhancements/data_logs_2';
+const ID_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+function generateRandomId(length = 20) {
+  return Array.from({ length }, () => ID_CHARS[Math.floor(Math.random() * ID_CHARS.length)]).join(
+    ''
+  );
+}
 
 // Helper function to parse integer
 function parseInteger(value) {
@@ -63,7 +69,7 @@ program
 
       // Create documents
       for (let i = 0; i < docCount; i++) {
-        const indexLine = JSON.stringify({ index: { _index: indexName, _id: i } });
+        const indexLine = JSON.stringify({ index: { _index: indexName, _id: generateRandomId() } });
         const docLine = JSON.stringify(generator.createDoc(i));
 
         dataWriter.write(indexLine + '\n');

@@ -95,6 +95,7 @@ function mockProps(branding = {}) {
     customNavLink$: new BehaviorSubject(undefined),
     branding,
     logos: getLogos(branding, mockBasePath.serverBasePath),
+    workspaceEnabled: true,
   };
 }
 

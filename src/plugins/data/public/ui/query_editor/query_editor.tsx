@@ -80,6 +80,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const editorQuery = props.query; // local query state managed by the editor. Not to be confused by the app query state.
 
   const queryString = getQueryService().queryString;
+  const timefilter = getQueryService().timefilter.timefilter;
   const languageManager = queryString.getLanguageService();
   const extensionMap = languageManager.getQueryEditorExtensionMap();
   const services = props.opensearchDashboards.services;
@@ -209,6 +210,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
             defaultMessage: `Language Toggle`,
           })}
           onClick={() => setIsCollapsed(!isCollapsed)}
+          data-test-subj="osdQueryEditorLanguageToggle"
         />
       </EuiFlexItem>
     );
@@ -218,24 +220,20 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     return <QueryControls queryControls={queryControls} />;
   };
 
-  const fetchIndexPattern = async () => {
-    const dataset = queryString.getQuery().dataset;
-    if (!dataset) return undefined;
-    const indexPattern = await getIndexPatterns().get(dataset.id);
-    return indexPattern;
-  };
-
   const provideCompletionItems = async (
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> => {
-    const indexPattern = await fetchIndexPattern();
+    const dataset = queryString.getQuery().dataset;
+    const indexPattern = dataset ? await getIndexPatterns().get(dataset.id) : undefined;
+
     const suggestions = await services.data.autocomplete.getQuerySuggestions({
       query: inputRef.current?.getValue() ?? '',
-      selectionStart: model.getOffsetAt(position),
+      selectionStart: model.getOffsetAt(position), // not needed, position handles same thing. remove
       selectionEnd: model.getOffsetAt(position),
       language: queryRef.current.language,
       indexPattern,
+      datasetType: dataset?.type,
       position,
       services,
     });
@@ -263,7 +261,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
                   range: s.replacePosition ?? defaultRange,
                   detail: s.detail,
                   command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
-                  sortText: s.sortText, // when undefined, the falsy value will default to the label
+                  sortText: s.sortText ?? s.text, // when undefined, the falsy value will default to the label
                 };
               })
           : [],
@@ -300,7 +298,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           query: editor.getValue(),
         };
 
-        onSubmit(newQuery);
+        onSubmit(newQuery, timefilter.getTime());
       });
 
       return () => {
@@ -357,11 +355,11 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
       editor.addCommand(monaco.KeyCode.Enter, () => {
         const newQuery = {
-          ...query,
+          ...queryRef.current,
           query: editor.getValue(),
         };
 
-        onSubmit(newQuery);
+        onSubmit(newQuery, timefilter.getTime());
       });
     },
     provideCompletionItems,

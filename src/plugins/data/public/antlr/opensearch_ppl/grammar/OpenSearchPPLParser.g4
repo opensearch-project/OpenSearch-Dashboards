@@ -53,8 +53,8 @@ commands
 
 searchCommand
    : (SEARCH)? fromClause                       # searchFrom
-   // | (SEARCH)? fromClause logicalExpression     # searchFromFilter
-   // | (SEARCH)? logicalExpression fromClause     # searchFilterFrom
+   | (SEARCH)? fromClause logicalExpression     # searchFromFilter
+   | (SEARCH)? logicalExpression fromClause     # searchFilterFrom
    ;
 
 describeCommand
@@ -168,12 +168,12 @@ mlArg
 fromClause
    : SOURCE EQUAL tableSourceClause
    | INDEX EQUAL tableSourceClause
-   // | SOURCE EQUAL tableFunction
-   // | INDEX EQUAL tableFunction
+   | SOURCE EQUAL tableFunction
+   | INDEX EQUAL tableFunction
    ;
 
 tableSourceClause
-   : tableSource // (COMMA tableSource)*
+   : tableSource (COMMA tableSource)*
    ;
 
 renameClasue
@@ -263,9 +263,9 @@ comparisonExpression
    ;
 
 valueExpression
-   // : left = valueExpression binaryOperator = (STAR | DIVIDE | MODULE) right = valueExpression   # binaryArithmetic
-   // | left = valueExpression binaryOperator = (PLUS | MINUS) right = valueExpression             # binaryArithmetic
-   : primaryExpression                                                                          # valueExpressionDefault
+   : left = valueExpression binaryOperator = (STAR | DIVIDE | MODULE) right = valueExpression   # binaryArithmetic
+   | left = valueExpression binaryOperator = (PLUS | MINUS) right = valueExpression             # binaryArithmetic
+   | primaryExpression                                                                          # valueExpressionDefault
    | positionFunction                                                                           # positionFunctionCall
    | extractFunction                                                                            # extractFunctionCall
    | getFormatFunction                                                                          # getFormatFunctionCall
@@ -775,7 +775,7 @@ valueList
    ;
 
 qualifiedName
-   : ID // ident (DOT ident)* # identsAsQualifiedName
+   : ident (DOT ident)* # identsAsQualifiedName
    ;
 
 tableQualifiedName
