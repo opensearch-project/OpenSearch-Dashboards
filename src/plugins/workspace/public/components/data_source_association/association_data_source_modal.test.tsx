@@ -107,7 +107,7 @@ describe('AssociationDataSourceModal', () => {
     );
   });
 
-  it('should display opensearch connections', async () => {
+  it('should display opensearch connections and should not display data connection when associating OpenSearch data sources', async () => {
     setupAssociationDataSourceModal();
     expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
     expect(
@@ -118,6 +118,28 @@ describe('AssociationDataSourceModal', () => {
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: 'Data Source 2' })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Data Connection 1' })).not.toBeInTheDocument();
+    });
+  });
+
+  it('should display data connection when associating direct query data sources', async () => {
+    setupAssociationDataSourceModal({
+      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+    });
+    expect(screen.getByText('Associate direct query data sources')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Data Connection 1' })).toBeInTheDocument();
+    });
+  });
+
+  it('should not render the second step fetching dqc when associating OpenSearch data sources', async () => {
+    setupAssociationDataSourceModal();
+    expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
+      expect(screen.queryByText('+ 1 related')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
+      expect(screen.queryByRole('option', { name: 'dqc1' })).not.toBeInTheDocument();
     });
   });
 
@@ -127,6 +149,7 @@ describe('AssociationDataSourceModal', () => {
     });
     expect(screen.getByText('Associate direct query data sources')).toBeInTheDocument();
     await waitFor(() => {
+      expect(screen.getByText('+ 1 related')).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'dqc1' })).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
       expect(screen.getByRole('option', { name: 'dqc1' })).toBeInTheDocument();

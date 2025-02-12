@@ -465,6 +465,7 @@ export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 export {
   createSavedQueryService,
   connectStorageToQueryState,
+  useConnectStorageToQueryState,
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
@@ -493,6 +494,7 @@ export {
   QueryStart,
   PersistedLog,
   LanguageReference,
+  DatasetIndexedViewsService,
 } from './query';
 
 export { AggsStart } from './search/aggs';

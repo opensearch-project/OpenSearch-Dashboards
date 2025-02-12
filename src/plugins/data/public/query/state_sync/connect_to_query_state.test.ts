@@ -126,13 +126,15 @@ describe('connect_storage_to_query_state', () => {
       sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
       application: setupMock.application,
+      notifications: setupMock.notifications,
     });
     queryServiceStart = queryService.start({
-      uiSettings: setupMock.uiSettings,
+      uiSettings: startMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
       application: startMock.application,
+      notifications: startMock.notifications,
     });
     indexPatternsMock = ({
       get: jest.fn(),

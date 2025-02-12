@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus, ChromeNavLink, NavGroupType, PublicAppInfo } from '../../../core/public';
+import { AppNavLinkStatus, NavGroupType, PublicAppInfo } from '../../../core/public';
 import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
@@ -16,11 +16,12 @@ import {
   prependWorkspaceToBreadcrumbs,
   getIsOnlyAllowEssentialUseCase,
   mergeDataSourcesWithConnections,
+  fetchDataSourceConnections,
   getUseCaseUrl,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { USE_CASE_PREFIX } from '../common/constants';
+import { USE_CASE_PREFIX, AssociationDataSourceModalMode } from '../common/constants';
 import {
   SigV4ServiceName,
   DataSourceEngineType,
@@ -764,7 +765,11 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
         connectionType: DataSourceConnectionType.DirectQueryConnection,
       },
     ];
-    const result = mergeDataSourcesWithConnections(dataSources, directQueryConnections);
+    const result = mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      AssociationDataSourceModalMode.DirectQueryConnections
+    );
     expect(result).toStrictEqual([
       {
         connectionType: 1,
@@ -804,7 +809,52 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
     ]);
   });
 
-  it('should not merge data sources or data connections if no direct query connections', () => {
+  it('should return only OpenSearch connections when mode is OpenSearchConnections', () => {
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+      },
+      {
+        id: 'idc2',
+        title: 'title2',
+        type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+      },
+    ];
+    const directQueryConnections = [
+      {
+        id: 'id3',
+        title: 'title3',
+        name: 'name1',
+        parentId: 'id1',
+        description: 'direct_query_connections_1',
+        type: 'Amazon S3',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+      },
+    ];
+    const result = mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      AssociationDataSourceModalMode.OpenSearchConnections
+    );
+    expect(result).toStrictEqual([
+      {
+        connectionType: 0,
+        description: '',
+        id: 'id1',
+        name: 'title1',
+        relatedConnections: [],
+        type: 'OpenSearch',
+      },
+    ]);
+  });
+
+  it('should not merge data sources if no direct query connections', () => {
     const dataSources = [
       {
         id: 'id1',
@@ -822,7 +872,11 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
       },
     ];
 
-    const result = mergeDataSourcesWithConnections(dataSources, []);
+    const result = mergeDataSourcesWithConnections(
+      dataSources,
+      [],
+      AssociationDataSourceModalMode.DirectQueryConnections
+    );
     expect(result).toStrictEqual([
       {
         connectionType: 0,
@@ -854,5 +908,97 @@ describe('workspace utils: getUseCaseUrl', () => {
     startMock.application.getUrlForApp.mockImplementation((id) => `http://localhost/${id}`);
     const url = getUseCaseUrl(undefined, 'foo', startMock.application, startMock.http);
     expect(url).toEqual('http://localhost/w/foo/workspace_detail');
+  });
+});
+
+describe('workspace utils: fetchDataSourceConnections', () => {
+  it('should successfully retrieve direct query connections and merge direct query connections with data source ', async () => {
+    const coreStart = coreMock.createStart();
+    const httpMock = coreStart.http;
+    const notificationsMock = coreStart.notifications;
+    httpMock.get.mockResolvedValue([
+      { name: 'Connection A', description: 'Test A', connector: 'S3GLUE' },
+    ]);
+
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      },
+    ];
+    const result = await fetchDataSourceConnections(
+      dataSources,
+      httpMock,
+      notificationsMock,
+      AssociationDataSourceModalMode.DirectQueryConnections
+    );
+    expect(result).toEqual([
+      {
+        id: 'id1-Connection A',
+        name: 'Connection A',
+        type: 'Amazon S3',
+        connectionType: 1,
+        description: 'Test A',
+        parentId: 'id1',
+      },
+      {
+        id: 'id1',
+        type: 'OpenSearch',
+        connectionType: 0,
+        name: 'title1',
+        description: '',
+        relatedConnections: [
+          {
+            id: 'id1-Connection A',
+            name: 'Connection A',
+            type: 'Amazon S3',
+            connectionType: 1,
+            description: 'Test A',
+            parentId: 'id1',
+          },
+        ],
+      },
+    ]);
+    expect(httpMock.get).toHaveBeenCalledWith(
+      expect.stringContaining('dataSourceMDSId=id1'),
+      expect.objectContaining({ prependOptions: { withoutClientBasePath: true } })
+    );
+    expect(notificationsMock.toasts.addDanger).not.toHaveBeenCalled();
+  });
+  it('should not retrieve direct query connections if mode is opensearch connection', async () => {
+    const coreStart = coreMock.createStart();
+    const httpMock = coreStart.http;
+    const notificationsMock = coreStart.notifications;
+
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      },
+    ];
+    const result = await fetchDataSourceConnections(
+      dataSources,
+      httpMock,
+      notificationsMock,
+      AssociationDataSourceModalMode.OpenSearchConnections
+    );
+    expect(result).toEqual([
+      {
+        id: 'id1',
+        type: 'OpenSearch',
+        connectionType: 0,
+        name: 'title1',
+        description: '',
+        relatedConnections: [],
+      },
+    ]);
+    expect(httpMock.get).not.toHaveBeenCalledWith(expect.stringContaining('dataSourceMDSId=id1'));
+    expect(notificationsMock.toasts.addDanger).not.toHaveBeenCalled();
   });
 });

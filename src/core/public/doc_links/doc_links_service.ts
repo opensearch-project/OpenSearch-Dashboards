@@ -436,6 +436,12 @@ export class DocLinksService {
             // https://opensearch.org/docs/latest/dashboards/management/advanced-settings/
             advancedSettings: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}management/advanced-settings/`,
           },
+          workspace: {
+            // https://opensearch.org/docs/latest/dashboards/workspace/workspace-acl/#defining-workspace-collaborators
+            collaborators: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}workspace/workspace-acl/#defining-workspace-collaborators`,
+            // https://opensearch.org/docs/latest/dashboards/workspace/workspace-acl/#configuring-workspace-privacy
+            privacy: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}workspace/workspace-acl/#configuring-workspace-privacy`,
+          },
         },
         noDocumentation: {
           auditbeat: `${OPENSEARCH_WEBSITE_DOCS}tools/index/#downloads`,
@@ -850,6 +856,7 @@ export interface DocLinksStart {
       readonly visualize: Record<string, string>;
       readonly dashboards: Record<string, string>;
       readonly management: Record<string, string>;
+      readonly workspace: Record<string, string>;
     };
     readonly noDocumentation: {
       readonly auditbeat: string;

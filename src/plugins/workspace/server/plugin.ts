@@ -5,6 +5,7 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { cloneDeep } from 'lodash';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -26,6 +27,7 @@ import {
   WORKSPACE_NAVIGATION_APP_ID,
   DEFAULT_WORKSPACE,
   PRIORITY_FOR_REPOSITORY_WRAPPER,
+  OPENSEARCHDASHBOARDS_CONFIG_PATH,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -47,11 +49,17 @@ import {
   SavedObjectsPermissionControl,
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
-import { getOSDAdminConfigFromYMLConfig, updateDashboardAdminStateForRequest } from './utils';
+import { updateDashboardAdminStateForRequest } from './utils';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 import { uiSettings } from './ui_settings';
 import { RepositoryWrapper } from './saved_objects/repository_wrapper';
+import { DataSourcePluginSetup } from '../../data_source/server';
+import { ConfigSchema } from '../config';
+
+export interface WorkspacePluginDependencies {
+  dataSource: DataSourcePluginSetup;
+}
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -61,6 +69,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private workspaceSavedObjectsClientWrapper?: WorkspaceSavedObjectsClientWrapper;
   private workspaceUiSettingsClientWrapper?: WorkspaceUiSettingsClientWrapper;
+  private workspaceConfig$: Observable<ConfigSchema>;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -97,8 +106,17 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       } catch (e) {
         return toolkit.next();
       }
+      // Get config from dynamic service client.
+      const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
+      const store = dynamicConfigServiceStart.getAsyncLocalStore();
+      const client = dynamicConfigServiceStart.getClient();
+      const config = await client.getConfig(
+        { pluginConfigPath: OPENSEARCHDASHBOARDS_CONFIG_PATH },
+        { asyncLocalStorageContext: store! }
+      );
+      const configUsers: string[] = cloneDeep(config.dashboardAdmin.users);
+      const configGroups: string[] = cloneDeep(config.dashboardAdmin.groups);
 
-      const [configGroups, configUsers] = await getOSDAdminConfigFromYMLConfig(this.globalConfig$);
       updateDashboardAdminStateForRequest(request, groups, users, configGroups, configUsers);
       return toolkit.next();
     });
@@ -199,17 +217,22 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
+    this.workspaceConfig$ = initializerContext.config.create();
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, deps: WorkspacePluginDependencies) {
     this.logger.debug('Setting up Workspaces service');
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
+    const workspaceConfig = await this.workspaceConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
+    const isDataSourceEnabled = !!deps.dataSource;
 
     // setup new ui_setting user's default workspace
     core.uiSettings.register(uiSettings);
 
-    this.client = new WorkspaceClient(core, this.logger);
+    this.client = new WorkspaceClient(core, this.logger, {
+      maximum_workspaces: workspaceConfig.maximum_workspaces,
+    });
 
     await this.client.setup(core);
 
@@ -248,6 +271,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       maxImportExportSize,
       permissionControlClient: this.permissionControl,
       isPermissionControlEnabled,
+      isDataSourceEnabled,
     });
 
     core.capabilities.registerProvider(() => ({

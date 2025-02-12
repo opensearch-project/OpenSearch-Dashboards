@@ -4,10 +4,13 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { WorkspacePermissionMode } from '../../../common/constants';
-import { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
+import { PermissionModeId } from '../../../../../core/public';
+import {
+  optionIdToWorkspacePermissionModesMap,
+  WorkspaceOperationType,
+  WorkspacePrivacyItemType,
+} from './constants';
 import { WorkspaceFormSubmitData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { waitFor } from '@testing-library/dom';
@@ -76,46 +79,6 @@ describe('useWorkspaceForm', () => {
         features: {
           code: WorkspaceFormErrorCode.UseCaseMissing,
           message: 'Use case is required. Select a use case.',
-        },
-      })
-    );
-    expect(onSubmitMock).not.toHaveBeenCalled();
-  });
-  it('should return "Add workspace owner." and not call onSubmit', async () => {
-    const { renderResult, onSubmitMock } = setup({
-      defaultValues: {
-        id: 'foo',
-        name: 'test-workspace-name',
-      },
-      permissionEnabled: true,
-    });
-    expect(renderResult.result.current.formErrors).toEqual({});
-
-    act(() => {
-      renderResult.result.current.setPermissionSettings([
-        {
-          id: 0,
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-          type: WorkspacePermissionItemType.User,
-        },
-        {
-          id: 1,
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-          type: WorkspacePermissionItemType.Group,
-        },
-      ]);
-    });
-    act(() => {
-      renderResult.result.current.handleFormSubmit({ preventDefault: jest.fn() });
-    });
-
-    expect(renderResult.result.current.formErrors).toEqual(
-      expect.objectContaining({
-        permissionSettings: {
-          overall: {
-            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-            message: 'Add a workspace owner.',
-          },
         },
       })
     );
@@ -193,6 +156,40 @@ describe('useWorkspaceForm', () => {
     });
     await waitFor(() => {
       expect(renderResult.result.current.formData.permissionSettings).toStrictEqual([]);
+    });
+  });
+
+  it('should return permissions settings after setPrivacyType called', async () => {
+    const onSubmitMock = jest.fn().mockResolvedValue({ success: true });
+    const { renderResult } = setup({
+      defaultValues: {
+        name: 'current-workspace-name',
+        features: ['use-case-observability'],
+      },
+      onSubmit: onSubmitMock,
+    });
+    act(() => {
+      renderResult.result.current.setPrivacyType(WorkspacePrivacyItemType.AnyoneCanEdit);
+    });
+    await waitFor(() => {
+      expect(renderResult.result.current.formData.permissionSettings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'user',
+            userId: '*',
+            modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.ReadAndWrite],
+          }),
+        ])
+      );
+    });
+
+    const oldPermissionSettings = renderResult.result.current.formData.permissionSettings;
+
+    act(() => {
+      renderResult.result.current.setPrivacyType(WorkspacePrivacyItemType.AnyoneCanEdit);
+    });
+    await waitFor(() => {
+      expect(renderResult.result.current.formData.permissionSettings).toBe(oldPermissionSettings);
     });
   });
 });

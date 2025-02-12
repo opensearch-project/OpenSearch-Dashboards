@@ -418,6 +418,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
         "visualize": Object {
           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
         },
+        "workspace": Object {
+          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+        },
       },
     }
   }
@@ -1072,6 +1076,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
             "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
             "visualize": Object {
               "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
+            },
+            "workspace": Object {
+              "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+              "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
             },
           },
         }
@@ -2007,6 +2015,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                        },
                       },
                     }
                   }
@@ -2418,6 +2430,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
+                        },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
                         },
                       },
                     }
@@ -2831,6 +2847,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                        },
                       },
                     }
                   }
@@ -3242,6 +3262,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
+                        },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
                         },
                       },
                     }
@@ -3710,6 +3734,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                        },
                       },
                     }
                   }
@@ -4123,6 +4151,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
+                        },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
                         },
                       },
                     }

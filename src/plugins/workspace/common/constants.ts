@@ -24,13 +24,8 @@ export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
  * UI setting for user default workspace
  */
 export const DEFAULT_WORKSPACE = 'defaultWorkspace';
-
-export enum WorkspacePermissionMode {
-  Read = 'read',
-  Write = 'write',
-  LibraryRead = 'library_read',
-  LibraryWrite = 'library_write',
-}
+export const ESSENTIAL_WORKSPACE_DISMISS_GET_STARTED = 'essentialWorkspace:dismissGetStarted';
+export const ANALYTICS_WORKSPACE_DISMISS_GET_STARTED = 'analyticsWorkspace:dismissGetStarted';
 
 export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';
 
@@ -168,6 +163,7 @@ export enum AssociationDataSourceModalMode {
   DirectQueryConnections = 'direction-query-connections',
 }
 export const USE_CASE_PREFIX = 'use-case-';
+export const OPENSEARCHDASHBOARDS_CONFIG_PATH = 'opensearchDashboards';
 
 // Workspace will handle both data source and data connection type saved object.
 export const WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES = [

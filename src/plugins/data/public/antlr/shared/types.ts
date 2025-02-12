@@ -26,6 +26,7 @@ export interface AutocompleteResultBase {
   suggestColumnAliases?: ColumnAliasSuggestion[];
   suggestDatabases?: boolean;
   suggestValuesForColumn?: string;
+  rerunWithoutRules?: number[];
 }
 
 export interface ParserSyntaxError extends TokenPosition {
@@ -59,6 +60,14 @@ export interface ColumnAliasSuggestion {
   name: string;
 }
 
+export enum ColumnValuePredicate {
+  COLUMN = 'COLUMN',
+  VALUE = 'VALUE',
+  OPERATOR = 'OPERATOR',
+  LPAREN = 'LPAREN',
+  END_IN_TERM = 'END_IN_TERM',
+}
+
 export type LexerConstructor<T> = new (input: CharStream) => T;
 
 export type ParserConstructor<T> = new (input: CommonTokenStream) => T;
@@ -86,10 +95,12 @@ export interface CursorPosition {
 
 export interface OpenSearchSqlAutocompleteResult extends AutocompleteResultBase {
   suggestViewsOrTables?: TableOrViewSuggestion;
+  suggestColumnValuePredicate?: ColumnValuePredicate;
 }
 
 export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase {
   suggestSourcesOrTables?: SourceOrTableSuggestion;
+  suggestRenameAs?: boolean;
 }
 
 export enum TableOrViewSuggestion {

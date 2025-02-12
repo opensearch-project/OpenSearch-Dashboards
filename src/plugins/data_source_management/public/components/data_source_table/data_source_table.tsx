@@ -297,7 +297,9 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         show: false,
       },
       dataType: 'string' as const,
-      sortable: ({ description }: { description: string }) => description,
+      sortable: ({ description }: { description?: string }) => description,
+      render: (description?: string) =>
+        !!description && description.length > 0 ? description : <EuiText>&mdash;</EuiText>,
     },
     {
       field: 'relatedConnections',
@@ -306,7 +308,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       }),
       align: 'right',
       truncateText: true,
-      render: (relatedConnections: DataSourceTableItem[]) => relatedConnections?.length,
+      render: (relatedConnections: DataSourceTableItem[]) =>
+        relatedConnections.length > 0 ? relatedConnections.length : <EuiText>&mdash;</EuiText>,
     },
   ];
 

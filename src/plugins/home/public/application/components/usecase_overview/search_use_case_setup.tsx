@@ -13,23 +13,26 @@ import {
   SEARCH_OVERVIEW_PAGE_ID,
   SECTIONS,
   SEARCH_OVERVIEW_CONTENT_AREAS,
+  Section,
 } from '../../../../../content_management/public';
 
 const DISCOVER_APP_ID = 'discover';
+
+export const getStartedSection: Section = {
+  id: SECTIONS.GET_STARTED,
+  order: 1000,
+  title: i18n.translate('home.searchOverview.setupSection.title', {
+    defaultMessage: 'Set up search',
+  }),
+  kind: 'card',
+};
 
 export const setupSearchUseCase = (contentManagement: ContentManagementPluginSetup) => {
   contentManagement.registerPage({
     id: SEARCH_OVERVIEW_PAGE_ID,
     title: 'Overview',
     sections: [
-      {
-        id: SECTIONS.GET_STARTED,
-        order: 1000,
-        title: i18n.translate('home.searchOverview.setupSection.title', {
-          defaultMessage: 'Set up search',
-        }),
-        kind: 'card',
-      },
+      getStartedSection,
       {
         id: SECTIONS.DIFFERENT_SEARCH_TYPES,
         order: 2000,

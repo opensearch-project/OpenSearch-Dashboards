@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const PPL_AGGREGATE_FUNTIONS = [
+import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
+
+export const PPL_AGGREGATE_FUNCTIONS = [
   'avg',
   'count',
   'sum',
@@ -14,3 +16,12 @@ export const PPL_AGGREGATE_FUNTIONS = [
   'stddev_samp',
   'stddev_pop',
 ];
+
+export const PPL_SUGGESTION_IMPORTANCE = new Map<number, string>([
+  [OpenSearchPPLParser.PIPE, '0'],
+  [OpenSearchPPLParser.COMMA, '1'],
+  [OpenSearchPPLParser.EQUAL, '1'],
+  [OpenSearchPPLParser.PLUS, '2'],
+  [OpenSearchPPLParser.MINUS, '2'],
+  [OpenSearchPPLParser.SOURCE, '2'],
+]);

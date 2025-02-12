@@ -88,16 +88,20 @@ const convertConnectionToOption = ({
   connection,
   selectedConnectionIds,
   logos,
+  mode,
 }: {
   connection: DataSourceConnection;
   selectedConnectionIds: string[];
   logos: Logos;
+  mode: AssociationDataSourceModalMode;
 }) => ({
   label: connection.name,
   key: connection.id,
   description: connection.description,
   append:
-    connection.relatedConnections && connection.relatedConnections.length > 0 ? (
+    mode === AssociationDataSourceModalMode.DirectQueryConnections &&
+    connection.relatedConnections &&
+    connection.relatedConnections.length > 0 ? (
       <EuiBadge>
         {i18n.translate('workspace.form.selectDataSource.optionBadge', {
           defaultMessage: '+ {relatedConnections} related',
@@ -113,15 +117,7 @@ const convertConnectionToOption = ({
     selectedConnectionIds.includes(connection.id)
       ? ('on' as const)
       : undefined,
-  prepend:
-    connection.connectionType === DataSourceConnectionType.DirectQueryConnection ? (
-      <>
-        <div style={{ width: 16 }} />
-        <ConnectionIcon connection={connection} logos={logos} />
-      </>
-    ) : (
-      <ConnectionIcon connection={connection} logos={logos} />
-    ),
+  prepend: <ConnectionIcon connection={connection} logos={logos} />,
   parentId: connection.parentId,
 });
 
@@ -131,12 +127,14 @@ const convertConnectionsToOptions = ({
   selectedConnectionIds,
   excludedConnectionIds,
   logos,
+  mode,
 }: {
   connections: DataSourceConnection[];
   excludedConnectionIds: string[];
   showDirectQueryConnections: boolean;
   selectedConnectionIds: string[];
   logos: Logos;
+  mode: AssociationDataSourceModalMode;
 }) => {
   return connections
     .flatMap((connection) => {
@@ -165,7 +163,9 @@ const convertConnectionsToOptions = ({
       }
       return [connection];
     })
-    .map((connection) => convertConnectionToOption({ connection, selectedConnectionIds, logos }));
+    .map((connection) =>
+      convertConnectionToOption({ connection, selectedConnectionIds, logos, mode })
+    );
 };
 
 export interface AssociationDataSourceModalProps {
@@ -231,7 +231,9 @@ export const AssociationDataSourceModalContent = ({
   useEffect(() => {
     setIsLoading(true);
     getDataSourcesList(savedObjects.client, ['*'])
-      .then((dataSourcesList) => fetchDataSourceConnections(dataSourcesList, http, notifications))
+      .then((dataSourcesList) =>
+        fetchDataSourceConnections(dataSourcesList, http, notifications, mode)
+      )
       .then((connections) => {
         setAllConnections(connections);
       })
@@ -248,6 +250,7 @@ export const AssociationDataSourceModalContent = ({
         selectedConnectionIds,
         showDirectQueryConnections: mode === AssociationDataSourceModalMode.DirectQueryConnections,
         logos,
+        mode,
       })
     );
   }, [allConnections, excludedConnectionIds, selectedConnectionIds, mode, logos]);
@@ -287,6 +290,7 @@ export const AssociationDataSourceModalContent = ({
               'workspace.detail.dataSources.associateModal.searchPlaceholder',
               { defaultMessage: 'Search' }
             ),
+            compressed: true,
           }}
           options={options}
           onChange={handleSelectionChange}
@@ -305,8 +309,8 @@ export const AssociationDataSourceModalContent = ({
       <EuiModalFooter>
         <EuiSmallButton onClick={closeModal}>
           <FormattedMessage
-            id="workspace.detail.dataSources.associateModal.close.button"
-            defaultMessage="Close"
+            id="workspace.detail.dataSources.associateModal.cancel.button"
+            defaultMessage="Cancel"
           />
         </EuiSmallButton>
         <EuiSmallButton

@@ -18,7 +18,7 @@ import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 import { IDataPluginServices } from '../..';
-import { fetchFieldSuggestions } from '../shared/utils';
+import { formatFieldsToSuggestions } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 
 const findCursorIndex = (
@@ -113,15 +113,7 @@ export const getSuggestions = async ({
     core.preferredRules = new Set([DQLParser.RULE_field]);
 
     // specify tokens to ignore
-    core.ignoredTokens = new Set([
-      DQLParser.LPAREN,
-      DQLParser.RPAREN,
-      DQLParser.EQ,
-      DQLParser.GE,
-      DQLParser.GT,
-      DQLParser.LE,
-      DQLParser.LT,
-    ]);
+    core.ignoredTokens = new Set([DQLParser.LPAREN, DQLParser.RPAREN]);
 
     // gets candidates at specified token index
     const candidates = core.collectCandidates(cursorIndex);
@@ -135,7 +127,15 @@ export const getSuggestions = async ({
 
     // check to see if field rule is a candidate. if so, suggest field names
     if (candidates.rules.has(DQLParser.RULE_field)) {
-      completions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f}: `));
+      completions.push(
+        ...formatFieldsToSuggestions(indexPattern, (field: string) => {
+          const indexField = indexPattern.getFieldByName(field);
+          if (indexField && ['boolean', 'string'].includes(indexField.type)) {
+            return `${field} : `;
+          }
+          return `${field} `;
+        })
+      );
     }
 
     interface FoundLastValue {
@@ -247,14 +247,21 @@ export const getSuggestions = async ({
                 cursorLine,
                 cursorColumn + 1
               ),
-              insertText: `${val} `,
+              insertText: `"${val}" `,
             };
           })
         );
       }
     }
 
-    const dqlOperators = new Set([DQLParser.AND, DQLParser.OR, DQLParser.NOT]);
+    const booleanOperators = new Set([DQLParser.AND, DQLParser.OR, DQLParser.NOT]);
+    const relationalOperators = new Set([
+      DQLParser.EQ,
+      DQLParser.GE,
+      DQLParser.GT,
+      DQLParser.LE,
+      DQLParser.LT,
+    ]);
 
     // suggest other candidates, mainly keywords
     [...candidates.tokens.keys()].forEach((token: number) => {
@@ -263,15 +270,19 @@ export const getSuggestions = async ({
         return;
       }
 
-      const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
+      const tokenSymbolName = relationalOperators.has(token)
+        ? parser.vocabulary.getDisplayName(token)?.replace(/'/g, '')
+        : parser.vocabulary.getSymbolicName(token)?.toLowerCase();
 
       if (tokenSymbolName) {
         let type = monaco.languages.CompletionItemKind.Keyword;
         let detail = SuggestionItemDetailsTags.Keyword;
-        if (dqlOperators.has(token)) {
+
+        if (booleanOperators.has(token) || relationalOperators.has(token)) {
           type = monaco.languages.CompletionItemKind.Operator;
           detail = SuggestionItemDetailsTags.Operator;
         }
+
         completions.push({
           text: tokenSymbolName,
           type,

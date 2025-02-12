@@ -17,7 +17,8 @@ export const registerDuplicateRoute = (
   router: IRouter,
   logger: Logger,
   client: IWorkspaceClientImpl,
-  maxImportExportSize: number
+  maxImportExportSize: number,
+  isDataSourceEnabled: boolean
 ) => {
   router.post(
     {
@@ -65,7 +66,7 @@ export const registerDuplicateRoute = (
       if (!getTargetWorkspaceResult.success) {
         return res.badRequest({
           body: {
-            message: `Get target workspace ${targetWorkspace} error: ${getTargetWorkspaceResult.error}`,
+            message: `Get target workspace error: ${getTargetWorkspaceResult.error}`,
           },
         });
       }
@@ -88,7 +89,8 @@ export const registerDuplicateRoute = (
         overwrite: false,
         createNewCopies: true,
         workspaces: [targetWorkspace],
-        dataSourceEnabled: true,
+        dataSourceEnabled: isDataSourceEnabled,
+        isCopy: true,
       });
 
       return res.ok({ body: result });
