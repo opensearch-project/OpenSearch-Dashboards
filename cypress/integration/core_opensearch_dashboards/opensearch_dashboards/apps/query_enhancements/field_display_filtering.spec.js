@@ -33,7 +33,7 @@ const fieldDisplayFilteringTestSuite = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspace);
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
       cy.wait(2000);

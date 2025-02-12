@@ -47,7 +47,7 @@ const inspectTestSuite = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({

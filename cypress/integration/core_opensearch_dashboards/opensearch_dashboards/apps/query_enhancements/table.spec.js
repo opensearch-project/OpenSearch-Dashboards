@@ -56,7 +56,7 @@ export const runTableTests = () => {
         url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });

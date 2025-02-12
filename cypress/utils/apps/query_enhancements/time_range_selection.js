@@ -12,7 +12,6 @@ import { DatasetTypes, QueryLanguages } from './constants';
  * @param {QueryEnhancementLanguage} language - the query language name
  * @returns {number|undefined}
  */
-
 const getExpectedHitCountRelativeQuickTimeSelect = (datasetType, language) => {
   switch (datasetType) {
     case DatasetTypes.INDEX_PATTERN.name:

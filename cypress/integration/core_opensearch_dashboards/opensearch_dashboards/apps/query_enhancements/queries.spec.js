@@ -33,7 +33,7 @@ const queriesTestSuite = () => {
       });
 
       // Create workspace and set up index pattern
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspace);
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
 

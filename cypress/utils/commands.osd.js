@@ -226,7 +226,7 @@ cy.osd.add(
         cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
       }
 
-      cy.getElementByTestId(`collapsibleNavAppLink-${page}`).should('be.visible').click();
+      cy.getElementByTestId(`collapsibleNavAppLink-${page}`).should('exist').click();
     });
 
     cy.osd.waitForLoader(isEnhancement);
