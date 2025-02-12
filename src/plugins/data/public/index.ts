@@ -468,6 +468,7 @@ export {
   useConnectStorageToQueryState,
   connectToQueryState,
   syncQueryStateWithUrl,
+  useSyncQueryStateWithUrl,
   QueryState,
   getDefaultQuery,
   FilterManager,
