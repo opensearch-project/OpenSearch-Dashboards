@@ -41,7 +41,7 @@ const cachingTestSuite = () => {
         isEnhancement: true,
       });
 
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'discover',
@@ -70,7 +70,7 @@ const cachingTestSuite = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'discover',
