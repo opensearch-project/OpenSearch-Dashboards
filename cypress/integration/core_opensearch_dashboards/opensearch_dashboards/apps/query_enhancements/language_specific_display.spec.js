@@ -78,17 +78,6 @@ export const runDisplayTests = () => {
 
         cy.setQueryLanguage(config.language);
 
-        // Sometimes the syntax highlighter opens automatically. Closing it here if it does that
-        cy.get('body').then(($body) => {
-          const popovers = $body.find('.euiPopoverTitle');
-
-          for (const popover of popovers) {
-            if (popover.textContent === 'Syntax options') {
-              cy.getElementByTestId('languageReferenceButton').click();
-            }
-          }
-        });
-
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         // testing the query editor

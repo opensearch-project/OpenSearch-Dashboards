@@ -31,7 +31,8 @@ Cypress.Commands.add(
     // adding a wait here as sometimes the button doesn't click below
     cy.wait(2000);
 
-    cy.getElementByTestId('createIndexPatternButton').click();
+    // adding a force as sometimes the button is hidden behind a popup
+    cy.getElementByTestId('createIndexPatternButton').click({ force: true });
     cy.osd.waitForLoader(isEnhancement);
 
     const disableLocalCluster = !!Cypress.env('DISABLE_LOCAL_CLUSTER');
