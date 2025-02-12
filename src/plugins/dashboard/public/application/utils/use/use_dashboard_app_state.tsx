@@ -69,7 +69,7 @@ export const useDashboardAppAndGlobalState = ({
         stopSyncingQueryServiceStateWithUrl,
       } = createDashboardGlobalAndAppState({
         stateDefaults,
-        osdUrlStateStorage: services.osdUrlStateStorage,
+        osdUrlStateStorage,
         services,
         savedDashboardInstance,
       });
