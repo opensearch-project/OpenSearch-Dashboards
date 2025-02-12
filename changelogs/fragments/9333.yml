@@ -1,0 +1,2 @@
+feat:
+- Add the ability to export current queried discover result as CSV ([#9333](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9333))

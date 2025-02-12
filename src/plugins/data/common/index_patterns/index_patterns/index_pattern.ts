@@ -40,7 +40,7 @@ import {
   OPENSEARCH_FIELD_TYPES,
   OSD_FIELD_TYPES,
 } from '../../../common';
-import { FieldFormat, FieldFormatsStartCommon } from '../../field_formats';
+import { FieldFormat, FieldFormatsStartCommon, FieldFormatsContentType } from '../../field_formats';
 import { IIndexPatternFieldList, IndexPatternField, fieldList } from '../fields';
 import {
   IndexPatternFieldMap,
@@ -71,7 +71,11 @@ interface SavedObjectBody {
   type?: string;
 }
 
-type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
+type FormatFieldFn = (
+  hit: Record<string, any>,
+  fieldName: string,
+  formatType?: FieldFormatsContentType
+) => any;
 
 const DATA_SOURCE_REFERNECE_NAME = 'dataSource';
 export class IndexPattern implements IIndexPattern {

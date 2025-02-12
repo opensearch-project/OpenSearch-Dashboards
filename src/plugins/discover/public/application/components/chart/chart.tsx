@@ -19,19 +19,22 @@ import { DiscoverServices } from '../../../build_services';
 import { Chart } from './utils';
 import { useDiscoverContext } from '../../view_components/context';
 import { setInterval, useDispatch, useSelector } from '../../utils/state_management';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { DownloadCsvButton } from './download_csv_button';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
   chartData?: Chart;
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
-  hits: number;
+  hits?: number;
   resetQuery: () => void;
   showResetButton?: boolean;
   isTimeBased?: boolean;
   services: DiscoverServices;
   isEnhancementsEnabled: boolean;
   discoverOptions: any;
+  rows?: OpenSearchSearchHit[];
 }
 
 export const DiscoverChart = ({
@@ -46,8 +49,9 @@ export const DiscoverChart = ({
   showResetButton = false,
   isEnhancementsEnabled,
   discoverOptions,
+  rows,
 }: DiscoverChartProps) => {
-  const { refetch$ } = useDiscoverContext();
+  const { indexPattern, refetch$ } = useDiscoverContext();
   const { from, to } = data.query.timefilter.timefilter.getTime();
   const timeRange = {
     from: dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
@@ -70,18 +74,22 @@ export const DiscoverChart = ({
     [data]
   );
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const histogramIsApplicable = isTimeBased && !!chartData?.values.length;
+  const showHistogram = histogramIsApplicable && (!isEnhancementsEnabled || !isCollapsed);
 
-  const hitsCounter = (
-    <div className="dscChart__hitsCounter" data-test-subj="dscChartHitsCounter">
-      <HitsCounter
-        hits={hits > 0 ? hits : 0}
-        showResetButton={showResetButton}
-        onResetQuery={resetQuery}
-      />
-    </div>
-  );
+  const hitsCounterFlexItem = hits ? (
+    <EuiFlexItem grow={false}>
+      <div className="dscChart__hitsCounter" data-test-subj="dscChartHitsCounter">
+        <HitsCounter
+          hits={hits > 0 ? hits : 0}
+          showResetButton={showResetButton}
+          onResetQuery={resetQuery}
+        />
+      </div>
+    </EuiFlexItem>
+  ) : null;
 
-  const timeChartHeader = (
+  const timeChartHeader = histogramIsApplicable ? (
     <div className="dscChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
       <TimechartHeader
         bucketInterval={bucketInterval}
@@ -92,24 +100,33 @@ export const DiscoverChart = ({
         stateInterval={interval || ''}
       />
     </div>
-  );
+  ) : null;
+
+  const exportAsCsvButtonFlexItem =
+    rows?.length && indexPattern ? (
+      <EuiFlexItem grow={false}>
+        <DownloadCsvButton indexPattern={indexPattern} rows={rows} />
+      </EuiFlexItem>
+    ) : null;
 
   const toggleLabel = i18n.translate('discover.histogram.collapse', {
     defaultMessage: 'Toggle histogram',
   });
 
-  const toggle = (
-    <EuiToolTip content={toggleLabel}>
-      <EuiButtonIcon
-        aria-expanded={isCollapsed}
-        aria-label={toggleLabel}
-        data-test-subj="histogramCollapseBtn"
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-        iconSize={'s'}
-      />
-    </EuiToolTip>
-  );
+  const toggleFlexItem = histogramIsApplicable ? (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip content={toggleLabel}>
+        <EuiButtonIcon
+          aria-expanded={isCollapsed}
+          aria-label={toggleLabel}
+          data-test-subj="histogramCollapseBtn"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+          iconSize={'s'}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  ) : null;
 
   const queryEnhancedHistogramHeader = (
     <EuiFlexGroup
@@ -118,25 +135,25 @@ export const DiscoverChart = ({
       className="dscChart__chartheader"
       data-test-subj="dscChartChartheader"
     >
-      <EuiFlexItem grow={false}>{toggle}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{hitsCounter}</EuiFlexItem>
+      {toggleFlexItem}
+      {hitsCounterFlexItem}
       <EuiFlexItem grow={true} style={{ justifyContent: 'flex-start' }}>
-        {isTimeBased && timeChartHeader}
+        {timeChartHeader}
       </EuiFlexItem>
+      {exportAsCsvButtonFlexItem}
     </EuiFlexGroup>
   );
 
   const histogramHeader = (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexGroup direction="row" gutterSize="s">
-        <EuiFlexItem grow={true}>{hitsCounter}</EuiFlexItem>
+        {hitsCounterFlexItem}
         <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem grow={false}>{isTimeBased && timeChartHeader}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{timeChartHeader}</EuiFlexItem>
+      {exportAsCsvButtonFlexItem}
     </EuiFlexGroup>
   );
-
-  const showHistogram = !isEnhancementsEnabled || !isCollapsed;
 
   return (
     <EuiFlexGroup
@@ -146,7 +163,7 @@ export const DiscoverChart = ({
       data-test-subj="dscChartWrapper"
     >
       {isEnhancementsEnabled ? queryEnhancedHistogramHeader : histogramHeader}
-      {isTimeBased && chartData && showHistogram && (
+      {showHistogram && (
         <EuiFlexItem grow={false}>
           <section
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {

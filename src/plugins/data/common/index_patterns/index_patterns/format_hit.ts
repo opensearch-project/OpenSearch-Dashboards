@@ -51,6 +51,7 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
   }
 
   function formatHit(hit: Record<string, any>, type: string = 'html') {
+    // Cache is only used for formatType === 'html' (default)
     if (type === 'text') {
       const flattened = indexPattern.flattenHit(hit);
       const result: Record<string, any> = {};
@@ -86,19 +87,26 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     return cache;
   }
 
-  formatHit.formatField = function (hit: Record<string, any>, fieldName: string) {
-    let partials = partialFormattedCache.get(hit);
-    if (partials && partials[fieldName] != null) {
-      return partials[fieldName];
-    }
+  formatHit.formatField = function (
+    hit: Record<string, any>,
+    fieldName: string,
+    formatType?: FieldFormatsContentType
+  ) {
+    // Cache is only used for formatType === 'html' (default)
+    if (formatType !== 'text') {
+      let partials = partialFormattedCache.get(hit);
+      if (partials && partials[fieldName] != null) {
+        return partials[fieldName];
+      }
 
-    if (!partials) {
-      partials = {};
-      partialFormattedCache.set(hit, partials);
+      if (!partials) {
+        partials = {};
+        partialFormattedCache.set(hit, partials);
+      }
     }
 
     const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
-    return convert(hit, val, fieldName);
+    return convert(hit, val, fieldName, formatType);
   };
 
   return formatHit;
