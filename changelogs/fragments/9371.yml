@@ -1,0 +1,2 @@
+feat:
+- Add MDS support for index pattern validate script ([#9371](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9371))
