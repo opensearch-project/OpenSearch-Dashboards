@@ -12,7 +12,6 @@ import {
   DATASOURCE_NAME,
 } from '../../../../../utils/apps/constants';
 import { BASE_PATH, PATHS } from '../../../../../utils/constants';
-import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
@@ -58,7 +57,6 @@ const runHistogramInteractionTests = () => {
         page: 'discover',
         isEnhancement: true,
       });
-      cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
     });
 
     afterEach(() => {
