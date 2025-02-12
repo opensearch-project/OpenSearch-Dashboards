@@ -92,7 +92,7 @@ jobs:
           # Dashboard tests with query enhanced - group 3
           - group: 13
             config: query_enhanced
-            test_location: source  
+            test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
@@ -266,6 +266,12 @@ jobs:
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
+      - name: Read Performance Metrics
+        id: read-metrics
+        run: |
+          echo "PERFORMANCE_MESSAGE=$(if [ -f ./cypress/performance_metrics.json ]; then jq -r 'to_entries | map("• ❌ **\(.key)**: \(.value)") | join("\n")' ./cypress/performance_metrics.json; else echo "No performance issues detected 🎉"; fi)" >> $GITHUB_ENV
+          if [ -f ./cypress/performance_metrics.json ]; then rm ./cypress/performance_metrics.json; fi
+
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - name: Upload FT repo screenshots
         uses: actions/upload-artifact@v4
@@ -352,3 +358,17 @@ jobs:
             #### Link to results:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           edit-mode: replace
+
+      - name: Post Performance Comment on PR
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ inputs.pr_number }}
+          body: |
+            🚀 **Component Performance Metrics**
+
+            The following performance metrics exceeded their thresholds:
+
+            ${{ env.PERFORMANCE_MESSAGE }}
+
+            🔍 **Please review and optimize if necessary.**
+          reactions: 'eyes,rocket'

@@ -263,6 +263,7 @@
     "@babel/plugin-transform-class-static-block": "^7.24.4",
     "@babel/register": "^7.22.9",
     "@babel/types": "^7.22.9",
+    "@cypress-audit/lighthouse": "^1.4.2",
     "@cypress/webpack-preprocessor": "^5.17.1",
     "@elastic/apm-rum": "^5.6.1",
     "@elastic/charts": "31.1.0",

@@ -2,9 +2,11 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import fs from 'fs';
+import path from 'path';
 import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
+import { prepareAudit } from '@cypress-audit/lighthouse';
 
 module.exports = defineConfig({
   defaultCommandTimeout: 60000,
@@ -76,6 +78,46 @@ function setupNodeEvents(
       webpackOptions,
     })
   );
+
+  on('before:browser:launch', (browser = Cypress.browser, launchOptions) => {
+    prepareAudit(launchOptions);
+  });
+
+  on('task', {
+    logPerformance({ metric, value }) {
+      const dirPath = './cypress';
+      const filePath = path.join(dirPath, 'performance_metrics.json');
+
+      let metrics = {};
+
+      // Ensure the directory exists
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+
+      // Ensure that filePath is not a directory
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+        // console.error(`Error: ${filePath} is a directory! Removing it...`);
+        fs.rmdirSync(filePath, { recursive: true }); // Remove incorrect directory
+      }
+
+      // If file exists, read existing metrics
+      if (fs.existsSync(filePath)) {
+        try {
+          const fileContent = fs.readFileSync(filePath, 'utf8');
+          metrics = fileContent ? JSON.parse(fileContent) : {};
+        } catch (error) {
+          // console.error('Error reading metrics file:', error);
+        }
+      }
+
+      // Add new metric
+      metrics[metric] = value;
+      fs.writeFileSync(filePath, JSON.stringify(metrics, null, 2));
+
+      return null;
+    },
+  });
 
   return config;
 }

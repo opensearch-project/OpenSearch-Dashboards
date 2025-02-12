@@ -1,0 +1,10 @@
+{
+  "discover": {
+    "performance": 30,
+    "accessibility": 50
+  },
+  "dashboard": {
+    "performance": 30,
+    "accessibility": 50
+  }
+}

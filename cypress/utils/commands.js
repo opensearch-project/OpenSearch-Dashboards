@@ -61,3 +61,84 @@ Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
     .find('a.euiLink')
     .click();
 });
+
+// Command to measure component performance and compare with baseline
+// Example -  cy.measureComponentPerformance(
+//   'workspace-initial-card-createWorkspace-button',
+//   'table_render_time'
+// );
+Cypress.Commands.add('measureComponentPerformance', (pluginName, testId) => {
+  cy.readFile('cypress/utils/performance_baselines.json').then((baselines) => {
+    // Retrieve baseline for the given component (testId)
+    const fieldName = `${pluginName}_${testId}`;
+    const baseline = baselines[fieldName];
+
+    if (baseline) {
+      cy.window().then((win) => {
+        const startTime = win.performance.now();
+
+        // Measure render time
+        cy.getElementByTestId(testId)
+          .should('be.visible')
+          .then(() => {
+            const endTime = win.performance.now();
+            const renderTime = endTime - startTime;
+
+            cy.log(renderTime, baseline.render_time, 'renderTime baseline.render_time');
+            // Compare Render Time with Baseline
+            if (renderTime > baseline.render_time) {
+              cy.task('logPerformance', {
+                metric: `${fieldName}_render_time`,
+                value: `exceeded: ${renderTime.toFixed(2)}ms > ${baseline.render_time}ms`,
+              });
+            }
+
+            // Capture Layout Shift (CLS)
+            cy.window().then((win) => {
+              return new Cypress.Promise((resolve) => {
+                let layoutShiftScore = 0;
+                const observer = new win.PerformanceObserver((list) => {
+                  for (const entry of list.getEntries()) {
+                    if (!entry.hadRecentInput) {
+                      layoutShiftScore += entry.value;
+                    }
+                  }
+                });
+                observer.observe({ type: 'layout-shift', buffered: true });
+
+                setTimeout(() => {
+                  observer.disconnect();
+                  resolve(layoutShiftScore);
+                }, 2000);
+              }).then((layoutShiftScore) => {
+                // Compare Layout Shift (CLS) with Baseline
+                if (layoutShiftScore > baseline.layout_shift) {
+                  cy.task('logPerformance', {
+                    metric: `${fieldName}_layout_shift`,
+                    value: `exceeded: ${layoutShiftScore.toFixed(2)} > ${
+                      baseline.layout_shift
+                    } (CLS)`,
+                  });
+                }
+              });
+            });
+
+            // Capture Memory Usage
+            cy.window().then((win) => {
+              const memoryUsage = win.performance.memory.usedJSHeapSize / 1024 / 1024;
+
+              // Compare Memory Usage with Baseline
+              if (memoryUsage > baseline.memory_MB) {
+                cy.task('logPerformance', {
+                  metric: `${fieldName}_memory_MB`,
+                  value: `exceeded: ${memoryUsage.toFixed(2)}MB > ${baseline.memory_MB}MB`,
+                });
+              }
+            });
+          });
+      });
+    } else {
+      cy.log(`No baseline found for component: ${fieldName}`);
+    }
+  });
+});

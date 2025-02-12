@@ -1,0 +1,12 @@
+{
+  "discover_docTable": {
+    "render_time": 800,
+    "layout_shift": 0.08,
+    "memory_MB": 40
+  },
+  "discover_sidebarPanel": {
+    "render_time": 500,
+    "layout_shift": 0.08,
+    "memory_MB": 40
+  }
+}
