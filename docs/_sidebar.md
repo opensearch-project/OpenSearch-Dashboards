@@ -196,4 +196,5 @@
   - [RELEASING](../RELEASING.md)
   - [SECURITY](../SECURITY.md)
   - [TESTING](../TESTING.md)
+  - [TRIAGING](../TRIAGING.md)
   - [TYPESCRIPT](../TYPESCRIPT.md)

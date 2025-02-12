@@ -9,7 +9,6 @@ import {
   INDEX_WITH_TIME_1,
 } from '../../../../../utils/apps/constants';
 import { BASE_PATH, PATHS } from '../../../../../utils/constants';
-import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
@@ -60,7 +59,6 @@ const runRecentQueryTests = () => {
         page: 'discover',
         isEnhancement: true,
       });
-      cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
     });
 
     afterEach(() => {
