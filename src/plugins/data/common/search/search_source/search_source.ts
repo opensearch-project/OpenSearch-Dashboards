@@ -124,7 +124,7 @@ import { handleQueryResults } from '../../utils/helpers';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
-  'dateFormat:tz',
+  UI_SETTINGS.DATE_FORMAT_TIMEZONE,
   UI_SETTINGS.COURIER_BATCH_SEARCHES,
   UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE,
   UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
@@ -444,7 +444,13 @@ export class SearchSource {
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
           const dataFrameResponse = response as IDataFrameDefaultResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+
+          const timeZone = getConfig(UI_SETTINGS.DATE_FORMAT_TIMEZONE);
+          const timeFormat = getConfig(UI_SETTINGS.DATE_FORMAT);
+          return onResponse(
+            searchRequest,
+            convertResult(response as IDataFrameResponse, timeZone, timeFormat)
+          );
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
           const startTime = Date.now();

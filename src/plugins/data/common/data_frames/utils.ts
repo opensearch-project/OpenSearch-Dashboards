@@ -18,6 +18,7 @@ import {
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
 import { TimeRange } from '../types';
+import { getTimeZoneFromSettings } from '../opensearch_query/utils';
 
 /**
  * Converts the data frame response to a search response.
@@ -27,7 +28,11 @@ import { TimeRange } from '../types';
  * @param response - data frame response object
  * @returns converted search response
  */
-export const convertResult = (response: IDataFrameResponse): SearchResponse<any> => {
+export const convertResult = (
+  response: IDataFrameResponse,
+  timezone: string,
+  dateFormat: string
+): SearchResponse<any> => {
   const body = response.body;
   if (body.hasOwnProperty('error')) {
     return response;
@@ -55,21 +60,19 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
       const hit: { [key: string]: any } = {};
 
       const processField = (field: any, value: any): any => {
-        // Handle date fields
-        if (field.type === 'date' || value instanceof Date || datemath.isDateTime(value)) {
+        // Handle date fields; Added moment check since nested field does not have a type but it might also be a date
+        if (field.type === 'date' || moment(value, ['YYYY-MM-DD HH:mm:ss'], true).isValid()) {
           const parsedDate = datemath.parse(value);
           return parsedDate
             ? moment(parsedDate)
                 .utc(true) // Since opensearch returns date in UTC
-                .tz('America/Los_Angeles')
-                .format('YYYY-MM-DD HH:mm:ss.SSS')
+                .tz(getTimeZoneFromSettings(timezone)) // Convert to user's timezone defined in advanced settings
+                .format(dateFormat) // Format the date based on user's date format defined in advanced settings
             : '';
         }
 
         // Handle nested objects with potential date fields
         if (field.type === 'object') {
-          const dataField = data.fields.find((f) => f.name === field.name);
-
           const nestedHit: { [key: string]: any } = {};
           Object.entries(value).forEach(([nestedField, nestedValue]) => {
             nestedHit[nestedField] = processField(nestedField, nestedValue);
@@ -123,20 +126,6 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
   }
 
   return searchResponse;
-};
-
-export const convertTimeField = (acc: IndexPatternFieldMap, field: IFieldType): any => {
-  switch (field.type) {
-    case 'date':
-      acc[field.name] = {
-        ...field,
-        type: 'date',
-      };
-      break;
-    case 'object':
-    default:
-      return field;
-  }
 };
 
 /**
@@ -202,7 +191,6 @@ export const getTimeField = (
 export const formatTimePickerDate = (dateRange: TimeRange, dateFormat: string) => {
   const dateMathParse = (date: string, roundUp?: boolean) => {
     const parsedDate = datemath.parse(date, { roundUp });
-
     return parsedDate ? parsedDate.utc().format(dateFormat) : '';
   };
 
