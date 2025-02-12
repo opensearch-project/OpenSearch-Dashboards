@@ -1,0 +1,2 @@
+doc:
+- Add alternative Docker development environment documentation specific to Cypress. ([#9362](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9362))
