@@ -5,6 +5,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import datemath from '@opensearch/datemath';
+import moment from 'moment';
 import {
   DATA_FRAME_TYPES,
   DataFrameAggConfig,
@@ -52,9 +53,38 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
   if (data && data.fields && data.fields.length > 0) {
     for (let index = 0; index < data.size; index++) {
       const hit: { [key: string]: any } = {};
+
+      const processField = (field: any, value: any): any => {
+        // Handle date fields
+        if (field.type === 'date' || value instanceof Date || datemath.isDateTime(value)) {
+          const parsedDate = datemath.parse(value);
+          return parsedDate
+            ? moment(parsedDate)
+                .utc(true) // Since opensearch returns date in UTC
+                .tz('America/Los_Angeles')
+                .format('YYYY-MM-DD HH:mm:ss.SSS')
+            : '';
+        }
+
+        // Handle nested objects with potential date fields
+        if (field.type === 'object') {
+          const dataField = data.fields.find((f) => f.name === field.name);
+
+          const nestedHit: { [key: string]: any } = {};
+          Object.entries(value).forEach(([nestedField, nestedValue]) => {
+            nestedHit[nestedField] = processField(nestedField, nestedValue);
+          });
+          return nestedHit;
+        }
+
+        // Default case for non-date fields
+        return value;
+      };
+
       data.fields.forEach((field) => {
-        hit[field.name] = field.values[index];
+        hit[field.name] = processField(field, field.values[index]);
       });
+
       hits.push({
         _index: data.name,
         _source: hit,
@@ -93,6 +123,20 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
   }
 
   return searchResponse;
+};
+
+export const convertTimeField = (acc: IndexPatternFieldMap, field: IFieldType): any => {
+  switch (field.type) {
+    case 'date':
+      acc[field.name] = {
+        ...field,
+        type: 'date',
+      };
+      break;
+    case 'object':
+    default:
+      return field;
+  }
 };
 
 /**
@@ -158,6 +202,7 @@ export const getTimeField = (
 export const formatTimePickerDate = (dateRange: TimeRange, dateFormat: string) => {
   const dateMathParse = (date: string, roundUp?: boolean) => {
     const parsedDate = datemath.parse(date, { roundUp });
+
     return parsedDate ? parsedDate.utc().format(dateFormat) : '';
   };
 
