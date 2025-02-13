@@ -273,6 +273,7 @@ jobs:
           if [ -f ./cypress/performance_metrics.json ]; then rm ./cypress/performance_metrics.json; fi
 
       - name: Post Performance Comment on PR
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ inputs.pr_number }}
