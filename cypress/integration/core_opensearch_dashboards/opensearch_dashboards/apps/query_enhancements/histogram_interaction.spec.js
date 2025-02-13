@@ -161,7 +161,7 @@ const runHistogramInteractionTests = () => {
             cy.getElementByTestId('discoverQueryHits').then(($hits) => {
               const hitsTxt = $hits.text();
               const langs = config.langPermutation;
-              langs.splice(langs.indexOf('PPL'), 1); // remove after the bug is fixed
+              langs.splice(langs.indexOf('PPL'), 1); // TODO: remove after the bug is fixed
               langs.forEach((lang) => {
                 if (lang === QueryLanguages.SQL.name) return; // SQL doesn't have a histogram
                 cy.setQueryLanguage(lang);
