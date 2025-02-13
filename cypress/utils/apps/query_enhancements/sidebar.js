@@ -99,3 +99,31 @@ export const generateSideBarTestConfiguration = (dataset, datasetType, language)
     visualizeButton: language.supports.visualizeButton,
   };
 };
+
+/**
+ * Verify that the sidebar filters shows the number of sidebar filters active.
+ * @param {number} numActiveFilters - Number of sidebar filters that are active
+ */
+export const verifyNumberOfActiveFilters = (numActiveFilters) => {
+  cy.getElementByTestId('toggleFieldFilterButton')
+    .find(`[aria-label="${numActiveFilters} active filters"]`)
+    .should('be.visible');
+};
+
+/**
+ * Select the filter in the sidebar, verify sidebar fields are filtered correctly, and the number of sidebar filters is displayed correctly.
+ * @param {string} filterType - Filters in the sidebar : 'aggregatable' xor 'searchable' only.
+ * @param {[string]} sidebarFields - Fields that should exist in the sidebar after applying the filter.
+ */
+export const selectFilterVerifySidebarFieldsVisibleAndActiveFiltersNumber = (
+  filterType,
+  sidebarFields
+) => {
+  cy.getElementByTestId(`${filterType}-true`).parent().click();
+  sidebarFields.forEach((fieldName) => {
+    cy.getElementByTestId(`field-${fieldName}`).should('be.visible');
+  });
+  verifyNumberOfActiveFilters(1);
+  cy.getElementByTestId(`${filterType}-any`).parent().click();
+  verifyNumberOfActiveFilters(0);
+};
