@@ -72,6 +72,11 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         }}
         triggerSuggestOnFocus={true}
       />
+      <div className="defaultEditor__progress" data-test-subj="defaultEditorProgress">
+        {queryStatus.status === ResultStatus.LOADING && (
+          <EuiProgress size="xs" color="accent" position="absolute" />
+        )}
+      </div>
       <div className="defaultEditor__footer" data-test-subj="defaultEditorFooter">
         {footerItems && (
           <EuiFlexGroup
@@ -103,11 +108,6 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
-        )}
-      </div>
-      <div className="defaultEditor__progress" data-test-subj="defaultEditorProgress">
-        {queryStatus.status === ResultStatus.LOADING && (
-          <EuiProgress size="xs" color="accent" position="absolute" />
         )}
       </div>
     </div>
