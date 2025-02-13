@@ -67,5 +67,11 @@ exports[`Query Result shows loading status 1`] = `
   isLoading={true}
   onClick={[Function]}
   size="xs"
-/>
+>
+  <EuiText
+    color="subdued"
+    data-test-subj="queryResultLoadingMsg"
+    size="xs"
+  />
+</EuiButtonEmpty>
 `;
