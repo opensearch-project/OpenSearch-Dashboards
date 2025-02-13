@@ -13,6 +13,7 @@ import { ISearchSource, unhashUrl } from '../../../opensearch_dashboards_service
 import {
   OnSaveProps,
   SavedObjectSaveModal,
+  SaveResult,
   showSaveModal,
 } from '../../../../../saved_objects/public';
 import {
@@ -23,13 +24,13 @@ import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
-import { syncQueryStateWithUrl } from '../../../../../data/public';
 import { OpenSearchPanel } from './open_search_panel';
 
 const getLegacyTopNavLinks = (
   services: DiscoverViewServices,
   inspectorAdapters: Adapters,
   savedSearch: SavedSearch,
+  startSyncingQueryStateWithUrl: () => void,
   isEnhancementEnabled: boolean = false
 ) => {
   const {
@@ -41,8 +42,6 @@ const getLegacyTopNavLinks = (
     toastNotifications,
     chrome,
     store,
-    data: { query },
-    osdUrlStateStorage,
   } = services;
 
   const newSearch: TopNavMenuData = {
@@ -83,7 +82,7 @@ const getLegacyTopNavLinks = (
         newCopyOnSave,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-      }: OnSaveProps) => {
+      }: OnSaveProps): Promise<SaveResult | undefined> => {
         const currentTitle = savedSearch.title;
         savedSearch.title = newTitle;
         savedSearch.copyOnSave = newCopyOnSave;
@@ -124,7 +123,7 @@ const getLegacyTopNavLinks = (
             store!.dispatch({ type: setSavedSearchId.type, payload: id });
 
             // starts syncing `_g` portion of url with query services
-            syncQueryStateWithUrl(query, osdUrlStateStorage);
+            startSyncingQueryStateWithUrl();
 
             return { id };
           }
@@ -277,6 +276,7 @@ export const getTopNavLinks = (
   services: DiscoverViewServices,
   inspectorAdapters: Adapters,
   savedSearch: SavedSearch,
+  startSyncingQueryStateWithUrl: () => void,
   isEnhancementEnabled: boolean = false,
   useNoIndexPatternsTopNav: boolean = false
 ) => {
@@ -289,14 +289,18 @@ export const getTopNavLinks = (
     toastNotifications,
     chrome,
     store,
-    data: { query },
-    osdUrlStateStorage,
     uiSettings,
   } = services;
 
   const showActionsInGroup = uiSettings.get('home:useNewHomePage');
   if (!showActionsInGroup)
-    return getLegacyTopNavLinks(services, inspectorAdapters, savedSearch, isEnhancementEnabled);
+    return getLegacyTopNavLinks(
+      services,
+      inspectorAdapters,
+      savedSearch,
+      startSyncingQueryStateWithUrl,
+      isEnhancementEnabled
+    );
 
   const topNavLinksMap = new Map<string, TopNavMenuData>();
 
@@ -361,7 +365,7 @@ export const getTopNavLinks = (
           newCopyOnSave,
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
-        }: OnSaveProps) => {
+        }: OnSaveProps): Promise<SaveResult | undefined> => {
           const currentTitle = savedSearch.title;
           savedSearch.title = newTitle;
           savedSearch.copyOnSave = newCopyOnSave;
@@ -402,7 +406,7 @@ export const getTopNavLinks = (
               store!.dispatch({ type: setSavedSearchId.type, payload: id });
 
               // starts syncing `_g` portion of url with query services
-              syncQueryStateWithUrl(query, osdUrlStateStorage);
+              startSyncingQueryStateWithUrl();
 
               return { id };
             }
