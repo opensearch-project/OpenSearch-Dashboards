@@ -28,11 +28,27 @@ Cypress.Commands.add(
       isEnhancement,
     });
 
-    // adding a wait here as sometimes the button doesn't click below
-    cy.wait(2000);
+    // There is a bug in Neo where the header of the index pattern page has the home page's header. Happens only in cypress
+    // Therefore it is unreliable to leverage the "create" button to navigate to this page
+    if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'neo') {
+      cy.get('@WORKSPACE_ID').then((workspaceId) => {
+        cy.visit(`/w/${workspaceId}/app/indexPatterns/create`);
+      });
+    } else {
+      // Navigate to Workspace Specific IndexPattern Page
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'indexPatterns',
+        isEnhancement,
+      });
 
-    // adding a force as sometimes the button is hidden behind a popup
-    cy.getElementByTestId('createIndexPatternButton').click({ force: true });
+      // adding a wait here as sometimes the button doesn't click below
+      cy.wait(2000);
+
+      // adding a force as sometimes the button is hidden behind a popup
+      cy.getElementByTestId('createIndexPatternButton').click({ force: true });
+    }
+
     cy.osd.waitForLoader(isEnhancement);
 
     const disableLocalCluster = !!Cypress.env('DISABLE_LOCAL_CLUSTER');
