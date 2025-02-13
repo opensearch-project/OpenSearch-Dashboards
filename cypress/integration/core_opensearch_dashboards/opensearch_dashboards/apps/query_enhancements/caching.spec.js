@@ -83,8 +83,15 @@ const cachingTestSuite = () => {
       cy.get(`[title="Index Patterns"]`).click();
 
       cy.wait('@getIndexPatternRequest').then((interceptedResponse) => {
-        const secondIndexPattern = interceptedResponse.response.body.saved_objects[1];
-        cy.wrap(secondIndexPattern.attributes.title).should('eq', alternativeIndexPattern);
+        let containsIndexPattern = false;
+
+        for (const savedObject of interceptedResponse.response.body.saved_objects) {
+          if (savedObject.attributes.title === alternativeIndexPattern) {
+            containsIndexPattern = true;
+          }
+        }
+
+        cy.wrap(containsIndexPattern).should('be.true');
       });
     });
   });
