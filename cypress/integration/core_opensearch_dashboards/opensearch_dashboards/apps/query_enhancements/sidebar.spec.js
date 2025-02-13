@@ -242,7 +242,7 @@ export const runSideBarTests = () => {
       );
       cy.osd.addDataSource({
         name: DATASOURCE_NAME,
-        url: 'http://opensearch-node:9200/',
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
