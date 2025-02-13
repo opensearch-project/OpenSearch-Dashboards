@@ -76,7 +76,9 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
         data-test-subj="queryResultLoading"
         className="editor__footerItem"
       >
-        {loadingText}
+        <EuiText size="xs" color="subdued" data-test-subj="queryResultLoadingMsg">
+          {loadingText}
+        </EuiText>
       </EuiButtonEmpty>
     );
   }
