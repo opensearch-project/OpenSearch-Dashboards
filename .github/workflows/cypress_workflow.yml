@@ -272,6 +272,20 @@ jobs:
           echo "PERFORMANCE_MESSAGE=$(if [ -f ./cypress/performance_metrics.json ]; then jq -r 'to_entries | map("• ❌ **\(.key)**: \(.value)") | join("\n")' ./cypress/performance_metrics.json; else echo "No performance issues detected 🎉"; fi)" >> $GITHUB_ENV
           if [ -f ./cypress/performance_metrics.json ]; then rm ./cypress/performance_metrics.json; fi
 
+      - name: Post Performance Comment on PR
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ inputs.pr_number }}
+          body: |
+            🚀 **Component Performance Metrics**
+
+            The following performance metrics exceeded their thresholds:
+
+            ${{ env.PERFORMANCE_MESSAGE }}
+
+            🔍 **Please review and optimize if necessary.**
+          reactions: 'eyes,rocket'
+
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - name: Upload FT repo screenshots
         uses: actions/upload-artifact@v4
@@ -358,17 +372,3 @@ jobs:
             #### Link to results:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           edit-mode: replace
-
-      - name: Post Performance Comment on PR
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          issue-number: ${{ inputs.pr_number }}
-          body: |
-            🚀 **Component Performance Metrics**
-
-            The following performance metrics exceeded their thresholds:
-
-            ${{ env.PERFORMANCE_MESSAGE }}
-
-            🔍 **Please review and optimize if necessary.**
-          reactions: 'eyes,rocket'
