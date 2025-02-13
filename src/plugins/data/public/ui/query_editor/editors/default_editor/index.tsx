@@ -21,7 +21,7 @@ export interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
   };
   headerRef?: React.RefObject<HTMLDivElement>;
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
-  queryStatus: QueryStatus;
+  queryStatus?: QueryStatus;
 }
 
 export const DefaultInput: React.FC<DefaultInputProps> = ({
@@ -73,7 +73,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         triggerSuggestOnFocus={true}
       />
       <div className="defaultEditor__progress" data-test-subj="defaultEditorProgress">
-        {queryStatus.status === ResultStatus.LOADING && (
+        {queryStatus?.status === ResultStatus.LOADING && (
           <EuiProgress size="xs" color="accent" position="absolute" />
         )}
       </div>
