@@ -267,7 +267,12 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)} flush="left">
+          <EuiButtonEmpty
+            size="xs"
+            {...reactRouterNavigate(history, `${index.id}`)}
+            flush="left"
+            data-test-subj={`dataSourcesManagement-dataSourceTableRowLink-${name}`}
+          >
             {name}
           </EuiButtonEmpty>
           {index.id === defaultDataSourceId ? (

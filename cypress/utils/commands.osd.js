@@ -99,6 +99,9 @@ cy.osd.add('addDataSource', (options) => {
 
   const { name, url, authType = 'no_auth', credentials = {} } = options;
 
+  // in case the data source already exists, delete it first
+  cy.osd.deleteDataSourceByName(name);
+
   // Visit the create data source page
   cy.visit('app/management/opensearch-dashboards/dataSources/create');
 
@@ -148,12 +151,26 @@ cy.osd.add('deleteDataSourceByName', (dataSourceName) => {
   // Navigate to the dataSource Management page
   cy.visit('app/dataSources');
 
-  // Find the anchor text corresponding to specified dataSource
-  cy.get('a').contains(dataSourceName).click();
+  cy.get('h1').contains('Data sources').should('be.visible');
 
-  // Delete the dataSource connection
-  cy.getElementByTestId('editDatasourceDeleteIcon').click();
-  cy.getElementByTestId('confirmModalConfirmButton').click();
+  // wait to ensure page fully loaded
+  cy.wait(1000);
+
+  cy.get('body').then(($body) => {
+    const dataSourceButton = $body.find(
+      `[data-test-subj="dataSourcesManagement-dataSourceTableRowLink-${dataSourceName}"]`
+    );
+
+    if (dataSourceButton.length) {
+      cy.getElementByTestId(
+        `dataSourcesManagement-dataSourceTableRowLink-${dataSourceName}`
+      ).click();
+
+      // Delete the dataSource connection
+      cy.getElementByTestId('editDatasourceDeleteIcon').click();
+      cy.getElementByTestId('confirmModalConfirmButton').click();
+    }
+  });
 });
 
 // Deletes all data sources. This command should only be used for convenience during development
