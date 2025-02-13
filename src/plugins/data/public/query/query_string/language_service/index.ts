@@ -10,5 +10,6 @@ export {
   QueryControls,
   QueryResult,
   QueryStatus,
+  ResultStatus,
   LanguageReference,
 } from './lib';

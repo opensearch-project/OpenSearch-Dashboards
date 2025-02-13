@@ -341,6 +341,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       ],
     },
     provideCompletionItems,
+    queryStatus: props.queryStatus!,
   };
 
   const singleLineInputProps = {

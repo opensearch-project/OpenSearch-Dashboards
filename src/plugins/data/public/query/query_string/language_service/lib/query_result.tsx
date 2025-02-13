@@ -58,8 +58,15 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     };
   }, [props.queryStatus.startTime]);
 
-  if (elapsedTime > BUFFER_TIME && props.queryStatus.status === ResultStatus.LOADING) {
+  if (props.queryStatus.status === ResultStatus.LOADING) {
     const time = Math.floor(elapsedTime / 1000);
+    const loadingText =
+      elapsedTime > BUFFER_TIME
+        ? i18n.translate('data.query.languageService.queryResults.loadTime', {
+            defaultMessage: 'Loading {time} s',
+            values: { time },
+          })
+        : '';
     return (
       <EuiButtonEmpty
         color="text"
@@ -69,10 +76,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
         data-test-subj="queryResultLoading"
         className="editor__footerItem"
       >
-        {i18n.translate('data.query.languageService.queryResults.loadTime', {
-          defaultMessage: 'Loading {time} s',
-          values: { time },
-        })}
+        {loadingText}
       </EuiButtonEmpty>
     );
   }
