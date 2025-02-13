@@ -194,6 +194,7 @@ const runHistogramInteractionTests = () => {
         };
         Object.keys(permutation).forEach((perm) => {
           config.langPermutation.forEach((lang) => {
+            if (lang === QueryLanguages.SQL.name) return; // SQL doesn't have a histogram
             cy.setQueryLanguage(lang);
             cy.getElementByTestId('dscChartChartheader').should('be.visible');
             cy.getElementByTestId('discoverChart').should(permutation[perm]);
