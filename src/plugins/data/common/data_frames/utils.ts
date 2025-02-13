@@ -18,7 +18,6 @@ import {
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
 import { TimeRange } from '../types';
-import { getTimeZoneFromSettings } from '../opensearch_query/utils';
 
 /**
  * Converts the data frame response to a search response.
@@ -28,11 +27,7 @@ import { getTimeZoneFromSettings } from '../opensearch_query/utils';
  * @param response - data frame response object
  * @returns converted search response
  */
-export const convertResult = (
-  response: IDataFrameResponse,
-  timezone: string,
-  dateFormat: string
-): SearchResponse<any> => {
+export const convertResult = (response: IDataFrameResponse): SearchResponse<any> => {
   const body = response.body;
   if (body.hasOwnProperty('error')) {
     return response;
@@ -60,15 +55,9 @@ export const convertResult = (
       const hit: { [key: string]: any } = {};
 
       const processField = (field: any, value: any): any => {
-        // Handle date fields; Added moment check since nested field does not have a type but it might also be a date
-        if (field.type === 'date' || moment(value, ['YYYY-MM-DD HH:mm:ss'], true).isValid()) {
-          const parsedDate = datemath.parse(value);
-          return parsedDate
-            ? moment(parsedDate)
-                .utc(true) // Since opensearch returns date in UTC
-                .tz(getTimeZoneFromSettings(timezone)) // Convert to user's timezone defined in advanced settings
-                .format(dateFormat) // Format the date based on user's date format defined in advanced settings
-            : '';
+        // Handle date fields
+        if (moment(value, ['YYYY-MM-DD HH:mm:ss'], true).isValid()) {
+          return value.replace(' ', 'T') + '+00:00';
         }
 
         // Handle nested objects with potential date fields

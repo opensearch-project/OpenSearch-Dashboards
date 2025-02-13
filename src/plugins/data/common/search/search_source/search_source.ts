@@ -444,13 +444,7 @@ export class SearchSource {
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
           const dataFrameResponse = response as IDataFrameDefaultResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-
-          const timeZone = getConfig(UI_SETTINGS.DATE_FORMAT_TIMEZONE);
-          const timeFormat = getConfig(UI_SETTINGS.DATE_FORMAT);
-          return onResponse(
-            searchRequest,
-            convertResult(response as IDataFrameResponse, timeZone, timeFormat)
-          );
+          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
           const startTime = Date.now();
