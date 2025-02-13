@@ -269,20 +269,30 @@ jobs:
       - name: Read Performance Metrics
         id: read-metrics
         run: |
-          echo "PERFORMANCE_MESSAGE=$(if [ -f ./cypress/performance_metrics.json ]; then jq -r 'to_entries | map("• ❌ **\(.key)**: \(.value)") | join("\n")' ./cypress/performance_metrics.json; else echo "No performance issues detected 🎉"; fi)" >> $GITHUB_ENV
-          if [ -f ./cypress/performance_metrics.json ]; then rm ./cypress/performance_metrics.json; fi
+          if [ -f ./cypress/performance_metrics.json ]; then
+            PERFORMANCE_MESSAGE=$(jq -r 'to_entries | map("• ❌ **\(.key)**: \(.value)") | join("\n")' ./cypress/performance_metrics.json)
+            echo "PERFORMANCE_MESSAGE<<EOF" >> $GITHUB_ENV
+            echo "$PERFORMANCE_MESSAGE" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            rm ./cypress/performance_metrics.json
+          else
+            echo "PERFORMANCE_MESSAGE=No performance issues detected 🎉" >> $GITHUB_ENV
+          fi
 
       - name: Post Performance Metrics Comment via GitHub Script
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: `🚀 **Component Performance Metrics**\n\nThe following performance metrics exceeded their thresholds:\n\n${{ env.PERFORMANCE_MESSAGE }}\n\n🔍 **Please review and optimize if necessary.**`
-            });
+            const message = process.env.PERFORMANCE_MESSAGE;
+               if (message && message.trim() !== "No performance issues detected 🎉") {
+                 github.rest.issues.createComment({
+                   owner: context.repo.owner,
+                   repo: context.repo.repo,
+                   issue_number: context.payload.pull_request.number,
+                   body: `🚀 **Component Performance Metrics**\n\nThe following performance metrics exceeded their thresholds:\n\n${message}\n\n🔍 **Please review and optimize if necessary.**`
+                 });
+               }
 
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - name: Upload FT repo screenshots
