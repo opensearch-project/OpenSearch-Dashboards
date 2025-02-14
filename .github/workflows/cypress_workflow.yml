@@ -279,10 +279,12 @@ jobs:
           fi
 
       - name: Upload Performance Metrics
-          uses: actions/upload-artifact@v4
-          with:
-            name: performance-metrics-${{ matrix.group }}
-            path: ./performance-results.json
+        uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('./cypress/performance_metrics.json') != '' }}
+        with:
+          name: performance-metrics-${{ matrix.group }}
+          path: ./cypress/performance_metrics.json
+          retention-days: 1
 
       - name: Post Performance Metrics Comment via GitHub Script
         uses: actions/github-script@v7
