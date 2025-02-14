@@ -24,19 +24,16 @@ const queriesTestSuite = () => {
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
       );
-
       // Add data source
       cy.osd.addDataSource({
         name: DATASOURCE_NAME,
         url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
-
       // Create workspace and set up index pattern
       cy.deleteAllWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
-
       // Create and select index pattern for ${INDEX_WITH_TIME_1}*
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspace,
@@ -46,7 +43,6 @@ const queriesTestSuite = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-
       // Go to discover page
       cy.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
