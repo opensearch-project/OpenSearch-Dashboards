@@ -25,7 +25,6 @@ const fieldDisplayFilteringTestSuite = () => {
         ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
         ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
       );
-
       // Add data source
       cy.osd.addDataSource({
         name: DATASOURCE_NAME,
