@@ -132,7 +132,8 @@ export const runSideBarTests = () => {
   describe('sidebar spec', () => {
     const testData = {
       pplQuery: (dataset) => `source = ${dataset} | where status_code = 200  | sort + timestamp`,
-      sqlQuery: (dataset) => `SELECT * FROM ${dataset} WHERE status_code = 200 ORDER BY ASC`,
+      sqlQuery: (dataset) =>
+        `SELECT * FROM ${dataset} WHERE status_code = 200 ORDER BY timestamp ASC`,
       simpleFields: {
         fields: ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'],
         expectedValues: ['3.91', '4.82', '1.72', '4.08', '3.97'],
