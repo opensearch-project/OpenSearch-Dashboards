@@ -7,6 +7,10 @@
     background-color: $euiColorLightestShade;
   }
 
+  &__progress {
+    position: relative;
+  }
+
   .monaco-editor {
     border-radius: $euiSizeXS $euiSizeXS 0 0;
 
