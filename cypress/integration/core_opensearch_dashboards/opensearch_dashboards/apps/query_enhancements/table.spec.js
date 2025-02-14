@@ -98,13 +98,18 @@ export const runTableTests = () => {
         it(`should allow expand multiple documents for ${config.testName}`, () => {
           // Setup
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
-          setDatePickerDatesAndSearchIfRelevant(config.language);
-          // expanding a document in the table
-          cy.get('[data-test-subj="docTableExpandToggleColumn"]')
-            .find('[type="button"]')
-            .eq(2)
-            .click();
+
+          // If SQL, since we don't set date picker, when switching languages later it won't show any results
+          // so setting dates here
+          if (config.language === QueryLanguages.SQL.name) {
+            cy.setQueryLanguage(QueryLanguages.PPL.name);
+            setDatePickerDatesAndSearchIfRelevant(QueryLanguages.PPL.name);
+            cy.wait(1000);
+            cy.setQueryLanguage(QueryLanguages.SQL.name);
+          } else {
+            cy.setQueryLanguage(config.language);
+            setDatePickerDatesAndSearchIfRelevant(config.language);
+          }
 
           // expanding a document in the table
           cy.get('[data-test-subj="docTableExpandToggleColumn"]')
