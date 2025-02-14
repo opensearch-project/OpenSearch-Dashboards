@@ -57,7 +57,7 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
       const processField = (field: any, value: any): any => {
         // Handle date fields
         if (moment(value, ['YYYY-MM-DD HH:mm:ss'], true).isValid()) {
-          return value.replace(' ', 'T') + '+00:00';
+          return moment.utc(value).format('YYYY-MM-DDTHH:mm:ssZ');
         }
 
         // Handle nested objects with potential date fields
