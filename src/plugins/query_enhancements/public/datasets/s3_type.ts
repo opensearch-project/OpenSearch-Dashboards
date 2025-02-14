@@ -132,7 +132,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicPPLQuery', {
               defaultMessage: 'Sample query for PPL',
             }),
-            query: `source = ${dataset.title} | head 10`,
+            query: `source = ${dataset.title} | head 500`,
           },
         ];
       case 'SQL':
@@ -141,18 +141,18 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicSQLQuery', {
               defaultMessage: 'Sample query for SQL',
             }),
-            query: `SELECT * FROM ${dataset.title} LIMIT 10`,
+            query: `SELECT * FROM ${dataset.title} LIMIT 500`,
           },
         ];
     }
   },
 
-  getInitialQueryString: (query: Query) => {
+  getInitialQueryString: (query: Query, sampleSize?: number) => {
     switch (query.language) {
       case 'PPL':
-        return `source = ${query.dataset?.title} | head 10`;
+        return `source = ${query.dataset?.title} | head ${sampleSize ?? 500}`;
       case 'SQL':
-        return `SELECT * FROM ${query.dataset?.title} LIMIT 10`;
+        return `SELECT * FROM ${query.dataset?.title} LIMIT ${sampleSize ?? 500}`;
     }
   },
 };

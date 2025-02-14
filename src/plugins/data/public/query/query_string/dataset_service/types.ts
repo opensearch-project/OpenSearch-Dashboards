@@ -117,5 +117,5 @@ export interface DatasetTypeConfig {
   /**
    * Returns the initial query that is added to the query editor when a dataset is selected.
    */
-  getInitialQueryString?: (query: Query) => string | void;
+  getInitialQueryString?: (query: Query, sampleSize?: number) => string | void;
 }

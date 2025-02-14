@@ -5,7 +5,7 @@
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import { DataStorage } from '../../data/common';
+import { DataStorage, UI_SETTINGS } from '../../data/common';
 import {
   createEditor,
   DefaultInput,
@@ -65,7 +65,12 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      // TODO: we should remove sample size for default PPL query here
+      // once fetch_size is working: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9385
+      getQueryString: (currentQuery: Query) =>
+        `source = ${currentQuery.dataset?.title} | head ${core.uiSettings.get(
+          UI_SETTINGS.DISCOVER_SAMPLE_SIZE
+        )}`,
       fields: { sortable: false, filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
