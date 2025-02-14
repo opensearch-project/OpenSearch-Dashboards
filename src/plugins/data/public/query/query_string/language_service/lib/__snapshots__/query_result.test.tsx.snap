@@ -59,4 +59,19 @@ exports[`Query Result show error status with error message 2`] = `
 </EuiPopover>
 `;
 
-exports[`Query Result shows loading status 1`] = `""`;
+exports[`Query Result shows loading status 1`] = `
+<EuiButtonEmpty
+  className="editor__footerItem"
+  color="text"
+  data-test-subj="queryResultLoading"
+  isLoading={true}
+  onClick={[Function]}
+  size="xs"
+>
+  <EuiText
+    color="subdued"
+    data-test-subj="queryResultLoadingMsg"
+    size="xs"
+  />
+</EuiButtonEmpty>
+`;

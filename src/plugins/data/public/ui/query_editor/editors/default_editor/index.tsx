@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
+import { QueryStatus, ResultStatus } from '../../../../query';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { createEditor, SingleLineInput } from '../shared';
 
@@ -20,6 +21,7 @@ export interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
   };
   headerRef?: React.RefObject<HTMLDivElement>;
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+  queryStatus?: QueryStatus;
 }
 
 export const DefaultInput: React.FC<DefaultInputProps> = ({
@@ -30,6 +32,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   editorDidMount,
   headerRef,
   provideCompletionItems,
+  queryStatus,
 }) => {
   return (
     <div className="defaultEditor" data-test-subj="osdQueryEditor__multiLine">
@@ -69,6 +72,11 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         }}
         triggerSuggestOnFocus={true}
       />
+      <div className="defaultEditor__progress" data-test-subj="defaultEditorProgress">
+        {queryStatus?.status === ResultStatus.LOADING && (
+          <EuiProgress size="xs" color="accent" position="absolute" />
+        )}
+      </div>
       <div className="defaultEditor__footer" data-test-subj="defaultEditorFooter">
         {footerItems && (
           <EuiFlexGroup
