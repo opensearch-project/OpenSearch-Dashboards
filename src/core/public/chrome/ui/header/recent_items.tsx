@@ -241,23 +241,25 @@ export const RecentItems = ({
       }));
     if (savedObjects.length) {
       bulkGetDetail(savedObjects, http).then((res) => {
-        const formatDetailedSavedObjects = res.map((obj) => {
-          const recentAccessItem = recentlyAccessedItems.find(
-            (item) => item.id === obj.id
-          ) as ChromeRecentlyAccessedHistoryItem;
+        const formatDetailedSavedObjects = res
+          .filter((obj) => !obj.error) // filter out saved objects has errors
+          .map((obj) => {
+            const recentAccessItem = recentlyAccessedItems.find(
+              (item) => item.id === obj.id
+            ) as ChromeRecentlyAccessedHistoryItem;
 
-          const findWorkspace = workspaceList.find(
-            (workspace) => workspace.id === recentAccessItem.workspaceId
-          );
+            const findWorkspace = workspaceList.find(
+              (workspace) => workspace.id === recentAccessItem.workspaceId
+            );
 
-          return {
-            ...recentAccessItem,
-            ...obj,
-            ...recentAccessItem.meta,
-            updatedAt: moment(obj?.updated_at).valueOf(),
-            workspaceName: findWorkspace?.name,
-          };
-        });
+            return {
+              ...recentAccessItem,
+              ...obj,
+              ...recentAccessItem.meta,
+              updatedAt: moment(obj?.updated_at).valueOf(),
+              workspaceName: findWorkspace?.name,
+            };
+          });
         setDetailedSavedObjects(formatDetailedSavedObjects);
       });
     }
