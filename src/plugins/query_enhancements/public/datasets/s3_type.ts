@@ -15,7 +15,6 @@ import {
   DataStructureCustomMeta,
   Dataset,
   DatasetField,
-  Query,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices, OSD_FIELD_TYPES } from '../../../data/public';
 import {

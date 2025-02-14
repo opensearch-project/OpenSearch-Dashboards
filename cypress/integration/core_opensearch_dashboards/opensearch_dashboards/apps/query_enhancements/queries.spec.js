@@ -125,7 +125,7 @@ const queriesTestSuite = () => {
         // Default PPL query should be set
         cy.waitForLoader(true);
         cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-          `source = ${INDEX_WITH_TIME_1}*`
+          `source = ${INDEX_WITH_TIME_1}* | head 500`
         );
         cy.waitForSearch();
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
