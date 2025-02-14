@@ -23,6 +23,16 @@ export const getTableVisCellValue = (
   const rawContent = row[columnId];
   const colIndex = columns.findIndex((col) => col.id === columnId);
   const htmlContent = columns[colIndex].formatter.convert(rawContent, 'html');
+  dompurify.addHook('uponSanitizeAttribute', function (currentNode, hookEvent) {
+    if (hookEvent.attrName === 'target') {
+      hookEvent.forceKeepAttr = true;
+    }
+  });
+  dompurify.addHook('afterSanitizeElements', (currentNode) => {
+    if (currentNode.tagName?.toUpperCase?.() === 'A') {
+      currentNode.setAttribute('rel', 'noopener noreferrer');
+    }
+  });
   const formattedContent = (
     /*
      * Justification for dangerouslySetInnerHTML:
@@ -36,3 +46,5 @@ export const getTableVisCellValue = (
   );
   return formattedContent || null;
 };
+
+
