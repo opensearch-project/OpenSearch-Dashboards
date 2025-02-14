@@ -1,0 +1,2 @@
+test:
+- [TESTID-64] Add cypress test for auto query updates when switch dataset ([#9322](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9322))

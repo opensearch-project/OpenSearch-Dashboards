@@ -47,7 +47,6 @@ export const runSimpleDatasetSelectorTests = () => {
         url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
-
       // Create workspace
       cy.deleteAllWorkspaces();
       cy.visit('/app/home');
