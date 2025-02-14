@@ -18,7 +18,7 @@ import {
   generateRecentQueriesTestConfiguration,
   BaseQuery,
   TestQueries,
-  QueryRegex,
+  //TODO: QueryRegex,
 } from '../../../../../utils/apps/query_enhancements/recent_queries';
 import { prepareTestSuite } from '../../../../../utils/helpers';
 
@@ -180,6 +180,10 @@ const runRecentQueryTests = () => {
           });
         });
 
+        /* TODO: adding these tests requires adding a dependency OR customizing the execSync function
+        //const { execSync } = require('child_process'); 
+        //console.log(execSync('xclip -selection clipboard -o').toString().trim()); // for Linux
+        //Caveat: the commands for reading the system's clipboard is OS-dependent.
         it(`check running and copying recent queries for ${config.testName}`, () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
@@ -221,7 +225,7 @@ const runRecentQueryTests = () => {
                 expect(clipboardText).to.eq(expectedQuery);
               });
             });
-        });
+        });*/
       });
   });
 };

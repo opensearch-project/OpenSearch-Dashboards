@@ -53,10 +53,11 @@ export const TestQueries = [
   'event_sequence_number > 10000000',
 ];
 
+/* // TODO
 export const QueryRegex = {
   PPL: /.*?(source .*? 8000)(?:.*)/s,
   'OpenSearch SQL': /.*?(SELECT .*? 8000)(?:.*)/s,
-};
+};*/
 
 /**
  * The configurations needed for recent queries tests
