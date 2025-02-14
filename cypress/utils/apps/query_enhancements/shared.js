@@ -27,6 +27,26 @@ export const getRandomizedWorkspaceName = () =>
   `${WORKSPACE_NAME}-${getRandomString().substring(7)}`;
 
 /**
+ * Generates base test configuration for tests
+ * @param {string} dataset - Dataset name
+ * @param {string} datasetType - Type of dataset
+ * @param {Object} language - Language configuration
+ * @returns {Object} Test configuration object
+ */
+export const generateBaseConfiguration = (dataset, datasetType, language) => {
+  const baseConfig = {
+    dataset,
+    datasetType,
+    language: language.name,
+    testName: `${language.name}-${datasetType}`,
+  };
+
+  return {
+    ...baseConfig,
+  };
+};
+
+/**
  * Callback for generateAllTestConfigurations
  * @callback GenerateTestConfigurationCallback
  * @param {string} dataset - the dataset name

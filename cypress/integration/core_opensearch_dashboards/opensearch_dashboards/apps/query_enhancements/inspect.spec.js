@@ -39,7 +39,6 @@ const inspectTestSuite = () => {
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
       );
-
       // Add data source
       cy.osd.addDataSource({
         name: DATASOURCE_NAME,

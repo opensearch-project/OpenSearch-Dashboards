@@ -99,6 +99,9 @@ cy.osd.add('addDataSource', (options) => {
 
   const { name, url, authType = 'no_auth', credentials = {} } = options;
 
+  // in case the data source already exists, delete it first
+  cy.osd.deleteDataSourceByName(name);
+
   // Visit the create data source page
   cy.visit('app/management/opensearch-dashboards/dataSources/create');
 
@@ -147,13 +150,32 @@ cy.osd.add('deleteDataSourceByName', (dataSourceName) => {
 
   // Navigate to the dataSource Management page
   cy.visit('app/dataSources');
+  cy.get('h1').contains('Data sources').should('be.visible');
+  cy.wait(2000);
 
-  // Find the anchor text corresponding to specified dataSource
-  cy.get('a').contains(dataSourceName).click();
+  // Check if data source exists before trying to delete
+  cy.get('body').then(($body) => {
+    // First check if we're in empty state
+    const hasEmptyState = $body.find('[data-test-subj="datasourceTableEmptyState"]').length > 0;
 
-  // Delete the dataSource connection
-  cy.getElementByTestId('editDatasourceDeleteIcon').click();
-  cy.getElementByTestId('confirmModalConfirmButton').click();
+    if (hasEmptyState) {
+      cy.log(`No data sources exist - skipping deletion of ${dataSourceName}`);
+      return;
+    }
+
+    // Then check if our specific data source exists
+    const dataSourceExists = $body.find(`a:contains("${dataSourceName}")`).length > 0;
+
+    if (!dataSourceExists) {
+      cy.log(`Data source ${dataSourceName} not found - skipping deletion`);
+      return;
+    }
+
+    // If we get here, the data source exists and we can delete it
+    cy.get('a').contains(dataSourceName).click();
+    cy.getElementByTestId('editDatasourceDeleteIcon').should('be.visible').click();
+    cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
+  });
 });
 
 // Deletes all data sources. This command should only be used for convenience during development

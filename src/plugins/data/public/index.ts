@@ -484,6 +484,7 @@ export {
   QueryControls,
   QueryResult,
   QueryStatus,
+  ResultStatus,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
