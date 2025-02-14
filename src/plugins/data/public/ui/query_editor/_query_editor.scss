@@ -219,6 +219,10 @@
   }
 }
 
+.queryEditor__progress {
+  position: relative;
+}
+
 .queryEditor__footer {
   display: flex;
   gap: 4px;

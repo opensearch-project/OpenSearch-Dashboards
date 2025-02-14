@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCompressedFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiProgress } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
 import React, { Fragment, useCallback, useRef, useState } from 'react';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
+import { QueryStatus, ResultStatus } from '../../../query';
 
 interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   languageId: string;
@@ -16,6 +17,7 @@ interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   footerItems?: any;
+  queryStatus?: QueryStatus;
 }
 
 type CollapsedComponent<T> = React.ComponentType<T>;
@@ -63,6 +65,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   provideCompletionItems,
   prepend,
   footerItems,
+  queryStatus,
 }) => {
   const [editorIsFocused, setEditorIsFocused] = useState(false);
   const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
@@ -152,6 +155,11 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
           }}
           triggerSuggestOnFocus={true}
         />
+        <div className="queryEditor__progress" data-test-subj="queryEditorProgress">
+          {queryStatus?.status === ResultStatus.LOADING && (
+            <EuiProgress size="xs" color="accent" position="absolute" />
+          )}
+        </div>
         {editorIsFocused && (
           <div className="queryEditor__footer" data-test-subj="queryEditorFooter">
             {footerItems && (
