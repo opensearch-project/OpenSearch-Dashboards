@@ -9,6 +9,7 @@ import {
   INDEX_PATTERN_WITH_TIME_1,
   PATHS,
   DATASOURCE_NAME,
+  QueryLanguages,
 } from '../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
@@ -75,11 +76,11 @@ const addSidebarFieldsAndCheckDocTableColumns = (
     },
   ]).each((fn) => fn());
 
-  if (isIndexPattern && config.language !== 'OpenSearch SQL') {
+  if (isIndexPattern && config.language !== QueryLanguages.SQL.name) {
     cy.getElementByTestId('discoverQueryHits').should('have.text', '10,000');
   }
 
-  if (config.language === 'PPL') {
+  if (config.language === QueryLanguages.PPL.name) {
     cy.intercept('**/api/enhancements/search/ppl').as('query');
     cy.setQueryEditor(pplQuery);
     cy.wait('@query').then(() => {
@@ -89,7 +90,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (
       }
       checkDocTableColumn(expectedValues, 2);
     });
-  } else if (config.language === 'OpenSearch SQL') {
+  } else if (config.language === QueryLanguages.SQL.name) {
     cy.intercept('**/api/enhancements/search/sql').as('query');
     cy.setQueryEditor(sqlQuery);
     cy.wait('@query').then(() => {
@@ -130,8 +131,8 @@ const checkSidebarPanelBehavior = () => {
 export const runSideBarTests = () => {
   describe('sidebar spec', () => {
     const testData = {
-      pplQuery: (dataset) => `source = ${dataset} | where status_code = 200`,
-      sqlQuery: (dataset) => `SELECT * FROM ${dataset} WHERE status_code = 200`,
+      pplQuery: (dataset) => `source = ${dataset} | where status_code = 200  | sort + timestamp`,
+      sqlQuery: (dataset) => `SELECT * FROM ${dataset} WHERE status_code = 200 ORDER BY ASC`,
       simpleFields: {
         fields: ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'],
         expectedValues: ['3.91', '4.82', '1.72', '4.08', '3.97'],

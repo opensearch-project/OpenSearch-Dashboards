@@ -10,6 +10,10 @@ module.exports = defineConfig({
   defaultCommandTimeout: 60000,
   requestTimeout: 60000,
   responseTimeout: 60000,
+  retries: {
+    runMode: 2,
+    openMode: 0,
+  },
   viewportWidth: 2000,
   viewportHeight: 1320,
   env: {
