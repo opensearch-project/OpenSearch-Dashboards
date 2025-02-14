@@ -62,7 +62,7 @@ export const runAutocompleteTests = () => {
                 isEnhancement: true,
               });
             }
-            cy.navigateToWorkSpaceSpecificPage({
+            cy.osd.navigateToWorkSpaceSpecificPage({
               workspaceName: workspaceName,
               page: 'discover',
               isEnhancement: true,
@@ -84,7 +84,7 @@ export const runAutocompleteTests = () => {
 
             // Run the query
             cy.getElementByTestId('querySubmitButton').click();
-            cy.waitForLoader(true);
+            cy.osd.waitForLoader(true);
             cy.wait(1000);
             // Validate results meet our conditions
             validateQueryResults('bytes_transferred', 9500, '>');

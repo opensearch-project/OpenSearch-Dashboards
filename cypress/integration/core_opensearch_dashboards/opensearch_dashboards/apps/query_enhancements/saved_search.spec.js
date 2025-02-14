@@ -60,6 +60,7 @@ const runSavedSearchTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+      cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
     });
 
     afterEach(() => {

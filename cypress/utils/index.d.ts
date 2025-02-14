@@ -143,6 +143,11 @@ declare namespace Cypress {
        * cy.osd.waitForLoader()
        */
       waitForLoader(isEnhancement?: boolean): Chainable<any>;
+
+      /**
+       * Grabs the dataSourceId in non-OSD environments and saves it in the alias @DATASOURCE_ID
+       */
+      grabDataSourceId(workspaceName: string, dataSourceName: string): Chainable<any>;
     };
   }
 }

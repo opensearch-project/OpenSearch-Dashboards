@@ -115,7 +115,7 @@ export const runAutocompleteTests = () => {
             // Run with mouse click
             cy.getElementByTestId('querySubmitButton').click();
 
-            cy.waitForLoader(true);
+            cy.osd.waitForLoader(true);
             cy.wait(1000);
             validateQueryResults('unique_category', 'Configuration');
           });
@@ -138,7 +138,7 @@ export const runAutocompleteTests = () => {
               cy.getElementByTestId('querySubmitButton').click();
             }
 
-            cy.waitForLoader(true);
+            cy.osd.waitForLoader(true);
             cy.wait(2000);
             validateQueryResults('unique_category', 'Configuration');
           });

@@ -150,7 +150,7 @@ cy.osd.add('deleteDataSourceByName', (dataSourceName) => {
 
   // Navigate to the dataSource Management page
   cy.visit('app/dataSources');
-  cy.waitForLoader(true);
+  cy.osd.waitForLoader(true);
   cy.wait(2000);
 
   // Check if data source exists before trying to delete
@@ -268,4 +268,22 @@ cy.osd.add('waitForLoader', (isEnhancement = false) => {
   cy.getElementByTestId(isEnhancement ? 'recentItemsSectionButton' : 'homeIcon', opts).should(
     'be.visible'
   );
+});
+
+cy.osd.add('grabDataSourceId', (workspaceName, dataSourceName) => {
+  // IN OSD environment, we are grabbing the DATASOURCE_ID in addDataSource command.
+  // In other environments, we need to grab it manually
+  if (Cypress.env('CYPRESS_RUNTIME_ENV') !== 'osd') {
+    cy.osd.navigateToWorkSpaceSpecificPage({
+      workspaceName,
+      page: 'dataSources',
+      isEnhancement: true,
+    });
+    cy.get('span').contains(dataSourceName).click();
+    cy.url().then(($url) => {
+      const urlParts = $url.split('/');
+      const dataSourceId = urlParts[urlParts.length - 1];
+      cy.wrap(dataSourceId).as('DATASOURCE_ID');
+    });
+  }
 });
