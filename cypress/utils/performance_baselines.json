@@ -1,12 +1,21 @@
 {
-  "discover_docTable": {
-    "render_time": 100,
-    "layout_shift": 0.08,
-    "memory_MB": 40
-  },
-  "discover_sidebarPanel": {
-    "render_time": 100,
-    "layout_shift": 0.08,
-    "memory_MB": 40
+  "discover": {
+    "docTable": {
+      "onLoadSavedQuery": {
+        "render_time": 500,
+        "layout_shift": 0.5,
+        "memory_MB": 2000
+      }
+    },
+    "docTableField": {
+      "onLoadSavedSearch": {
+        "render_time": 100,
+        "layout_shift": 0.5,
+        "memory_MB": 100
+      }
+    },
+    "sidebarPanel": {
+      "onPageLoad": { "render_time": 500, "layout_shift": 0.5, "memory_MB": 500 }
+    }
   }
 }

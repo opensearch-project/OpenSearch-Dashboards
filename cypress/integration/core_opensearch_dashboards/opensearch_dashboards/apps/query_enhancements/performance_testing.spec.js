@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// This file is rough for performance metrics testing. Do Not Delete.
 import {
   DATASOURCE_NAME,
   INDEX_WITH_TIME_1,
@@ -46,9 +47,13 @@ export const runSavedSearchTests = () => {
       cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
     });
 
-    it('should test discover page compoonent performance', () => {
+    it('should test discover page compoonent sidebar performance', () => {
       cy.visit('/app/discover');
-      cy.measureComponentPerformance('discover', 'sidebarPanel');
+      cy.measureComponentPerformance({
+        page: 'discover',
+        componentTestId: 'sidebarPanel',
+        eventName: 'onPageLoad',
+      });
       cy.getElementByTestId('sidebarPanel').should('be.visible');
     });
   });

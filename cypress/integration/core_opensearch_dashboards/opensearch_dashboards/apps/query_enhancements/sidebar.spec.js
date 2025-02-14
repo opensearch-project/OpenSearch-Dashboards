@@ -117,6 +117,14 @@ const checkFilteredFieldsForAllLanguages = () => {
 
 const checkSidebarPanelBehavior = () => {
   const checkPanelVisibility = (shouldBeVisible) => {
+    {
+      shouldBeVisible &&
+        cy.measureComponentPerformance({
+          page: 'discover',
+          componentTestId: 'sidebarPanel',
+          eventName: 'onPageLoad',
+        });
+    }
     cy.getElementByTestId('sidebarPanel').should(shouldBeVisible ? 'be.visible' : 'not.be.visible');
   };
 
@@ -148,6 +156,7 @@ export const runSideBarTests = () => {
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
       );
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
       cy.osd.addDataSource({
         name: DATASOURCE_NAME,
         url: PATHS.SECONDARY_ENGINE,

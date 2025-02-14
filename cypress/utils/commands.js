@@ -63,22 +63,24 @@ Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
 });
 
 // Command to measure component performance and compare with baseline
-// Example -  cy.measureComponentPerformance(
-//   'workspace-initial-card-createWorkspace-button',
-//   'table_render_time'
-// );
-Cypress.Commands.add('measureComponentPerformance', (pluginName, testId) => {
+// Exampele - cy.measureComponentPerformance({
+//   page: 'discover',
+//   componentTestId: 'docTable',
+//   eventName: 'onLoadSavedQuery',
+// });
+Cypress.Commands.add('measureComponentPerformance', (opts) => {
+  const { page, componentTestId, eventName } = opts;
   cy.readFile('cypress/utils/performance_baselines.json').then((baselines) => {
     // Retrieve baseline for the given component (testId)
-    const fieldName = `${pluginName}_${testId}`;
-    const baseline = baselines[fieldName];
+    const baseline = baselines[page][componentTestId][eventName];
+    const fieldName = `${page}_${componentTestId}_${eventName}`;
 
     if (baseline) {
       cy.window().then((win) => {
         const startTime = win.performance.now();
 
         // Measure render time
-        cy.getElementByTestId(testId)
+        cy.getElementByTestId(componentTestId)
           .should('be.visible')
           .then(() => {
             const endTime = win.performance.now();
