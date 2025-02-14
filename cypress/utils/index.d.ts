@@ -83,6 +83,11 @@ declare namespace Cypress {
      */
     openWorkspaceDashboard<S = any>(workspaceName: string): Chainable<S>;
 
+    /**
+     * Sets advanced settings
+     */
+    setAdvancedSetting(changes: Record<string, any>): Chainable<any>;
+
     // osd namespace
     osd: {
       /**

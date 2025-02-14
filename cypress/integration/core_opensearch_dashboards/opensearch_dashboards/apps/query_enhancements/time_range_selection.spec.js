@@ -58,6 +58,10 @@ export const runTimeRangeSelectionTests = () => {
       cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
       cy.osd.deleteIndex(INDEX_WITH_TIME_1);
       cy.osd.deleteIndex(INDEX_WITH_TIME_2);
+      cy.window().then((win) => {
+        win.localStorage.clear();
+        win.sessionStorage.clear();
+      });
     });
 
     generateAllTestConfigurations(generateTimeRangeTestConfiguration).forEach((config) => {

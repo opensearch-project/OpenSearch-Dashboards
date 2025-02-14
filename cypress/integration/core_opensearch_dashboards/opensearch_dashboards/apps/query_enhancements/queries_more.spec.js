@@ -78,7 +78,7 @@ export const runQueryTests = () => {
               indexPatternHasTimefield: false,
             });
           }
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
             page: 'discover',
             isEnhancement: true,

@@ -16,3 +16,12 @@ Cypress.on('uncaught:exception', (err) => {
     return false;
   }
 });
+
+Cypress.on('test:before:run', () => {
+  Cypress.automation('remote:debugger:protocol', {
+    command: 'Emulation.setTimezoneOverride',
+    params: {
+      timezoneId: 'UTC',
+    },
+  });
+});
