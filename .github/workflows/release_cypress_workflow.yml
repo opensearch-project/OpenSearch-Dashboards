@@ -150,10 +150,12 @@ jobs:
           name: release-osd-cypress-screenshots-${{ matrix.spec_group }}
           path: ${{ env.OSD_PATH }}/cypress/screenshots
           retention-days: 1
+          overwrite: true
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: release-osd-cypress-videos-${{ matrix.spec_group }}
           path: ${{ env.OSD_PATH }}/cypress/videos
           retention-days: 1
+          overwrite: true
