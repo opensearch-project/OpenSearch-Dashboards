@@ -15,7 +15,7 @@ const workspace = getRandomizedWorkspaceName();
 
 const s3DatasetTestSuite = () => {
   let dataSourceId = '';
-  const definedS3Variables = !S3_CLUSTER?.url;
+  const definedS3Variables = !S3_CLUSTER.url;
 
   (definedS3Variables ? describe.skip : describe)(
     'S3 Dataset',
