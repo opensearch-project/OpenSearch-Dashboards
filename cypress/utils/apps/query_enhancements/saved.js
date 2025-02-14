@@ -511,6 +511,10 @@ export const navigateToDashboardAndOpenSavedSearchPanel = (workspaceName) => {
     page: 'dashboards',
     isEnhancement: true,
   });
+
+  // adding a wait as cy.click sometimes fails with the error "...failed because the page updated while this command was executing"
+  cy.wait(1000);
+
   cy.getElementByTestId('newItemButton').click();
   // using DQL as it supports date picker
   setDatePickerDatesAndSearchIfRelevant(QueryLanguages.DQL.name);
