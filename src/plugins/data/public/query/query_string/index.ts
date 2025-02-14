@@ -45,5 +45,6 @@ export {
   QueryControls,
   QueryResult,
   QueryStatus,
+  ResultStatus,
   LanguageReference,
 } from './language_service';
