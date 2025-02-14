@@ -40,7 +40,6 @@ export const runTimeRangeSelectionTests = () => {
         url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
-
       // Create workspace
       cy.deleteWorkspaceByName(workspaceName);
       cy.visit('/app/home');
