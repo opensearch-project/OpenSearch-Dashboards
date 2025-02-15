@@ -28,6 +28,7 @@ const cachingTestSuite = () => {
       });
       // Create workspace
       cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.wait(2000);

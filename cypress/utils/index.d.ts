@@ -153,6 +153,11 @@ declare namespace Cypress {
        * Grabs the dataSourceId in non-OSD environments and saves it in the alias @DATASOURCE_ID
        */
       grabDataSourceId(workspaceName: string, dataSourceName: string): Chainable<any>;
+
+      /**
+       * Deletes all workspaces that are older than a specified amount. This is to prevent ws buildup
+       */
+      deleteAllOldWorkspaces(): Chainable<any>;
     };
   }
 }

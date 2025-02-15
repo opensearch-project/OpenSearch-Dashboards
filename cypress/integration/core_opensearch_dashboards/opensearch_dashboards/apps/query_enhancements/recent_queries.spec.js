@@ -42,6 +42,7 @@ const runRecentQueryTests = () => {
       });
       // Create workspace
       cy.deleteWorkspaceByName(workspace);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
       cy.createWorkspaceIndexPatterns({

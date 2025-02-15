@@ -287,3 +287,47 @@ cy.osd.add('grabDataSourceId', (workspaceName, dataSourceName) => {
     });
   }
 });
+
+cy.osd.add('deleteAllOldWorkspaces', () => {
+  cy.visit('/app/workspace_list#/');
+  cy.get('h1').contains('Workspaces').should('be.visible');
+
+  cy.get('.application')
+    .find('a')
+    .then(($links) => {
+      for (let i = 0; i < $links.length; i++) {
+        const link = $links[i];
+        const wsName = link.textContent;
+
+        // the first portion of the ws name is the epoch time it was created in seconds,
+        // see: getRandomizedWorkspaceName() util
+        const epochTimeCreated = Number(wsName.split('-')[0]);
+
+        if (!Number.isNaN(epochTimeCreated)) {
+          const currentEpoch = moment().unix();
+          const timeDiff = currentEpoch - epochTimeCreated;
+
+          // if ws was created more than 1 hr ago, then delete it
+          if (timeDiff > 3600) {
+            cy.get('.application')
+              .find('table input')
+              // ignore first element as that is select all checkbox
+              .eq(1 + i)
+              .click();
+          }
+        }
+      }
+    });
+
+  cy.get('.application').then(($application) => {
+    const deleteButton = $application.find('[data-test-subj="multi-deletion-button"]');
+    if (deleteButton.length) {
+      cy.getElementByTestId('multi-deletion-button').click();
+      cy.getElementByTestId('delete-workspace-modal-input').type('delete');
+      cy.getElementByTestId('delete-workspace-modal-confirm').click();
+
+      // wait until modal is gone
+      cy.getElementByTestId('delete-workspace-modal-input').should('not.exist');
+    }
+  });
+});

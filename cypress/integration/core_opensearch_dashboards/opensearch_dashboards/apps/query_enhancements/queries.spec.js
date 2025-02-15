@@ -32,6 +32,7 @@ const queriesTestSuite = () => {
       });
       // Create workspace and set up index pattern
       cy.deleteWorkspaceByName(workspace);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
       // Create and select index pattern for ${INDEX_WITH_TIME_1}*

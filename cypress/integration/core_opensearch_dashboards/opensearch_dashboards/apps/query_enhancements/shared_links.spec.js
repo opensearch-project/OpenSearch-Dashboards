@@ -76,6 +76,7 @@ export const runSharedLinksTests = () => {
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });

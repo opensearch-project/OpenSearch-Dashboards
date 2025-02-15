@@ -4,7 +4,6 @@
  */
 
 export const DATASOURCE_NAME = 'data-logs-1';
-export const WORKSPACE_NAME = 'query-ws';
 export const START_TIME = 'Jan 1, 2020 @ 00:00:00.000';
 export const END_TIME = 'Jan 1, 2024 @ 00:00:00.000';
 
