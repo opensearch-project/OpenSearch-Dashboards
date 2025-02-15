@@ -53,7 +53,7 @@ const runRecentQueryTests = () => {
         isEnhancement: true,
       });
 
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspace,
         page: 'discover',
@@ -127,7 +127,7 @@ const runRecentQueryTests = () => {
               // check table after visiting a different URL and coming back to the workspace
               action: () => {
                 cy.visit('/app/workspace_initial');
-                cy.navigateToWorkSpaceSpecificPage({
+                cy.osd.navigateToWorkSpaceSpecificPage({
                   url: BASE_PATH,
                   workspaceName: workspace,
                   page: 'discover',
@@ -181,7 +181,7 @@ const runRecentQueryTests = () => {
         });
 
         /* TODO: adding these tests requires adding a dependency OR customizing the execSync function
-        //const { execSync } = require('child_process'); 
+        //const { execSync } = require('child_process');
         //console.log(execSync('xclip -selection clipboard -o').toString().trim()); // for Linux
         //Caveat: the commands for reading the system's clipboard is OS-dependent.
         it(`check running and copying recent queries for ${config.testName}`, () => {
