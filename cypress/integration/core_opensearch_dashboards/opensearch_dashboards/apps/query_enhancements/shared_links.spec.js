@@ -164,6 +164,9 @@ export const runSharedLinksTests = () => {
           // Set interval
           setHistogramIntervalIfRelevant(config.language, testData.interval);
 
+          // scroll to top
+          cy.getElementByTestId('dscCanvas').scrollTo('top');
+
           // Set query
           cy.setQueryEditor(queryString, { parseSpecialCharSequences: false });
 

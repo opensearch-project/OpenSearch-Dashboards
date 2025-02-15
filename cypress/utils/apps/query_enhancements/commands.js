@@ -84,8 +84,6 @@ Cypress.Commands.add('setQueryEditor', (value, options = {}) => {
   // Extract our command-specific options
   const { submit = defaults.submit, ...typeOptions } = options;
 
-  cy.getElementByTestId('dscCanvas').scrollTo('top');
-
   Cypress.log({
     name: 'setQueryEditor',
     displayName: 'set query',
