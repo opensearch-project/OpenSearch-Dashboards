@@ -121,6 +121,7 @@ import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
 import { handleQueryResults } from '../../utils/helpers';
+import { query } from '../../../../console/server/lib/spec_definitions/js/query/dsl';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -444,7 +445,13 @@ export class SearchSource {
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
           const dataFrameResponse = response as IDataFrameDefaultResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+          return onResponse(
+            searchRequest,
+            convertResult({
+              fields: this.getFields(),
+              response: response as IDataFrameResponse,
+            })
+          );
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
           const startTime = Date.now();

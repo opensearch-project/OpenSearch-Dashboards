@@ -9,7 +9,6 @@ import moment from 'moment';
 import {
   DATA_FRAME_TYPES,
   DataFrameAggConfig,
-  IDataFrame,
   IDataFrameWithAggs,
   IDataFrameResponse,
   PartialDataFrame,
@@ -18,6 +17,8 @@ import {
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
 import { TimeRange } from '../types';
+import { IDataFrame } from './types';
+import { SearchSourceFields } from '../search';
 
 /**
  * Converts the data frame response to a search response.
@@ -27,7 +28,14 @@ import { TimeRange } from '../types';
  * @param response - data frame response object
  * @returns converted search response
  */
-export const convertResult = (response: IDataFrameResponse): SearchResponse<any> => {
+export const convertResult = ({
+  response,
+  fields,
+}: {
+  response: IDataFrameResponse;
+  fields: SearchSourceFields;
+}): SearchResponse<any> => {
+  console.log('fields', fields);
   const body = response.body;
   if (body.hasOwnProperty('error')) {
     return response;

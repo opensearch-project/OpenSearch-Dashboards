@@ -81,6 +81,9 @@ export const indexTypeConfig: DatasetTypeConfig = {
       pattern: dataset.title,
       dataSourceId: dataset.dataSource?.id,
     });
+    // TODO: map fields to the OSD Field type
+    // Similar to the S3 where it casteS3FieldTypeToOsdFieldType
+    // if field is object then transform
     return fields.map((field: any) => ({
       name: field.name,
       type: field.type,

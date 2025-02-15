@@ -54,6 +54,7 @@ export interface LanguageConfig {
     sortable?: boolean;
     filterable?: boolean;
     visualizable?: boolean;
+    // TODO: Add more field formatter options for PPL since we need to format ppl date fields
   };
   showDocLinks?: boolean;
   docLink?: {
