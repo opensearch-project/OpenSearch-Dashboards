@@ -27,6 +27,26 @@ export const getRandomizedWorkspaceName = () =>
   `${WORKSPACE_NAME}-${getRandomString().substring(7)}`;
 
 /**
+ * Generates base test configuration for tests
+ * @param {string} dataset - Dataset name
+ * @param {string} datasetType - Type of dataset
+ * @param {Object} language - Language configuration
+ * @returns {Object} Test configuration object
+ */
+export const generateBaseConfiguration = (dataset, datasetType, language) => {
+  const baseConfig = {
+    dataset,
+    datasetType,
+    language: language.name,
+    testName: `${language.name}-${datasetType}`,
+  };
+
+  return {
+    ...baseConfig,
+  };
+};
+
+/**
  * Callback for generateAllTestConfigurations
  * @callback GenerateTestConfigurationCallback
  * @param {string} dataset - the dataset name
@@ -41,18 +61,23 @@ export const getRandomizedWorkspaceName = () =>
  * @param {Object} [options] - Optional configuration options
  * @param {string} [options.indexPattern] - Custom index pattern name (defaults to INDEX_PATTERN_WITH_TIME)
  * @param {string} [options.index] - Custom index name (defaults to INDEX_WITH_TIME_1)
+ * @param {Object.<QueryEnhancementDataset, QueryEnhancementDatasetData>} [options.datasetTypes] - Custom dataset types (defaults to DatasetTypes)
  * @returns {object[]}
  */
 export const generateAllTestConfigurations = (generateTestConfigurationCallback, options = {}) => {
-  const { indexPattern = INDEX_PATTERN_WITH_TIME, index = INDEX_WITH_TIME_1 } = options;
-  return Object.values(DatasetTypes).flatMap((dataset) =>
+  const {
+    indexPattern = INDEX_PATTERN_WITH_TIME,
+    index = INDEX_WITH_TIME_1,
+    datasetTypes = DatasetTypes,
+  } = options;
+  return Object.values(datasetTypes).flatMap((dataset) =>
     dataset.supportedLanguages.map((language) => {
       let datasetToUse;
       switch (dataset.name) {
-        case DatasetTypes.INDEX_PATTERN.name:
+        case datasetTypes.INDEX_PATTERN.name:
           datasetToUse = indexPattern;
           break;
-        case DatasetTypes.INDEXES.name:
+        case datasetTypes.INDEXES.name:
           datasetToUse = index;
           break;
         default:

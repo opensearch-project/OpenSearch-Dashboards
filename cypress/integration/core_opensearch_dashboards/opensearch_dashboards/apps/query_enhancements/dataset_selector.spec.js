@@ -9,6 +9,7 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   PATHS,
+  DatasetTypes,
 } from '../../../../../utils/constants';
 
 import {
@@ -50,7 +51,6 @@ export const runDatasetSelectorTests = () => {
         url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
-
       // Create workspace
       cy.deleteAllWorkspaces();
       cy.visit('/app/home');
@@ -79,7 +79,7 @@ export const runDatasetSelectorTests = () => {
           isEnhancement: true,
         });
 
-        if (config.datasetType === 'INDEX_PATTERN') {
+        if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
           cy.setIndexPatternFromAdvancedSelector(config.dataset, DATASOURCE_NAME, config.language);
         } else {
           cy.setIndexAsDataset(config.dataset, DATASOURCE_NAME, config.language);
@@ -111,7 +111,7 @@ export const runDatasetSelectorTests = () => {
         verifyBaseState(INDEX_PATTERN_WITH_TIME);
 
         // Try setting the dataset-language combination but click on cancel
-        if (config.datasetType === 'INDEX_PATTERN') {
+        if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
           cy.setIndexPatternFromAdvancedSelector(
             config.dataset,
             DATASOURCE_NAME,
