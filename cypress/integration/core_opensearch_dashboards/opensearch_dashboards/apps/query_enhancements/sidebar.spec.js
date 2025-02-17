@@ -4,11 +4,11 @@
  */
 
 import { DatasetTypes, PATHS, BASE_PATH } from '../../../../../utils/constants';
-
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME_1,
   INDEX_WITH_TIME_1,
+  QueryLanguages,
 } from '../../../../../utils/apps/query_enhancements/constants';
 import {
   generateAllTestConfigurations,
@@ -363,11 +363,19 @@ export const runSideBarTests = () => {
             );
           }
 
-          cy.getElementByTestId('missingSwitch').click();
-          sidebarFields.missingFields.forEach((fieldName) => {
-            cy.getElementByTestId(`field-${fieldName}`).should('be.visible');
-          });
-          cy.getElementByTestId('missingSwitch').click();
+          // TODO: Hide missing fields switch is not working for SQL and PPL.
+          // SQL and PPL add all mapped fields to the sidebar, including missing fields.
+          // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9342
+          if (
+            config.language === QueryLanguages.DQL.name ||
+            config.language === QueryLanguages.Lucene.name
+          ) {
+            cy.getElementByTestId('missingSwitch').click();
+            sidebarFields.missingFields.forEach((fieldName) => {
+              cy.getElementByTestId(`field-${fieldName}`).should('be.visible');
+            });
+            cy.getElementByTestId('missingSwitch').click();
+          }
 
           sideBar.verifyNumberOfActiveFilters(0);
           cy.getElementByTestId('aggregatable-true').parent().click();
