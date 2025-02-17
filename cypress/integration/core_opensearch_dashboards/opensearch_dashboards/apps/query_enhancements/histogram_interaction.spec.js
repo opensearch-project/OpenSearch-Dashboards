@@ -11,7 +11,7 @@ import {
   QueryLanguages,
   DATASOURCE_NAME,
 } from '../../../../../utils/apps/constants';
-import { BASE_PATH, PATHS } from '../../../../../utils/constants';
+import { PATHS } from '../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
@@ -41,6 +41,7 @@ const runHistogramInteractionTests = () => {
       });
       // Create workspace
       cy.deleteWorkspaceByName(workspace);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
       cy.createWorkspaceIndexPatterns({
@@ -51,8 +52,7 @@ const runHistogramInteractionTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
         page: 'discover',
         isEnhancement: true,
