@@ -1,0 +1,2 @@
+fix:
+- Clean up sync URL subscription in Discover plugin topNav ([#9316](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9316))
