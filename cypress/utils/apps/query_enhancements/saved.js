@@ -250,9 +250,6 @@ export const setSearchConfigurations = ({
 
     cy.getElementByTestId(`docTableHeaderFieldSort_${APPLIED_SORT}`).click();
 
-    // TODO: This reload shouldn't need to be here, but currently the sort doesn't always happen right away
-    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9131
-    cy.reload();
     cy.getElementByTestId('querySubmitButton').should('be.visible');
   }
 };
