@@ -19,6 +19,10 @@ export const configSchema = schema.object({
     defaultValue: 10000,
     min: 1,
   }),
+  filePreviewDocumentsCount: schema.number({
+    defaultValue: 10,
+    min: 1,
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

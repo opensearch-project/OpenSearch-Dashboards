@@ -4,7 +4,7 @@
  */
 
 import { Readable } from 'stream';
-import { IFileParser, IngestOptions, ValidationOptions } from '../types';
+import { IFileParser, IngestOptions, ParseOptions, ValidationOptions } from '../types';
 
 export class JSONParser implements IFileParser {
   public async validateText(text: string, _: ValidationOptions) {
@@ -58,5 +58,26 @@ export class JSONParser implements IFileParser {
       total: 1,
       message: `Indexed 1 document`,
     };
+  }
+
+  public async parseFile(file: Readable, limit: number, _: ParseOptions) {
+    const documents: Array<Record<string, any>> = [];
+    await new Promise<void>((resolve, reject) => {
+      let rawData = '';
+      file
+        .on('data', (chunk) => (rawData += chunk))
+        .on('error', (e: any) => reject(e))
+        .on('end', async () => {
+          try {
+            const document = JSON.parse(rawData);
+            documents.push(document);
+          } catch (e) {
+            reject(e);
+          }
+          resolve();
+        });
+    });
+
+    return documents;
   }
 }

@@ -85,4 +85,25 @@ describe('NDJSONParser', () => {
       }
     );
   });
+
+  describe('parseFile()', () => {
+    const limit = 4;
+    it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
+      'should parse 4 documents from NDJSON',
+      async ({ rawString, expected }) => {
+        const validNDJSONFileStream = Readable.from(rawString.join('\n'));
+        const response = await parser.parseFile(validNDJSONFileStream, limit, {});
+
+        expect(response).toEqual(expected.slice(0, limit));
+      }
+    );
+
+    it.each<NDJSONTestCaseFormat>(INVALID_NDJSON_TEST_CASES)(
+      'should throw an error for invalid NDJSON',
+      async ({ rawString }) => {
+        const invalidNDJSONFileStream = Readable.from(rawString.join('\n'));
+        expect(parser.parseFile(invalidNDJSONFileStream, limit, {})).rejects.toThrow();
+      }
+    );
+  });
 });

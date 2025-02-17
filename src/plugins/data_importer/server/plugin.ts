@@ -17,6 +17,8 @@ import { NDJSONParser } from './parsers/ndjson_parser';
 import { JSONParser } from './parsers/json_parser';
 import { FileParserService } from './parsers/file_parser_service';
 import { validateEnabledFileTypes } from './utils/util';
+import { previewRoute } from './routes/preview';
+import { catIndicesRoute } from './routes/cat_indices';
 
 export interface DataImporterPluginSetupDeps {
   dataSource?: DataSourcePluginSetup;
@@ -48,6 +50,8 @@ export class DataImporterPlugin
     // Register server side APIs
     importFileRoute(router, this.config, this.fileParsers, !!dataSource);
     importTextRoute(router, this.config, this.fileParsers, !!dataSource);
+    previewRoute(router, this.config, this.fileParsers, !!dataSource);
+    catIndicesRoute(router, this.config, !!dataSource);
 
     return {
       registerFileParser: (fileType, fileParser) => {

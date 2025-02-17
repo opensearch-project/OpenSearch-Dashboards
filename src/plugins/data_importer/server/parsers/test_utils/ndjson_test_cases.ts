@@ -35,7 +35,7 @@ export const VALID_NDJSON_TEST_CASES: NDJSONTestCaseFormat[] = [
         phone: '+1 (818) 413-3869',
         address: '225 Lincoln Road, Salunga, Oregon, 1912',
         about:
-          'Consectetur incididunt do ad eu aliquip. Ipsum dolore est aute quis dolor sit sit Lorem qui duis. Aliquip amet ea ullamco exercitation velit consequat.\\r\\n',
+          'Consectetur incididunt do ad eu aliquip. Ipsum dolore est aute quis dolor sit sit Lorem qui duis. Aliquip amet ea ullamco exercitation velit consequat.\r\n',
         registered: '2022-03-14T08:16:17 +07:00',
         latitude: -14.235158,
         longitude: -126.483142,
@@ -63,7 +63,7 @@ export const VALID_NDJSON_TEST_CASES: NDJSONTestCaseFormat[] = [
         phone: '+1 (865) 488-3455',
         address: '550 Martense Street, Beason, New Mexico, 5488',
         about:
-          'Eiusmod ipsum cupidatat ut non ea. Excepteur dolor exercitation ipsum quis ipsum minim amet. Ad do id nostrud laboris do deserunt ea non. Adipisicing dolore elit cupidatat exercitation. Minim reprehenderit occaecat laborum sint quis quis pariatur Lorem. Sunt sunt labore labore dolore.\\r\\n',
+          'Eiusmod ipsum cupidatat ut non ea. Excepteur dolor exercitation ipsum quis ipsum minim amet. Ad do id nostrud laboris do deserunt ea non. Adipisicing dolore elit cupidatat exercitation. Minim reprehenderit occaecat laborum sint quis quis pariatur Lorem. Sunt sunt labore labore dolore.\r\n',
         registered: '2017-03-06T11:29:42 +08:00',
         latitude: -78.400609,
         longitude: -19.696437,
@@ -91,7 +91,7 @@ export const VALID_NDJSON_TEST_CASES: NDJSONTestCaseFormat[] = [
         phone: '+1 (859) 565-2942',
         address: '262 Anna Court, Gardners, Colorado, 2959',
         about:
-          'Labore eiusmod nostrud tempor esse culpa exercitation do est dolor elit amet Lorem ad. Officia mollit aliquip laborum exercitation est. Elit incididunt ipsum occaecat elit excepteur nulla quis. Labore voluptate sit consequat magna minim proident ad sunt velit eu culpa do esse amet. Voluptate enim exercitation non elit consequat enim. Dolor ipsum mollit qui ipsum aute dolore aute in est nostrud officia do culpa.\\r\\n',
+          'Labore eiusmod nostrud tempor esse culpa exercitation do est dolor elit amet Lorem ad. Officia mollit aliquip laborum exercitation est. Elit incididunt ipsum occaecat elit excepteur nulla quis. Labore voluptate sit consequat magna minim proident ad sunt velit eu culpa do esse amet. Voluptate enim exercitation non elit consequat enim. Dolor ipsum mollit qui ipsum aute dolore aute in est nostrud officia do culpa.\r\n',
         registered: '2018-03-28T04:23:02 +07:00',
         latitude: 84.307741,
         longitude: 147.311241,
@@ -119,7 +119,7 @@ export const VALID_NDJSON_TEST_CASES: NDJSONTestCaseFormat[] = [
         phone: '+1 (889) 485-3565',
         address: '861 Monitor Street, Richville, South Carolina, 4203',
         about:
-          'Minim aute nisi Lorem amet veniam. Proident ea mollit labore sint amet aliqua esse nostrud. Ea Lorem cillum minim ut dolore anim cillum ipsum in voluptate enim. Aliqua non incididunt duis culpa quis cupidatat. Sint magna minim cillum Lorem irure fugiat nulla consectetur. Cupidatat commodo Lorem nulla commodo ad consequat est proident qui eiusmod culpa amet elit.\\r\\n',
+          'Minim aute nisi Lorem amet veniam. Proident ea mollit labore sint amet aliqua esse nostrud. Ea Lorem cillum minim ut dolore anim cillum ipsum in voluptate enim. Aliqua non incididunt duis culpa quis cupidatat. Sint magna minim cillum Lorem irure fugiat nulla consectetur. Cupidatat commodo Lorem nulla commodo ad consequat est proident qui eiusmod culpa amet elit.\r\n',
         registered: '2023-04-19T04:41:24 +07:00',
         latitude: 30.87967,
         longitude: -147.679292,
@@ -147,7 +147,7 @@ export const VALID_NDJSON_TEST_CASES: NDJSONTestCaseFormat[] = [
         phone: '+1 (969) 504-2988',
         address: '931 Prince Street, Herald, Hawaii, 6686',
         about:
-          'Id labore eiusmod commodo pariatur incididunt velit ea sunt id et eiusmod commodo consectetur. Id id do amet minim cillum. Eiusmod duis deserunt velit id laboris culpa laboris fugiat consectetur ex. Commodo minim et labore cillum esse qui non excepteur est aliquip pariatur eiusmod.\\r\\n',
+          'Id labore eiusmod commodo pariatur incididunt velit ea sunt id et eiusmod commodo consectetur. Id id do amet minim cillum. Eiusmod duis deserunt velit id laboris culpa laboris fugiat consectetur ex. Commodo minim et labore cillum esse qui non excepteur est aliquip pariatur eiusmod.\r\n',
         registered: '2020-07-15T01:28:08 +07:00',
         latitude: 76.643551,
         longitude: 111.097854,
@@ -175,7 +175,7 @@ export const VALID_NDJSON_TEST_CASES: NDJSONTestCaseFormat[] = [
         phone: '+1 (891) 520-3186',
         address: '779 Highlawn Avenue, Rew, Rhode Island, 7836',
         about:
-          'Tempor labore esse officia ut consectetur nisi excepteur consectetur Lorem non. Enim sunt exercitation consequat dolore qui velit proident ex sint anim quis. Labore do nisi non minim occaecat dolore nisi velit laboris enim ad ullamco consequat. Est excepteur veniam commodo proident elit dolor. Qui mollit quis sit anim ipsum et.\\r\\n',
+          'Tempor labore esse officia ut consectetur nisi excepteur consectetur Lorem non. Enim sunt exercitation consequat dolore qui velit proident ex sint anim quis. Labore do nisi non minim occaecat dolore nisi velit laboris enim ad ullamco consequat. Est excepteur veniam commodo proident elit dolor. Qui mollit quis sit anim ipsum et.\r\n',
         registered: '2024-09-02T07:35:33 +07:00',
         latitude: 43.61443,
         longitude: -108.026998,
@@ -203,7 +203,7 @@ export const VALID_NDJSON_TEST_CASES: NDJSONTestCaseFormat[] = [
         phone: '+1 (883) 580-2660',
         address: '395 Vandervoort Avenue, Graball, North Carolina, 4702',
         about:
-          'Cupidatat exercitation sint est sunt irure cillum ullamco excepteur. Reprehenderit sit do sint Lorem amet officia consectetur cupidatat ad. Est labore duis fugiat deserunt duis eiusmod cillum do Lorem reprehenderit ea nulla deserunt velit. Officia non in velit laborum sit. Incididunt nisi reprehenderit in commodo commodo minim ea sint sunt officia officia. Est est irure mollit aute reprehenderit excepteur commodo aliquip magna nisi tempor id voluptate.\\r\\n',
+          'Cupidatat exercitation sint est sunt irure cillum ullamco excepteur. Reprehenderit sit do sint Lorem amet officia consectetur cupidatat ad. Est labore duis fugiat deserunt duis eiusmod cillum do Lorem reprehenderit ea nulla deserunt velit. Officia non in velit laborum sit. Incididunt nisi reprehenderit in commodo commodo minim ea sint sunt officia officia. Est est irure mollit aute reprehenderit excepteur commodo aliquip magna nisi tempor id voluptate.\r\n',
         registered: '2019-12-23T01:28:23 +08:00',
         latitude: -6.896081,
         longitude: -174.084986,

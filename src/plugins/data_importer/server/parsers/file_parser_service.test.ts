@@ -20,6 +20,7 @@ describe('FileParserService', () => {
         validateText: jest.fn(),
         ingestText: jest.fn(),
         ingestFile: jest.fn(),
+        parseFile: jest.fn(),
       };
       const csvParser = new CSVParser();
       fileParserService.registerFileParser('testFormat', fileParser);

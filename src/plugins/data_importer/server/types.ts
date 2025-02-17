@@ -51,6 +51,7 @@ export interface ValidationOptions {
    */
   delimiter?: string;
 }
+export type ParseOptions = ValidationOptions;
 
 /**
  * Parser that handles a particular file type
@@ -63,7 +64,7 @@ export interface IFileParser {
    * @returns
    * @throws Can throw an error if text doesn't match expected format
    */
-  validateText: (text: string, options: ValidationOptions) => Promise<boolean>;
+  validateText?: (text: string, options: ValidationOptions) => Promise<boolean>;
 
   /**
    * Assuming valid text input, handle the ingestion into OpenSearch
@@ -72,7 +73,7 @@ export interface IFileParser {
    * @returns
    * @throws Can throw server errors when attempting to ingest into OpenSearch
    */
-  ingestText: (text: string, options: IngestOptions) => Promise<IngestResponse>;
+  ingestText?: (text: string, options: IngestOptions) => Promise<IngestResponse>;
 
   /**
    * Given an arbitrary file stream, handle the validation and ingestion into OpenSearch
@@ -82,4 +83,23 @@ export interface IFileParser {
    * @throws Can throw server errors when attempting to ingest into OpenSearch
    */
   ingestFile: (file: Readable, options: IngestOptions) => Promise<IngestResponse>;
+
+  /**
+   * Given an arbitrary file stream, parse the file into an object array
+   * @param file
+   * @param limit
+   * @param ingestOptions
+   * @returns
+   */
+  parseFile: (
+    file: Readable,
+    limit: number,
+    options: ParseOptions
+  ) => Promise<Array<Record<string, any>>>;
+}
+
+export interface FileStream extends Readable {
+  hapi: {
+    filename: string;
+  };
 }

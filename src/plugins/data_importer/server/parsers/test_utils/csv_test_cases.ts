@@ -61,21 +61,21 @@ export const VALID_CSV_CASES: CSVTestCaseFormat[] = [
     rawStringArray: [
       'email,name,age,gender,occupation,phone\n',
       'john@example.com,John Smith,44,male,engineer,0\n',
-      'mary@example.com,Mary Shelby,31,VP sales,',
+      'mary@example.com,Mary Shelby,31,,VP sales,',
     ],
     expected: [
       {
         email: 'john@example.com',
         name: 'John Smith',
-        age: 44,
+        age: '44',
         gender: 'male',
         occupation: 'engineer',
-        phone: 0,
+        phone: '0',
       },
       {
         email: 'mary@example.com',
         name: 'Mary Shelby',
-        age: 31,
+        age: '31',
         gender: '',
         occupation: 'VP sales',
         phone: '',

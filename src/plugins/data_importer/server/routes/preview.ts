@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IRouter } from 'src/core/server';
 import { schema, TypeOf } from '@osd/config-schema';
+import _ from 'lodash';
 import { FileParserService } from '../parsers/file_parser_service';
-import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
-import { IRouter } from '../../../../core/server';
 import { configSchema } from '../../config';
-import { decideClient } from '../utils/util';
+import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
+import { decideClient, determineMapping } from '../utils/util';
 import { FileStream } from '../types';
 
-export function importFileRoute(
+export function previewRoute(
   router: IRouter,
   config: TypeOf<typeof configSchema>,
   fileParsers: FileParserService,
@@ -19,7 +20,7 @@ export function importFileRoute(
 ) {
   router.post(
     {
-      path: '/api/data_importer/_import_file',
+      path: '/api/data_importer/_preview',
       options: {
         body: {
           maxBytes: config.maxFileSizeBytes,
@@ -45,7 +46,6 @@ export function importFileRoute(
         }),
         body: schema.object({
           file: schema.stream(),
-          mapping: schema.maybe(schema.string({ minLength: 1 })),
         }),
       },
     },
@@ -62,7 +62,6 @@ export function importFileRoute(
       }
 
       const client = await decideClient(dataSourceEnabled, context, request.query.dataSource);
-
       if (!!!client) {
         return response.notFound({
           body: 'Data source is not enabled or does not exist',
@@ -85,40 +84,44 @@ export function importFileRoute(
             body: `Error checking if index exists: ${e}`,
           });
         }
-      } else {
-        try {
-          await client.indices.create({
-            index: request.query.indexName,
-            body: {
-              mappings: JSON.parse(request.body.mapping!),
-            },
-          });
-        } catch (e) {
-          return response.internalError({
-            body: `Error creating index: ${e}`,
-          });
-        }
       }
 
       const file = request.body.file as FileStream;
+      const documents = (
+        await parser.parseFile(file, config.filePreviewDocumentsCount, {
+          delimiter: request.query.delimiter,
+        })
+      ).slice(0, config.filePreviewDocumentsCount);
 
       try {
-        const message = await parser.ingestFile(file, {
-          indexName: request.query.indexName,
-          client,
-          delimiter: request.query.delimiter,
-          dataSourceId: request.query.dataSource,
-        });
+        // Ensure OpenSearch can handle the deeply nested objects
+        const nestedObjectsLimit =
+          (
+            await client.cluster.getSettings({
+              include_defaults: true,
+              filter_path: '**.nested_objects.limit',
+            })
+          ).body.defaults?.indices?.mapping?.nested_objects?.limit ?? 50000;
+
+        // Some documents may omit fields so we must merge into one large document
+        const predictedMapping = determineMapping(_.merge(documents), Number(nestedObjectsLimit));
+
+        const existingMapping = !request.query.createMode
+          ? (await client.indices.getMapping({ index: request.query.indexName })).body[
+              request.query.indexName
+            ].mappings
+          : undefined;
 
         return response.ok({
           body: {
-            message,
-            success: true,
+            predictedMapping,
+            documents,
+            ...(existingMapping && { existingMapping }),
           },
         });
       } catch (e) {
         return response.internalError({
-          body: `Error ingesting file: ${e}`,
+          body: `Error determining mapping: ${e}`,
         });
       }
     }

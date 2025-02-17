@@ -46,6 +46,13 @@ export function importTextRoute(
       },
     },
     async (context, request, response) => {
+      const parser = fileParsers.getFileParser(request.query.fileType);
+      if (!parser || !parser.validateText || !parser.ingestText) {
+        return response.badRequest({
+          body: `${request.query.fileType} is not a registered or supported filetype`,
+        });
+      }
+
       const client = await decideClient(dataSourceEnabled, context, request.query.dataSource);
 
       if (!!!client) {
@@ -72,9 +79,9 @@ export function importTextRoute(
 
       let isValid;
       try {
-        isValid = await fileParsers
-          .getFileParser(request.query.fileType)
-          ?.validateText(request.body.text, { delimiter: request.query.delimiter });
+        isValid = await parser.validateText(request.body.text, {
+          delimiter: request.query.delimiter,
+        });
       } catch (e) {
         return response.badRequest({
           body: `Text is not valid: ${e}`,
@@ -88,14 +95,12 @@ export function importTextRoute(
       }
 
       try {
-        const message = await fileParsers
-          .getFileParser(request.query.fileType)
-          ?.ingestText(request.body.text, {
-            indexName: request.query.indexName,
-            client,
-            delimiter: request.query.delimiter,
-            dataSourceId: request.query.dataSource,
-          });
+        const message = await parser.ingestText(request.body.text, {
+          indexName: request.query.indexName,
+          client,
+          delimiter: request.query.delimiter,
+          dataSourceId: request.query.dataSource,
+        });
         return response.ok({
           body: {
             message,

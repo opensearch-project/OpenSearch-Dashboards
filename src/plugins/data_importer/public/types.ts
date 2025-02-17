@@ -28,3 +28,9 @@ export interface ImportResponse {
   };
   success: boolean;
 }
+
+export interface PreviewResponse {
+  predictedMapping: Record<string, any>;
+  documents: Array<Record<string, any>>;
+  existingMapping?: Record<string, any>;
+}

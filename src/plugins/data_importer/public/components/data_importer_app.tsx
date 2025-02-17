@@ -46,6 +46,7 @@ import {
   PLUGIN_NAME_AS_TITLE,
 } from '../../common/constants';
 import { DelimiterSelect } from './delimiter_select';
+import { previewFile } from '../lib/preview';
 
 interface DataImporterPluginAppProps {
   basename: string;
@@ -123,12 +124,54 @@ export const DataImporterPluginApp = ({
     }
   };
 
+  const previewData = async () => {
+    if (importType === IMPORT_CHOICE_FILE) {
+      if (inputFile) {
+        const fileExtension = extname(inputFile.name);
+        const response = await previewFile(
+          http,
+          inputFile,
+          // TODO This should be determined from the index name textbox/selectable
+          false,
+          // TODO This should be determined from the file type selectable
+          fileExtension,
+          indexName!,
+          delimiter,
+          dataSourceId
+        );
+        if (response) {
+          notifications.toasts.addSuccess(
+            i18n.translate('dataImporter.previewSuccess', {
+              defaultMessage: `Preview successful`,
+            })
+          );
+        } else {
+          notifications.toasts.addDanger(
+            i18n.translate('dataImporter.previewFailed', {
+              defaultMessage: `Preview failed`,
+            })
+          );
+        }
+      }
+    }
+  };
+
   const importData = async () => {
     let response: ImportResponse | undefined;
 
     try {
       if (importType === IMPORT_CHOICE_FILE) {
-        response = await importFile(http, inputFile!, indexName!, delimiter, dataSourceId);
+        response = await importFile(
+          http,
+          inputFile!,
+          indexName!,
+          // TODO This should be determined from the index name textbox/selectable
+          false,
+          // TODO This should be determined from the file type selectable
+          extname(inputFile!.name),
+          delimiter,
+          dataSourceId
+        );
       } else if (importType === IMPORT_CHOICE_TEXT) {
         response = await importText(
           http,
@@ -267,6 +310,10 @@ export const DataImporterPluginApp = ({
               {dataSourceEnabled && renderDataSourceComponent}
               <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
                 Import
+              </EuiButton>
+              <EuiSpacer size="m" />
+              <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
+                Preview
               </EuiButton>
             </EuiPageSideBar>
             <EuiPageBody component="main">

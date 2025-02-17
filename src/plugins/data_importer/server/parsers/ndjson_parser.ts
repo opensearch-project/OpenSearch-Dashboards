@@ -5,7 +5,7 @@
 
 import { parse } from 'ndjson';
 import { Readable } from 'stream';
-import { IFileParser, IngestOptions, ValidationOptions } from '../types';
+import { IFileParser, IngestOptions, ParseOptions, ValidationOptions } from '../types';
 
 export class NDJSONParser implements IFileParser {
   public async validateText(text: string, _: ValidationOptions) {
@@ -96,5 +96,27 @@ export class NDJSONParser implements IFileParser {
       total: numDocuments,
       message: `Indexed ${numDocuments} documents`,
     };
+  }
+
+  public async parseFile(file: Readable, limit: number, _: ParseOptions) {
+    const documents: Array<Record<string, any>> = [];
+    await new Promise<void>((resolve, reject) => {
+      file
+        .pipe(parse({ strict: true }))
+        .on('error', (e: any) => reject(e))
+        .on('data', (document: Record<string, any>) => {
+          if (documents.length >= limit) {
+            resolve();
+            file.destroy();
+            return;
+          }
+          documents.push(document);
+        })
+        .on('end', () => {
+          resolve();
+        });
+    });
+
+    return documents;
   }
 }
