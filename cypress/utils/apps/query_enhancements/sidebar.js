@@ -64,6 +64,17 @@ export const selectFieldFromSidebar = (field) => {
 };
 
 /**
+ * Shows Top Values of the field in a popover by clicking field show details button.
+ * @param {string} field Field name to show top values
+ * @example
+ * // View Top Values of the timestamp field.
+ * selectFieldFromSidebar('timestamp')
+ */
+export const showSidebarFieldDetails = (field) => {
+  cy.getElementByTestId(`field-${field}-showDetails`).click();
+};
+
+/**
  * The configurations needed for side bar tests
  * @typedef {Object} SideBarTestConfig
  * @property {string} dataset - the dataset name to use
@@ -85,5 +96,34 @@ export const generateSideBarTestConfiguration = (dataset, datasetType, language)
     datasetType,
     language: language.name,
     testName: `dataset: ${datasetType} and language: ${language.name}`,
+    visualizeButton: language.supports.visualizeButton,
   };
+};
+
+/**
+ * Verify that the sidebar filters shows the number of sidebar filters active.
+ * @param {number} numActiveFilters - Number of sidebar filters that are active
+ */
+export const verifyNumberOfActiveFilters = (numActiveFilters) => {
+  cy.getElementByTestId('toggleFieldFilterButton')
+    .find(`[aria-label="${numActiveFilters} active filters"]`)
+    .should('be.visible');
+};
+
+/**
+ * Select the filter in the sidebar, verify sidebar fields are filtered correctly, and the number of sidebar filters is displayed correctly.
+ * @param {string} filterType - Filters in the sidebar : 'aggregatable' xor 'searchable' only.
+ * @param {[string]} sidebarFields - Fields that should exist in the sidebar after applying the filter.
+ */
+export const selectFilterVerifySidebarFieldsVisibleAndActiveFiltersNumber = (
+  filterType,
+  sidebarFields
+) => {
+  cy.getElementByTestId(`${filterType}-true`).parent().click();
+  sidebarFields.forEach((fieldName) => {
+    cy.getElementByTestId(`field-${fieldName}`).should('be.visible');
+  });
+  verifyNumberOfActiveFilters(1);
+  cy.getElementByTestId(`${filterType}-any`).parent().click();
+  verifyNumberOfActiveFilters(0);
 };
