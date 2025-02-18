@@ -1,0 +1,2 @@
+test:
+- Remove unnecessary reload in saved_search test. ([#9396](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9396))

@@ -61,18 +61,23 @@ export const generateBaseConfiguration = (dataset, datasetType, language) => {
  * @param {Object} [options] - Optional configuration options
  * @param {string} [options.indexPattern] - Custom index pattern name (defaults to INDEX_PATTERN_WITH_TIME)
  * @param {string} [options.index] - Custom index name (defaults to INDEX_WITH_TIME_1)
+ * @param {Object.<QueryEnhancementDataset, QueryEnhancementDatasetData>} [options.datasetTypes] - Custom dataset types (defaults to DatasetTypes)
  * @returns {object[]}
  */
 export const generateAllTestConfigurations = (generateTestConfigurationCallback, options = {}) => {
-  const { indexPattern = INDEX_PATTERN_WITH_TIME, index = INDEX_WITH_TIME_1 } = options;
-  return Object.values(DatasetTypes).flatMap((dataset) =>
+  const {
+    indexPattern = INDEX_PATTERN_WITH_TIME,
+    index = INDEX_WITH_TIME_1,
+    datasetTypes = DatasetTypes,
+  } = options;
+  return Object.values(datasetTypes).flatMap((dataset) =>
     dataset.supportedLanguages.map((language) => {
       let datasetToUse;
       switch (dataset.name) {
-        case DatasetTypes.INDEX_PATTERN.name:
+        case datasetTypes.INDEX_PATTERN.name:
           datasetToUse = indexPattern;
           break;
-        case DatasetTypes.INDEXES.name:
+        case datasetTypes.INDEXES.name:
           datasetToUse = index;
           break;
         default:
