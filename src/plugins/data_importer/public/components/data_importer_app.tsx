@@ -14,15 +14,13 @@ import {
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageHeader,
-  EuiTitle,
-  EuiPageSideBar,
-  EuiFieldText,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiTitle,
   EuiBasicTable,
   EuiLoadingSpinner,
+  EuiFieldText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { extname } from 'path';
 import {
@@ -45,13 +43,10 @@ import { ImportResponse } from '../types';
 import { PublicConfigSchema } from '../../config';
 import { ImportTextContentBody } from './import_text_content';
 import { ImportFileContentBody } from './import_file_content';
-import {
-  CSV_FILE_TYPE,
-  CSV_SUPPORTED_DELIMITERS,
-  PLUGIN_NAME_AS_TITLE,
-} from '../../common/constants';
+import { CSV_FILE_TYPE, CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 import { DelimiterSelect } from './delimiter_select';
 import { previewFile } from '../lib/preview';
+import { PreviewComponent } from './preview_table';
 
 interface DataImporterPluginAppProps {
   basename: string;
@@ -74,25 +69,27 @@ export const DataImporterPluginApp = ({
   dataSourceEnabled,
   dataSourceManagement,
 }: DataImporterPluginAppProps) => {
-  const DataSourceMenuComponent =
-    dataSourceManagement?.ui.getDataSourceMenu<DataSourceSelectableConfig>() || (() => null);
+  const DataSourceMenuComponent = dataSourceManagement?.ui.getDataSourceMenu<
+    DataSourceSelectableConfig
+  >();
   const [indexName, setIndexName] = useState<string>();
   const [importType, setImportType] = useState<ImportChoices>(IMPORT_CHOICE_FILE);
   const [disableImport, setDisableImport] = useState<boolean>();
   const [dataType, setDataType] = useState<string | undefined>(
     config.enabledFileTypes.length > 0 ? config.enabledFileTypes[0] : undefined
   );
+  const [filePreviewData, setFilePreviewData] = useState<any[]>([]);
   const [inputText, setText] = useState<string | undefined>();
   const [inputFile, setInputFile] = useState<File | undefined>();
   const [dataSourceId, setDataSourceId] = useState<string | undefined>();
   const [selectedDataSource, setSelectedDataSource] = useState<DataSourceOption | undefined>();
+  const [filePreviewColumns, setFilePreviewColumns] = useState<any[]>([]);
+  const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
   const [showDelimiterChoice, setShowDelimiterChoice] = useState<boolean>(shouldShowDelimiter());
   const [delimiter, setDelimiter] = useState<string | undefined>(
     dataType === CSV_FILE_TYPE ? CSV_SUPPORTED_DELIMITERS[0] : undefined
   );
-  const [filePreviewData, setFilePreviewData] = useState<any[]>([]);
-  const [filePreviewColumns, setFilePreviewColumns] = useState<any[]>([]);
-  const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
+  const [visibleRows, setVisibleRows] = useState<number>(10);
 
   const onImportTypeChange = (type: ImportChoices) => {
     if (type === IMPORT_CHOICE_FILE) {
@@ -142,7 +139,6 @@ export const DataImporterPluginApp = ({
       setFilePreviewData([]);
     }
   };
-
   const onTextInput = (text: string) => {
     setText(text);
   };
@@ -166,7 +162,7 @@ export const DataImporterPluginApp = ({
           http,
           inputFile,
           // TODO This should be determined from the index name textbox/selectable
-          false,
+          true,
           // TODO This should be determined from the file type selectable
           fileExtension,
           indexName!,
@@ -321,41 +317,16 @@ export const DataImporterPluginApp = ({
     );
   }
 
+  const loadMoreRows = () => {
+    setVisibleRows((prevVisibleRows) => prevVisibleRows + 10);
+  };
+
   return (
     <Router basename={basename}>
       <I18nProvider>
         <>
           <navigation.ui.TopNavMenu appName={PLUGIN_ID} useDefaultBehaviors={true} />
           <EuiPage>
-            <EuiPageSideBar>
-              <ImportTypeSelector
-                updateSelection={onImportTypeChange}
-                initialSelection={importType}
-              />
-              {showDelimiterChoice && (
-                <DelimiterSelect
-                  onDelimiterChange={onDelimiterChange}
-                  initialDelimiter={delimiter}
-                />
-              )}
-              <EuiTitle size="xs">
-                <span>
-                  {i18n.translate('dataImporter.dataSource', {
-                    defaultMessage: 'Data Source Options',
-                  })}
-                </span>
-              </EuiTitle>
-              <EuiFieldText placeholder="Index name" onChange={onIndexNameChange} />
-              <EuiSpacer size="m" />
-              {dataSourceEnabled && renderDataSourceComponent}
-              <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
-                Import
-              </EuiButton>
-              <EuiSpacer size="m" />
-              <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
-                Preview
-              </EuiButton>
-            </EuiPageSideBar>
             <EuiPageBody component="main">
               <EuiPageHeader>
                 <EuiTitle size="l">
@@ -367,16 +338,6 @@ export const DataImporterPluginApp = ({
               <EuiPageContent>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={1}>
-                    <EuiPageContentHeader>
-                      <EuiTitle>
-                        <h2>
-                          <FormattedMessage
-                            id="dataImporter.importFormTitle"
-                            defaultMessage="Import Data"
-                          />
-                        </h2>
-                      </EuiTitle>
-                    </EuiPageContentHeader>
                     <ImportTypeSelector
                       updateSelection={onImportTypeChange}
                       initialSelection={importType}
@@ -397,33 +358,21 @@ export const DataImporterPluginApp = ({
                     <EuiFieldText placeholder="Index name" onChange={onIndexNameChange} />
                     <EuiSpacer size="m" />
                     {dataSourceEnabled && renderDataSourceComponent}
-                    <ImportFileContentBody
-                      enabledFileTypes={config.enabledFileTypes}
-                      onFileUpdate={onFileInput}
-                    />
+                    {importType === IMPORT_CHOICE_FILE && (
+                      <ImportFileContentBody
+                        enabledFileTypes={config.enabledFileTypes}
+                        onFileUpdate={onFileInput}
+                      />
+                    )}
+                    <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
+                      Preview
+                    </EuiButton>
+                    <EuiSpacer size="m" />
                     <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
                       Import
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>
-                    <EuiPageContentHeader>
-                      <EuiTitle>
-                        <h2>
-                          {importType === IMPORT_CHOICE_TEXT && (
-                            <FormattedMessage
-                              id="dataImporter.textTitle"
-                              defaultMessage="Paste Text Data"
-                            />
-                          )}
-                          {importType === IMPORT_CHOICE_FILE && (
-                            <FormattedMessage
-                              id="dataImporter.fileTitle"
-                              defaultMessage="Preview Data"
-                            />
-                          )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiPageContentHeader>
                     {importType === IMPORT_CHOICE_TEXT && (
                       <ImportTextContentBody
                         onTextChange={onTextInput}
@@ -433,12 +382,16 @@ export const DataImporterPluginApp = ({
                         onFileTypeChange={onDataTypeChange}
                       />
                     )}
-                    {importType === IMPORT_CHOICE_FILE && inputFile && (
+                    {importType === IMPORT_CHOICE_FILE && (
                       <div>
                         {isLoadingPreview ? (
                           <EuiLoadingSpinner size="xl" />
                         ) : (
-                          <EuiBasicTable items={filePreviewData} columns={filePreviewColumns} />
+                          <PreviewComponent
+                            previewData={filePreviewData}
+                            visibleRows={visibleRows}
+                            loadMoreRows={loadMoreRows}
+                          />
                         )}
                       </div>
                     )}
