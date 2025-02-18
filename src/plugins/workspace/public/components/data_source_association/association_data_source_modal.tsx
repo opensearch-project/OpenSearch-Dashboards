@@ -230,7 +230,7 @@ export const AssociationDataSourceModalContent = ({
 
   useEffect(() => {
     setIsLoading(true);
-    getDataSourcesList(savedObjects.client, ['*'])
+    getDataSourcesList(savedObjects.client)
       .then((dataSourcesList) =>
         fetchDataSourceConnections(dataSourcesList, http, notifications, mode)
       )

@@ -404,9 +404,12 @@ export class SavedObjectsClient {
     // a query param
     if (query.has_reference) query.has_reference = JSON.stringify(query.has_reference);
 
+    // if no workspaces are provided, we need to remove the client base path
+    const prependOptions = query.workspaces === undefined ? { withoutClientBasePath: true } : {};
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
       query,
+      prependOptions,
     });
     return request.then((resp) => {
       return renameKeys<
@@ -548,8 +551,11 @@ export class SavedObjectsClient {
    * the old kfetch error format of `{res: {status: number}}` whereas `http.fetch`
    * uses `{response: {status: number}}`.
    */
-  private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
-    return this.http.fetch(path, { method, query, body });
+  private savedObjectsFetch(
+    path: string,
+    { method, query, body, prependOptions }: HttpFetchOptions
+  ) {
+    return this.http.fetch(path, { method, query, body, prependOptions });
   }
 }
 
