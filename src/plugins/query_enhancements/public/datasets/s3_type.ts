@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { trimEnd } from 'lodash';
-import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { CoreStart, HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import semver from 'semver';
 import {
   DATA_STRUCTURE_META_TYPES,
@@ -15,6 +15,7 @@ import {
   DataStructureCustomMeta,
   Dataset,
   DatasetField,
+  Query,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices, OSD_FIELD_TYPES } from '../../../data/public';
 import {
@@ -146,12 +147,16 @@ export const s3TypeConfig: DatasetTypeConfig = {
     }
   },
 
-  getInitialQueryString: (query: Query, sampleSize?: number) => {
+  getInitialQueryString: (query: Query, uiSettings?: CoreStart['uiSettings']) => {
     switch (query.language) {
       case 'PPL':
-        return `source = ${query.dataset?.title} | head ${sampleSize ?? 500}`;
+        return `source = ${query.dataset?.title} | head ${
+          uiSettings?.get('discover:sampleSize') ?? 500
+        }`;
       case 'SQL':
-        return `SELECT * FROM ${query.dataset?.title} LIMIT ${sampleSize ?? 500}`;
+        return `SELECT * FROM ${query.dataset?.title} LIMIT ${
+          uiSettings?.get('discover:sampleSize') ?? 500
+        }`;
     }
   },
 };

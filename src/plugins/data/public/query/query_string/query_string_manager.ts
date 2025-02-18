@@ -74,7 +74,7 @@ export class QueryStringManager {
     }
 
     return (
-      typeConfig?.getInitialQueryString?.(query, this.uiSettings.get('discover:sampleSize')) ??
+      typeConfig?.getInitialQueryString?.(query, this.uiSettings) ??
       (languageConfig?.getQueryString(query) || '')
     );
   }
