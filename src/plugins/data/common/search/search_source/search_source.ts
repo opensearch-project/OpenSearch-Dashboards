@@ -121,7 +121,6 @@ import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
 import { handleQueryResults } from '../../utils/helpers';
-import { query } from '../../../../console/server/lib/spec_definitions/js/query/dsl';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -450,6 +449,7 @@ export class SearchSource {
             convertResult({
               fields: this.getFields(),
               response: response as IDataFrameResponse,
+              options,
             })
           );
         }

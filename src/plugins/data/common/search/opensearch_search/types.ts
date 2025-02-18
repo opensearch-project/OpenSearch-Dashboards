@@ -48,6 +48,10 @@ export interface ISearchOptions {
    * Use this option to enable support for long numerals.
    */
   withLongNumeralsSupport?: boolean;
+  /**
+   * Use this option to format the date fields in the search response.
+   */
+  dateFieldsFormatter?: (value: string) => string;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {

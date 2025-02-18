@@ -5,7 +5,6 @@
 
 import { SearchResponse } from 'elasticsearch';
 import datemath from '@opensearch/datemath';
-import moment from 'moment';
 import {
   DATA_FRAME_TYPES,
   DataFrameAggConfig,
@@ -18,7 +17,7 @@ import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
 import { TimeRange } from '../types';
 import { IDataFrame } from './types';
-import { SearchSourceFields } from '../search';
+import { ISearchOptions, SearchSourceFields } from '../search';
 
 /**
  * Converts the data frame response to a search response.
@@ -31,11 +30,12 @@ import { SearchSourceFields } from '../search';
 export const convertResult = ({
   response,
   fields,
+  options,
 }: {
   response: IDataFrameResponse;
-  fields: SearchSourceFields;
+  fields?: SearchSourceFields;
+  options?: ISearchOptions;
 }): SearchResponse<any> => {
-  console.log('fields', fields);
   const body = response.body;
   if (body.hasOwnProperty('error')) {
     return response;
@@ -63,22 +63,36 @@ export const convertResult = ({
       const hit: { [key: string]: any } = {};
 
       const processField = (field: any, value: any): any => {
-        // Handle date fields
-        if (moment(value, ['YYYY-MM-DD HH:mm:ss'], true).isValid()) {
-          return moment.utc(value).format('YYYY-MM-DDTHH:mm:ssZ');
+        if (options && options.dateFieldsFormatter) {
+          const formatter = options.dateFieldsFormatter;
+          // Handle date fields
+          if (field.type === 'date') {
+            return formatter(value);
+          }
+          // Handle nested objects with potential date fields
+          else if (field.type === 'object') {
+            const nestedHit: { [key: string]: any } = value;
+            Object.entries(value).forEach(([nestedField, nestedValue]) => {
+              // Need to get the flattened field name
+              const flattenedFieldName = `${field.name}.${nestedField}`;
+              fields?.index?.fields.forEach((indexPatternField) => {
+                if (
+                  indexPatternField.displayName === flattenedFieldName &&
+                  indexPatternField.type === 'date'
+                ) {
+                  nestedHit[nestedField] = formatter(nestedValue as string);
+                }
+              });
+            });
+            return nestedHit;
+          } else {
+            // Default case when the field is either a date type or object type
+            return value;
+          }
+        } else {
+          // Default case when we don't have a dateFieldsFormatter
+          return value;
         }
-
-        // Handle nested objects with potential date fields
-        if (field.type === 'object') {
-          const nestedHit: { [key: string]: any } = {};
-          Object.entries(value).forEach(([nestedField, nestedValue]) => {
-            nestedHit[nestedField] = processField(nestedField, nestedValue);
-          });
-          return nestedHit;
-        }
-
-        // Default case for non-date fields
-        return value;
       };
 
       data.fields.forEach((field) => {
