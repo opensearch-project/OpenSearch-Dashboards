@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasetTypes, PATHS, BASE_PATH, QueryLanguages } from '../../../../../utils/constants';
+import { DatasetTypes, PATHS, BASE_PATH } from '../../../../../utils/constants';
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME_1,

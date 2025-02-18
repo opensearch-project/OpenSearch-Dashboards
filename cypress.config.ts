@@ -8,7 +8,8 @@ import webpackPreprocessor from '@cypress/webpack-preprocessor';
 // TODO: import { paste } from 'copy-paste';
 
 module.exports = defineConfig({
-  defaultCommandTimeout: 60000,
+  experimentalMemoryManagement: true,
+  defaultCommandTimeout: 15000,
   requestTimeout: 60000,
   responseTimeout: 60000,
   retries: {
