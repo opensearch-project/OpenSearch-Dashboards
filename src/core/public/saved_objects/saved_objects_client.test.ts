@@ -386,7 +386,7 @@ describe('SavedObjectsClient', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-02-18T07:16:42.070Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "prependOptions": undefined,
               "query": Object {
@@ -405,7 +405,7 @@ describe('SavedObjectsClient', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-02-18T07:16:42.070Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "prependOptions": undefined,
               "query": Object {
@@ -426,7 +426,7 @@ describe('SavedObjectsClient', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-02-18T07:16:42.070Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "prependOptions": undefined,
               "query": Object {
@@ -587,7 +587,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "prependOptions": Object {},
+              "prependOptions": undefined,
               "query": Object {
                 "workspaces": Array [
                   "foo",
@@ -699,7 +699,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-02-18T07:16:42.096Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "prependOptions": undefined,
               "query": Object {
@@ -721,7 +721,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-02-18T07:16:42.096Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "prependOptions": undefined,
               "query": Object {
@@ -745,7 +745,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-02-18T07:16:42.096Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "prependOptions": undefined,
               "query": Object {
@@ -818,7 +818,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "prependOptions": Object {},
+              "prependOptions": undefined,
               "query": Object {
                 "default_search_operator": "OR",
                 "fields": Array [
@@ -859,7 +859,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "prependOptions": Object {},
+              "prependOptions": undefined,
               "query": Object {
                 "workspaces": Array [
                   "bar",
