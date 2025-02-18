@@ -11,16 +11,16 @@ import {
   INDEX_PATTERN_WITH_TIME_1,
   INDEX_PATTERN_WITH_NO_TIME_1,
   PATHS,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   generateAllTestConfigurations,
   generateIndexPatternTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/constants';
-import { selectFieldFromSidebar } from '../../../../../utils/apps/query_enhancements/sidebar';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
+import { selectFieldFromSidebar } from '../../../../../../utils/apps/query_enhancements/sidebar';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

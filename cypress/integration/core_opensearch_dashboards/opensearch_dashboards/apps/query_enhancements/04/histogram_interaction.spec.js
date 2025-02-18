@@ -10,16 +10,16 @@ import {
   INDEX_WITH_TIME_1,
   QueryLanguages,
   DATASOURCE_NAME,
-} from '../../../../../utils/apps/constants';
-import { PATHS } from '../../../../../utils/constants';
+} from '../../../../../../utils/apps/constants';
+import { PATHS } from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { generateHistogramTestConfigurations } from '../../../../../utils/apps/query_enhancements/histogram_interaction';
-import { DatasetTypes } from '../../../../../utils/apps/query_enhancements/constants';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/query_enhancements/histogram_interaction';
+import { DatasetTypes } from '../../../../../../utils/apps/query_enhancements/constants';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 

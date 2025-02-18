@@ -9,18 +9,18 @@ import {
   PATHS,
   DATASOURCE_NAME,
   DatasetTypes,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   generateBaseConfiguration,
   generateAllTestConfigurations,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateQueryTestConfigurations,
   LanguageConfigs,
-} from '../../../../../utils/apps/query_enhancements/queries';
-import { prepareTestSuite } from '../../../../../utils/helpers';
-import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/constants';
+} from '../../../../../../utils/apps/query_enhancements/queries';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
 
 const workspaceName = getRandomizedWorkspaceName();
 

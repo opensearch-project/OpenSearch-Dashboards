@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_PATTERN_WITH_TIME, INDEX_WITH_TIME_1 } from '../../../../../utils/apps/constants.js';
-import { PATHS, BASE_PATH, DATASOURCE_NAME } from '../../../../../utils/constants.js';
-import { DatasetTypes } from '../../../../../utils/apps/query_enhancements/constants.js';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared.js';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+import {
+  INDEX_PATTERN_WITH_TIME,
+  INDEX_WITH_TIME_1,
+} from '../../../../../../utils/apps/constants.js';
+import { PATHS, BASE_PATH, DATASOURCE_NAME } from '../../../../../../utils/constants.js';
+import { DatasetTypes } from '../../../../../../utils/apps/query_enhancements/constants.js';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared.js';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

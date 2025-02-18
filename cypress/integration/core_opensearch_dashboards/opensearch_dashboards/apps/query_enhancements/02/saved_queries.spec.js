@@ -9,7 +9,7 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   PATHS,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 
 import {
   verifyDiscoverPageState,
@@ -18,16 +18,16 @@ import {
   updateAndVerifySavedQuery,
   SAVE_AS_NEW_QUERY_SUFFIX,
   validateSaveAsNewQueryMatchingNameHasError,
-} from '../../../../../utils/apps/query_enhancements/saved_queries';
+} from '../../../../../../utils/apps/query_enhancements/saved_queries';
 
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateAllTestConfigurations,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 
-import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+import { generateSavedTestConfiguration } from '../../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

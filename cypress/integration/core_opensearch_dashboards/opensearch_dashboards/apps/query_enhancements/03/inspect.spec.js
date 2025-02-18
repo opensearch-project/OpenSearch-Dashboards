@@ -8,14 +8,14 @@ import {
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   QueryLanguages,
-} from '../../../../../utils/apps/constants.js';
-import * as docTable from '../../../../../utils/apps/query_enhancements/doc_table.js';
-import { PATHS, BASE_PATH } from '../../../../../utils/constants.js';
+} from '../../../../../../utils/apps/constants.js';
+import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
+import { PATHS, BASE_PATH } from '../../../../../../utils/constants.js';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared.js';
+} from '../../../../../../utils/apps/query_enhancements/shared.js';
 import {
   generateInspectTestConfiguration,
   getFlattenedFieldsWithValue,
@@ -23,8 +23,8 @@ import {
   verifyVisualizationsWithInspectOption,
   visualizationTitlesWithNoInspectOptions,
   visualizationTitlesWithInspectOptions,
-} from '../../../../../utils/apps/query_enhancements/inspect.js';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/inspect.js';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

@@ -10,12 +10,12 @@ import {
   QueryLanguages,
   PATHS,
   DATASOURCE_NAME,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   setSearchConfigurations,
   verifyDiscoverPageState,
@@ -23,8 +23,8 @@ import {
   postRequestSaveSearch,
   updateSavedSearchAndSaveAndVerify,
   generateSavedTestConfiguration,
-} from '../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

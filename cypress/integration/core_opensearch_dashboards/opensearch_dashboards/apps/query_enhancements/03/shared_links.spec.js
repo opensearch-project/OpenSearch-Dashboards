@@ -9,21 +9,21 @@ import {
   INDEX_PATTERN_WITH_TIME_1,
   PATHS,
   DATASOURCE_NAME,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   setHistogramIntervalIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/constants';
-import { selectFieldFromSidebar } from '../../../../../utils/apps/query_enhancements/sidebar';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
+import { selectFieldFromSidebar } from '../../../../../../utils/apps/query_enhancements/sidebar';
 import {
   verifyShareUrl,
   openShareMenuWithRetry,
-} from '../../../../../utils/apps/query_enhancements/shared_links';
-import { setSort } from '../../../../../utils/apps/query_enhancements/table';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared_links';
+import { setSort } from '../../../../../../utils/apps/query_enhancements/table';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

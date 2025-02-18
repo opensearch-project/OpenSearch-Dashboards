@@ -8,10 +8,10 @@ import {
   DATASOURCE_NAME,
   START_TIME,
   END_TIME,
-} from '../../../../../utils/apps/constants';
-import { PATHS } from '../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/constants';
+import { PATHS } from '../../../../../../utils/constants';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 

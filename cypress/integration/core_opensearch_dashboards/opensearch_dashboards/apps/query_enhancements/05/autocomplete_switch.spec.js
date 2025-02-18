@@ -10,18 +10,18 @@ import {
   PATHS,
   DATASOURCE_NAME,
   DatasetTypes,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   getDefaultQuery,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateAutocompleteTestConfiguration,
   generateAutocompleteTestConfigurations,
   LanguageConfigs,
   getDatasetName,
-} from '../../../../../utils/apps/query_enhancements/autocomplete';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/autocomplete';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

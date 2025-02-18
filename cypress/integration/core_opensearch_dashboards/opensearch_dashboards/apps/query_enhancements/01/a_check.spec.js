@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DATASOURCE_NAME, PATHS, INDEX_WITH_TIME_1 } from '../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+import { DATASOURCE_NAME, PATHS, INDEX_WITH_TIME_1 } from '../../../../../../utils/constants';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

@@ -9,13 +9,13 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   PATHS,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { generateTimeRangeTestConfiguration } from '../../../../../utils/apps/query_enhancements/time_range_selection';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { generateTimeRangeTestConfiguration } from '../../../../../../utils/apps/query_enhancements/time_range_selection';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

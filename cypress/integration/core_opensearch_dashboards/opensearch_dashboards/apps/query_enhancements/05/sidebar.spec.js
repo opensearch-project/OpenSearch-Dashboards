@@ -3,22 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasetTypes, PATHS, BASE_PATH } from '../../../../../utils/constants';
+import { DatasetTypes, PATHS, BASE_PATH } from '../../../../../../utils/constants';
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME_1,
   INDEX_WITH_TIME_1,
   QueryLanguages,
-} from '../../../../../utils/apps/query_enhancements/constants';
+} from '../../../../../../utils/apps/query_enhancements/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { getDocTableField } from '../../../../../utils/apps/query_enhancements/doc_table';
-import * as sideBar from '../../../../../utils/apps/query_enhancements/sidebar';
-import { generateSideBarTestConfiguration } from '../../../../../utils/apps/query_enhancements/sidebar';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { getDocTableField } from '../../../../../../utils/apps/query_enhancements/doc_table';
+import * as sideBar from '../../../../../../utils/apps/query_enhancements/sidebar';
+import { generateSideBarTestConfiguration } from '../../../../../../utils/apps/query_enhancements/sidebar';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

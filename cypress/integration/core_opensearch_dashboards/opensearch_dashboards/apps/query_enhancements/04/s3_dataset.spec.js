@@ -7,9 +7,9 @@ import {
   DS_API,
   DSM_API,
   S3_CLUSTER,
-} from '../../../../../utils/apps/query_enhancements/constants';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/constants';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 

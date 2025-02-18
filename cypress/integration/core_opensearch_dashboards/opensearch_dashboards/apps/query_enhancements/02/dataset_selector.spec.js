@@ -10,23 +10,23 @@ import {
   INDEX_WITH_TIME_2,
   PATHS,
   DatasetTypes,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   getDefaultQuery,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 
-import { verifyDiscoverPageState } from '../../../../../utils/apps/query_enhancements/saved';
+import { verifyDiscoverPageState } from '../../../../../../utils/apps/query_enhancements/saved';
 
 import {
   generateDatasetSelectorTestConfiguration,
   verifyBaseState,
   setUpBaseState,
-} from '../../../../../utils/apps/query_enhancements/dataset_selector';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/dataset_selector';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

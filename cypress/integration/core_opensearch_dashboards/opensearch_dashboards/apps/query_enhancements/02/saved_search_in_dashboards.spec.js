@@ -12,19 +12,19 @@ import {
   QueryLanguages,
   PATHS,
   START_TIME,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   postRequestSaveSearch,
   generateSavedTestConfiguration,
   getExpectedHitCount,
   loadSavedSearchFromDashboards,
   navigateToDashboardAndOpenSavedSearchPanel,
-} from '../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

@@ -10,17 +10,17 @@ import {
   INDEX_WITH_TIME_2,
   QueryLanguages,
   PATHS,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateDisplayTestConfiguration,
   getLanguageReferenceTestText,
-} from '../../../../../utils/apps/query_enhancements/language_specific_display';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/language_specific_display';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 

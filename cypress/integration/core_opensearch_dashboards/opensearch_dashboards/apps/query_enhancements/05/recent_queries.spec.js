@@ -7,20 +7,20 @@ import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
-} from '../../../../../utils/apps/constants';
-import { BASE_PATH, PATHS } from '../../../../../utils/constants';
+} from '../../../../../../utils/apps/constants';
+import { BASE_PATH, PATHS } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateAllTestConfigurations,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateRecentQueriesTestConfiguration,
   BaseQuery,
   TestQueries,
   //TODO: QueryRegex,
-} from '../../../../../utils/apps/query_enhancements/recent_queries';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/recent_queries';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 const runRecentQueryTests = () => {
