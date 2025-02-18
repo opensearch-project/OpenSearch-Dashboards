@@ -12,6 +12,8 @@ import {
   IDataFrameResponse,
 } from '.';
 import moment from 'moment';
+import { ISearchOptions, SearchSourceFields } from '../search';
+import { IIndexPatternFieldList, IndexPattern, IndexPatternField } from '../index_patterns';
 
 describe('formatTimePickerDate', () => {
   const mockDateFormat = 'YYYY-MM-DD HH:mm:ss';
@@ -61,7 +63,7 @@ describe('convertResult', () => {
       type: DATA_FRAME_TYPES.DEFAULT,
     };
 
-    const result = convertResult(response);
+    const result = convertResult({ response });
     expect(result.hits.hits).toEqual([]);
     expect(result.took).toBe(0);
   });
@@ -92,7 +94,16 @@ describe('convertResult', () => {
       type: DATA_FRAME_TYPES.DEFAULT,
     };
 
-    const result = convertResult(response);
+    // Custom date formatter
+    const customFormatter = (dateStr: string) => {
+      return moment.utc(dateStr).format('YYYY-MM-DDTHH:mm:ssZ');
+    };
+
+    const options: ISearchOptions = {
+      dateFieldsFormatter: customFormatter,
+    };
+
+    const result = convertResult({ response, options });
     expect(result.hits.hits[0]._source.timestamp).toBe(expectedFormattedDate);
     expect(result.hits.hits[0]._source.message).toBe('test message');
   });
@@ -126,7 +137,66 @@ describe('convertResult', () => {
       type: DATA_FRAME_TYPES.DEFAULT,
     };
 
-    const result = convertResult(response);
+    // Create proper IndexPatternField instances
+    const createdAtField = new IndexPatternField(
+      {
+        name: 'metadata.created_at',
+        type: 'date',
+        esTypes: ['date'],
+        searchable: true,
+        aggregatable: true,
+      },
+      'metadata.created_at'
+    );
+
+    const statusField = new IndexPatternField(
+      {
+        name: 'metadata.status',
+        type: 'keyword',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+      },
+      'metadata.status'
+    );
+
+    // Create a mock of IIndexPatternFieldList with the required methods
+    const mockFields = [createdAtField, statusField] as IIndexPatternFieldList;
+    // Add required methods
+    mockFields.getAll = jest.fn().mockReturnValue([createdAtField, statusField]);
+    mockFields.getByName = jest.fn((name) =>
+      name === 'metadata.created_at'
+        ? createdAtField
+        : name === 'metadata.status'
+        ? statusField
+        : undefined
+    );
+    mockFields.getByType = jest.fn((type) =>
+      type === 'date' ? [createdAtField] : type === 'keyword' ? [statusField] : []
+    );
+
+    // Mock IndexPattern with fields property using IIndexPatternFieldList
+    const mockIndexPattern: IndexPattern = {
+      fields: mockFields,
+      title: 'test-index',
+      timeFieldName: 'timestamp',
+    };
+
+    // Correctly structured SearchSourceFields
+    const fields: SearchSourceFields = {
+      index: mockIndexPattern,
+    };
+
+    // Custom date formatter
+    const customFormatter = (dateStr: string) => {
+      return moment.utc(dateStr).format('YYYY-MM-DDTHH:mm:ssZ');
+    };
+
+    const options: ISearchOptions = {
+      dateFieldsFormatter: customFormatter,
+    };
+
+    const result = convertResult({ response, fields, options });
     expect(result.hits.hits[0]._source.metadata.created_at).toBe(expectedFormattedDate);
     expect(result.hits.hits[0]._source.metadata.status).toBe('active');
   });
@@ -163,7 +233,7 @@ describe('convertResult', () => {
       type: DATA_FRAME_TYPES.DEFAULT,
     };
 
-    const result = convertResult(response);
+    const result = convertResult({ response });
     expect(result.aggregations?.timestamp_histogram.buckets).toHaveLength(2);
     expect(result.aggregations?.timestamp_histogram.buckets[0].doc_count).toBe(10);
   });
@@ -190,7 +260,34 @@ describe('convertResult', () => {
       },
     };
 
-    const result = convertResult(errorResponse as IDataFrameResponse);
+    const result = convertResult({ response: errorResponse as IDataFrameResponse });
     expect(result).toEqual(errorResponse);
+  });
+
+  it('should use default processing when no formatter is provided', () => {
+    const response: IDataFrameResponse = {
+      took: 100,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      body: {
+        fields: [{ name: 'timestamp', type: 'date', values: [mockDateString] }],
+        size: 1,
+        name: 'test-index',
+      },
+      type: DATA_FRAME_TYPES.DEFAULT,
+    };
+
+    const result = convertResult({ response });
+    expect(result.hits.hits[0]._source.timestamp).toBe(mockDateString);
   });
 });

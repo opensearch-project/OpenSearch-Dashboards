@@ -447,8 +447,8 @@ export class SearchSource {
           return onResponse(
             searchRequest,
             convertResult({
-              fields: this.getFields(),
               response: response as IDataFrameResponse,
+              fields: this.getFields(),
               options,
             })
           );
@@ -484,7 +484,14 @@ export class SearchSource {
           (results as any).took = elapsedMs;
 
           await this.setDataFrame((results as QuerySuccessStatusResponse).body as IDataFrame);
-          return onResponse(searchRequest, convertResult(results as IDataFrameResponse));
+          return onResponse(
+            searchRequest,
+            convertResult({
+              response: results as IDataFrameResponse,
+              fields: this.getFields(),
+              options,
+            })
+          );
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
           const dataFrameError = response as IDataFrameError;
