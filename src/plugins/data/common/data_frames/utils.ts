@@ -62,8 +62,7 @@ export const convertResult = ({
     for (let index = 0; index < data.size; index++) {
       const hit: { [key: string]: any } = {};
 
-      const processNestedField = (field: any, value: any, formatter: any): any => {
-        const nestedHit: { [key: string]: any } = value;
+      const processNestedFieldEntry = (field: any, value: any, formatter: any): any => {
         Object.entries(value).forEach(([nestedField, nestedValue]) => {
           // Need to get the flattened field name for nested fields ex.products.created_on
           const flattenedFieldName = `${field.name}.${nestedField}`;
@@ -74,11 +73,23 @@ export const convertResult = ({
               searchSourceField.displayName === flattenedFieldName &&
               searchSourceField.type === 'date'
             ) {
-              nestedHit[nestedField] = formatter(nestedValue as string, OSD_FIELD_TYPES.DATE);
+              value[nestedField] = formatter(nestedValue as string, OSD_FIELD_TYPES.DATE);
             }
           });
         });
-        return nestedHit;
+        return value;
+      };
+
+      const processNestedField = (field: any, value: any, formatter: any): any => {
+        const nestedHit: { [key: string]: any } = value;
+        // if nestedHit is an array, we need to process each element
+        if (Array.isArray(nestedHit)) {
+          return nestedHit.map((nestedValue) => {
+            return processNestedFieldEntry(field, nestedValue, formatter);
+          });
+        } else {
+          return processNestedFieldEntry(field, nestedHit, formatter);
+        }
       };
 
       const processField = (field: any, value: any): any => {
