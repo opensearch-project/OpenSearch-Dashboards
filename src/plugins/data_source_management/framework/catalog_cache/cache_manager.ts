@@ -156,8 +156,7 @@ export class CatalogCacheManager {
         (ds: CachedDataSource) =>
           ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
       );
-    }
-    else {
+    } else {
       index = cacheData.dataSources.findIndex(
         (ds: CachedDataSource) => ds.name === dataSource.name
       );

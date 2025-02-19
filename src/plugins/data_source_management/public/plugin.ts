@@ -53,7 +53,12 @@ import { CreateAcceleration } from './components/direct_query_data_sources_compo
 import { AssociatedObjectsDetailsFlyout } from './components/direct_query_data_sources_components/associated_object_management/associated_objects_details_flyout';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { CatalogCacheManager } from '../framework/catalog_cache/cache_manager';
-import { useLoadAccelerationsToCache, useLoadDatabasesToCache, useLoadTableColumnsToCache, useLoadTablesToCache } from '../framework/catalog_cache/cache_loader';
+import {
+  useLoadAccelerationsToCache,
+  useLoadDatabasesToCache,
+  useLoadTableColumnsToCache,
+  useLoadTablesToCache,
+} from '../framework/catalog_cache/cache_loader';
 
 export const [
   getRenderAccelerationDetailsFlyout,

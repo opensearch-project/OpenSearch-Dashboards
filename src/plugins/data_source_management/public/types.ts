@@ -22,7 +22,12 @@ import { AuthType } from '../../data_source/common/data_sources';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 import { AuthenticationMethodRegistry } from './auth_registry';
-import { LoadCachehookOutput, RenderAccelerationDetailsFlyoutParams, RenderAccelerationFlyoutParams, RenderAssociatedObjectsDetailsFlyoutParams } from '../framework/types';
+import {
+  LoadCachehookOutput,
+  RenderAccelerationDetailsFlyoutParams,
+  RenderAccelerationFlyoutParams,
+  RenderAssociatedObjectsDetailsFlyoutParams,
+} from '../framework/types';
 import { CatalogCacheManager } from '../framework/catalog_cache/cache_manager';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
