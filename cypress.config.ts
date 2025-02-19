@@ -6,7 +6,6 @@ import fs from 'fs';
 import path from 'path';
 import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
-import { prepareAudit } from '@cypress-audit/lighthouse';
 
 module.exports = defineConfig({
   defaultCommandTimeout: 60000,
@@ -78,10 +77,6 @@ function setupNodeEvents(
       webpackOptions,
     })
   );
-
-  on('before:browser:launch', (browser = Cypress.browser, launchOptions) => {
-    prepareAudit(launchOptions);
-  });
 
   on('task', {
     logPerformance({ metric, value }) {

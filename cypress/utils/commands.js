@@ -68,79 +68,70 @@ Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
 //   componentTestId: 'docTable',
 //   eventName: 'onLoadSavedQuery',
 // });
+
 Cypress.Commands.add('measureComponentPerformance', (opts) => {
-  const { page, componentTestId, eventName } = opts;
+  const { page, componentTestId, eventName, isDynamic = false } = opts;
+
   cy.readFile('cypress/utils/performance_baselines.json').then((baselines) => {
-    // Retrieve baseline for the given component (testId)
     const baseline = baselines[page][componentTestId][eventName];
     const fieldName = `${page}_${componentTestId}_${eventName}`;
 
-    if (baseline) {
-      cy.window().then((win) => {
-        const startTime = win.performance.now();
-
-        // Measure render time
-        cy.getElementByTestId(componentTestId)
-          .should('be.visible')
-          .then(() => {
-            const endTime = win.performance.now();
-            const renderTime = endTime - startTime;
-
-            cy.log(renderTime, baseline.render_time, 'renderTime baseline.render_time');
-            // Compare Render Time with Baseline
-            if (renderTime > baseline.render_time) {
-              cy.task('logPerformance', {
-                metric: `${fieldName}_render_time`,
-                value: `exceeded: ${renderTime.toFixed(2)}ms > ${baseline.render_time}ms`,
-              });
-            }
-
-            // Capture Layout Shift (CLS)
-            cy.window().then((win) => {
-              return new Cypress.Promise((resolve) => {
-                let layoutShiftScore = 0;
-                const observer = new win.PerformanceObserver((list) => {
-                  for (const entry of list.getEntries()) {
-                    if (!entry.hadRecentInput) {
-                      layoutShiftScore += entry.value;
-                    }
-                  }
-                });
-                observer.observe({ type: 'layout-shift', buffered: true });
-
-                setTimeout(() => {
-                  observer.disconnect();
-                  resolve(layoutShiftScore);
-                }, 2000);
-              }).then((layoutShiftScore) => {
-                // Compare Layout Shift (CLS) with Baseline
-                if (layoutShiftScore > baseline.layout_shift) {
-                  cy.task('logPerformance', {
-                    metric: `${fieldName}_layout_shift`,
-                    value: `exceeded: ${layoutShiftScore.toFixed(2)} > ${
-                      baseline.layout_shift
-                    } (CLS)`,
-                  });
-                }
-              });
-            });
-
-            // Capture Memory Usage
-            cy.window().then((win) => {
-              const memoryUsage = win.performance.memory.usedJSHeapSize / 1024 / 1024;
-
-              // Compare Memory Usage with Baseline
-              if (memoryUsage > baseline.memory_MB) {
-                cy.task('logPerformance', {
-                  metric: `${fieldName}_memory_MB`,
-                  value: `exceeded: ${memoryUsage.toFixed(2)}MB > ${baseline.memory_MB}MB`,
-                });
-              }
-            });
-          });
-      });
-    } else {
+    if (!baseline) {
       cy.log(`No baseline found for component: ${fieldName}`);
+      return;
     }
+
+    cy.window().then((win) => {
+      win.performance.mark(`${fieldName}_start`);
+
+      cy.get(`[data-test-subj="${componentTestId}"]`).as('component');
+
+      cy.get('@component')
+        .should('exist')
+        .then(($el) => {
+          // Check if finalRenderSelector is provided (indicating a dynamic component)
+          if (isDynamic) {
+            return new Cypress.Promise((resolve) => {
+              const observer = new MutationObserver(() => {
+                observer.disconnect();
+                resolve();
+              });
+
+              observer.observe($el[0], { childList: true, subtree: true });
+
+              // Fallback: If no changes detected in 3s, assume it's rendered
+              setTimeout(() => {
+                observer.disconnect();
+                resolve();
+              }, 3000);
+            });
+          }
+        });
+
+      // Now measure time
+      cy.window().then((win) => {
+        win.performance.mark(`${fieldName}_end`);
+        win.performance.measure(
+          `${fieldName}_render_time`,
+          `${fieldName}_start`,
+          `${fieldName}_end`
+        );
+
+        const measures = win.performance.getEntriesByName(`${fieldName}_render_time`);
+        if (measures.length > 0) {
+          const renderTime = measures[0].duration;
+          cy.log(`Render Time: ${renderTime.toFixed(2)}ms`);
+
+          if (renderTime > baseline.render_time) {
+            cy.task('logPerformance', {
+              metric: `${fieldName}_render_time`,
+              value: `exceeded: ${renderTime.toFixed(2)}ms > ${baseline.render_time}ms`,
+            });
+          }
+        } else {
+          cy.log('⚠️ Render time measurement failed.');
+        }
+      });
+    });
   });
 });

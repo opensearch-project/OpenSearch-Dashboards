@@ -3,20 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// This file is rough for performance metrics testing. Do Not Delete.
 import {
-  DATASOURCE_NAME,
+  INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   PATHS,
+  DATASOURCE_NAME,
 } from '../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
-
+import {
+  generateAllTestConfigurations,
+  getRandomizedWorkspaceName,
+  setDatePickerDatesAndSearchIfRelevant,
+} from '../../../../../utils/apps/query_enhancements/shared';
+import { generateDisplayTestConfiguration } from '../../../../../utils/apps/query_enhancements/language_specific_display';
 import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
-export const runSavedSearchTests = () => {
+const runSavedSearchTests = () => {
   describe('Performance testing', () => {
     beforeEach(() => {
       // Load test data
@@ -38,23 +42,67 @@ export const runSavedSearchTests = () => {
         url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
+
+      // Create workspace
+      cy.deleteAllWorkspaces();
       cy.visit('/app/home');
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+      cy.createWorkspaceIndexPatterns({
+        workspaceName: workspaceName,
+        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
+        timefieldName: 'timestamp',
+        dataSource: DATASOURCE_NAME,
+        isEnhancement: true,
+      });
+      cy.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'discover',
+        isEnhancement: true,
+      });
     });
 
     afterEach(() => {
-      // No need to explicitly delete all saved queries as deleting the workspace will delete associated saved queries
       cy.deleteWorkspaceByName(workspaceName);
       cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_2);
     });
 
-    it('should test discover page compoonent sidebar performance', () => {
-      cy.visit('/app/discover');
-      cy.measureComponentPerformance({
-        page: 'discover',
-        componentTestId: 'sidebarPanel',
-        eventName: 'onPageLoad',
+    generateAllTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
+      const keywords = ['PPL', 'DQL', 'SQL', 'Lucene'];
+      const matchingKeyword = keywords.find((keyword) => config.language.includes(keyword));
+
+      it(`should correctly sidebar metrics components for ${config.testName}`, () => {
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.setQueryLanguage(config.language);
+        setDatePickerDatesAndSearchIfRelevant(config.language);
+        cy.measureComponentPerformance({
+          page: 'discover',
+          componentTestId: 'sidebarPanel',
+          eventName: `onDateTimeSearch_${matchingKeyword}`,
+          isDynamic: true,
+        });
+        // testing the datepicker
+        if (config.datepicker) {
+          cy.getElementByTestId('superDatePickerstartDatePopoverButton').should('be.visible');
+        }
       });
-      cy.getElementByTestId('sidebarPanel').should('be.visible');
+
+      it(`should correctly table metrics components for ${config.testName}`, () => {
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.setQueryLanguage(config.language);
+        setDatePickerDatesAndSearchIfRelevant(config.language);
+        cy.measureComponentPerformance({
+          page: 'discover',
+          componentTestId: 'docTable',
+          eventName: `onDateTimeSearch_${matchingKeyword}`,
+          isDynamic: true,
+        });
+        // testing the datepicker
+        if (config.datepicker) {
+          cy.getElementByTestId('superDatePickerstartDatePopoverButton').should('be.visible');
+        }
+      });
     });
   });
 };

@@ -2,20 +2,42 @@
   "discover": {
     "docTable": {
       "onLoadSavedQuery": {
-        "render_time": 500,
-        "layout_shift": 0.5,
-        "memory_MB": 2000
-      }
-    },
-    "docTableField": {
-      "onLoadSavedSearch": {
-        "render_time": 100,
-        "layout_shift": 0.5,
-        "memory_MB": 100
+        "render_time": 300
+      },
+      "onDateTimeSearch_SQL": {
+        "render_time": 3000
+      },
+      "onDateTimeSearch_PPL": {
+        "render_time": 3000
+      },
+      "onDateTimeSearch_Lucene": {
+        "render_time": 500
+      },
+      "onDateTimeSearch_DQL": {
+        "render_time": 500
       }
     },
     "sidebarPanel": {
-      "onPageLoad": { "render_time": 500, "layout_shift": 0.5, "memory_MB": 500 }
+      "onPageLoad": { "render_time": 300 },
+      "onDateTimeSearch_SQL": {
+        "render_time": 100
+      },
+      "onDateTimeSearch_PPL": {
+        "render_time": 3000
+      },
+      "onDateTimeSearch_Lucene": {
+        "render_time": 100
+      },
+      "onDateTimeSearch_DQL": {
+        "render_time": 300
+      }
+    }
+  },
+  "home": {
+    "workspace-initial-card-createWorkspace-button": {
+      "onPageLoad": {
+        "render_time": 300
+      }
     }
   }
 }

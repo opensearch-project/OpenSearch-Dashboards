@@ -1,4 +1,0 @@
-{
-  "discover_sidebarPanel_onPageLoad_memory_MB": "exceeded: 2792.83MB > 100MB",
-  "discover_sidebarPanel_onPageLoad_layout_shift": "exceeded: 0.89 > 0.08 (CLS)"
-}

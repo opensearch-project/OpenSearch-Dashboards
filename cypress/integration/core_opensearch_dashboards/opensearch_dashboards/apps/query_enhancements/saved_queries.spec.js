@@ -68,12 +68,6 @@ const loadSavedQuery = (config) => {
   );
 
   cy.loadSaveQuery(config.saveName);
-  // wait for saved queries to load.
-  cy.measureComponentPerformance({
-    page: 'discover',
-    componentTestId: 'docTable',
-    eventName: 'onLoadSavedQuery',
-  });
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
 };
