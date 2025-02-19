@@ -14,6 +14,7 @@ import {
 import moment from 'moment';
 import { ISearchOptions, SearchSourceFields } from '../search';
 import { IIndexPatternFieldList, IndexPattern, IndexPatternField } from '../index_patterns';
+import { OSD_FIELD_TYPES } from '../types';
 
 describe('formatTimePickerDate', () => {
   const mockDateFormat = 'YYYY-MM-DD HH:mm:ss';
@@ -95,12 +96,14 @@ describe('convertResult', () => {
     };
 
     // Custom date formatter
-    const customFormatter = (dateStr: string) => {
-      return moment.utc(dateStr).format('YYYY-MM-DDTHH:mm:ssZ');
+    const customFormatter = (dateStr: string, type: OSD_FIELD_TYPES) => {
+      if (type === OSD_FIELD_TYPES.DATE) {
+        return moment.utc(dateStr).format('YYYY-MM-DDTHH:mm:ssZ');
+      }
     };
 
     const options: ISearchOptions = {
-      dateFieldsFormatter: customFormatter,
+      formatter: customFormatter,
     };
 
     const result = convertResult({ response, options });
@@ -188,12 +191,14 @@ describe('convertResult', () => {
     };
 
     // Custom date formatter
-    const customFormatter = (dateStr: string) => {
-      return moment.utc(dateStr).format('YYYY-MM-DDTHH:mm:ssZ');
+    const customFormatter = (dateStr: string, type: OSD_FIELD_TYPES) => {
+      if (type === OSD_FIELD_TYPES.DATE) {
+        return moment.utc(dateStr).format('YYYY-MM-DDTHH:mm:ssZ');
+      }
     };
 
     const options: ISearchOptions = {
-      dateFieldsFormatter: customFormatter,
+      formatter: customFormatter,
     };
 
     const result = convertResult({ response, fields, options });

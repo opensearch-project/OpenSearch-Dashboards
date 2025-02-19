@@ -252,8 +252,8 @@ export const useSearch = (services: DiscoverViewServices) => {
         abortSignal: fetchStateRef.current.abortController.signal,
         withLongNumeralsSupport: await services.uiSettings.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS),
         ...(languageConfig &&
-          languageConfig.fields?.dateFieldsFormatter && {
-            dateFieldsFormatter: languageConfig.fields.dateFieldsFormatter,
+          languageConfig.fields?.formatter && {
+            formatter: languageConfig.fields.formatter,
           }),
       });
 

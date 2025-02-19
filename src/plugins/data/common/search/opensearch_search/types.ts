@@ -31,6 +31,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { Search } from '@opensearch-project/opensearch/api/requestParams';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
+import { OSD_FIELD_TYPES } from '../../types';
 
 export const OPENSEARCH_SEARCH_STRATEGY = 'opensearch';
 export const OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY = 'opensearch-with-long-numerals';
@@ -49,9 +50,9 @@ export interface ISearchOptions {
    */
   withLongNumeralsSupport?: boolean;
   /**
-   * Use this option to format the date fields in the search response.
+   * Use this option to format the fields in the search response.
    */
-  dateFieldsFormatter?: (value: string) => string;
+  formatter?: (value: any, type: OSD_FIELD_TYPES) => any;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {
