@@ -500,3 +500,33 @@ export const updateSavedSearchAndSaveAndVerify = (
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);
 };
+
+/**
+ * Navigates to dashboard page, clicks new dashboard, and open up the saved search panel
+ * @param {string} workspaceName - name of workspace
+ */
+export const navigateToDashboardAndOpenSavedSearchPanel = (workspaceName) => {
+  cy.navigateToWorkSpaceSpecificPage({
+    workspaceName,
+    page: 'dashboards',
+    isEnhancement: true,
+  });
+  cy.getElementByTestId('newItemButton').click();
+  // using DQL as it supports date picker
+  setDatePickerDatesAndSearchIfRelevant(QueryLanguages.DQL.name);
+  cy.getElementByTestId('dashboardAddPanelButton').click();
+  cy.getElementByTestId('savedObjectFinderFilterButton').click();
+  cy.getElementByTestId('savedObjectFinderFilter-search').click();
+};
+
+/**
+ * Navigates to dashboard page and loads a saved search as a new dashboard
+ * @param {SavedTestConfig} config - the relevant config for the test case
+ * @param {string} workspaceName - name of workspace
+ */
+export const loadSavedSearchFromDashboards = (config, workspaceName) => {
+  navigateToDashboardAndOpenSavedSearchPanel(workspaceName);
+  cy.getElementByTestId(`savedObjectTitle${config.saveName}`).click();
+  cy.getElementByTestId('addObjectToContainerSuccess').should('be.visible');
+  cy.getElementByTestId('euiFlyoutCloseButton').click();
+};
