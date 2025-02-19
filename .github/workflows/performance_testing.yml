@@ -37,9 +37,13 @@ jobs:
 
       - name: Read and comment bundle size variations
         run: |
-          echo "📊 **Bundle Size crossed 20% for below plugins**" > comment.txt
-          echo "" >> comment.txt
-          cat packages/osd-optimizer/bundle_size_variations.yml >> comment.txt
-          gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
+          if [ -f packages/osd-optimizer/bundle_size_variations.yml ]; then
+            echo "📊 **Bundle Size crossed 5% for below plugins**" > comment.txt
+            echo "" >> comment.txt
+            cat packages/osd-optimizer/bundle_size_variations.yml >> comment.txt
+            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
+          else
+            echo "No bundle size variations detected, skipping comment."
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
