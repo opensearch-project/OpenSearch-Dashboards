@@ -1,4 +1,4 @@
-name: Performance Testing
+name: Lighthouse Testing
 
 on:
   pull_request:
