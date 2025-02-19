@@ -102,7 +102,7 @@ export function registerDataSourceConnectionsRoutes(
 
   router.delete(
     {
-      path: `${API.DATA_SOURCE.ASYNC_JOBS}`,
+      path: API.DATA_SOURCE.ASYNC_JOBS,
       validate: {
         query: schema.object({
           id: schema.string(),

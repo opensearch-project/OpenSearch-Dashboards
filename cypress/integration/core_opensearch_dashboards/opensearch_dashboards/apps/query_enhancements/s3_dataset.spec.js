@@ -7,7 +7,7 @@ import {
   DS_API,
   DSM_API,
   S3_CLUSTER,
-  DELETE_API,
+  JOBS_API,
 } from '../../../../../utils/apps/query_enhancements/constants';
 import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
 import { prepareTestSuite } from '../../../../../utils/helpers';
@@ -166,7 +166,7 @@ const s3DatasetTestSuite = () => {
           // Need to wait a bit for initial query to start
           cy.wait(3000);
 
-          cy.intercept('DELETE', `**/${DELETE_API}*`).as('cancelRequest');
+          cy.intercept('DELETE', `**/${JOBS_API.DELETE}*`).as('cancelRequest');
           cy.getElementByTestId(`querySubmitButton`).click();
 
           cy.wait('@cancelRequest').then((interception) => {
