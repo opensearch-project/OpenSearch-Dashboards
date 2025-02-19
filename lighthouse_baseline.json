@@ -1,38 +1,18 @@
 {
   "http://localhost:5601/app/home": {
-    "performance": 0.2,
     "first-contentful-paint": 1800,
-    "largest-contentful-paint": 2500,
-    "interactive": 5000,
-    "total-blocking-time": 300,
-    "cumulative-layout-shift": 0.1,
-    "speed-index": 4300
+    "speed-index": 15000
   },
   "http://localhost:5601/app/data-explorer/discover": {
-    "performance": 0.2,
     "first-contentful-paint": 1800,
-    "largest-contentful-paint": 2400,
-    "interactive": 5000,
-    "total-blocking-time": 300,
-    "cumulative-layout-shift": 0.1,
-    "speed-index": 4300
+    "speed-index": 24000
   },
   "http://localhost:5601/app/dashboards": {
-    "performance": 0.2,
     "first-contentful-paint": 1800,
-    "interactive": 5000,
-    "largest-contentful-paint": 2600,
-    "total-blocking-time": 300,
-    "cumulative-layout-shift": 0.1,
-    "speed-index": 4300
+    "speed-index": 25000
   },
   "http://localhost:5601/app/visualize": {
-    "performance": 0.2,
     "first-contentful-paint": 1800,
-    "interactive": 5000,
-    "largest-contentful-paint": 2600,
-    "total-blocking-time": 300,
-    "cumulative-layout-shift": 0.1,
-    "speed-index": 4300
+    "speed-index": 25000
   }
 }

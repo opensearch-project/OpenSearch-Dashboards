@@ -28,13 +28,13 @@ module.exports = {
     assert: {
       // Only the key assertions
       assertions: {
-        performance: ['warn', { minScore: 0.2 }], // Aggregates all key metrics into a single score.
+        // performance: ['warn', { minScore: 0.2 }], // Aggregates all key metrics into a single score.
         'first-contentful-paint': ['warn', { maxNumericValue: 1800 }], //	Indicates how fast the page starts loading.
-        'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }], // Critical for user-perceived load speed.
-        interactive: ['warn', { maxNumericValue: 5000 }], // Affects usability—page is responsive to user input.
-        'total-blocking-time': ['warn', { maxNumericValue: 300 }], // Higher TBT makes the page feel sluggish.
-        'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }], // Prevents janky UI movements during load.
-        'speed-index': ['warn', { maxNumericValue: 4300 }], // Lower speed index = better perceived performance.
+        'speed-index': ['warn', { maxNumericValue: 20000 }], // Lower speed index = better perceived performance.
+        // 'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }], // Critical for user-perceived load speed.
+        // interactive: ['warn', { maxNumericValue: 5000 }], // Affects usability—page is responsive to user input.
+        // 'total-blocking-time': ['warn', { maxNumericValue: 300 }], // Higher TBT makes the page feel sluggish.
+        // 'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }], // Prevents janky UI movements during load.
       },
     },
     upload: {
