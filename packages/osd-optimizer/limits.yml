@@ -4,45 +4,45 @@ pageLoadAssetSize:
   bfetch: 41874
   charts: 159211
   console: 46235
-  contentManagement: 15000
-  core: 692646
-  dashboard: 374267
-  data: 1174083
-  dataExplorer: 15000
-  dataSource: 15000
-  dataSourceManagement: 462690
-  devTools: 38781
-  discover: 105147
+  contentManagement: 189948
+  core: 989885
+  dashboard: 694542
+  data: 2701242
+  dataExplorer: 142726
+  dataSource: 24232
+  dataSourceManagement: 541476
+  devTools: 66175
+  discover: 778790
   embeddable: 242671
   expressions: 224120
-  home: 41661
+  home: 75810
   indexPatternManagement: 154366
   inputControlVis: 172819
   inspector: 148999
-  management: 46112
-  managementOverview: 15000
+  management: 181535
+  managementOverview: 23856
   mapsLegacy: 116961
-  navigation: 37413
-  opensearchDashboardsLegacy: 965853
+  navigation: 63579
+  opensearchDashboardsLegacy: 107855
   opensearchDashboardsOverview: 56426
   opensearchDashboardsReact: 162353
-  opensearchDashboardsUtils: 198829
+  opensearchDashboardsUtils: 227366
   opensearchUiShared: 326798
-  queryEnhancements: 216801
+  queryEnhancements: 298536
   regionMap: 66098
   savedObjects: 108662
-  savedObjectsManagement: 100503
-  securityDashboards: 15000
+  savedObjectsManagement: 375822
+  securityDashboards: 1330246
   share: 99205
   tileMap: 65337
   uiActions: 95074
   urlForwarding: 32579
   usageCollection: 39762
-  visAugmenter: 15000
-  visBuilder: 32771
-  visDefaultEditor: 50178
+  visAugmenter: 119145
+  visBuilder: 810681
+  visDefaultEditor: 344621
   visTypeMarkdown: 30896
-  visTypeMetric: 42790
+  visTypeMetric: 61507
   visTypeTable: 95078
   visTypeTagcloud: 37575
   visTypeTimeline: 51933
@@ -52,4 +52,4 @@ pageLoadAssetSize:
   visTypeXy: 20255
   visualizations: 295169
   visualize: 57433
-  workspace: 591590
+  workspace: 454041

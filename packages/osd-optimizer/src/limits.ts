@@ -39,6 +39,7 @@ import { OptimizerConfig, getMetrics, Limits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
 const DELTA_FILE_PATH = path.resolve(__dirname, '../bundle_size_variations.yml');
+const DELTA_PERCENTAGE_LIMIT = 5;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
@@ -103,7 +104,7 @@ const updateBundleSizeVariation = (log: ToolingLog, metric: Metric) => {
     const delta = metric.value - metric.limit;
     const deltaPercentage = Math.round((delta / metric.limit) * 100 * 100) / 100;
 
-    if (deltaPercentage > 20) {
+    if (deltaPercentage > DELTA_PERCENTAGE_LIMIT) {
       log.warning(
         `Metric [${metric.group}] for [${metric.id}] exceeds the limit by more than ${deltaPercentage}%`
       );
@@ -137,7 +138,7 @@ export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
       pageLoadAssetSize[metric.id] =
         existingLimit != null && existingLimit >= metric.value ? existingLimit : metric.value;
 
-      // Update the bundle size variation file for bundles that exceed the limit by more than 20%.
+      // Update the bundle size variation file for bundles that exceed the limit by more than 5%.
       updateBundleSizeVariation(log, metric);
     }
   }
