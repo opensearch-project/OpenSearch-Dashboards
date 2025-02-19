@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
-import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageContent } from '@elastic/eui';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { OpenSearchRequestState, useOpenSearchDocSearch } from './use_opensearch_doc_search';
 import { DocViewer } from '../doc_viewer/doc_viewer';
@@ -59,82 +59,84 @@ export function Doc(props: DocProps) {
   const [reqState, hit, indexPattern] = useOpenSearchDocSearch(props);
   return (
     <I18nProvider>
-      <EuiPageContent>
-        {reqState === OpenSearchRequestState.NotFoundIndexPattern && (
-          <EuiCallOut
-            color="danger"
-            data-test-subj={`doc-msg-notFoundIndexPattern`}
-            iconType="alert"
-            title={
-              <FormattedMessage
-                id="discover.doc.failedToLocateIndexPattern"
-                defaultMessage="No index pattern matches ID {indexPatternId}"
-                values={{ indexPatternId: props.indexPatternId }}
-              />
-            }
-          />
-        )}
-        {reqState === OpenSearchRequestState.NotFound && (
-          <EuiCallOut
-            color="danger"
-            data-test-subj={`doc-msg-notFound`}
-            iconType="alert"
-            title={
-              <FormattedMessage
-                id="discover.doc.failedToLocateDocumentDescription"
-                defaultMessage="Cannot find document"
-              />
-            }
-          >
-            <FormattedMessage
-              id="discover.doc.couldNotFindDocumentsDescription"
-              defaultMessage="No documents match that ID."
+      <EuiPage className="discover.context.appPage" data-test-subj="discoverAppPage">
+        <EuiPageContent paddingSize="s">
+          {reqState === OpenSearchRequestState.NotFoundIndexPattern && (
+            <EuiCallOut
+              color="danger"
+              data-test-subj={`doc-msg-notFoundIndexPattern`}
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="discover.doc.failedToLocateIndexPattern"
+                  defaultMessage="No index pattern matches ID {indexPatternId}"
+                  values={{ indexPatternId: props.indexPatternId }}
+                />
+              }
             />
-          </EuiCallOut>
-        )}
-
-        {reqState === OpenSearchRequestState.Error && (
-          <EuiCallOut
-            color="danger"
-            data-test-subj={`doc-msg-error`}
-            iconType="alert"
-            title={
-              <FormattedMessage
-                id="discover.doc.failedToExecuteQueryDescription"
-                defaultMessage="Cannot run search"
-              />
-            }
-          >
-            <FormattedMessage
-              id="discover.doc.somethingWentWrongDescription"
-              defaultMessage="{indexName} is missing."
-              values={{ indexName: props.index }}
-            />{' '}
-            <EuiLink
-              href={`https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/exists/`}
-              target="_blank"
+          )}
+          {reqState === OpenSearchRequestState.NotFound && (
+            <EuiCallOut
+              color="danger"
+              data-test-subj={`doc-msg-notFound`}
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="discover.doc.failedToLocateDocumentDescription"
+                  defaultMessage="Cannot find document"
+                />
+              }
             >
               <FormattedMessage
-                id="discover.doc.somethingWentWrongDescriptionAddon"
-                defaultMessage="Please ensure the index exists."
+                id="discover.doc.couldNotFindDocumentsDescription"
+                defaultMessage="No documents match that ID."
               />
-            </EuiLink>
-          </EuiCallOut>
-        )}
+            </EuiCallOut>
+          )}
 
-        {reqState === OpenSearchRequestState.Loading && (
-          <EuiCallOut data-test-subj={`doc-msg-loading`}>
-            <EuiLoadingSpinner size="m" />{' '}
-            <FormattedMessage id="discover.doc.loadingDescription" defaultMessage="Loading…" />
-          </EuiCallOut>
-        )}
+          {reqState === OpenSearchRequestState.Error && (
+            <EuiCallOut
+              color="danger"
+              data-test-subj={`doc-msg-error`}
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="discover.doc.failedToExecuteQueryDescription"
+                  defaultMessage="Cannot run search"
+                />
+              }
+            >
+              <FormattedMessage
+                id="discover.doc.somethingWentWrongDescription"
+                defaultMessage="{indexName} is missing."
+                values={{ indexName: props.index }}
+              />{' '}
+              <EuiLink
+                href={`https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/exists/`}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="discover.doc.somethingWentWrongDescriptionAddon"
+                  defaultMessage="Please ensure the index exists."
+                />
+              </EuiLink>
+            </EuiCallOut>
+          )}
 
-        {reqState === OpenSearchRequestState.Found && hit !== null && indexPattern && (
-          <div data-test-subj="doc-hit">
-            <DocViewer hit={hit} indexPattern={indexPattern} />
-          </div>
-        )}
-      </EuiPageContent>
+          {reqState === OpenSearchRequestState.Loading && (
+            <EuiCallOut data-test-subj={`doc-msg-loading`}>
+              <EuiLoadingSpinner size="m" />{' '}
+              <FormattedMessage id="discover.doc.loadingDescription" defaultMessage="Loading…" />
+            </EuiCallOut>
+          )}
+
+          {reqState === OpenSearchRequestState.Found && hit !== null && indexPattern && (
+            <div data-test-subj="doc-hit">
+              <DocViewer hit={hit} indexPattern={indexPattern} />
+            </div>
+          )}
+        </EuiPageContent>
+      </EuiPage>
     </I18nProvider>
   );
 }
