@@ -1,0 +1,2 @@
+feat:
+- Deletes S3 Jobs in Backend when Original Query is Canceled ([#9355](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9355))

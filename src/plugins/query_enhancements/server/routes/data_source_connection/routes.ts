@@ -99,4 +99,31 @@ export function registerDataSourceConnectionsRoutes(
       }
     }
   );
+
+  router.delete(
+    {
+      path: API.DATA_SOURCE.ASYNC_JOBS,
+      validate: {
+        query: schema.object({
+          id: schema.string(),
+          queryId: schema.nullable(schema.string()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const client = request.query.id
+          ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
+          : defaultClient.asScoped(request).callAsCurrentUser;
+
+        await client('enhancements.deleteJob', {
+          queryId: request.query.queryId,
+        });
+        return response.noContent();
+      } catch (error) {
+        const statusCode = error.statusCode === 500 ? 503 : error.statusCode || 503;
+        return response.custom({ statusCode, body: error.message });
+      }
+    }
+  );
 }
