@@ -364,7 +364,7 @@ export const mergeDataSourcesWithConnections = (
 
 // If all connected data sources are serverless, will only allow to select essential use case.
 export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
-  const allDataSources = await getDataSourcesList(client, ['*']);
+  const allDataSources = await getDataSourcesList(client);
   if (allDataSources.length > 0) {
     return allDataSources.every(
       (ds) => ds?.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
