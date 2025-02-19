@@ -133,13 +133,15 @@ export const updateAccelerationsToCache = (
   const currentTime = new Date().toUTCString();
 
   if (!pollingResult) {
-    CatalogCacheManager.addOrUpdateAccelerationsByDataSource({
-      name: dataSourceName,
-      accelerations: [],
-      lastUpdated: currentTime,
-      status: CachedDataSourceStatus.Failed,
-      ...(dataSourceMDSId && { dataSourceMDSId }),
-    });
+    CatalogCacheManager.addOrUpdateAccelerationsByDataSource(
+      {
+        name: dataSourceName,
+        accelerations: [],
+        lastUpdated: currentTime,
+        status: CachedDataSourceStatus.Failed,
+      },
+      dataSourceMDSId
+    );
     return;
   }
 
@@ -155,13 +157,15 @@ export const updateAccelerationsToCache = (
     status: row.status,
   }));
 
-  CatalogCacheManager.addOrUpdateAccelerationsByDataSource({
-    name: dataSourceName,
-    accelerations: newAccelerations,
-    lastUpdated: currentTime,
-    status: CachedDataSourceStatus.Updated,
-    ...(dataSourceMDSId && { dataSourceMDSId }),
-  });
+  CatalogCacheManager.addOrUpdateAccelerationsByDataSource(
+    {
+      name: dataSourceName,
+      accelerations: newAccelerations,
+      lastUpdated: currentTime,
+      status: CachedDataSourceStatus.Updated,
+    },
+    dataSourceMDSId
+  );
 };
 
 export const updateTableColumnsToCache = (

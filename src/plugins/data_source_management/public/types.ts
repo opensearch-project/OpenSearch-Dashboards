@@ -22,6 +22,8 @@ import { AuthType } from '../../data_source/common/data_sources';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 import { AuthenticationMethodRegistry } from './auth_registry';
+import { LoadCachehookOutput, RenderAccelerationDetailsFlyoutParams, RenderAccelerationFlyoutParams, RenderAssociatedObjectsDetailsFlyoutParams } from '../framework/types';
+import { CatalogCacheManager } from '../framework/catalog_cache/cache_manager';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
@@ -200,3 +202,31 @@ export interface PermissionsConfigurationProps {
   layout: 'horizontal' | 'vertical';
   hasSecurityAccess: boolean;
 }
+
+export interface CacheStart {
+  renderAccelerationDetailsFlyout: ({
+    acceleration,
+    dataSourceName,
+    handleRefresh,
+    dataSourceMDSId,
+  }: RenderAccelerationDetailsFlyoutParams) => void;
+  renderAssociatedObjectsDetailsFlyout: ({
+    tableDetail,
+    dataSourceName,
+    handleRefresh,
+  }: RenderAssociatedObjectsDetailsFlyoutParams) => void;
+  renderCreateAccelerationFlyout: ({
+    dataSourceName,
+    dataSourceMDSId,
+    databaseName,
+    tableName,
+    handleRefresh,
+  }: RenderAccelerationFlyoutParams) => void;
+  CatalogCacheManagerInstance: typeof CatalogCacheManager;
+  useLoadDatabasesToCacheHook: () => LoadCachehookOutput;
+  useLoadTablesToCacheHook: () => LoadCachehookOutput;
+  useLoadTableColumnsToCacheHook: () => LoadCachehookOutput;
+  useLoadAccelerationsToCacheHook: () => LoadCachehookOutput;
+}
+export type CatalogCacheManagerType = typeof CatalogCacheManager;
+export type LoadCachehookOutputType = LoadCachehookOutput;

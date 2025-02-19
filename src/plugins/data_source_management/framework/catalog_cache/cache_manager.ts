@@ -101,7 +101,7 @@ export class CatalogCacheManager {
       );
     }
     if (index !== -1) {
-      accCacheData.dataSources[index] = dataSource;
+      accCacheData.dataSources[index] = { ...dataSource, dataSourceMDSId };
     } else {
       accCacheData.dataSources.push(dataSource);
     }
@@ -157,7 +157,11 @@ export class CatalogCacheManager {
           ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
       );
     }
-    index = cacheData.dataSources.findIndex((ds: CachedDataSource) => ds.name === dataSource.name);
+    else {
+      index = cacheData.dataSources.findIndex(
+        (ds: CachedDataSource) => ds.name === dataSource.name
+      );
+    }
     if (index !== -1) {
       cacheData.dataSources[index] = dataSource;
     } else {
