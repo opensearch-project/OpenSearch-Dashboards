@@ -91,7 +91,7 @@ const inspectTestSuite = () => {
           );
 
           for (const [key, value] of Object.entries(flattenedFieldsWithValues)) {
-            // For SQL and PPL, this number is not accurate. https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9305
+            // TODO: For SQL and PPL, this number is not accurate. https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9305
             if (
               key === 'event_sequence_number' &&
               (config.language === QueryLanguages.SQL.name ||
