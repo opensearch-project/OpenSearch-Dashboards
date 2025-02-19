@@ -84,7 +84,7 @@ jobs:
 
       - name: Mock data
         run: |
-          curl 'http://localhost:5601/api/sample_data/ecommerce' -X 'POST' -H 'osd-version: 3.0.0' -H 'osd-xsrf: osd-fetch'
+          curl 'http://localhost:5601/api/sample_data/ecommerce' -X 'POST' -H 'osd-version: ${{ env.VERSION }}' -H 'osd-xsrf: osd-fetch'
 
       - name: Run Lighthouse CI
         run: |
