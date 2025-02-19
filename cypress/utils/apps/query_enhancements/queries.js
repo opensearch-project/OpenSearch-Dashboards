@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { QueryLanguages, INDEX_PATTERN_WITH_TIME_1 } from './constants';
+import { QueryLanguages, INDEX_PATTERN_WITH_TIME_1, INDEX_WITH_TIME_1 } from './constants';
 
 // =======================================
 // Test Configuration Generators
@@ -15,6 +15,11 @@ import { QueryLanguages, INDEX_PATTERN_WITH_TIME_1 } from './constants';
 export const LanguageConfigs = {
   DQL_Lucene: {
     INDEX_PATTERN: [QueryLanguages.DQL, QueryLanguages.Lucene],
+    INDEXES: [],
+  },
+  SQL_PPL: {
+    INDEX_PATTERN: [QueryLanguages.SQL, QueryLanguages.PPL],
+    INDEXES: [QueryLanguages.SQL, QueryLanguages.PPL],
   },
 };
 
@@ -27,6 +32,10 @@ const createQueryDatasetTypes = (languageConfig = LanguageConfigs.DQL_Lucene) =>
   INDEX_PATTERN: {
     name: 'INDEX_PATTERN',
     supportedLanguages: languageConfig.INDEX_PATTERN,
+  },
+  INDEXES: {
+    name: 'INDEXES',
+    supportedLanguages: languageConfig.INDEXES,
   },
 });
 
@@ -51,6 +60,7 @@ export const generateQueryTestConfigurations = (
 ) => {
   const {
     indexPattern = INDEX_PATTERN_WITH_TIME_1,
+    index = INDEX_WITH_TIME_1,
     languageConfig = LanguageConfigs.DQL_Lucene,
   } = options;
 
@@ -62,6 +72,9 @@ export const generateQueryTestConfigurations = (
       switch (dataset.name) {
         case datasetTypes.INDEX_PATTERN.name:
           datasetToUse = indexPattern;
+          break;
+        case datasetTypes.INDEXES.name:
+          datasetToUse = index;
           break;
         default:
           throw new Error(
