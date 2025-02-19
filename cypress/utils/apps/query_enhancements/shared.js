@@ -46,18 +46,22 @@ export const getRandomizedDatasourceName = () =>
 /**
  * Returns an array of test configurations for every query language + dataset permutation
  * @param {GenerateTestConfigurationCallback} generateTestConfigurationCallback - cb function that generates a test case for the particular permutation
+ * @param {Object} [options] - Optional configuration options
+ * @param {string} [options.indexPattern] - Custom index pattern name (defaults to INDEX_PATTERN_WITH_TIME)
+ * @param {string} [options.index] - Custom index name (defaults to INDEX_WITH_TIME_1)
  * @returns {object[]}
  */
-export const generateAllTestConfigurations = (generateTestConfigurationCallback) => {
+export const generateAllTestConfigurations = (generateTestConfigurationCallback, options = {}) => {
+  const { indexPattern = INDEX_PATTERN_WITH_TIME, index = INDEX_WITH_TIME_1 } = options;
   return Object.values(DatasetTypes).flatMap((dataset) =>
     dataset.supportedLanguages.map((language) => {
       let datasetToUse;
       switch (dataset.name) {
         case DatasetTypes.INDEX_PATTERN.name:
-          datasetToUse = INDEX_PATTERN_WITH_TIME;
+          datasetToUse = indexPattern;
           break;
         case DatasetTypes.INDEXES.name:
-          datasetToUse = INDEX_WITH_TIME_1;
+          datasetToUse = index;
           break;
         default:
           throw new Error(
@@ -88,7 +92,7 @@ export const setDatePickerDatesAndSearchIfRelevant = (
 /**
  * Returns the default query for a given dataset and language combination
  * @param {string} datasetName - the dataset name
- * @param {QueryEnhancementLanguage} - the name of the query language
+ * @param {QueryEnhancementLanguage} language - the name of the query language
  * @returns {string}
  */
 export const getDefaultQuery = (datasetName, language) => {
@@ -101,5 +105,16 @@ export const getDefaultQuery = (datasetName, language) => {
       return `source = ${datasetName}`;
     case QueryLanguages.SQL.name:
       return `SELECT * FROM ${datasetName} LIMIT 10`;
+  }
+};
+
+/**
+ * Sets the interval in historgram if it is relevant for the passed language
+ * @param {QueryEnhancementLanguage} language - the name of the query language
+ * @param {HistogramInterval} interval - histogram interval
+ */
+export const setHistogramIntervalIfRelevant = (language, interval) => {
+  if (language !== QueryLanguages.SQL.name) {
+    cy.getElementByTestId('discoverIntervalSelect').select(interval);
   }
 };
