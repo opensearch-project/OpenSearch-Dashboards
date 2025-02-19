@@ -134,4 +134,29 @@ Cypress.Commands.add('measureComponentPerformance', (opts) => {
       });
     });
   });
+}); 
+  
+Cypress.Commands.add('setAdvancedSetting', (changes) => {
+  const url = `${Cypress.config().baseUrl}/api/opensearch-dashboards/settings`;
+
+  return cy
+    .request({
+      method: 'POST',
+      url,
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+      body: { changes }, // This is the key change - wrapping in changes object
+      failOnStatusCode: false,
+    })
+    .then((response) => {
+      if (response.status === 400) {
+        throw new Error(`Bad request: ${response.body.message}`);
+      }
+      if (response.body.errors) {
+        console.error(response.body.items);
+        throw new Error('Setting advanced setting failed');
+      }
+    });
 });

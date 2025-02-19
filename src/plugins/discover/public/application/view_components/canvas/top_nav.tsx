@@ -13,6 +13,7 @@ import {
   useConnectStorageToQueryState,
   opensearchFilters,
   QueryStatus,
+  useSyncQueryStateWithUrl,
 } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { PLUGIN_ID } from '../../../../common';
@@ -59,10 +60,20 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     uiSettings,
   } = services;
 
+  const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
+    data.query,
+    osdUrlStateStorage
+  );
   const showActionsInGroup = uiSettings.get('home:useNewHomePage');
 
   const topNavLinks = savedSearch
-    ? getTopNavLinks(services, inspectorAdapters, savedSearch, isEnhancementsEnabled)
+    ? getTopNavLinks(
+        services,
+        inspectorAdapters,
+        savedSearch,
+        startSyncingQueryStateWithUrl,
+        isEnhancementsEnabled
+      )
     : [];
 
   const syncConfig = useMemo(() => {

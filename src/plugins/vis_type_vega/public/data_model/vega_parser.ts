@@ -656,7 +656,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         opensearch: new OpenSearchQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
-        ppl: new PPLQueryParser(this.searchAPI),
+        ppl: new PPLQueryParser(this.timeCache, this.searchAPI),
       };
     }
     const pending: PendingType = {};

@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
+// TODO: import { paste } from 'copy-paste';
 
 module.exports = defineConfig({
   defaultCommandTimeout: 60000,
@@ -77,6 +78,12 @@ function setupNodeEvents(
       webpackOptions,
     })
   );
+  // TODO: Define the custom task to read clipboard
+  /* on('task', {
+    readClipboard() {
+      return paste(); // Return the clipboard content
+    },
+  });*/
 
   on('task', {
     logPerformance({ metric, value }) {

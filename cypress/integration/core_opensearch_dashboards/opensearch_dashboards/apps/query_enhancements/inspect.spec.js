@@ -39,7 +39,6 @@ const inspectTestSuite = () => {
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
         [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
       );
-
       // Add data source
       cy.osd.addDataSource({
         name: DATASOURCE_NAME,
@@ -92,7 +91,7 @@ const inspectTestSuite = () => {
           );
 
           for (const [key, value] of Object.entries(flattenedFieldsWithValues)) {
-            // For SQL and PPL, this number is not accurate. https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9305
+            // TODO: For SQL and PPL, this number is not accurate. https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9305
             if (
               key === 'event_sequence_number' &&
               (config.language === QueryLanguages.SQL.name ||

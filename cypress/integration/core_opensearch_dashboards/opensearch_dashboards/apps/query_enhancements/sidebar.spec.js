@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DatasetTypes, PATHS, BASE_PATH } from '../../../../../utils/constants';
 import {
-  DatasetTypes,
-  INDEX_WITH_TIME_1,
-  INDEX_PATTERN_WITH_TIME_1,
-  PATHS,
   DATASOURCE_NAME,
-} from '../../../../../utils/constants';
+  INDEX_PATTERN_WITH_TIME_1,
+  INDEX_WITH_TIME_1,
+  QueryLanguages,
+} from '../../../../../utils/apps/query_enhancements/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
@@ -17,10 +17,76 @@ import {
 } from '../../../../../utils/apps/query_enhancements/shared';
 import { getDocTableField } from '../../../../../utils/apps/query_enhancements/doc_table';
 import * as sideBar from '../../../../../utils/apps/query_enhancements/sidebar';
-import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
+import { generateSideBarTestConfiguration } from '../../../../../utils/apps/query_enhancements/sidebar';
 import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+
+const sidebarFields = {
+  aggregatableFields: {
+    unnested: [
+      'bytes_transferred',
+      'category',
+      'event_sequence_number',
+      'event_time',
+      'request_url',
+      'response_time',
+      'service_endpoint',
+      'status_code',
+      'timestamp',
+      'unique_category',
+    ],
+    nested: [
+      'personal.address.country',
+      'personal.address.city',
+      'personal.address.coordinates.lat',
+      'personal.address.coordinates.lon',
+      'personal.address.street',
+      'personal.age',
+      'personal.birthdate',
+      'personal.email',
+      'personal.name',
+      'personal.user_id',
+    ],
+  },
+  nonAggregatableFields: ['_score', '_type'],
+  searchableFields: [
+    'bytes_transferred',
+    'category',
+    'event_sequence_number',
+    'event_time',
+    'request_url',
+    'response_time',
+    'service_endpoint',
+    'status_code',
+    'timestamp',
+    'unique_category',
+    'personal.address.country',
+    'personal.address.city',
+    'personal.address.coordinates.lat',
+    'personal.address.coordinates.lon',
+    'personal.address.street',
+    'personal.age',
+    'personal.birthdate',
+    'personal.email',
+    'personal.name',
+    'personal.user_id',
+  ],
+  nonSearchableFields: ['_score', '_type'],
+  missingFields: ['never_present_field'],
+  stringTypeFields: [
+    'category',
+    'personal.address.country',
+    'personal.address.city',
+    'personal.address.street',
+    'personal.email',
+    'personal.name',
+    'personal.user_id',
+    'request_url',
+    'service_endpoint',
+    'unique_category',
+  ],
+};
 
 const addSidebarFieldsAndCheckDocTableColumns = (
   testFields,
@@ -135,6 +201,32 @@ const checkSidebarPanelBehavior = () => {
   checkPanelVisibility(true);
 };
 
+const verifyFieldShowDetailsShowsTopValuesAndViewVisualization = (
+  config,
+  field,
+  isAggregatable
+) => {
+  const aggregatableShouldText = isAggregatable ? 'be.visible' : 'not.exist';
+  const aggregatableShouldNotText = isAggregatable ? 'not.exist' : 'be.visible';
+
+  setDatePickerDatesAndSearchIfRelevant(config.language);
+  sideBar.showSidebarFieldDetails(field);
+  // Either the field details text for each top value should exist, or there should be a field Visualize error.
+  cy.getElementsByTestIds(['dscFieldDetailsText', 'fieldVisualizeError']).should(
+    'have.length.above',
+    0
+  );
+  if (config.visualizeButton) {
+    cy.getElementByTestId(`fieldVisualize-${field}`).should('be.visible').click();
+    cy.getElementByTestId('visualizationLoader').should(aggregatableShouldText);
+    cy.getElementByTestId('globalToastList')
+      .contains(`Saved field "${field}" is invalid for use with`)
+      .should(aggregatableShouldNotText);
+  } else {
+    cy.getElementByTestId(`fieldVisualize-${field}`).should('not.exist');
+  }
+};
+
 export const runSideBarTests = () => {
   describe('sidebar spec', () => {
     const testData = {
@@ -177,7 +269,7 @@ export const runSideBarTests = () => {
       });
     });
 
-    generateAllTestConfigurations(generateSavedTestConfiguration, {
+    generateAllTestConfigurations(generateSideBarTestConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
@@ -231,6 +323,81 @@ export const runSideBarTests = () => {
 
         it('handles panel collapse/expand correctly', () => {
           checkSidebarPanelBehavior();
+        });
+
+        it('fields should have top values', () => {
+          const aggregatableFieldsToTest = [sidebarFields.aggregatableFields.unnested[0]];
+          const nestedFieldsToTest = [sidebarFields.aggregatableFields.nested[0]];
+
+          aggregatableFieldsToTest.forEach((aggregatableField) => {
+            verifyFieldShowDetailsShowsTopValuesAndViewVisualization(
+              config,
+              aggregatableField,
+              true
+            );
+          });
+
+          cy.navigateToWorkSpaceSpecificPage({
+            url: BASE_PATH,
+            workspaceName: workspaceName,
+            page: 'discover',
+            isEnhancement: true,
+          });
+          cy.getElementByTestId('discoverNewButton').click();
+          // Setting the dataset and query language again to ensure the date picker is not missing
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.setQueryLanguage(config.language);
+
+          nestedFieldsToTest.forEach((nestedField) => {
+            verifyFieldShowDetailsShowsTopValuesAndViewVisualization(config, nestedField, false);
+          });
+        });
+
+        it('fields should be filtered by type', () => {
+          cy.getElementByTestId('toggleFieldFilterButton').click();
+
+          sideBar.selectFilterVerifySidebarFieldsVisibleAndActiveFiltersNumber(
+            'aggregatable',
+            sidebarFields.aggregatableFields.unnested.concat(
+              sidebarFields.aggregatableFields.nested
+            )
+          );
+
+          // TODO: Index dataset type does not support searchable fields.
+          // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9381
+          if (config.datasetType !== 'INDEXES') {
+            sideBar.selectFilterVerifySidebarFieldsVisibleAndActiveFiltersNumber(
+              'searchable',
+              sidebarFields.searchableFields
+            );
+          }
+
+          // TODO: Hide missing fields switch is not working for SQL and PPL.
+          // SQL and PPL add all mapped fields to the sidebar, including missing fields.
+          // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9342
+          if (
+            config.language === QueryLanguages.DQL.name ||
+            config.language === QueryLanguages.Lucene.name
+          ) {
+            cy.getElementByTestId('missingSwitch').click();
+            sidebarFields.missingFields.forEach((fieldName) => {
+              cy.getElementByTestId(`field-${fieldName}`).should('be.visible');
+            });
+            cy.getElementByTestId('missingSwitch').click();
+          }
+
+          sideBar.verifyNumberOfActiveFilters(0);
+          cy.getElementByTestId('aggregatable-true').parent().click();
+          sideBar.verifyNumberOfActiveFilters(1);
+          cy.getElementByTestId('typeSelect').select('string');
+          sideBar.verifyNumberOfActiveFilters(2);
+
+          const intersectionAggregatableStringTypeSidebarFields = sidebarFields.aggregatableFields.unnested
+            .concat(sidebarFields.aggregatableFields.nested)
+            .filter((field) => sidebarFields.stringTypeFields.includes(field));
+          intersectionAggregatableStringTypeSidebarFields.forEach((fieldName) => {
+            cy.getElementByTestId(`field-${fieldName}`).should('be.visible');
+          });
         });
       });
     });

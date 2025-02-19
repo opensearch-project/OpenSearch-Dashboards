@@ -93,6 +93,14 @@ jobs:
           - group: 13
             config: query_enhanced
             test_location: source
+          # Dashboard tests with query enhanced - group 4
+          - group: 14
+            config: query_enhanced
+            test_location: source
+          # Dashboard tests with query enhanced - group 5
+          - group: 15
+            config: query_enhanced
+            test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
@@ -309,14 +317,16 @@ jobs:
           name: ftr-cypress-screenshots-${{ matrix.group }}
           path: ${{ env.FTR_PATH }}/cypress/screenshots
           retention-days: 1
+          overwrite: true
 
       - name: Upload FT repo videos
         uses: actions/upload-artifact@v4
-        if: always() && matrix.test_location == 'ftr'
+        if: failure() && matrix.test_location == 'ftr'
         with:
           name: ftr-cypress-videos-${{ matrix.group }}
           path: ${{ env.FTR_PATH }}/cypress/videos
           retention-days: 1
+          overwrite: true
 
       - name: Upload FT repo results
         uses: actions/upload-artifact@v4
@@ -325,6 +335,7 @@ jobs:
           name: ftr-cypress-results-${{ matrix.group }}
           path: ${{ env.FTR_PATH }}/cypress/results
           retention-days: 1
+          overwrite: true
 
       - name: Upload Dashboards screenshots
         if: failure() && matrix.test_location == 'source'
@@ -333,14 +344,16 @@ jobs:
           name: dashboards-cypress-screenshots-${{ matrix.group }}
           path: cypress/screenshots
           retention-days: 1
+          overwrite: true
 
       - name: Upload Dashboards repo videos
         uses: actions/upload-artifact@v4
-        if: always() && matrix.test_location == 'source'
+        if: failure() && matrix.test_location == 'source'
         with:
           name: dashboards-cypress-videos-${{ matrix.group }}
           path: cypress/videos
           retention-days: 1
+          overwrite: true
 
       - name: Upload Dashboards repo results
         uses: actions/upload-artifact@v4
@@ -349,6 +362,7 @@ jobs:
           name: dashboards-cypress-results-${{ matrix.group }}
           path: cypress/results
           retention-days: 1
+          overwrite: true
 
   add-comment:
     needs: [cypress-tests]

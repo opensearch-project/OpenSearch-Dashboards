@@ -106,6 +106,7 @@ describe('sync_query_state_with_url', () => {
       sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
       application: setupMock.application,
+      notifications: setupMock.notifications,
     });
     queryServiceStart = queryService.start({
       indexPatterns: indexPatternsMock,
@@ -113,6 +114,7 @@ describe('sync_query_state_with_url', () => {
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       application: startMock.application,
+      notifications: startMock.notifications,
     });
     filterManager = queryServiceStart.filterManager;
     timefilter = queryServiceStart.timefilter.timefilter;
