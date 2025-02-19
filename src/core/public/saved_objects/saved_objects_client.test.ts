@@ -587,7 +587,9 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "prependOptions": undefined,
+              "prependOptions": Object {
+                "withoutClientBasePath": true,
+              },
               "query": Object {
                 "workspaces": Array [
                   "foo",
@@ -818,7 +820,9 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "prependOptions": undefined,
+              "prependOptions": Object {
+                "withoutClientBasePath": true,
+              },
               "query": Object {
                 "default_search_operator": "OR",
                 "fields": Array [
@@ -859,7 +863,9 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "prependOptions": undefined,
+              "prependOptions": Object {
+                "withoutClientBasePath": true,
+              },
               "query": Object {
                 "workspaces": Array [
                   "bar",

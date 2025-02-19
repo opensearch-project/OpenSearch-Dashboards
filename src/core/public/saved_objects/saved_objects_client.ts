@@ -404,13 +404,11 @@ export class SavedObjectsClient {
     // a query param
     if (query.has_reference) query.has_reference = JSON.stringify(query.has_reference);
 
-    // if no workspaces are provided, we need to remove the client base path
-    const prependOptions =
-      query.workspaces === undefined ? { withoutClientBasePath: true } : undefined;
+    // we need to remove the client base path
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
       query,
-      prependOptions,
+      prependOptions: { withoutClientBasePath: true },
     });
     return request.then((resp) => {
       return renameKeys<
