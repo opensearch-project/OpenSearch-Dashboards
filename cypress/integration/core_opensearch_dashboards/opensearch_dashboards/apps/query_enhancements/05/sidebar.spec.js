@@ -330,7 +330,7 @@ export const runSideBarTests = () => {
             );
           });
 
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             url: BASE_PATH,
             workspaceName: workspaceName,
             page: 'discover',

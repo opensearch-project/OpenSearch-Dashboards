@@ -115,6 +115,12 @@ export const runTableTests = () => {
           // expanding a document in the table
           cy.get('[data-test-subj="docTableExpandToggleColumn"]')
             .find('[type="button"]')
+            .eq(2)
+            .click();
+
+          // expanding a document in the table
+          cy.get('[data-test-subj="docTableExpandToggleColumn"]')
+            .find('[type="button"]')
             .eq(3)
             .click();
 
