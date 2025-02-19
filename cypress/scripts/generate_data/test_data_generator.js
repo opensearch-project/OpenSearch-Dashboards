@@ -15,6 +15,30 @@ class TestDataGenerator {
     this.categories = ['Network', 'Database', 'Security', 'Application'];
     this.statusCodes = [200, 201, 400, 401, 403, 404, 500, 502, 503];
 
+    // Unique categories for some indices
+    this.uniqueCategories = [
+      'Analytics',
+      'Monitoring',
+      'Deployment',
+      'Testing',
+      'Development',
+      'Production',
+      'Staging',
+      'LoadBalancing',
+      'Caching',
+      'Logging',
+      'Authentication',
+      'Authorization',
+      'Encryption',
+      'Backup',
+      'Recovery',
+      'Configuration',
+      'Integration',
+      'Migration',
+      'Optimization',
+      'Maintenance',
+    ];
+
     // Country-city mapping for controlled location data
     this.locationMap = {
       USA: ['New York', 'Los Angeles', 'Chicago', 'Seattle'],
@@ -31,6 +55,7 @@ class TestDataGenerator {
 
     this.countries = Object.keys(this.locationMap);
     this.categoryCount = this.categories.length;
+    this.uniqueCategoriesCount = this.uniqueCategories.length;
 
     // Only set time-related properties if includeTimestamp is true
     if (includeTimestamp) {
@@ -109,6 +134,10 @@ class TestDataGenerator {
     const location = this.getLocationWithCoordinates();
     const doc = {
       category: this.categories[Math.floor((index * this.categoryCount) / this.docCount)],
+      // Remove for some indices to create a unique field. Test for modifyColumnsOnSwitch.
+      unique_category: this.uniqueCategories[
+        Math.floor((index * this.uniqueCategoriesCount) / this.docCount)
+      ],
       status_code: faker.helpers.arrayElement(this.statusCodes),
       response_time: faker.datatype.float({ min: 0.1, max: 5.0, precision: 0.01 }),
       bytes_transferred: faker.datatype.number({ min: 100, max: 10000 }),
@@ -159,6 +188,10 @@ class TestDataGenerator {
           event_sequence_number: { type: 'long' }, // New field mapping
           request_url: { type: 'keyword' },
           service_endpoint: { type: 'keyword' },
+          // Field that is never present in the data. Test for hide missing values.
+          never_present_field: { type: 'keyword' },
+          // Remove for some indices to create a unique field. Test for modifyColumnsOnSwitch.
+          unique_category: { type: 'keyword' }, // Field with unique values for time_1 indices
           personal: {
             type: 'nested',
             properties: {
