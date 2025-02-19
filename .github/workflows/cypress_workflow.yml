@@ -294,20 +294,92 @@ jobs:
           path: ./cypress/performance_metrics.json
           retention-days: 1
 
-      - name: Post Performance Metrics Comment via GitHub Script
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const message = process.env.PERFORMANCE_MESSAGE;
-               if (message && message.trim() !== "No performance issues detected 🎉") {
-                 github.rest.issues.createComment({
-                   owner: context.repo.owner,
-                   repo: context.repo.repo,
-                   issue_number: context.payload.pull_request.number,
-                   body: `🚀 **Component Performance Metrics**\n\nThe following performance metrics exceeded their thresholds:\n\n${message}\n\n🔍 **Please review and optimize if necessary.**`
-                 });
-               }
+      # - name: Post Performance Metrics Comment via GitHub Script
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     script: |
+      #       const message = process.env.PERFORMANCE_MESSAGE;
+      #          if (message && message.trim() !== "No performance issues detected 🎉") {
+      #            github.rest.issues.createComment({
+      #              owner: context.repo.owner,
+      #              repo: context.repo.repo,
+      #              issue_number: context.payload.pull_request.number,
+      #              body: `🚀 **Component Performance Metrics**\n\nThe following performance metrics exceeded their thresholds:\n\n${message}\n\n🔍 **Please review and optimize if necessary.**`
+      #            });
+      #          }
+
+    - name: Combine Performance Metrics
+      id: combine_metrics
+      run: |
+        combined_message=""
+        has_metrics=false
+
+        for file in $(find artifacts -type f -name 'performance-metrics-*'); do
+          group_name="cigroup${file##*-}"  # Extract group number from file name
+          content=$(cat "$file")
+
+          if [[ ! -z "$content" ]]; then
+            combined_message+="**${group_name}**\n\`\`\`json\n${content}\n\`\`\`\n\n"
+            has_metrics=true
+          fi
+        done
+
+        if [[ "$has_metrics" == false ]]; then
+          echo "NO_METRICS=true" >> $GITHUB_ENV
+        else
+          echo "PERFORMANCE_MESSAGE<<EOF" >> $GITHUB_ENV
+          echo "$combined_message" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "BLOCK_PR=true" >> $GITHUB_ENV
+        fi
+
+    - name: Post or Update Performance Metrics Comment
+      if: env.NO_METRICS != 'true'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const issue_number = context.payload.pull_request.number;
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number
+          });
+
+          const existingComment = comments.find(comment => comment.body.includes("🚀 **Component Performance Metrics**"));
+          const newMessage = `🚀 **Component Performance Metrics**\n\n${process.env.PERFORMANCE_MESSAGE}\n\n🔍 **Please review and optimize if necessary.**`;
+
+          if (existingComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existingComment.id,
+              body: newMessage
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              body: newMessage
+            });
+          }
+
+    - name: Block PR from Merge if Performance Issues Exist
+      if: env.BLOCK_PR == 'true'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          await github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: context.payload.pull_request.head.sha,
+            state: "failure",
+            context: "Performance Metrics Check",
+            description: "Performance metrics exceeded thresholds. Please review."
+          });
 
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - name: Upload FT repo screenshots
