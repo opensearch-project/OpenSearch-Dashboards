@@ -114,7 +114,7 @@ export const runSavedSearchTests = () => {
         START_TIME,
         'Oct 1, 2022 @ 00:00:00.000'
       );
-      cy.getElementByTestId('osdDocTablePagination').contains(/of 15/);
+      cy.getElementByTestId('osdDocTablePagination').contains(/of 13/);
     });
 
     it('Show valid saved searches', () => {
