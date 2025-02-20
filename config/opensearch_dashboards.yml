@@ -381,8 +381,3 @@
 # data.savedQueriesNewUI.enabled: true
 
 opensearch.ignoreVersionMismatch: true
-data_source.enabled: true
-workspace.enabled: true
-data:
-  savedQueriesNewUI:
-    enabled: true
