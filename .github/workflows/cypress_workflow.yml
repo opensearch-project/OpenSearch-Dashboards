@@ -295,7 +295,7 @@ jobs:
           retention-days: 1
 
       - name: Post or Update Performance Metrics Comment
-        if: env.PERFORMANCE_MESSAGE !== "No performance issues detected 🎉"
+        if: env.PERFORMANCE_MESSAGE != "No performance issues detected 🎉"
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -380,6 +380,10 @@ jobs:
           path: cypress/results
           retention-days: 1
           overwrite: true
+
+      - name: Fail PR on Performance Issues
+        if: env.PERFORMANCE_MESSAGE != 'No performance issues detected 🎉'
+        run: exit 1
 
   add-comment:
     needs: [cypress-tests]
