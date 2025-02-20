@@ -161,11 +161,11 @@ export const runSharedLinksTests = () => {
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
-          // Set interval
-          setHistogramIntervalIfRelevant(config.language, testData.interval);
-
           // Set query
           cy.setQueryEditor(queryString, { parseSpecialCharSequences: false });
+
+          // Set interval
+          setHistogramIntervalIfRelevant(config.language, testData.interval);
 
           // Set filter for DQL/Lucene
           if (config.hasDocLinks) {
