@@ -310,7 +310,7 @@ jobs:
             });
 
             const existingComment = comments.find(comment => comment.body.includes("🚀 **Component Performance Metrics**"));
-            const newMessage = `🚀 **Component Performance Metrics**\n\n **CI Group: ${env.MATRIX_GROUP}** \n\n \n\n${env.PERFORMANCE_MESSAGE}\n\n🔍 **Please review and optimize if necessary.**`;
+            const newMessage = `🚀 **Component Performance Metrics**\n\n **CI Group: ${process.env.MATRIX_GROUP}** \n\n \n\n${process.env.PERFORMANCE_MESSAGE}\n\n🔍 **Please review and optimize if necessary.**`;
 
             if (existingComment) {
               await github.rest.issues.updateComment({
