@@ -277,6 +277,8 @@ jobs:
       - name: Read Performance Metrics
         id: read-metrics
         run: |
+          echo "MATRIX_GROUP=${{ matrix.group }}" >> $GITHUB_ENV 
+
           if [ -f ./cypress/performance_metrics.json ]; then
             PERFORMANCE_MESSAGE=$(jq -r 'to_entries | map("• ❌ **\(.key)**: \(.value)") | join("\n")' ./cypress/performance_metrics.json)
             echo "PERFORMANCE_MESSAGE<<EOF" >> $GITHUB_ENV
@@ -308,7 +310,7 @@ jobs:
             });
 
             const existingComment = comments.find(comment => comment.body.includes("🚀 **Component Performance Metrics**"));
-            const newMessage = `🚀 **Component Performance Metrics**\n\n cigroup${{ matrix.group }} \n\n \n\n${env.PERFORMANCE_MESSAGE}\n\n🔍 **Please review and optimize if necessary.**`;
+            const newMessage = `🚀 **Component Performance Metrics**\n\n **CI Group: ${env.MATRIX_GROUP}** \n\n \n\n${env.PERFORMANCE_MESSAGE}\n\n🔍 **Please review and optimize if necessary.**`;
 
             if (existingComment) {
               await github.rest.issues.updateComment({
