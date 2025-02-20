@@ -87,6 +87,7 @@ export const runSavedSearchTests = () => {
         page: 'discover',
         componentTestId: 'docTableField',
         eventName: 'onLoadSavedSearch',
+        isDynamic: false,
       });
       cy.getElementByTestId('docTableField').should('be.visible');
 

@@ -183,14 +183,6 @@ const checkFilteredFieldsForAllLanguages = () => {
 
 const checkSidebarPanelBehavior = () => {
   const checkPanelVisibility = (shouldBeVisible) => {
-    {
-      shouldBeVisible &&
-        cy.measureComponentPerformance({
-          page: 'discover',
-          componentTestId: 'sidebarPanel',
-          eventName: 'onPageLoad',
-        });
-    }
     cy.getElementByTestId('sidebarPanel').should(shouldBeVisible ? 'be.visible' : 'not.be.visible');
   };
 

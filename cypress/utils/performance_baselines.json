@@ -18,7 +18,6 @@
       }
     },
     "sidebarPanel": {
-      "onPageLoad": { "render_time": 300 },
       "onDateTimeSearch_SQL": {
         "render_time": 100
       },
@@ -30,6 +29,11 @@
       },
       "onDateTimeSearch_DQL": {
         "render_time": 300
+      },
+      "docTableField": {
+        "onLoadSavedSearch": {
+          "render_time": 100
+        }
       }
     }
   },
