@@ -5,6 +5,8 @@
 
 declare namespace Cypress {
   interface Chainable<Subject> {
+    clearQueryEditor(): Chainable<any>;
+
     setQueryEditor(
       value: string,
       options?: Partial<Cypress.TypeOptions> & { submit?: boolean }

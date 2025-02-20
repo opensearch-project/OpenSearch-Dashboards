@@ -11,16 +11,16 @@ import {
   INDEX_PATTERN_WITH_TIME_1,
   INDEX_PATTERN_WITH_NO_TIME_1,
   PATHS,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   generateAllTestConfigurations,
   generateIndexPatternTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/constants';
-import { selectFieldFromSidebar } from '../../../../../utils/apps/query_enhancements/sidebar';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
+import { selectFieldFromSidebar } from '../../../../../../utils/apps/query_enhancements/sidebar';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -56,7 +56,8 @@ export const runTableTests = () => {
         url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
@@ -85,7 +86,7 @@ export const runTableTests = () => {
               isEnhancement: true,
             });
           }
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
             page: 'discover',
             isEnhancement: true,
@@ -98,8 +99,19 @@ export const runTableTests = () => {
         it(`should allow expand multiple documents for ${config.testName}`, () => {
           // Setup
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
-          setDatePickerDatesAndSearchIfRelevant(config.language);
+
+          // If SQL, since we don't set date picker, when switching languages later it won't show any results
+          // so setting dates here
+          if (config.language === QueryLanguages.SQL.name) {
+            cy.setQueryLanguage(QueryLanguages.PPL.name);
+            setDatePickerDatesAndSearchIfRelevant(QueryLanguages.PPL.name);
+            cy.wait(1000);
+            cy.setQueryLanguage(QueryLanguages.SQL.name);
+          } else {
+            cy.setQueryLanguage(config.language);
+            setDatePickerDatesAndSearchIfRelevant(config.language);
+          }
+
           // expanding a document in the table
           cy.get('[data-test-subj="docTableExpandToggleColumn"]')
             .find('[type="button"]')
@@ -147,7 +159,7 @@ export const runTableTests = () => {
               isEnhancement: true,
             });
           }
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
             page: 'discover',
             isEnhancement: true,

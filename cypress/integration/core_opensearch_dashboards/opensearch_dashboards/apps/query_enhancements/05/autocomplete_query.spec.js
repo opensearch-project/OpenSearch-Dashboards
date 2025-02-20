@@ -9,19 +9,19 @@ import {
   PATHS,
   DATASOURCE_NAME,
   DatasetTypes,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   validateQueryResults,
   generateAutocompleteTestConfiguration,
   generateAutocompleteTestConfigurations,
   createOtherQueryUsingAutocomplete,
   createDQLQueryUsingAutocomplete,
-} from '../../../../../utils/apps/query_enhancements/autocomplete';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/autocomplete';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -39,6 +39,7 @@ export const runAutocompleteTests = () => {
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
@@ -62,7 +63,7 @@ export const runAutocompleteTests = () => {
                 isEnhancement: true,
               });
             }
-            cy.navigateToWorkSpaceSpecificPage({
+            cy.osd.navigateToWorkSpaceSpecificPage({
               workspaceName: workspaceName,
               page: 'discover',
               isEnhancement: true,
@@ -84,7 +85,7 @@ export const runAutocompleteTests = () => {
 
             // Run the query
             cy.getElementByTestId('querySubmitButton').click();
-            cy.waitForLoader(true);
+            cy.osd.waitForLoader(true);
             cy.wait(1000);
             // Validate results meet our conditions
             validateQueryResults('bytes_transferred', 9500, '>');
