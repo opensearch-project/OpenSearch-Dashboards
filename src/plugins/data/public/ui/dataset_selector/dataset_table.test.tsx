@@ -29,8 +29,8 @@ describe('DataSetTable', () => {
       title: 'Parent',
       type: 'cluster',
       children: [
-        { id: 'child1', title: 'Child 1', type: 'index' },
-        { id: 'child2', title: 'Child 2', type: 'index' },
+        { id: 'child1', title: 'Child 1', description: 'Description 1', type: 'index' },
+        { id: 'child2', title: 'Child 2', description: 'Description 2', type: 'index' },
       ],
       paginationToken: 'token',
       multiSelect: true,
@@ -78,6 +78,8 @@ describe('DataSetTable', () => {
 
     expect(screen.getByText('Child 1')).toBeInTheDocument();
     expect(screen.getByText('Child 2')).toBeInTheDocument();
+    expect(screen.getByText('Description 1')).toBeInTheDocument();
+    expect(screen.getByText('Description 2')).toBeInTheDocument();
     expect(screen.getByText('Load more')).toBeInTheDocument();
   });
 
