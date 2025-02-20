@@ -1,3 +1,8 @@
 {
-  "discover_sidebarPanel_onDateTimeSearch_DQL_render_time": "exceeded: 315.10ms > 300ms"
+  "discover_sidebarPanel_onDateTimeSearch_DQL_render_time": "exceeded: 315.10ms > 300ms",
+  "discover_sidebarPanel_onDateTimeSearch_Lucene_render_time": "exceeded: 296.50ms > 100ms",
+  "discover_sidebarPanel_onDateTimeSearch_SQL_render_time": "exceeded: 307.70ms > 100ms",
+  "discover_docTable_onDateTimeSearch_SQL_render_time": "exceeded: 3035.20ms > 3000ms",
+  "discover_sidebarPanel_onDateTimeSearch_PPL_render_time": "exceeded: 3042.10ms > 3000ms",
+  "discover_docTable_onDateTimeSearch_Lucene_render_time": "exceeded: 525.90ms > 500ms"
 }
