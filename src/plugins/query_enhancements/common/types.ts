@@ -57,6 +57,9 @@ export enum S3_FIELD_TYPES {
   LONG = 'long',
   FLOAT = 'float',
   DOUBLE = 'double',
+  TINYINT = 'tinyint',
+  SMALLINT = 'smallint',
+  BIGINT = 'bigint',
   KEYWORD = 'keyword',
   TEXT = 'text',
   STRING = 'string',
@@ -70,8 +73,5 @@ export enum S3_FIELD_TYPES {
   BINARY = 'binary',
   STRUCT = 'struct',
   ARRAY = 'array',
-  TINYINT = 'tinyint',
-  SMALLINT = 'smallint',
-  BIGINT = 'bigint',
   UNKNOWN = 'unknown', // For unmapped or unsupported types
 }
