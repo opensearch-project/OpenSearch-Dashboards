@@ -94,7 +94,7 @@ const queriesTestSuite = () => {
         // Default SQL query should be set
         cy.waitForLoader(true);
         cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-          `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`
+          `SELECT * FROM ${INDEX_WITH_TIME_1}`
         );
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
 
@@ -125,8 +125,10 @@ const queriesTestSuite = () => {
         // Default PPL query should be set
         cy.waitForLoader(true);
         cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-          `source = ${INDEX_WITH_TIME_1}*`
+          `source = ${INDEX_WITH_TIME_1}* | head 500`
         );
+        //TODO: Set the query to not include head 500 because https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9421
+        cy.setQueryEditor(`source = ${INDEX_WITH_TIME_1}*`);
         cy.waitForSearch();
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
 
