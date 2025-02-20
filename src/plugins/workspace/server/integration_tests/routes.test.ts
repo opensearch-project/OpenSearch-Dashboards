@@ -19,7 +19,7 @@ const testWorkspace: WorkspaceAttribute = {
   features: ['use-case-all'],
 };
 
-const cleanWorkspaces = async (
+const clearWorkspaces = async (
   root: ReturnType<typeof osdTestServer.createRoot>,
   osd: osdTestServer.TestOpenSearchDashboardsUtils
 ) => {
@@ -70,7 +70,7 @@ describe('workspace service api integration test', () => {
     await opensearchServer.stop();
   });
   describe('Workspace CRUD APIs', () => {
-    afterEach(async () => cleanWorkspaces(root, osd));
+    afterEach(async () => clearWorkspaces(root, osd));
 
     it('create', async () => {
       await osdTestServer.request
@@ -458,7 +458,7 @@ describe('workspace service api integration test', () => {
       references: [],
     };
 
-    afterAll(async () => cleanWorkspaces(root, osd));
+    afterAll(async () => clearWorkspaces(root, osd));
 
     it('requires objects', async () => {
       const result = await osdTestServer.request
@@ -605,7 +605,7 @@ describe('workspace service api integration test when savedObjects.permission.en
     await opensearchServer.stop();
   });
   describe('Workspace CRUD APIs', () => {
-    afterEach(async () => cleanWorkspaces(root, osd));
+    afterEach(async () => clearWorkspaces(root, osd));
 
     it('create', async () => {
       await osdTestServer.request
@@ -673,7 +673,7 @@ describe('workspace service api integration test when savedObjects.permission.en
   });
 
   describe('Saved Object Management APIs', () => {
-    afterEach(async () => cleanWorkspaces(root, osd));
+    afterEach(async () => clearWorkspaces(root, osd));
 
     const findUrl = '/api/opensearch-dashboards/management/saved_objects/_find?type=index-pattern';
 
