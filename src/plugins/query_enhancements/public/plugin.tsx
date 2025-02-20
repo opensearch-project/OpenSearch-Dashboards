@@ -4,8 +4,9 @@
  */
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
+import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import { DataStorage } from '../../data/common';
+import { DataStorage, OSD_FIELD_TYPES } from '../../data/common';
 import {
   createEditor,
   DefaultInput,
@@ -66,7 +67,20 @@ export class QueryEnhancementsPlugin
         usageCollector: data.search.usageCollector,
       }),
       getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
-      fields: { sortable: false, filterable: false, visualizable: false },
+      fields: {
+        sortable: false,
+        filterable: false,
+        visualizable: false,
+        formatter: (value: string, type: OSD_FIELD_TYPES) => {
+          switch (type) {
+            case OSD_FIELD_TYPES.DATE:
+              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ssZ'); // PPL date fields need special formatting in order for discover table formatter to render in the correct time zone
+
+            default:
+              return value;
+          }
+        },
+      },
       docLink: {
         title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
           defaultMessage: 'PPL documentation',

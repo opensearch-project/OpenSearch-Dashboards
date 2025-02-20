@@ -99,10 +99,17 @@ const inspectTestSuite = () => {
             ) {
               cy.log(`Skipped for ${key}`);
               continue;
+            } else if (config.language === QueryLanguages.PPL.name && key === 'timestamp') {
+              // PPL date field will be formatted
+              docTable
+                .getExpandedDocTableRowFieldValue(key)
+                .should('have.text', 'Dec 31, 2020 @ 16:00:00.000');
+              continue;
+            } else {
+              docTable
+                .getExpandedDocTableRowFieldValue(key)
+                .should('have.text', value === null ? ' - ' : value);
             }
-            docTable
-              .getExpandedDocTableRowFieldValue(key)
-              .should('have.text', value === null ? ' - ' : value);
           }
         });
       });
