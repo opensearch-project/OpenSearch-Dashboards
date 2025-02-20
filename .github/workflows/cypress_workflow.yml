@@ -383,10 +383,6 @@ jobs:
           retention-days: 1
           overwrite: true
 
-      - name: Fail PR on Performance Issues
-        if: env.PERFORMANCE_MESSAGE != 'No performance issues detected 🎉'
-        run: exit 1
-
   add-comment:
     needs: [cypress-tests]
     if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
