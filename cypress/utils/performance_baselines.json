@@ -29,11 +29,11 @@
       },
       "onDateTimeSearch_DQL": {
         "render_time": 300
-      },
-      "docTableField": {
-        "onLoadSavedSearch": {
-          "render_time": 100
-        }
+      }
+    },
+    "docTableField": {
+      "onLoadSavedSearch": {
+        "render_time": 100
       }
     }
   },
