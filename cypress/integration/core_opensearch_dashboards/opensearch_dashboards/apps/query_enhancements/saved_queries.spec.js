@@ -46,7 +46,7 @@ const createSavedQuery = (config) => {
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
 
-  cy.saveQuery(config.saveName, ' ', true, true);
+  cy.saveQuery(`${workspaceName}-${config.saveName}`, ' ', true, true);
 };
 
 const loadSavedQuery = (config) => {
@@ -67,7 +67,7 @@ const loadSavedQuery = (config) => {
     'Aug 30, 2020 @ 00:00:00.000'
   );
 
-  cy.loadSaveQuery(config.saveName);
+  cy.loadSaveQuery(`${workspaceName}-${config.saveName}`);
   // wait for saved queries to load.
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
@@ -81,11 +81,11 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
 
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
-  validateSaveAsNewQueryMatchingNameHasError(config.saveName);
-  cy.updateSaveQuery(saveAsNewQueryName, true, true, true);
+  validateSaveAsNewQueryMatchingNameHasError(`${workspaceName}-${config.saveName}`);
+  cy.updateSaveQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
 
   cy.reload();
-  cy.loadSaveQuery(saveAsNewQueryName);
+  cy.loadSaveQuery(`${workspaceName}-${saveAsNewQueryName}`);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
@@ -98,8 +98,8 @@ const deleteSavedQuery = (saveAsNewQueryName) => {
     isEnhancement: true,
   });
 
-  cy.deleteSaveQuery(saveAsNewQueryName);
-  verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName);
+  cy.deleteSaveQuery(`${workspaceName}-${saveAsNewQueryName}`);
+  verifyQueryDoesNotExistInSavedQueries(`${workspaceName}-${saveAsNewQueryName}`);
 };
 
 const runSavedQueriesUITests = () => {
@@ -142,6 +142,10 @@ const runSavedQueriesUITests = () => {
       cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
       cy.osd.deleteIndex(INDEX_WITH_TIME_1);
       cy.osd.deleteIndex(INDEX_WITH_TIME_2);
+      cy.window().then((win) => {
+        win.localStorage.clear();
+        win.sessionStorage.clear();
+      });
     });
 
     const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
