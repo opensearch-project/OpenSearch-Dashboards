@@ -39,7 +39,7 @@ export async function extractExportDetails(
     reader.addEventListener('error', (e) => {
       reject(e);
     });
-    reader.readAsText(blob, 'utf-8');
+    reader.readAsText(blob, 'utf8');
   });
   const lines = content.split('\n').filter((l) => l.length > 0);
   const maybeDetails = JSON.parse(lines[lines.length - 1]);
