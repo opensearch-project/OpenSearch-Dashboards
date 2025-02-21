@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ensurePopoverIsOpen } from '../query_enhancements/saved_queries';
+
 export const toTestId = (str, replace = '-') => str.replace(/\s+/g, replace);
 
 Cypress.Commands.add('saveSearch', (name, saveAsNew = false) => {
@@ -156,8 +158,7 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('loadSaveQuery', (name) => {
-  cy.getElementByTestId('saved-query-management-popover-button').click();
-
+  ensurePopoverIsOpen();
   cy.getElementByTestId('saved-query-management-open-button').click();
 
   cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
@@ -174,8 +175,7 @@ Cypress.Commands.add('clearSaveQuery', () => {
 });
 
 Cypress.Commands.add('deleteSaveQuery', (name) => {
-  cy.getElementByTestId('saved-query-management-popover-button').click();
-
+  ensurePopoverIsOpen();
   cy.getElementByTestId('saved-query-management-open-button').click();
   cy.getElementByTestId('euiFlyoutCloseButton')
     .parent()
