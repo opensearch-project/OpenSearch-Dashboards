@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment';
 import { TestFixtureHandler } from '../lib/test_fixture_handler';
 import initCommandNamespace from './command_namespace';
 
