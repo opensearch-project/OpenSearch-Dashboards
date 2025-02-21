@@ -232,8 +232,8 @@ $ sysctl -w vm.max_map_count=262144
 
 #### Debugging
 You can debug the OpenSearch Dashboards server by
-1. Running `yarn debug`. This will start the OpenSearch Dashboards development server with a debug port open on port `9229`.
-2. Attaching your debugger client to the debug port on port `9229`. If you're using VSCode, you can use the `attach-to-server` debug configuration provided.
+1. Attaching your debugger client to the debug port on port `9229`. If you're using VSCode, you can use the `attach-to-server` debug configuration provided.
+3. Running `yarn debug`. This will start the OpenSearch Dashboards development server with a debug port open on port `9229`.
 
 ### Next Steps
 
