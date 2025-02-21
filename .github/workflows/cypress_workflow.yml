@@ -111,7 +111,7 @@ jobs:
         'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true' ||
         'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false' }}
       OPENSEARCH_SNAPSHOT_CMD: ${{ matrix.config == 'query_enhanced' &&
-        '/bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"' ||
+        '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
         matrix.config == 'dashboard' &&
         'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' ||
         'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' }}
@@ -247,7 +247,7 @@ jobs:
       - name: Run OpenSearch
         if: matrix.config == 'query_enhanced'
         run: |
-          /bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"
+          /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"
           sleep 30
         shell: bash
 

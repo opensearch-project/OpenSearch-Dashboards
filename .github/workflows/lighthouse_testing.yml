@@ -1,0 +1,154 @@
+name: Lighthouse Testing
+
+on:
+  pull_request:
+    branches:
+      - main
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+env:
+  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
+  LATEST_VERSION: '2.17.0'
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Download OpenSearch
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
+
+      - name: Extract OpenSearch
+        run: |
+          tar -xzf opensearch-*.tar.gz
+          rm -f opensearch-*.tar.gz
+        shell: bash
+
+      - name: Remove security plugin
+        run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
+        shell: bash
+
+      - name: Run OpenSearch
+        run: |
+          /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"
+          sleep 30
+        shell: bash
+
+      - name: Install Lighthouse CI
+        run: yarn add --dev @lhci/cli
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+
+      - name: Wait for OpenSearch to be ready
+        run: |
+          until curl -s http://localhost:9200 >/dev/null; do
+            echo "Waiting for OpenSearch..."
+            sleep 10
+          done
+          echo "OpenSearch is up!"
+
+      - name: Start OpenSearch Dashboards
+        run: |
+          yarn start --no-base-path &
+          until curl -s http://localhost:5601 >/dev/null; do
+            echo "Waiting for OpenSearch Dashboards..."
+            sleep 10
+          done
+          echo "OpenSearch Dashboards is up!"
+
+      - name: Mock data
+        run: |
+          curl 'http://localhost:5601/api/sample_data/ecommerce' -X 'POST' -H 'osd-version: ${{ env.VERSION }}' -H 'osd-xsrf: osd-fetch'
+
+      - name: Run Lighthouse CI
+        run: |
+          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          yarn lhci autorun --verbose
+        continue-on-error: true
+
+      - name: Verify Lighthouse Results
+        run: |
+          if [ ! -d ".lighthouseci" ] || [ -z "$(ls -A .lighthouseci)" ]; then
+            echo "❌ Lighthouse CI did not generate reports."
+            exit 1
+          fi
+
+      - name: Post Lighthouse Results into comment
+        run: |
+          # Validate if empty
+          if [ ! -s .lighthouseci/assertion-results.json ]; then
+            echo "❌ No assertion results found. Skipping PR comment."
+            exit 0   #Prevents failure
+          fi
+
+          # Ensure JSON is properly formatted
+          if ! jq empty .lighthouseci/assertion-results.json; then
+            echo "❌ Invalid JSON format in Lighthouse assertion results."
+            cat .lighthouseci/assertion-results.json  # Print for debugging
+            exit 1
+          fi
+
+            BASELINE=$(cat ./lighthouse_baseline.json)
+
+            FAILURES=$(jq --argjson baseline "$BASELINE" -r '[.[] | select(.passed==false) | {metric: .auditId, expected: ($baseline[.url][.auditId] // "N/A"), actual: (if .actual then (.actual | floor) else "N/A" end), url: .url}]' .lighthouseci/assertion-results.json)
+
+            UNIQUE_FAILURE_URLS=$(echo "$FAILURES" | jq '[.[] | .url] | unique')
+
+            # Load the URL to report mapping from links.json
+            URL_REPORT_MAP=$(jq -c '.' .lighthouseci/links.json)
+
+            # Append report URLs to failed assertions
+            FAILURES_WITH_REPORTS=$(jq --argjson url_report_map "$URL_REPORT_MAP" '
+            map(. + {reportUrl: $url_report_map[.url]})
+            ' <<< "$FAILURES")
+
+            # Check if there are failures before posting a comment
+            if [[ "$FAILURES_WITH_REPORTS" == "[]" ]]; then
+            echo "✅ **All Lighthouse metrics passed!** 🎉"
+            exit 0
+            fi
+
+            COMMENT="### ⚡ Lighthouse CI Performance Issues ⚡
+
+            | Metric | Expected Value | Current Value | Page URL | Report |
+            |--------|---------------|--------------|----------|--------|"
+
+            while IFS= read -r line; do
+                COMMENT+="\n| $(echo "$line" | jq -r '.metric') | $(echo "$line" | jq -r '.expected') | $(echo "$line" | jq -r '.actual') | $(echo "$line" | jq -r '.url') | [Report]($(echo "$line" | jq -r '.reportUrl')) |"
+            done <<< "$(echo "$FAILURES_WITH_REPORTS" | jq -c '.[]')"
+
+            echo -e "$COMMENT" > comment.txt
+
+            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN  }}
+
+      - name: Cleanup Lighthouse Reports
+        run: rm -f comment.txt && rm -rf .lighthouseci

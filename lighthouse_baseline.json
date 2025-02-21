@@ -1,0 +1,18 @@
+{
+  "http://localhost:5601/app/home": {
+    "first-contentful-paint": 1800,
+    "speed-index": 15000
+  },
+  "http://localhost:5601/app/data-explorer/discover": {
+    "first-contentful-paint": 1800,
+    "speed-index": 20000
+  },
+  "http://localhost:5601/app/dashboards": {
+    "first-contentful-paint": 1800,
+    "speed-index": 22000
+  },
+  "http://localhost:5601/app/visualize": {
+    "first-contentful-paint": 1800,
+    "speed-index": 20000
+  }
+}
