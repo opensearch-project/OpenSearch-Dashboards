@@ -384,6 +384,7 @@ export class IndexPattern implements IIndexPattern {
     return (this.fieldsLoading = status);
   };
 
+  // DQL and Lucene already calling this formatter, we should add ppl formatter in the language config
   /**
    * Provide a field, get its formatter
    * @param field
