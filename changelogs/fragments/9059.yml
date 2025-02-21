@@ -1,2 +1,0 @@
-fix:
-- Inactive manage link in the data source selector when opening DevTools ([#9059](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9059))

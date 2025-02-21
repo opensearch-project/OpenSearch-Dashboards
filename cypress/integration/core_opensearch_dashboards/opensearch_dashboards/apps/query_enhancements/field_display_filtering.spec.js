@@ -3,70 +3,67 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  DATASOURCE_NAME,
-  INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-} from '../../../../../utils/apps/constants';
-import * as dataExplorer from '../../../../../utils/apps/query_enhancements/field_display_filtering.js';
-import { SECONDARY_ENGINE, BASE_PATH } from '../../../../../utils/constants';
-import { NEW_SEARCH_BUTTON } from '../../../../../utils/dashboards/data_explorer/elements.js';
+import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../utils/apps/constants';
+import * as docTable from '../../../../../utils/apps/query_enhancements/doc_table.js';
+import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../utils/apps/query_enhancements/field_display_filtering.js';
+import { PATHS, BASE_PATH } from '../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../utils/apps/query_enhancements/shared';
-import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../utils/apps/query_enhancements/field_display_filtering';
+import { prepareTestSuite } from '../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 
-describe('filter for value spec', () => {
-  beforeEach(() => {
-    // Load test data
-    cy.setupTestData(
-      SECONDARY_ENGINE.url,
-      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
-      ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
-    );
+const fieldDisplayFilteringTestSuite = () => {
+  describe('filter for value spec', () => {
+    beforeEach(() => {
+      // Load test data
+      cy.osd.setupTestData(
+        PATHS.SECONDARY_ENGINE,
+        ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
+        ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
+      );
+      // Add data source
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: `${PATHS.SECONDARY_ENGINE}`,
+        authType: 'no_auth',
+      });
+      // Create workspace
+      cy.deleteAllWorkspaces();
+      cy.visit('/app/home');
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
+      cy.wait(2000);
+      cy.createWorkspaceIndexPatterns({
+        workspaceName: workspace,
+        indexPattern: INDEX_WITH_TIME_1,
+        timefieldName: 'timestamp',
+        indexPatternHasTimefield: true,
+        dataSource: DATASOURCE_NAME,
+        isEnhancement: true,
+      });
 
-    // Add data source
-    cy.addDataSource({
-      name: DATASOURCE_NAME,
-      url: `${SECONDARY_ENGINE.url}`,
-      authType: 'no_auth',
+      cy.navigateToWorkSpaceSpecificPage({
+        url: BASE_PATH,
+        workspaceName: workspace,
+        page: 'discover',
+        isEnhancement: true,
+      });
+      cy.getElementByTestId('discoverNewButton').click();
     });
-    // Create workspace
-    cy.deleteWorkspaceByName(workspace);
-    cy.visit('/app/home');
-    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
-    cy.wait(2000);
-    cy.createWorkspaceIndexPatterns({
-      workspaceName: workspace,
-      indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-      timefieldName: 'timestamp',
-      indexPatternHasTimefield: true,
-      dataSource: DATASOURCE_NAME,
-      isEnhancement: true,
+
+    afterEach(() => {
+      cy.deleteWorkspaceByName(workspace);
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
     });
 
-    cy.navigateToWorkSpaceSpecificPage({
-      url: BASE_PATH,
-      workspaceName: workspace,
-      page: 'discover',
-      isEnhancement: true,
-    });
-    cy.getElementByTestId(NEW_SEARCH_BUTTON).click();
-  });
-
-  afterEach(() => {
-    cy.deleteWorkspaceByName(workspace);
-    cy.deleteDataSourceByName(DATASOURCE_NAME);
-    // TODO: Modify deleteIndex to handle an array of index and remove hard code
-    cy.deleteIndex(INDEX_WITH_TIME_1);
-  });
-
-  generateAllTestConfigurations(generateFieldDisplayFilteringTestConfiguration).forEach(
-    (config) => {
+    generateAllTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {
+      index: INDEX_WITH_TIME_1,
+      indexPattern: `${INDEX_WITH_TIME_1}*`,
+    }).forEach((config) => {
       it(`filter actions in table field for ${config.testName}`, () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.setQueryLanguage(config.language);
@@ -75,14 +72,14 @@ describe('filter for value spec', () => {
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
         const shouldText = config.isFilterButtonsEnabled ? 'exist' : 'not.exist';
-        dataExplorer.getDocTableField(0, 0).within(() => {
+        docTable.getDocTableField(0, 0).within(() => {
           cy.getElementByTestId('filterForValue').should(shouldText);
           cy.getElementByTestId('filterOutValue').should(shouldText);
         });
 
         if (config.isFilterButtonsEnabled) {
-          dataExplorer.verifyDocTableFilterAction(0, 'filterForValue', '10,000', '1', true);
-          dataExplorer.verifyDocTableFilterAction(0, 'filterOutValue', '10,000', '9,999', false);
+          docTable.verifyDocTableFilterAction(0, 'filterForValue', '10,000', '1', true);
+          docTable.verifyDocTableFilterAction(0, 'filterOutValue', '10,000', '9,999', false);
         }
       });
 
@@ -90,7 +87,7 @@ describe('filter for value spec', () => {
         // Check if the first expanded Doc Table Field's first row's Filter For, Filter Out and Exists Filter buttons are disabled.
         const verifyFirstExpandedFieldFilterForFilterOutFilterExistsButtons = () => {
           const shouldText = config.isFilterButtonsEnabled ? 'be.enabled' : 'be.disabled';
-          dataExplorer.getExpandedDocTableRow(0, 0).within(() => {
+          docTable.getExpandedDocTableRow(0, 0).within(() => {
             cy.getElementByTestId('addInclusiveFilterButton').should(shouldText);
             cy.getElementByTestId('removeInclusiveFilterButton').should(shouldText);
             cy.getElementByTestId('addExistsFilterButton').should(shouldText);
@@ -122,11 +119,11 @@ describe('filter for value spec', () => {
             filterButton === 'for' ? 'addInclusiveFilterButton' : 'removeInclusiveFilterButton';
           const shouldText = filterButton === 'for' ? 'have.text' : 'not.have.text';
 
-          dataExplorer
+          docTable
             .getExpandedDocTableRowValue(docTableRowNumber, expandedDocumentRowNumber)
             .then(($expandedDocumentRowValue) => {
               const filterFieldText = $expandedDocumentRowValue.text();
-              dataExplorer
+              docTable
                 .getExpandedDocTableRow(docTableRowNumber, expandedDocumentRowNumber)
                 .within(() => {
                   cy.getElementByTestId(filterButtonElement).click();
@@ -137,7 +134,7 @@ describe('filter for value spec', () => {
                 'have.text',
                 expectedQueryHitsAfterFilterApplied
               ); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
-              dataExplorer
+              docTable
                 .getExpandedDocTableRowValue(docTableRowNumber, expandedDocumentRowNumber)
                 .should(shouldText, filterFieldText);
             });
@@ -161,11 +158,11 @@ describe('filter for value spec', () => {
           expectedQueryHitsWithoutFilter,
           expectedQueryHitsAfterFilterApplied
         ) => {
-          dataExplorer
+          docTable
             .getExpandedDocTableRowFieldName(docTableRowNumber, expandedDocumentRowNumber)
             .then(($expandedDocumentRowField) => {
               const filterFieldText = $expandedDocumentRowField.text();
-              dataExplorer
+              docTable
                 .getExpandedDocTableRow(docTableRowNumber, expandedDocumentRowNumber)
                 .within(() => {
                   cy.getElementByTestId('addExistsFilterButton').click();
@@ -194,9 +191,9 @@ describe('filter for value spec', () => {
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
-        dataExplorer.toggleDocTableRow(0);
+        docTable.toggleDocTableRow(0);
         verifyFirstExpandedFieldFilterForFilterOutFilterExistsButtons();
-        dataExplorer.verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
+        docTable.verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
 
         if (config.isFilterButtonsEnabled) {
           verifyDocTableFirstExpandedFieldFirstRowFilterForOutButtonFiltersCorrectField(
@@ -221,6 +218,8 @@ describe('filter for value spec', () => {
           );
         }
       });
-    }
-  );
-});
+    });
+  });
+};
+
+prepareTestSuite('Field Display Filtering', fieldDisplayFilteringTestSuite);

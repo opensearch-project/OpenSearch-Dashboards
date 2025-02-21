@@ -316,6 +316,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     chartsTheme.axes!.axisTitle = {
       fill: euiThemeVars.euiTextColor,
     };
+    chartsTheme.colors = chartsTheme.colors ?? {};
+    chartsTheme.colors.vizColors = [euiThemeVars.euiColorVis1_behindText];
 
     return (
       <Chart size="100%">

@@ -1,2 +1,0 @@
-chore:
-- Remove data enhancement options from yaml config now it is controlled by Advanced Settings ([#8828](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8828))

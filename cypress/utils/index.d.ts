@@ -6,24 +6,15 @@
 declare namespace Cypress {
   interface Chainable<Subject> {
     /**
-     * Call a function when an element with a test id cannot be found
+     * Get an element by its test id
      * @example
-     * cy.whenTestIdNotFound(['query', 'puery'], () => {...})
+     * cy.getElementByTestId('query')
      */
-    whenTestIdNotFound<S = any>(
-      testIds: string | string[],
-      callbackFn: void,
+    getElementByTestId<S = any>(
+      testId: string,
       options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
     ): Chainable<S>;
-    /**
-     * Get elements by their test ids
-     * @example
-     * cy.getElementsByTestIds(['query', 'puery'])
-     */
-    getElementsByTestIds<S = any>(
-      testIds: string | string[],
-      options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
-    ): Chainable<S>;
+
     /**
      * Get an element which contains testId
      * @example
@@ -33,13 +24,14 @@ declare namespace Cypress {
       testId: string,
       options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
     ): Chainable<S>;
+
     /**
-     * Get an element by its test id
+     * Get elements by their test ids
      * @example
-     * cy.getElementByTestId('query')
+     * cy.getElementsByTestIds(['query', 'puery'])
      */
-    getElementByTestId<S = any>(
-      testId: string,
+    getElementsByTestIds<S = any>(
+      testIds: string | string[],
       options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
     ): Chainable<S>;
 
@@ -69,127 +61,27 @@ declare namespace Cypress {
     ): Chainable<S>;
 
     /**
-     * Create an index
+     * Call a function when an element with a test id cannot be found
      * @example
-     * cy.createIndex('indexID')
-     * cy.createIndex('indexID', 'policy')
+     * cy.whenTestIdNotFound(['query', 'puery'], () => {...})
      */
-    createIndex<S = any>(index: string, policyID?: string, settings?: any): Chainable<S>;
-
-    /**
-     * Delete an index
-     * @example
-     * cy.deleteIndex('indexID')
-     */
-    deleteIndex<S = any>(index: string): Chainable<S>;
-
-    /**
-     * Bulk upload NDJSON fixture data
-     * @example
-     * cy.bulkUploadDocs('plugins/test/test_data.txt')
-     */
-    bulkUploadDocs<S = any>(
-      fixturePath: string,
-      index: string
-      // options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
+    whenTestIdNotFound<S = any>(
+      testIds: string | string[],
+      callbackFn: void,
+      options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
     ): Chainable<S>;
 
     /**
-     * Import saved objects
+     * Deletes a workspace
      * @example
-     * cy.importSavedObject('plugins/test/exported_data.ndjson')
+     * cy.deleteWorkspace('workspace-name');
      */
-    importSavedObjects<S = any>(fixturePath: string, overwrite?: boolean): Chainable<S>;
+    deleteWorkspace<S = any>(workspaceName: string): Chainable<S>;
 
     /**
-     * Delete a saved object
-     * @example
-     * cy.deleteSavedObject('index-pattern', 'id')
+     * Opens workspace dashboard
      */
-    deleteSavedObject<S = any>(type: string, id: string): Chainable<S>;
-
-    /**
-     * Test if data source exists
-     * @example
-     * cy.ifDataSourceExists('data-source')
-     */
-    ifDataSourceExists<S = any>(search: string): Chainable<S>;
-
-    /**
-     * Delete all saved objects of a particular type
-     * Optionally, narrow down the results using search
-     * @example
-     * cy.deleteSavedObjectByType('index-pattern')
-     * cy.deleteSavedObjectByType('index-pattern', 'search string')
-     */
-    deleteSavedObjectByType<S = any>(type: string, search?: string): Chainable<S>;
-
-    /**
-     * Adds an index pattern
-     * @example
-     * cy.createIndexPattern('patterId', { title: 'patt*', timeFieldName: 'timestamp' })
-     */
-    createIndexPattern<S = any>(
-      id: string,
-      attributes: {
-        title: string;
-        timeFieldName?: string;
-        [key: string]: any;
-      },
-      header: string
-    ): Chainable<S>;
-
-    /**
-     * Adds a dashboard
-     * @example
-     * cy.createDashboard({ title: 'My dashboard'})
-     */
-    createDashboard<S = any>(
-      attributes: {
-        title: string;
-        [key: string]: any;
-      },
-      headers?: {
-        [key: string]: any;
-      }
-    ): Chainable<S>;
-
-    /**
-     * Changes the Default tenant for the domain.
-     * @example
-     * cy.changeDefaultTenant({multitenancy_enabled: true, private_tenant_enabled: true, default_tenant: tenantName, });
-     */
-    changeDefaultTenant<S = any>(
-      attributes: {
-        multitenancy_enabled: boolean;
-        private_tenant_enabled: boolean;
-        default_tenant: string;
-      }
-      // header: string,
-      // default_tenant: string
-    ): Chainable<S>;
-
-    /**
-     * Delete an index pattern
-     * @example
-     * cy.createIndexPattern('patterId')
-     */
-    deleteIndexPattern<S = any>(id: string): Chainable<S>;
-
-    /**
-     * Set advanced setting values
-     * tip: setting the value to null set's it to its default value
-     * @example
-     * cy.setAdvancedSetting({ 'visualize:enableLabs' : true })
-     */
-    setAdvancedSetting<S = any>(changes: { [key: string]: any }): Chainable<S>;
-
-    /**
-     * Performs drag and drop action
-     * @example
-     * cy.get('sourceSelector').drag('targetSelector')
-     */
-    drag<S = any>(targetSelector: string): Chainable<S>;
+    openWorkspaceDashboard<S = any>(workspaceName: string): Chainable<S>;
 
     // osd namespace
     osd: {
@@ -203,9 +95,31 @@ declare namespace Cypress {
       ): Chainable<S>;
 
       /**
-       * Opens workspace dashboard
+       * Delete an index
+       * @example
+       * cy.deleteIndex('indexID')
        */
-      openWorkspaceDashboard<S = any>(workspaceName: string): Chainable<S>;
+      deleteIndex<S = any>(index: string): Chainable<S>;
+
+      /**
+       * Sets up test data
+       */
+      setupTestData<S = any>(
+        endpoint: string,
+        mappingFiles: string[],
+        dataFiles: string[]
+      ): Chainable<S>;
+
+      addDataSource(opts: {
+        name: string;
+        url: string;
+        auth_type?: string;
+        credentials?: { username: string; password: string };
+      }): Chainable<any>;
+
+      deleteDataSourceByName(dataSourceName: string): Chainable<any>;
+
+      deleteAllDataSources(): Chainable<any>;
     };
   }
 }
