@@ -54,6 +54,7 @@ npm-debug.log*
 .ci/runbld
 .ci/bash_standard_lib.sh
 .gradle
+packages/osd-optimizer/bundle_size_variations.yml
 
 # apm plugin
 apm.tsconfig.json

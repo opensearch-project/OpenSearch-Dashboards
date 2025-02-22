@@ -1,0 +1,49 @@
+name: Performance Testing
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        # Install dependencies and bootstrap the OpenSearch Dashboards project
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        # Build OpenSearch Dashboards platform plugins without examples using 12 workers
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+
+      - name: Update Limit and bundle size variation
+        # This command updates the limit and bundle size variation for the OpenSearch Dashboards platform plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --update-limits
+
+      - name: Read and comment bundle size variations
+        run: |
+          if [ -f packages/osd-optimizer/bundle_size_variations.yml ]; then
+            echo "📊 **Bundle Size crossed 5% for below plugins**" > comment.txt
+            echo "" >> comment.txt
+            cat packages/osd-optimizer/bundle_size_variations.yml >> comment.txt
+            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
+          else
+            echo "No bundle size variations detected, skipping comment."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
