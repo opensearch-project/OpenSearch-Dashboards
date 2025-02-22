@@ -106,7 +106,7 @@ export const getLegacyTopNavConfig = (
     {
       id: 'inspector',
       label: i18n.translate('visualize.topNavMenu.openInspectorButtonLabel', {
-        defaultMessage: 'inspect',
+        defaultMessage: 'Inspect',
       }),
       description: i18n.translate('visualize.topNavMenu.openInspectorButtonAriaLabel', {
         defaultMessage: 'Open Inspector for visualization',
@@ -127,7 +127,7 @@ export const getLegacyTopNavConfig = (
     {
       id: 'share',
       label: i18n.translate('visualize.topNavMenu.shareVisualizationButtonLabel', {
-        defaultMessage: 'share',
+        defaultMessage: 'Share',
       }),
       description: i18n.translate('visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
         defaultMessage: 'Share Visualization',
@@ -168,10 +168,10 @@ export const getLegacyTopNavConfig = (
             label:
               savedVis?.id && originatingApp
                 ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
-                    defaultMessage: 'save as',
+                    defaultMessage: 'Save as',
                   })
                 : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
-                    defaultMessage: 'save',
+                    defaultMessage: 'Save',
                   }),
             emphasize: (savedVis && !savedVis.id) || !originatingApp,
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {

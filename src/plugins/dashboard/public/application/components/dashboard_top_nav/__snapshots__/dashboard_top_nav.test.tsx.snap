@@ -144,6 +144,9 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "globalSearch": Object {
+                "getAllSearchCommands": [MockFunction],
+              },
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -211,10 +214,12 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -315,6 +320,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -322,6 +328,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -514,6 +521,9 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                     "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                   },
                   "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                  "lucene": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                  },
                   "management": Object {
                     "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                     "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -530,6 +540,9 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                     "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                  "ppl": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                  },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                   },
@@ -559,6 +572,12 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                     "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                     "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                  },
+                  "sql": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplLimitation": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                   },
                   "tutorial": Object {
                     "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -778,6 +797,10 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -894,6 +917,26 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "getListingLimit": [MockFunction],
                 "getPerPage": [Function],
               },
+            },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
             },
             "toastNotifications": Object {
               "add": [MockFunction],
@@ -1209,6 +1252,9 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "globalSearch": Object {
+                "getAllSearchCommands": [MockFunction],
+              },
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -1276,10 +1322,12 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -1380,6 +1428,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -1387,6 +1436,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -1579,6 +1629,9 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                     "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                   },
                   "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                  "lucene": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                  },
                   "management": Object {
                     "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                     "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -1595,6 +1648,9 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                     "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                  "ppl": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                  },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                   },
@@ -1624,6 +1680,12 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                     "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                     "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                  },
+                  "sql": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplLimitation": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                   },
                   "tutorial": Object {
                     "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -1843,6 +1905,10 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -1959,6 +2025,26 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "getListingLimit": [MockFunction],
                 "getPerPage": [Function],
               },
+            },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
             },
             "toastNotifications": Object {
               "add": [MockFunction],
@@ -2274,6 +2360,9 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "globalSearch": Object {
+                "getAllSearchCommands": [MockFunction],
+              },
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -2341,10 +2430,12 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -2445,6 +2536,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -2452,6 +2544,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -2644,6 +2737,9 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                     "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                   },
                   "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                  "lucene": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                  },
                   "management": Object {
                     "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                     "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -2660,6 +2756,9 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                     "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                  "ppl": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                  },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                   },
@@ -2689,6 +2788,12 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                     "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                     "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                  },
+                  "sql": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplLimitation": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                   },
                   "tutorial": Object {
                     "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -2908,6 +3013,10 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -3024,6 +3133,26 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "getListingLimit": [MockFunction],
                 "getPerPage": [Function],
               },
+            },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
             },
             "toastNotifications": Object {
               "add": [MockFunction],
@@ -3339,6 +3468,9 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "globalSearch": Object {
+                "getAllSearchCommands": [MockFunction],
+              },
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -3406,10 +3538,12 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -3510,6 +3644,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -3517,6 +3652,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -3709,6 +3845,9 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                     "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                   },
                   "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                  "lucene": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                  },
                   "management": Object {
                     "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                     "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -3725,6 +3864,9 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                     "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                  "ppl": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                  },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                   },
@@ -3754,6 +3896,12 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                     "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                     "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                  },
+                  "sql": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplLimitation": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                   },
                   "tutorial": Object {
                     "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -3973,6 +4121,10 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -4089,6 +4241,26 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "getListingLimit": [MockFunction],
                 "getPerPage": [Function],
               },
+            },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
             },
             "toastNotifications": Object {
               "add": [MockFunction],
@@ -4404,6 +4576,9 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "globalSearch": Object {
+                "getAllSearchCommands": [MockFunction],
+              },
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -4471,10 +4646,12 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -4575,6 +4752,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -4582,6 +4760,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -4774,6 +4953,9 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                     "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                   },
                   "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                  "lucene": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                  },
                   "management": Object {
                     "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                     "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -4790,6 +4972,9 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                     "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                  "ppl": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                  },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                   },
@@ -4819,6 +5004,12 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                     "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                     "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                  },
+                  "sql": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplLimitation": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                   },
                   "tutorial": Object {
                     "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -5038,6 +5229,10 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -5154,6 +5349,26 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "getListingLimit": [MockFunction],
                 "getPerPage": [Function],
               },
+            },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
             },
             "toastNotifications": Object {
               "add": [MockFunction],
@@ -5469,6 +5684,9 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "globalSearch": Object {
+                "getAllSearchCommands": [MockFunction],
+              },
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -5536,10 +5754,12 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -5640,6 +5860,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -5647,6 +5868,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -5839,6 +6061,9 @@ exports[`Dashboard top nav render with all components 1`] = `
                     "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                   },
                   "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                  "lucene": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                  },
                   "management": Object {
                     "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                     "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -5855,6 +6080,9 @@ exports[`Dashboard top nav render with all components 1`] = `
                     "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                  "ppl": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                  },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                   },
@@ -5884,6 +6112,12 @@ exports[`Dashboard top nav render with all components 1`] = `
                     "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                     "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                  },
+                  "sql": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplLimitation": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                   },
                   "tutorial": Object {
                     "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -6103,6 +6337,10 @@ exports[`Dashboard top nav render with all components 1`] = `
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -6219,6 +6457,26 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "getListingLimit": [MockFunction],
                 "getPerPage": [Function],
               },
+            },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
             },
             "toastNotifications": Object {
               "add": [MockFunction],

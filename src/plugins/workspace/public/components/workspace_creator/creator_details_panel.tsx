@@ -13,17 +13,23 @@ import {
   EuiFormControlLayout,
   EuiFormRow,
   EuiPanel,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
 import { i18n } from '@osd/i18n';
-import { WorkspaceDescriptionField, WorkspaceNameField } from '../workspace_form';
+import {
+  WorkspaceDescriptionField,
+  WorkspaceNameField,
+  WorkspaceFormErrors,
+} from '../workspace_form';
 import { generateRightSidebarScrollProps, RightSidebarScrollField } from './utils';
 
 interface CreatorDetailsPanelProps {
   color?: string;
   name?: string;
   description?: string;
+  formErrors?: Pick<WorkspaceFormErrors, 'name' | 'color'>;
   onColorChange: (text: string, output: EuiColorPickerOutput) => void;
   onNameChange: (name: string) => void;
   onDescriptionChange: (description: string) => void;
@@ -33,6 +39,7 @@ export const CreatorDetailsPanel = ({
   color,
   name,
   description,
+  formErrors,
   onColorChange,
   onNameChange,
   onDescriptionChange,
@@ -46,6 +53,7 @@ export const CreatorDetailsPanel = ({
           })}
         </h2>
       </EuiText>
+      <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={
           <h4 {...generateRightSidebarScrollProps(RightSidebarScrollField.Name)}>
@@ -66,11 +74,14 @@ export const CreatorDetailsPanel = ({
                 defaultMessage: 'Color',
               })}
               {...generateRightSidebarScrollProps(RightSidebarScrollField.Color)}
+              error={formErrors?.color?.message}
+              isInvalid={!!formErrors?.color}
             >
               <EuiColorPicker
                 color={color}
                 onChange={onColorChange}
                 compressed
+                mode="swatch"
                 button={
                   <EuiFormControlLayout
                     icon={{
@@ -98,6 +109,7 @@ export const CreatorDetailsPanel = ({
                 }
               )}
               showDescription={false}
+              error={formErrors?.name?.message}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

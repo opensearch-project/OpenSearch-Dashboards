@@ -11,17 +11,22 @@
 
 import { monaco } from '@osd/monaco';
 import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
-import { fetchFieldSuggestions, parseQuery } from '../shared/utils';
+import {
+  fetchColumnValues,
+  formatFieldsToSuggestions,
+  formatValuesToSuggestions,
+  parseQuery,
+} from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
-import { PPL_AGGREGATE_FUNTIONS } from './constants';
-import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
+import { PPL_AGGREGATE_FUNCTIONS, PPL_SUGGESTION_IMPORTANCE } from './constants';
 
 export const getSuggestions = async ({
   selectionStart,
   selectionEnd,
   indexPattern,
+  datasetType,
   position,
   query,
   services,
@@ -37,17 +42,31 @@ export const getSuggestions = async ({
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
-      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `));
+      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '3'));
+    }
+
+    if (suggestions.suggestValuesForColumn) {
+      finalSuggestions.push(
+        ...formatValuesToSuggestions(
+          await fetchColumnValues(
+            indexPattern.title,
+            suggestions.suggestValuesForColumn,
+            services,
+            indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn),
+            datasetType
+          ).catch(() => []),
+          (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
+        )
+      );
     }
 
     if (suggestions.suggestAggregateFunctions) {
       finalSuggestions.push(
-        ...PPL_AGGREGATE_FUNTIONS.map((af) => ({
+        ...PPL_AGGREGATE_FUNCTIONS.map((af) => ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
-          insertText: af + '(${1:expr}) ',
+          insertText: af + ' ',
           detail: SuggestionItemDetailsTags.AggregateFunction,
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         }))
       );
     }
@@ -61,14 +80,14 @@ export const getSuggestions = async ({
       });
     }
 
-    // create the sortlist
-    const suggestionImportance = new Map<number, string>();
-    suggestionImportance.set(OpenSearchPPLParser.PIPE, '0');
-    suggestionImportance.set(OpenSearchPPLParser.COMMA, '1');
-    suggestionImportance.set(OpenSearchPPLParser.PLUS, '2');
-    suggestionImportance.set(OpenSearchPPLParser.MINUS, '2');
-    suggestionImportance.set(OpenSearchPPLParser.EQUAL, '2');
-    suggestionImportance.set(OpenSearchPPLParser.SOURCE, '2');
+    if (suggestions.suggestRenameAs) {
+      finalSuggestions.push({
+        text: 'as',
+        insertText: 'as ',
+        type: monaco.languages.CompletionItemKind.Keyword,
+        detail: SuggestionItemDetailsTags.Keyword,
+      });
+    }
 
     // Fill in PPL keywords
     if (suggestions.suggestKeywords?.length) {
@@ -78,10 +97,12 @@ export const getSuggestions = async ({
           insertText: `${sk.value.toLowerCase()} `,
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: SuggestionItemDetailsTags.Keyword,
-          sortText: suggestionImportance.get(sk.id) ?? sk.value.toLowerCase(),
+          // sortText is the only option to sort suggestions, compares strings
+          sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
         }))
       );
     }
+
     return finalSuggestions;
   } catch (e) {
     return [];

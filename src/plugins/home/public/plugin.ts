@@ -156,6 +156,7 @@ export class HomePublicPlugin
         injectedMetadata: coreStart.injectedMetadata,
         dataSource,
         sectionTypes: this.sectionTypeService,
+        workspaces: core.workspaces,
         ...homeOpenSearchDashboardsServices,
       });
     };
@@ -166,6 +167,10 @@ export class HomePublicPlugin
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const [coreStart, { navigation }] = await core.getStartServices();
+        if (!!coreStart.application.capabilities.workspaces?.enabled) {
+          coreStart.application.navigateToApp('workspace_initial');
+          return () => {};
+        }
         setCommonService();
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
@@ -192,7 +197,7 @@ export class HomePublicPlugin
         mount: async (params: AppMountParameters) => {
           const [
             coreStart,
-            { contentManagement: contentManagementStart },
+            { contentManagement: contentManagementStart, navigation },
           ] = await core.getStartServices();
           setCommonService();
 
@@ -200,7 +205,8 @@ export class HomePublicPlugin
           return await renderSearchUseCaseOverviewApp(
             params.element,
             coreStart,
-            contentManagementStart
+            contentManagementStart,
+            navigation
           );
         },
       });
@@ -210,6 +216,7 @@ export class HomePublicPlugin
         {
           id: SEARCH_OVERVIEW_PAGE_ID,
           order: -1,
+          showInAllNavGroup: true,
         },
       ]);
     }

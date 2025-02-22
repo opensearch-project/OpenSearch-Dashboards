@@ -174,6 +174,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       items,
       totalItemCount,
       isSearching,
+      columnRegistry,
       filters,
       selectionConfig: selection,
       onDelete,
@@ -186,8 +187,6 @@ export class Table extends PureComponent<TableProps, TableState> {
       onShowRelationships,
       basePath,
       actionRegistry,
-      columnRegistry,
-      namespaceRegistry,
       dateFormat,
       availableWorkspaces,
       currentWorkspaceId,
@@ -423,6 +422,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
+          compressed
           filters={filters}
           onChange={this.onChange}
           toolsRight={[
@@ -487,7 +487,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                   label={
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
+                      defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                       values={{
                         useUpdatedUX: this.props.useUpdatedUX,
                       }}

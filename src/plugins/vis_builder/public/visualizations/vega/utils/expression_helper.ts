@@ -27,7 +27,11 @@ export const createRawDataVisFn = (): ExpressionFunctionDefinition<
   inputTypes: ['opensearch_dashboards_datatable'],
   help: 'Returns raw data from opensearchaggs without modification',
   args: {},
-  fn(context: OpenSearchDashboardsDatatable): OpenSearchDashboardsDatatable {
+  fn(
+    context: OpenSearchDashboardsDatatable,
+    args?: {},
+    handlers?: {}
+  ): OpenSearchDashboardsDatatable {
     // Simply return the input context, which should be the opensearchaggs result
     return context;
   },

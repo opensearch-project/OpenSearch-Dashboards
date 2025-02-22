@@ -12,7 +12,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../../../core/public';
 import {
   WorkspacePermissionItemType,
   optionIdToWorkspacePermissionModesMap,
@@ -20,23 +20,9 @@ import {
   PERMISSION_COLLABORATOR_LABEL_ID,
   PERMISSION_ACCESS_LEVEL_LABEL_ID,
   permissionModeOptions,
+  typeOptions,
 } from './constants';
 import { getPermissionModeId } from './utils';
-
-const typeOptions = [
-  {
-    value: WorkspacePermissionItemType.User,
-    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
-      defaultMessage: 'User',
-    }),
-  },
-  {
-    value: WorkspacePermissionItemType.Group,
-    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
-      defaultMessage: 'User Group',
-    }),
-  },
-];
 
 export interface WorkspacePermissionSettingInputProps {
   index: number;
@@ -120,7 +106,7 @@ export const WorkspacePermissionSettingInput = ({
         ) : (
           <EuiSuperSelect
             compressed={true}
-            placeholder={i18n.translate('workspaceForm.permissionSetting.selectType', {
+            placeholder={i18n.translate('workspace.form.permissionSetting.selectType', {
               defaultMessage: 'Select',
             })}
             options={typeOptions}
@@ -143,10 +129,10 @@ export const WorkspacePermissionSettingInput = ({
           data-test-subj="workspaceFormUserIdOrGroupInput"
           placeholder={
             type === WorkspacePermissionItemType.User
-              ? i18n.translate('workspaceForm.permissionSetting.selectUser', {
-                  defaultMessage: 'Enter user name or uer ID',
+              ? i18n.translate('workspace.form.permissionSetting.selectUser', {
+                  defaultMessage: 'Enter user name or user ID',
                 })
-              : i18n.translate('workspaceForm.permissionSetting.selectUserGroup', {
+              : i18n.translate('workspace.form.permissionSetting.selectUserGroup', {
                   defaultMessage: 'Enter group name or group ID',
                 })
           }

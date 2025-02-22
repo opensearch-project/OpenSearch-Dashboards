@@ -116,6 +116,7 @@ export class DataSourceManagementPlugin
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
     const uiSettings = core.uiSettings;
+    setUiSettings(uiSettings);
 
     if (!opensearchDashboardsSection) {
       throw new Error('`opensearchDashboards` management section not found.');
@@ -125,7 +126,7 @@ export class DataSourceManagementPlugin
       .getStartServices()
       .then(([coreStart]) => coreStart.savedObjects);
 
-    const column = new DataSourceColumn(savedObjectPromise);
+    const column = new DataSourceColumn(savedObjectPromise, uiSettings.get('home:useNewHomePage'));
     indexPatternManagement.columns.register(column);
 
     this.featureFlagStatus = !!dataSource;
@@ -151,7 +152,7 @@ export class DataSourceManagementPlugin
         id: DSM_APP_ID,
         title: PLUGIN_NAME,
         order: 100,
-        description: i18n.translate('data_source_management.description', {
+        description: i18n.translate('dataSourcesManagement.description', {
           defaultMessage: 'Create and manage data source connections.',
         }),
         mount: async (params: AppMountParameters) => {
@@ -207,7 +208,6 @@ export class DataSourceManagementPlugin
     }
 
     setHideLocalCluster({ enabled: dataSource!.hideLocalCluster });
-    setUiSettings(uiSettings);
     // This instance will be got in each data source selector component.
     setDataSourceSelection(this.dataSourceSelection);
 

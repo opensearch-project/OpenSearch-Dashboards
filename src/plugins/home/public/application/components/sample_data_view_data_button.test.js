@@ -36,6 +36,11 @@ import { SampleDataViewDataButton } from './sample_data_view_data_button';
 jest.mock('../opensearch_dashboards_services', () => ({
   getServices: () => ({
     addBasePath: (path) => `root${path}`,
+    chrome: {
+      navGroup: {
+        getNavGroupEnabled: jest.fn().mockReturnValue(true),
+      },
+    },
   }),
 }));
 

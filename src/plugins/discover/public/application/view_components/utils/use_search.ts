@@ -5,14 +5,15 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, filter, pairwise } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
+import { useEffectOnce } from 'react-use';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { search } from '../../../../../data/public';
+import { search, UI_SETTINGS } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
@@ -33,6 +34,7 @@ import {
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
+import { trackQueryMetric } from '../../../ui_metric';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -85,8 +87,11 @@ export const useSearch = (services: DiscoverViewServices) => {
   const { pathname } = useLocation();
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
-  const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
+  const { savedSearch: savedSearchId, sort, interval, savedQuery } = useSelector(
+    (state) => state.discover
+  );
   const indexPattern = useIndexPattern(services);
+  const skipInitialFetch = useRef(false);
   const {
     data,
     filterManager,
@@ -111,31 +116,82 @@ export const useSearch = (services: DiscoverViewServices) => {
   };
 
   const shouldSearchOnPageLoad = useCallback(() => {
+    // Checks the searchOnpageLoadPreference for the current dataset if not specifed defaults to UI Settings
+    const { queryString } = data.query;
+    const { dataset } = queryString.getQuery();
+    const typeConfig = dataset ? queryString.getDatasetService().getType(dataset.type) : undefined;
+    const datasetPreference =
+      typeConfig?.meta?.searchOnLoad ?? uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING);
+
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
-      services.uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      datasetPreference ||
+      uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch?.id !== undefined ||
       timefilter.getRefreshInterval().pause === false
     );
-  }, [savedSearch, services.uiSettings, timefilter]);
+  }, [data.query, savedSearch, uiSettings, timefilter]);
 
   const startTime = Date.now();
   const data$ = useMemo(
     () =>
       new BehaviorSubject<SearchData>({
-        status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        status:
+          shouldSearchOnPageLoad() && !skipInitialFetch.current
+            ? ResultStatus.LOADING
+            : ResultStatus.UNINITIALIZED,
         queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad, startTime]
+    // we only want data$ observable to be created once, updates will be done through useEffect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
+
+  // re-initialize data$ when the selected dataset changes
+  useEffectOnce(() => {
+    const subscription = data.query.queryString
+      .getUpdates$()
+      .pipe(
+        pairwise(),
+        filter(([prev, curr]) => prev.dataset?.id !== curr.dataset?.id)
+      )
+      .subscribe(() => {
+        data$.next({
+          status:
+            shouldSearchOnPageLoad() && !skipInitialFetch.current
+              ? ResultStatus.LOADING
+              : ResultStatus.UNINITIALIZED,
+          queryStatus: { startTime },
+          rows: [],
+        });
+      });
+    return () => subscription.unsubscribe();
+  });
+
+  useEffect(() => {
+    data$.next({ ...data$.value, queryStatus: { startTime } });
+  }, [data$, startTime]);
+
+  useEffect(() => {
+    data$.next({
+      ...data$.value,
+      status:
+        shouldSearchOnPageLoad() && !skipInitialFetch.current
+          ? ResultStatus.LOADING
+          : ResultStatus.UNINITIALIZED,
+    });
+  }, [data$, shouldSearchOnPageLoad, skipInitialFetch]);
+
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
+    const currentTime = Date.now();
     let dataset = indexPattern;
     if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        queryStatus: { startTime: currentTime },
       });
       return;
     }
@@ -165,10 +221,7 @@ export const useSearch = (services: DiscoverViewServices) => {
 
     let elapsedMs;
     try {
-      // Only show loading indicator if we are fetching when the rows are empty
-      if (fetchStateRef.current.rows?.length === 0) {
-        data$.next({ status: ResultStatus.LOADING });
-      }
+      data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime: currentTime } });
 
       // Initialize inspect adapter for search source
       inspectorAdapters.requests.reset();
@@ -184,10 +237,24 @@ export const useSearch = (services: DiscoverViewServices) => {
         inspectorRequest.json(body);
       });
 
+      // Track the dataset type and language used
+      const query = searchSource.getField('query');
+      if (query && query.dataset?.type && query.language) {
+        trackQueryMetric(query);
+      }
+
+      const languageConfig = data.query.queryString
+        .getLanguageService()
+        .getLanguage(query!.language);
+
       // Execute the search
       const fetchResp = await searchSource.fetch({
         abortSignal: fetchStateRef.current.abortController.signal,
-        withLongNumeralsSupport: true,
+        withLongNumeralsSupport: await services.uiSettings.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS),
+        ...(languageConfig &&
+          languageConfig.fields?.formatter && {
+            formatter: languageConfig.fields.formatter,
+          }),
       });
 
       inspectorRequest
@@ -236,7 +303,7 @@ export const useSearch = (services: DiscoverViewServices) => {
           elapsedMs,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
@@ -252,15 +319,19 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
       let errorBody;
       try {
-        errorBody = JSON.parse(error.body.message);
+        errorBody = JSON.parse(error.body);
       } catch (e) {
-        errorBody = error.body.message;
+        if (error.body) {
+          errorBody = error.body;
+        } else {
+          errorBody = error;
+        }
       }
 
       data$.next({
         status: ResultStatus.ERROR,
         queryStatus: {
-          body: errorBody,
+          body: { error: errorBody },
           elapsedMs,
         },
       });
@@ -292,6 +363,11 @@ export const useSearch = (services: DiscoverViewServices) => {
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe(() => {
+      if (skipInitialFetch.current) {
+        skipInitialFetch.current = false; // Reset so future fetches will proceed normally
+        return; // Skip the first fetch
+      }
+
       (async () => {
         try {
           await fetch();
@@ -324,21 +400,40 @@ export const useSearch = (services: DiscoverViewServices) => {
   useEffect(() => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
-      setSavedSearch(savedSearchInstance);
 
-      // if saved search does not exist, do not atempt to sync filters and query from savedObject
-      if (!savedSearch) {
-        return;
+      const query =
+        savedSearchInstance.searchSource.getField('query') || data.query.queryString.getQuery();
+
+      const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
+      if (isEnhancementsEnabled && query.dataset) {
+        let pattern = await data.indexPatterns.get(
+          query.dataset.id,
+          query.dataset.type !== 'INDEX_PATTERN'
+        );
+        if (!pattern) {
+          await data.query.queryString.getDatasetService().cacheDataset(query.dataset, {
+            uiSettings: services.uiSettings,
+            savedObjects: services.savedObjects,
+            notifications: services.notifications,
+            http: services.http,
+            data: services.data,
+          });
+          pattern = await data.indexPatterns.get(
+            query.dataset.id,
+            query.dataset.type !== 'INDEX_PATTERN'
+          );
+          savedSearchInstance.searchSource.setField('index', pattern);
+        }
       }
 
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
-      const query =
-        savedSearchInstance.searchSource.getField('query') ||
-        data.query.queryString.getDefaultQuery();
-      const actualFilters = [];
 
-      if (filters !== undefined) {
+      let actualFilters: any[] = [];
+
+      if (savedQuery) {
+        actualFilters = data.query.filterManager.getFilters();
+      } else if (filters !== undefined) {
         const result = typeof filters === 'function' ? filters() : filters;
         if (result !== undefined) {
           actualFilters.push(...(Array.isArray(result) ? result : [result]));
@@ -347,6 +442,7 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       filterManager.setAppFilters(actualFilters);
       data.query.queryString.setQuery(query);
+      setSavedSearch(savedSearchInstance);
 
       if (savedSearchInstance?.id) {
         chrome.recentlyAccessed.add(
@@ -359,8 +455,6 @@ export const useSearch = (services: DiscoverViewServices) => {
         );
       }
     })();
-
-    return () => {};
     // This effect will only run when getSavedSearchById is called, which is
     // only called when the component is first mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps

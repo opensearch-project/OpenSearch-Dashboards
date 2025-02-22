@@ -4,22 +4,20 @@
  */
 
 import crypto from 'crypto';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   OpenSearchDashboardsRequest,
-  SharedGlobalConfig,
   Permissions,
   SavedObjectsClientContract,
   IUiSettingsClient,
   Principals,
+  WorkspacePermissionMode,
 } from '../../../core/server';
 import { updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
 import {
   CURRENT_USER_PLACEHOLDER,
-  WorkspacePermissionMode,
   WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+  OSD_ADMIN_WILDCARD_MATCH_ALL,
 } from '../common/constants';
 import { PermissionModeId } from '../../../core/server';
 
@@ -39,30 +37,17 @@ export const updateDashboardAdminStateForRequest = (
 ) => {
   // If the security plugin is not installed, login defaults to OSD Admin
   if (!groups.length && !users.length) {
-    updateWorkspaceState(request, { isDashboardAdmin: true });
-    return;
+    return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
-  // If groups/users are not configured or [], login defaults to OSD Admin
-  if (!configGroups.length && !configUsers.length) {
-    updateWorkspaceState(request, { isDashboardAdmin: true });
-    return;
+  // If user config contains wildcard characters '*', login defaults to OSD Admin
+  if (configUsers.includes(OSD_ADMIN_WILDCARD_MATCH_ALL)) {
+    return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
   const groupMatchAny = groups.some((group) => configGroups.includes(group));
   const userMatchAny = users.some((user) => configUsers.includes(user));
-  updateWorkspaceState(request, {
+  return updateWorkspaceState(request, {
     isDashboardAdmin: groupMatchAny || userMatchAny,
   });
-};
-
-export const getOSDAdminConfigFromYMLConfig = async (
-  globalConfig$: Observable<SharedGlobalConfig>
-) => {
-  const globalConfig = await globalConfig$.pipe(first()).toPromise();
-  const groupsResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.groups ||
-    []) as string[];
-  const usersResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.users || []) as string[];
-
-  return [groupsResult, usersResult];
 };
 
 export const transferCurrentUserInPermissions = (

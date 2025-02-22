@@ -7,8 +7,8 @@ import type {
   AppMountParameters,
   ApplicationStart,
   SavedObjectsStart,
+  WorkspacePermissionMode,
 } from '../../../../../core/public';
-import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { DataSourceConnection } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
@@ -39,19 +39,13 @@ export interface WorkspaceFormSubmitData {
   color?: string;
   permissionSettings?: WorkspacePermissionSetting[];
   selectedDataSourceConnections?: DataSourceConnection[];
+  shouldNavigate?: boolean;
 }
 
 export enum WorkspaceFormErrorCode {
   InvalidWorkspaceName,
   WorkspaceNameMissing,
   UseCaseMissing,
-  InvalidPermissionType,
-  InvalidPermissionModes,
-  PermissionUserIdMissing,
-  PermissionUserGroupMissing,
-  DuplicateUserIdPermissionSetting,
-  DuplicateUserGroupPermissionSetting,
-  PermissionSettingOwnerMissing,
   InvalidDataSource,
   DuplicateDataSource,
   InvalidColor,
@@ -78,7 +72,10 @@ export type WorkspaceFormErrors = {
 export interface WorkspaceFormProps {
   application: ApplicationStart;
   savedObjects: SavedObjectsStart;
-  onSubmit?: (formData: WorkspaceFormSubmitData) => void;
+  onSubmit?: (
+    formData: WorkspaceFormSubmitData,
+    refresh?: boolean
+  ) => Promise<{ result: boolean; success: true } | undefined>;
   defaultValues?: Partial<WorkspaceFormSubmitData>;
   operationType: WorkspaceOperationType;
   permissionEnabled?: boolean;
@@ -88,7 +85,10 @@ export interface WorkspaceFormProps {
 }
 
 export interface AvailableUseCaseItem
-  extends Pick<WorkspaceUseCase, 'id' | 'title' | 'features' | 'description' | 'systematic'> {
+  extends Pick<
+    WorkspaceUseCase,
+    'id' | 'title' | 'features' | 'description' | 'systematic' | 'icon'
+  > {
   disabled?: boolean;
 }
 

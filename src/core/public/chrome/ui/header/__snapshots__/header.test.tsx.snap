@@ -2540,6 +2540,17 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  navControlsPrimaryHeaderRight$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8005,7 +8016,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                   Object {
                                     "aria-label": "dashboard, type: opensearchDashboards",
                                     "data-test-subj": "collapsibleNavAppLink--recent",
-                                    "href": "http://localhost/test/",
+                                    "href": "http://localhost/",
                                     "label": "dashboard",
                                     "onClick": [Function],
                                     "title": "dashboard, type: opensearchDashboards",
@@ -8028,7 +8039,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                   aria-label="dashboard, type: opensearchDashboards"
                                   color="subdued"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/test/"
+                                  href="http://localhost/"
                                   key="title-0"
                                   label="dashboard"
                                   onClick={[Function]}
@@ -8044,7 +8055,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                       aria-label="dashboard, type: opensearchDashboards"
                                       className="euiListGroupItem__button"
                                       data-test-subj="collapsibleNavAppLink--recent"
-                                      href="http://localhost/test/"
+                                      href="http://localhost/"
                                       onClick={[Function]}
                                       rel="noreferrer"
                                       title="dashboard, type: opensearchDashboards"
@@ -9339,7 +9350,45 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -9612,6 +9661,55 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
       "hasError": false,
       "isStopped": false,
       "observers": Array [],
+      "thrownError": null,
+    }
+  }
+  navControlsPrimaryHeaderRight$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -10086,7 +10184,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
               className="newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl"
               data-test-subj="toggleNavButton"
               flush="both"
-              isSmallScreen={true}
               onClick={[Function]}
             >
               <EuiButtonEmpty
@@ -10114,18 +10211,14 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                           <span
                             class="euiHeaderSectionItemButton__content"
                           >
-                            <button
-                              class="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall"
-                              title="Menu"
-                              type="button"
+                            <span
+                              class="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall "
                             >
                               <span
-                                aria-hidden="true"
-                                class="euiButtonIcon__icon"
-                                color="inherit"
                                 data-euiicon-type="menu"
+                                title="Menu"
                               />
-                            </button>
+                            </span>
                           </span>
                         </span>
                       </span>
@@ -10136,7 +10229,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                 color="text"
                 data-test-subj="toggleNavButton"
                 flush="both"
-                isSmallScreen={true}
                 onClick={[Function]}
               >
                 <button
@@ -10147,7 +10239,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                   className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl"
                   data-test-subj="toggleNavButton"
                   disabled={false}
-                  isSmallScreen={true}
                   onClick={[Function]}
                   type="button"
                 >
@@ -10171,37 +10262,21 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                         <span
                           className="euiHeaderSectionItemButton__content"
                         >
-                          <EuiButtonIcon
-                            color="subdued"
-                            display="base"
-                            iconSize="s"
-                            iconType="menu"
-                            size="xs"
-                            title="Menu"
+                          <span
+                            className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall "
                           >
-                            <button
-                              className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall"
-                              disabled={false}
+                            <EuiIcon
+                              size="s"
                               title="Menu"
-                              type="button"
+                              type="menu"
                             >
-                              <EuiIcon
-                                aria-hidden="true"
-                                className="euiButtonIcon__icon"
-                                color="inherit"
+                              <span
+                                data-euiicon-type="menu"
                                 size="s"
-                                type="menu"
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className="euiButtonIcon__icon"
-                                  color="inherit"
-                                  data-euiicon-type="menu"
-                                  size="s"
-                                />
-                              </EuiIcon>
-                            </button>
-                          </EuiButtonIcon>
+                                title="Menu"
+                              />
+                            </EuiIcon>
+                          </span>
                         </span>
                       </span>
                     </span>
@@ -10261,6 +10336,55 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                           "patch": [MockFunction],
                           "post": [MockFunction],
                           "put": [MockFunction],
+                        }
+                      }
+                      loadingCount$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": 0,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                          ],
+                          "thrownError": null,
                         }
                       }
                       navLinks$={
@@ -10675,7 +10799,67 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
             >
               <div
                 className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--right"
-              />
+              >
+                <EuiHeaderSectionItem
+                  border="none"
+                >
+                  <div
+                    className="euiHeaderSectionItem"
+                  >
+                    <HeaderNavControls
+                      navControls$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": Array [],
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                          ],
+                          "thrownError": null,
+                        }
+                      }
+                    />
+                  </div>
+                </EuiHeaderSectionItem>
+              </div>
             </EuiHeaderSection>
           </div>
         </EuiHeader>
@@ -13470,6 +13654,17 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   navControlsLeftBottom$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
+  navControlsPrimaryHeaderRight$={
     BehaviorSubject {
       "_isScalar": false,
       "_value": Array [],
@@ -18621,7 +18816,45 @@ exports[`Header renders page header with application title 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -18894,6 +19127,55 @@ exports[`Header renders page header with application title 1`] = `
       "hasError": false,
       "isStopped": false,
       "observers": Array [],
+      "thrownError": null,
+    }
+  }
+  navControlsPrimaryHeaderRight$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -19245,22 +19527,18 @@ exports[`Header renders page header with application title 1`] = `
     <div
       id="globalHeaderBars"
     >
-      <div>
+      <div
+        style={
+          Object {
+            "paddingRight": 640,
+          }
+        }
+      >
         <EuiHeader
           className="primaryHeader newTopNavHeader"
-          style={
-            Object {
-              "paddingRight": 640,
-            }
-          }
         >
           <div
             className="euiHeader euiHeader--default euiHeader--static primaryHeader newTopNavHeader"
-            style={
-              Object {
-                "paddingRight": 640,
-              }
-            }
           >
             <EuiHeaderSectionItemButton
               aria-controls="mockId"
@@ -19368,7 +19646,6 @@ exports[`Header renders page header with application title 1`] = `
               className="newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl"
               data-test-subj="toggleNavButton"
               flush="both"
-              isSmallScreen={true}
               onClick={[Function]}
             >
               <EuiButtonEmpty
@@ -19396,18 +19673,14 @@ exports[`Header renders page header with application title 1`] = `
                           <span
                             class="euiHeaderSectionItemButton__content"
                           >
-                            <button
-                              class="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall"
-                              title="Menu"
-                              type="button"
+                            <span
+                              class="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall "
                             >
                               <span
-                                aria-hidden="true"
-                                class="euiButtonIcon__icon"
-                                color="inherit"
                                 data-euiicon-type="menu"
+                                title="Menu"
                               />
-                            </button>
+                            </span>
                           </span>
                         </span>
                       </span>
@@ -19418,7 +19691,6 @@ exports[`Header renders page header with application title 1`] = `
                 color="text"
                 data-test-subj="toggleNavButton"
                 flush="both"
-                isSmallScreen={true}
                 onClick={[Function]}
               >
                 <button
@@ -19429,7 +19701,6 @@ exports[`Header renders page header with application title 1`] = `
                   className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl"
                   data-test-subj="toggleNavButton"
                   disabled={false}
-                  isSmallScreen={true}
                   onClick={[Function]}
                   type="button"
                 >
@@ -19453,37 +19724,21 @@ exports[`Header renders page header with application title 1`] = `
                         <span
                           className="euiHeaderSectionItemButton__content"
                         >
-                          <EuiButtonIcon
-                            color="subdued"
-                            display="base"
-                            iconSize="s"
-                            iconType="menu"
-                            size="xs"
-                            title="Menu"
+                          <span
+                            className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall "
                           >
-                            <button
-                              className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall"
-                              disabled={false}
+                            <EuiIcon
+                              size="s"
                               title="Menu"
-                              type="button"
+                              type="menu"
                             >
-                              <EuiIcon
-                                aria-hidden="true"
-                                className="euiButtonIcon__icon"
-                                color="inherit"
+                              <span
+                                data-euiicon-type="menu"
                                 size="s"
-                                type="menu"
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className="euiButtonIcon__icon"
-                                  color="inherit"
-                                  data-euiicon-type="menu"
-                                  size="s"
-                                />
-                              </EuiIcon>
-                            </button>
-                          </EuiButtonIcon>
+                                title="Menu"
+                              />
+                            </EuiIcon>
+                          </span>
                         </span>
                       </span>
                     </span>
@@ -19542,6 +19797,55 @@ exports[`Header renders page header with application title 1`] = `
                           "patch": [MockFunction],
                           "post": [MockFunction],
                           "put": [MockFunction],
+                        }
+                      }
+                      loadingCount$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": 0,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                          ],
+                          "thrownError": null,
                         }
                       }
                       navLinks$={
@@ -20323,6 +20627,65 @@ exports[`Header renders page header with application title 1`] = `
                 </EuiSimplifiedBreadcrumbs>
               </EuiHeaderBreadcrumbs>
             </HeaderBreadcrumbs>
+            <EuiHeaderSectionItem
+              border="none"
+            >
+              <div
+                className="euiHeaderSectionItem"
+              >
+                <HeaderNavControls
+                  navControls$={
+                    BehaviorSubject {
+                      "_isScalar": false,
+                      "_value": Array [],
+                      "closed": false,
+                      "hasError": false,
+                      "isStopped": false,
+                      "observers": Array [
+                        Subscriber {
+                          "_parentOrParents": null,
+                          "_subscriptions": Array [
+                            SubjectSubscription {
+                              "_parentOrParents": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "subject": [Circular],
+                              "subscriber": [Circular],
+                            },
+                          ],
+                          "closed": false,
+                          "destination": SafeSubscriber {
+                            "_complete": undefined,
+                            "_context": [Circular],
+                            "_error": undefined,
+                            "_next": [Function],
+                            "_parentOrParents": null,
+                            "_parentSubscriber": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "destination": Object {
+                              "closed": true,
+                              "complete": [Function],
+                              "error": [Function],
+                              "next": [Function],
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": false,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": true,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                      ],
+                      "thrownError": null,
+                    }
+                  }
+                />
+              </div>
+            </EuiHeaderSectionItem>
           </div>
         </EuiHeader>
         <EuiHeader
@@ -20333,27 +20696,41 @@ exports[`Header renders page header with application title 1`] = `
           >
             <EuiFlexGroup
               className="secondaryPageHeaderFlexGroup"
-              gutterSize="s"
+              gutterSize="none"
               justifyContent="spaceBetween"
             >
               <div
-                className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive secondaryPageHeaderFlexGroup"
+                className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive secondaryPageHeaderFlexGroup"
               >
                 <EuiHeaderSection
+                  grow={true}
                   side="left"
+                  style={
+                    Object {
+                      "flexShrink": 1,
+                    }
+                  }
                 >
                   <div
-                    className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+                    className="euiHeaderSection euiHeaderSection--grow euiHeaderSection--left"
+                    style={
+                      Object {
+                        "flexShrink": 1,
+                      }
+                    }
                   >
                     <EuiFlexGroup
+                      className="leftSecondaryPageHeaderFlexGroup"
                       gutterSize="s"
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive leftSecondaryPageHeaderFlexGroup"
                       >
-                        <EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                        >
                           <div
-                            className="euiFlexItem"
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiHeaderSectionItem
                               border="none"
@@ -20368,7 +20745,7 @@ exports[`Header renders page header with application title 1`] = `
                                   size="l"
                                 >
                                   <h1
-                                    className="euiTitle euiTitle--large newTopNavHeaderTitle"
+                                    className="euiTitle euiTitle--large newTopNavHeaderTitle eui-textBreakWord"
                                   >
                                     testTitle
                                   </h1>
@@ -23320,6 +23697,17 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
     }
   }
   navControlsLeftBottom$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
+  navControlsPrimaryHeaderRight$={
     BehaviorSubject {
       "_isScalar": false,
       "_value": Array [],

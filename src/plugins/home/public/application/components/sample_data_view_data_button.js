@@ -38,6 +38,8 @@ import { createAppNavigationHandler } from './app_navigation_handler';
 
 export class SampleDataViewDataButton extends React.Component {
   addBasePath = getServices().addBasePath;
+  isDataSourceEnabled = !!getServices().dataSource;
+  chrome = getServices().chrome;
 
   state = {
     isPopoverOpen: false,
@@ -71,7 +73,7 @@ export class SampleDataViewDataButton extends React.Component {
     const dashboardPath = `/app/dashboards#/view/${this.props.overviewDashboard}`;
     const prefixedDashboardPath = this.addBasePath(dashboardPath);
 
-    if (this.props.appLinks.length === 0) {
+    if (this.props.appLinks.length === 0 && this.props.overviewDashboard !== '') {
       return (
         <EuiSmallButton
           onClick={createAppNavigationHandler(dashboardPath)}
@@ -83,26 +85,40 @@ export class SampleDataViewDataButton extends React.Component {
       );
     }
 
-    const additionalItems = this.props.appLinks.map(({ path, label, icon }) => {
-      return {
-        name: label,
-        icon: <EuiIcon type={icon} size="m" />,
-        href: this.addBasePath(path),
-        onClick: createAppNavigationHandler(path),
-      };
-    });
+    const additionalItems = this.props.appLinks.map(
+      ({ path, label, icon, newPath, appendDatasourceToPath }) => {
+        // switch paths if new nav is enabled
+        let appPath = this.chrome.navGroup.getNavGroupEnabled()
+          ? this.addBasePath(newPath)
+          : this.addBasePath(path);
+        // append datasourceId to app path
+        if (this.isDataSourceEnabled && appendDatasourceToPath) {
+          appPath = `${appPath}?datasourceId=${this.props.dataSourceId}`;
+        }
+        return {
+          name: label,
+          icon: <EuiIcon type={icon} size="m" />,
+          href: appPath,
+          onClick: createAppNavigationHandler(appPath),
+        };
+      }
+    );
     const panels = [
       {
         id: 0,
         items: [
-          {
-            name: i18n.translate('home.sampleDataSetCard.dashboardLinkLabel', {
-              defaultMessage: 'Dashboard',
-            }),
-            icon: <EuiIcon type="dashboardApp" size="m" />,
-            href: prefixedDashboardPath,
-            onClick: createAppNavigationHandler(dashboardPath),
-          },
+          ...(this.props.overviewDashboard !== ''
+            ? [
+                {
+                  name: i18n.translate('home.sampleDataSetCard.dashboardLinkLabel', {
+                    defaultMessage: 'Dashboard',
+                  }),
+                  icon: <EuiIcon type="dashboardApp" size="m" />,
+                  href: prefixedDashboardPath,
+                  onClick: createAppNavigationHandler(dashboardPath),
+                },
+              ]
+            : []),
           ...additionalItems,
         ],
       },

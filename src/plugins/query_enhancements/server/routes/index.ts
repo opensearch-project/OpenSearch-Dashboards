@@ -17,6 +17,15 @@ import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 
 /**
+ * Coerce status code to 503 for 500 errors from dependency services. Only use
+ * this function to handle errors throw by other services, and not from OSD.
+ */
+export const coerceStatusCode = (statusCode: number) => {
+  if (statusCode === 500) return 503;
+  return statusCode || 503;
+};
+
+/**
  * @experimental
  *
  * This method creates a function that will setup the routes for a search strategy by encapsulating the
@@ -71,6 +80,13 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
               format: schema.string(),
             }),
             aggConfig: schema.nullable(schema.object({}, { unknowns: 'allow' })),
+            pollQueryResultsParams: schema.maybe(
+              schema.object({
+                queryId: schema.maybe(schema.string()),
+                sessionId: schema.maybe(schema.string()),
+              })
+            ),
+            timeRange: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           }),
         },
       },
@@ -79,8 +95,14 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
           const queryRes: IDataFrameResponse = await searchStrategy.search(context, req as any, {});
           return res.ok({ body: { ...queryRes } });
         } catch (err) {
+          let error;
+          try {
+            error = JSON.parse(err.message);
+          } catch (e) {
+            error = err;
+          }
           return res.custom({
-            statusCode: err.name,
+            statusCode: coerceStatusCode(error.status || err.status),
             body: err.message,
           });
         }

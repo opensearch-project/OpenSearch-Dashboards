@@ -1,0 +1,65 @@
+/* stylelint-disable */
+.workspace-initial-use-case-card__observability {
+  background-color: hsla(30deg, 24%, 96%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 48%, hsla(64deg, 81%, 77%, 40%) 0%, transparent 82%),
+    radial-gradient(circle at 100% 54%, hsla(5deg, 77%, 74%, 35%) 3%, transparent 73%),
+    radial-gradient(circle at 40% 0%, hsla(315deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 60% 0%, hsla(256deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 80% 0%, hsla(191deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 100% 0%, hsla(152deg, 77%, 74%, 0%) 3%, transparent 40%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.72%, transparent 72.48%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+}
+
+.workspace-initial-use-case-card__security-analytics {
+  background-color: hsla(30, 28%, 97%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(5deg, 77%, 74%, 35%) 0%, transparent 82%),
+    radial-gradient(circle at 99% 2%, hsla(315deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 60% 0%, hsla(256deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 80% 0%, hsla(191deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 100% 0%, hsla(152deg, 77%, 74%, 0%) 3%, transparent 40%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.72%, transparent 72.48%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+}
+
+.workspace-initial-use-case-card__essentials {
+  background-color: hsla(30deg, 28%, 97%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(5deg, 77%, 74%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(315deg, 77%, 74%, 0%) 0%, transparent 80%),
+    radial-gradient(circle at 1% 2%, hsla(256deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 98% 2%, hsla(191deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 100% 0%, hsla(152deg, 77%, 74%, 0%) 3%, transparent 40%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.72%, transparent 72.48%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+}
+
+.workspace-initial-use-case-card__search {
+  background-color: hsla(30deg, 28%, 97%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(5deg, 77%, 74%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(315deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 98% 3%, hsla(256deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 80% 0%, hsla(191deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 100% 0%, hsla(152deg, 77%, 74%, 0%) 3%, transparent 40%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.72%, transparent 72.48%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+}
+
+.workspace-initial-use-case-card__all {
+  background-color: hsla(30deg, 28%, 97%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(5deg, 77%, 74%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(315deg, 77%, 74%, 0%) 0%, transparent 80%),
+    radial-gradient(circle at 1% 2%, hsla(256deg, 77%, 74%, 0%) 0%, transparent 80%),
+    radial-gradient(circle at 1% 2%, hsla(191deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 99% 2%, hsla(152deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.7%, transparent 72.5%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+}

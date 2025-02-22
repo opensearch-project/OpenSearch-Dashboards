@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
+import { QueryStatus, ResultStatus } from '../../../../query';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { createEditor, SingleLineInput } from '../shared';
 
@@ -20,6 +21,7 @@ export interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
   };
   headerRef?: React.RefObject<HTMLDivElement>;
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+  queryStatus?: QueryStatus;
 }
 
 export const DefaultInput: React.FC<DefaultInputProps> = ({
@@ -30,10 +32,11 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   editorDidMount,
   headerRef,
   provideCompletionItems,
+  queryStatus,
 }) => {
   return (
-    <div className="defaultEditor">
-      <div ref={headerRef} className="defaultEditor__header" />
+    <div className="defaultEditor" data-test-subj="osdQueryEditor__multiLine">
+      <div ref={headerRef} className="defaultEditor__header" data-test-subj="defaultEditorHeader" />
       <CodeEditor
         height={100}
         languageId={languageId}
@@ -43,14 +46,15 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         options={{
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
-          fontSize: 14,
-          fontFamily: 'Roboto Mono',
+          fontSize: 12,
+          lineHeight: 20,
+          fontFamily: 'var(--font-code)',
           lineNumbers: 'on',
           folding: true,
           wordWrap: 'on',
           wrappingIndent: 'same',
           lineDecorationsWidth: 0,
-          lineNumbersMinChars: 2,
+          lineNumbersMinChars: 1,
           wordBasedSuggestions: false,
         }}
         suggestionProvider={{
@@ -68,17 +72,38 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         }}
         triggerSuggestOnFocus={true}
       />
-      <div className="defaultEditor__footer">
+      <div className="defaultEditor__progress" data-test-subj="defaultEditorProgress">
+        {queryStatus?.status === ResultStatus.LOADING && (
+          <EuiProgress size="xs" color="accent" position="absolute" />
+        )}
+      </div>
+      <div className="defaultEditor__footer" data-test-subj="defaultEditorFooter">
         {footerItems && (
-          <EuiFlexGroup direction="row" alignItems="center">
-            {footerItems.start?.map((item) => (
-              <EuiFlexItem grow={false} className="defaultEditor__footerItem">
+          <EuiFlexGroup
+            direction="row"
+            alignItems="center"
+            gutterSize="none"
+            className="defaultEditor__footerRow"
+            data-test-subj="defaultEditorFooterRow"
+          >
+            {footerItems.start?.map((item, idx) => (
+              <EuiFlexItem
+                key={`defaultEditor__footerItem-start-${idx}`}
+                grow={false}
+                className="defaultEditor__footerItem"
+                data-test-subj="defaultEditorFooterStartItem"
+              >
                 {item}
               </EuiFlexItem>
             ))}
             <EuiFlexItem grow />
-            {footerItems.end?.map((item) => (
-              <EuiFlexItem grow={false} className="defaultEditor__footerItem">
+            {footerItems.end?.map((item, idx) => (
+              <EuiFlexItem
+                key={`defaultEditor__footerItem-end-${idx}`}
+                grow={false}
+                className="defaultEditor__footerItem"
+                data-test-subj="defaultEditorFooterEndItem"
+              >
                 {item}
               </EuiFlexItem>
             ))}

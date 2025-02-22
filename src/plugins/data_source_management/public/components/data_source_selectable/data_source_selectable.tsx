@@ -52,6 +52,7 @@ interface DataSourceSelectableProps {
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   uiSettings?: IUiSettingsClient;
+  onManageDataSource: () => void;
 }
 
 interface DataSourceSelectableState extends DataSourceBaseState {
@@ -120,8 +121,9 @@ export class DataSourceSelectable extends React.Component<
     const dsOption = dataSourceOptions.find((ds) => ds.id === id);
     if (!dsOption) {
       this.props.notifications.addWarning(
-        i18n.translate('dataSource.fetchDataSourceError', {
-          defaultMessage: `Data source with id: ${id} is not available`,
+        i18n.translate('dataSourcesManagement.error.fetchDataSourceById', {
+          defaultMessage: 'Data source with ID "{id}" is not available',
+          values: { id },
         })
       );
       this.setState({
@@ -292,6 +294,7 @@ export class DataSourceSelectable extends React.Component<
         data-test-subj={'dataSourceSelectableContextMenuPopover'}
       >
         <DataSourceDropDownHeader
+          onManageDataSource={this.props.onManageDataSource}
           totalDataSourceCount={this.state.dataSourceOptions.length}
           application={this.props.application}
         />

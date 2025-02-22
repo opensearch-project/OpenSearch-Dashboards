@@ -7,25 +7,25 @@ exports[`WorkspaceList should render title and table normally 1`] = `
   >
     Organize collaborative projects with use-case-specific workspaces.
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
       role="main"
     >
       <div>
         <div
-          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
         >
           <div
             class="euiFlexItem euiSearchBar__searchHolder"
           >
             <div
-              class="euiFormControlLayout euiFormControlLayout--fullWidth"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
             >
               <div
                 class="euiFormControlLayout__childrenWrapper"
               >
                 <input
                   aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                  class="euiFieldSearch euiFieldSearch--fullWidth"
+                  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                   placeholder="Search..."
                   type="search"
                   value=""
@@ -60,7 +60,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiFilterButton euiFilterButton--hasIcon"
                     type="button"
                   >
                     <span
@@ -90,7 +90,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
           </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--l"
+          class="euiSpacer euiSpacer--m"
         />
         <div
           class="euiBasicTable"
@@ -163,7 +163,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
               </div>
             </div>
             <table
-              class="euiTable euiTable--compressed euiTable--responsive"
+              class="euiTable euiTable--responsive"
               id="__table_generated-id"
               tabindex="-1"
             >
@@ -248,7 +248,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     data-test-subj="tableHeaderCell_description_2"
                     role="columnheader"
                     scope="col"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -263,28 +263,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </th>
                   <th
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_permissions_3"
+                    data-test-subj="tableHeaderCell_lastUpdatedTime_3"
                     role="columnheader"
                     scope="col"
-                    style="width: 15%;"
-                  >
-                    <span
-                      class="euiTableCellContent"
-                    >
-                      <span
-                        class="euiTableCellContent__text"
-                        title="Owners"
-                      >
-                        Owners
-                      </span>
-                    </span>
-                  </th>
-                  <th
-                    class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_lastUpdatedTime_4"
-                    role="columnheader"
-                    scope="col"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -299,10 +281,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </th>
                   <th
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_dataSources_5"
+                    data-test-subj="tableHeaderCell_dataSources_4"
                     role="columnheader"
                     scope="col"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -375,9 +357,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id1/workspace_detail"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -392,7 +375,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -411,13 +394,13 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       <span
                         class="euiTableCellContent__text"
                       >
-                        Analytics (All)
+                        Analytics
                       </span>
                     </div>
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -431,7 +414,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -441,53 +424,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Owners
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    >
-                      admin
-                       
-                      <span
-                        class="euiBadge euiBadge--hollow euiBadge--iconRight"
-                      >
-                        <span
-                          class="euiBadge__content"
-                        >
-                          <button
-                            aria-label="Open workspace detail"
-                            class="euiBadge__childButton"
-                            data-test-subj="workspaceList-more-collaborators-badge"
-                            title="+ 1 more"
-                          >
-                            + 
-                            1
-                             more
-                          </button>
-                          <button
-                            aria-label="Open workspace detail"
-                            class="euiBadge__iconButton"
-                            title="Open workspace detail"
-                            type="button"
-                          >
-                            <span
-                              class="euiBadge__icon"
-                              color="inherit"
-                              data-euiicon-type="popout"
-                            />
-                          </button>
-                        </span>
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -502,7 +439,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -593,9 +530,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id2/discover"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -610,7 +548,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -635,7 +573,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -649,7 +587,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -659,20 +597,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Owners
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    />
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -687,7 +612,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -778,9 +703,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id3/discover"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -795,7 +721,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -820,7 +746,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -834,28 +760,17 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
-                        />
+                        >
+                          —
+                        </div>
                       </span>
                     </div>
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Owners
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    />
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -870,7 +785,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -957,7 +872,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         >
                           Rows per page
                           : 
-                          10
+                          20
                         </span>
                       </span>
                     </button>

@@ -20,7 +20,7 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
 
   public euiColumn = {
     field: 'referenceId',
-    name: i18n.translate('dataSource.management.dataSourceColumn', {
+    name: i18n.translate('dataSourcesManagement.dataSourceColumn', {
       defaultMessage: 'Data Source Connection',
     }),
     render: (referenceId: string) => {
@@ -44,6 +44,7 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
               path: `opensearch-dashboards/${DSM_APP_ID}/${encodeURIComponent(id)}`,
             })
           }
+          style={this.useUpdatedUX ? { fontWeight: 'normal' } : {}}
         >
           {title}
         </EuiLink>
@@ -51,7 +52,10 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
     },
   };
 
-  constructor(private readonly savedObjectPromise: Promise<SavedObjectsStart>) {}
+  constructor(
+    private readonly savedObjectPromise: Promise<SavedObjectsStart>,
+    private readonly useUpdatedUX: boolean
+  ) {}
 
   public loadData = async () => {
     const savedObject = await this.savedObjectPromise;

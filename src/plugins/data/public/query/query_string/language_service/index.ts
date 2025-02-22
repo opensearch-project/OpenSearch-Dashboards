@@ -5,4 +5,11 @@
 
 export * from './types';
 export { LanguageServiceContract, LanguageService } from './language_service';
-export { RecentQueriesTable, QueryControls, QueryResult, QueryStatus } from './lib';
+export {
+  RecentQueriesTable,
+  QueryControls,
+  QueryResult,
+  QueryStatus,
+  ResultStatus,
+  LanguageReference,
+} from './lib';

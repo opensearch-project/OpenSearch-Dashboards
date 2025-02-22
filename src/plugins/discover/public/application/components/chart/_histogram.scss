@@ -11,10 +11,11 @@
 }
 
 .dscChart__wrapper {
-  border-top: 1px solid $euiColorLightShade;
   border-bottom: 1px solid $euiColorLightShade;
   padding: 8px;
   gap: 8px;
+  flex-grow: 0;
+  flex-wrap: nowrap;
 
   .dscChart__chartheader {
     align-items: center;

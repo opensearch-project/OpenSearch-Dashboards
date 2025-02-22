@@ -39,6 +39,7 @@ import {
   EuiPagination,
   EuiText,
   EuiSpacer,
+  EuiListGroupItem,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -46,33 +47,50 @@ import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
+import {
+  toMountPoint,
+  useOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
+import { SaveQueryFlyout } from '../saved_query_flyouts/save_query_flyout';
+import {
+  OpenSavedQueryFlyout,
+  OpenSavedQueryFlyoutProps,
+} from '../saved_query_flyouts/open_saved_query_flyout';
+import { SavedQueryMeta } from '../saved_query_form';
 
 const perPage = 50;
 interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
-  onSave: () => void;
-  onSaveAsNew: () => void;
-  onLoad: (savedQuery: SavedQuery) => void;
+  useNewSavedQueryUI?: boolean;
+  onInitiateSave: () => void;
+  onInitiateSaveAsNew: () => void;
+  onLoad: OpenSavedQueryFlyoutProps['onQueryOpen'];
   onClearSavedQuery: () => void;
   closeMenuPopover: () => void;
+  saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
 }
 
 export function SavedQueryManagementComponent({
   showSaveQuery,
   loadedSavedQuery,
-  onSave,
-  onSaveAsNew,
+  onInitiateSave,
+  onInitiateSaveAsNew,
   onLoad,
   onClearSavedQuery,
   savedQueryService,
   closeMenuPopover,
+  useNewSavedQueryUI,
+  saveQuery,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
+  const {
+    services: { overlays, notifications },
+  } = useOpenSearchDashboards();
 
   useEffect(() => {
     const fetchCountAndSavedQueries = async () => {
@@ -102,13 +120,13 @@ export function SavedQueryManagementComponent({
 
   const handleSave = useCallback(() => {
     handleClosePopover();
-    onSave();
-  }, [handleClosePopover, onSave]);
+    onInitiateSave();
+  }, [handleClosePopover, onInitiateSave]);
 
   const handleSaveAsNew = useCallback(() => {
     handleClosePopover();
-    onSaveAsNew();
-  }, [handleClosePopover, onSaveAsNew]);
+    onInitiateSaveAsNew();
+  }, [handleClosePopover, onInitiateSaveAsNew]);
 
   const handleSelect = useCallback(
     (savedQueryToSelect) => {
@@ -134,10 +152,21 @@ export function SavedQueryManagementComponent({
         setActivePage(0);
       };
 
-      onDeleteSavedQuery(savedQueryToDelete);
-      handleClosePopover();
+      const deletePromise = onDeleteSavedQuery(savedQueryToDelete);
+      if (!useNewSavedQueryUI) {
+        handleClosePopover();
+      }
+
+      return deletePromise;
     },
-    [handleClosePopover, loadedSavedQuery, onClearSavedQuery, savedQueries, savedQueryService]
+    [
+      handleClosePopover,
+      loadedSavedQuery,
+      onClearSavedQuery,
+      savedQueries,
+      savedQueryService,
+      useNewSavedQueryUI,
+    ]
   );
 
   const savedQueryDescriptionText = i18n.translate(
@@ -186,7 +215,58 @@ export function SavedQueryManagementComponent({
     ));
   };
 
-  return (
+  return useNewSavedQueryUI ? (
+    <div
+      className="osdSavedQueryManagement__popover"
+      data-test-subj="saved-query-management-popover"
+    >
+      <EuiListGroup>
+        <EuiListGroupItem
+          label={i18n.translate('data.saved_query_management.save_query_item_label', {
+            defaultMessage: 'Save query',
+          })}
+          data-test-subj="saved-query-management-save-button"
+          iconType="save"
+          onClick={() => {
+            closeMenuPopover();
+            const saveQueryFlyout = overlays?.openFlyout(
+              toMountPoint(
+                <SaveQueryFlyout
+                  savedQueryService={savedQueryService}
+                  onClose={() => saveQueryFlyout?.close().then()}
+                  onSave={saveQuery}
+                  showFilterOption={true}
+                  showTimeFilterOption={true}
+                  savedQuery={loadedSavedQuery?.attributes}
+                />
+              )
+            );
+          }}
+        />
+        <EuiListGroupItem
+          label={i18n.translate('data.saved_query_management.open_query_item_label', {
+            defaultMessage: 'Open query',
+          })}
+          data-test-subj="saved-query-management-open-button"
+          iconType="folderOpen"
+          onClick={() => {
+            closeMenuPopover();
+            const openSavedQueryFlyout = overlays?.openFlyout(
+              toMountPoint(
+                <OpenSavedQueryFlyout
+                  savedQueryService={savedQueryService}
+                  notifications={notifications}
+                  onClose={() => openSavedQueryFlyout?.close().then()}
+                  onQueryOpen={onLoad}
+                  handleQueryDelete={handleDelete}
+                />
+              )
+            );
+          }}
+        />
+      </EuiListGroup>
+    </div>
+  ) : (
     <div
       className="osdSavedQueryManagement__popover"
       data-test-subj="saved-query-management-popover"
@@ -196,13 +276,19 @@ export function SavedQueryManagementComponent({
       </EuiPopoverTitle>
       {savedQueries.length > 0 ? (
         <Fragment>
-          <EuiText size="s" color="subdued" className="osdSavedQueryManagement__text">
+          <EuiText
+            size="s"
+            color="subdued"
+            className="osdSavedQueryManagement__text"
+            data-test-subj="osdSavedQueryManagementText"
+          >
             <p>{savedQueryDescriptionText}</p>
           </EuiText>
           <div className="osdSavedQueryManagement__listWrapper">
             <EuiListGroup
               flush={true}
               className="osdSavedQueryManagement__list"
+              data-test-subj="osdSavedQueryManagementList"
               aria-labelledby={'savedQueryManagementPopoverTitle'}
             >
               {savedQueryRows()}
@@ -210,6 +296,7 @@ export function SavedQueryManagementComponent({
           </div>
           <EuiPagination
             className="osdSavedQueryManagement__pagination"
+            data-test-subj="osdSavedQueryManagementPagination"
             pageCount={Math.ceil(count / perPage)}
             activePage={activePage}
             onPageClick={goToPage}
@@ -217,7 +304,12 @@ export function SavedQueryManagementComponent({
         </Fragment>
       ) : (
         <Fragment>
-          <EuiText size="s" color="subdued" className="osdSavedQueryManagement__text">
+          <EuiText
+            size="s"
+            color="subdued"
+            className="osdSavedQueryManagement__text"
+            data-test-subj="osdSavedQueryManagementNoSavedQueryText"
+          >
             <p>{noSavedQueriesDescriptionText}</p>
           </EuiText>
           <EuiSpacer size="s" />

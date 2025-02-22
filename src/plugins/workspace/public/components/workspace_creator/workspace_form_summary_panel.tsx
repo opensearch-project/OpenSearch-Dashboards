@@ -21,8 +21,7 @@ import { WorkspaceFormDataState } from '../workspace_form';
 import { WorkspaceUseCase } from '../../types';
 import { RightSidebarScrollField, RIGHT_SIDEBAR_SCROLL_KEY } from './utils';
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
-import { WorkspacePermissionMode } from '../../../common/constants';
-import { getPermissionModeName } from '../workspace_form/utils';
+import { privacyType2TextMap, WorkspacePrivacyItemType } from '../workspace_form/constants';
 
 const SCROLL_FIELDS = {
   [RightSidebarScrollField.Name]: i18n.translate('workspace.form.summary.panel.name.title', {
@@ -52,12 +51,13 @@ const SCROLL_FIELDS = {
       defaultMessage: 'Collaborators',
     }
   ),
+  [RightSidebarScrollField.PrivacyType]: i18n.translate(
+    'workspace.form.summary.panel.privacyType.title',
+    {
+      defaultMessage: 'Workspace privacy',
+    }
+  ),
 };
-
-interface UserAndGroups {
-  key: string;
-  modes: WorkspacePermissionMode[] | undefined;
-}
 
 export const FieldSummaryItem = ({
   field,
@@ -138,55 +138,28 @@ export const ExpandableTextList = ({
   );
 };
 
-const mapUserAndGroupToList = (userAndGroups: UserAndGroups[]) => {
-  return userAndGroups.map((userAndGroup) => {
-    return (
-      <EuiFlexGroup
-        key={userAndGroup.key}
-        gutterSize="none"
-        justifyContent="spaceBetween"
-        alignItems="center"
-      >
-        <EuiFlexItem grow={false}>{userAndGroup.key}</EuiFlexItem>
-        {userAndGroup.modes && (
-          <EuiFlexItem grow={false}>
-            <em>{getPermissionModeName(userAndGroup.modes)}</em>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  });
-};
-
 interface WorkspaceFormSummaryPanelProps {
-  formData: WorkspaceFormDataState;
+  formData: Omit<WorkspaceFormDataState, 'permissionSettings'>;
   availableUseCases: WorkspaceUseCase[];
-  permissionEnabled?: boolean;
   formId: string;
   application: ApplicationStart;
   isSubmitting: boolean;
+  dataSourceEnabled: boolean;
+  privacyType: WorkspacePrivacyItemType;
 }
 
 export const WorkspaceFormSummaryPanel = ({
   formData,
   availableUseCases,
-  permissionEnabled,
   formId,
   application,
   isSubmitting,
+  dataSourceEnabled,
+  privacyType,
 }: WorkspaceFormSummaryPanelProps) => {
   const useCase = availableUseCases.find((item) => item.id === formData.useCase);
-  const userAndGroups: UserAndGroups[] = formData.permissionSettings.flatMap((setting) => {
-    const modesExist = 'modes' in setting && !!setting.modes;
-    if ('userId' in setting && !!setting.userId && modesExist) {
-      return [{ key: setting.userId, modes: setting.modes }];
-    }
-    if ('group' in setting && !!setting.group && modesExist) {
-      return [{ key: setting.group, modes: setting.modes }];
-    }
-    return [];
-  });
   const useCaseIcon = useCase?.icon || 'logoOpenSearch';
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   return (
     <EuiCard
@@ -213,33 +186,32 @@ export const WorkspaceFormSummaryPanel = ({
       <FieldSummaryItem field={RightSidebarScrollField.UseCase}>
         {useCase && <EuiText size="xs">{useCase.title}</EuiText>}
       </FieldSummaryItem>
-      <FieldSummaryItem field={RightSidebarScrollField.DataSource}>
-        {formData.selectedDataSourceConnections.length > 0 && (
-          <ExpandableTextList
-            items={formData.selectedDataSourceConnections.map((connection) => (
-              <ul key={connection.id} style={{ marginBottom: 0 }}>
-                <li>{connection.name}</li>
-              </ul>
-            ))}
-            collapseDisplayCount={3}
-          />
-        )}
-      </FieldSummaryItem>
-      {permissionEnabled && (
-        <FieldSummaryItem bottomGap={false} field={RightSidebarScrollField.Collaborators}>
-          {userAndGroups.length > 0 && (
+      {dataSourceEnabled && (
+        <FieldSummaryItem field={RightSidebarScrollField.DataSource}>
+          {formData.selectedDataSourceConnections.length > 0 && (
             <ExpandableTextList
-              items={mapUserAndGroupToList(userAndGroups)}
-              collapseDisplayCount={2}
+              items={formData.selectedDataSourceConnections.map((connection) => (
+                <ul key={connection.id} style={{ marginBottom: 0 }}>
+                  <li>{connection.name}</li>
+                </ul>
+              ))}
+              collapseDisplayCount={3}
             />
           )}
         </FieldSummaryItem>
       )}
+      {isPermissionEnabled && (
+        <FieldSummaryItem field={RightSidebarScrollField.PrivacyType}>
+          {privacyType && <EuiText size="xs">{privacyType2TextMap[privacyType].title}</EuiText>}
+        </FieldSummaryItem>
+      )}
+
       <WorkspaceCreateActionPanel
         formData={formData}
         formId={formId}
         application={application}
         isSubmitting={isSubmitting}
+        dataSourceEnabled={dataSourceEnabled}
       />
     </EuiCard>
   );

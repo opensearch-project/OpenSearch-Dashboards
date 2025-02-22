@@ -41,6 +41,9 @@ const createSetupContractMock = () => {
       getNavGroupEnabled: jest.fn(),
       registerNavGroupUpdater: jest.fn(),
     },
+    globalSearch: {
+      registerSearchCommand: jest.fn(),
+    },
   };
 };
 
@@ -72,16 +75,21 @@ const createStartContractMock = () => {
       registerCenter: jest.fn(),
       registerRight: jest.fn(),
       registerLeftBottom: jest.fn(),
+      registerPrimaryHeaderRight: jest.fn(),
       getLeft$: jest.fn(),
       getCenter$: jest.fn(),
       getRight$: jest.fn(),
       getLeftBottom$: jest.fn(),
+      getPrimaryHeaderRight$: jest.fn(),
     },
     navGroup: {
       getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
       getNavGroupEnabled: jest.fn(),
       getCurrentNavGroup$: jest.fn(() => new BehaviorSubject(undefined)),
       setCurrentNavGroup: jest.fn(),
+    },
+    globalSearch: {
+      getAllSearchCommands: jest.fn(() => []),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),

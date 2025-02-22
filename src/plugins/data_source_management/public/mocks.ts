@@ -30,6 +30,7 @@ import {
   SkippingIndexRowType,
 } from '../framework/types';
 import { AvailableIntegrationsTableProps } from './components/direct_query_data_sources_components/integrations/available_integration_table';
+import { navigationPluginMock } from '../../navigation/public/mocks';
 
 /* Mock Types */
 
@@ -54,6 +55,7 @@ const createDataSourceManagementContext = () => {
     uiSettings,
     notifications,
     overlays,
+    workspaces,
   } = coreMock.createStart();
   const { http } = coreMock.createSetup();
 
@@ -64,10 +66,12 @@ const createDataSourceManagementContext = () => {
     uiSettings,
     notifications,
     overlays,
+    workspaces,
     http,
     docLinks,
     setBreadcrumbs: () => {},
     authenticationMethodRegistry,
+    navigation: navigationPluginMock.createStartContract(),
   };
 };
 
@@ -282,6 +286,33 @@ export const getMappedDataSources = [
     title: 'beta-test',
     connectionType: 'OpenSearchConnection',
     sort: 'beta-test',
+  },
+];
+
+export const getMappedDataSourcesWithEmptyDescription = [
+  {
+    id: 'test-null',
+    type: 'OpenSearch',
+    title: 'test-null',
+    connectionType: 'OpenSearchConnection',
+    description: null,
+    relatedConnections: directQueryConnections,
+  },
+  {
+    id: 'test-undefined',
+    type: 'OpenSearch',
+    title: 'test-undefined',
+    connectionType: 'OpenSearchConnection',
+    description: undefined,
+    relatedConnections: directQueryConnections,
+  },
+  {
+    id: 'test-no-description',
+    type: 'OpenSearch',
+    title: 'test-no-description',
+    connectionType: 'OpenSearchConnection',
+    // no description
+    relatedConnections: directQueryConnections,
   },
 ];
 

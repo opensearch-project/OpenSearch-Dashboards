@@ -13,17 +13,21 @@ import {
   EuiConfirmModal,
   EuiPageBody,
   EuiSpacer,
-  EuiTableFieldDataColumnType,
   EuiSearchBarProps,
   EuiLoadingSpinner,
   EuiText,
   LEFT_ALIGNMENT,
   EuiButtonEmpty,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useObservable } from 'react-use';
+import { of } from 'rxjs';
+import { TopNavControlComponentData } from 'src/plugins/navigation/public';
+
 import {
   DataSourceConnectionType,
   DataSourceManagementContext,
@@ -35,13 +39,18 @@ import {
   fetchDataSourceConnections,
   getDataSources,
   deleteMultipleDataSources,
-  getDefaultDataSourceId,
   setFirstDataSourceAsDefault,
   getHideLocalCluster,
+  getDataConnections,
 } from '../../utils';
 import { LoadingMask } from '../../loading_mask';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../../../constants';
+import { DatasourceTypeToDisplayName, DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../constants';
+import {
+  DataConnectionType,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+} from '../../../../../data_source/common';
 
 interface DirectQueryDataConnectionsProps extends RouteComponentProps {
   featureFlagStatus: boolean;
@@ -51,9 +60,30 @@ export const ManageDirectQueryDataConnectionsTable = ({
   featureFlagStatus,
   history,
 }: DirectQueryDataConnectionsProps) => {
-  const { savedObjects, http, notifications, uiSettings } = useOpenSearchDashboards<
-    DataSourceManagementContext
-  >().services;
+  const {
+    application,
+    savedObjects,
+    http,
+    notifications,
+    uiSettings,
+    navigation,
+    workspaces,
+    overlays,
+  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { HeaderControl } = navigation.ui;
+  const workspaceClient = useObservable(workspaces.client$);
+  const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
+  const DataSourceAssociation = workspaceClient?.ui().DataSourceAssociation;
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+  const defaultDataSourceIdRef = useRef(
+    uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)
+  );
+  const defaultDataSourceId = useObservable(defaultDataSourceIdRef.current);
+  const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
+  const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
+  const canAssociateDataSource =
+    !!currentWorkspace && !currentWorkspace.readonly && isDashboardAdmin;
+
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
   const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
   const [integrationsFlyout, setIntegrationsFlyout] = useState<React.JSX.Element | null>(null);
@@ -83,7 +113,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
   const setDefaultDataSource = async () => {
     try {
       for (const dataSource of selectedDataSources) {
-        if (getDefaultDataSourceId(uiSettings) === dataSource.id) {
+        if (defaultDataSourceId === dataSource.id) {
           await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
           break;
         }
@@ -99,6 +129,87 @@ export const ManageDirectQueryDataConnectionsTable = ({
       setIsDeleting(false);
     }
   };
+
+  const fetchDataSources = useCallback(() => {
+    setIsLoading(true);
+
+    const fetchOpenSearchConnections = async (): Promise<DataSourceTableItem[]> => {
+      const fetchConnections = featureFlagStatus
+        ? getDataSources(savedObjects.client)
+        : http.get(`${DATACONNECTIONS_BASE}`);
+
+      return fetchConnections
+        .then((response) => {
+          return featureFlagStatus
+            ? fetchDataSourceConnections(
+                response,
+                http,
+                notifications,
+                true,
+                getHideLocalCluster().enabled
+              )
+            : response.map((dataConnection: DirectQueryDatasourceDetails) => ({
+                id: dataConnection.name,
+                title: dataConnection.name,
+                type:
+                  {
+                    S3GLUE: DatasourceTypeToDisplayName.S3GLUE,
+                    PROMETHEUS: DatasourceTypeToDisplayName.PROMETHEUS,
+                  }[dataConnection.connector] || dataConnection.connector,
+                connectionType: dataConnection.connector,
+                description: dataConnection.description,
+              }));
+        })
+        .then((finalData) => {
+          return featureFlagStatus
+            ? finalData.filter((item) => item.relatedConnections?.length > 0)
+            : finalData;
+        })
+        .catch(() => {
+          notifications.toasts.addDanger(
+            i18n.translate('dataSourcesManagement.directQueryTable.fetchDataSources', {
+              defaultMessage: 'Could not fetch data sources',
+            })
+          );
+          return [];
+        });
+    };
+
+    const fetchDirectQueryConnections = async (): Promise<DataSourceTableItem[]> => {
+      try {
+        const dataConnectionSavedObjects = await getDataConnections(savedObjects.client);
+        return dataConnectionSavedObjects.map((obj) => ({
+          id: obj.id,
+          title: obj.attributes.connectionId,
+          type: obj.attributes.type,
+          // This represents this is data connection type saved object not data source type saved object
+          objectType: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+        }));
+      } catch (error: any) {
+        return [];
+      }
+    };
+
+    const fetchAllData = async () => {
+      try {
+        const [openSearchConnections, directQueryConnections] = await Promise.all([
+          fetchOpenSearchConnections(),
+          fetchDirectQueryConnections(),
+        ]);
+        setData([...openSearchConnections, ...directQueryConnections]);
+      } catch (error) {
+        notifications.toasts.addDanger(
+          i18n.translate('dataSourcesManagement.directQueryTable.fetchAllConnections', {
+            defaultMessage: 'Could not fetch OpenSearch and Direct Query Connections',
+          })
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, [http, savedObjects, notifications, featureFlagStatus]);
 
   /* Delete selected data sources*/
   const onClickDelete = () => {
@@ -126,6 +237,47 @@ export const ManageDirectQueryDataConnectionsTable = ({
         setIsDeleting(false);
       });
   };
+
+  const onDissociate = useCallback(
+    async (item: DataSourceTableItem | DataSourceTableItem[]) => {
+      const itemsToDissociate = Array<DataSourceTableItem>().concat(item);
+      const payload = itemsToDissociate.map((ds) => ({
+        id: ds.id,
+        type:
+          ds?.objectType === DATA_CONNECTION_SAVED_OBJECT_TYPE
+            ? DATA_CONNECTION_SAVED_OBJECT_TYPE
+            : 'data-source',
+      }));
+      const confirmed = await overlays.openConfirm('', {
+        title: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation', {
+          defaultMessage:
+            '{selectionSize, plural, one {Remove # association} other {Remove # associations}}',
+          values: { selectionSize: itemsToDissociate.length },
+        }),
+        buttonColor: 'danger',
+      });
+      if (confirmed) {
+        setIsLoading(true);
+        if (workspaceClient && currentWorkspace) {
+          await workspaceClient.dissociate(payload, currentWorkspace.id);
+          await fetchDataSources();
+          setSelectedDataSources([]);
+          if (payload.some((p) => p.id === defaultDataSourceId)) {
+            setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+          }
+        }
+      }
+    },
+    [
+      currentWorkspace,
+      defaultDataSourceId,
+      fetchDataSources,
+      overlays,
+      savedObjects.client,
+      uiSettings,
+      workspaceClient,
+    ]
+  );
 
   /* render delete modal*/
   const tableRenderDeleteModal = () => {
@@ -173,22 +325,43 @@ export const ManageDirectQueryDataConnectionsTable = ({
   };
 
   const renderToolsLeft = useCallback(() => {
-    return selectedDataSources.length > 0
-      ? [
-          <EuiSmallButton
-            color="danger"
-            onClick={() => setIsModalVisible(true)}
-            data-test-subj="deleteDataSourceConnections"
-          >
-            <FormattedMessage
-              id="dataSourcesManagement.directQueryTable.deleteToolLabel"
-              defaultMessage="{selectionSize, plural, one {Delete # connection} other {Delete # connections}}"
-              values={{ selectionSize: selectedDataSources.length }}
-            />
-          </EuiSmallButton>,
-        ]
-      : [];
-  }, [selectedDataSources]);
+    if (selectedDataSources.length === 0) {
+      return [];
+    }
+    if (canManageDataSource) {
+      return [
+        <EuiSmallButton
+          color="danger"
+          onClick={() => setIsModalVisible(true)}
+          data-test-subj="deleteDataSourceConnections"
+        >
+          <FormattedMessage
+            id="dataSourcesManagement.directQueryTable.deleteToolLabel"
+            defaultMessage="{selectionSize, plural, one {Delete # connection} other {Delete # connections}}"
+            values={{ selectionSize: selectedDataSources.length }}
+          />
+        </EuiSmallButton>,
+      ];
+    }
+    if (canAssociateDataSource) {
+      return [
+        <EuiSmallButton
+          color="danger"
+          onClick={() => {
+            onDissociate(selectedDataSources);
+          }}
+          data-test-subj="dissociateSelectedDataSources"
+        >
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourcesTable.dissociateSelectedDataSources"
+            defaultMessage="{selectionSize, plural, one {Remove # association} other {Remove # associations}}"
+            values={{ selectionSize: selectedDataSources.length }}
+          />
+        </EuiSmallButton>,
+      ];
+    }
+    return [];
+  }, [selectedDataSources, canManageDataSource, canAssociateDataSource, onDissociate]);
 
   const toggleDetails = (item: DataSourceTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -209,55 +382,6 @@ export const ManageDirectQueryDataConnectionsTable = ({
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
-
-  const fetchDataSources = useCallback(() => {
-    setIsLoading(true);
-
-    const fetchConnections = featureFlagStatus
-      ? getDataSources(savedObjects.client)
-      : http.get(`${DATACONNECTIONS_BASE}`);
-
-    fetchConnections
-      .then((response) => {
-        return featureFlagStatus
-          ? fetchDataSourceConnections(
-              response,
-              http,
-              notifications,
-              true,
-              getHideLocalCluster().enabled
-            )
-          : response.map((dataConnection: DirectQueryDatasourceDetails) => ({
-              id: dataConnection.name,
-              title: dataConnection.name,
-              type:
-                {
-                  S3GLUE: 'Amazon S3',
-                  PROMETHEUS: 'Prometheus',
-                }[dataConnection.connector] || dataConnection.connector,
-              connectionType: dataConnection.connector,
-              description: dataConnection.description,
-            }));
-      })
-      .then((finalData) => {
-        setData(
-          featureFlagStatus
-            ? finalData.filter((item) => item.relatedConnections?.length > 0)
-            : finalData
-        );
-      })
-      .catch(() => {
-        setData([]);
-        notifications.toasts.addDanger(
-          i18n.translate('dataSourcesManagement.directQueryTable.fetchDataSources', {
-            defaultMessage: 'Could not fetch data sources',
-          })
-        );
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [http, savedObjects, notifications, featureFlagStatus]);
 
   useEffect(() => {
     fetchDataSources();
@@ -304,6 +428,13 @@ export const ManageDirectQueryDataConnectionsTable = ({
           record.connectionType !== DataSourceConnectionType.OpenSearchConnection
             ? { marginLeft: '20px' }
             : {};
+        if (
+          record.type === DataConnectionType.SecurityLake ||
+          record.type === DataConnectionType.CloudWatch
+        ) {
+          // TODO: link to details page for security lake and cloudwatch
+          return <span style={indentStyle}> {name}</span>;
+        }
         return (
           <EuiButtonEmpty
             size="xs"
@@ -345,7 +476,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
       truncateText: true,
       render: (relatedConnections: DataSourceTableItem[]) => relatedConnections?.length,
     },
-  ].filter(Boolean) as Array<EuiTableFieldDataColumnType<DataSourceTableItem>>;
+  ].filter(Boolean) as Array<EuiBasicTableColumn<DataSourceTableItem>>;
 
   const customSearchBar: EuiSearchBarProps = {
     toolsLeft: renderToolsLeft(),
@@ -370,8 +501,77 @@ export const ManageDirectQueryDataConnectionsTable = ({
     ],
   };
 
+  const associateDataSourceButton = DataSourceAssociation && [
+    {
+      renderComponent: (
+        <DataSourceAssociation
+          excludedDataSourceIds={data.map((ds) => ds.id)}
+          onComplete={() => fetchDataSources()}
+        />
+      ),
+    } as TopNavControlComponentData,
+  ];
+
+  const actionColumn: EuiBasicTableColumn<DataSourceTableItem> = {
+    name: 'Action',
+    actions: [],
+  };
+
+  // Add remove association action
+  if (canAssociateDataSource) {
+    actionColumn.actions.push({
+      name: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation.label', {
+        defaultMessage: 'Remove association',
+      }),
+      isPrimary: true,
+      description: i18n.translate(
+        'dataSourcesManagement.dataSourcesTable.removeAssociation.description',
+        {
+          defaultMessage: 'Remove association',
+        }
+      ),
+      icon: 'unlink',
+      type: 'icon',
+      onClick: async (item: DataSourceTableItem) => {
+        onDissociate(item);
+      },
+      'data-test-subj': 'dataSourcesManagement-dataSourceTable-dissociateButton',
+    });
+  }
+
+  // Add set as default action when data source list page opened within a workspace
+  if (currentWorkspace) {
+    actionColumn.actions.push({
+      render: (item) => {
+        return (
+          <EuiButtonIcon
+            isDisabled={defaultDataSourceId === item.id}
+            aria-label="Set as default data source"
+            title={i18n.translate('dataSourcesManagement.dataSourcesTable.setAsDefault.label', {
+              defaultMessage: 'Set as default',
+            })}
+            iconType="flag"
+            onClick={async () => {
+              await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, item.id);
+            }}
+          />
+        );
+      },
+    });
+  }
+
+  if (actionColumn.actions.length > 0) {
+    tableColumns.push(actionColumn);
+  }
+
   return (
     <EuiPageBody component="div">
+      {useUpdatedUX && canAssociateDataSource && associateDataSourceButton && (
+        <HeaderControl
+          setMountPoint={application.setAppRightControls}
+          controls={associateDataSourceButton}
+        />
+      )}
       <EuiFlexGroup justifyContent="center">
         {tableRenderDeleteModal()}
         <EuiFlexItem grow={false} style={{ width: '100%' }}>

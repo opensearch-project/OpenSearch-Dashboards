@@ -28,18 +28,34 @@
  * under the License.
  */
 
-import React from 'react';
+import './no_results.scss';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 
-import { EuiEmptyPrompt, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiText,
+  EuiTabbedContent,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import {
+  Query,
+  QueryStringContract,
+  SavedQuery,
+  SavedQueryService,
+} from '../../../../../data/public/';
 
 interface Props {
+  queryString: QueryStringContract;
+  savedQuery: SavedQueryService;
+  query: Query | undefined;
   timeFieldName?: string;
-  queryLanguage?: string;
 }
 
-export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
+export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldName }: Props) => {
   // Commented out due to no usage in code
   // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8149
   //
@@ -157,11 +173,111 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
   //   );
   // }
 
+  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
+  const [sampleQueries, setSampleQueries] = useState<any>([]);
+
+  useEffect(() => {
+    const fetchSavedQueries = async () => {
+      const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
+      setSavedQueries(
+        savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
+      );
+    };
+
+    fetchSavedQueries();
+  }, [setSavedQueries, query, savedQuery]);
+
+  useEffect(() => {
+    // Samples for the language
+    const newSampleQueries: any = [];
+    if (query?.language) {
+      const languageSampleQueries = queryString.getLanguageService()?.getLanguage(query.language)
+        ?.sampleQueries;
+      if (Array.isArray(languageSampleQueries)) {
+        newSampleQueries.push(...languageSampleQueries);
+      }
+    }
+
+    // Samples for the dataset type
+    if (query?.dataset?.type) {
+      const datasetType = queryString.getDatasetService()?.getType(query.dataset.type);
+      if (datasetType?.getSampleQueries) {
+        const sampleQueriesResponse = datasetType.getSampleQueries(query.dataset, query.language);
+        if (Array.isArray(sampleQueriesResponse)) {
+          setSampleQueries([...sampleQueriesResponse, ...newSampleQueries]);
+        } else if (sampleQueriesResponse instanceof Promise) {
+          sampleQueriesResponse
+            .then((datasetSampleQueries: any) => {
+              if (Array.isArray(datasetSampleQueries)) {
+                setSampleQueries([...datasetSampleQueries, ...newSampleQueries]);
+              }
+            })
+            .catch((error: any) => {
+              // noop
+            });
+        }
+      }
+    }
+  }, [queryString, query]);
+
+  const tabs = useMemo(() => {
+    const buildSampleQueryBlock = (sampleTitle: string, sampleQuery: string) => {
+      return (
+        <>
+          <EuiText size="s">{sampleTitle}</EuiText>
+          <EuiSpacer size="s" />
+          <EuiCodeBlock isCopyable>{sampleQuery}</EuiCodeBlock>
+          <EuiSpacer size="s" />
+        </>
+      );
+    };
+    return [
+      ...(sampleQueries.length > 0
+        ? [
+            {
+              id: 'sample_queries',
+              name: i18n.translate('discover.emptyPrompt.sampleQueries.title', {
+                defaultMessage: 'Sample Queries',
+              }),
+              content: (
+                <EuiPanel hasBorder={false} hasShadow={false}>
+                  <EuiSpacer size="s" />
+                  {sampleQueries
+                    .slice(0, 5)
+                    .map((sampleQuery: any) =>
+                      buildSampleQueryBlock(sampleQuery.title, sampleQuery.query)
+                    )}
+                </EuiPanel>
+              ),
+            },
+          ]
+        : []),
+      ...(savedQueries.length > 0
+        ? [
+            {
+              id: 'saved_queries',
+              name: i18n.translate('discover.emptyPrompt.savedQueries.title', {
+                defaultMessage: 'Saved Queries',
+              }),
+              content: (
+                <Fragment>
+                  <EuiSpacer />
+                  {savedQueries.map((sq) =>
+                    buildSampleQueryBlock(sq.id, sq.attributes.query.query as string)
+                  )}
+                </Fragment>
+              ),
+            },
+          ]
+        : []),
+    ];
+  }, [savedQueries, sampleQueries]);
+
   return (
     <I18nProvider>
-      <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
+      <>
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="editorCodeBlock"
           iconColor="default"
           data-test-subj="discoverNoResults"
           title={
@@ -184,7 +300,15 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
             </EuiText>
           }
         />
-      </EuiPanel>
+        {tabs.length > 0 && (
+          <div
+            className="discoverNoResults-sampleContainer"
+            data-test-subj="discoverNoResultsSampleContainer"
+          >
+            <EuiTabbedContent tabs={tabs} />
+          </div>
+        )}
+      </>
     </I18nProvider>
   );
 };

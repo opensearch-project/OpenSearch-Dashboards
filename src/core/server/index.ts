@@ -93,6 +93,7 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
+import { WorkspaceSetup, WorkspaceStart } from './workspace';
 
 export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
 
@@ -371,8 +372,19 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { AppCategory, WorkspaceAttribute, PermissionModeId } from '../types';
-export { DEFAULT_APP_CATEGORIES, WORKSPACE_TYPE, DEFAULT_NAV_GROUPS } from '../utils';
+export {
+  AppCategory,
+  WorkspaceAttribute,
+  PermissionModeId,
+  WorkspaceFindOptions,
+  WorkspacePermissionMode,
+} from '../types';
+export {
+  DEFAULT_APP_CATEGORIES,
+  WORKSPACE_TYPE,
+  DEFAULT_NAV_GROUPS,
+  WORKSPACE_PATH_PREFIX,
+} from '../utils';
 
 export {
   SavedObject,
@@ -480,6 +492,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   auditTrail: AuditTrailSetup;
   /** {@link DynamicConfigServiceSetup} */
   dynamicConfigService: DynamicConfigServiceSetup;
+  /** {@link WorkspaceSetup} */
+  workspace: WorkspaceSetup;
 }
 
 /**
@@ -521,6 +535,8 @@ export interface CoreStart {
   crossCompatibility: CrossCompatibilityServiceStart;
   /** {@link DynamicConfigServiceStart} */
   dynamicConfig: DynamicConfigServiceStart;
+  /** {@link WorkspaceStart} */
+  workspace: WorkspaceStart;
 }
 
 export {

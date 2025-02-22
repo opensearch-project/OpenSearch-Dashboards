@@ -12,7 +12,7 @@ import {
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState } from 'react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
-import { ACCELERATION_INDEX_TYPES, DATA_SOURCE_TYPES } from '../../../../framework/constants';
+import { ACCELERATION_INDEX_TYPES } from '../../../../framework/constants';
 import { AssociatedObject, CachedAcceleration } from '../../../../framework/types';
 import {
   getRenderAccelerationDetailsFlyout,
@@ -24,9 +24,10 @@ import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
   ASSC_OBJ_TABLE_SEARCH_HINT,
   ASSC_OBJ_TABLE_SUBJ,
-  redirectToExplorerOSIdx,
-  redirectToExplorerWithDataSrc,
+  redirectToDiscoverOSIdx,
+  redirectToDiscoverWithDataSrc,
 } from './utils/associated_objects_tab_utils';
+import { getUiSettings } from '../../utils';
 
 interface AssociatedObjectsTableProps {
   datasourceName: string;
@@ -64,7 +65,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
   const columns = [
     {
       field: 'name',
-      name: i18n.translate('datasources.associatedObjectsTab.column.name', {
+      name: i18n.translate('dataSourcesManagement.associatedObjectsTab.column.name', {
         defaultMessage: 'Name',
       }),
       sortable: true,
@@ -97,7 +98,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
     },
     {
       field: 'type',
-      name: i18n.translate('datasources.associatedObjectsTab.column.type', {
+      name: i18n.translate('dataSourcesManagement.associatedObjectsTab.column.type', {
         defaultMessage: 'Type',
       }),
       sortable: true,
@@ -108,7 +109,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
     },
     {
       field: 'accelerations',
-      name: i18n.translate('datasources.associatedObjectsTab.column.accelerations', {
+      name: i18n.translate('dataSourcesManagement.associatedObjectsTab.column.accelerations', {
         defaultMessage: 'Associations',
       }),
       sortable: true,
@@ -166,20 +167,27 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
       },
     },
     {
-      name: i18n.translate('datasources.associatedObjectsTab.column.actions', {
+      name: i18n.translate('dataSourcesManagement.associatedObjectsTab.column.actions', {
         defaultMessage: 'Actions',
       }),
       actions: [
         {
-          name: i18n.translate('datasources.associatedObjectsTab.action.discover.name', {
+          name: i18n.translate('dataSourcesManagement.associatedObjectsTab.action.discover.name', {
             defaultMessage: 'Discover',
           }),
           description: i18n.translate(
-            'datasources.associatedObjectsTab.action.discover.description',
+            'dataSourcesManagement.associatedObjectsTab.action.discover.description',
             {
-              defaultMessage: 'Query in Observability Logs',
+              defaultMessage: 'Query in Discover',
             }
           ),
+          enabled: () => {
+            try {
+              return getUiSettings().get('query:enhancements:enabled');
+            } catch (e) {
+              return false;
+            }
+          },
           type: 'icon',
           icon: 'discoverApp',
           onClick: (asscObj: AssociatedObject) => {
@@ -188,11 +196,11 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
               const acceleration = cachedAccelerations.find(
                 (acc) => getAccelerationName(acc) === asscObj.name
               );
-              redirectToExplorerOSIdx(acceleration!.flintIndexName, application);
+              redirectToDiscoverOSIdx(acceleration!.flintIndexName, dataSourceMDSId, application);
             } else if (asscObj.type === 'table' || asscObj.type === 'skipping') {
-              redirectToExplorerWithDataSrc(
+              redirectToDiscoverWithDataSrc(
                 asscObj.datasource,
-                DATA_SOURCE_TYPES.S3Glue,
+                dataSourceMDSId,
                 asscObj.database,
                 asscObj.tableName,
                 application
@@ -201,11 +209,14 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           },
         },
         {
-          name: i18n.translate('datasources.associatedObjectsTab.action.accelerate.name', {
-            defaultMessage: 'Accelerate',
-          }),
+          name: i18n.translate(
+            'dataSourcesManagement.associatedObjectsTab.action.accelerate.name',
+            {
+              defaultMessage: 'Accelerate',
+            }
+          ),
           description: i18n.translate(
-            'datasources.associatedObjectsTab.action.accelerate.description',
+            'dataSourcesManagement.associatedObjectsTab.action.accelerate.description',
             {
               defaultMessage: 'Accelerate this object',
             }

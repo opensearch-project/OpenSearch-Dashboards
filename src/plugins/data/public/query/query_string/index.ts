@@ -29,7 +29,13 @@
  */
 
 export { QueryStringContract, QueryStringManager } from './query_string_manager';
-export { DatasetServiceContract, DatasetService, DatasetTypeConfig } from './dataset_service';
+export {
+  DataStructureFetchOptions,
+  DatasetService,
+  DatasetServiceContract,
+  DatasetTypeConfig,
+  DatasetIndexedViewsService,
+} from './dataset_service';
 export {
   LanguageServiceContract,
   LanguageService,
@@ -39,4 +45,6 @@ export {
   QueryControls,
   QueryResult,
   QueryStatus,
+  ResultStatus,
+  LanguageReference,
 } from './language_service';

@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { getOsdFieldOverrides } from '../../../../../../plugins/data/common';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { shortenDottedString } from '../../helpers';
 
@@ -54,12 +55,18 @@ export interface ColumnProps {
  * If it's an IndexPattern with timefield, the time column is
  * prepended, not moveable and removeable
  * @param timeFieldName
+ * @param osdFieldOverrides
  */
-export function getTimeColumn(timeFieldName: string): ColumnProps {
+export function getTimeColumn(
+  timeFieldName: string,
+  osdFieldOverrides: {
+    [key: string]: any;
+  }
+): ColumnProps {
   return {
     name: timeFieldName,
     displayName: 'Time',
-    isSortable: true,
+    isSortable: osdFieldOverrides.sortable ?? true,
     isRemoveable: false,
     colLeftIdx: -1,
     colRightIdx: -1,
@@ -83,12 +90,14 @@ export function getLegacyDisplayedColumns(
   if (!Array.isArray(columns) || typeof indexPattern !== 'object' || !indexPattern.getFieldByName) {
     return [];
   }
+  // TODO: Remove overrides once we support PPL/SQL sorting
+  const osdFieldOverrides = getOsdFieldOverrides();
   const columnProps = columns.map((column, idx) => {
     const field = indexPattern.getFieldByName(column);
     return {
       name: column,
       displayName: isShortDots ? shortenDottedString(column) : column,
-      isSortable: field && field.sortable ? true : false,
+      isSortable: osdFieldOverrides.sortable ?? !!field?.sortable,
       isRemoveable: column !== '_source' || columns.length > 1,
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
       colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
@@ -101,6 +110,6 @@ export function getLegacyDisplayedColumns(
     !columns.includes(indexPattern.timeFieldName);
 
   return shouldIncludeTimeField
-    ? [getTimeColumn(indexPattern.timeFieldName as string), ...columnProps]
+    ? [getTimeColumn(indexPattern.timeFieldName as string, osdFieldOverrides), ...columnProps]
     : columnProps;
 }

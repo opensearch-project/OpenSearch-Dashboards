@@ -30,7 +30,7 @@
 
 import { ToolingLog } from '@osd/dev-utils';
 import { i18n } from '@osd/i18n';
-import path from 'path';
+import path, { resolve } from 'path';
 
 import { createFailError } from '@osd/dev-utils';
 import {
@@ -56,6 +56,8 @@ export interface IntegrateOptions {
   ignoreIncompatible: boolean;
   ignoreUnused: boolean;
   ignoreMissing: boolean;
+  ignoreMissingFormats?: boolean;
+  update?: boolean;
   config: I18nConfig;
   log: ToolingLog;
 }
@@ -162,7 +164,27 @@ function groupMessagesByNamespace(
       ]);
   }
 
-  return localizedMessagesByNamespace;
+  const sortedKeys = [...localizedMessagesByNamespace.keys()].sort((a, b) =>
+    a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+  );
+  const keySortedMap = new Map();
+  for (const key of sortedKeys) {
+    keySortedMap.set(key, localizedMessagesByNamespace.get(key));
+  }
+
+  return keySortedMap;
+}
+
+async function writeToFile(filePath: string, content: string) {
+  const destPath = path.dirname(filePath);
+
+  try {
+    await accessAsync(destPath);
+  } catch (_) {
+    await makeDirAsync(destPath);
+  }
+
+  await writeFileAsync(filePath, content);
 }
 
 async function writeMessages(
@@ -170,10 +192,10 @@ async function writeMessages(
   formats: typeof i18n.formats,
   options: IntegrateOptions
 ) {
-  // If target file name is specified we need to write all the translations into one file,
+  // If target filename is specified we need to write all the translations into one file,
   // irrespective to the namespace.
   if (options.targetFileName) {
-    await writeFileAsync(
+    await writeToFile(
       options.targetFileName,
       serializeToJson(
         [...localizedMessagesByNamespace.values()].reduce((acc, val) => acc.concat(val), []),
@@ -186,33 +208,106 @@ async function writeMessages(
     );
   }
 
+  // When a target filename is not specified, spread the translations into individual folders.
   // Use basename of source file name to write the same locale name as the source file has.
   const fileName = path.basename(options.sourceFileName);
   for (const [namespace, messages] of localizedMessagesByNamespace) {
     for (const namespacedPath of options.config.paths[namespace]) {
-      const destPath = path.resolve(namespacedPath, 'translations');
-
-      try {
-        await accessAsync(destPath);
-      } catch (_) {
-        await makeDirAsync(destPath);
-      }
-
-      const writePath = path.resolve(destPath, fileName);
-      await writeFileAsync(writePath, serializeToJson(messages, formats));
+      const writePath = path.resolve(namespacedPath, 'translations', fileName);
+      await writeToFile(writePath, serializeToJson(messages, formats));
       options.log.success(`Translations have been integrated to ${normalizePath(writePath)}`);
     }
   }
+}
+
+function isSpreadableObject(value: unknown) {
+  try {
+    // @ts-ignore: Intentionally allowing type error to catch it
+    return { ...value }, true;
+  } catch {
+    return false;
+  }
+}
+
+function isEmptyObject(obj: Record<any, any>) {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      return false; // Found a key, so it is NOT empty
+    }
+  }
+  return true;
+}
+
+async function getIntegrationBase(options: IntegrateOptions) {
+  const localizedMessages = {
+    formats: {},
+    messages: {},
+  };
+
+  // If target file name is specified and has been asked to be updated, read it in
+  if (options.targetFileName && options.update) {
+    try {
+      await accessAsync(resolve(options.targetFileName));
+    } catch (ex) {
+      options.log.warning(
+        `Failed to read from the existing target file at ${normalizePath(
+          options.targetFileName
+        )}; will overwrite it.`
+      );
+      // If the file doesn't exist, return the untouched localizedMessages
+      return localizedMessages;
+    }
+
+    try {
+      const existingDefinition = JSON.parse(
+        (await readFileAsync(options.targetFileName)).toString()
+      );
+      if (isSpreadableObject(existingDefinition.formats))
+        localizedMessages.formats = existingDefinition.formats;
+      if (isSpreadableObject(existingDefinition.messages))
+        localizedMessages.messages = existingDefinition.messages;
+    } catch (ex) {
+      throw createFailError(
+        `Failed to parse the existing target file at ${normalizePath(options.targetFileName)}`
+      );
+    }
+  }
+
+  return localizedMessages;
 }
 
 export async function integrateLocaleFiles(
   defaultMessagesMap: MessageMap,
   options: IntegrateOptions
 ) {
-  const localizedMessages = JSON.parse((await readFileAsync(options.sourceFileName)).toString());
-  if (!localizedMessages.formats) {
-    throw createFailError(`Locale file should contain formats object.`);
+  const localizedMessages = await getIntegrationBase(options);
+
+  const newDefinition = JSON.parse((await readFileAsync(options.sourceFileName)).toString());
+
+  // We need to complain about missing formats but no need for that if updating an existing target
+  // that already has formats
+  if (isSpreadableObject(newDefinition.formats))
+    localizedMessages.formats = {
+      ...localizedMessages.formats,
+      ...newDefinition.formats,
+    };
+
+  if (isEmptyObject(localizedMessages.formats)) {
+    if (options.ignoreMissingFormats) {
+      options.log.warning('Missing "formats" object ignored');
+    } else {
+      throw createFailError(`Locale file should contain a "formats" object.`);
+    }
   }
+
+  if (!isSpreadableObject(newDefinition.messages) || isEmptyObject({ ...newDefinition.messages })) {
+    throw createFailError(`Locale file should contain a "messages" object.`);
+  }
+
+  localizedMessages.messages = {
+    ...localizedMessages.messages,
+    ...newDefinition.messages,
+  };
 
   const localizedMessagesMap: LocalizedMessageMap = new Map(
     Object.entries(localizedMessages.messages)

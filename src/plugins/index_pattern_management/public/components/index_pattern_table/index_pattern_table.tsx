@@ -38,6 +38,7 @@ import {
   EuiText,
   EuiBadgeGroup,
   EuiPageContent,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -199,7 +200,11 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+          <EuiButtonEmpty
+            size="xs"
+            {...reactRouterNavigate(history, `patterns/${index.id}`)}
+            {...(useUpdatedUX ? { textProps: { style: { fontWeight: 600 } } } : {})}
+          >
             {name}
           </EuiButtonEmpty>
           &emsp;
@@ -245,21 +250,21 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     );
   })();
 
-  const description = i18n.translate(
-    'indexPatternManagement.indexPatternTable.indexPatternExplanation',
-    currentWorkspace
-      ? {
+  const description = currentWorkspace
+    ? i18n.translate(
+        'indexPatternManagement.indexPatternTable.indexPatternExplanationWithWorkspace',
+        {
           defaultMessage:
             'Create and manage the index patterns that help you retrieve your data from OpenSearch for {name} workspace.',
           values: {
             name: currentWorkspace.name,
           },
         }
-      : {
-          defaultMessage:
-            'Create and manage the index patterns that help you retrieve your data from OpenSearch.',
-        }
-  );
+      )
+    : i18n.translate('indexPatternManagement.indexPatternTable.indexPatternExplanation', {
+        defaultMessage:
+          'Create and manage the index patterns that help you retrieve your data from OpenSearch.',
+      });
   const pageTitleAndDescription = useUpdatedUX ? (
     <HeaderControl
       controls={[{ description }]}
@@ -309,7 +314,12 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
 
   return (
     <>
-      <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
+      <EuiPageContent
+        data-test-subj="indexPatternTable"
+        role="region"
+        aria-label={ariaRegion}
+        {...(useUpdatedUX ? { paddingSize: 'm' } : {})}
+      >
         <EuiFlexGroup justifyContent="spaceBetween">
           {pageTitleAndDescription}
           {createButton}

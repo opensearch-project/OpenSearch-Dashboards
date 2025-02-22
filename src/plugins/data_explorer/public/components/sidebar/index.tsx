@@ -18,7 +18,12 @@ import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
 
-export const Sidebar: FC = ({ children }) => {
+interface SidebarProps {
+  children: React.ReactNode;
+  datasetSelectorRef: React.RefObject<HTMLDivElement>;
+}
+
+export const Sidebar: FC<SidebarProps> = ({ children, datasetSelectorRef }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
   const dispatch = useTypedDispatch();
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
@@ -119,16 +124,12 @@ export const Sidebar: FC = ({ children }) => {
       <EuiSplitPanel.Outer
         className="eui-yScroll deSidebar_panel"
         hasBorder={true}
-        borderRadius="none"
-        color="transparent"
+        borderRadius="l"
+        data-test-subj="sidebarPanel"
       >
-        {!isEnhancementEnabled && (
-          <EuiSplitPanel.Inner
-            paddingSize="s"
-            grow={false}
-            color="transparent"
-            className="deSidebar_dataSource"
-          >
+        <EuiSplitPanel.Inner paddingSize="s" grow={false} className="deSidebar_dataSource">
+          {isEnhancementEnabled && <div ref={datasetSelectorRef} />}
+          {!isEnhancementEnabled && (
             <DataSourceSelectable
               dataSources={activeDataSources}
               dataSourceOptionList={dataSourceOptionList}
@@ -139,8 +140,9 @@ export const Sidebar: FC = ({ children }) => {
               onRefresh={memorizedReload}
               fullWidth
             />
-          </EuiSplitPanel.Inner>
-        )}
+          )}
+        </EuiSplitPanel.Inner>
+
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>

@@ -137,7 +137,7 @@
 .osdQueryEditor__header {
   display: flex;
   align-items: center;
-  padding: 0 $euiSizeXS $euiSizeXS;
+  padding: 0 $euiSizeXS $euiSizeS;
 }
 
 .osdQueryEditor__topBar {
@@ -150,9 +150,6 @@
   }
 
   .osdQueryEditor__querycontrols {
-    float: right;
-    margin: $euiSizeS $euiSizeS;
-
     .osdQueryEditor__extensionQueryControls {
       display: flex;
       padding: 0 $euiSizeS 0 $euiSizeXS;
@@ -187,12 +184,18 @@
 
 .osdQuerEditor__singleLine {
   padding: calc($euiSizeXS + 1px);
-  background-color: $euiColorEmptyShade;
   overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
   min-width: 0;
 
   .monaco-editor .view-overlays .current-line {
     border: none;
+  }
+
+  &,
+  & .monaco-editor,
+  & .monaco-editor .inputarea.ime-input,
+  & .monaco-editor-background {
+    background-color: $euiFormBackgroundColor;
   }
 }
 
@@ -214,4 +217,45 @@
     content: "Tab to insert, ESC to close window";
     display: block;
   }
+}
+
+.queryEditor__progress {
+  position: relative;
+}
+
+.queryEditor__footer {
+  display: flex;
+  gap: 4px;
+  background: $euiColorLightestShade;
+  padding: 2px 4px;
+  margin-top: 5px;
+  margin-left: -5px;
+  margin-right: -5px;
+  z-index: 1;
+  position: relative;
+  align-items: center;
+}
+
+.queryEditor__footerSpacer {
+  flex-grow: 1;
+}
+
+.queryEditor__footerItem {
+  // Needed so the footer items never have paddings
+  padding: 0 !important;
+}
+
+// TODO: Temporary workaround to disable padding for single line editor footer
+.euiFormControlLayout--group.euiFormControlLayout--compressed .osdQuerEditor__singleLine .euiText {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiText {
+  background-color: unset !important;
+  line-height: 21px !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiButtonEmpty {
+  border-right: 0;
 }

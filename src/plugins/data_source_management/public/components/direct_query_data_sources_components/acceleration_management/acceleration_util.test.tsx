@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiButton, EuiHealth } from '@elastic/eui';
+import { EuiHealth, EuiSmallButton } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { CachedAcceleration } from '../../../../framework/types';
 import {
@@ -136,7 +136,7 @@ describe('acceleration_utils', () => {
         />
       );
 
-      wrapper.find(EuiButton).simulate('click');
+      wrapper.find(EuiSmallButton).simulate('click');
       expect(renderCreateAccelerationFlyout).toHaveBeenCalledWith({
         dataSourceName: 'test_data_source',
         handleRefresh,
@@ -200,14 +200,10 @@ describe('acceleration_utils', () => {
         navigateToApp: jest.fn(),
       } as unknown) as ApplicationStart;
 
-      onDiscoverIconClick(acceleration, 'test_data_source', application);
-      expect(application.navigateToApp).toHaveBeenCalledWith('observability-logs', {
-        path: '#/explorer',
-        state: {
-          datasourceName: 'test_data_source',
-          datasourceType: 's3glue',
-          queryToRun: 'source = test_data_source.default.test_table | head 10',
-        },
+      onDiscoverIconClick(acceleration, 'test_data_source', 'testMDSId', application);
+      expect(application.navigateToApp).toHaveBeenCalledWith('data-explorer', {
+        path:
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',meta:(name:test_data_source,type:CUSTOM),title:'',type:DATA_SOURCE),id:'testMDSId::test_data_source.default.test_table',title:test_data_source.default.test_table,type:S3),language:SQL,query:'SELECT%20*%20FROM%20test_data_source.default.test_table%20LIMIT%2010'))",
       });
     });
 
@@ -226,14 +222,10 @@ describe('acceleration_utils', () => {
         navigateToApp: jest.fn(),
       } as unknown) as ApplicationStart;
 
-      onDiscoverIconClick(acceleration, 'test_data_source', application);
-      expect(application.navigateToApp).toHaveBeenCalledWith('observability-logs', {
-        path: '#/explorer',
-        state: {
-          datasourceName: 'Default cluster',
-          datasourceType: 'DEFAULT_INDEX_PATTERNS',
-          queryToRun: 'source = flint_index | head 10',
-        },
+      onDiscoverIconClick(acceleration, 'test_data_source', 'testMDSId', application);
+      expect(application.navigateToApp).toHaveBeenCalledWith('data-explorer', {
+        path:
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',title:'',type:DATA_SOURCE),id:'testMDSId::flint_index',title:flint_index,type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20flint_index%20LIMIT%2010'))",
       });
     });
   });

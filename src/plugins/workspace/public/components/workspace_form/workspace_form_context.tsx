@@ -10,6 +10,8 @@ import { WorkspaceFormProps, WorkspaceFormErrors } from './types';
 import { AppMountParameters, PublicAppInfo } from '../../../../../core/public';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspaceFormDataState } from '../workspace_form';
+import { WorkspacePermissionSetting } from './types';
+import { WorkspacePrivacyItemType } from './constants';
 
 interface WorkspaceFormContextProps {
   formId: string;
@@ -31,6 +33,11 @@ interface WorkspaceFormContextProps {
   >;
   setSelectedDataSourceConnections: React.Dispatch<React.SetStateAction<DataSourceConnection[]>>;
   onAppLeave: AppMountParameters['onAppLeave'];
+  handleSubmitPermissionSettings: (
+    permissionSettings: WorkspacePermissionSetting[]
+  ) => Promise<void>;
+  privacyType: WorkspacePrivacyItemType;
+  setPrivacyType: (newPrivacyType: WorkspacePrivacyItemType) => void;
 }
 
 const initialContextValue: WorkspaceFormContextProps = {} as WorkspaceFormContextProps;

@@ -32,17 +32,21 @@ import { includes } from 'lodash';
 import { IndexPatternsContract } from './index_patterns';
 import { UiSettingsCommon } from '../types';
 
-export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
+export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
 
 export const createEnsureDefaultIndexPattern = (
   uiSettings: UiSettingsCommon,
-  onRedirectNoIndexPattern: () => Promise<unknown> | void
+  onRedirectNoIndexPattern: () => Promise<unknown> | void,
+  canUpdateUiSetting?: boolean
 ) => {
   /**
    * Checks whether a default index pattern is set and exists and defines
    * one otherwise.
    */
   return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
+    if (canUpdateUiSetting === false) {
+      return;
+    }
     const patterns = await this.getIds();
     let defaultId = await uiSettings.get('defaultIndex');
     let defined = !!defaultId;
@@ -62,7 +66,10 @@ export const createEnsureDefaultIndexPattern = (
       defaultId = patterns[0];
       await uiSettings.set('defaultIndex', defaultId);
     } else {
-      return onRedirectNoIndexPattern();
+      const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
+      const shouldRedirect = !isEnhancementsEnabled;
+      if (shouldRedirect) return onRedirectNoIndexPattern();
+      else return;
     }
   };
 };

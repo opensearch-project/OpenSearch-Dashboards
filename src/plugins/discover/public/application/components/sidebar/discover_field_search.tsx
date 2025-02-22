@@ -275,6 +275,7 @@ export function DiscoverFieldSearch({
         <EuiSmallFilterButton
           iconType="filter"
           iconSide="left"
+          iconGap="none"
           hasActiveFilters={activeFiltersCount > 0}
           aria-label={filterBtnAriaLabel}
           data-test-subj="toggleFieldFilterButton"
@@ -314,7 +315,10 @@ export function DiscoverFieldSearch({
 
   if (isEnhancementsEnabledOverride) {
     return (
-      <div className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdDiscoverSideBar__wrap">
+      <div
+        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdDiscoverSideBar__wrap"
+        data-test-subj="osdDiscoverSideBarWrapper"
+      >
         {compressedFieldSearch}
         {fieldPopover}
       </div>

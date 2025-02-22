@@ -32,25 +32,25 @@ import _, { each, reject } from 'lodash';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
 
+import { SerializedFieldFormat } from '../../../../expressions/common';
 import {
-  OPENSEARCH_FIELD_TYPES,
-  OSD_FIELD_TYPES,
-  IIndexPattern,
   FieldFormatNotFoundError,
   IFieldType,
+  IIndexPattern,
+  OPENSEARCH_FIELD_TYPES,
+  OSD_FIELD_TYPES,
 } from '../../../common';
-import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
-import { formatHitProvider } from './format_hit';
-import { flattenHitWrapper } from './flatten_hit';
-import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
+import { FieldFormat, FieldFormatsStartCommon } from '../../field_formats';
+import { IIndexPatternFieldList, IndexPatternField, fieldList } from '../fields';
 import {
-  IndexPatternSpec,
-  TypeMeta,
-  SourceFilter,
   IndexPatternFieldMap,
+  IndexPatternSpec,
   SavedObjectReference,
+  SourceFilter,
+  TypeMeta,
 } from '../types';
-import { SerializedFieldFormat } from '../../../../expressions/common';
+import { flattenHitWrapper } from './flatten_hit';
+import { formatHitProvider } from './format_hit';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
@@ -94,6 +94,7 @@ export class IndexPattern implements IIndexPattern {
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
   public dataSourceRef?: SavedObjectReference;
+  public fieldsLoading?: boolean;
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
@@ -137,6 +138,7 @@ export class IndexPattern implements IIndexPattern {
       return this.deserializeFieldFormatMap(mapping);
     });
     this.dataSourceRef = spec.dataSourceRef;
+    this.fieldsLoading = spec.fieldsLoading;
   }
 
   /**
@@ -378,6 +380,11 @@ export class IndexPattern implements IIndexPattern {
       : [];
   };
 
+  setFieldsLoading = (status: boolean) => {
+    return (this.fieldsLoading = status);
+  };
+
+  // DQL and Lucene already calling this formatter, we should add ppl formatter in the language config
   /**
    * Provide a field, get its formatter
    * @param field

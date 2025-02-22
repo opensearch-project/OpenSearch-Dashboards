@@ -28,7 +28,6 @@
  * under the License.
  */
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeader,
@@ -45,7 +44,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
-import React, { createRef, useMemo, useState } from 'react';
+import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
@@ -82,6 +81,7 @@ import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
+import { GlobalSearchCommand } from '../../global_search';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -108,6 +108,7 @@ export interface HeaderProps {
   navControlsExpandedCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsExpandedRight$: Observable<readonly ChromeNavControl[]>;
   navControlsLeftBottom$: Observable<readonly ChromeNavControl[]>;
+  navControlsPrimaryHeaderRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -123,6 +124,7 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
+  globalSearchCommands?: GlobalSearchCommand[];
 }
 
 const hasValue = (value: any) => {
@@ -148,12 +150,13 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
+  globalSearchCommands,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isNavOpenState, setIsNavOpenState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
 
@@ -176,6 +179,22 @@ export function Header({
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
+
+  const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
+
+  const setIsNavOpen = useCallback(
+    (value) => {
+      /**
+       * When use updated header, we will regard the lock state as source of truth
+       */
+      if (useUpdatedHeader) {
+        onIsLockedUpdate(value);
+      } else {
+        setIsNavOpenState(value);
+      }
+    },
+    [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
+  );
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
@@ -246,49 +265,56 @@ export function Header({
   const renderNavToggle = () => {
     const renderNavToggleWithExtraProps = (
       props: EuiHeaderSectionItemButtonProps & { isSmallScreen?: boolean }
-    ) => (
-      <EuiHeaderSectionItemButton
-        data-test-subj="toggleNavButton"
-        aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-          defaultMessage: 'Toggle primary navigation',
-        })}
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        aria-expanded={isNavOpen}
-        aria-pressed={isNavOpen}
-        aria-controls={navId}
-        ref={toggleCollapsibleNavRef}
-        {...props}
-        className={classnames(
-          useUpdatedHeader
-            ? useApplicationHeader
-              ? 'newAppTopNavExpander'
-              : 'newPageTopNavExpander'
-            : undefined,
-          props.className
-        )}
-      >
-        {props.isSmallScreen ? (
-          <EuiButtonIcon
-            iconType="menu"
-            size="xs"
-            title={i18n.translate('core.ui.primaryNav.menu', {
-              defaultMessage: 'Menu',
-            })}
-            display="base"
-            color="subdued"
-            iconSize="s"
-          />
-        ) : (
-          <EuiIcon
-            type="menu"
-            size="m"
-            title={i18n.translate('core.ui.primaryNav.menu', {
-              defaultMessage: 'Menu',
-            })}
-          />
-        )}
-      </EuiHeaderSectionItemButton>
-    );
+    ) => {
+      const { isSmallScreen, ...others } = props;
+      return (
+        <EuiHeaderSectionItemButton
+          data-test-subj="toggleNavButton"
+          aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+            defaultMessage: 'Toggle primary navigation',
+          })}
+          onClick={() => setIsNavOpen(!isNavOpen)}
+          aria-expanded={isNavOpen}
+          aria-pressed={isNavOpen}
+          aria-controls={navId}
+          ref={toggleCollapsibleNavRef}
+          {...others}
+          className={classnames(
+            useUpdatedHeader
+              ? useApplicationHeader
+                ? 'newAppTopNavExpander'
+                : 'newPageTopNavExpander'
+              : undefined,
+            props.className
+          )}
+        >
+          {props.isSmallScreen ? (
+            /**
+             * Using <EuiButtonIcon type="base" /> here will introduce a warning in console
+             * because button can not be a child of a button. In order to give the looks of a bordered icon,
+             * here we use the classes to imitate the style
+             */
+            <span className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall ">
+              <EuiIcon
+                title={i18n.translate('core.ui.primaryNav.menu', {
+                  defaultMessage: 'Menu',
+                })}
+                type="menu"
+                size="s"
+              />
+            </span>
+          ) : (
+            <EuiIcon
+              type="menu"
+              size="m"
+              title={i18n.translate('core.ui.primaryNav.menu', {
+                defaultMessage: 'Menu',
+              })}
+            />
+          )}
+        </EuiHeaderSectionItemButton>
+      );
+    };
     return useUpdatedHeader ? (
       <>
         {isNavOpen
@@ -475,7 +501,14 @@ export function Header({
         navigateToUrl={application.navigateToUrl}
         renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
+        loadingCount$={observables.loadingCount$}
+        workspaceEnabled={application.capabilities.workspaces.enabled}
       />
+    </EuiHeaderSectionItem>
+  );
+  const renderPrimaryHeaderRight = () => (
+    <EuiHeaderSectionItem border="none">
+      <HeaderNavControls navControls$={observables.navControlsPrimaryHeaderRight$} />
     </EuiHeaderSectionItem>
   );
 
@@ -521,36 +554,42 @@ export function Header({
   );
 
   const renderPageHeader = () => (
-    <div>
-      <EuiHeader className="primaryHeader newTopNavHeader" style={sidecarPaddingStyle}>
+    <div style={sidecarPaddingStyle}>
+      <EuiHeader className="primaryHeader newTopNavHeader">
         {renderNavToggle()}
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
         {renderBreadcrumbs(false, false)}
+
+        {renderPrimaryHeaderRight()}
       </EuiHeader>
 
       {/* Secondary header */}
       <EuiHeader className="newTopNavHeader">
         <EuiFlexGroup
           justifyContent="spaceBetween"
-          gutterSize="s"
+          gutterSize="none"
           className="secondaryPageHeaderFlexGroup"
         >
           {/* Left Section */}
-          <EuiHeaderSection side="left">
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
+          <EuiHeaderSection side="left" grow={true} style={{ flexShrink: 1 }}>
+            <EuiFlexGroup gutterSize="s" className="leftSecondaryPageHeaderFlexGroup">
+              <EuiFlexItem grow={false}>
                 <EuiHeaderSectionItem border="none" data-test-subj="headerApplicationTitle">
                   <EuiTitle size="l" className="newTopNavHeaderTitle">
-                    {breadcrumbs && <h1>{breadcrumbs[breadcrumbs.length - 1]?.text}</h1>}
+                    {breadcrumbs && (
+                      <h1 className="eui-textBreakWord">
+                        {breadcrumbs[breadcrumbs.length - 1]?.text}
+                      </h1>
+                    )}
                   </EuiTitle>
                 </EuiHeaderSectionItem>
               </EuiFlexItem>
 
-              {badge && <EuiFlexItem>{badge}</EuiFlexItem>}
+              {badge && <EuiFlexItem grow={false}>{badge}</EuiFlexItem>}
 
-              {leftControls && <EuiFlexItem>{leftControls}</EuiFlexItem>}
+              {leftControls && <EuiFlexItem grow={false}>{leftControls}</EuiFlexItem>}
             </EuiFlexGroup>
           </EuiHeaderSection>
 
@@ -593,7 +632,10 @@ export function Header({
           {renderRecentItems()}
           {actionMenu}
         </EuiHeaderSection>
-        <EuiHeaderSection side="right">{rightControls}</EuiHeaderSection>
+        <EuiHeaderSection side="right">
+          {rightControls}
+          {renderPrimaryHeaderRight()}
+        </EuiHeaderSection>
       </EuiHeader>
       <div id="applicationHeaderFilterBar" />
     </div>
@@ -616,13 +658,11 @@ export function Header({
             appId$={application.currentAppId$}
             collapsibleNavHeaderRender={collapsibleNavHeaderRender}
             id={navId}
-            isLocked={isLocked}
             navLinks$={observables.navLinks$}
             isNavOpen={isNavOpen}
             basePath={basePath}
             navigateToApp={application.navigateToApp}
             navigateToUrl={application.navigateToUrl}
-            onIsLockedUpdate={onIsLockedUpdate}
             closeNav={() => {
               setIsNavOpen(false);
               if (toggleCollapsibleNavRef.current) {
@@ -637,6 +677,7 @@ export function Header({
             setCurrentNavGroup={setCurrentNavGroup}
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
+            globalSearchCommands={globalSearchCommands}
           />
         ) : (
           <CollapsibleNav
@@ -660,6 +701,7 @@ export function Header({
             }}
             customNavLink$={observables.customNavLink$}
             logos={logos}
+            workspaceEnabled={application.capabilities.workspaces.enabled}
           />
         )}
       </header>

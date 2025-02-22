@@ -34,6 +34,10 @@ import { UiSettingsParams } from 'opensearch-dashboards/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
+// cannot import from core/server due to src/core/server/saved_objects/opensearch_query.js which
+// export { opensearchKuery } from '../../../plugins/data/server';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { UiSettingScope } from '../../../core/server/ui_settings/types';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
   defaultMessage: 'Lucene',
@@ -79,7 +83,9 @@ const numeralLanguageIds = [
   }),
 ];
 
-export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
+export function getUiSettings(
+  workspaceEnabled: boolean
+): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.META_FIELDS]: {
       name: i18n.translate('data.advancedSettings.metaFieldsTitle', {
@@ -200,6 +206,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         defaultMessage: 'The index to access if no index is set',
       }),
       schema: schema.nullable(schema.string()),
+      scope: workspaceEnabled ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL,
     },
     [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: {
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
@@ -528,6 +535,17 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
+    [UI_SETTINGS.DATA_WITH_LONG_NUMERALS]: {
+      name: i18n.translate('data.advancedSettings.data.withLongNumeralsTitle', {
+        defaultMessage: 'Extend Numeric Precision',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.data.withLongNumeralsText', {
+        defaultMessage:
+          "Turn on for precise handling of extremely large numbers. Turn off to optimize performance when high precision for large values isn't required.",
+      }),
+      schema: schema.boolean(),
+    },
     [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
       name: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
         defaultMessage: 'Time filter refresh interval',
@@ -720,6 +738,37 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       requiresPageReload: true,
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES]: {
+      name: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesTitle', {
+        defaultMessage: 'Allow for Value Suggestion through the enhancements APIs',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesText', {
+        defaultMessage: `
+          Value Suggestion will be done through a SQL query to the enhancements APIs, sorted by the most frequent options
+          <strong>Experimental</strong>: Requires query enhancements enabled.`,
+      }),
+      category: ['search'],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT]: {
+      name: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesLimitTitle', {
+        defaultMessage: 'Enhancements Value Suggestion Limit',
+      }),
+      value: 200,
+      description: i18n.translate(
+        'data.advancedSettings.query.enhancements.suggestValuesLimitText',
+        {
+          defaultMessage: `
+          The limit on number of values fetched
+          <strong>Experimental</strong>: Requires query enhancements enabled.`,
+        }
+      ),
+      category: ['search'],
+      requiresPageReload: true,
+      schema: schema.number(),
+    },
     [UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY]: {
       name: i18n.translate('data.advancedSettings.query.dataFrameHydrationStrategyTitle', {
         defaultMessage: 'Data frame hydration strategy',
@@ -757,7 +806,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       value: ['none'],
       description: i18n.translate('data.advancedSettings.searchQueryLanguageBlocklistText', {
-        defaultMessage: `Additional languages that are blocked from being used in the query editor. 
+        defaultMessage: `Additional languages that are blocked from being used in the query editor.
          <strong>Note</strong>: DQL and Lucene will not be blocked even if set.`,
       }),
       schema: schema.arrayOf(schema.string()),
@@ -773,6 +822,15 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         Adds the <code>"fields": ["*"]</code> property to search request body`,
       }),
       schema: schema.boolean(),
+      category: ['search'],
+    },
+    [UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS]: {
+      name: i18n.translate('data.advancedSettings.searchMaxRecentDatasets', {
+        defaultMessage: 'Maximum datasets in recents list',
+      }),
+      value: 4,
+      type: 'number',
+      schema: schema.number(),
       category: ['search'],
     },
   };

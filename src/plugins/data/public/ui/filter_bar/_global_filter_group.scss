@@ -81,4 +81,8 @@
   &--compressed {
     margin-top: -$euiSizeS;
   }
+
+  &__allFiltersPopover {
+    background-color: $euiFormInputGroupLabelBackground;
+  }
 }

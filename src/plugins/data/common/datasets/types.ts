@@ -28,6 +28,8 @@ export interface DataSourceMeta {
   name?: string;
   /** Optional session ID for faster responses when utilizing async query sources */
   sessionId?: string;
+  /** Optional supportsTimeFilter determines if a time filter is needed */
+  supportsTimeFilter?: boolean;
 }
 
 /**
@@ -115,11 +117,15 @@ export interface DataStructure {
   title: string;
   /** The type of the data structure */
   type: string;
+  /** Optional description of the data structure */
+  description?: string;
   /** Optional reference to the parent data structure */
   parent?: DataStructure;
   /** Optional array of child data structures */
   children?: DataStructure[];
   hasNext?: boolean;
+  paginationToken?: string;
+  multiSelect?: boolean;
   columnHeader?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
@@ -243,6 +249,13 @@ export interface Dataset extends BaseDataset {
   timeFieldName?: string;
   /** Optional language to default to from the language selector */
   language?: string;
+  /** Optional reference to the source dataset. Example usage is for indexed views to store the
+   * reference to the table dataset
+   */
+  sourceDatasetRef?: {
+    id: string;
+    type: string;
+  };
 }
 
 export interface DatasetField {

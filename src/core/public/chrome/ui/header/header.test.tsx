@@ -72,6 +72,7 @@ function mockProps() {
     navControlsRight$: new BehaviorSubject([]),
     navControlsExpandedCenter$: new BehaviorSubject([]),
     navControlsExpandedRight$: new BehaviorSubject([]),
+    navControlsPrimaryHeaderRight$: new BehaviorSubject([]),
     basePath: http.basePath,
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
@@ -226,7 +227,7 @@ describe('Header', () => {
     expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeFalsy();
     expect(component.find('HeaderBadge').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerLeftControl"]').exists()).toBeFalsy();
-    expect(component.find('HeaderNavControls').exists()).toBeFalsy();
+    expect(component.find('HeaderNavControls')).toHaveLength(1);
     expect(component.find('[data-test-subj="headerCenterControl"]').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
     expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
@@ -256,5 +257,20 @@ describe('Header', () => {
     expect(component.find('RecentItems').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
     expect(component).toMatchSnapshot();
+  });
+
+  it('should remember the collapse state when new nav is enabled', () => {
+    const branding = {
+      useExpandedHeader: false,
+    };
+    const props = {
+      ...mockProps(),
+      branding,
+      useUpdatedHeader: true,
+      onIsLockedUpdate: jest.fn(),
+    };
+    const component = mountWithIntl(<Header {...props} />);
+    component.find(EuiHeaderSectionItemButton).first().simulate('click');
+    expect(props.onIsLockedUpdate).toBeCalledWith(true);
   });
 });

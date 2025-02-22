@@ -42,6 +42,7 @@ import {
   ScopedHistory,
 } from 'opensearch-dashboards/public';
 
+import { WorkspaceAvailability } from '../../../../src/core/public';
 import {
   Storage,
   createOsdUrlTracker,
@@ -158,6 +159,7 @@ export class VisualizePlugin
       title: 'Visualize',
       order: 8000,
       euiIconType: 'inputOutput',
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       updater$: this.appStateUpdater.asObservable(),
@@ -236,7 +238,7 @@ export class VisualizePlugin
       {
         id: visualizeAppId,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 200,
+        order: 100,
         title: titleInLeftNav,
       },
     ]);
@@ -244,7 +246,7 @@ export class VisualizePlugin
       {
         id: visualizeAppId,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 200,
+        order: 100,
         title: titleInLeftNav,
       },
     ]);
@@ -259,16 +261,16 @@ export class VisualizePlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
       {
         id: visualizeAppId,
-        category: DEFAULT_APP_CATEGORIES.analyzeSearch,
-        order: 400,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+        order: 100,
         title: titleInLeftNav,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
       {
         id: visualizeAppId,
-        category: undefined,
-        order: 400,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+        order: 100,
         title: titleInLeftNav,
       },
     ]);
