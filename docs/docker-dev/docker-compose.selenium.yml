@@ -1,4 +1,3 @@
-version: '3'
 services:
   selenium-test:
     build:
