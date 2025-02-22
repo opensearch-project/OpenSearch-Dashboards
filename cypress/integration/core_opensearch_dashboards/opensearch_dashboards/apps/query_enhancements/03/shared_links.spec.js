@@ -9,21 +9,21 @@ import {
   INDEX_PATTERN_WITH_TIME_1,
   PATHS,
   DATASOURCE_NAME,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   setHistogramIntervalIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/constants';
-import { selectFieldFromSidebar } from '../../../../../utils/apps/query_enhancements/sidebar';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
+import { selectFieldFromSidebar } from '../../../../../../utils/apps/query_enhancements/sidebar';
 import {
   verifyShareUrl,
   openShareMenuWithRetry,
-} from '../../../../../utils/apps/query_enhancements/shared_links';
-import { setSort } from '../../../../../utils/apps/query_enhancements/table';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared_links';
+import { setSort } from '../../../../../../utils/apps/query_enhancements/table';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -76,6 +76,7 @@ export const runSharedLinksTests = () => {
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
@@ -101,7 +102,7 @@ export const runSharedLinksTests = () => {
               isEnhancement: true,
             });
           }
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
             page: 'discover',
             isEnhancement: true,
@@ -164,6 +165,9 @@ export const runSharedLinksTests = () => {
           // Set interval
           setHistogramIntervalIfRelevant(config.language, testData.interval);
 
+          // scroll to top
+          cy.getElementByTestId('dscCanvas').scrollTo('top', { ensureScrollable: false });
+
           // Set query
           cy.setQueryEditor(queryString, { parseSpecialCharSequences: false });
 
@@ -209,7 +213,7 @@ export const runSharedLinksTests = () => {
           // Before save, export as saved object is disabled
           cy.getElementByTestId('exportAsSavedObject').find('input').should('be.disabled');
           cy.saveSearch(config.saveName);
-          cy.waitForLoader(true);
+          cy.osd.waitForLoader(true);
           openShareMenuWithRetry();
           cy.getElementByTestId('exportAsSavedObject').find('input').should('not.be.disabled');
           cy.getElementByTestId('exportAsSavedObject').click();

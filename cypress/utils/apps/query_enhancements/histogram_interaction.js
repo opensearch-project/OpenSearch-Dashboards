@@ -33,7 +33,7 @@ export const HistogramDatasetTypes = {
  * @returns {HistogramTestConfig}
  */
 export const generateHistogramTestConfigurations = (dataset, datasetType, language) => {
-  const isHistogramVisible = language.name === QueryLanguages.SQL.name ? false : true;
+  const isHistogramVisible = language.name !== QueryLanguages.SQL.name;
   let langPermutation;
   if (datasetType === DatasetTypes.INDEX_PATTERN.name) {
     // access the supportedLanguages object and converting it into an array

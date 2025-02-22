@@ -39,7 +39,7 @@ declare namespace Cypress {
      * @param includeFilters - Save filters.
      * @param includeTimeFilter - Save Time filter.
      */
-    updateSaveQuery(
+    updateSavedQuery(
       name: string,
       saveAsNewQuery: boolean,
       includeFilters?: boolean,
@@ -49,8 +49,8 @@ declare namespace Cypress {
      * Load a saved query.
      * @param name - Name of saved query.
      */
-    loadSaveQuery(name: string): Chainable<any>;
-    clearSaveQuery(): Chainable<any>;
-    deleteSaveQuery(name: string): Chainable<any>;
+    loadSavedQuery(name: string): Chainable<any>;
+    clearSavedQuery(): Chainable<any>;
+    deleteSavedQuery(name: string): Chainable<any>;
   }
 }

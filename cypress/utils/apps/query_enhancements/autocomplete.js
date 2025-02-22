@@ -347,6 +347,12 @@ export const hideWidgets = (maxAttempts = 3) => {
     cy.get('.inputarea').type('{esc}', { force: true });
 
     return cy.get('.suggest-widget').then(($widget) => {
+      // sometimes when cypress interacts with editor, the visible class does not go away but the height is 0
+      // that is sufficient
+      if ($widget.height() === 0) {
+        return;
+      }
+
       if ($widget.hasClass('visible')) {
         if (attempts >= maxAttempts) {
           throw new Error('Failed to hide widgets after ${maxAttempts} attempts');

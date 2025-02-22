@@ -12,19 +12,19 @@ import {
   QueryLanguages,
   PATHS,
   START_TIME,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   postRequestSaveSearch,
   generateSavedTestConfiguration,
   getExpectedHitCount,
   loadSavedSearchFromDashboards,
   navigateToDashboardAndOpenSavedSearchPanel,
-} from '../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -51,7 +51,8 @@ export const runSavedSearchTests = () => {
       });
 
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
@@ -61,6 +62,7 @@ export const runSavedSearchTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+      cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
     });
 
     afterEach(() => {

@@ -48,6 +48,15 @@ const plugins = [
   require.resolve('@babel/plugin-transform-logical-assignment-operators'),
 ];
 
+if (process.env.COVERAGE) {
+  plugins.unshift([
+    'istanbul',
+    {
+      exclude: ['**/public/framework/redux/store/**', '**/bootstrap/osd_bundles_loader_source.js'],
+    },
+  ]);
+}
+
 module.exports = {
   presets: [
     [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],

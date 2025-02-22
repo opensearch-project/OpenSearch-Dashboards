@@ -6,13 +6,6 @@
 declare namespace Cypress {
   interface Chainable<Subject> {
     /**
-     * Wait for Dashboards page to load
-     * @example
-     * cy.waitForLoader()
-     */
-    waitForLoader(isEnhancement?: boolean): Chainable<any>;
-
-    /**
      * Set the top nav query value
      * @example
      * cy.setTopNavQuery('products.base_price > 40')

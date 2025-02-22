@@ -7,21 +7,6 @@ import './data_explorer/commands';
 import './query_enhancements/commands';
 import './workspace/commands';
 
-Cypress.Commands.add('waitForLoader', (isEnhancement = false) => {
-  const opts = { log: false };
-
-  Cypress.log({
-    name: 'waitForPageLoad',
-    displayName: 'wait',
-    message: 'page load',
-  });
-
-  // Use recentItemsSectionButton for query enhancement, otherwise use homeIcon
-  cy.getElementByTestId(isEnhancement ? 'recentItemsSectionButton' : 'homeIcon', opts).should(
-    'be.visible'
-  );
-});
-
 Cypress.Commands.add('setTopNavQuery', (value, submit = true) => {
   const opts = { log: false };
 

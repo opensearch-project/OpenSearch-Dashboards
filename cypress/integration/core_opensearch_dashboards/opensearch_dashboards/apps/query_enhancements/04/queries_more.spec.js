@@ -9,19 +9,19 @@ import {
   PATHS,
   DATASOURCE_NAME,
   DatasetTypes,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateBaseConfiguration,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { getDatasetName } from '../../../../../utils/apps/query_enhancements/autocomplete';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { getDatasetName } from '../../../../../../utils/apps/query_enhancements/autocomplete';
 import {
   generateQueryTestConfigurations,
   LanguageConfigs,
-} from '../../../../../utils/apps/query_enhancements/queries';
-import { prepareTestSuite } from '../../../../../utils/helpers';
-import { getDocTableField } from '../../../../../utils/apps/query_enhancements/doc_table';
+} from '../../../../../../utils/apps/query_enhancements/queries';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { getDocTableField } from '../../../../../../utils/apps/query_enhancements/doc_table';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -45,6 +45,7 @@ export const runQueryTests = () => {
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
@@ -78,7 +79,7 @@ export const runQueryTests = () => {
               indexPatternHasTimefield: false,
             });
           }
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
             page: 'discover',
             isEnhancement: true,

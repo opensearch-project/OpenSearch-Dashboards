@@ -85,7 +85,7 @@ Cypress.Commands.add(
     }
 
     cy.getElementByTestId('saveFilter').click({ force: true });
-    cy.waitForLoader(isEnhancement);
+    cy.osd.waitForLoader(isEnhancement);
   }
 );
 
@@ -120,7 +120,7 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add(
-  'updateSaveQuery',
+  'updateSavedQuery',
   (name = '', saveAsNewQuery = false, includeFilters = true, includeTimeFilter = false) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
       cy.getElementByTestId('saved-query-management-popover-button').click();
@@ -157,8 +157,10 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('loadSaveQuery', (name) => {
+Cypress.Commands.add('loadSavedQuery', (name) => {
   ensurePopoverIsOpen();
+  cy.getElementByTestId('saved-query-management-popover-button').click();
+
   cy.getElementByTestId('saved-query-management-open-button').click();
 
   cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
@@ -166,7 +168,7 @@ Cypress.Commands.add('loadSaveQuery', (name) => {
   cy.getElementByTestId('open-query-action-button').click({ force: true });
 });
 
-Cypress.Commands.add('clearSaveQuery', () => {
+Cypress.Commands.add('clearSavedQuery', () => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {
     cy.getElementByTestId('saved-query-management-popover-button').click();
   });
@@ -174,8 +176,10 @@ Cypress.Commands.add('clearSaveQuery', () => {
   cy.getElementByTestId('saved-query-management-clear-button').click();
 });
 
-Cypress.Commands.add('deleteSaveQuery', (name) => {
+Cypress.Commands.add('deleteSavedQuery', (name) => {
   ensurePopoverIsOpen();
+  cy.getElementByTestId('saved-query-management-popover-button').click();
+
   cy.getElementByTestId('saved-query-management-open-button').click();
   cy.getElementByTestId('euiFlyoutCloseButton')
     .parent()

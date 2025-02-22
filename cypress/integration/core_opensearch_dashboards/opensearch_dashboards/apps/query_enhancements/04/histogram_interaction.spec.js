@@ -10,16 +10,16 @@ import {
   INDEX_WITH_TIME_1,
   QueryLanguages,
   DATASOURCE_NAME,
-} from '../../../../../utils/apps/constants';
-import { BASE_PATH, PATHS } from '../../../../../utils/constants';
+} from '../../../../../../utils/apps/constants';
+import { PATHS } from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { generateHistogramTestConfigurations } from '../../../../../utils/apps/query_enhancements/histogram_interaction';
-import { DatasetTypes } from '../../../../../utils/apps/query_enhancements/constants';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/query_enhancements/histogram_interaction';
+import { DatasetTypes } from '../../../../../../utils/apps/query_enhancements/constants';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 
@@ -41,6 +41,7 @@ const runHistogramInteractionTests = () => {
       });
       // Create workspace
       cy.deleteWorkspaceByName(workspace);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
       cy.createWorkspaceIndexPatterns({
@@ -51,8 +52,7 @@ const runHistogramInteractionTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
         page: 'discover',
         isEnhancement: true,

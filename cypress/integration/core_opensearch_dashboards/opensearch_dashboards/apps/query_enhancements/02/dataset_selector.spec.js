@@ -10,23 +10,23 @@ import {
   INDEX_WITH_TIME_2,
   PATHS,
   DatasetTypes,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   getDefaultQuery,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 
-import { verifyDiscoverPageState } from '../../../../../utils/apps/query_enhancements/saved';
+import { verifyDiscoverPageState } from '../../../../../../utils/apps/query_enhancements/saved';
 
 import {
   generateDatasetSelectorTestConfiguration,
   verifyBaseState,
   setUpBaseState,
-} from '../../../../../utils/apps/query_enhancements/dataset_selector';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/dataset_selector';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -52,7 +52,8 @@ export const runDatasetSelectorTests = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
@@ -73,7 +74,7 @@ export const runDatasetSelectorTests = () => {
 
     generateAllTestConfigurations(generateDatasetSelectorTestConfiguration).forEach((config) => {
       it(`should be able to select and load ${config.testName} dataset-language combination using advanced dataset selector`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -98,7 +99,7 @@ export const runDatasetSelectorTests = () => {
       });
 
       it(`select the ${config.testName} dataset-language combination and cancelling the workflow restores the original state`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,

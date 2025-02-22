@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_PATTERN_WITH_TIME, INDEX_WITH_TIME_1 } from '../../../../../utils/apps/constants.js';
-import { PATHS, BASE_PATH, DATASOURCE_NAME } from '../../../../../utils/constants.js';
-import { DatasetTypes } from '../../../../../utils/apps/query_enhancements/constants.js';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared.js';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+import {
+  INDEX_PATTERN_WITH_TIME,
+  INDEX_WITH_TIME_1,
+} from '../../../../../../utils/apps/constants.js';
+import { PATHS, BASE_PATH, DATASOURCE_NAME } from '../../../../../../utils/constants.js';
+import { DatasetTypes } from '../../../../../../utils/apps/query_enhancements/constants.js';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared.js';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -28,6 +31,7 @@ const cachingTestSuite = () => {
       });
       // Create workspace
       cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.wait(2000);
@@ -40,7 +44,7 @@ const cachingTestSuite = () => {
         isEnhancement: true,
       });
 
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'discover',
@@ -69,7 +73,7 @@ const cachingTestSuite = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'discover',
@@ -82,8 +86,15 @@ const cachingTestSuite = () => {
       cy.get(`[title="Index Patterns"]`).click();
 
       cy.wait('@getIndexPatternRequest').then((interceptedResponse) => {
-        const secondIndexPattern = interceptedResponse.response.body.saved_objects[1];
-        cy.wrap(secondIndexPattern.attributes.title).should('eq', alternativeIndexPattern);
+        let containsIndexPattern = false;
+
+        for (const savedObject of interceptedResponse.response.body.saved_objects) {
+          if (savedObject.attributes.title === alternativeIndexPattern) {
+            containsIndexPattern = true;
+          }
+        }
+
+        cy.wrap(containsIndexPattern).should('be.true');
       });
     });
   });
