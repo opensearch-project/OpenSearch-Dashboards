@@ -6,7 +6,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
- - [CVE-2024-27980, CVE-2024-27983, CVE-2024-36138] Bump `NodeJS` from 18.20.4 to 18.20.7 ([#8294](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8294))
+ - [CVE-2024-27980, CVE-2024-27983, CVE-2024-36138] Bump `NodeJS` from 18.19.0 to 18.20.7 ([#8294](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8294))
 
 ## [2.19.0-2025-02-04](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.19.0)
 
