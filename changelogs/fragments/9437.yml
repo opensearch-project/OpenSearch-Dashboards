@@ -1,0 +1,7 @@
+test:
+- Introduce code coverage collection to Cypress runs ([#9437](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9437))
+- Enable Cypress tests to detect features of the OSD instance they are running against ([#9437](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9437))
+- Turn on test isolation when security is disabled ([#9437](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9437))
+
+infra:
+- Add coverage reporting to Cypress CI ([#9437](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9437))
