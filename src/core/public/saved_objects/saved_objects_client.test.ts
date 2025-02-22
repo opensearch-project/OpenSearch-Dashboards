@@ -82,6 +82,7 @@ describe('SavedObjectsClient', () => {
           Object {
             "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"}]",
             "method": "POST",
+            "prependOptions": undefined,
             "query": undefined,
           },
         ]
@@ -103,6 +104,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type1\\"},{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type0\\"}]",
               "method": "POST",
+              "prependOptions": undefined,
               "query": undefined,
             },
           ],
@@ -126,6 +128,7 @@ describe('SavedObjectsClient', () => {
           Object {
             "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"},{\\"id\\":\\"some-id\\",\\"type\\":\\"some-type\\"}]",
             "method": "POST",
+            "prependOptions": undefined,
             "query": undefined,
           },
         ]
@@ -196,6 +199,7 @@ describe('SavedObjectsClient', () => {
           Object {
             "body": undefined,
             "method": "DELETE",
+            "prependOptions": undefined,
             "query": Object {
               "force": false,
             },
@@ -240,6 +244,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"version\\":\\"1\\"}",
               "method": "PUT",
+              "prependOptions": undefined,
               "query": undefined,
             },
           ],
@@ -302,6 +307,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"}}",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": undefined,
               },
@@ -320,6 +326,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"}}",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": undefined,
               },
@@ -340,6 +347,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"workspaces\\":[\\"foo\\"]}",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": undefined,
               },
@@ -380,6 +388,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": false,
               },
@@ -398,6 +407,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": true,
               },
@@ -418,6 +428,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": undefined,
                 "workspaces": Array [
@@ -460,6 +471,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
               "method": "PUT",
+              "prependOptions": undefined,
               "query": undefined,
             },
           ],
@@ -509,6 +521,9 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": undefined,
               "method": "GET",
+              "prependOptions": Object {
+                "withoutClientBasePath": true,
+              },
               "query": Object {
                 "default_search_operator": "OR",
                 "fields": Array [
@@ -547,6 +562,9 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": undefined,
               "method": "GET",
+              "prependOptions": Object {
+                "withoutClientBasePath": true,
+              },
               "query": Object {},
             },
           ],
@@ -569,6 +587,9 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": undefined,
               "method": "GET",
+              "prependOptions": Object {
+                "withoutClientBasePath": true,
+              },
               "query": Object {
                 "workspaces": Array [
                   "foo",
@@ -617,6 +638,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"workspaces\\":[\\"foo\\"]}",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": undefined,
               },
@@ -635,6 +657,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"workspaces\\":[\\"foo\\"]}",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": undefined,
               },
@@ -655,6 +678,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"workspaces\\":[\\"foo\\"]}",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": undefined,
               },
@@ -679,6 +703,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": false,
                 "workspaces": Array [
@@ -700,6 +725,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": true,
                 "workspaces": Array [
@@ -723,6 +749,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
+              "prependOptions": undefined,
               "query": Object {
                 "overwrite": undefined,
                 "workspaces": Array [
@@ -756,6 +783,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
               "method": "PUT",
+              "prependOptions": undefined,
               "query": undefined,
             },
           ],
@@ -792,6 +820,9 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": undefined,
               "method": "GET",
+              "prependOptions": Object {
+                "withoutClientBasePath": true,
+              },
               "query": Object {
                 "default_search_operator": "OR",
                 "fields": Array [
@@ -832,6 +863,9 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
             Object {
               "body": undefined,
               "method": "GET",
+              "prependOptions": Object {
+                "withoutClientBasePath": true,
+              },
               "query": Object {
                 "workspaces": Array [
                   "bar",
