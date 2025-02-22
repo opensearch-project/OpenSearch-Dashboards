@@ -56,6 +56,9 @@ describe('callMsearch', () => {
           "/internal/_msearch",
           Object {
             "body": "{\\"searches\\":[{\\"header\\":{\\"index\\":\\"foo\\"},\\"body\\":{}}]}",
+            "query": Object {
+              "data_source_id": undefined,
+            },
             "signal": AbortSignal {},
           },
         ],
