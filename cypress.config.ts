@@ -4,6 +4,7 @@
  */
 
 import { defineConfig } from 'cypress';
+import codeCoverageTask from '@cypress/code-coverage/task';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
 // TODO: import { paste } from 'copy-paste';
 
@@ -21,11 +22,11 @@ module.exports = defineConfig({
   env: {
     ENGINE: {
       name: 'default',
-      url: 'http://localhost:9200',
+      url: undefined,
     },
     SECONDARY_ENGINE: {
       name: 'test_cluster',
-      url: 'http://localhost:9200',
+      url: undefined,
     },
     S3_ENGINE: {
       name: 'BasicS3Connection',
@@ -34,7 +35,6 @@ module.exports = defineConfig({
       password: process.env.S3_CONNECTION_PASSWORD,
     },
     openSearchUrl: 'http://localhost:9200',
-    SECURITY_ENABLED: false,
     AGGREGATION_VIEW: false,
     username: 'admin',
     password: 'myStrongPassword123!',
@@ -46,6 +46,9 @@ module.exports = defineConfig({
     WAIT_FOR_LOADER_BUFFER_MS: 0,
     DISABLE_LOCAL_CLUSTER: false,
     CYPRESS_RUNTIME_ENV: 'osd',
+
+    // This value is automatically determined at runtime
+    SECURITY_ENABLED: false,
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
@@ -55,10 +58,15 @@ module.exports = defineConfig({
   },
 });
 
-function setupNodeEvents(
+async function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
-): Cypress.PluginConfigOptions {
+): Promise<Cypress.PluginConfigOptions> {
+  if (process.env.COVERAGE) {
+    config.env.codeCoverage = { url: '/__coverage__' };
+    codeCoverageTask(on, config);
+  }
+
   const { webpackOptions } = webpackPreprocessor.defaultOptions;
 
   /**
