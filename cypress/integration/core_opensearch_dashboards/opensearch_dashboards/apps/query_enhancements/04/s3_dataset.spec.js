@@ -8,9 +8,9 @@ import {
   DSM_API,
   S3_CLUSTER,
   JOBS_API,
-} from '../../../../../utils/apps/query_enhancements/constants';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/constants';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 
@@ -89,9 +89,10 @@ const s3DatasetTestSuite = () => {
         beforeEach(() => {
           // Create workspace
           cy.deleteWorkspaceByName(workspace);
+          cy.osd.deleteAllOldWorkspaces();
           cy.visit('/app/home');
           cy.osd.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, workspace);
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspace,
             page: 'discover',
             isEnhancement: true,
@@ -115,7 +116,7 @@ const s3DatasetTestSuite = () => {
 
           cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
           cy.getElementByTestId('advancedSelectorConfirmButton').click();
-          cy.waitForLoader(true);
+          cy.osd.waitForLoader(true);
           cy.waitForSearch();
 
           cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'OpenSearch SQL');
@@ -139,7 +140,7 @@ const s3DatasetTestSuite = () => {
 
           cy.getElementByTestId('advancedSelectorLanguageSelect').select('PPL');
           cy.getElementByTestId('advancedSelectorConfirmButton').click();
-          cy.waitForLoader(true);
+          cy.osd.waitForLoader(true);
           cy.waitForSearch();
 
           cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'PPL');

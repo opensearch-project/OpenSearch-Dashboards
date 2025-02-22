@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DATASOURCE_NAME, PATHS, INDEX_WITH_TIME_1 } from '../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+import { DATASOURCE_NAME, PATHS, INDEX_WITH_TIME_1 } from '../../../../../../utils/constants';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -25,7 +25,8 @@ const noIndexPatternTestSuite = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.wait(2000);
@@ -40,12 +41,12 @@ const noIndexPatternTestSuite = () => {
     describe('empty state', () => {
       it('no index pattern', function () {
         // Go to the Discover page
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName: workspaceName,
           page: 'discover',
           isEnhancement: true,
         });
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId('discoverNoIndexPatterns').should('be.visible');
       });
     });

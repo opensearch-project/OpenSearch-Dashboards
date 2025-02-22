@@ -40,7 +40,7 @@ const getExpectedHitCount = (datasetType, language) => {
         case QueryLanguages.SQL.name:
           return undefined;
         case QueryLanguages.PPL.name:
-          // TODO: Update this to 10,894 once Histogram is supported on 2.17
+          // TODO: Update this to 10,904 once Histogram is supported on 2.17
           return undefined;
         default:
           throw new Error(

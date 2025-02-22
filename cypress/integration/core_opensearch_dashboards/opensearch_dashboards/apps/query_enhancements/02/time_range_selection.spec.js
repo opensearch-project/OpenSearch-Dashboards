@@ -9,13 +9,13 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   PATHS,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { generateTimeRangeTestConfiguration } from '../../../../../utils/apps/query_enhancements/time_range_selection';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { generateTimeRangeTestConfiguration } from '../../../../../../utils/apps/query_enhancements/time_range_selection';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -41,7 +41,8 @@ export const runTimeRangeSelectionTests = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
@@ -58,11 +59,15 @@ export const runTimeRangeSelectionTests = () => {
       cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
       cy.osd.deleteIndex(INDEX_WITH_TIME_1);
       cy.osd.deleteIndex(INDEX_WITH_TIME_2);
+      cy.window().then((win) => {
+        win.localStorage.clear();
+        win.sessionStorage.clear();
+      });
     });
 
     generateAllTestConfigurations(generateTimeRangeTestConfiguration).forEach((config) => {
       it(`Time Range Selection using the quick select menu ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -83,7 +88,7 @@ export const runTimeRangeSelectionTests = () => {
       });
 
       it(`Time Range Selection using the relative time select menu ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -104,7 +109,7 @@ export const runTimeRangeSelectionTests = () => {
       });
 
       it(`Time Range Selection using the absolute time select menu ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,

@@ -15,11 +15,17 @@ const formatDateForUrl = (dateString) => {
  * @param {Object} config Test configuration
  * @param {Object} testData Data that should be in columns
  * @param {string} datasourceName Expected datasource name
+ * @param {string} queryString Expected query string
  */
 export const verifyShareUrl = (url, config, testData, datasourceName, queryString) => {
-  const hashPart = url.split('#')[1];
+  let hashPart = url.split('#')[1];
   if (!hashPart) {
     throw new Error('No hash part in URL');
+  }
+
+  // sometimes there is a beginning slash in the hash part that causes test failures. Remove it
+  if (hashPart[0] === '/') {
+    hashPart = hashPart.substring(1);
   }
 
   const searchParams = new URLSearchParams(hashPart);
