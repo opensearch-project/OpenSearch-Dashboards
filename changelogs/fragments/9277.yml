@@ -1,0 +1,2 @@
+fix:
+- Hide the assistant entry when there isn't data2summary agent ([#9277](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9277))
