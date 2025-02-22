@@ -10,6 +10,20 @@ import { APPLIED_FILTERS } from './saved';
 import { setDatePickerDatesAndSearchIfRelevant } from './shared';
 
 /**
+ * Ensures the saved query management popover is open by checking its state and clicking if needed
+ */
+export const ensurePopoverIsOpen = () => {
+  cy.getElementByTestId('saved-query-management-popover-button')
+    .parent()
+    .parent()
+    .then(($popover) => {
+      if (!$popover.hasClass('euiPopover-isOpen')) {
+        cy.getElementByTestId('saved-query-management-popover-button').click();
+      }
+    });
+};
+
+/**
  * Error text when there is a name conflict when saving a query.
  * @constant
  * @type {string}
@@ -273,7 +287,7 @@ export const setAlternateQueryConfigurations = ({ filters, queryString, histogra
  */
 export const verifyQueryDoesNotExistInSavedQueries = (deletedQueryName) => {
   cy.reload();
-  cy.getElementByTestId('saved-query-management-popover-button').click();
+  ensurePopoverIsOpen();
   cy.getElementByTestId('saved-query-management-open-button').click();
   cy.getElementByTestId('savedQueriesFlyoutBody').contains(deletedQueryName).should('not.exist');
   // Two references to two buttons layered over each other.
