@@ -1,0 +1,2 @@
+fix:
+- Flatten hit modify original array ([#9347](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9347))
