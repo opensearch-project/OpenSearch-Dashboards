@@ -12,15 +12,14 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
   EuiPageHeader,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiBasicTable,
   EuiLoadingSpinner,
-  EuiFieldText,
   EuiSpacer,
+  EuiComboBox,
+  EuiFormRow,
 } from '@elastic/eui';
 import { extname } from 'path';
 import {
@@ -78,30 +77,46 @@ export const DataImporterPluginApp = ({
   const [dataType, setDataType] = useState<string | undefined>(
     config.enabledFileTypes.length > 0 ? config.enabledFileTypes[0] : undefined
   );
-  const [filePreviewData, setFilePreviewData] = useState<any[]>([]);
+  const [filePreviewData, setFilePreviewData] = useState<any>({});
   const [inputText, setText] = useState<string | undefined>();
   const [inputFile, setInputFile] = useState<File | undefined>();
   const [dataSourceId, setDataSourceId] = useState<string | undefined>();
-  const [selectedDataSource, setSelectedDataSource] = useState<DataSourceOption | undefined>();
-  const [filePreviewColumns, setFilePreviewColumns] = useState<any[]>([]);
   const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
-  const [showDelimiterChoice, setShowDelimiterChoice] = useState<boolean>(shouldShowDelimiter());
+  const [showDelimiterChoice, setShowDelimiterChoice] = useState<boolean>(false);
   const [delimiter, setDelimiter] = useState<string | undefined>(
     dataType === CSV_FILE_TYPE ? CSV_SUPPORTED_DELIMITERS[0] : undefined
   );
   const [visibleRows, setVisibleRows] = useState<number>(10);
+  const [indexOptions, setIndexOptions] = useState<Array<{ label: string }>>([]);
+  const [createMode, setCreateMode] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchIndices = async () => {
+      try {
+        const response = await http.get('/api/data_importer/_cat_indices');
+        setIndexOptions(response.indices.map((index: string) => ({ label: index })));
+      } catch (error) {
+        notifications.toasts.addDanger(
+          i18n.translate('dataImporter.indicesFetchError', {
+            defaultMessage: `Failed to fetch indices: {error}`,
+            values: { error },
+          })
+        );
+      }
+    };
+
+    fetchIndices();
+  }, [http, notifications.toasts]);
 
   const onImportTypeChange = (type: ImportChoices) => {
     if (type === IMPORT_CHOICE_FILE) {
       setInputFile(undefined);
+      setShowDelimiterChoice(true);
     } else if (type === IMPORT_CHOICE_TEXT) {
       setText(undefined);
+      setShowDelimiterChoice(false);
     }
     setImportType(type);
-  };
-
-  const onIndexNameChange = (e: any) => {
-    setIndexName(e.target.value);
   };
 
   const onDataTypeChange = (type: string) => {
@@ -109,36 +124,16 @@ export const DataImporterPluginApp = ({
       setDelimiter(undefined);
     }
     setDataType(type);
+    setShowDelimiterChoice(type === CSV_FILE_TYPE && importType === IMPORT_CHOICE_FILE);
   };
 
   const onFileInput = (file?: File) => {
     setInputFile(file);
-    if (file) {
-      setIsLoadingPreview(true);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target?.result as string;
-        const rows = text.split('\n').map((row) => row.split(','));
-        const columns = rows[0].map((header, index) => ({
-          field: `column_${index}`,
-          name: header,
-        }));
-        const data = rows.slice(1, 11).map((row) =>
-          row.reduce((acc: { [key: string]: string }, value, index) => {
-            acc[`column_${index}`] = value;
-            return acc;
-          }, {})
-        );
-        setFilePreviewColumns(columns);
-        setFilePreviewData(data);
-        setIsLoadingPreview(false);
-      };
-      reader.readAsText(file);
-    } else {
-      setFilePreviewColumns([]);
-      setFilePreviewData([]);
+    if (!file) {
+      setFilePreviewData({});
     }
   };
+
   const onTextInput = (text: string) => {
     setText(text);
   };
@@ -150,37 +145,56 @@ export const DataImporterPluginApp = ({
   const onDataSourceSelect = (newDataSource: DataSourceOption[]) => {
     if (newDataSource.length > 0) {
       setDataSourceId(newDataSource[0].id);
-      setSelectedDataSource(newDataSource[0]);
     }
+  };
+
+  const onIndexNameChange = (selected: Array<{ label: string }>) => {
+    if (selected.length) {
+      setIndexName(selected[0].label);
+      setCreateMode(false);
+    } else {
+      setIndexName('');
+    }
+  };
+
+  const onCreateIndexName = (createdOption: string) => {
+    setIndexName(createdOption);
+    setCreateMode(true);
   };
 
   const previewData = async () => {
     if (importType === IMPORT_CHOICE_FILE) {
       if (inputFile) {
         const fileExtension = extname(inputFile.name);
-        const response = await previewFile(
-          http,
-          inputFile,
-          // TODO This should be determined from the index name textbox/selectable
-          true,
-          // TODO This should be determined from the file type selectable
-          fileExtension,
-          indexName!,
-          delimiter,
-          dataSourceId
-        );
-        if (response) {
-          notifications.toasts.addSuccess(
-            i18n.translate('dataImporter.previewSuccess', {
-              defaultMessage: `Preview successful`,
-            })
+        setIsLoadingPreview(true); // Set loading state to true
+        try {
+          const response = await previewFile(
+            http,
+            inputFile,
+            createMode,
+            fileExtension,
+            indexName!,
+            delimiter,
+            dataSourceId
           );
-        } else {
-          notifications.toasts.addDanger(
-            i18n.translate('dataImporter.previewFailed', {
-              defaultMessage: `Preview failed`,
-            })
-          );
+          setIsLoadingPreview(false); // Set loading state to false
+          if (response) {
+            setFilePreviewData(response);
+            notifications.toasts.addSuccess(
+              i18n.translate('dataImporter.previewSuccess', {
+                defaultMessage: `Preview successful`,
+              })
+            );
+          } else {
+            notifications.toasts.addDanger(
+              i18n.translate('dataImporter.previewFailed', {
+                defaultMessage: `Preview failed`,
+              })
+            );
+          }
+        } catch (error) {
+          // console.error(error, 'error');
+          setIsLoadingPreview(false);
         }
       }
     }
@@ -195,8 +209,7 @@ export const DataImporterPluginApp = ({
           http,
           inputFile!,
           indexName!,
-          // TODO This should be determined from the index name textbox/selectable
-          false,
+          createMode,
           // TODO This should be determined from the file type selectable
           extname(inputFile!.name),
           delimiter,
@@ -306,15 +319,7 @@ export const DataImporterPluginApp = ({
   }
 
   function shouldShowDelimiter() {
-    let inputFileType;
-    if (inputFile) {
-      const fileExtention = extname(inputFile.name).toLowerCase();
-      inputFileType = fileExtention.startsWith('.') ? fileExtention.slice(1) : fileExtention;
-    }
-    return (
-      (importType === IMPORT_CHOICE_FILE && inputFile && inputFileType === CSV_FILE_TYPE) ||
-      (importType === IMPORT_CHOICE_TEXT && dataType === CSV_FILE_TYPE)
-    );
+    return importType === IMPORT_CHOICE_FILE && dataType === CSV_FILE_TYPE;
   }
 
   const loadMoreRows = () => {
@@ -342,12 +347,6 @@ export const DataImporterPluginApp = ({
                       updateSelection={onImportTypeChange}
                       initialSelection={importType}
                     />
-                    {showDelimiterChoice && (
-                      <DelimiterSelect
-                        onDelimiterChange={onDelimiterChange}
-                        initialDelimiter={delimiter}
-                      />
-                    )}
                     <EuiTitle size="xs">
                       <span>
                         {i18n.translate('dataImporter.dataSource', {
@@ -355,19 +354,46 @@ export const DataImporterPluginApp = ({
                         })}
                       </span>
                     </EuiTitle>
-                    <EuiFieldText placeholder="Index name" onChange={onIndexNameChange} />
-                    <EuiSpacer size="m" />
-                    {dataSourceEnabled && renderDataSourceComponent}
-                    {importType === IMPORT_CHOICE_FILE && (
-                      <ImportFileContentBody
-                        enabledFileTypes={config.enabledFileTypes}
-                        onFileUpdate={onFileInput}
+                    {true && renderDataSourceComponent}
+                    <EuiSpacer size="s" />
+                    <EuiTitle size="xs">
+                      <span>
+                        {i18n.translate('dataImporter.indexName', {
+                          defaultMessage: 'Create/Select Index Name',
+                        })}
+                      </span>
+                    </EuiTitle>
+                    <EuiFormRow>
+                      <EuiComboBox
+                        placeholder="Enter index name"
+                        singleSelection={{ asPlainText: true }}
+                        options={indexOptions}
+                        selectedOptions={indexName ? [{ label: indexName }] : []}
+                        onChange={onIndexNameChange}
+                        onCreateOption={onCreateIndexName}
                       />
+                    </EuiFormRow>
+                    <EuiSpacer size="s" />
+                    {importType === IMPORT_CHOICE_FILE && (
+                      <>
+                        {showDelimiterChoice && (
+                          <DelimiterSelect
+                            onDelimiterChange={onDelimiterChange}
+                            initialDelimiter={delimiter}
+                          />
+                        )}
+                        <ImportFileContentBody
+                          enabledFileTypes={config.enabledFileTypes}
+                          onFileUpdate={onFileInput}
+                        />
+                      </>
                     )}
-                    <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
-                      Preview
-                    </EuiButton>
-                    <EuiSpacer size="m" />
+                    {importType === IMPORT_CHOICE_FILE && (
+                      <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
+                        Preview
+                      </EuiButton>
+                    )}
+                    <EuiSpacer size="s" />
                     <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
                       Import
                     </EuiButton>
@@ -388,9 +414,11 @@ export const DataImporterPluginApp = ({
                           <EuiLoadingSpinner size="xl" />
                         ) : (
                           <PreviewComponent
-                            previewData={filePreviewData}
+                            previewData={filePreviewData.documents || []}
                             visibleRows={visibleRows}
                             loadMoreRows={loadMoreRows}
+                            predictedMapping={filePreviewData.predictedMapping || {}}
+                            existingMapping={filePreviewData.existingMapping || {}}
                           />
                         )}
                       </div>

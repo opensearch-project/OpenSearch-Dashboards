@@ -14,6 +14,8 @@ import {
   EuiTableRowCell,
   EuiButton,
   EuiFieldSearch,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import './preview_table.scss';
 
@@ -21,23 +23,45 @@ interface PreviewComponentProps {
   previewData: any[];
   visibleRows: number;
   loadMoreRows: () => void;
+  predictedMapping: Record<string, any>;
+  existingMapping: Record<string, any>;
 }
 
 export const PreviewComponent = ({
   previewData,
   visibleRows,
   loadMoreRows,
+  predictedMapping,
+  existingMapping,
 }: PreviewComponentProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const totalRows = previewData.length;
+  const totalRows = previewData?.length;
   const loadedRows = Math.min(visibleRows, totalRows);
 
-  const filteredData = previewData.filter((row) =>
+  const filteredData = previewData?.filter((row) =>
     Object.values(row).some(
       (value) =>
         typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
+
+  const getCellStyle = (field: string) => {
+    const predictedType = predictedMapping?.properties?.[field]?.type;
+    const existingType = existingMapping?.properties?.[field]?.type;
+    if (predictedType && existingType && predictedType !== existingType) {
+      return { color: '#BD271E' };
+    }
+    return {};
+  };
+
+  const getTooltipContent = (field: string) => {
+    const predictedType = predictedMapping?.properties?.[field]?.type;
+    const existingType = existingMapping?.properties?.[field]?.type;
+    if (predictedType && existingType && predictedType !== existingType) {
+      return `Predicted type: ${predictedType}, Existing type: ${existingType}`;
+    }
+    return '';
+  };
 
   return (
     <>
@@ -59,7 +83,7 @@ export const PreviewComponent = ({
         <EuiTable>
           <EuiTableHeader>
             <EuiTableHeaderCell>#</EuiTableHeaderCell>
-            {previewData.length > 0 ? (
+            {previewData?.length > 0 ? (
               Object.keys(previewData[0]).map((key) => (
                 <EuiTableHeaderCell key={key}>{key}</EuiTableHeaderCell>
               ))
@@ -69,11 +93,18 @@ export const PreviewComponent = ({
           </EuiTableHeader>
           <EuiTableBody>
             {totalRows > 0 &&
-              filteredData.slice(0, loadedRows).map((row, rowIndex) => (
+              filteredData?.slice(0, loadedRows).map((row, rowIndex) => (
                 <EuiTableRow key={rowIndex}>
                   <EuiTableRowCell>{rowIndex + 1}</EuiTableRowCell>
                   {Object.keys(row).map((field, colIndex) => (
-                    <EuiTableRowCell key={colIndex}>{row[field]}</EuiTableRowCell>
+                    <EuiTableRowCell key={colIndex} style={getCellStyle(field)}>
+                      {row[field]}
+                      {getTooltipContent(field) && (
+                        <EuiToolTip position="top" content={getTooltipContent(field)}>
+                          <EuiIcon type="alert" color="danger" style={{ marginLeft: '5px' }} />
+                        </EuiToolTip>
+                      )}
+                    </EuiTableRowCell>
                   ))}
                 </EuiTableRow>
               ))}
