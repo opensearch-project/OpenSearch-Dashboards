@@ -118,9 +118,24 @@ Cypress.Commands.add('setQueryLanguage', (value) => {
     message: value,
   });
 
+  // adding wait here as sometimes the button clicks doesn't register
+  cy.wait(2000);
+
   cy.getElementByTestId(`queryEditorLanguageSelector`).click();
   cy.get(`[class~="languageSelector__menuItem"]`).contains(value).click({
     force: true,
+  });
+
+  // Sometimes the syntax highlighter opens automatically. Closing it here if it does that
+  cy.wait(1000);
+  cy.get('body').then(($body) => {
+    const popovers = $body.find('.euiPopoverTitle');
+
+    for (const popover of popovers) {
+      if (popover.textContent === 'Syntax options') {
+        cy.getElementByTestId('languageReferenceButton').click();
+      }
+    }
   });
 });
 
