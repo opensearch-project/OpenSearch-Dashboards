@@ -10,8 +10,8 @@ import {
   INDEX_WITH_TIME_1,
   QueryLanguages,
   START_TIME,
-  WORKSPACE_NAME,
 } from './constants';
+import moment from 'moment';
 
 /**
  * Returns a randomized string
@@ -20,11 +20,11 @@ import {
 const getRandomString = () => Math.random().toString(36);
 
 /**
- * Returns a randomized workspace name
+ * Returns a randomized workspace name. First part will be unix time in seconds
  * @returns {string}
  */
 export const getRandomizedWorkspaceName = () =>
-  `${WORKSPACE_NAME}-${getRandomString().substring(7)}`;
+  `${moment().unix()}-${getRandomString().substring(7)}`;
 
 /**
  * Generates base test configuration for tests

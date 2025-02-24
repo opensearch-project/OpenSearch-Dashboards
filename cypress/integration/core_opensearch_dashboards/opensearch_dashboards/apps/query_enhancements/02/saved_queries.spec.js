@@ -9,7 +9,7 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   PATHS,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 
 import {
   verifyDiscoverPageState,
@@ -18,21 +18,21 @@ import {
   updateAndVerifySavedQuery,
   SAVE_AS_NEW_QUERY_SUFFIX,
   validateSaveAsNewQueryMatchingNameHasError,
-} from '../../../../../utils/apps/query_enhancements/saved_queries';
+} from '../../../../../../utils/apps/query_enhancements/saved_queries';
 
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateAllTestConfigurations,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 
-import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+import { generateSavedTestConfiguration } from '../../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
 const createSavedQuery = (config) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'discover',
     isEnhancement: true,
@@ -50,7 +50,7 @@ const createSavedQuery = (config) => {
 };
 
 const loadSavedQuery = (config) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'discover',
     isEnhancement: true,
@@ -67,7 +67,7 @@ const loadSavedQuery = (config) => {
     'Aug 30, 2020 @ 00:00:00.000'
   );
 
-  cy.loadSaveQuery(`${workspaceName}-${config.saveName}`);
+  cy.loadSavedQuery(`${workspaceName}-${config.saveName}`);
   // wait for saved queries to load.
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
@@ -82,23 +82,23 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
   validateSaveAsNewQueryMatchingNameHasError(`${workspaceName}-${config.saveName}`);
-  cy.updateSaveQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
+  cy.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
 
   cy.reload();
-  cy.loadSaveQuery(`${workspaceName}-${saveAsNewQueryName}`);
+  cy.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
 };
 
 const deleteSavedQuery = (saveAsNewQueryName) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'discover',
     isEnhancement: true,
   });
 
-  cy.deleteSaveQuery(`${workspaceName}-${saveAsNewQueryName}`);
+  cy.deleteSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   verifyQueryDoesNotExistInSavedQueries(`${workspaceName}-${saveAsNewQueryName}`);
 };
 
@@ -124,7 +124,8 @@ const runSavedQueriesUITests = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({

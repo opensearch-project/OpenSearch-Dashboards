@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ensurePopoverIsOpen } from '../query_enhancements/saved_queries';
-
 export const toTestId = (str, replace = '-') => str.replace(/\s+/g, replace);
 
 Cypress.Commands.add('saveSearch', (name, saveAsNew = false) => {
@@ -85,7 +83,7 @@ Cypress.Commands.add(
     }
 
     cy.getElementByTestId('saveFilter').click({ force: true });
-    cy.waitForLoader(isEnhancement);
+    cy.osd.waitForLoader(isEnhancement);
   }
 );
 
@@ -120,7 +118,7 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add(
-  'updateSaveQuery',
+  'updateSavedQuery',
   (name = '', saveAsNewQuery = false, includeFilters = true, includeTimeFilter = false) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
       cy.getElementByTestId('saved-query-management-popover-button').click();
@@ -157,8 +155,9 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('loadSaveQuery', (name) => {
-  ensurePopoverIsOpen();
+Cypress.Commands.add('loadSavedQuery', (name) => {
+  cy.getElementByTestId('saved-query-management-popover-button').click();
+
   cy.getElementByTestId('saved-query-management-open-button').click();
 
   cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
@@ -166,7 +165,7 @@ Cypress.Commands.add('loadSaveQuery', (name) => {
   cy.getElementByTestId('open-query-action-button').click({ force: true });
 });
 
-Cypress.Commands.add('clearSaveQuery', () => {
+Cypress.Commands.add('clearSavedQuery', () => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {
     cy.getElementByTestId('saved-query-management-popover-button').click();
   });
@@ -174,8 +173,9 @@ Cypress.Commands.add('clearSaveQuery', () => {
   cy.getElementByTestId('saved-query-management-clear-button').click();
 });
 
-Cypress.Commands.add('deleteSaveQuery', (name) => {
-  ensurePopoverIsOpen();
+Cypress.Commands.add('deleteSavedQuery', (name) => {
+  cy.getElementByTestId('saved-query-management-popover-button').click();
+
   cy.getElementByTestId('saved-query-management-open-button').click();
   cy.getElementByTestId('euiFlyoutCloseButton')
     .parent()

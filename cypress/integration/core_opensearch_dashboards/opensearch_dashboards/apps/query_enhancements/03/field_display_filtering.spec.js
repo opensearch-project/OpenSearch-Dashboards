@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../utils/apps/constants';
-import * as docTable from '../../../../../utils/apps/query_enhancements/doc_table.js';
-import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../utils/apps/query_enhancements/field_display_filtering.js';
-import { PATHS, BASE_PATH } from '../../../../../utils/constants';
+import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../../utils/apps/constants';
+import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
+import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../../utils/apps/query_enhancements/field_display_filtering.js';
+import { PATHS, BASE_PATH } from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 
@@ -32,7 +32,8 @@ const fieldDisplayFilteringTestSuite = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspace);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
       cy.wait(2000);
@@ -45,7 +46,7 @@ const fieldDisplayFilteringTestSuite = () => {
         isEnhancement: true,
       });
 
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspace,
         page: 'discover',

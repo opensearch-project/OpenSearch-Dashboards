@@ -4,14 +4,13 @@
  */
 
 export const DATASOURCE_NAME = 'data-logs-1';
-export const WORKSPACE_NAME = 'query-ws';
 export const START_TIME = 'Jan 1, 2020 @ 00:00:00.000';
 export const END_TIME = 'Jan 1, 2024 @ 00:00:00.000';
 
 export const clusterName = 'test_cluster';
 export const clusterConnection = 'http://localhost:9200';
 
-export const S3_CLUSTER = Cypress.env('S3_ENGINE');
+export const S3_CLUSTER = Cypress.env('S3_ENGINE') || {};
 
 export const DS_API_PREFIX = '/api/saved_objects';
 export const DS_API = {

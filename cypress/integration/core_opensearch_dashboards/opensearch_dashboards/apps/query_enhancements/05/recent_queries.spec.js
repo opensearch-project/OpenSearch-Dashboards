@@ -7,20 +7,20 @@ import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
-} from '../../../../../utils/apps/constants';
-import { BASE_PATH, PATHS } from '../../../../../utils/constants';
+} from '../../../../../../utils/apps/constants';
+import { BASE_PATH, PATHS } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateAllTestConfigurations,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateRecentQueriesTestConfiguration,
   BaseQuery,
   TestQueries,
   //TODO: QueryRegex,
-} from '../../../../../utils/apps/query_enhancements/recent_queries';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/recent_queries';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 const runRecentQueryTests = () => {
@@ -42,6 +42,7 @@ const runRecentQueryTests = () => {
       });
       // Create workspace
       cy.deleteWorkspaceByName(workspace);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
       cy.createWorkspaceIndexPatterns({
@@ -53,7 +54,7 @@ const runRecentQueryTests = () => {
         isEnhancement: true,
       });
 
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspace,
         page: 'discover',
@@ -127,7 +128,7 @@ const runRecentQueryTests = () => {
               // check table after visiting a different URL and coming back to the workspace
               action: () => {
                 cy.visit('/app/workspace_initial');
-                cy.navigateToWorkSpaceSpecificPage({
+                cy.osd.navigateToWorkSpaceSpecificPage({
                   url: BASE_PATH,
                   workspaceName: workspace,
                   page: 'discover',
@@ -181,7 +182,7 @@ const runRecentQueryTests = () => {
         });
 
         /* TODO: adding these tests requires adding a dependency OR customizing the execSync function
-        //const { execSync } = require('child_process'); 
+        //const { execSync } = require('child_process');
         //console.log(execSync('xclip -selection clipboard -o').toString().trim()); // for Linux
         //Caveat: the commands for reading the system's clipboard is OS-dependent.
         it(`check running and copying recent queries for ${config.testName}`, () => {
