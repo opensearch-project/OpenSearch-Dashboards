@@ -6,6 +6,7 @@
 import moment from 'moment';
 import { TestFixtureHandler } from '../lib/test_fixture_handler';
 import initCommandNamespace from './command_namespace';
+import { DATASOURCE_NAME, PATHS } from './constants';
 
 /**
  * This file houses all the commands specific to OSD. For commands that are used across the project please move it to the general commands file
@@ -331,4 +332,38 @@ cy.osd.add('deleteAllOldWorkspaces', () => {
       cy.getElementByTestId('delete-workspace-modal-input').should('not.exist');
     }
   });
+});
+
+// this currently only works with data-logs-1. If we ever need data from data-logs-2, we should update this.
+cy.osd.add('setupWorkspaceAndDataSourceWithIndices', (workspaceName, indices) => {
+  // Load test data
+  cy.osd.setupTestData(
+    PATHS.SECONDARY_ENGINE,
+    indices.map((index) => `cypress/fixtures/query_enhancements/data_logs_1/${index}.mapping.json`),
+    indices.map((index) => `cypress/fixtures/query_enhancements/data_logs_1/${index}.data.ndjson`)
+  );
+
+  // Add data source
+  cy.osd.addDataSource({
+    name: DATASOURCE_NAME,
+    url: PATHS.SECONDARY_ENGINE,
+    authType: 'no_auth',
+  });
+
+  // delete any old workspaces and potentially conflicting one
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteAllOldWorkspaces();
+
+  // create workspace
+  cy.visit('/app/home');
+  cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+});
+
+// this currently only works with data-logs-1.
+cy.osd.add('cleanupWorkspaceAndDataSourceAndIndices', (workspaceName, indices) => {
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+  for (const index of indices) {
+    cy.osd.deleteIndex(index);
+  }
 });

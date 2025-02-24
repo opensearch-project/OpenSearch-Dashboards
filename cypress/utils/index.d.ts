@@ -158,6 +158,34 @@ declare namespace Cypress {
        * Deletes all workspaces that are older than a specified amount. This is to prevent ws buildup
        */
       deleteAllOldWorkspaces(): Chainable<any>;
+
+      /**
+       * Loads test data, adds data source, creates workspace, and optionally creates index patterns
+       */
+      setupWorkspaceAndDataSourceWithIndices(
+        workspaceName: string,
+        indices:
+          | 'data_logs_large_time_1'
+          | 'data_logs_large_time_2'
+          | 'data_logs_small_no_time_1'
+          | 'data_logs_small_no_time_2'
+          | 'data_logs_small_time_1'
+          | 'data_logs_small_time_2'
+      ): Chainable<any>;
+
+      /**
+       * Cleans up workspace, data source, and indices
+       */
+      cleanupWorkspaceAndDataSourceAndIndices(
+        workspaceName: string,
+        indices:
+          | 'data_logs_large_time_1'
+          | 'data_logs_large_time_2'
+          | 'data_logs_small_no_time_1'
+          | 'data_logs_small_no_time_2'
+          | 'data_logs_small_time_1'
+          | 'data_logs_small_time_2'
+      ): Chainable<any>;
     };
   }
 }

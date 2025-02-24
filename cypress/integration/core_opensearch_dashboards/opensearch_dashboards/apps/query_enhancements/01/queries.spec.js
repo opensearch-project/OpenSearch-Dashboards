@@ -4,12 +4,11 @@
  */
 
 import {
-  INDEX_WITH_TIME_1,
   DATASOURCE_NAME,
+  INDEX_WITH_TIME_1,
   START_TIME,
   END_TIME,
 } from '../../../../../../utils/apps/constants';
-import { PATHS } from '../../../../../../utils/constants';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
@@ -17,24 +16,8 @@ const workspace = getRandomizedWorkspaceName();
 
 const queriesTestSuite = () => {
   describe('query enhancement queries', { scrollBehavior: false }, () => {
-    beforeEach(() => {
-      // Load test data
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
-      );
-      // Add data source
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: PATHS.SECONDARY_ENGINE,
-        authType: 'no_auth',
-      });
-      // Create workspace and set up index pattern
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       // Create and select index pattern for ${INDEX_WITH_TIME_1}*
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspace,
@@ -44,6 +27,9 @@ const queriesTestSuite = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+    });
+
+    beforeEach(() => {
       // Go to discover page
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
@@ -52,14 +38,12 @@ const queriesTestSuite = () => {
       });
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteDataSourceByName(`${DATASOURCE_NAME}`);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
     describe('send queries', () => {
-      it('with DQL', function () {
+      it('with DQL', () => {
         cy.setQueryLanguage('DQL');
         cy.setTopNavDate(START_TIME, END_TIME);
 
@@ -74,7 +58,7 @@ const queriesTestSuite = () => {
         cy.verifyHitCount(1);
       });
 
-      it('with Lucene', function () {
+      it('with Lucene', () => {
         cy.setQueryLanguage('Lucene');
         cy.setTopNavDate(START_TIME, END_TIME);
 
@@ -89,7 +73,7 @@ const queriesTestSuite = () => {
         cy.verifyHitCount(1);
       });
 
-      it('with SQL', function () {
+      it('with SQL', () => {
         cy.setQueryLanguage('OpenSearch SQL');
 
         // Default SQL query should be set
@@ -119,7 +103,7 @@ const queriesTestSuite = () => {
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
       });
 
-      it('with PPL', function () {
+      it('with PPL', () => {
         cy.setQueryLanguage('PPL');
         cy.setTopNavDate(START_TIME, END_TIME);
 

@@ -10,7 +10,7 @@ import {
   QueryLanguages,
 } from '../../../../../../utils/apps/constants.js';
 import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
-import { PATHS, BASE_PATH } from '../../../../../../utils/constants.js';
+import { BASE_PATH } from '../../../../../../utils/constants.js';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
@@ -32,24 +32,8 @@ const NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD = 17;
 
 const inspectTestSuite = () => {
   describe('inspect spec', () => {
-    beforeEach(() => {
-      // Load test data
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
-      );
-      // Add data source
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: PATHS.SECONDARY_ENGINE,
-        authType: 'no_auth',
-      });
-      // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
@@ -58,24 +42,21 @@ const inspectTestSuite = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
-        workspaceName: workspaceName,
-        page: 'discover',
-        isEnhancement: true,
-      });
-      cy.getElementByTestId('discoverNewButton').click();
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
     generateAllTestConfigurations(generateInspectTestConfiguration).forEach((config) => {
       it(`should inspect and validate the first row data for ${config.testName}`, () => {
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName: workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+        cy.getElementByTestId('discoverNewButton').click();
+
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
