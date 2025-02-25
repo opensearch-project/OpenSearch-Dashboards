@@ -87,10 +87,11 @@ export function importFileRoute(
         }
       } else {
         try {
+          const mapping = request.body.mapping ? JSON.parse(request.body.mapping) : {};
           await client.indices.create({
             index: request.query.indexName,
             body: {
-              mappings: JSON.parse(request.body.mapping!),
+              mappings: mapping,
             },
           });
         } catch (e) {

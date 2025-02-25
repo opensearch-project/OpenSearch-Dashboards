@@ -14,7 +14,7 @@ export function catIndicesRoute(
   config: TypeOf<typeof configSchema>,
   dataSourceEnabled: boolean
 ) {
-  router.post(
+  router.get(
     {
       path: '/api/data_importer/_cat_indices',
       validate: {
@@ -24,7 +24,11 @@ export function catIndicesRoute(
       },
     },
     async (context, request, response) => {
-      const client = await decideClient(dataSourceEnabled, context, request.query.dataSource);
+      const client = await decideClient(
+        dataSourceEnabled,
+        context,
+        (request.query as { dataSource?: string }).dataSource
+      );
       if (!!!client) {
         return response.notFound({
           body: 'Data source is not enabled or does not exist',

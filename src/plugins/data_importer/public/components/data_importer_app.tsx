@@ -12,12 +12,14 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
   EuiPageHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiTitle,
-  EuiPageSideBar,
-  EuiFieldText,
+  EuiLoadingSpinner,
   EuiSpacer,
+  EuiComboBox,
+  EuiFormRow,
 } from '@elastic/eui';
 import { extname } from 'path';
 import {
@@ -40,13 +42,10 @@ import { ImportResponse } from '../types';
 import { PublicConfigSchema } from '../../config';
 import { ImportTextContentBody } from './import_text_content';
 import { ImportFileContentBody } from './import_file_content';
-import {
-  CSV_FILE_TYPE,
-  CSV_SUPPORTED_DELIMITERS,
-  PLUGIN_NAME_AS_TITLE,
-} from '../../common/constants';
+import { CSV_FILE_TYPE, CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 import { DelimiterSelect } from './delimiter_select';
 import { previewFile } from '../lib/preview';
+import { PreviewComponent } from './preview_table';
 
 interface DataImporterPluginAppProps {
   basename: string;
@@ -59,6 +58,8 @@ interface DataImporterPluginAppProps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
+const ROWS_COUNT = 10;
+
 export const DataImporterPluginApp = ({
   basename,
   notifications,
@@ -69,33 +70,55 @@ export const DataImporterPluginApp = ({
   dataSourceEnabled,
   dataSourceManagement,
 }: DataImporterPluginAppProps) => {
-  const DataSourceMenu = dataSourceManagement?.ui.getDataSourceMenu<DataSourceSelectableConfig>();
+  const DataSourceMenuComponent = dataSourceManagement?.ui.getDataSourceMenu<
+    DataSourceSelectableConfig
+  >();
   const [indexName, setIndexName] = useState<string>();
   const [importType, setImportType] = useState<ImportChoices>(IMPORT_CHOICE_FILE);
   const [disableImport, setDisableImport] = useState<boolean>();
   const [dataType, setDataType] = useState<string | undefined>(
     config.enabledFileTypes.length > 0 ? config.enabledFileTypes[0] : undefined
   );
+  const [filePreviewData, setFilePreviewData] = useState<any>({});
   const [inputText, setText] = useState<string | undefined>();
   const [inputFile, setInputFile] = useState<File | undefined>();
   const [dataSourceId, setDataSourceId] = useState<string | undefined>();
-  const [selectedDataSource, setSelectedDataSource] = useState<DataSourceOption | undefined>();
-  const [showDelimiterChoice, setShowDelimiterChoice] = useState<boolean>(shouldShowDelimiter());
+  const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
+  const [showDelimiterChoice, setShowDelimiterChoice] = useState<boolean>(false);
   const [delimiter, setDelimiter] = useState<string | undefined>(
     dataType === CSV_FILE_TYPE ? CSV_SUPPORTED_DELIMITERS[0] : undefined
   );
+  const [visibleRows, setVisibleRows] = useState<number>(ROWS_COUNT);
+  const [indexOptions, setIndexOptions] = useState<Array<{ label: string }>>([]);
+  const [createMode, setCreateMode] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchIndices = async () => {
+      try {
+        const response = await http.get('/api/data_importer/_cat_indices');
+        setIndexOptions(response.indices.map((index: string) => ({ label: index })));
+      } catch (error) {
+        notifications.toasts.addDanger(
+          i18n.translate('dataImporter.indicesFetchError', {
+            defaultMessage: `Failed to fetch indices: {error}`,
+            values: { error },
+          })
+        );
+      }
+    };
+
+    fetchIndices();
+  }, [http, notifications.toasts]);
 
   const onImportTypeChange = (type: ImportChoices) => {
     if (type === IMPORT_CHOICE_FILE) {
       setInputFile(undefined);
+      setShowDelimiterChoice(true);
     } else if (type === IMPORT_CHOICE_TEXT) {
       setText(undefined);
+      setShowDelimiterChoice(false);
     }
     setImportType(type);
-  };
-
-  const onIndexNameChange = (e: any) => {
-    setIndexName(e.target.value);
   };
 
   const onDataTypeChange = (type: string) => {
@@ -103,10 +126,14 @@ export const DataImporterPluginApp = ({
       setDelimiter(undefined);
     }
     setDataType(type);
+    setShowDelimiterChoice(type === CSV_FILE_TYPE && importType === IMPORT_CHOICE_FILE);
   };
 
   const onFileInput = (file?: File) => {
     setInputFile(file);
+    if (!file) {
+      setFilePreviewData({});
+    }
   };
 
   const onTextInput = (text: string) => {
@@ -120,37 +147,56 @@ export const DataImporterPluginApp = ({
   const onDataSourceSelect = (newDataSource: DataSourceOption[]) => {
     if (newDataSource.length > 0) {
       setDataSourceId(newDataSource[0].id);
-      setSelectedDataSource(newDataSource[0]);
     }
+  };
+
+  const onIndexNameChange = (selected: Array<{ label: string }>) => {
+    if (selected.length) {
+      setIndexName(selected[0].label);
+      setCreateMode(false);
+    } else {
+      setIndexName('');
+    }
+  };
+
+  const onCreateIndexName = (createdOption: string) => {
+    setIndexName(createdOption);
+    setCreateMode(true);
   };
 
   const previewData = async () => {
     if (importType === IMPORT_CHOICE_FILE) {
       if (inputFile) {
         const fileExtension = extname(inputFile.name);
-        const response = await previewFile(
-          http,
-          inputFile,
-          // TODO This should be determined from the index name textbox/selectable
-          false,
-          // TODO This should be determined from the file type selectable
-          fileExtension,
-          indexName!,
-          delimiter,
-          dataSourceId
-        );
-        if (response) {
-          notifications.toasts.addSuccess(
-            i18n.translate('dataImporter.previewSuccess', {
-              defaultMessage: `Preview successful`,
-            })
+        setIsLoadingPreview(true); // Set loading state to true
+        try {
+          const response = await previewFile(
+            http,
+            inputFile,
+            createMode,
+            fileExtension,
+            indexName!,
+            delimiter,
+            dataSourceId
           );
-        } else {
-          notifications.toasts.addDanger(
-            i18n.translate('dataImporter.previewFailed', {
-              defaultMessage: `Preview failed`,
-            })
-          );
+          setIsLoadingPreview(false); // Set loading state to false
+          if (response) {
+            setFilePreviewData(response);
+            notifications.toasts.addSuccess(
+              i18n.translate('dataImporter.previewSuccess', {
+                defaultMessage: `Preview successful`,
+              })
+            );
+          } else {
+            notifications.toasts.addDanger(
+              i18n.translate('dataImporter.previewFailed', {
+                defaultMessage: `Preview failed`,
+              })
+            );
+          }
+        } catch (error) {
+          // console.error(error, 'error');
+          setIsLoadingPreview(false);
         }
       }
     }
@@ -165,8 +211,7 @@ export const DataImporterPluginApp = ({
           http,
           inputFile!,
           indexName!,
-          // TODO This should be determined from the index name textbox/selectable
-          false,
+          createMode,
           // TODO This should be determined from the file type selectable
           extname(inputFile!.name),
           delimiter,
@@ -241,18 +286,22 @@ export const DataImporterPluginApp = ({
   const renderDataSourceComponent = useMemo(() => {
     return (
       <div>
-        <DataSourceMenu
-          dataSourceManagement={dataSourceManagement}
-          componentType={'DataSourceSelectable'}
-          componentConfig={{
-            fullWidth: true,
-            savedObjects: savedObjects.client,
-            notifications,
-            onSelectedDataSources: onDataSourceSelect,
-            selectedOption: selectedDataSource,
-          }}
-        />
-        <EuiSpacer size="m" />
+        {DataSourceMenuComponent && (
+          <>
+            <DataSourceMenuComponent
+              componentType={'DataSourceSelectable'}
+              componentConfig={{
+                fullWidth: true,
+                savedObjects: savedObjects.client,
+                notifications,
+                onSelectedDataSources: onDataSourceSelect,
+                onManageDataSource: () => {}, // Add a proper handler if needed
+              }}
+              onManageDataSource={() => {}}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
       </div>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -270,16 +319,12 @@ export const DataImporterPluginApp = ({
   }
 
   function shouldShowDelimiter() {
-    let inputFileType;
-    if (inputFile) {
-      const fileExtention = extname(inputFile.name).toLowerCase();
-      inputFileType = fileExtention.startsWith('.') ? fileExtention.slice(1) : fileExtention;
-    }
-    return (
-      (importType === IMPORT_CHOICE_FILE && inputFile && inputFileType === CSV_FILE_TYPE) ||
-      (importType === IMPORT_CHOICE_TEXT && dataType === CSV_FILE_TYPE)
-    );
+    return importType === IMPORT_CHOICE_FILE && dataType === CSV_FILE_TYPE;
   }
+
+  const loadMoreRows = () => {
+    setVisibleRows((prevVisibleRows) => prevVisibleRows + ROWS_COUNT);
+  };
 
   return (
     <Router basename={basename}>
@@ -287,81 +332,103 @@ export const DataImporterPluginApp = ({
         <>
           <navigation.ui.TopNavMenu appName={PLUGIN_ID} useDefaultBehaviors={true} />
           <EuiPage>
-            <EuiPageSideBar>
-              <ImportTypeSelector
-                updateSelection={onImportTypeChange}
-                initialSelection={importType}
-              />
-              {showDelimiterChoice && (
-                <DelimiterSelect
-                  onDelimiterChange={onDelimiterChange}
-                  initialDelimiter={delimiter}
-                />
-              )}
-              <EuiTitle size="xs">
-                <span>
-                  {i18n.translate('dataImporter.dataSource', {
-                    defaultMessage: 'Data Source Options',
-                  })}
-                </span>
-              </EuiTitle>
-              <EuiFieldText placeholder="Index name" onChange={onIndexNameChange} />
-              <EuiSpacer size="m" />
-              {dataSourceEnabled && renderDataSourceComponent}
-              <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
-                Import
-              </EuiButton>
-              <EuiSpacer size="m" />
-              <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
-                Preview
-              </EuiButton>
-            </EuiPageSideBar>
             <EuiPageBody component="main">
               <EuiPageHeader>
                 <EuiTitle size="l">
                   <h1>
-                    <FormattedMessage
-                      id="dataImporter.mainTitle"
-                      defaultMessage="{title}"
-                      values={{ title: PLUGIN_NAME_AS_TITLE }}
-                    />
+                    <FormattedMessage id="dataImporter.mainTitle" defaultMessage="Data Importer" />
                   </h1>
                 </EuiTitle>
               </EuiPageHeader>
               <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      {importType === IMPORT_CHOICE_TEXT && (
-                        <FormattedMessage
-                          id="dataImporter.textTitle"
-                          defaultMessage="Import Data"
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={1}>
+                    <ImportTypeSelector
+                      updateSelection={onImportTypeChange}
+                      initialSelection={importType}
+                    />
+                    {dataSourceEnabled && (
+                      <>
+                        <EuiTitle size="xs">
+                          <span>
+                            {i18n.translate('dataImporter.dataSource', {
+                              defaultMessage: 'Select target data source',
+                            })}
+                          </span>
+                        </EuiTitle>
+                        {renderDataSourceComponent}
+                      </>
+                    )}
+                    <EuiSpacer size="s" />
+                    <EuiTitle size="xs">
+                      <span>
+                        {i18n.translate('dataImporter.indexName', {
+                          defaultMessage: 'Create/Select Index Name',
+                        })}
+                      </span>
+                    </EuiTitle>
+                    <EuiFormRow>
+                      <EuiComboBox
+                        placeholder="Enter index name"
+                        singleSelection={{ asPlainText: true }}
+                        options={indexOptions}
+                        selectedOptions={indexName ? [{ label: indexName }] : []}
+                        onChange={onIndexNameChange}
+                        onCreateOption={onCreateIndexName}
+                      />
+                    </EuiFormRow>
+                    <EuiSpacer size="s" />
+                    {importType === IMPORT_CHOICE_FILE && (
+                      <>
+                        {showDelimiterChoice && (
+                          <DelimiterSelect
+                            onDelimiterChange={onDelimiterChange}
+                            initialDelimiter={delimiter}
+                          />
+                        )}
+                        <ImportFileContentBody
+                          enabledFileTypes={config.enabledFileTypes}
+                          onFileUpdate={onFileInput}
                         />
-                      )}
-                      {importType === IMPORT_CHOICE_FILE && (
-                        <FormattedMessage
-                          id="dataImporter.fileTitle"
-                          defaultMessage="Import Data from File"
-                        />
-                      )}
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
-                {importType === IMPORT_CHOICE_TEXT && (
-                  <ImportTextContentBody
-                    onTextChange={onTextInput}
-                    enabledFileTypes={config.enabledFileTypes}
-                    initialFileType={dataType!}
-                    characterLimit={config.maxTextCount}
-                    onFileTypeChange={onDataTypeChange}
-                  />
-                )}
-                {importType === IMPORT_CHOICE_FILE && (
-                  <ImportFileContentBody
-                    enabledFileTypes={config.enabledFileTypes}
-                    onFileUpdate={onFileInput}
-                  />
-                )}
+                      </>
+                    )}
+                    {importType === IMPORT_CHOICE_FILE && (
+                      <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
+                        Preview
+                      </EuiButton>
+                    )}
+                    <EuiSpacer size="s" />
+                    <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
+                      Import
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={2}>
+                    {importType === IMPORT_CHOICE_TEXT && (
+                      <ImportTextContentBody
+                        onTextChange={onTextInput}
+                        enabledFileTypes={config.enabledFileTypes}
+                        initialFileType={dataType!}
+                        characterLimit={config.maxTextCount}
+                        onFileTypeChange={onDataTypeChange}
+                      />
+                    )}
+                    {importType === IMPORT_CHOICE_FILE && (
+                      <div>
+                        {isLoadingPreview ? (
+                          <EuiLoadingSpinner size="xl" />
+                        ) : (
+                          <PreviewComponent
+                            previewData={filePreviewData.documents || []}
+                            visibleRows={visibleRows}
+                            loadMoreRows={loadMoreRows}
+                            predictedMapping={filePreviewData.predictedMapping || {}}
+                            existingMapping={filePreviewData.existingMapping || {}}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiPageContent>
             </EuiPageBody>
           </EuiPage>

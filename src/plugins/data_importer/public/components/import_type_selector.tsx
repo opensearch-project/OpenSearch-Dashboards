@@ -61,35 +61,39 @@ export const ImportTypeSelector = ({
         ),
       }}
     >
-      <EuiCheckableCard
-        id={'file-selection'}
-        label={createLabel({
-          text: i18n.translate('dataImporter.file', {
-            defaultMessage: 'Upload from file',
-          }),
-          tooltip: i18n.translate('dataImporter.fileTooltip.file', {
-            defaultMessage: 'Upload data from a file',
-          }),
-        })}
-        checked={importType === IMPORT_CHOICE_FILE}
-        onChange={() => onChange(IMPORT_CHOICE_FILE)}
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiCheckableCard
+            id={'file-selection'}
+            label={createLabel({
+              text: i18n.translate('dataImporter.file', {
+                defaultMessage: 'Upload',
+              }),
+              tooltip: i18n.translate('dataImporter.fileTooltip.file', {
+                defaultMessage: 'Upload data from a file',
+              }),
+            })}
+            checked={importType === IMPORT_CHOICE_FILE}
+            onChange={() => onChange(IMPORT_CHOICE_FILE)}
+          />
+        </EuiFlexItem>
 
-      <EuiSpacer size="s" />
-
-      <EuiCheckableCard
-        id={'text-selection'}
-        label={createLabel({
-          text: i18n.translate('dataImporter.text', {
-            defaultMessage: 'Text box',
-          }),
-          tooltip: i18n.translate('dataImporter.fileTooltip.text', {
-            defaultMessage: 'Type/paste data',
-          }),
-        })}
-        checked={importType === IMPORT_CHOICE_TEXT}
-        onChange={() => onChange(IMPORT_CHOICE_TEXT)}
-      />
+        <EuiFlexItem>
+          <EuiCheckableCard
+            id={'text-selection'}
+            label={createLabel({
+              text: i18n.translate('dataImporter.text', {
+                defaultMessage: 'Text',
+              }),
+              tooltip: i18n.translate('dataImporter.fileTooltip.text', {
+                defaultMessage: 'Type/paste data',
+              }),
+            })}
+            checked={importType === IMPORT_CHOICE_TEXT}
+            onChange={() => onChange(IMPORT_CHOICE_TEXT)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
     </EuiFormFieldset>
