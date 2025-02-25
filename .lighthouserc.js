@@ -1,8 +1,3 @@
-/*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
-
 const baseUrl = 'http://localhost:5601';
 
 module.exports = {
