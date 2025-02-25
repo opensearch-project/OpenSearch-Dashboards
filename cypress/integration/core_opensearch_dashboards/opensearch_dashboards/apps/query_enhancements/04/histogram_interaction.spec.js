@@ -137,7 +137,7 @@ const runHistogramInteractionTests = () => {
           // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9294
           if (config.language !== 'PPL') {
             // remove after the bug is fixed
-            cy.setTopNavDate(START_DATE, END_DATE);
+            cy.osd.setTopNavDate(START_DATE, END_DATE);
             cy.wait(1000); // adding a wait here to ensure the data has been updated
             checkIntervals();
             cy.getElementByTestId('discoverQueryHits').then(($hits) => {

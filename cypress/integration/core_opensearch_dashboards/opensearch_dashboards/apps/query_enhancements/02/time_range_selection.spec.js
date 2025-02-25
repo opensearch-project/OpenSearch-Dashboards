@@ -82,7 +82,7 @@ export const runTimeRangeSelectionTests = () => {
         cy.setQueryLanguage(config.language.name);
 
         if (config.language.supports.datepicker) {
-          cy.setRelativeTopNavDate(15, 'Years ago');
+          cy.osd.setRelativeTopNavDate(15, 'Years ago');
           if (config.hitCountRealtiveQuickTimeSelect) {
             cy.verifyHitCount(config.hitCountRealtiveQuickTimeSelect);
           }
@@ -103,7 +103,7 @@ export const runTimeRangeSelectionTests = () => {
         cy.setQueryLanguage(config.language.name);
 
         if (config.language.supports.datepicker) {
-          cy.setTopNavDate('Nov 29, 2021 @ 00:00:00.000', 'Dec 29, 2023 @ 00:00:00.000');
+          cy.osd.setTopNavDate('Nov 29, 2021 @ 00:00:00.000', 'Dec 29, 2023 @ 00:00:00.000');
           if (config.hitCountAbsoluteTimeSelect) {
             cy.verifyHitCount(config.hitCountAbsoluteTimeSelect);
           }

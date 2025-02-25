@@ -367,3 +367,144 @@ cy.osd.add('cleanupWorkspaceAndDataSourceAndIndices', (workspaceName, indices) =
     cy.osd.deleteIndex(index);
   }
 });
+
+cy.osd.add('ensureTopNavExists', () => {
+  const MAX_RETRY = 3;
+
+  const getTopNavOrRetry = (attempt = 1) => {
+    const opts = { log: false };
+
+    cy.get('body', opts).then(($body) => {
+      const superDatePickerstartDatePopoverButtonEl = $body.find(
+        '[data-test-subj="superDatePickerstartDatePopoverButton"]'
+      );
+      const superDatePickerShowDatesButton = $body.find(
+        '[data-test-subj="superDatePickerShowDatesButton"]'
+      );
+
+      if (
+        !superDatePickerstartDatePopoverButtonEl.length &&
+        !superDatePickerShowDatesButton.length
+      ) {
+        if (attempt < MAX_RETRY) {
+          cy.log(`Top Nav not found, reloading and retrying... (attempt ${attempt})`);
+          cy.reload();
+          cy.wait(2000, opts);
+          return getTopNavOrRetry(attempt + 1);
+        } else {
+          cy.log(`Failed to find Top Nav after attempting ${MAX_RETRY} times`);
+        }
+      }
+    });
+  };
+
+  return getTopNavOrRetry();
+});
+
+cy.osd.add('setTopNavDate', (start, end, submit = true) => {
+  cy.osd.ensureTopNavExists();
+
+  const opts = { log: false };
+
+  Cypress.log({
+    name: 'setTopNavDate',
+    displayName: 'set date',
+    message: `Start: ${start} :: End: ${end}`,
+  });
+
+  /* Find any one of the two buttons that change/open the date picker:
+   *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
+   *      * in some versions of OUI, the switch will open the date selection dialog as well
+   *   * if `superDatePickerstartDatePopoverButton` is found, it will open the date selection dialog
+   */
+  cy.getElementsByTestIds(
+    ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
+    opts
+  )
+    .should('be.visible')
+    .invoke('attr', 'data-test-subj')
+    .then((testId) => {
+      cy.getElementByTestId(testId, opts).should('be.visible').click(opts);
+    });
+
+  /* While we surely are in the date selection mode, we don't know if the date selection dialog
+   * is open or not. Looking for a tab and if it is missing, click on the dialog opener.
+   */
+  cy.whenTestIdNotFound('superDatePickerAbsoluteTab', () => {
+    cy.getElementByTestId('superDatePickerstartDatePopoverButton', opts)
+      .should('be.visible')
+      .click(opts);
+  });
+
+  // Click absolute tab
+  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).click(opts);
+
+  // Type absolute start date
+  cy.getElementByTestId('superDatePickerAbsoluteDateInput', opts)
+    .click(opts)
+    .clear(opts)
+    .type(start, {
+      ...opts,
+      delay: 0, // add a delay here, cypress sometimes fails to type all the content into the input.
+    });
+
+  // Click end date
+  cy.getElementByTestId('superDatePickerendDatePopoverButton', opts).last(opts).click(opts);
+
+  // Click absolute tab
+  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).last(opts).click(opts);
+
+  // Type absolute end date
+  cy.getElementByTestId('superDatePickerAbsoluteDateInput', opts)
+    .last(opts)
+    .click(opts)
+    .clear(opts)
+    .type(end, {
+      ...opts,
+      delay: 0, // add a delay here, cypress sometimes fails to type all the content into the input.
+    });
+
+  // Close popup
+  cy.getElementByTestId('superDatePickerendDatePopoverButton', opts).click(opts);
+
+  if (submit) {
+    cy.updateTopNav(opts);
+  }
+});
+
+cy.osd.add('setRelativeTopNavDate', (time, timeUnit) => {
+  cy.osd.ensureTopNavExists();
+
+  const opts = { log: false };
+
+  /* Find any one of the two buttons that change/open the date picker:
+   *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
+   *      * in some versions of OUI, the switch will open the date selection dialog as well
+   *   * if `superDatePickerstartDatePopoverButton` is found, it will open the date selection dialog
+   */
+  cy.getElementsByTestIds(
+    ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
+    opts
+  )
+    .should('be.visible')
+    .invoke('attr', 'data-test-subj')
+    .then((testId) => {
+      cy.getElementByTestId(testId, opts).should('be.visible').click(opts);
+    });
+
+  /* While we surely are in the date selection mode, we don't know if the date selection dialog
+   * is open or not. Looking for a tab and if it is missing, click on the dialog opener.
+   */
+  cy.whenTestIdNotFound('superDatePickerAbsoluteTab', () => {
+    cy.getElementByTestId('superDatePickerstartDatePopoverButton', opts)
+      .should('be.visible')
+      .click(opts);
+  });
+
+  // Click absolute tab
+  cy.getElementByTestId('superDatePickerRelativeTab', opts).click(opts);
+
+  cy.getElementByTestId('superDatePickerRelativeDateInputNumber').clear().type(time);
+  cy.getElementByTestId('superDatePickerRelativeDateInputUnitSelector').select(timeUnit);
+  cy.getElementByTestId('querySubmitButton').click();
+});
