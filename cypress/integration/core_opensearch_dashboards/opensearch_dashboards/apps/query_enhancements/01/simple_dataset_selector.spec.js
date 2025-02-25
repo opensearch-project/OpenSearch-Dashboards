@@ -10,18 +10,18 @@ import {
   INDEX_WITHOUT_TIME_1,
   PATHS,
   DATASOURCE_NAME,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   getDefaultQuery,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { verifyDiscoverPageState } from '../../../../../utils/apps/query_enhancements/saved';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { verifyDiscoverPageState } from '../../../../../../utils/apps/query_enhancements/saved';
 import {
   generateSimpleDatasetSelectorTestConfigurations,
   validateItemsInSimpleDatasetSelectorDropDown,
-} from '../../../../../utils/apps/query_enhancements/simple_dataset_selector';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/simple_dataset_selector';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
@@ -48,7 +48,8 @@ export const runSimpleDatasetSelectorTests = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
@@ -90,7 +91,7 @@ export const runSimpleDatasetSelectorTests = () => {
       } Indexpattern when original language was ${
         config.language
       } from the simple dataset selector`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -169,7 +170,7 @@ export const runSimpleDatasetSelectorTests = () => {
     });
 
     it('validate filtering index pattern in simple dataset selector', () => {
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName,
         page: 'discover',
         isEnhancement: true,

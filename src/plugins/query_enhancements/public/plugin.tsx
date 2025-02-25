@@ -39,6 +39,7 @@ export class QueryEnhancementsPlugin
   private readonly config: ConfigSchema;
   private isQuerySummaryCollapsed$ = new BehaviorSubject<boolean>(false);
   private resultSummaryEnabled$ = new BehaviorSubject<boolean>(false);
+  private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(false);
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -74,7 +75,7 @@ export class QueryEnhancementsPlugin
         formatter: (value: string, type: OSD_FIELD_TYPES) => {
           switch (type) {
             case OSD_FIELD_TYPES.DATE:
-              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ssZ'); // PPL date fields need special formatting in order for discover table formatter to render in the correct time zone
+              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // PPL date fields need special formatting in order for discover table formatter to render in the correct time zone
 
             default:
               return value;
@@ -206,6 +207,7 @@ export class QueryEnhancementsPlugin
           data,
           this.config.queryAssist,
           this.isQuerySummaryCollapsed$,
+          this.isSummaryAgentAvailable$,
           this.resultSummaryEnabled$,
           usageCollection
         ),
@@ -217,6 +219,7 @@ export class QueryEnhancementsPlugin
     return {
       isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,
       resultSummaryEnabled$: this.resultSummaryEnabled$,
+      isSummaryAgentAvailable$: this.isSummaryAgentAvailable$,
     };
   }
 

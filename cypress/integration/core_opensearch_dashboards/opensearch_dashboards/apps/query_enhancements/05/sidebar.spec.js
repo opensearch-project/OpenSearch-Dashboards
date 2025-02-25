@@ -3,22 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasetTypes, PATHS, BASE_PATH } from '../../../../../utils/constants';
+import { DatasetTypes, PATHS, BASE_PATH } from '../../../../../../utils/constants';
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME_1,
   INDEX_WITH_TIME_1,
   QueryLanguages,
-} from '../../../../../utils/apps/query_enhancements/constants';
+} from '../../../../../../utils/apps/query_enhancements/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { getDocTableField } from '../../../../../utils/apps/query_enhancements/doc_table';
-import * as sideBar from '../../../../../utils/apps/query_enhancements/sidebar';
-import { generateSideBarTestConfiguration } from '../../../../../utils/apps/query_enhancements/sidebar';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { getDocTableField } from '../../../../../../utils/apps/query_enhancements/doc_table';
+import * as sideBar from '../../../../../../utils/apps/query_enhancements/sidebar';
+import { generateSideBarTestConfiguration } from '../../../../../../utils/apps/query_enhancements/sidebar';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -141,11 +141,11 @@ const addSidebarFieldsAndCheckDocTableColumns = (
     },
   ]).each((fn) => fn());
 
-  if (isIndexPattern && config.language !== 'OpenSearch SQL') {
+  if (isIndexPattern && config.language !== QueryLanguages.SQL.name) {
     cy.getElementByTestId('discoverQueryHits').should('have.text', '10,000');
   }
 
-  if (config.language === 'PPL') {
+  if (config.language === QueryLanguages.PPL.name) {
     cy.intercept('**/api/enhancements/search/ppl').as('query');
     cy.setQueryEditor(pplQuery);
     cy.wait('@query').then(() => {
@@ -155,7 +155,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (
       }
       checkDocTableColumn(expectedValues, 2);
     });
-  } else if (config.language === 'OpenSearch SQL') {
+  } else if (config.language === QueryLanguages.SQL.name) {
     cy.intercept('**/api/enhancements/search/sql').as('query');
     cy.setQueryEditor(sqlQuery);
     cy.wait('@query').then(() => {
@@ -222,8 +222,9 @@ const verifyFieldShowDetailsShowsTopValuesAndViewVisualization = (
 export const runSideBarTests = () => {
   describe('sidebar spec', () => {
     const testData = {
-      pplQuery: (dataset) => `source = ${dataset} | where status_code = 200`,
-      sqlQuery: (dataset) => `SELECT * FROM ${dataset} WHERE status_code = 200`,
+      pplQuery: (dataset) => `source = ${dataset} | where status_code = 200  | sort + timestamp`,
+      sqlQuery: (dataset) =>
+        `SELECT * FROM ${dataset} WHERE status_code = 200 ORDER BY timestamp ASC`,
       simpleFields: {
         fields: ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'],
         expectedValues: ['3.91', '4.82', '1.72', '4.08', '3.97'],
@@ -246,6 +247,7 @@ export const runSideBarTests = () => {
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
@@ -275,7 +277,7 @@ export const runSideBarTests = () => {
               isEnhancement: true,
             });
           }
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
             page: 'discover',
             isEnhancement: true,
@@ -328,7 +330,7 @@ export const runSideBarTests = () => {
             );
           });
 
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             url: BASE_PATH,
             workspaceName: workspaceName,
             page: 'discover',

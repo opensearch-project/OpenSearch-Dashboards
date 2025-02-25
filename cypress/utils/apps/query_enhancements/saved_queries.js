@@ -287,7 +287,7 @@ export const verifyQueryDoesNotExistInSavedQueries = (deletedQueryName) => {
 export const updateAndVerifySavedQuery = (config) => {
   // Create alternate config
   const alternateConfig = generateAlternateTestConfiguration(config);
-  cy.loadSaveQuery(config.saveName);
+  cy.loadSavedQuery(config.saveName);
 
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
@@ -300,10 +300,10 @@ export const updateAndVerifySavedQuery = (config) => {
 
   setAlternateQueryConfigurations(alternateConfig);
   verifyAlternateDiscoverPageState(alternateConfig);
-  cy.updateSaveQuery('', false, true, true);
+  cy.updateSavedQuery('', false, true, true);
 
   cy.reload();
-  cy.loadSaveQuery(config.saveName);
+  cy.loadSavedQuery(config.saveName);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
   verifyAlternateDiscoverPageState(alternateConfig);

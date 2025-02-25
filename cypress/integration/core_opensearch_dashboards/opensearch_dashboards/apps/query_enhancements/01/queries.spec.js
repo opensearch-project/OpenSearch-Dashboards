@@ -8,10 +8,10 @@ import {
   DATASOURCE_NAME,
   START_TIME,
   END_TIME,
-} from '../../../../../utils/apps/constants';
-import { PATHS } from '../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../utils/apps/query_enhancements/shared';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/constants';
+import { PATHS } from '../../../../../../utils/constants';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 
@@ -31,7 +31,8 @@ const queriesTestSuite = () => {
         authType: 'no_auth',
       });
       // Create workspace and set up index pattern
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspace);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
       // Create and select index pattern for ${INDEX_WITH_TIME_1}*
@@ -44,7 +45,7 @@ const queriesTestSuite = () => {
         isEnhancement: true,
       });
       // Go to discover page
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
         page: 'discover',
         isEnhancement: true,
@@ -64,7 +65,7 @@ const queriesTestSuite = () => {
 
         const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.waitForSearch();
         cy.verifyHitCount(1);
 
@@ -79,7 +80,7 @@ const queriesTestSuite = () => {
 
         const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.waitForSearch();
         cy.verifyHitCount(1);
 
@@ -92,7 +93,7 @@ const queriesTestSuite = () => {
         cy.setQueryLanguage('OpenSearch SQL');
 
         // Default SQL query should be set
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
           `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`
         );
@@ -123,7 +124,7 @@ const queriesTestSuite = () => {
         cy.setTopNavDate(START_TIME, END_TIME);
 
         // Default PPL query should be set
-        cy.waitForLoader(true);
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
           `source = ${INDEX_WITH_TIME_1}*`
         );

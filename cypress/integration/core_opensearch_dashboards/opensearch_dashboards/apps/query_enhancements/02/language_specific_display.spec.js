@@ -9,18 +9,18 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   QueryLanguages,
-  SECONDARY_ENGINE,
-} from '../../../../../utils/constants';
+  PATHS,
+} from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateDisplayTestConfiguration,
   getLanguageReferenceTestText,
-} from '../../../../../utils/apps/query_enhancements/language_specific_display';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/language_specific_display';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -29,7 +29,7 @@ export const runDisplayTests = () => {
     beforeEach(() => {
       // Load test data
       cy.osd.setupTestData(
-        SECONDARY_ENGINE.url,
+        PATHS.SECONDARY_ENGINE,
         [
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
           `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_2}.mapping.json`,
@@ -42,12 +42,13 @@ export const runDisplayTests = () => {
       // Add data source
       cy.osd.addDataSource({
         name: DATASOURCE_NAME,
-        url: SECONDARY_ENGINE.url,
+        url: PATHS.SECONDARY_ENGINE,
         authType: 'no_auth',
       });
 
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
@@ -68,7 +69,7 @@ export const runDisplayTests = () => {
 
     generateAllTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
       it(`should correctly display all UI components for ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -77,6 +78,7 @@ export const runDisplayTests = () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         cy.setQueryLanguage(config.language);
+
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         // testing the query editor
