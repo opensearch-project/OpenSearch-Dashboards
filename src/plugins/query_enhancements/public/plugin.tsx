@@ -38,6 +38,7 @@ export class QueryEnhancementsPlugin
   private readonly config: ConfigSchema;
   private isQuerySummaryCollapsed$ = new BehaviorSubject<boolean>(false);
   private resultSummaryEnabled$ = new BehaviorSubject<boolean>(false);
+  private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(false);
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -192,6 +193,7 @@ export class QueryEnhancementsPlugin
           data,
           this.config.queryAssist,
           this.isQuerySummaryCollapsed$,
+          this.isSummaryAgentAvailable$,
           this.resultSummaryEnabled$,
           usageCollection
         ),
@@ -203,6 +205,7 @@ export class QueryEnhancementsPlugin
     return {
       isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,
       resultSummaryEnabled$: this.resultSummaryEnabled$,
+      isSummaryAgentAvailable$: this.isSummaryAgentAvailable$,
     };
   }
 
