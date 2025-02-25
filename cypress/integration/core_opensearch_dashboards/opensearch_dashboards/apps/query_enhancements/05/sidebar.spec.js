@@ -246,18 +246,6 @@ export const runSideBarTests = () => {
       });
     });
 
-    beforeEach(() => {
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        workspaceName: workspaceName,
-        page: 'discover',
-        isEnhancement: true,
-      });
-      cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-      cy.setQueryLanguage(config.language);
-      setDatePickerDatesAndSearchIfRelevant(config.language);
-      sideBar.removeAllSelectedFields();
-    });
-
     afterEach(() => {
       cy.window().then((win) => {
         win.localStorage.clear();
@@ -273,6 +261,18 @@ export const runSideBarTests = () => {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
+      beforeEach(() => {
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName: workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.setQueryLanguage(config.language);
+        setDatePickerDatesAndSearchIfRelevant(config.language);
+        sideBar.removeAllSelectedFields();
+      });
+
       describe(`${config.testName}`, () => {
         it('adds simple fields', () => {
           addSidebarFieldsAndCheckDocTableColumns(

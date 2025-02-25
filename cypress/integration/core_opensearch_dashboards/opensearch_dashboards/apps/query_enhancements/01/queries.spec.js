@@ -44,6 +44,7 @@ const queriesTestSuite = () => {
 
     describe('send queries', () => {
       it('with DQL', () => {
+        cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('DQL');
         cy.setTopNavDate(START_TIME, END_TIME);
 
@@ -59,6 +60,7 @@ const queriesTestSuite = () => {
       });
 
       it('with Lucene', () => {
+        cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('Lucene');
         cy.setTopNavDate(START_TIME, END_TIME);
 
@@ -74,6 +76,7 @@ const queriesTestSuite = () => {
       });
 
       it('with SQL', () => {
+        cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('OpenSearch SQL');
 
         // Default SQL query should be set
@@ -104,6 +107,7 @@ const queriesTestSuite = () => {
       });
 
       it('with PPL', () => {
+        cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('PPL');
         cy.setTopNavDate(START_TIME, END_TIME);
 
