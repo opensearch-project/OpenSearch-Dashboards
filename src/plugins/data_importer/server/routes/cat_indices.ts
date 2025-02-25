@@ -17,7 +17,11 @@ export function catIndicesRoute(
   router.get(
     {
       path: '/api/data_importer/_cat_indices',
-      validate: false,
+      validate: {
+        query: schema.object({
+          dataSource: schema.maybe(schema.string()),
+        }),
+      },
     },
     async (context, request, response) => {
       const client = await decideClient(

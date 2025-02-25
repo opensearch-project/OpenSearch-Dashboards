@@ -58,6 +58,8 @@ interface DataImporterPluginAppProps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
+const ROWS_COUNT = 10;
+
 export const DataImporterPluginApp = ({
   basename,
   notifications,
@@ -86,7 +88,7 @@ export const DataImporterPluginApp = ({
   const [delimiter, setDelimiter] = useState<string | undefined>(
     dataType === CSV_FILE_TYPE ? CSV_SUPPORTED_DELIMITERS[0] : undefined
   );
-  const [visibleRows, setVisibleRows] = useState<number>(10);
+  const [visibleRows, setVisibleRows] = useState<number>(ROWS_COUNT);
   const [indexOptions, setIndexOptions] = useState<Array<{ label: string }>>([]);
   const [createMode, setCreateMode] = useState<boolean>(false);
 
@@ -295,9 +297,7 @@ export const DataImporterPluginApp = ({
                 onSelectedDataSources: onDataSourceSelect,
                 onManageDataSource: () => {}, // Add a proper handler if needed
               }}
-              onManageDataSource={function (): void {
-                throw new Error('Function not implemented.');
-              }}
+              onManageDataSource={() => {}}
             />
             <EuiSpacer size="m" />
           </>
@@ -323,7 +323,7 @@ export const DataImporterPluginApp = ({
   }
 
   const loadMoreRows = () => {
-    setVisibleRows((prevVisibleRows) => prevVisibleRows + 10);
+    setVisibleRows((prevVisibleRows) => prevVisibleRows + ROWS_COUNT);
   };
 
   return (
@@ -347,14 +347,18 @@ export const DataImporterPluginApp = ({
                       updateSelection={onImportTypeChange}
                       initialSelection={importType}
                     />
-                    <EuiTitle size="xs">
-                      <span>
-                        {i18n.translate('dataImporter.dataSource', {
-                          defaultMessage: 'Data Source Options',
-                        })}
-                      </span>
-                    </EuiTitle>
-                    {true && renderDataSourceComponent}
+                    {dataSourceEnabled && (
+                      <>
+                        <EuiTitle size="xs">
+                          <span>
+                            {i18n.translate('dataImporter.dataSource', {
+                              defaultMessage: 'Select target data source',
+                            })}
+                          </span>
+                        </EuiTitle>
+                        {renderDataSourceComponent}
+                      </>
+                    )}
                     <EuiSpacer size="s" />
                     <EuiTitle size="xs">
                       <span>
