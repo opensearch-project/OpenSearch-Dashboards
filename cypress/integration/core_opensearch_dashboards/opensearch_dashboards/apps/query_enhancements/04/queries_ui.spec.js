@@ -9,18 +9,18 @@ import {
   PATHS,
   DATASOURCE_NAME,
   DatasetTypes,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   generateBaseConfiguration,
   generateAllTestConfigurations,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateQueryTestConfigurations,
   LanguageConfigs,
-} from '../../../../../utils/apps/query_enhancements/queries';
-import { prepareTestSuite } from '../../../../../utils/helpers';
-import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/constants';
+} from '../../../../../../utils/apps/query_enhancements/queries';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -38,6 +38,7 @@ export const runQueryTests = () => {
         authType: 'no_auth',
       });
       cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
@@ -62,7 +63,7 @@ export const runQueryTests = () => {
               isEnhancement: true,
             });
           }
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
             page: 'discover',
             isEnhancement: true,
@@ -129,7 +130,7 @@ export const runQueryTests = () => {
               isEnhancement: true,
             });
           }
-          cy.navigateToWorkSpaceSpecificPage({
+          cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
             page: 'discover',
             isEnhancement: true,
@@ -186,36 +187,36 @@ export const runQueryTests = () => {
                 // Verify popover appears with title
                 cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
 
-                // Get the link and verify href based on current language
-                cy.get('.euiLink').then(($link) => {
-                  const href = $link.attr('href');
+                // Get current language first
+                cy.getElementByTestId('queryEditorLanguageSelector')
+                  .invoke('text')
+                  .then((language) => {
+                    // Get the link with matching text content and verify href
+                    cy.get('a.euiLink.euiLink--primary')
+                      .should('have.attr', 'href')
+                      .then((href) => {
+                        let expectedHref;
 
-                  // Get current language from the page
-                  cy.getElementByTestId('queryEditorLanguageSelector')
-                    .invoke('text')
-                    .then((language) => {
-                      let expectedHref;
+                        switch (language.trim()) {
+                          case 'DQL':
+                            expectedHref = `https://opensearch.org/docs/${docsVersion}/dashboards/dql`;
+                            break;
+                          case 'Lucene':
+                            expectedHref = `https://opensearch.org/docs/${docsVersion}/query-dsl/full-text/query-string/`;
+                            break;
+                          case 'OpenSearch SQL':
+                            expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/sql/basic/`;
+                            break;
+                          case 'PPL':
+                            expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/ppl/syntax/`;
+                            break;
+                          default:
+                            throw new Error(`Unexpected language: ${language}`);
+                        }
 
-                      switch (language.trim()) {
-                        case 'DQL':
-                          expectedHref = `https://opensearch.org/docs/${docsVersion}/dashboards/dql`;
-                          break;
-                        case 'Lucene':
-                          expectedHref = `https://opensearch.org/docs/${docsVersion}/query-dsl/full-text/query-string/`;
-                          break;
-                        case 'OpenSearch SQL':
-                          expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/sql/basic/`;
-                          break;
-                        case 'PPL':
-                          expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/ppl/syntax/`;
-                          break;
-                        default:
-                          throw new Error(`Unexpected language: ${language}`);
-                      }
-
-                      expect(href).to.equal(expectedHref);
-                    });
-                });
+                        expect(href).to.equal(expectedHref);
+                      });
+                  });
               });
             });
         });

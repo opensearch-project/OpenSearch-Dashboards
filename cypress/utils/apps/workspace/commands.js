@@ -4,47 +4,6 @@
  */
 
 Cypress.Commands.add(
-  // navigates to the workspace HomePage of a given workspace
-  'navigateToWorkSpaceHomePage',
-  (workspaceName) => {
-    // Selecting the correct workspace
-    cy.visit('/app/workspace_list#');
-    cy.openWorkspaceDashboard(workspaceName);
-    // wait until page loads
-    if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'osd') {
-      cy.getElementByTestId('headerAppActionMenu').should('be.visible');
-    } else {
-      cy.getElementByTestId('breadcrumbs').should('be.visible');
-    }
-  }
-);
-
-Cypress.Commands.add(
-  //navigate to workspace specific pages
-  'navigateToWorkSpaceSpecificPage',
-  (opts) => {
-    const { workspaceName, page, isEnhancement = false } = opts;
-    // Navigating to the WorkSpace Home Page
-    cy.navigateToWorkSpaceHomePage(workspaceName);
-
-    // Check for toggleNavButton and handle accordingly
-    // If collapsibleNavShrinkButton is shown which means toggleNavButton is already clicked, try clicking the app link directly
-    // Using collapsibleNavShrinkButton is more robust than using toggleNavButton due to another toggleNavButton item on discover page
-    cy.get('body').then(($body) => {
-      const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
-
-      if (shrinkButton.length === 0) {
-        cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
-      }
-
-      cy.getElementByTestId(`collapsibleNavAppLink-${page}`).should('be.visible').click();
-    });
-
-    cy.waitForLoader(isEnhancement);
-  }
-);
-
-Cypress.Commands.add(
   // Creates an index pattern within the workspace using cluster
   // Don't use * in the indexPattern it adds it by default at the end of name
   'createWorkspaceIndexPatterns',
@@ -63,13 +22,34 @@ Cypress.Commands.add(
     );
 
     // Navigate to Workspace Specific IndexPattern Page
-    cy.navigateToWorkSpaceSpecificPage({
+    cy.osd.navigateToWorkSpaceSpecificPage({
       workspaceName,
       page: 'indexPatterns',
       isEnhancement,
     });
-    cy.getElementByTestId('createIndexPatternButton').click();
-    cy.waitForLoader(isEnhancement);
+
+    // There is a bug in Neo where the header of the index pattern page has the home page's header. Happens only in cypress
+    // Therefore it is unreliable to leverage the "create" button to navigate to this page
+    if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'neo') {
+      cy.get('@WORKSPACE_ID').then((workspaceId) => {
+        cy.visit(`/w/${workspaceId}/app/indexPatterns/create`);
+      });
+    } else {
+      // Navigate to Workspace Specific IndexPattern Page
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'indexPatterns',
+        isEnhancement,
+      });
+
+      // adding a wait here as sometimes the button doesn't click below
+      cy.wait(2000);
+
+      // adding a force as sometimes the button is hidden behind a popup
+      cy.getElementByTestId('createIndexPatternButton').click({ force: true });
+    }
+
+    cy.osd.waitForLoader(isEnhancement);
 
     const disableLocalCluster = !!Cypress.env('DISABLE_LOCAL_CLUSTER');
 
@@ -141,7 +121,7 @@ Cypress.Commands.add(
     const { workspaceName, indexPattern, isEnhancement = false } = opts;
 
     // Navigate to Workspace Specific IndexPattern Page
-    cy.navigateToWorkSpaceSpecificPage({
+    cy.osd.navigateToWorkSpaceSpecificPage({
       workspaceName,
       page: 'indexPatterns',
       isEnhancement,

@@ -8,14 +8,14 @@ import {
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   QueryLanguages,
-} from '../../../../../utils/apps/constants.js';
-import * as docTable from '../../../../../utils/apps/query_enhancements/doc_table.js';
-import { PATHS, BASE_PATH } from '../../../../../utils/constants.js';
+} from '../../../../../../utils/apps/constants.js';
+import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
+import { PATHS, BASE_PATH } from '../../../../../../utils/constants.js';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared.js';
+} from '../../../../../../utils/apps/query_enhancements/shared.js';
 import {
   generateInspectTestConfiguration,
   getFlattenedFieldsWithValue,
@@ -23,8 +23,8 @@ import {
   verifyVisualizationsWithInspectOption,
   visualizationTitlesWithNoInspectOptions,
   visualizationTitlesWithInspectOptions,
-} from '../../../../../utils/apps/query_enhancements/inspect.js';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/inspect.js';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -46,7 +46,8 @@ const inspectTestSuite = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
@@ -58,7 +59,7 @@ const inspectTestSuite = () => {
         isEnhancement: true,
       });
 
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'discover',
@@ -79,7 +80,12 @@ const inspectTestSuite = () => {
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
+        if (config.queryString) {
+          cy.setQueryEditor(config.queryString, { submit: false });
+        }
+
         cy.intercept('POST', '**/search/*').as('docTablePostRequest');
+        cy.getElementByTestId('querySubmitButton').click();
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
         docTable.toggleDocTableRow(0);
@@ -99,34 +105,31 @@ const inspectTestSuite = () => {
             ) {
               cy.log(`Skipped for ${key}`);
               continue;
-            } else if (config.language === QueryLanguages.PPL.name && key === 'timestamp') {
-              // PPL date field will be formatted
-              docTable
-                .getExpandedDocTableRowFieldValue(key)
-                .should('have.text', 'Dec 31, 2020 @ 16:00:00.000');
-              continue;
-            } else {
-              docTable
-                .getExpandedDocTableRowFieldValue(key)
-                .should('have.text', value === null ? ' - ' : value);
             }
+            docTable
+              .getExpandedDocTableRowFieldValue(key)
+              .should('have.text', value === null ? ' - ' : value);
           }
         });
       });
     });
 
     it('should test visualizations inspect', () => {
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'import_sample_data',
         isEnhancement: true,
       });
 
-      cy.getElementByTestId('addSampleDataSetflights').click();
+      // adding a wait here as sometimes the button doesn't click below
+      cy.wait(3000);
+
+      cy.getElementByTestId('addSampleDataSetflights').should('be.visible').click();
+
       cy.getElementByTestId('sampleDataSetInstallToast').should('exist');
 
-      cy.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
         page: 'dashboards',

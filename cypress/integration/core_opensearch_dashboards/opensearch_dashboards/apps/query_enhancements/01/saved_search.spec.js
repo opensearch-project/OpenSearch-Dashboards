@@ -10,12 +10,12 @@ import {
   QueryLanguages,
   PATHS,
   DATASOURCE_NAME,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   setSearchConfigurations,
   verifyDiscoverPageState,
@@ -23,8 +23,8 @@ import {
   postRequestSaveSearch,
   updateSavedSearchAndSaveAndVerify,
   generateSavedTestConfiguration,
-} from '../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../utils/helpers';
+} from '../../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -50,7 +50,8 @@ const runSavedSearchTests = () => {
         authType: 'no_auth',
       });
       // Create workspace
-      cy.deleteAllWorkspaces();
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
       cy.createWorkspaceIndexPatterns({
@@ -60,6 +61,7 @@ const runSavedSearchTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+      cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
     });
 
     afterEach(() => {
@@ -71,7 +73,7 @@ const runSavedSearchTests = () => {
 
     generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
       it(`should successfully create a saved search for ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
@@ -106,7 +108,7 @@ const runSavedSearchTests = () => {
             // using a POST request to create a saved search to load
             postRequestSaveSearch(config);
 
-            cy.navigateToWorkSpaceSpecificPage({
+            cy.osd.navigateToWorkSpaceSpecificPage({
               workspaceName,
               page: 'discover',
               isEnhancement: true,
