@@ -7,7 +7,6 @@ import {
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
-  QueryLanguages,
   DATASOURCE_NAME,
 } from '../../../../../../utils/constants';
 import {
@@ -19,9 +18,9 @@ import {
   setSearchConfigurations,
   verifyDiscoverPageState,
   verifySavedSearchInAssetsPage,
-  postRequestSaveSearch,
   updateSavedSearchAndSaveAndVerify,
   generateSavedTestConfiguration,
+  postRequestSaveSearch,
 } from '../../../../../../utils/apps/query_enhancements/saved';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
@@ -53,7 +52,7 @@ const runSavedSearchTests = () => {
     });
 
     generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
-      it(`should successfully create a saved search for ${config.testName}`, () => {
+      it(`create and load for ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
@@ -74,41 +73,19 @@ const runSavedSearchTests = () => {
         cy.wait(2000);
 
         verifySavedSearchInAssetsPage(config, workspaceName);
-      });
 
-      // We are starting from various languages
-      // to guard against: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9078
-      Object.values(QueryLanguages)
-        .map((queryLanguage) => queryLanguage.name)
-        .forEach((startingLanguage) => {
-          // TODO: Remove this line once bugs are fixed
-          // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9078
-          if (startingLanguage !== config.language) return;
-
-          it(`should successfully load a saved search for ${config.testName} starting from ${startingLanguage}`, () => {
-            // using a POST request to create a saved search to load
-            postRequestSaveSearch(config);
-
-            cy.osd.navigateToWorkSpaceSpecificPage({
-              workspaceName,
-              page: 'discover',
-              isEnhancement: true,
-            });
-            cy.getElementByTestId('discoverNewButton').click();
-
-            // Intentionally setting INDEX_PATTERN dataset here so that
-            // we have access to all four languages that INDEX_PATTERN allows.
-            // This means that we are only testing loading a saved search
-            // starting from an INDEX_PATTERN dataset, but I think testing where the
-            // start is a permutation of other dataset is overkill
-            cy.setIndexPatternAsDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME);
-
-            cy.setQueryLanguage(startingLanguage);
-            cy.loadSaveSearch(config.saveName);
-            setDatePickerDatesAndSearchIfRelevant(config.language);
-            verifyDiscoverPageState(config);
-          });
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'discover',
+          isEnhancement: true,
         });
+
+        cy.getElementByTestId('discoverNewButton').click();
+        cy.setQueryLanguage(config.language);
+        cy.loadSaveSearch(config.saveName);
+        setDatePickerDatesAndSearchIfRelevant(config.language);
+        verifyDiscoverPageState(config);
+      });
 
       it(`should successfully update a saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load

@@ -23,7 +23,7 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 const workspace = getRandomizedWorkspaceName();
 
 const runHistogramInteractionTests = () => {
-  describe('histogram interaction', { testIsolation: true }, () => {
+  describe('histogram interaction', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       cy.createWorkspaceIndexPatterns({
