@@ -122,7 +122,7 @@ jobs:
 
       - name: Build Plugin
         working-directory: plugins/${{ matrix.plugin.name }}
-        run: yarn plugin_helpers build --opensearch-dashboards-version=${{ env.VERSION }} 2>&1 | tee build.log
+        run: node ../../scripts/plugin_helpers build --opensearch-dashboards-version=${{ env.VERSION }} 2>&1 | tee build.log
 
       - name: Upload Plugin Artifact
         if: success()
