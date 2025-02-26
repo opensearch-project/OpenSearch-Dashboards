@@ -202,6 +202,9 @@ const verifyFieldShowDetailsShowsTopValuesAndViewVisualization = (
   const aggregatableShouldNotText = isAggregatable ? 'not.exist' : 'be.visible';
 
   setDatePickerDatesAndSearchIfRelevant(config.language);
+
+  // adding a wait as this does not work sometimes
+  cy.wait(1000);
   sideBar.showSidebarFieldDetails(field);
   // Either the field details text for each top value should exist, or there should be a field Visualize error.
   cy.getElementsByTestIds(['dscFieldDetailsText', 'fieldVisualizeError']).should(
