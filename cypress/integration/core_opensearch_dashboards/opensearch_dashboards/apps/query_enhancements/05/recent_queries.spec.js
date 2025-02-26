@@ -45,6 +45,13 @@ const runRecentQueryTests = () => {
       });
     });
 
+    afterEach(() => {
+      cy.window().then((win) => {
+        win.localStorage.clear();
+        win.sessionStorage.clear();
+      });
+    });
+
     after(() => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
