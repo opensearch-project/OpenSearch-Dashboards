@@ -78,7 +78,6 @@ const queriesTestSuite = () => {
       it('with SQL', () => {
         cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('OpenSearch SQL');
-        cy.osd.setTopNavDate(START_TIME, END_TIME);
 
         // Default SQL query should be set
         cy.osd.waitForLoader(true);

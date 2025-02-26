@@ -74,6 +74,7 @@ const runSavedSearchTests = () => {
 
         verifySavedSearchInAssetsPage(config, workspaceName);
 
+        // load saved search
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
