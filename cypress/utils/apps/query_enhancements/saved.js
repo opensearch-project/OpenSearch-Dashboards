@@ -83,9 +83,9 @@ export const getExpectedHitCount = (datasetType, language) => {
     case DatasetTypes.INDEX_PATTERN.name:
       switch (language) {
         case QueryLanguages.DQL.name:
-          return 28;
+          return 26;
         case QueryLanguages.Lucene.name:
-          return 28;
+          return 26;
         case QueryLanguages.SQL.name:
           return undefined;
         case QueryLanguages.PPL.name:
@@ -125,13 +125,13 @@ export const getSampleTableData = (datasetType, language) => {
       switch (language) {
         case QueryLanguages.DQL.name:
           return [
-            [1, '9,998'],
-            [2, 'Phyllis Dach'],
+            [1, '9,997'],
+            [2, 'Meghan Sipes'],
           ];
         case QueryLanguages.Lucene.name:
           return [
-            [1, '9,998'],
-            [2, 'Phyllis Dach'],
+            [1, '9,997'],
+            [2, 'Meghan Sipes'],
           ];
         case QueryLanguages.SQL.name:
           return [];
@@ -250,9 +250,6 @@ export const setSearchConfigurations = ({
 
     cy.getElementByTestId(`docTableHeaderFieldSort_${APPLIED_SORT}`).click();
 
-    // TODO: This reload shouldn't need to be here, but currently the sort doesn't always happen right away
-    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9131
-    cy.reload();
     cy.getElementByTestId('querySubmitButton').should('be.visible');
   }
 };
@@ -331,7 +328,7 @@ export const verifySavedSearchInAssetsPage = (
   },
   workspaceName
 ) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName: workspaceName,
     page: 'objects',
     isEnhancement: true,
@@ -464,7 +461,7 @@ export const updateSavedSearchAndSaveAndVerify = (
   datasourceName,
   saveAsNew
 ) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName: workspaceName,
     page: 'discover',
     isEnhancement: true,
@@ -499,4 +496,38 @@ export const updateSavedSearchAndSaveAndVerify = (
   cy.loadSaveSearch(saveNameToUse);
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);
+};
+
+/**
+ * Navigates to dashboard page, clicks new dashboard, and open up the saved search panel
+ * @param {string} workspaceName - name of workspace
+ */
+export const navigateToDashboardAndOpenSavedSearchPanel = (workspaceName) => {
+  cy.osd.navigateToWorkSpaceSpecificPage({
+    workspaceName,
+    page: 'dashboards',
+    isEnhancement: true,
+  });
+
+  // adding a wait as cy.click sometimes fails with the error "...failed because the page updated while this command was executing"
+  cy.wait(1000);
+
+  cy.getElementByTestId('newItemButton').click();
+  // using DQL as it supports date picker
+  setDatePickerDatesAndSearchIfRelevant(QueryLanguages.DQL.name);
+  cy.getElementByTestId('dashboardAddPanelButton').click();
+  cy.getElementByTestId('savedObjectFinderFilterButton').click();
+  cy.getElementByTestId('savedObjectFinderFilter-search').click();
+};
+
+/**
+ * Navigates to dashboard page and loads a saved search as a new dashboard
+ * @param {SavedTestConfig} config - the relevant config for the test case
+ * @param {string} workspaceName - name of workspace
+ */
+export const loadSavedSearchFromDashboards = (config, workspaceName) => {
+  navigateToDashboardAndOpenSavedSearchPanel(workspaceName);
+  cy.getElementByTestId(`savedObjectTitle${config.saveName}`).click();
+  cy.getElementByTestId('addObjectToContainerSuccess').should('be.visible');
+  cy.getElementByTestId('euiFlyoutCloseButton').click();
 };

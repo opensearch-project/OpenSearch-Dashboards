@@ -1,2 +1,0 @@
-fix:
-- Prevent user from visiting dashboards / visualizations when out of a workspace ([#9024](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9024))

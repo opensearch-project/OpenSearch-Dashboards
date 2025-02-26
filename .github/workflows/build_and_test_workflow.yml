@@ -312,6 +312,7 @@ jobs:
           path: |
             test/*/failure_debug/
             test/*/screenshots/
+          overwrite: true
 
   plugin-functional-tests:
     name: Run plugin functional tests on ${{ matrix.name }}
@@ -423,6 +424,7 @@ jobs:
           path: |
             test/*/failure_debug/
             test/*/screenshots/
+          overwrite: true
 
   build-min-artifact-tests:
     name: Build min release artifacts on ${{ matrix.name }}
@@ -535,6 +537,7 @@ jobs:
           name: ${{ matrix.suffix }}-${{ env.VERSION }}
           path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
           retention-days: 1
+          overwrite: true
 
   bwc-tests:
     needs: [build-min-artifact-tests]
@@ -627,3 +630,4 @@ jobs:
             ./artifacts/bwc_tmp/test/cypress/screenshots/*
             ./artifacts/bwc_tmp/test/cypress/results/*
           retention-days: 1
+          overwrite: true

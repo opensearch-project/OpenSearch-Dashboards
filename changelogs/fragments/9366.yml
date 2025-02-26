@@ -1,0 +1,2 @@
+fix:
+- Update actions/cache from v1 to v4 to address deprecation warning ([#9366](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9366))

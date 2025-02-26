@@ -1,2 +1,0 @@
-fix:
-- [MDS] Fix showing DQS sources list in workspaces ([#8838](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8838))
