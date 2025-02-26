@@ -1,6 +1,14 @@
 name: Build Release & Plugins
 
 on:
+  push:
+    branches:
+      - feature/node-2x
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/**'
+      - '!.github/workflows/**'
   workflow_dispatch:
 
 env:
