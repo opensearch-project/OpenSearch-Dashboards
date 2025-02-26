@@ -18,8 +18,6 @@ jobs:
   build_release:
     name: Build OpenSearch Dashboards Release
     runs-on: ubuntu-latest
-    container:
-      image: opensearchstaging/ci-runner:ci-runner-almalinux8-opensearch-dashboards-build-v1
     steps:
       - name: Checkout OpenSearch Dashboards
         uses: actions/checkout@v3
