@@ -396,7 +396,7 @@
     "d3-cloud": "1.2.5",
     "dedent": "^0.7.0",
     "delete-empty": "^2.0.0",
-    "dompurify": "^3.0.11",
+    "dompurify": "^3.2.4",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.5",
     "enzyme-to-json": "^3.5.0",
