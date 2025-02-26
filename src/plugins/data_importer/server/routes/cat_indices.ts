@@ -6,6 +6,7 @@
 import { IRouter } from 'src/core/server';
 import { schema, TypeOf } from '@osd/config-schema';
 import _ from 'lodash';
+import { CatIndicesIndicesRecord } from '@opensearch-project/opensearch/api/types';
 import { configSchema } from '../../config';
 import { decideClient } from '../utils/util';
 
@@ -24,11 +25,7 @@ export function catIndicesRoute(
       },
     },
     async (context, request, response) => {
-      const client = await decideClient(
-        dataSourceEnabled,
-        context,
-        (request.query as { dataSource?: string }).dataSource
-      );
+      const client = await decideClient(dataSourceEnabled, context, request.query.dataSource);
       if (!!!client) {
         return response.notFound({
           body: 'Data source is not enabled or does not exist',
@@ -41,7 +38,11 @@ export function catIndicesRoute(
         });
         return response.ok({
           body: {
-            indices: indices.body.map((index: { index?: string }) => index.index || 'unknown'),
+            indices: indices.body
+              .filter((index: CatIndicesIndicesRecord) => {
+                return !index.index?.startsWith('.');
+              })
+              .map((index: CatIndicesIndicesRecord) => index.index || 'unknown'),
           },
         });
       } catch (e) {

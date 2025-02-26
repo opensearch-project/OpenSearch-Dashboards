@@ -18,6 +18,7 @@ describe('App', () => {
   const savedObjectsMock = coreMock.createStart().savedObjects;
   const navigationMock = navigationPluginMock.createStartContract();
   const mockConfig: PublicConfigSchema = {
+    filePreviewDocumentsCount: 10,
     enabledFileTypes: DEFAULT_SUPPORTED_FILE_TYPES_LIST,
     maxFileSizeBytes: 104857600,
     maxTextCount: 10000,

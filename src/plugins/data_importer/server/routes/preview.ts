@@ -43,6 +43,7 @@ export function previewRoute(
               },
             })
           ),
+          previewCount: schema.number({ min: 1, max: config.filePreviewDocumentsCount }),
         }),
         body: schema.object({
           file: schema.stream(),
@@ -88,10 +89,10 @@ export function previewRoute(
 
       const file = request.body.file as FileStream;
       const documents = (
-        await parser.parseFile(file, config.filePreviewDocumentsCount, {
+        await parser.parseFile(file, request.query.previewCount, {
           delimiter: request.query.delimiter,
         })
-      ).slice(0, config.filePreviewDocumentsCount);
+      ).slice(0, request.query.previewCount);
 
       try {
         // Ensure OpenSearch can handle the deeply nested objects
