@@ -22,7 +22,7 @@ jobs:
       image: opensearchstaging/ci-runner:ci-runner-almalinux8-opensearch-dashboards-build-v1
     steps:
       - name: Checkout OpenSearch Dashboards
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -42,7 +42,7 @@ jobs:
       - name: Upload Release Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: opensearch-dashboards-${VERSION}
+          name: opensearch-dashboards-${{ env.VERSION }}
           path: target/opensearch-dashboards-*.tar.gz
           retention-days: 1
 
@@ -100,7 +100,7 @@ jobs:
             ref: main
     steps:
       - name: Checkout OpenSearch Dashboards
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -111,33 +111,27 @@ jobs:
       - name: Install Yarn
         run: npm install -g yarn@1.22.10
 
+      # Check out the plugin repository into the main repo's plugins folder.
       - name: Checkout Plugin
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ${{ matrix.plugin.repo }}
           ref: ${{ matrix.plugin.ref }}
-          path: plugin
+          path: plugins/${{ matrix.plugin.name }}
+
+      - name: Bootstrap with Plugins
+        run: yarn osd bootstrap --single-version=loose
 
       - name: Build Plugin
-        id: build
-        continue-on-error: true
-        working-directory: plugin
-        run: |
-          if yarn plugin-helpers build --opensearch-dashboards-version=${VERSION} 2>&1 | tee build.log; then
-            echo "Built with plugin-helpers"
-          elif yarn plugin_helpers build --opensearch-dashboards-version=${VERSION} 2>&1 | tee -a build.log; then
-            echo "Built with plugin_helpers"
-          else
-            echo "::error::Failed to build plugin ${{ matrix.plugin.name }}"
-            exit 1
-          fi
+        working-directory: plugins/${{ matrix.plugin.name }}
+        run: yarn plugin_helpers build --opensearch-dashboards-version=${{ env.VERSION }} 2>&1 | tee build.log
 
       - name: Upload Plugin Artifact
-        if: steps.build.outcome == 'success'
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: plugin-${{ matrix.plugin.name }}
-          path: plugin/build/*.zip
+          path: plugins/${{ matrix.plugin.name }}/build/*.zip
           retention-days: 1
 
       - name: Upload Build Log
@@ -145,7 +139,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ matrix.plugin.name }}
-          path: plugin/build.log
+          path: plugins/${{ matrix.plugin.name }}/build.log
           retention-days: 1
 
   assemble_release:
@@ -156,13 +150,13 @@ jobs:
       - name: Download Release Artifact
         uses: actions/download-artifact@v4
         with:
-          name: opensearch-dashboards-${VERSION}
+          name: opensearch-dashboards-${{ env.VERSION }}
           path: ./
 
       - name: Extract Release
         run: |
           tar xzf opensearch-dashboards-*.tar.gz
-          mv opensearch-dashboards-* opensearch-dashboards-${VERSION}
+          mv opensearch-dashboards-* opensearch-dashboards-${{ env.VERSION }}
 
       - name: Download All Plugin Artifacts
         uses: actions/download-artifact@v4
@@ -178,7 +172,7 @@ jobs:
             if [ -f "$plugin" ]; then
               plugin_name=$(basename "$plugin" .zip)
               echo "Installing plugin: $plugin_name"
-              if ./opensearch-dashboards-${VERSION}/bin/opensearch-dashboards-plugin install "file://$plugin" 2>&1 | tee install_logs/${plugin_name}_install.log; then
+              if ./opensearch-dashboards-${{ env.VERSION }}/bin/opensearch-dashboards-plugin install "file://$plugin" 2>&1 | tee install_logs/${plugin_name}_install.log; then
                 echo "✅ Successfully installed $plugin_name"
               else
                 echo "⚠️ Failed to install $plugin_name"
@@ -197,6 +191,6 @@ jobs:
       - name: Upload Final Release
         uses: actions/upload-artifact@v4
         with:
-          name: opensearch-dashboards-${VERSION}-with-plugins
-          path: opensearch-dashboards-${VERSION}/
+          name: opensearch-dashboards-${{ env.VERSION }}-with-plugins
+          path: opensearch-dashboards-${{ env.VERSION }}/
           retention-days: 1
