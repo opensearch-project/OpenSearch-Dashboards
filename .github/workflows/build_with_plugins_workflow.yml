@@ -153,8 +153,7 @@ jobs:
 
       - name: Extract Release
         run: |
-          tar xzf opensearch-dashboards-*.tar.gz
-          mv opensearch-dashboards-* opensearch-dashboards-${{ env.VERSION }}
+          unzip opensearch-dashboards-*.zip -d opensearch-dashboards-${{ env.VERSION }}
 
       - name: Download All Plugin Artifacts
         uses: actions/download-artifact@v4
