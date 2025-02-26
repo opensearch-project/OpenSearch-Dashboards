@@ -55,7 +55,7 @@ configService.atPath.mockReturnValue(
     compression: { enabled: true },
     xsrf: {
       disableProtection: true,
-      whitelist: [],
+      allowlist: [],
     },
     customResponseHeaders: {},
     requestId: {

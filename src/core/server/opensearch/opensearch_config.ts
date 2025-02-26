@@ -74,7 +74,7 @@ export const configSchema = schema.object({
     )
   ),
   password: schema.maybe(schema.string()),
-  requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+  requestHeadersAllowlist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
     defaultValue: ['authorization'],
   }),
   memoryCircuitBreaker: schema.object({
@@ -140,13 +140,13 @@ const deprecations: ConfigDeprecationProvider = ({ renameFromRoot, renameFromRoo
   renameFromRoot('elasticsearch.hosts', 'opensearch.hosts'),
   renameFromRoot('elasticsearch.username', 'opensearch.username'),
   renameFromRoot('elasticsearch.password', 'opensearch.password'),
-  renameFromRoot('elasticsearch.requestHeadersWhitelist', 'opensearch.requestHeadersWhitelist'),
+  renameFromRoot('elasticsearch.requestHeadersAllowlist', 'opensearch.requestHeadersAllowlist'),
   renameFromRootWithoutMap(
-    'opensearch.requestHeadersWhitelist',
+    'opensearch.requestHeadersAllowlist',
     'opensearch.requestHeadersAllowlist'
   ),
   renameFromRootWithoutMap(
-    'opensearch.requestHeadersWhitelistConfigured',
+    'opensearch.requestHeadersAllowlistConfigured',
     'opensearch.requestHeadersAllowlistConfigured'
   ),
   renameFromRoot('elasticsearch.customHeaders', 'opensearch.customHeaders'),
@@ -236,7 +236,7 @@ export class OpenSearchConfig {
    * scoped cluster client is used. If this is an empty array then *no* client-side
    * will be sent.
    */
-  public readonly requestHeadersWhitelist: string[];
+  public readonly requestHeadersAllowlist: string[];
 
   /**
    * Timeout after which PING HTTP request will be aborted and retried.
@@ -303,7 +303,7 @@ export class OpenSearchConfig {
   /**
    * Header names and values to send to OpenSearch with every request. These
    * headers cannot be overwritten by client-side headers and aren't affected by
-   * `requestHeadersWhitelist` configuration.
+   * `requestHeadersAllowlist` configuration.
    */
   public readonly customHeaders: OpenSearchConfigType['customHeaders'];
 
@@ -319,9 +319,9 @@ export class OpenSearchConfig {
     this.logQueries = rawConfig.logQueries;
     this.optimizedHealthcheck = rawConfig.optimizedHealthcheck;
     this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
-    this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
-      ? rawConfig.requestHeadersWhitelist
-      : [rawConfig.requestHeadersWhitelist];
+    this.requestHeadersAllowlist = Array.isArray(rawConfig.requestHeadersAllowlist)
+      ? rawConfig.requestHeadersAllowlist
+      : [rawConfig.requestHeadersAllowlist];
     this.memoryCircuitBreaker = rawConfig.memoryCircuitBreaker;
     this.pingTimeout = rawConfig.pingTimeout;
     this.requestTimeout = rawConfig.requestTimeout;

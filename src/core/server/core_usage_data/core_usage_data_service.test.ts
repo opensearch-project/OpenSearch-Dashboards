@@ -117,7 +117,7 @@ describe('CoreUsageDataService', () => {
                 "basePathConfigured": false,
                 "compression": Object {
                   "enabled": true,
-                  "referrerWhitelistConfigured": false,
+                  "referrerAllowlistConfigured": false,
                 },
                 "keepaliveTimeout": 120000,
                 "maxPayloadInBytes": 1048576,
@@ -168,8 +168,8 @@ describe('CoreUsageDataService', () => {
                   "truststoreConfigured": false,
                 },
                 "xsrf": Object {
+                  "allowlistConfigured": false,
                   "disableProtection": false,
-                  "whitelistConfigured": false,
                 },
               },
               "logging": Object {
@@ -183,7 +183,7 @@ describe('CoreUsageDataService', () => {
                 "logQueries": false,
                 "numberOfHostsConfigured": 1,
                 "pingTimeoutMs": 30000,
-                "requestHeadersWhitelistConfigured": false,
+                "requestHeadersAllowlistConfigured": false,
                 "requestTimeoutMs": 30000,
                 "shardTimeoutMs": 30000,
                 "sniffIntervalMs": -1,

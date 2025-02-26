@@ -80,7 +80,7 @@ export interface CoreConfigUsageData {
     sniffIntervalMs?: number;
     sniffOnConnectionFault: boolean;
     numberOfHostsConfigured: number;
-    requestHeadersWhitelistConfigured: boolean;
+    requestHeadersAllowlistConfigured: boolean;
     customHeadersConfigured: boolean;
     shardTimeoutMs: number;
     requestTimeoutMs: number;
@@ -107,11 +107,11 @@ export interface CoreConfigUsageData {
     socketTimeout: number;
     compression: {
       enabled: boolean;
-      referrerWhitelistConfigured: boolean;
+      referrerAllowlistConfigured: boolean;
     };
     xsrf: {
       disableProtection: boolean;
-      whitelistConfigured: boolean;
+      allowlistConfigured: boolean;
     };
     requestId: {
       allowFromAnyIp: boolean;

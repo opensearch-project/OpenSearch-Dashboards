@@ -47,7 +47,7 @@ const defaultProxyValue = Object.freeze({
   readLegacyOpenSearchConfig: async () => ({
     requestTimeout: duration(30000),
     customHeaders: {},
-    requestHeadersWhitelist: [],
+    requestHeadersAllowlist: [],
     hosts: ['http://localhost:9200'],
   }),
   pathFilters: [/.*/],

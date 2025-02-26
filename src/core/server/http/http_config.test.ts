@@ -176,15 +176,15 @@ test('uses os.hostname() as default for server.name', () => {
   expect(validated.name).toEqual('opensearch-dashboards-hostname');
 });
 
-test('throws if xsrf.whitelist element does not start with a slash', () => {
+test('throws if xsrf.allowlist element does not start with a slash', () => {
   const httpSchema = config.schema;
   const obj = {
     xsrf: {
-      whitelist: ['/valid-path', 'invalid-path'],
+      allowlist: ['/valid-path', 'invalid-path'],
     },
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-    `"[xsrf.whitelist.1]: must start with a slash"`
+    `"[xsrf.allowlist.1]: must start with a slash"`
   );
 });
 
@@ -232,40 +232,40 @@ test('can specify socket timeouts', () => {
 });
 
 describe('with compression', () => {
-  test('accepts valid referrer whitelist', () => {
+  test('accepts valid referrer allowlist', () => {
     const {
-      compression: { referrerWhitelist },
+      compression: { referrerAllowlist },
     } = config.schema.validate({
       compression: {
-        referrerWhitelist: validHostnames,
+        referrerAllowlist: validHostnames,
       },
     });
 
-    expect(referrerWhitelist).toMatchSnapshot();
+    expect(referrerAllowlist).toMatchSnapshot();
   });
 
-  test('throws if invalid referrer whitelist', () => {
+  test('throws if invalid referrer allowlist', () => {
     const httpSchema = config.schema;
     const invalidHostnames = {
       compression: {
-        referrerWhitelist: [invalidHostname],
+        referrerAllowlist: [invalidHostname],
       },
     };
     const emptyArray = {
       compression: {
-        referrerWhitelist: [],
+        referrerAllowlist: [],
       },
     };
     expect(() => httpSchema.validate(invalidHostnames)).toThrowErrorMatchingSnapshot();
     expect(() => httpSchema.validate(emptyArray)).toThrowErrorMatchingSnapshot();
   });
 
-  test('throws if referrer whitelist is specified and compression is disabled', () => {
+  test('throws if referrer allowlist is specified and compression is disabled', () => {
     const httpSchema = config.schema;
     const obj = {
       compression: {
         enabled: false,
-        referrerWhitelist: validHostnames,
+        referrerAllowlist: validHostnames,
       },
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();

@@ -45,7 +45,7 @@ export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Prom
 /** @internal */
 export interface OpenSearchConfigForProxy {
   hosts: string[];
-  requestHeadersWhitelist: string[];
+  requestHeadersAllowlist: string[];
   customHeaders: Record<string, any>;
   requestTimeout: Duration;
   ssl?: {

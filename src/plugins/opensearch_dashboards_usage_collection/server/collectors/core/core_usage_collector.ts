@@ -45,7 +45,7 @@ export function getCoreUsageCollector(
           sniffIntervalMs: { type: 'long' },
           sniffOnConnectionFault: { type: 'boolean' },
           numberOfHostsConfigured: { type: 'long' },
-          requestHeadersWhitelistConfigured: { type: 'boolean' },
+          requestHeadersAllowlistConfigured: { type: 'boolean' },
           customHeadersConfigured: { type: 'boolean' },
           shardTimeoutMs: { type: 'long' },
           requestTimeoutMs: { type: 'long' },
@@ -72,11 +72,11 @@ export function getCoreUsageCollector(
           socketTimeout: { type: 'long' },
           compression: {
             enabled: { type: 'boolean' },
-            referrerWhitelistConfigured: { type: 'boolean' },
+            referrerAllowlistConfigured: { type: 'boolean' },
           },
           xsrf: {
             disableProtection: { type: 'boolean' },
-            whitelistConfigured: { type: 'boolean' },
+            allowlistConfigured: { type: 'boolean' },
           },
           requestId: {
             allowFromAnyIp: { type: 'boolean' },

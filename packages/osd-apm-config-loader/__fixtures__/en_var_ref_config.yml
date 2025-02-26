@@ -2,4 +2,4 @@ foo: 1
 bar: "pre-${OSD_ENV_VAR1}-mid-${OSD_ENV_VAR2}-post"
 
 opensearch:
-  requestHeadersWhitelist: ["${OSD_ENV_VAR1}", "${OSD_ENV_VAR2}"]
+  requestHeadersAllowlist: ["${OSD_ENV_VAR1}", "${OSD_ENV_VAR2}"]

@@ -259,7 +259,7 @@ describe('#asScoped', () => {
     mockLogger = logger.get();
     mockOpenSearchConfig = {
       apiVersion: 'opensearch-version',
-      requestHeadersWhitelist: ['one', 'two'],
+      requestHeadersAllowlist: ['one', 'two'],
     } as any;
 
     clusterClient = new LegacyClusterClient(
@@ -575,7 +575,7 @@ describe('#close', () => {
     );
 
     clusterClient = new LegacyClusterClient(
-      { apiVersion: 'opensearch-version', requestHeadersWhitelist: [] } as any,
+      { apiVersion: 'opensearch-version', requestHeadersAllowlist: [] } as any,
       logger.get(),
       auditTrailServiceMock.createAuditorFactory
     );

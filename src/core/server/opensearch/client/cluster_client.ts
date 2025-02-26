@@ -143,10 +143,10 @@ export class ClusterClient implements ICustomClusterClient {
 
       scopedHeaders = filterHeaders({ ...requestHeaders, ...requestIdHeaders, ...authHeaders }, [
         'x-opaque-id',
-        ...this.config.requestHeadersWhitelist,
+        ...this.config.requestHeadersAllowlist,
       ]);
     } else {
-      scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
+      scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersAllowlist);
     }
 
     return {

@@ -158,7 +158,7 @@ describe('#setup', () => {
             "http://8.8.8.8",
           ],
           "logQueries": true,
-          "requestHeadersWhitelist": Array [
+          "requestHeadersAllowlist": Array [
             undefined,
           ],
           "ssl": Object {
@@ -183,7 +183,7 @@ describe('#setup', () => {
           "hosts": Array [
             "http://1.2.3.4",
           ],
-          "requestHeadersWhitelist": Array [
+          "requestHeadersAllowlist": Array [
             undefined,
           ],
           "ssl": Object {
@@ -231,7 +231,7 @@ describe('#setup', () => {
             "http://8.8.8.8",
           ],
           "logQueries": true,
-          "requestHeadersWhitelist": Array [
+          "requestHeadersAllowlist": Array [
             undefined,
           ],
           "ssl": Object {
@@ -373,7 +373,7 @@ describe('#start', () => {
             "http://8.8.8.8",
           ],
           "logQueries": true,
-          "requestHeadersWhitelist": Array [
+          "requestHeadersAllowlist": Array [
             undefined,
           ],
           "ssl": Object {
