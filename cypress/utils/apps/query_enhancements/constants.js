@@ -26,15 +26,21 @@ export const INDEX_WITHOUT_TIME_1 = 'data_logs_small_no_time_1';
 export const INDEX_WITH_TIME_2 = 'data_logs_small_time_2';
 export const INDEX_PATTERN_WITH_TIME = 'data_logs_small_time_*';
 export const INDEX_PATTERN_WITH_NO_TIME = 'data_logs_small_no_time_*';
+export const INDEX_PATTERN_WITH_TIME_1 = 'data_logs_small_time_1*';
 
 /**
- * The dataset type that saved search uses
+ * The dataset type in discover
  * @typedef {('INDEXES'|'INDEX_PATTERN')} QueryEnhancementDataset
  */
 
 /**
- * The languages that saved search uses
+ * The languages in discover
  * @typedef {('DQL'|'Lucene'|'OpenSearch SQL'|'PPL')} QueryEnhancementLanguage
+ */
+
+/**
+ * The histogram interval in discover
+ * @typedef {('auto'|'ms'|'s'|'m'|'h'|'d'|'w'|'M'|'y')} HistogramInterval
  */
 
 /**

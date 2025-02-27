@@ -59,7 +59,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setQueryLanguage('DQL');
       cy.setTopNavDate(START_TIME, END_TIME);
 
-      const query = `_id:1`;
+      const query = `_id:N9srQ8opwBxGdIoQU3TW`;
       cy.setQueryEditor(query);
       cy.waitForLoader(true);
       cy.waitForSearch();
@@ -74,7 +74,7 @@ describe('query enhancement queries', { scrollBehavior: false }, () => {
       cy.setQueryLanguage('Lucene');
       cy.setTopNavDate(START_TIME, END_TIME);
 
-      const query = `_id:1`;
+      const query = `_id:N9srQ8opwBxGdIoQU3TW`;
       cy.setQueryEditor(query);
       cy.waitForLoader(true);
       cy.waitForSearch();

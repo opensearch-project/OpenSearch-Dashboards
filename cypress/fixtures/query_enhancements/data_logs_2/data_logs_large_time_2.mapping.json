@@ -22,6 +22,9 @@
       "service_endpoint": {
         "type": "keyword"
       },
+      "never_present_field": {
+        "type": "keyword"
+      },
       "personal": {
         "type": "nested",
         "properties": {
