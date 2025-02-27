@@ -109,7 +109,6 @@ jobs:
       - name: Install Yarn
         run: npm install -g yarn@1.22.10
 
-      # Check out the plugin repository into the main repo's plugins folder.
       - name: Checkout Plugin
         uses: actions/checkout@v3
         with:
@@ -128,15 +127,15 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: plugin-${{ matrix.plugin.name }}
+          name: ${{ matrix.plugin.name }}-${{ env.VERSION }}
           path: plugins/${{ matrix.plugin.name }}/build/*.zip
           retention-days: 1
 
       - name: Upload Build Log
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-log-${{ matrix.plugin.name }}
+          name: ${{ matrix.plugin.name }}-${{ env.VERSION }}-failed-log
           path: plugins/${{ matrix.plugin.name }}/build.log
           retention-days: 1
 
@@ -163,7 +162,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: plugins
-          pattern: plugin-*
+          pattern: "*-${{ env.VERSION }}"
           merge-multiple: true
 
       - name: Install Plugins
@@ -171,9 +170,9 @@ jobs:
           mkdir -p install_logs
           for plugin in plugins/*.zip; do
             if [ -f "$plugin" ]; then
-              plugin_name=$(basename "$plugin" .zip)
+              plugin_name=$(basename "$plugin" -${{ env.VERSION }}.zip)
               echo "Installing plugin: $plugin_name"
-              if ./opensearch-dashboards-${{ env.VERSION }}/bin/opensearch-dashboards-plugin install "file://$plugin" 2>&1 | tee install_logs/${plugin_name}_install.log; then
+              if ./opensearch-dashboards-${{ env.VERSION }}/bin/opensearch-dashboards-plugin install "file://$plugin" 2>&1 | tee install_logs/${plugin_name}-${{ env.VERSION }}-install.log; then
                 echo "✅ Successfully installed $plugin_name"
               else
                 echo "⚠️ Failed to install $plugin_name"
