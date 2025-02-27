@@ -86,8 +86,10 @@ Discover’s multi-data type support revolves around a few key ideas: **`DataStr
 A `DataStructure` describes how data is arranged or nested, enabling hierarchical browsing. For example, an S3 bucket might be broken down into:
 
 ```
-S3 Connection → Data Sources → Databases → Tables
+Indices → Data sources → Indices
 ```
+
+Using the interface:
 
 ```ts
 export interface DataStructure {
@@ -103,6 +105,9 @@ export interface DataStructure {
   meta?: DataStructureMeta;
 }
 ```
+
+Would result in these data structures:
+![Alt text](./resources/data_structure_example.svg)
 
 ### 4.2 Dataset Interface
 
@@ -316,6 +321,8 @@ In this simplified code:
 
 ## 6. Search Execution Flow in Detail
 
+![](./resources/search_context.svg)
+
 Let’s break down the steps end-to-end:
 
 1. **UI Input**  
@@ -348,12 +355,14 @@ Let’s break down the steps end-to-end:
 
 ## 7. UI Components Overview
 
-While the specifics vary by codebase, Discover setup involves:
+![](./resources/components.svg)
+
+Discover is made of the following components
 
 - **Search Bar:** Contains a query editor, dataset selector, time picker, and filter bar.  
 - **Dataset Selector:** Lets users browse or pick from available data sources.  
 - **Query Editor:** Adjusts UI (syntax highlighting, auto-complete, error hints) based on the selected language.  
-- **Results Table / Chart:** Displays records and visual insights from the returned data.
+- **Discover Canvas:** Displays records and visual insights from the returned data.
 
 Rather than showing all the component code, it’s more useful to understand **how** they interact:
 
