@@ -168,11 +168,12 @@ jobs:
       - name: Install Plugins
         run: |
           mkdir -p install_logs
-          for plugin in plugins/*.zip; do
+          cd plugins
+          for plugin in *.zip; do
             if [ -f "$plugin" ]; then
-              plugin_name=$(basename "$plugin" -${{ env.VERSION }}.zip)
+              plugin_name=$(basename "$plugin" .zip)
               echo "Installing plugin: $plugin_name"
-              if ./opensearch-dashboards-${{ env.VERSION }}/bin/opensearch-dashboards-plugin install "file://$plugin" 2>&1 | tee install_logs/${plugin_name}-${{ env.VERSION }}-install.log; then
+              if ../opensearch-dashboards-${{ env.VERSION }}/bin/opensearch-dashboards-plugin install "file:$(pwd)/$plugin" 2>&1 | tee ../install_logs/${plugin_name}-install.log; then
                 echo "✅ Successfully installed $plugin_name"
               else
                 echo "⚠️ Failed to install $plugin_name"
