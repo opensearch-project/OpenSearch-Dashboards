@@ -103,6 +103,11 @@ export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase 
   suggestRenameAs?: boolean;
 }
 
+export interface PromQLAutocompleteResult extends AutocompleteResultBase {
+  suggestSourcesOrTables?: SourceOrTableSuggestion;
+  suggestRenameAs?: boolean;
+}
+
 export enum TableOrViewSuggestion {
   ALL = 'ALL',
   TABLES = 'TABLES',
