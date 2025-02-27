@@ -1,39 +1,31 @@
 {
   "discover": {
     "docTable": {
-      "onLoadSavedQuery": {
-        "render_time": 300
-      },
       "onDateTimeSearch_SQL": {
-        "render_time": 3000
+        "render_time": 3300
       },
       "onDateTimeSearch_PPL": {
         "render_time": 3000
       },
       "onDateTimeSearch_Lucene": {
-        "render_time": 500
+        "render_time": 1300
       },
       "onDateTimeSearch_DQL": {
-        "render_time": 500
+        "render_time": 1500
       }
     },
     "sidebarPanel": {
       "onDateTimeSearch_SQL": {
-        "render_time": 100
+        "render_time": 600
       },
       "onDateTimeSearch_PPL": {
-        "render_time": 3000
+        "render_time": 3300
       },
       "onDateTimeSearch_Lucene": {
-        "render_time": 100
+        "render_time": 1000
       },
       "onDateTimeSearch_DQL": {
-        "render_time": 300
-      }
-    },
-    "docTableField": {
-      "onLoadSavedSearch": {
-        "render_time": 100
+        "render_time": 1000
       }
     }
   },
