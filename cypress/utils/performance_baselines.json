@@ -1,4 +1,9 @@
 {
+  "_comments": {
+    "info": "This JSON file follows the structure: baselines[page][componentTestId][eventName]",
+    "example": "For example: baselines['discover']['docTable']['onDateTimeSearch_SQL'].render_time",
+    "note": "Modify values inside 'render_time' to update performance thresholds"
+  },
   "discover": {
     "docTable": {
       "onDateTimeSearch_SQL": {
