@@ -89,7 +89,13 @@ const {
   useContainer: useAppStateContainer,
 } = createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
 
-const App = ({ navigation, data, history, osdUrlStateStorage }: StateDemoAppDeps) => {
+const App = ({
+  navigation,
+  data,
+  history,
+  osdUrlStateStorage,
+  notifications,
+}: StateDemoAppDeps) => {
   const appStateContainer = useAppStateContainer();
   const appState = useAppState();
 
@@ -99,6 +105,10 @@ const App = ({ navigation, data, history, osdUrlStateStorage }: StateDemoAppDeps
   const indexPattern = useIndexPattern(data);
   if (!indexPattern)
     return <div>No index pattern found. Please create an index patter before loading...</div>;
+
+  const handleSuccess = (message: string) => {
+    notifications.toasts.addSuccess(message);
+  };
 
   // Render the application DOM.
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
@@ -130,7 +140,10 @@ const App = ({ navigation, data, history, osdUrlStateStorage }: StateDemoAppDeps
                 <EuiFieldText
                   placeholder="Additional application state: My name is..."
                   value={appState.name}
-                  onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}
+                  onChange={(e) => {
+                    appStateContainer.set({ ...appState, name: e.target.value });
+                    handleSuccess('Name updated successfully');
+                  }}
                   aria-label="My name"
                 />
               </EuiPageContent>

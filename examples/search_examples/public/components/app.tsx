@@ -176,7 +176,6 @@ export const SearchExamplesApp = ({
             });
             searchSubscription$.unsubscribe();
           } else if (isErrorResponse(response)) {
-            // TODO: Make response error status clearer
             notifications.toasts.addWarning('An error has occurred');
             searchSubscription$.unsubscribe();
           }
