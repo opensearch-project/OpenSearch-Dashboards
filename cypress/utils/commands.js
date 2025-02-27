@@ -62,13 +62,6 @@ Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
     .click();
 });
 
-// Command to measure component performance and compare with baseline
-// Exampele - cy.measureComponentPerformance({
-//   page: 'discover',
-//   componentTestId: 'docTable',
-//   eventName: 'onLoadSavedQuery',
-// });
-
 Cypress.Commands.add('measureComponentPerformance', (opts) => {
   const { page, componentTestId, eventName, isDynamic = false } = opts;
 
@@ -84,7 +77,7 @@ Cypress.Commands.add('measureComponentPerformance', (opts) => {
     cy.window().then((win) => {
       win.performance.mark(`${fieldName}_start`);
 
-      cy.get(`[data-test-subj="${componentTestId}"]`).as('component');
+      cy.getElementByTestId(`${componentTestId}`).should('exist');
 
       cy.get('@component')
         .should('exist')
@@ -134,8 +127,8 @@ Cypress.Commands.add('measureComponentPerformance', (opts) => {
       });
     });
   });
-}); 
-  
+});
+
 Cypress.Commands.add('setAdvancedSetting', (changes) => {
   const url = `${Cypress.config().baseUrl}/api/opensearch-dashboards/settings`;
 

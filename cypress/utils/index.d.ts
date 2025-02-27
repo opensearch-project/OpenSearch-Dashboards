@@ -120,6 +120,27 @@ declare namespace Cypress {
       deleteDataSourceByName(dataSourceName: string): Chainable<any>;
 
       deleteAllDataSources(): Chainable<any>;
+
+      /**
+       * Measures the performance of a component and compares it with a baseline.
+       * @param {Object} options - The options for measuring performance.
+       * @param {string} options.page - The page where the component is located.
+       * @param {string} options.componentTestId - The test ID of the component to measure.
+       * @param {string} options.eventName - The event triggering the measurement.
+       * @param {boolean} [options.isDynamic=false] - Indicates if the component is dynamically rendered.
+       * @example
+       * cy.measureComponentPerformance({
+       *   page: 'discover',
+       *   componentTestId: 'docTable',
+       *   eventName: 'onLoadSavedQuery',
+       * });
+       */
+      measureComponentPerformance<S = any>(options: {
+        page: string;
+        componentTestId: string;
+        eventName: string;
+        isDynamic?: boolean;
+      }): Chainable<S>;
     };
   }
 }
