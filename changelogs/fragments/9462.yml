@@ -1,0 +1,2 @@
+fix:
+- Remove system indexes from the index name selector ([#9462](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9462))
