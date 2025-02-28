@@ -51,7 +51,6 @@ export const runSavedSearchTests = () => {
       });
 
       // Create workspace
-
       cy.deleteAllWorkspaces();
       cy.visit('/app/home');
       cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);

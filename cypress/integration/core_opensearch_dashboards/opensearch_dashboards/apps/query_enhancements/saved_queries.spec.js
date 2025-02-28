@@ -68,6 +68,7 @@ const loadSavedQuery = (config) => {
   );
 
   cy.loadSaveQuery(config.saveName);
+  // wait for saved queries to load.
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
 };
