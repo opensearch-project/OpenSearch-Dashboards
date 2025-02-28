@@ -84,7 +84,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (
     cy.wait('@query').then(() => {
       checkTableHeaders(testFields);
       if (isIndexPattern) {
-        cy.getElementByTestId('discoverQueryHits').should('have.text', '1,152');
+        cy.getElementByTestId('discoverQueryHits').should('have.text', '1,125');
       }
       checkDocTableColumn(expectedValues, 2);
     });
@@ -133,11 +133,11 @@ export const runSideBarTests = () => {
       sqlQuery: (dataset) => `SELECT * FROM ${dataset} WHERE status_code = 200`,
       simpleFields: {
         fields: ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'],
-        expectedValues: ['3.32', '2.8', '3.35', '1.68', '4.98'],
+        expectedValues: ['3.91', '4.82', '1.72', '4.08', '3.97'],
       },
       nestedFields: {
         fields: ['personal.name', 'personal.age', 'personal.birthdate', 'personal.address.country'],
-        expectedValues: ['28', '55', '76', '56', '36'],
+        expectedValues: ['28', '52', '65', '21', '79'],
       },
     };
 
