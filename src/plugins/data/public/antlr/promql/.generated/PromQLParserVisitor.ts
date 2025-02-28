@@ -23,12 +23,14 @@ import { LabelMatcherOperatorContext } from "./PromQLParser.js";
 import { LabelMatcherListContext } from "./PromQLParser.js";
 import { MatrixSelectorContext } from "./PromQLParser.js";
 import { OffsetContext } from "./PromQLParser.js";
-import { Function_Context } from "./PromQLParser.js";
+import { FunctionContext } from "./PromQLParser.js";
 import { ParameterContext } from "./PromQLParser.js";
 import { ParameterListContext } from "./PromQLParser.js";
+import { FunctionNamesContext } from "./PromQLParser.js";
 import { AggregationContext } from "./PromQLParser.js";
 import { ByContext } from "./PromQLParser.js";
 import { WithoutContext } from "./PromQLParser.js";
+import { AggregationOperatorsContext } from "./PromQLParser.js";
 import { GroupingContext } from "./PromQLParser.js";
 import { On_Context } from "./PromQLParser.js";
 import { IgnoringContext } from "./PromQLParser.js";
@@ -169,11 +171,11 @@ export class PromQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result
      */
     visitOffset?: (ctx: OffsetContext) => Result;
     /**
-     * Visit a parse tree produced by `PromQLParser.function_`.
+     * Visit a parse tree produced by `PromQLParser.function`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitFunction_?: (ctx: Function_Context) => Result;
+    visitFunction?: (ctx: FunctionContext) => Result;
     /**
      * Visit a parse tree produced by `PromQLParser.parameter`.
      * @param ctx the parse tree
@@ -186,6 +188,12 @@ export class PromQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result
      * @return the visitor result
      */
     visitParameterList?: (ctx: ParameterListContext) => Result;
+    /**
+     * Visit a parse tree produced by `PromQLParser.functionNames`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitFunctionNames?: (ctx: FunctionNamesContext) => Result;
     /**
      * Visit a parse tree produced by `PromQLParser.aggregation`.
      * @param ctx the parse tree
@@ -204,6 +212,12 @@ export class PromQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result
      * @return the visitor result
      */
     visitWithout?: (ctx: WithoutContext) => Result;
+    /**
+     * Visit a parse tree produced by `PromQLParser.aggregationOperators`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitAggregationOperators?: (ctx: AggregationOperatorsContext) => Result;
     /**
      * Visit a parse tree produced by `PromQLParser.grouping`.
      * @param ctx the parse tree

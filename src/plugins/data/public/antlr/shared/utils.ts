@@ -6,7 +6,7 @@
 import { from } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
+import { CharStream, Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
 import { monaco } from '@osd/monaco';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryStringContract } from '../../query';
@@ -207,6 +207,8 @@ const singleParseQuery = <
   const { tokenStream } = parser;
   const errorListener = new GeneralErrorListener(tokenDictionary.SPACE);
 
+  // console.clear();
+
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
   getParseTree(parser);
@@ -236,6 +238,28 @@ const singleParseQuery = <
       id: tokenType,
     });
   });
+
+  // console.log('Formatted Token Stream:');
+  // let index = 0;
+  // try {
+  //   while (true) {
+  //     const token = tokenStream.get(index);
+  //     if (!token) break;
+
+  //     const isCurrentToken = index === cursorTokenIndex;
+  //     const tokenInfo = `Token ${index}: ${token.text} (Type: ${token.type})`;
+
+  //     if (isCurrentToken) {
+  //       console.log(`%c${tokenInfo}`, 'background-color: red; font-weight: bold;');
+  //     } else {
+  //       console.log(tokenInfo);
+  //     }
+
+  //     index++;
+  //   }
+  // } catch (error) {
+  //   console.error('Error while iterating through token stream:', error);
+  // }
 
   const result: AutocompleteResultBase = {
     errors: errorListener.errors,

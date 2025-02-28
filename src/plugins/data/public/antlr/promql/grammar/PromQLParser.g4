@@ -100,7 +100,7 @@ offsetOp
     ;
 
 vector
-    : function_
+    : function
     | aggregation
     | instantSelector
     | matrixSelector
@@ -146,8 +146,8 @@ offset
 
 // Functions
 
-function_
-    : FUNCTION LEFT_PAREN (parameter (COMMA parameter)*)? RIGHT_PAREN
+function
+    : functionNames LEFT_PAREN (parameter (COMMA parameter)*)? RIGHT_PAREN
     ;
 
 parameter
@@ -159,12 +159,85 @@ parameterList
     : LEFT_PAREN (parameter (COMMA parameter)*)? RIGHT_PAREN
     ;
 
+functionNames
+    : ABS
+    | ABSENT
+    | ABSENT_OVER_TIME
+    | CEIL
+    | CHANGES
+    | CLAMP
+    | CLAMP_MAX
+    | CLAMP_MIN
+    | DAY_OF_MONTH
+    | DAY_OF_WEEK
+    | DAY_OF_YEAR
+    | DAYS_IN_MONTH
+    | DELTA
+    | DERIV
+    | EXP
+    | FLOOR
+    | HISTOGRAM_COUNT
+    | HISTOGRAM_SUM
+    | HISTOGRAM_FRACTION
+    | HISTOGRAM_QUANTILE
+    | HOLT_WINTERS
+    | HOUR
+    | IDELTA
+    | INCREASE
+    | IRATE
+    | LABEL_JOIN
+    | LABEL_REPLACE
+    | LN
+    | LOG2
+    | LOG10
+    | MINUTE
+    | MONTH
+    | PREDICT_LINEAR
+    | RATE
+    | RESETS
+    | ROUND
+    | SCALAR
+    | SGN
+    | SORT
+    | SORT_DESC
+    | SQRT
+    | TIME
+    | TIMESTAMP
+    | VECTOR
+    | YEAR
+    | AVG_OVER_TIME
+    | MIN_OVER_TIME
+    | MAX_OVER_TIME
+    | SUM_OVER_TIME
+    | COUNT_OVER_TIME
+    | QUANTILE_OVER_TIME
+    | STDDEV_OVER_TIME
+    | STDVAR_OVER_TIME
+    | LAST_OVER_TIME
+    | PRESENT_OVER_TIME
+    | ACOS
+    | ACOSH
+    | ASIN
+    | ASINH
+    | ATAN
+    | ATANH
+    | COS
+    | COSH
+    | SIN
+    | SINH
+    | TAN
+    | TANH
+    | DEG
+    | PI
+    | RAD
+    ;
+
 // Aggregations
 
 aggregation
-    : AGGREGATION_OPERATOR parameterList
-    | AGGREGATION_OPERATOR (by | without) parameterList
-    | AGGREGATION_OPERATOR parameterList ( by | without)
+    : aggregationOperators parameterList
+    | aggregationOperators (by | without) parameterList
+    | aggregationOperators parameterList ( by | without)
     ;
 
 by
@@ -175,8 +248,22 @@ without
     : WITHOUT labelNameList
     ;
 
-// Vector one-to-one/one-to-many joins
+aggregationOperators
+    : SUM
+    | MIN
+    | MAX
+    | AVG
+    | GROUP
+    | STDDEV
+    | STDVAR
+    | COUNT
+    | COUNT_VALUES
+    | BOTTOMK
+    | TOPK
+    | QUANTILE
+    ;
 
+// Vector one-to-one/one-to-many joins
 grouping
     : (on_ | ignoring) (groupLeft | groupRight)?
     ;
@@ -221,8 +308,8 @@ keyword
     | GROUP_RIGHT
     | OFFSET
     | BOOL
-    | AGGREGATION_OPERATOR
-    | FUNCTION
+    | aggregationOperators
+    | functionNames
     ;
 
 literal
