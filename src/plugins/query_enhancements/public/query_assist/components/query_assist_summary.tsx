@@ -7,6 +7,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiMarkdownFormat,
   EuiIcon,
   EuiIconTip,
   EuiSmallButtonIcon,
@@ -334,9 +335,9 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
           </EuiText>
         )}
         {summary && !loading && (
-          <EuiText size="s" data-test-subj="queryAssist_summary_result">
+          <EuiMarkdownFormat data-test-subj="queryAssist_summary_result">
             {summary}
-          </EuiText>
+          </EuiMarkdownFormat>
         )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
