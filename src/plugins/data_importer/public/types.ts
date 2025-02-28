@@ -34,3 +34,7 @@ export interface PreviewResponse {
   documents: Array<Record<string, any>>;
   existingMapping?: Record<string, any>;
 }
+
+export interface CatIndicesResponse {
+  indices: string[];
+}

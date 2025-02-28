@@ -12,6 +12,7 @@ export async function previewFile(
   createMode: boolean,
   fileExtension: string,
   indexName: string,
+  previewCount: number,
   delimiter?: string,
   selectedDataSourceId?: string
 ) {
@@ -21,6 +22,7 @@ export async function previewFile(
     indexName,
     fileExtension,
     createMode,
+    previewCount,
     ...(selectedDataSourceId && { dataSource: selectedDataSourceId }),
     delimiter,
   };

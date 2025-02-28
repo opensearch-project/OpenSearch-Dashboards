@@ -46,6 +46,7 @@ import { CSV_FILE_TYPE, CSV_SUPPORTED_DELIMITERS } from '../../common/constants'
 import { DelimiterSelect } from './delimiter_select';
 import { previewFile } from '../lib/preview';
 import { PreviewComponent } from './preview_table';
+import { catIndices } from '../lib/cat_indices';
 
 interface DataImporterPluginAppProps {
   basename: string;
@@ -92,31 +93,11 @@ export const DataImporterPluginApp = ({
   const [indexOptions, setIndexOptions] = useState<Array<{ label: string }>>([]);
   const [createMode, setCreateMode] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchIndices = async () => {
-      try {
-        const response = await http.get('/api/data_importer/_cat_indices');
-        setIndexOptions(response.indices.map((index: string) => ({ label: index })));
-      } catch (error) {
-        notifications.toasts.addDanger(
-          i18n.translate('dataImporter.indicesFetchError', {
-            defaultMessage: `Failed to fetch indices: {error}`,
-            values: { error },
-          })
-        );
-      }
-    };
-
-    fetchIndices();
-  }, [http, notifications.toasts]);
-
   const onImportTypeChange = (type: ImportChoices) => {
     if (type === IMPORT_CHOICE_FILE) {
       setInputFile(undefined);
-      setShowDelimiterChoice(true);
     } else if (type === IMPORT_CHOICE_TEXT) {
       setText(undefined);
-      setShowDelimiterChoice(false);
     }
     setImportType(type);
   };
@@ -126,7 +107,6 @@ export const DataImporterPluginApp = ({
       setDelimiter(undefined);
     }
     setDataType(type);
-    setShowDelimiterChoice(type === CSV_FILE_TYPE && importType === IMPORT_CHOICE_FILE);
   };
 
   const onFileInput = (file?: File) => {
@@ -168,7 +148,7 @@ export const DataImporterPluginApp = ({
     if (importType === IMPORT_CHOICE_FILE) {
       if (inputFile) {
         const fileExtension = extname(inputFile.name);
-        setIsLoadingPreview(true); // Set loading state to true
+        setIsLoadingPreview(true);
         try {
           const response = await previewFile(
             http,
@@ -176,10 +156,11 @@ export const DataImporterPluginApp = ({
             createMode,
             fileExtension,
             indexName!,
+            config.filePreviewDocumentsCount,
             delimiter,
             dataSourceId
           );
-          setIsLoadingPreview(false); // Set loading state to false
+          setIsLoadingPreview(false);
           if (response) {
             setFilePreviewData(response);
             notifications.toasts.addSuccess(
@@ -195,7 +176,6 @@ export const DataImporterPluginApp = ({
             );
           }
         } catch (error) {
-          // console.error(error, 'error');
           setIsLoadingPreview(false);
         }
       }
@@ -207,25 +187,28 @@ export const DataImporterPluginApp = ({
 
     try {
       if (importType === IMPORT_CHOICE_FILE) {
-        response = await importFile(
+        response = await importFile({
           http,
-          inputFile!,
-          indexName!,
+          file: inputFile!,
+          indexName: indexName!,
           createMode,
           // TODO This should be determined from the file type selectable
-          extname(inputFile!.name),
+          fileExtension: extname(inputFile!.name),
           delimiter,
-          dataSourceId
-        );
+          selectedDataSourceId: dataSourceId,
+          mapping: filePreviewData.mapping,
+        });
       } else if (importType === IMPORT_CHOICE_TEXT) {
-        response = await importText(
+        response = await importText({
           http,
-          inputText!,
-          dataType!,
-          indexName!,
+          text: inputText!,
+          textFormat: dataType!,
+          createMode,
+          indexName: indexName!,
           delimiter,
-          dataSourceId
-        );
+          selectedDataSourceId: dataSourceId,
+          mapping: filePreviewData.mapping,
+        });
       }
     } catch (error) {
       notifications.toasts.addDanger(
@@ -247,6 +230,21 @@ export const DataImporterPluginApp = ({
           },
         })
       );
+
+      if (createMode) {
+        try {
+          const catIndicesResponse = await catIndices({ http, dataSourceId });
+          setIndexOptions(catIndicesResponse.indices.map((index: string) => ({ label: index })));
+          setCreateMode(false);
+        } catch (error) {
+          notifications.toasts.addDanger(
+            i18n.translate('dataImporter.indicesFetchError', {
+              defaultMessage: `Failed to fetch indices: {error}`,
+              values: { error },
+            })
+          );
+        }
+      }
     } else {
       const errorMessage = response ? `: ${response.message.message}` : '';
       notifications.toasts.addDanger(
@@ -257,6 +255,24 @@ export const DataImporterPluginApp = ({
       );
     }
   };
+
+  useEffect(() => {
+    async function fetchIndices() {
+      try {
+        const response = await catIndices({ http, dataSourceId });
+        setIndexOptions(response.indices.map((index: string) => ({ label: index })));
+      } catch (error) {
+        notifications.toasts.addDanger(
+          i18n.translate('dataImporter.indicesFetchError', {
+            defaultMessage: `Failed to fetch indices: {error}`,
+            values: { error },
+          })
+        );
+      }
+    }
+
+    fetchIndices();
+  }, [http, dataSourceId, notifications.toasts, filePreviewData]);
 
   useEffect(() => {
     setDisableImport(shouldDisableImportButton());
@@ -295,7 +311,7 @@ export const DataImporterPluginApp = ({
                 savedObjects: savedObjects.client,
                 notifications,
                 onSelectedDataSources: onDataSourceSelect,
-                onManageDataSource: () => {}, // Add a proper handler if needed
+                onManageDataSource: () => {},
               }}
               onManageDataSource={() => {}}
             />
@@ -319,7 +335,12 @@ export const DataImporterPluginApp = ({
   }
 
   function shouldShowDelimiter() {
-    return importType === IMPORT_CHOICE_FILE && dataType === CSV_FILE_TYPE;
+    return (
+      (inputFile &&
+        importType === IMPORT_CHOICE_FILE &&
+        extname(inputFile.name) === `.${CSV_FILE_TYPE}`) ||
+      (importType === IMPORT_CHOICE_TEXT && dataType === CSV_FILE_TYPE)
+    );
   }
 
   const loadMoreRows = () => {
@@ -378,19 +399,17 @@ export const DataImporterPluginApp = ({
                       />
                     </EuiFormRow>
                     <EuiSpacer size="s" />
+                    {showDelimiterChoice && (
+                      <DelimiterSelect
+                        onDelimiterChange={onDelimiterChange}
+                        initialDelimiter={delimiter}
+                      />
+                    )}
                     {importType === IMPORT_CHOICE_FILE && (
-                      <>
-                        {showDelimiterChoice && (
-                          <DelimiterSelect
-                            onDelimiterChange={onDelimiterChange}
-                            initialDelimiter={delimiter}
-                          />
-                        )}
-                        <ImportFileContentBody
-                          enabledFileTypes={config.enabledFileTypes}
-                          onFileUpdate={onFileInput}
-                        />
-                      </>
+                      <ImportFileContentBody
+                        enabledFileTypes={config.enabledFileTypes}
+                        onFileUpdate={onFileInput}
+                      />
                     )}
                     {importType === IMPORT_CHOICE_FILE && (
                       <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>

@@ -69,23 +69,28 @@ export function importFileRoute(
         });
       }
 
-      if (!request.query.createMode) {
-        try {
-          const indexExists = await client.indices.exists({
-            index: request.query.indexName,
-          });
+      try {
+        const indexExists = await client.indices.exists({
+          index: request.query.indexName,
+        });
 
-          if (!indexExists.body) {
-            return response.notFound({
-              body: `Index ${request.query.indexName} does not exist`,
-            });
-          }
-        } catch (e) {
-          return response.internalError({
-            body: `Error checking if index exists: ${e}`,
+        if (!request.query.createMode && !indexExists.body) {
+          return response.notFound({
+            body: `Index ${request.query.indexName} does not exist`,
           });
         }
-      } else {
+        if (request.query.createMode && indexExists.body) {
+          return response.badRequest({
+            body: `Index ${request.query.indexName} already exists`,
+          });
+        }
+      } catch (e) {
+        return response.internalError({
+          body: `Error checking if index exists: ${e}`,
+        });
+      }
+
+      if (request.query.createMode) {
         try {
           const mapping = request.body.mapping ? JSON.parse(request.body.mapping) : {};
           await client.indices.create({

@@ -28,7 +28,8 @@ export function importTextRoute(
               }
             },
           }),
-          indexName: schema.string(),
+          indexName: schema.string({ minLength: 1 }),
+          createMode: schema.boolean(),
           delimiter: schema.maybe(
             schema.string({
               validate(value: string) {
@@ -42,6 +43,7 @@ export function importTextRoute(
         }),
         body: schema.object({
           text: schema.string({ minLength: 1, maxLength: config.maxTextCount }),
+          mapping: schema.maybe(schema.string({ minLength: 1 })),
         }),
       },
     },
@@ -66,15 +68,36 @@ export function importTextRoute(
           index: request.query.indexName,
         });
 
-        if (!indexExists.body) {
+        if (!request.query.createMode && !indexExists.body) {
           return response.notFound({
             body: `Index ${request.query.indexName} does not exist`,
+          });
+        }
+        if (request.query.createMode && indexExists.body) {
+          return response.badRequest({
+            body: `Index ${request.query.indexName} already exists`,
           });
         }
       } catch (e) {
         return response.internalError({
           body: `Error checking if index exists: ${e}`,
         });
+      }
+
+      if (request.query.createMode) {
+        try {
+          const mapping = request.body.mapping ? JSON.parse(request.body.mapping) : {};
+          await client.indices.create({
+            index: request.query.indexName,
+            body: {
+              mappings: mapping,
+            },
+          });
+        } catch (e) {
+          return response.internalError({
+            body: `Error creating index: ${e}`,
+          });
+        }
       }
 
       let isValid;
