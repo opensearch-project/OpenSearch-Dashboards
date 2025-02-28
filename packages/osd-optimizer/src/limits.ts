@@ -38,7 +38,7 @@ import { createFailError, ToolingLog } from '@osd/dev-utils';
 import { OptimizerConfig, getMetrics, Limits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
-const DELTA_FILE_PATH = path.resolve(__dirname, '../bundle_size_variations.yml');
+const DELTA_FILE_PATH = path.resolve(__dirname, '../limits_delta.yml');
 const DELTA_PERCENTAGE_LIMIT = 5;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
@@ -99,30 +99,34 @@ interface Metric {
   limit?: number;
 }
 
+const readDeltas = (): { [key: string]: any } => {
+  if (Fs.existsSync(DELTA_FILE_PATH)) {
+    const fileContent = Fs.readFileSync(DELTA_FILE_PATH, 'utf-8');
+    return Yaml.load(fileContent) as { [key: string]: any };
+  }
+  return {};
+};
+
 const updateBundleSizeVariation = (log: ToolingLog, metric: Metric) => {
   if (metric.limit != null && metric.value > metric.limit) {
-    const delta = metric.value - metric.limit;
-    const deltaPercentage = Math.round((delta / metric.limit) * 100 * 100) / 100;
+    const deltaPercentage = Math.round(((metric.value - metric.limit) / metric.limit) * 100);
 
     if (deltaPercentage > DELTA_PERCENTAGE_LIMIT) {
       log.warning(
         `Metric [${metric.group}] for [${metric.id}] exceeds the limit by more than ${deltaPercentage}%`
       );
 
-      // Read existing data from the file if it exists
-      let existingData: { [key: string]: any } = {};
-      if (Fs.existsSync(DELTA_FILE_PATH)) {
-        const fileContent = Fs.readFileSync(DELTA_FILE_PATH, 'utf-8');
-        existingData = Yaml.load(fileContent) as { [key: string]: any };
-      }
+      // Use helper function to read existing data
+      const existingData = readDeltas();
 
       // Update the data with the new metric
-      existingData[metric.id] = {
-        deltaPercentage,
+      const updatedData = {
+        ...existingData,
+        [metric.id]: { deltaPercentage },
       };
 
       // Write the updated data back to the file
-      Fs.writeFileSync(DELTA_FILE_PATH, Yaml.dump(existingData));
+      Fs.writeFileSync(DELTA_FILE_PATH, Yaml.dump(updatedData));
     }
   }
 };
