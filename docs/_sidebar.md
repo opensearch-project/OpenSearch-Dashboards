@@ -13,7 +13,7 @@
   - [Openapi](openapi/README.md)
   - Plugins
     - discover
-      - [Guide](plugins/discover/guide.md)
+      - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
@@ -187,7 +187,6 @@
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
-  - [Dis](dis.md)
   - [Theme](theme.md)
   - [CHANGELOG](../CHANGELOG.md)
   - [CODE_OF_CONDUCT](../CODE_OF_CONDUCT.md)
