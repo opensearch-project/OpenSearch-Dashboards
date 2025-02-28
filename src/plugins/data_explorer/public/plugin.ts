@@ -33,6 +33,7 @@ import { getPreloadedStore } from './utils/state_management';
 import { opensearchFilters } from '../../data/public';
 import { setUsageCollector } from './services';
 import { WorkspaceAvailability } from '../../../../src/core/public';
+
 export class DataExplorerPlugin
   implements
     Plugin<
@@ -87,7 +88,6 @@ export class DataExplorerPlugin
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-      defaultPath: '#/',
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
