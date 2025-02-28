@@ -80,6 +80,10 @@ const inspectTestSuite = () => {
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
+        if (config.queryString) {
+          cy.setQueryEditor(config.queryString, { submit: false });
+        }
+
         cy.intercept('POST', '**/search/*').as('docTablePostRequest');
         cy.getElementByTestId('querySubmitButton').click();
 
