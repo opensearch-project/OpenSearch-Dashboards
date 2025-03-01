@@ -52,6 +52,15 @@ const dependencies: QueryEditorExtensionDependencies = {
   onSelectLanguage: jest.fn(),
   isCollapsed: false,
   setIsCollapsed: jest.fn(),
+  query: {
+    query: '',
+    language: '',
+    dataset: {
+      type: 'INDEX_PATTERN',
+      id: '',
+      title: '',
+    },
+  },
 };
 
 type Props = ComponentProps<typeof QueryAssistBar>;
@@ -217,5 +226,26 @@ describe('QueryAssistBar', () => {
       query: 'generated query',
     });
     expect(screen.getByTestId('query-assist-query-generated-callout')).toBeInTheDocument();
+  });
+
+  it('should render callout when dataset is not supported', async () => {
+    const { component } = renderQueryAssistBar({
+      dependencies: {
+        ...dependencies,
+        query: {
+          query: '',
+          language: 'kuery',
+          dataset: {
+            id: 'foo',
+            title: 'mock',
+            type: 'S3',
+          },
+        },
+      },
+    });
+
+    await component.findByText(
+      'The selected datasource mock is not supported for Amazon Q query assistance. Please select another data source that is compatible.'
+    );
   });
 });
