@@ -40,9 +40,8 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 };
 
-function msearch({ searchRequests, getConfig, legacy }: SearchStrategySearchParams) {
+function msearch({ searchRequests, getConfig, legacy, dataSourceId }: SearchStrategySearchParams) {
   const { callMsearch, loadingCount$ } = legacy;
-
   const requests = searchRequests.map(({ index, body }) => {
     return {
       header: {
@@ -71,6 +70,7 @@ function msearch({ searchRequests, getConfig, legacy }: SearchStrategySearchPara
   const searching = callMsearch({
     body: { searches: requests },
     signal: abortController.signal,
+    dataSourceId,
   })
     .then((res: any) => res?.body?.responses)
     .finally(() => cleanup());

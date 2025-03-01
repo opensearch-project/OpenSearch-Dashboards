@@ -39,9 +39,10 @@ import { LegacyFetchHandlers } from '../../../common/search/search_source';
  * @internal
  */
 export function getCallMsearch({ http }: { http: HttpStart }): LegacyFetchHandlers['callMsearch'] {
-  return async ({ body, signal }) => {
+  return async ({ body, signal, dataSourceId }) => {
     return http.post('/internal/_msearch', {
       body: JSON.stringify(body),
+      query: { data_source_id: dataSourceId },
       signal,
     });
   };
