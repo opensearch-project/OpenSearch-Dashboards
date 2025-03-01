@@ -55,6 +55,7 @@ interface DataImporterPluginAppProps {
   savedObjects: CoreStart['savedObjects'];
   navigation: NavigationPublicPluginStart;
   config: PublicConfigSchema;
+  hideLocalCluster: boolean;
   dataSourceEnabled: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
@@ -69,6 +70,7 @@ export const DataImporterPluginApp = ({
   config,
   savedObjects,
   dataSourceEnabled,
+  hideLocalCluster,
   dataSourceManagement,
 }: DataImporterPluginAppProps) => {
   const DataSourceMenuComponent = dataSourceManagement?.ui.getDataSourceMenu<
@@ -271,8 +273,10 @@ export const DataImporterPluginApp = ({
       }
     }
 
-    fetchIndices();
-  }, [http, dataSourceId, notifications.toasts, filePreviewData]);
+    if (!hideLocalCluster || dataSourceId) {
+      fetchIndices();
+    }
+  }, [http, dataSourceId, notifications.toasts, filePreviewData, hideLocalCluster]);
 
   useEffect(() => {
     setDisableImport(shouldDisableImportButton());

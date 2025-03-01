@@ -27,6 +27,7 @@ export const renderApp = (
       config={config}
       savedObjects={savedObjects}
       dataSourceEnabled={!!dataSource}
+      hideLocalCluster={dataSource?.hideLocalCluster || false}
       dataSourceManagement={dataSourceManagement}
     />,
     element
