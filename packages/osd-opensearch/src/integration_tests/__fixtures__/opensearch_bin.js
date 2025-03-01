@@ -48,8 +48,8 @@ const { OPENSEARCH_KEY_PATH, OPENSEARCH_CERT_PATH } = require('@osd/dev-utils');
     {
       // Note: the integration uses the OPENSEARCH_P12_PATH, but that keystore contains
       // the same key/cert as OPENSEARCH_KEY_PATH and OPENSEARCH_CERT_PATH
-      key: ssl ? fs.readFileSync(OPENSEARCH_KEY_PATH) : undefined,
-      cert: ssl ? fs.readFileSync(OPENSEARCH_CERT_PATH) : undefined,
+      key: ssl ? fs.readFileSync(OPENSEARCH_KEY_PATH, 'utf8') : undefined,
+      cert: ssl ? fs.readFileSync(OPENSEARCH_CERT_PATH, 'utf8') : undefined,
     },
     (req, res) => {
       const url = new URL(req.url, serverUrl);
