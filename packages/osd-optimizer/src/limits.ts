@@ -29,6 +29,7 @@
  */
 
 import Fs from 'fs';
+import path from 'path';
 
 import dedent from 'dedent';
 import Yaml from 'js-yaml';
@@ -37,7 +38,8 @@ import { createFailError, ToolingLog } from '@osd/dev-utils';
 import { OptimizerConfig, getMetrics, Limits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
-const DEFAULT_BUDGET = 15000;
+const DELTA_FILE_PATH = path.resolve(__dirname, '../limits_delta.yml');
+const DELTA_PERCENTAGE_LIMIT = 5;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
@@ -90,6 +92,45 @@ export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerCo
   log.success('limits.yml file valid');
 }
 
+interface Metric {
+  group: string;
+  id: string;
+  value: number;
+  limit?: number;
+}
+
+const readDeltas = (): { [key: string]: any } => {
+  if (Fs.existsSync(DELTA_FILE_PATH)) {
+    const fileContent = Fs.readFileSync(DELTA_FILE_PATH, 'utf-8');
+    return Yaml.load(fileContent) as { [key: string]: any };
+  }
+  return {};
+};
+
+const updateBundleSizeVariation = (log: ToolingLog, metric: Metric) => {
+  if (metric.limit != null && metric.value > metric.limit) {
+    const deltaPercentage = Math.round(((metric.value - metric.limit) / metric.limit) * 100);
+
+    if (deltaPercentage > DELTA_PERCENTAGE_LIMIT) {
+      log.warning(
+        `Metric [${metric.group}] for [${metric.id}] exceeds the limit by more than ${deltaPercentage}%`
+      );
+
+      // Use helper function to read existing data
+      const existingData = readDeltas();
+
+      // Update the data with the new metric
+      const updatedData = {
+        ...existingData,
+        [metric.id]: { deltaPercentage },
+      };
+
+      // Write the updated data back to the file
+      Fs.writeFileSync(DELTA_FILE_PATH, Yaml.dump(updatedData));
+    }
+  }
+};
+
 export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
   const metrics = getMetrics(log, config);
 
@@ -99,9 +140,10 @@ export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
     if (metric.group === 'page load bundle size') {
       const existingLimit = config.limits.pageLoadAssetSize?.[metric.id];
       pageLoadAssetSize[metric.id] =
-        existingLimit != null && existingLimit >= metric.value
-          ? existingLimit
-          : metric.value + DEFAULT_BUDGET;
+        existingLimit != null && existingLimit >= metric.value ? existingLimit : metric.value;
+
+      // Update the bundle size variation file for bundles that exceed the limit by more than 5%.
+      updateBundleSizeVariation(log, metric);
     }
   }
 
