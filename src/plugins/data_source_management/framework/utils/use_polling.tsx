@@ -60,7 +60,7 @@ export class UsePolling<T, P = void> {
   stopPolling() {
     this.shouldPoll = false;
     if (this.intervalRef) {
-      clearInterval(this.intervalRef);
+      clearInterval((this.intervalRef as unknown) as NodeJS.Timeout);
       this.intervalRef = undefined;
     }
   }
@@ -98,13 +98,13 @@ export function usePolling<T, P = void>(
     }, interval);
     intervalRef.current = intervalId;
     if (unmounted.current) {
-      clearInterval(intervalId);
+      clearInterval((intervalId as unknown) as NodeJS.Timeout);
     }
   };
 
   const stopPolling = () => {
     shouldPoll.current = false;
-    clearInterval(intervalRef.current);
+    clearInterval((intervalRef.current as unknown) as NodeJS.Timeout);
   };
 
   const fetchData = async (params?: P) => {

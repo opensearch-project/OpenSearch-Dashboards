@@ -105,7 +105,9 @@ function determineCachePrefix() {
 
 function compile(cache: Cache, source: string, path: string) {
   try {
-    const filehash = Crypto.createHash('sha1').update(Fs.readFileSync(path)).digest('base64');
+    const filehash = Crypto.createHash('sha1')
+      .update(Fs.readFileSync(path, 'utf8'))
+      .digest('base64');
     if (cache.getFileHash(path) === filehash) {
       const code = cache.getCode(path);
       if (code) {

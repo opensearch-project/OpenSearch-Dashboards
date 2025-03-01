@@ -74,11 +74,11 @@ const { OPENSEARCH_KEY_PATH, OPENSEARCH_CERT_PATH } = require('@osd/dev-utils');
     }
   );
 
-  // setup server auto close after 1 second of silence
+  // setup server auto close after 3 seconds of silence
   let serverCloseTimer;
   const delayServerClose = () => {
     clearTimeout(serverCloseTimer);
-    serverCloseTimer = setTimeout(() => server.close(), 1000);
+    serverCloseTimer = setTimeout(() => server.close(), 3000);
   };
   server.on('request', delayServerClose);
   server.on('listening', delayServerClose);

@@ -24652,7 +24652,7 @@ var maybeRealpathSync = function maybeRealpathSync(realpathSync, x, opts) {
 };
 
 var defaultReadPackageSync = function defaultReadPackageSync(readFileSync, pkgfile) {
-    var body = readFileSync(pkgfile);
+    var body = readFileSync(pkgfile, 'utf8');
     try {
         var pkg = JSON.parse(body);
         return pkg;
@@ -41000,7 +41000,7 @@ singleVersionResolution = SingleVersionResolution.STRICT) {
         var _deps;
         if (!cachedManifests.has(project.path)) cachedManifests.set(project.path,
         // If there are errors reading or parsing the lockfiles, don't catch and let them fall through
-        (0, _lockfile.parse)((0, _fs.readFileSync)(_path.default.join(project.path, 'yarn.lock'), 'utf-8')));
+        (0, _lockfile.parse)((0, _fs.readFileSync)(_path.default.join(project.path, 'yarn.lock'), 'utf8')));
         const {
           object: deps
         } = cachedManifests.get(project.path);
