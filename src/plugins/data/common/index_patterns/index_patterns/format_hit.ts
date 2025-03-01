@@ -42,7 +42,7 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     hit: Record<string, any>,
     val: any,
     fieldName: string,
-    type: FieldFormatsContentType = 'html'
+    type: FieldFormatsContentType
   ) {
     const field = indexPattern.fields.getByName(fieldName);
     const format = field ? indexPattern.getFormatterForField(field) : defaultFormat;
@@ -50,7 +50,8 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     return format.convert(val, type, { field, hit, indexPattern });
   }
 
-  function formatHit(hit: Record<string, any>, type: string = 'html') {
+  function formatHit(hit: Record<string, any>, type: FieldFormatsContentType = 'html') {
+    // Cache is only used for formatType === 'html' (default)
     if (type === 'text') {
       const flattened = indexPattern.flattenHit(hit);
       const result: Record<string, any> = {};
@@ -79,26 +80,33 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
         return;
       }
       const formatted =
-        partials[fieldName] == null ? convert(hit, val, fieldName) : partials[fieldName];
+        partials[fieldName] == null ? convert(hit, val, fieldName, type) : partials[fieldName];
       cache[fieldName] = partials[fieldName] = formatted;
     });
 
     return cache;
   }
 
-  formatHit.formatField = function (hit: Record<string, any>, fieldName: string) {
-    let partials = partialFormattedCache.get(hit);
-    if (partials && partials[fieldName] != null) {
-      return partials[fieldName];
-    }
+  formatHit.formatField = function (
+    hit: Record<string, any>,
+    fieldName: string,
+    type: FieldFormatsContentType = 'html'
+  ) {
+    // Cache is only used for formatType === 'html' (default)
+    if (type === 'html') {
+      let partials = partialFormattedCache.get(hit);
+      if (partials && partials[fieldName] != null) {
+        return partials[fieldName];
+      }
 
-    if (!partials) {
-      partials = {};
-      partialFormattedCache.set(hit, partials);
+      if (!partials) {
+        partials = {};
+        partialFormattedCache.set(hit, partials);
+      }
     }
 
     const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
-    return convert(hit, val, fieldName);
+    return convert(hit, val, fieldName, type);
   };
 
   return formatHit;
