@@ -100,6 +100,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
+    "**/browserify-rsa": "^4.1.1",
     "**/@babel/traverse": "^7.23.2",
     "**/@types/node": "~18.7.0",
     "**/ansi-regex": "^5.0.1",
