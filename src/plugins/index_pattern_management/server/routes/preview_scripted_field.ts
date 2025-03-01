@@ -43,11 +43,18 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
           query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           additionalFields: schema.maybe(schema.arrayOf(schema.string())),
         }),
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
       },
     },
     async (context, request, res) => {
-      const client = context.core.opensearch.client.asCurrentUser;
       const { index, name, script, query, additionalFields } = request.body;
+      const { dataSourceId } = request.query;
+      const client =
+        dataSourceId && context.dataSource
+          ? await context.dataSource.opensearch.getClient(dataSourceId)
+          : context.core.opensearch.client.asCurrentUser;
 
       try {
         const response = await client.search({
