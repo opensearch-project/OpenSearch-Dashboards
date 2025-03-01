@@ -121,11 +121,6 @@
 # For reference, the `threshold of memoryCircuitBreaker` = `max-old-space-size of NodeJS` * `opensearch.memoryCircuitBreaker.maxPercentage`
 #opensearch.memoryCircuitBreaker.maxPercentage: 1.0
 
-# DEPRECATED: Use opensearch.requestHeadersAllowlist
-# List of OpenSearch Dashboards client-side headers to send to OpenSearch. To send *no* client-side
-# headers, set this value to [] (an empty list).
-#opensearch.requestHeadersWhitelist: [ authorization ]
-
 # List of OpenSearch Dashboards client-side headers to send to OpenSearch. To send *no* client-side
 # headers, set this value to [] (an empty list).
 #opensearch.requestHeadersAllowlist: [ authorization ]
@@ -372,7 +367,7 @@
 
 # Set the backend roles in groups or users, whoever has the backend roles or exactly match the user ids defined in this config will be regard as dashboard admin.
 # Dashboard admin will have the access to all the workspaces(workspace.enabled: true) and objects inside OpenSearch Dashboards.
-# The default config is [], and no one will be dashboard admin. 
+# The default config is [], and no one will be dashboard admin.
 # If the user config is set to wildcard ["*"], anyone will be dashboard admin.
 # opensearchDashboards.dashboardAdmin.groups: ["dashboard_admin"]
 # opensearchDashboards.dashboardAdmin.users: ["dashboard_admin"]

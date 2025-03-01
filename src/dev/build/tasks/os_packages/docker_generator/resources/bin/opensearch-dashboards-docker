@@ -33,7 +33,7 @@ opensearch_dashboards_vars=(
     opensearch.memoryCircuitBreaker.maxPercentage
     opensearch.password
     opensearch.pingTimeout
-    opensearch.requestHeadersWhitelist
+    opensearch.requestHeadersAllowlist
     opensearch.requestTimeout
     opensearch.shardTimeout
     opensearch.sniffInterval
@@ -103,7 +103,7 @@ opensearch_dashboards_vars=(
     security.showInsecureClusterWarning
     server.basePath
     server.compression.enabled
-    server.compression.referrerWhitelist
+    server.compression.referrerAllowlist
     server.cors
     server.cors.origin
     server.defaultRoute
@@ -130,7 +130,7 @@ opensearch_dashboards_vars=(
     server.ssl.redirectHttpFromPort
     server.ssl.supportedProtocols
     server.xsrf.disableProtection
-    server.xsrf.whitelist
+    server.xsrf.allowlist
     status.allowAnonymous
     status.v6ApiFormat
     tilemap.options.attribution

@@ -864,12 +864,12 @@ describe('conditional compression', () => {
     expect(response.header).not.toHaveProperty('content-encoding');
   });
 
-  describe('with defined `compression.referrerWhitelist`', () => {
+  describe('with defined `compression.referrerAllowlist`', () => {
     let listener: Server;
     beforeEach(async () => {
       listener = await setupServer({
         ...config,
-        compression: { enabled: true, referrerWhitelist: ['foo'] },
+        compression: { enabled: true, referrerAllowlist: ['foo'] },
       });
     });
 
@@ -879,7 +879,7 @@ describe('conditional compression', () => {
       expect(response.header).toHaveProperty('content-encoding', 'gzip');
     });
 
-    test('enables compression for whitelisted (deprecated) or allowlisted referer', async () => {
+    test('enables compression for allowlisted (deprecated) or allowlisted referer', async () => {
       const response = await supertest(listener)
         .get('/')
         .set('accept-encoding', 'gzip')
@@ -888,7 +888,7 @@ describe('conditional compression', () => {
       expect(response.header).toHaveProperty('content-encoding', 'gzip');
     });
 
-    test('disables compression for non-whitelisted (deprecated) or non-allowlisted referer', async () => {
+    test('disables compression for non-allowlisted (deprecated) or non-allowlisted referer', async () => {
       const response = await supertest(listener)
         .get('/')
         .set('accept-encoding', 'gzip')
