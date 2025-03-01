@@ -142,8 +142,8 @@ describe('js file', () => {
       'content-type',
       'application/javascript; charset=utf-8'
     );
-    expect(readFileSync(resolve(fooPluginFixture, 'plugin.js'), 'utf8')).toEqual(
-      response.rawPayload
+    expect(readFileSync(resolve(fooPluginFixture, 'plugin.js'), { encoding: 'utf8' })).toEqual(
+      response.rawPayload.toString('utf8')
     );
   });
 });
