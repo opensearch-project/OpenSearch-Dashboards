@@ -6,7 +6,7 @@
 import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../../utils/apps/constants';
 import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
 import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../../utils/apps/query_enhancements/field_display_filtering.js';
-import { PATHS, BASE_PATH } from '../../../../../../utils/constants';
+import { BASE_PATH } from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
@@ -18,25 +18,8 @@ const workspace = getRandomizedWorkspaceName();
 
 const fieldDisplayFilteringTestSuite = () => {
   describe('filter for value spec', () => {
-    beforeEach(() => {
-      // Load test data
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
-        ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
-      );
-      // Add data source
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: `${PATHS.SECONDARY_ENGINE}`,
-        authType: 'no_auth',
-      });
-      // Create workspace
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
-      cy.wait(2000);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspace,
         indexPattern: INDEX_WITH_TIME_1,
@@ -45,7 +28,9 @@ const fieldDisplayFilteringTestSuite = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+    });
 
+    beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspace,
@@ -55,10 +40,8 @@ const fieldDisplayFilteringTestSuite = () => {
       cy.getElementByTestId('discoverNewButton').click();
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
     generateAllTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {

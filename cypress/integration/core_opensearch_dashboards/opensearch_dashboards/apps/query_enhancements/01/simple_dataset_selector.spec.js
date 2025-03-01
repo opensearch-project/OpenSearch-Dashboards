@@ -8,7 +8,6 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_NO_TIME,
   INDEX_WITHOUT_TIME_1,
-  PATHS,
   DATASOURCE_NAME,
 } from '../../../../../../utils/constants';
 import {
@@ -28,30 +27,11 @@ const noIndexPatterns = 5; // Determines the no of index patterns that should be
 
 export const runSimpleDatasetSelectorTests = () => {
   describe('simple dataset selector selecting an index pattern', () => {
-    beforeEach(() => {
-      // Load test data
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.mapping.json`,
-        ],
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`,
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.data.ndjson`,
-        ]
-      );
-      // Add data source
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: PATHS.SECONDARY_ENGINE,
-        authType: 'no_auth',
-      });
-      // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITHOUT_TIME_1,
+      ]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
@@ -69,11 +49,11 @@ export const runSimpleDatasetSelectorTests = () => {
       });
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
-      cy.osd.deleteIndex(INDEX_WITHOUT_TIME_1);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITHOUT_TIME_1,
+      ]);
     });
 
     generateSimpleDatasetSelectorTestConfigurations([
@@ -126,30 +106,11 @@ export const runSimpleDatasetSelectorTests = () => {
   });
 
   describe('filtering index pattern in simple dataset selector', () => {
-    beforeEach(() => {
-      // Load test data
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.mapping.json`,
-        ],
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`,
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.data.ndjson`,
-        ]
-      );
-      // Add data source
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: PATHS.SECONDARY_ENGINE,
-        authType: 'no_auth',
-      });
-
-      // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITHOUT_TIME_1,
+      ]);
 
       for (let i = 1; i <= noIndexPatterns; i++) {
         cy.createWorkspaceIndexPatterns({
@@ -162,11 +123,11 @@ export const runSimpleDatasetSelectorTests = () => {
       }
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
-      cy.osd.deleteIndex(INDEX_WITHOUT_TIME_1);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITHOUT_TIME_1,
+      ]);
     });
 
     it('validate filtering index pattern in simple dataset selector', () => {

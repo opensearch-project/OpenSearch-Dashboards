@@ -128,7 +128,7 @@ export const setDatePickerDatesAndSearchIfRelevant = (
   end = END_TIME
 ) => {
   if (language !== QueryLanguages.SQL.name) {
-    cy.setTopNavDate(start, end);
+    cy.osd.setTopNavDate(start, end);
   }
 };
 
