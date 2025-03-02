@@ -36,7 +36,7 @@ import { createFailError } from '@osd/dev-utils';
 
 // load the include globs from .stylelintrc.yml and convert them to regular expressions for filtering files
 const stylelintPath = path.resolve(__dirname, '..', '..', '..', '.stylelintrc.yml');
-const styleLintConfig = load(fs.readFileSync(stylelintPath));
+const styleLintConfig = load(fs.readFileSync(stylelintPath, 'utf8'));
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log

@@ -132,7 +132,7 @@ const renameExtractedApiPackageName = async (folder: string) => {
   const fname = getReportFileName(folder);
   const jsonApiFile = `build/${folder}/${fname}.api.json`;
   log.info(`Updating ${jsonApiFile}...`);
-  const json = JSON.parse(fs.readFileSync(jsonApiFile).toString());
+  const json = JSON.parse(fs.readFileSync(jsonApiFile, 'utf8').toString());
   json.name = json.canonicalReference = `opensearch-dashboards-plugin-${folder.replace(
     /\//g,
     '-'

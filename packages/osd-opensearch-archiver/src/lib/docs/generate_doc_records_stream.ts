@@ -53,7 +53,7 @@ export function createGenerateDocRecordsStream({
     async transform(index, enc, callback) {
       try {
         let remainingHits = 0;
-        let resp: ApiResponse<any> | null = null;
+        let resp: ApiResponse | null = null;
 
         while (!resp || remainingHits > 0) {
           if (!resp) {
