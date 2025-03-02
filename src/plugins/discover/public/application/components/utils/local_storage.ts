@@ -5,7 +5,7 @@
 
 import { Storage } from '../../../../../opensearch_dashboards_utils/public';
 
-export const NEW_DISCOVER_KEY = 'discover:newExpereince';
+export const NEW_DISCOVER_KEY = 'discover:newExperience';
 
 export const getNewDiscoverSetting = (storage: Storage): boolean => {
   const storedValue = storage.get(NEW_DISCOVER_KEY);
