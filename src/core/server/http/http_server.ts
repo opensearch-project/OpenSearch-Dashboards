@@ -440,6 +440,8 @@ export class HttpServer {
       path,
       method: 'GET',
       handler: {
+        // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+        // @ts-ignore: directory handler comes from @hapi/inert plugin
         directory: {
           path: dirPath,
           listing: false,
