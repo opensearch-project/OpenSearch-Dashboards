@@ -2601,10 +2601,10 @@
   version "1.0.6"
   resolved "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz#f2f489832a75191e243c6d2b42d49047265d9ce3"
 
-"@opensearch-project/opensearch@^2.13.0":
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.13.0.tgz#e60c1a3a3dd059562f1d901aa8d3659035cb1781"
-  integrity sha512-Bu3jJ7pKzumbMMeefu7/npAWAvFu5W9SlbBow1ulhluqUpqc7QoXe0KidDrMy7Dy3BQrkI6llR3cWL4lQTZOFw==
+"@opensearch-project/opensearch@^3.0.0-beta.9":
+  version "3.0.0-beta.9"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-3.0.0-beta.9.tgz#347acffe6fa2cb83e301450059f9673eadbb2932"
+  integrity sha512-RJhkf9gvU0aVuZtIfGOxFNsfkLOCtJMtN9seHsA8JgftmDTm0p77tfo2uvpKMGQzRqRKbQR6HpZLtfQKtT32PA==
   dependencies:
     aws4 "^1.11.0"
     debug "^4.3.1"
