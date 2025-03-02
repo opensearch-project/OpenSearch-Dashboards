@@ -495,6 +495,7 @@
     "redux-mock-store": "^1.5.4",
     "regenerate": "^1.4.0",
     "reselect": "^4.0.0",
+    "resize-observer-polyfill": "^1.5.1",
     "rimraf": "^5.0.7",
     "selenium-webdriver": "^4.0.0-alpha.7",
     "simple-git": "^3.16.0",
