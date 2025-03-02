@@ -74,6 +74,32 @@ export const generateAllTestConfigurations = (generateTestConfigurationCallback,
 };
 
 /**
+ * Returns an array of test configurations for every query language + index pattern permutation
+ * @param {GenerateTestConfigurationCallback} generateTestConfigurationCallback - cb function that generates a test case for the particular permutation
+ * @param {Object} [options] - Optional configuration options
+ * @param {string} [options.indexPattern] - Custom index pattern name (defaults to INDEX_PATTERN_WITH_TIME)
+ * @param {string} [options.supportedLanguages] - Custom supported languages (defaults to all four supported languages)
+ * @returns {object[]}
+ */
+export const generateIndexPatternTestConfigurations = (
+  generateTestConfigurationCallback,
+  options = {}
+) => {
+  const {
+    indexPattern = INDEX_PATTERN_WITH_TIME,
+    supportedLanguages = DatasetTypes.INDEX_PATTERN.supportedLanguages,
+  } = options;
+  const indexPatternDatasets = Object.values(DatasetTypes).filter(
+    (dataset) => dataset.name === DatasetTypes.INDEX_PATTERN.name
+  );
+  return indexPatternDatasets.flatMap((dataset) =>
+    supportedLanguages.map((language) => {
+      return generateTestConfigurationCallback(indexPattern, dataset.name, language);
+    })
+  );
+};
+
+/**
  * Sets the top nav date if it is relevant for the passed language
  * @param {QueryEnhancementLanguage} language - query language
  * @param {string=} start - start datetime string

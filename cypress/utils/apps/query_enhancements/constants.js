@@ -27,6 +27,7 @@ export const INDEX_WITH_TIME_2 = 'data_logs_small_time_2';
 export const INDEX_PATTERN_WITH_TIME = 'data_logs_small_time_*';
 export const INDEX_PATTERN_WITH_NO_TIME = 'data_logs_small_no_time_*';
 export const INDEX_PATTERN_WITH_TIME_1 = 'data_logs_small_time_1*';
+export const INDEX_PATTERN_WITH_NO_TIME_1 = 'data_logs_small_no_time_1*';
 
 /**
  * The dataset type in discover
