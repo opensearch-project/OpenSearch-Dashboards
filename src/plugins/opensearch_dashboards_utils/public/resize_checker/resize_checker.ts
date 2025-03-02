@@ -30,6 +30,7 @@
 
 import { EventEmitter } from 'events';
 import { isEqual } from 'lodash';
+import ResizeObserver from 'resize-observer-polyfill';
 
 function getSize(el: HTMLElement): [number, number] {
   return [el.clientWidth, el.clientHeight];
