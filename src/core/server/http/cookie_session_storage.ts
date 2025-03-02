@@ -147,12 +147,14 @@ export async function createCookieSessionStorageFactory<T extends Record<string,
     log.debug('Clearing invalid session cookie');
     // need to use Hapi toolkit to clear cookie with defined options
     if (req) {
-      // @ts-expect-error
+      // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+      // @ts-ignore: cookieAuth is added by the hapi-auth-cookie plugin
       (req.cookieAuth as any).h.unstate(cookieOptions.name, { path });
     }
   }
 
-  // @ts-expect-error
+  // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+  // @ts-ignore: cookieAuth is added by the hapi-auth-cookie plugin
   await server.register({ plugin: hapiAuthCookie });
 
   server.auth.strategy('security-cookie', 'cookie', {
