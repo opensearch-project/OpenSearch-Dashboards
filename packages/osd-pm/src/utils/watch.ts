@@ -101,7 +101,7 @@ function getWatchHandlers(
 
 export function waitUntilWatchIsReady(stream: NodeJS.EventEmitter, opts: IWatchOptions = {}) {
   const buildOutput$ = new Rx.Subject<string>();
-  const onDataListener = (data: Buffer) => buildOutput$.next(data.toString('utf-8'));
+  const onDataListener = (data: Buffer) => buildOutput$.next(data.toString('utf8'));
   const onEndListener = () => buildOutput$.complete();
   const onErrorListener = (e: Error) => buildOutput$.error(e);
 

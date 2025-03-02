@@ -58,7 +58,6 @@
       "react",
       "flot",
       "@testing-library/jest-dom",
-      "resize-observer-polyfill"
     ]
   },
   "include": [
