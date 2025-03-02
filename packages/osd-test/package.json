@@ -18,7 +18,7 @@
     "@osd/dev-utils": "1.0.0",
     "@osd/utils": "1.0.0",
     "@types/joi": "^13.4.2",
-    "@types/lodash": "^4.14.170",
+    "@types/lodash": "4.14.165",
     "@types/parse-link-header": "^1.0.0",
     "@types/strip-ansi": "^5.2.1",
     "@types/xml2js": "^0.4.5",

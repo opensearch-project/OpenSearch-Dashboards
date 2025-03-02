@@ -128,7 +128,7 @@ export class HttpServer {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
-    await this.server.register([HapiStaticFiles]);
+    await this.server.register([HapiStaticFiles as any]);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);

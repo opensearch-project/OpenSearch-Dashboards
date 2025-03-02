@@ -31,11 +31,6 @@
 import { ResizeChecker } from './resize_checker';
 import { EventEmitter } from 'events';
 
-// If you want to know why these mocks are created,
-// please check: https://github.com/elastic/kibana/pull/44750
-jest.mock('resize-observer-polyfill');
-import ResizeObserver from 'resize-observer-polyfill';
-
 class MockElement {
   public clientWidth: number;
   public clientHeight: number;
