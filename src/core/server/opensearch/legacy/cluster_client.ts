@@ -226,7 +226,7 @@ export class LegacyClusterClient implements ILegacyClusterClient {
       this.callAsCurrentUser,
       filterHeaders(this.getHeaders(request), [
         'x-opaque-id',
-        ...this.config.requestHeadersWhitelist,
+        ...this.config.requestHeadersAllowlist,
       ]),
       this.getScopedAuditor(request)
     );
