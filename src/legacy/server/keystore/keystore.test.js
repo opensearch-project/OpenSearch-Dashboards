@@ -96,7 +96,7 @@ describe('Keystore', () => {
       keystore.save();
 
       readFileSync.mockReturnValueOnce(mockProtectedKeystoreData);
-      const fileBuffer = readFileSync(path);
+      const fileBuffer = readFileSync(path, 'utf8');
       const contents = fileBuffer.toString();
       const [version, data] = contents.split(':');
 

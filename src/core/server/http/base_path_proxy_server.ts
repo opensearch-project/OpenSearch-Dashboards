@@ -84,7 +84,7 @@ export class BasePathProxyServer {
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).
-    await this.server.register([HapiProxy]);
+    await this.server.register([HapiProxy as any]);
 
     if (this.httpConfig.ssl.enabled) {
       const tlsOptions = serverOptions.tls as TlsOptions;
