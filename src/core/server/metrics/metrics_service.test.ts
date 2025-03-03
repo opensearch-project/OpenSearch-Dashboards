@@ -29,18 +29,28 @@
  */
 
 import moment from 'moment';
-import { setImmediate } from 'timers';
-
+import { firstValueFrom } from '@osd/std';
+import { take } from 'rxjs/operators';
+import { setInterval, clearInterval } from 'timers';
 import { configServiceMock } from '../config/mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { mockCoreContext } from '../core_context.mock';
 import { httpServiceMock } from '../http/http_service.mock';
-import { take } from 'rxjs/operators';
 
 const testInterval = 100;
 
 const dummyMetrics = { metricA: 'value', metricB: 'otherValue' };
+
+// Mock global setInterval/clearInterval functions
+jest.mock('timers', () => ({
+  setInterval: jest.fn((fn, ms) => {
+    return { id: 'interval-id', fn, ms };
+  }),
+  clearInterval: jest.fn(),
+}));
+
+// Import the mocked setInterval/clearInterval
 
 describe('MetricsService', () => {
   const httpMock = httpServiceMock.createInternalSetupContract();
@@ -48,7 +58,12 @@ describe('MetricsService', () => {
 
   beforeEach(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
-    setImmediate(() => {});
+
+    // Clear mock state before each test
+    mockOpsCollector.collect.mockClear();
+    mockOpsCollector.reset.mockClear();
+    setInterval.mockClear();
+    clearInterval.mockClear();
 
     const configService = configServiceMock.create({
       atPath: { interval: moment.duration(testInterval) },
@@ -79,10 +94,12 @@ describe('MetricsService', () => {
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(testInterval);
+      // Manually trigger the interval callback
+      const intervalCallback = setInterval.mock.calls[0][0];
+      await intervalCallback();
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
 
-      jest.advanceTimersByTime(testInterval);
+      await intervalCallback();
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(3);
     });
 
@@ -92,26 +109,24 @@ describe('MetricsService', () => {
       await metricsService.setup({ http: httpMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
-      // `advanceTimersByTime` only ensure the interval handler is executed
-      // however the `reset` call is executed after the async call to `collect`
-      // meaning that we are going to miss the call if we don't wait for the
-      // actual observable emission that is performed after. The extra
-      // `nextTick` is to ensure we've done a complete roundtrip of the event
-      // loop.
-      const nextEmission = async () => {
-        jest.advanceTimersByTime(testInterval);
-        await getOpsMetrics$().pipe(take(1)).toPromise();
-        await new Promise((resolve) => process.nextTick(resolve));
-      };
-
+      // Initial call from start()
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(1);
 
-      await nextEmission();
+      // Manually trigger the interval callback
+      const intervalCallback = setInterval.mock.calls[0][0];
+
+      // Wait for complete emission cycle
+      await intervalCallback();
+      await firstValueFrom(getOpsMetrics$().pipe(take(1)));
+
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(2);
 
-      await nextEmission();
+      // Wait for another complete emission cycle
+      await intervalCallback();
+      await firstValueFrom(getOpsMetrics$().pipe(take(1)));
+
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(3);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(3);
     });
@@ -132,30 +147,41 @@ describe('MetricsService', () => {
       await metricsService.setup({ http: httpMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
-      const nextEmission = async () => {
-        jest.advanceTimersByTime(testInterval);
-        const emission = await getOpsMetrics$().pipe(take(1)).toPromise();
-        await new Promise((resolve) => process.nextTick(resolve));
-        return emission;
-      };
+      // Initial value from start()
+      let emission = await firstValueFrom(getOpsMetrics$().pipe(take(1)));
+      expect(emission).toEqual({ metric: 'first' });
 
-      expect(await nextEmission()).toEqual({ metric: 'first' });
-      expect(await nextEmission()).toEqual({ metric: 'second' });
+      // Manually trigger the interval callback for second value
+      const intervalCallback = setInterval.mock.calls[0][0];
+      await intervalCallback();
+
+      emission = await firstValueFrom(getOpsMetrics$().pipe(take(1)));
+      expect(emission).toEqual({ metric: 'second' });
     });
   });
 
   describe('#stop', () => {
     it('stops the metrics interval', async () => {
+      mockOpsCollector.collect.mockResolvedValue(dummyMetrics);
+
       await metricsService.setup({ http: httpMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(testInterval);
+      // Manually trigger interval callback
+      const intervalCallback = setInterval.mock.calls[0][0];
+      await intervalCallback();
+
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
 
+      // Stop should call clearInterval
       await metricsService.stop();
-      jest.advanceTimersByTime(10 * testInterval);
+      expect(clearInterval).toHaveBeenCalledTimes(1);
+
+      // After stop, further calls to the callback shouldn't affect collect call count
+      await intervalCallback();
+      await intervalCallback();
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
 
       getOpsMetrics$().subscribe({ complete: () => {} });

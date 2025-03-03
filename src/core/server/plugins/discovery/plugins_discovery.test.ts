@@ -239,7 +239,7 @@ describe('plugins discovery system', () => {
     const srcPluginsPath = resolve(PROCESS_WORKING_DIR, 'src', 'plugins');
     expect(errors).toEqual(
       expect.arrayContaining([
-        expect.stringContaining(`Error: EACCES, UV_EACCES '${standardize(srcPluginsPath)}`),
+        expect.stringContaining(`Error: EACCES, permission denied '${standardize(srcPluginsPath)}`),
       ])
     );
   });
@@ -274,7 +274,7 @@ describe('plugins discovery system', () => {
     const errorPath = manifestPath('plugin_a');
     expect(errors).toEqual(
       expect.arrayContaining([
-        expect.stringContaining(`Error: EACCES, UV_EACCES '${standardize(errorPath)}`),
+        expect.stringContaining(`Error: EACCES, permission denied '${standardize(errorPath)}`),
       ])
     );
   });

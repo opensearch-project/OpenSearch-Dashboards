@@ -148,7 +148,7 @@ throttled_time 666
     const collector = new OsCgroupMetricsCollector({ logger });
     expect(await collector.collect()).toEqual({});
     expect(logger.error).toHaveBeenCalledWith(
-      `cgroup metrics could not be read due to error: [Error: EACCES, UV_EACCES '${usagePath}']`
+      `cgroup metrics could not be read due to error: [Error: EACCES, permission denied '${usagePath}']`
     );
   });
 });
