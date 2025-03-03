@@ -38,7 +38,7 @@ interface WorkspaceObservables {
   initialized$: BehaviorSubject<boolean>;
 }
 
-enum WORKSPACE_ERROR {
+export enum WorkspaceError {
   WORKSPACE_IS_STALE = 'WORKSPACE_IS_STALE',
 }
 
@@ -75,10 +75,10 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
              * Current workspace is stale
              */
             this.currentWorkspaceId$.error({
-              reason: WORKSPACE_ERROR.WORKSPACE_IS_STALE,
+              reason: WorkspaceError.WORKSPACE_IS_STALE,
             });
             this.currentWorkspace$.error({
-              reason: WORKSPACE_ERROR.WORKSPACE_IS_STALE,
+              reason: WorkspaceError.WORKSPACE_IS_STALE,
             });
           }
         }
