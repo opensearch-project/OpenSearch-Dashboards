@@ -52,12 +52,21 @@ describe('QueryStringManager', () => {
   let sessionStorage: DataStorage;
   let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 
+  const advanceTimersByMs = async (ms: number = 100) => {
+    jest.advanceTimersByTime(ms);
+    // Allow any pending promises to resolve
+    await Promise.resolve();
+  };
+
   beforeEach(() => {
+    jest.useFakeTimers();
     // Reset mocks between tests
     jest.clearAllMocks();
 
     storage = new DataStorage(window.localStorage, 'opensearchDashboards.');
+    storage.clear();
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
+    sessionStorage.clear();
 
     mockSearchInterceptor = ({
       search: jest.fn(),
@@ -79,6 +88,11 @@ describe('QueryStringManager', () => {
       mockSearchInterceptor,
       coreMock.createStart().notifications
     );
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   test('getUpdates$ is a cold emits only after query changes', () => {
@@ -133,18 +147,22 @@ describe('QueryStringManager', () => {
     expect(formattedUndefinedQuery).toEqual(service.getDefaultQuery());
   });
 
-  test('clearQueryHistory clears the query history', () => {
+  test('clearQueryHistory clears the query history', async () => {
     service.addToQueryHistory({ query: 'test query 1', language: 'sql' });
+    await advanceTimersByMs();
     service.addToQueryHistory({ query: 'test query 2', language: 'sql' });
+    await advanceTimersByMs();
     expect(service.getQueryHistory()).toHaveLength(2);
 
     service.clearQueryHistory();
+    await advanceTimersByMs();
     expect(service.getQueryHistory()).toHaveLength(0);
   });
 
-  test('addToQueryHistory adds query to history', () => {
+  test('addToQueryHistory adds query to history', async () => {
     const query: Query = { query: 'test query', language: 'sql' };
     service.addToQueryHistory(query);
+    await advanceTimersByMs();
     const history = service.getQueryHistory();
     expect(history).toHaveLength(1);
     expect(history[0]).toHaveProperty('query', query);
