@@ -22,6 +22,7 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupType,
   ALL_USE_CASE_ID,
+  WorkspaceError,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -333,6 +334,19 @@ export class WorkspacePlugin
         })();
       }
     }
+
+    // Register error handling, display error page
+    core.workspaces.currentWorkspace$.subscribe({
+      error: async ({ reason }) => {
+        if (reason === WorkspaceError.WORKSPACE_IS_STALE) {
+          core.fatalErrors.add(
+            i18n.translate('workspace.error.workspaceIsStale', {
+              defaultMessage: 'Cannot find current workspace since it is stale',
+            })
+          );
+        }
+      },
+    });
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
       const [coreStart, { navigation }] = await core.getStartServices();

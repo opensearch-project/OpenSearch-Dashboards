@@ -14,6 +14,7 @@ import {
   AppNavLinkStatus,
   WorkspaceAvailability,
   AppStatus,
+  WorkspaceError,
 } from '../../../core/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
@@ -367,6 +368,22 @@ describe('Workspace plugin', () => {
     expect(result.ui.AddCollaboratorsModal).toBe(AddCollaboratorsModal);
   });
 
+  it('#setup should add fatal error when workspace is stale', async () => {
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+
+    const workspaceError = new Error('Workspace is stale');
+    Object.assign(workspaceError, {
+      reason: WorkspaceError.WORKSPACE_IS_STALE,
+    });
+
+    setupMock.workspaces.currentWorkspace$.error(workspaceError);
+
+    await workspacePlugin.setup(setupMock, {});
+
+    expect(setupMock.fatalErrors.add).toHaveBeenCalled();
+  });
+
   it('#start add workspace detail page to breadcrumbs when start', async () => {
     const startMock = coreMock.createStart();
     const workspaceObject = {
@@ -439,9 +456,7 @@ describe('Workspace plugin', () => {
       name: 'foo',
     });
 
-    await waitFor(() => {
-      expect(navGroupUpdater$.next).toHaveBeenCalled();
-    });
+    expect(navGroupUpdater$.next).toHaveBeenCalled();
   });
 
   it('#start register workspace dropdown menu at left navigation bottom when start', async () => {
