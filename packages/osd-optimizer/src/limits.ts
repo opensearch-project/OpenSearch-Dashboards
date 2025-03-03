@@ -39,7 +39,7 @@ import { OptimizerConfig, getMetrics, Limits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
 const DELTA_FILE_PATH = path.resolve(__dirname, '../limits_delta.yml');
-const DELTA_PERCENTAGE_LIMIT = 5;
+const DELTA_LIMIT = 0.05;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
@@ -109,24 +109,29 @@ const readDeltas = (): { [key: string]: any } => {
 
 const updateBundleSizeVariation = (log: ToolingLog, metric: Metric) => {
   if (metric.limit != null && metric.value > metric.limit) {
-    const deltaPercentage = Math.round(((metric.value - metric.limit) / metric.limit) * 100);
+    const delta = (metric.value - metric.limit) / metric.limit; // Decimal format
 
-    if (deltaPercentage > DELTA_PERCENTAGE_LIMIT) {
+    if (delta > DELTA_LIMIT) {
+      // DELTA_LIMIT is 0.05 (5%)
       log.warning(
-        `Metric [${metric.group}] for [${metric.id}] exceeds the limit by more than ${deltaPercentage}%`
+        `Metric [${metric.group}] for [${metric.id}] exceeds the limit by more than ${(
+          delta * 100
+        ).toFixed(2)}%`
       );
 
-      // Use helper function to read existing data
-      const existingData = readDeltas();
+      // Read existing data
+      const existingData = readDeltas() || {};
 
-      // Update the data with the new metric
-      const updatedData = {
-        ...existingData,
-        [metric.id]: { deltaPercentage },
-      };
+      // Ensure `pageLoadAssetSizeVariation` exists in the structure
+      if (!existingData.pageLoadAssetSizeVariation) {
+        existingData.pageLoadAssetSizeVariation = {};
+      }
 
-      // Write the updated data back to the file
-      Fs.writeFileSync(DELTA_FILE_PATH, Yaml.dump(updatedData));
+      // Convert decimal to whole number percentage and store
+      existingData.pageLoadAssetSizeVariation[metric.id] = Math.round(delta * 100);
+
+      // Write the updated structure back to the file
+      Fs.writeFileSync(DELTA_FILE_PATH, Yaml.dump(existingData));
     }
   }
 };
