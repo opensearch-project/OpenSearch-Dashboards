@@ -11,7 +11,8 @@
         "src/test_utils/public/*"
       ],
       "fixtures/*": ["src/fixtures/*"],
-      "@opensearch-project/opensearch": ["node_modules/@opensearch-project/opensearch/api/new"]
+      "@opensearch-project/opensearch": ["node_modules/@opensearch-project/opensearch/api/new"],
+      "@opensearch-project/opensearch/lib/*": ["node_modules/@opensearch-project/opensearch/lib/*"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

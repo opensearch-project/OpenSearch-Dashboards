@@ -45,6 +45,7 @@ export class QueryStringManager {
   private queryHistory: QueryHistory;
   private datasetService!: DatasetServiceContract;
   private languageService!: LanguageServiceContract;
+  private currentAppId: string | undefined;
 
   constructor(
     private readonly storage: DataStorage,
@@ -57,6 +58,17 @@ export class QueryStringManager {
     this.queryHistory = createHistory({ storage: this.sessionStorage });
     this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
+    try {
+      const application = getApplication();
+      if (application && application.currentAppId$) {
+        application.currentAppId$.subscribe((appId) => {
+          this.currentAppId = appId;
+        });
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Could not subscribe to application.currentAppId$');
+    }
   }
 
   private getDefaultQueryString() {
@@ -341,20 +353,15 @@ export class QueryStringManager {
     return this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
   }
 
-  private getCurrentAppId = () => {
-    let appId;
+  private getCurrentAppId(): string | undefined {
     try {
-      const application = getApplication();
-      if (application) {
-        application.currentAppId$.subscribe((val) => (appId = val)).unsubscribe();
-      }
+      return this.currentAppId;
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Application Not available.');
     }
-
-    return appId;
-  };
+    return undefined;
+  }
 }
 
 const showWarning = (
