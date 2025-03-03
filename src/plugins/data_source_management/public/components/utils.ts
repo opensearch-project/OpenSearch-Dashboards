@@ -544,10 +544,14 @@ export const isPluginInstalled = async (
 ): Promise<boolean> => {
   try {
     const response = await http.get('/api/status');
-    const pluginExists = response.status.statuses.some((status: { id: string }) =>
-      status.id.includes(pluginId)
-    );
-    return pluginExists;
+    // Check if response.status and response.status.statuses exist before using them
+    if (response && response.status && Array.isArray(response.status.statuses)) {
+      const pluginExists = response.status.statuses.some((status: { id: string }) =>
+        status.id.includes(pluginId)
+      );
+      return pluginExists;
+    }
+    return false;
   } catch (error) {
     notifications.toasts.addDanger(`Error checking ${pluginId} Plugin Installation status.`);
     // eslint-disable-next-line no-console
