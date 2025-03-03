@@ -38,11 +38,12 @@ interface WorkspaceObservables {
   initialized$: BehaviorSubject<boolean>;
 }
 
-enum WORKSPACE_ERROR {
+export enum WorkspaceError {
   WORKSPACE_IS_STALE = 'WORKSPACE_IS_STALE',
 }
 
 export type WorkspacesSetup = WorkspaceObservables & {
+  workspaceError$: BehaviorSubject<string>;
   setClient: (client: IWorkspaceClient) => void;
 };
 
@@ -56,6 +57,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
   private currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   private initialized$ = new BehaviorSubject<boolean>(false);
   private client$ = new BehaviorSubject<IWorkspaceClient | null>(null);
+  private workspaceError$ = new BehaviorSubject<string>('');
 
   constructor() {
     combineLatest([this.initialized$, this.workspaceList$, this.currentWorkspaceId$]).subscribe(
@@ -74,11 +76,8 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
             /**
              * Current workspace is stale
              */
-            this.currentWorkspaceId$.error({
-              reason: WORKSPACE_ERROR.WORKSPACE_IS_STALE,
-            });
-            this.currentWorkspace$.error({
-              reason: WORKSPACE_ERROR.WORKSPACE_IS_STALE,
+            this.workspaceError$.error({
+              reason: WorkspaceError.WORKSPACE_IS_STALE,
             });
           }
         }
@@ -92,6 +91,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
+      workspaceError$: this.workspaceError$,
       setClient: (client: IWorkspaceClient) => {
         this.client$.next(client);
       },

@@ -22,6 +22,7 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupType,
   ALL_USE_CASE_ID,
+  WorkspaceError,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -260,6 +261,21 @@ export class WorkspacePlugin
     });
   }
 
+  /**
+   * Fatal error service does not support customized actions
+   * So we have to use a self-hosted page to show the errors and redirect.
+   */
+  private handleFatalError(core: CoreSetup<WorkspacePluginStartDeps>, error: unknown) {
+    (async () => {
+      const [{ application, chrome }] = await core.getStartServices();
+      chrome.setIsVisible(false);
+      application.navigateToApp(WORKSPACE_FATAL_ERROR_APP_ID, {
+        replace: true,
+        state: { error },
+      });
+    })();
+  }
+
   public async setup(
     core: CoreSetup<WorkspacePluginStartDeps>,
     {
@@ -298,23 +314,25 @@ export class WorkspacePlugin
       core.http.basePath.getBasePath()
     );
 
-    if (workspaceId) {
+    const workspaceError = core.workspaces.workspaceError$;
+
+    workspaceError.subscribe({
+      error: ({ reason }) => {
+        if (reason === WorkspaceError.WORKSPACE_IS_STALE) {
+          this.handleFatalError(
+            core,
+            i18n.translate('workspace.error.workspaceIsStale', {
+              defaultMessage: 'Cannot find current workspace since it is stale',
+            })
+          );
+        }
+      },
+    });
+
+    if (!workspaceError.hasError && workspaceId) {
       const result = await workspaceClient.enterWorkspace(workspaceId);
       if (!result.success) {
-        /**
-         * Fatal error service does not support customized actions
-         * So we have to use a self-hosted page to show the errors and redirect.
-         */
-        (async () => {
-          const [{ application, chrome }] = await core.getStartServices();
-          chrome.setIsVisible(false);
-          application.navigateToApp(WORKSPACE_FATAL_ERROR_APP_ID, {
-            replace: true,
-            state: {
-              error: result?.error,
-            },
-          });
-        })();
+        this.handleFatalError(core, result?.error);
       } else {
         /**
          * If the workspace id is valid and user is currently on workspace_fatal_error page,

@@ -14,11 +14,14 @@ const createWorkspacesSetupContractMock = () => {
   const workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([]);
   const currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   const initialized$ = new BehaviorSubject<boolean>(false);
+  const workspaceError$ = new BehaviorSubject<string>('');
+
   return {
     currentWorkspaceId$,
     workspaceList$,
     currentWorkspace$,
     initialized$,
+    workspaceError$,
     setClient: jest.fn(),
   };
 };

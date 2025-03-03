@@ -14,6 +14,7 @@ import {
   AppNavLinkStatus,
   WorkspaceAvailability,
   AppStatus,
+  WorkspaceError,
 } from '../../../core/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
@@ -365,6 +366,45 @@ describe('Workspace plugin', () => {
     const result = await workspacePlugin.setup(setupMock, {});
 
     expect(result.ui.AddCollaboratorsModal).toBe(AddCollaboratorsModal);
+  });
+
+  it('#setup should handle fatal error when workspace is stale', async () => {
+    const setupMock = coreMock.createSetup();
+    const applicationStartMock = applicationServiceMock.createStartContract();
+    const chromeStartMock = chromeServiceMock.createStartContract();
+
+    setupMock.getStartServices.mockImplementation(() => {
+      return Promise.resolve([
+        {
+          application: applicationStartMock,
+          chrome: chromeStartMock,
+        },
+        {},
+        {},
+      ]) as any;
+    });
+
+    const workspacePlugin = new WorkspacePlugin();
+    const workspaceError = new Error('Workspace is stale');
+    Object.assign(workspaceError, {
+      reason: WorkspaceError.WORKSPACE_IS_STALE,
+    });
+    setupMock.workspaces.workspaceError$.error(workspaceError);
+
+    await workspacePlugin.setup(setupMock, {});
+    await waitFor(
+      () => {
+        expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
+          replace: true,
+          state: {
+            error: 'Cannot find current workspace since it is stale',
+          },
+        });
+      },
+      {
+        container: document.body,
+      }
+    );
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {
