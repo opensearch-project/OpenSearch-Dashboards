@@ -34,6 +34,18 @@ import { Query } from '../../../common/query';
 import { ISearchInterceptor } from '../../search';
 import { DataStorage, DEFAULT_DATA } from 'src/plugins/data/common';
 
+// Mock the services module
+jest.mock('../../services', () => ({
+  getApplication: jest.fn().mockReturnValue({
+    currentAppId$: {
+      subscribe: jest.fn((callback) => {
+        callback('test-app-id');
+        return { unsubscribe: jest.fn() };
+      }),
+    },
+  }),
+}));
+
 describe('QueryStringManager', () => {
   let service: QueryStringManager;
   let storage: DataStorage;
@@ -41,13 +53,29 @@ describe('QueryStringManager', () => {
   let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 
   beforeEach(() => {
+    // Reset mocks between tests
+    jest.clearAllMocks();
+
     storage = new DataStorage(window.localStorage, 'opensearchDashboards.');
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
-    mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
+
+    mockSearchInterceptor = ({
+      search: jest.fn(),
+    } as unknown) as jest.Mocked<ISearchInterceptor>;
+
+    const uiSettings = coreMock.createSetup().uiSettings;
+
+    // Add default UI settings for tests
+    uiSettings.get.mockImplementation((key) => {
+      if (key === 'search:queryLanguage') return 'kuery';
+      if (key === 'query:enhancements:enabled') return true;
+      return undefined;
+    });
+
     service = new QueryStringManager(
       storage,
       sessionStorage,
-      coreMock.createSetup().uiSettings,
+      uiSettings,
       mockSearchInterceptor,
       coreMock.createStart().notifications
     );
@@ -123,6 +151,12 @@ describe('QueryStringManager', () => {
   });
 
   test('getInitialQueryByLanguage returns correct query for language', () => {
+    // Mock language service
+    service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+      title: 'Test Language',
+      getQueryString: jest.fn().mockReturnValue('test query string'),
+    });
+
     const sqlQuery = service.getInitialQueryByLanguage('sql');
     expect(sqlQuery).toHaveProperty('language', 'sql');
 
@@ -131,6 +165,11 @@ describe('QueryStringManager', () => {
   });
 
   test('getInitialQueryByDataset returns correct query for dataset', () => {
+    service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+      title: 'SQL',
+      getQueryString: jest.fn().mockReturnValue('SELECT * FROM TABLE'),
+    });
+
     const dataset = {
       id: 'test-dataset',
       title: 'Test Dataset',
@@ -264,6 +303,11 @@ describe('QueryStringManager', () => {
     };
 
     beforeEach(() => {
+      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+        title: 'kuery',
+        getQueryString: jest.fn().mockReturnValue(''),
+      });
+
       service.setQuery({
         query: 'initial query',
         language: 'kuery',
@@ -318,6 +362,8 @@ describe('QueryStringManager', () => {
               return 'default sql dataset query';
             case 'ppl':
               return 'default ppl dataset query';
+            default:
+              return '';
           }
         }),
       });
