@@ -47,7 +47,7 @@ describe('MetricsService', () => {
   let metricsService: MetricsService;
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     setImmediate(() => {});
 
     const configService = configServiceMock.create({

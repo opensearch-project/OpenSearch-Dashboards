@@ -350,7 +350,7 @@ export class QueryStringManager {
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.log('Application Not available.');
+      console.error('Application Not available.');
     }
 
     return appId;
