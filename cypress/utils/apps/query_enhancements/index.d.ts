@@ -38,7 +38,5 @@ declare namespace Cypress {
     ): Chainable<any>;
 
     setQuickSelectTime(direction: string, time: number, timeUnit: string): Chainable<any>;
-
-    setRelativeTopNavDate(time: number, timeUnit: string): Chainable<any>;
   }
 }

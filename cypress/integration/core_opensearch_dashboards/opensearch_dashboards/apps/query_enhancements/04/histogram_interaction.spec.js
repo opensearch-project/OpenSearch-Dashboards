@@ -11,7 +11,6 @@ import {
   QueryLanguages,
   DATASOURCE_NAME,
 } from '../../../../../../utils/apps/constants';
-import { PATHS } from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
@@ -24,26 +23,9 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 const workspace = getRandomizedWorkspaceName();
 
 const runHistogramInteractionTests = () => {
-  describe('histogram interaction', { testIsolation: true }, () => {
-    beforeEach(() => {
-      // Load test data
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
-        ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
-      );
-
-      // Add data source
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: `${PATHS.SECONDARY_ENGINE}`,
-        authType: 'no_auth',
-      });
-      // Create workspace
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
+  describe('histogram interaction', () => {
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspace,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
@@ -52,6 +34,9 @@ const runHistogramInteractionTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+    });
+
+    beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
         page: 'discover',
@@ -59,11 +44,8 @@ const runHistogramInteractionTests = () => {
       });
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-      // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
     generateAllTestConfigurations(generateHistogramTestConfigurations).forEach((config) => {
@@ -155,7 +137,7 @@ const runHistogramInteractionTests = () => {
           // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9294
           if (config.language !== 'PPL') {
             // remove after the bug is fixed
-            cy.setTopNavDate(START_DATE, END_DATE);
+            cy.osd.setTopNavDate(START_DATE, END_DATE);
             cy.wait(1000); // adding a wait here to ensure the data has been updated
             checkIntervals();
             cy.getElementByTestId('discoverQueryHits').then(($hits) => {

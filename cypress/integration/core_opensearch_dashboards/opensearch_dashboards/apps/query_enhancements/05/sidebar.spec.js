@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasetTypes, PATHS, BASE_PATH } from '../../../../../../utils/constants';
+import { DatasetTypes } from '../../../../../../utils/constants';
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME_1,
@@ -202,6 +202,9 @@ const verifyFieldShowDetailsShowsTopValuesAndViewVisualization = (
   const aggregatableShouldNotText = isAggregatable ? 'not.exist' : 'be.visible';
 
   setDatePickerDatesAndSearchIfRelevant(config.language);
+
+  // adding a wait as this does not work sometimes
+  cy.wait(1000);
   sideBar.showSidebarFieldDetails(field);
   // Either the field details text for each top value should exist, or there should be a field Visualize error.
   cy.getElementsByTestIds(['dscFieldDetailsText', 'fieldVisualizeError']).should(
@@ -235,31 +238,26 @@ export const runSideBarTests = () => {
       },
     };
 
-    beforeEach(() => {
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
-      );
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: PATHS.SECONDARY_ENGINE,
-        authType: 'no_auth',
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.createWorkspaceIndexPatterns({
+        workspaceName: workspaceName,
+        indexPattern: INDEX_WITH_TIME_1,
+        timefieldName: 'timestamp',
+        dataSource: DATASOURCE_NAME,
+        isEnhancement: true,
       });
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
 
     afterEach(() => {
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
       cy.window().then((win) => {
         win.localStorage.clear();
         win.sessionStorage.clear();
       });
+    });
+
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
     generateAllTestConfigurations(generateSideBarTestConfiguration, {
@@ -268,15 +266,6 @@ export const runSideBarTests = () => {
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         beforeEach(() => {
-          if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-            cy.createWorkspaceIndexPatterns({
-              workspaceName: workspaceName,
-              indexPattern: INDEX_WITH_TIME_1,
-              timefieldName: 'timestamp',
-              dataSource: DATASOURCE_NAME,
-              isEnhancement: true,
-            });
-          }
           cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
             page: 'discover',
@@ -331,7 +320,6 @@ export const runSideBarTests = () => {
           });
 
           cy.osd.navigateToWorkSpaceSpecificPage({
-            url: BASE_PATH,
             workspaceName: workspaceName,
             page: 'discover',
             isEnhancement: true,

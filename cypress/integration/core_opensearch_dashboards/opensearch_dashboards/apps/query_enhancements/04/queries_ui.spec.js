@@ -6,9 +6,7 @@
 import {
   INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
-  PATHS,
   DATASOURCE_NAME,
-  DatasetTypes,
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
@@ -26,50 +24,33 @@ const workspaceName = getRandomizedWorkspaceName();
 
 export const runQueryTests = () => {
   describe('discover autocomplete tests', () => {
-    beforeEach(() => {
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
-      );
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: PATHS.SECONDARY_ENGINE,
-        authType: 'no_auth',
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.createWorkspaceIndexPatterns({
+        workspaceName: workspaceName,
+        indexPattern: INDEX_WITH_TIME_1,
+        timefieldName: 'timestamp',
+        dataSource: DATASOURCE_NAME,
+        isEnhancement: true,
       });
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+    beforeEach(() => {
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspaceName,
+        page: 'discover',
+        isEnhancement: true,
+      });
+    });
+
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
     generateQueryTestConfigurations(generateBaseConfiguration, {
       languageConfig: LanguageConfigs.SQL_PPL,
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
-        beforeEach(() => {
-          if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-            cy.createWorkspaceIndexPatterns({
-              workspaceName: workspaceName,
-              indexPattern: INDEX_WITH_TIME_1,
-              timefieldName: 'timestamp',
-              dataSource: DATASOURCE_NAME,
-              isEnhancement: true,
-            });
-          }
-          cy.osd.navigateToWorkSpaceSpecificPage({
-            workspaceName: workspaceName,
-            page: 'discover',
-            isEnhancement: true,
-          });
-        });
-
         it('should handle query editor expand/collapse state correctly', () => {
           // Setup
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
@@ -120,23 +101,6 @@ export const runQueryTests = () => {
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
-        beforeEach(() => {
-          if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-            cy.createWorkspaceIndexPatterns({
-              workspaceName: workspaceName,
-              indexPattern: INDEX_WITH_TIME_1,
-              timefieldName: 'timestamp',
-              dataSource: DATASOURCE_NAME,
-              isEnhancement: true,
-            });
-          }
-          cy.osd.navigateToWorkSpaceSpecificPage({
-            workspaceName: workspaceName,
-            page: 'discover',
-            isEnhancement: true,
-          });
-        });
-
         it('should show correct documentation link in language reference popover', () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
