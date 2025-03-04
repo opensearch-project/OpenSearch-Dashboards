@@ -269,6 +269,7 @@ describe('query assist summary', () => {
     query$.next({ query: PPL, language: 'PPL' });
     data$.next(emptyDataFrame);
     expect(httpMock.post).toBeCalledTimes(0);
+    expect(screen.queryAllByTestId('queryAssist_summary_empty_text')).toHaveLength(1);
   });
 
   it('should fetch summary with expected payload and response', async () => {
