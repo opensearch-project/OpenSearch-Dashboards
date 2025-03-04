@@ -63,16 +63,14 @@ const runRecentQueryTests = () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
+
           const currentLang = BaseQuery[config.datasetType][config.language];
-          const currentBaseQuery = currentLang.query;
-          const currentWhereStatement = currentLang.where;
+          const baseQueryString = `${currentLang.query} ${config.dataset} ${currentLang.where}`;
+
           TestQueries.forEach((query) => {
-            cy.setQueryEditor(
-              currentBaseQuery + config.dataset + currentWhereStatement + query,
-              {},
-              true
-            );
+            cy.setQueryEditor(`${baseQueryString} ${query}`, {}, true);
           });
+
           cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
             force: true,
           });
@@ -129,15 +127,13 @@ const runRecentQueryTests = () => {
           steps.forEach(({ action }, stepIndex) => {
             action();
             cy.getElementByTestIdLike('row-').each(($row, rowIndex) => {
-              let expectedQuery = '';
+              let expectedQuery;
               if (rowIndex === 1 && stepIndex >= 2) {
-                expectedQuery =
-                  currentBaseQuery + config.alternativeDataset + reverseList[rowIndex];
+                expectedQuery = `${currentLang.query} ${config.alternativeDataset} ${reverseList[rowIndex]}`;
               } else if (rowIndex === 0 && stepIndex >= 1) {
-                expectedQuery = currentBaseQuery + config.dataset + reverseList[rowIndex];
+                expectedQuery = `${currentLang.query} ${config.dataset} ${reverseList[rowIndex]}`;
               } else {
-                expectedQuery =
-                  currentBaseQuery + config.dataset + currentWhereStatement + reverseList[rowIndex];
+                expectedQuery = `${baseQueryString} ${reverseList[rowIndex]}`;
               }
               expect($row.text()).to.contain(expectedQuery);
             });
@@ -148,18 +144,19 @@ const runRecentQueryTests = () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
+
           const currentLang = BaseQuery[config.datasetType][config.language];
-          const currentBaseQuery = currentLang.query;
-          const currentWhereStatement = currentLang.where;
+          const baseQueryString = `${currentLang.query} ${config.dataset} ${currentLang.where}`;
+
           const testQueries = [
-            currentBaseQuery + config.dataset + currentWhereStatement + ' status_code = 504', // valid
-            currentBaseQuery + config.dataset + currentWhereStatement, // invalid
+            `${baseQueryString} status_code = 504`, // valid
+            baseQueryString, // invalid
           ];
+
           testQueries.forEach((query, index) => {
             cy.setQueryEditor(query, {}, true);
             cy.setQueryEditor(query, {}, true);
             if (!index)
-              // it remains expanded for the second iteration, no need to expand it again
               cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
                 force: true,
               });
@@ -177,15 +174,17 @@ const runRecentQueryTests = () => {
           setDatePickerDatesAndSearchIfRelevant(config.language);
           // Precondition: run some queries first
           const currentLang = BaseQuery[config.datasetType][config.language];
-          const currentBaseQuery = currentLang.query + config.dataset + currentLang.where;
+          const baseQueryString = `${currentLang.query} ${config.dataset} ${currentLang.where}`;
+          
           const queries = [...TestQueries].splice(0, 3);
           queries.forEach((query) => {
-            cy.setQueryEditor(currentBaseQuery + query, {}, true);
+            cy.setQueryEditor(`${baseQueryString} ${query}`, {}, true);
           });
+          
           cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
             force: true,
           });
-          const expectedQuery = currentBaseQuery + queries[0];
+          const expectedQuery = `${baseQueryString} ${queries[0]}`;
           cy.getElementByTestIdLike('row-') // check query in original position
             .eq(2)
             .focus()

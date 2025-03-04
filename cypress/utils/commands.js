@@ -5,11 +5,11 @@
 
 // --- Typed commands --
 
-Cypress.Commands.add('getElementByTestId', (testId, options = {}) => {
+Cypress.Commands.add('getElementByTestId', (testId, options = { timeout: 10000 }) => {
   return cy.get(`[data-test-subj="${testId}"]`, options);
 });
 
-Cypress.Commands.add('getElementByTestIdLike', (testId, options = {}) => {
+Cypress.Commands.add('getElementByTestIdLike', (testId, options = { timeout: 10000 }) => {
   return cy.get(`[data-test-subj*="${testId}"]`, options);
 });
 

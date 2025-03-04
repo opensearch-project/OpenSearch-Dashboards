@@ -90,14 +90,20 @@ const runSavedSearchTests = () => {
 
       it(`should successfully update a saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
-        postRequestSaveSearch(config);
-        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
+        cy.wrap(null).then(() => {
+          return postRequestSaveSearch(config).then(() => {
+            updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
+          });
+        });
       });
 
       it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
-        postRequestSaveSearch(config);
-        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, true);
+        cy.wrap(null).then(() => {
+          return postRequestSaveSearch(config).then(() => {
+            updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, true);
+          });
+        });
       });
     });
   });
