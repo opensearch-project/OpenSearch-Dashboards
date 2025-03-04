@@ -120,9 +120,9 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
 
   const fetchSummary = useCallback(
     async (queryContext: QueryContext) => {
+      setSummary('');
       if (isEmpty(queryContext?.queryResults)) return;
       setLoading(true);
-      setSummary('');
       setFeedback(FeedbackStatus.NONE);
       const SUCCESS_METRIC = 'fetch_summary_success';
       try {
