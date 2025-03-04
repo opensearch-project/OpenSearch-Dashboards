@@ -11,11 +11,13 @@ export const BASE_API_ASSISTANT = '/api/assistant';
 
 export const DATASET = {
   S3: 'S3',
+  PROMETHEUS: 'PROMETHEUS',
 };
 
 export const SEARCH_STRATEGY = {
   PPL: 'ppl',
   PPL_RAW: 'pplraw',
+  PROMQL: 'promql',
   SQL: 'sql',
   SQL_ASYNC: 'sqlasync',
   PPL_ASYNC: 'pplasync',

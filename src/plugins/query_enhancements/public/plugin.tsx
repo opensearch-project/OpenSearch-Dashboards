@@ -16,6 +16,7 @@ import {
 } from '../../data/public';
 import { ConfigSchema } from '../common/config';
 import { s3TypeConfig } from './datasets';
+import { prometheusTypeConfig } from './datasets/prometheus_type';
 import { createQueryAssistExtension } from './query_assist';
 import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
@@ -215,6 +216,86 @@ export class QueryEnhancementsPlugin
     });
 
     queryString.getDatasetService().registerType(s3TypeConfig);
+
+    // Register PPL language configuration
+    // TODO: This will need to get updated when we're closer to dispatching queries
+    const promqlLanguageConfig: LanguageConfig = {
+      id: 'PROMQL',
+      title: 'PROMQL',
+      search: new PPLSearchInterceptor({
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      }),
+      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      fields: {
+        sortable: false,
+        filterable: false,
+        visualizable: false,
+        formatter: (value: string, type: OSD_FIELD_TYPES) => {
+          switch (type) {
+            case OSD_FIELD_TYPES.DATE:
+              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // PPL date fields need special formatting in order for discover table formatter to render in the correct time zone
+
+            default:
+              return value;
+          }
+        },
+      },
+      docLink: {
+        title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
+          defaultMessage: 'PPL documentation',
+        }),
+        url: 'https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/',
+      },
+      showDocLinks: false,
+      editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
+      editorSupportedAppNames: ['discover'],
+      supportedAppNames: ['discover', 'data-explorer'],
+      sampleQueries: [
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
+            defaultMessage: 'The title field contains the word wind.',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind%')`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWindOrWindy', {
+            defaultMessage: 'The title field contains the word wind or the word windy.',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind%') OR LIKE(title, '%windy%')`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsPhraseWindRises', {
+            defaultMessage: 'The title field contains the phrase wind rises.',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind rises%')`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleExactMatchWindRises', {
+            defaultMessage: 'The title.keyword field exactly matches The wind rises.',
+          }),
+          query: `SOURCE = your_table | WHERE title = 'The wind rises'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleFieldsContainWind', {
+            defaultMessage:
+              'Any field that starts with title (for example, title and title.keyword) contains the word wind',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind%') OR title = 'wind'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.descriptionFieldExists', {
+            defaultMessage: 'Documents in which the field description exists.',
+          }),
+          query: `SOURCE = your_table | WHERE ISNOTNULL(description) AND description != '';`,
+        },
+      ],
+    };
+    queryString.getLanguageService().registerLanguage(promqlLanguageConfig);
+    queryString.getDatasetService().registerType(prometheusTypeConfig);
 
     return {
       isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,
