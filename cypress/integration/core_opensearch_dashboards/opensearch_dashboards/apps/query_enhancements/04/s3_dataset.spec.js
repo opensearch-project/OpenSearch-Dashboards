@@ -100,6 +100,10 @@ const s3DatasetTestSuite = () => {
         });
         afterEach(() => {
           cy.deleteWorkspaceByName(workspace);
+          cy.window().then((win) => {
+            win.localStorage.clear();
+            win.sessionStorage.clear();
+          });
         });
 
         it('with SQL', function () {
