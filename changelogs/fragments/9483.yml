@@ -1,0 +1,2 @@
+test:
+- Update caniuse and return promise and properly chain the async operations ([#9483](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9483))
