@@ -16,8 +16,8 @@ module.exports = defineConfig({
     runMode: 2,
     openMode: 0,
   },
-  viewportWidth: 2000,
-  viewportHeight: 1320,
+  viewportWidth: 1920,
+  viewportHeight: 1080,
   env: {
     ENGINE: {
       name: 'default',
@@ -50,7 +50,7 @@ module.exports = defineConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     specPattern: 'cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
-    testIsolation: false,
+    testIsolation: true,
     setupNodeEvents,
   },
 });
