@@ -139,6 +139,7 @@ export const createQueryAssistExtension = (
               usageCollection={usageCollection}
               dependencies={dependencies}
               core={core}
+              panelTitle={config.summary.panelTitle}
             />
           )}
         </QueryAssistWrapper>
