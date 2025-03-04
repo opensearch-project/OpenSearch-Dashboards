@@ -41,7 +41,7 @@ interface QueryAssistSummaryProps {
   usageCollection?: UsageCollectionSetup;
   dependencies: QueryEditorExtensionDependencies;
   core: CoreSetup;
-  panelTitle?: string;
+  brandingLabel?: string;
 }
 
 export const convertResult = (body: IDataFrame) => {
@@ -236,10 +236,10 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>
-                {props.panelTitle ||
-                  i18n.translate('queryEnhancements.queryAssist.summary.panelTitle', {
-                    defaultMessage: 'Response',
-                  })}
+                {`${props.brandingLabel} `}
+                {i18n.translate('queryEnhancements.queryAssist.summary.panelTitle', {
+                  defaultMessage: 'Summary',
+                })}
               </strong>
             </EuiText>
           </EuiFlexItem>
