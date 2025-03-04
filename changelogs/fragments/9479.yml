@@ -1,0 +1,2 @@
+fix:
+- Do not call data2summary api when summary toggle is collapsed ([#9479](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9479))
