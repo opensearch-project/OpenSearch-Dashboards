@@ -32,7 +32,6 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { formatNumWithCommas } from '../../../helpers';
 
 export interface HitsCounterProps {
   /**
@@ -62,7 +61,7 @@ export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounter
       >
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <strong data-test-subj="discoverQueryHits">{formatNumWithCommas(hits)}</strong>{' '}
+            <strong data-test-subj="discoverQueryHits">{hits.toLocaleString()}</strong>{' '}
             <FormattedMessage
               id="discover.hitsPluralTitle"
               defaultMessage="{hits, plural, one {hit} other {hits}}"
