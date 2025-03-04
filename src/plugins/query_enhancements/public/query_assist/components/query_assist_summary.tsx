@@ -7,6 +7,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiMarkdownFormat,
   EuiIcon,
   EuiIconTip,
   EuiSmallButtonIcon,
@@ -30,8 +31,6 @@ import { QueryAssistContextType } from '../../../common/query_assist';
 import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
 import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
 import { FeedbackStatus } from '../../../common/query_assist';
-import { checkAgentsExist } from '../utils/get_is_summary_agent';
-import { DATA2SUMMARY_AGENT_CONFIG_ID } from '../utils/constant';
 
 export interface QueryContext {
   question: string;
@@ -72,9 +71,8 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const [loading, setLoading] = useState(false); // track loading state
   const [feedback, setFeedback] = useState(FeedbackStatus.NONE);
   const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
-  const [isSummaryAgentAvailable, setIsSummaryAgentAvailable] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
-  const { question$, isQuerySummaryCollapsed } = useQueryAssist();
+  const { question$, isQuerySummaryCollapsed, isSummaryAgentAvailable } = useQueryAssist();
   const METRIC_APP = `query-assist`;
   const afterFeedbackTip = i18n.translate('queryEnhancements.queryAssist.summary.afterFeedback', {
     defaultMessage:
@@ -209,26 +207,6 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     });
   }, [props.core]);
 
-  useEffect(() => {
-    setIsSummaryAgentAvailable(false);
-    const fetchSummaryAgent = async () => {
-      try {
-        const summaryAgentStatus = await checkAgentsExist(
-          props.http,
-          DATA2SUMMARY_AGENT_CONFIG_ID,
-          selectedDataset.current?.dataSource?.id
-        );
-        setIsSummaryAgentAvailable(summaryAgentStatus.exists);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-      }
-    };
-    if (isEnabledByCapability) {
-      fetchSummaryAgent();
-    }
-  }, [selectedDataset.current?.dataSource?.id, props.http, isEnabledByCapability]);
-
   const onFeedback = useCallback(
     (satisfied: boolean) => {
       if (feedback !== FeedbackStatus.NONE) return;
@@ -357,9 +335,9 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
           </EuiText>
         )}
         {summary && !loading && (
-          <EuiText size="s" data-test-subj="queryAssist_summary_result">
-            {summary}
-          </EuiText>
+          <div data-test-subj="queryAssist_summary_result">
+            <EuiMarkdownFormat>{summary}</EuiMarkdownFormat>
+          </div>
         )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

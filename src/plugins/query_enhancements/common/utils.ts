@@ -13,6 +13,7 @@ import {
   QueryStatusConfig,
   QueryStatusOptions,
 } from './types';
+import { API } from './constants';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -57,13 +58,34 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
     pollQueryResultsParams: context.body?.pollQueryResultsParams,
     timeRange: context.body?.timeRange,
   });
+
   return from(
-    http.fetch({
-      method: 'POST',
-      path,
-      body,
-      signal,
-    })
+    http
+      .fetch({
+        method: 'POST',
+        path,
+        body,
+        signal,
+      })
+      .catch(async (error) => {
+        if (error.name === 'AbortError' && context.body?.pollQueryResultsParams?.queryId) {
+          // Cancel job
+          try {
+            await http.fetch({
+              method: 'DELETE',
+              path: API.DATA_SOURCE.ASYNC_JOBS,
+              query: {
+                id: query.dataset?.dataSource?.id,
+                queryId: context.body?.pollQueryResultsParams.queryId,
+              },
+            });
+          } catch (cancelError) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to cancel query:', cancelError);
+          }
+          throw error;
+        }
+      })
   );
 };
 

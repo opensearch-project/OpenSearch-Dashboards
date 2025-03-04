@@ -1,0 +1,2 @@
+fix:
+- Add mappings for tinyint, smallint, and bigint in S3 dataset type ([#9430](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9430))

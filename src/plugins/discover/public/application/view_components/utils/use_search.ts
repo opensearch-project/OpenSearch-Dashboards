@@ -243,10 +243,18 @@ export const useSearch = (services: DiscoverViewServices) => {
         trackQueryMetric(query);
       }
 
+      const languageConfig = data.query.queryString
+        .getLanguageService()
+        .getLanguage(query!.language);
+
       // Execute the search
       const fetchResp = await searchSource.fetch({
         abortSignal: fetchStateRef.current.abortController.signal,
         withLongNumeralsSupport: await services.uiSettings.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS),
+        ...(languageConfig &&
+          languageConfig.fields?.formatter && {
+            formatter: languageConfig.fields.formatter,
+          }),
       });
 
       inspectorRequest

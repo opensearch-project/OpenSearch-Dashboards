@@ -141,7 +141,7 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
   });
 
   enhancements.deleteJob = createAction(client, components, {
-    endpoint: `${URI.ASYNC_QUERY}/<%=queryId%>`,
+    endpoint: `${URI.ASYNC_QUERY}`,
     method: 'DELETE',
     paramKey: 'queryId',
   });

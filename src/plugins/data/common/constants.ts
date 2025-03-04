@@ -111,4 +111,6 @@ export const UI_SETTINGS = {
   SEARCH_QUERY_LANGUAGE_BLOCKLIST: 'search:queryLanguageBlocklist',
   NEW_HOME_PAGE: 'home:useNewHomePage',
   DATA_WITH_LONG_NUMERALS: 'data:withLongNumerals',
+  DATE_FORMAT: 'dateFormat',
+  DATE_FORMAT_TIMEZONE: 'dateFormat:tz',
 } as const;

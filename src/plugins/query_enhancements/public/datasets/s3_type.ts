@@ -311,6 +311,9 @@ export function castS3FieldTypeToOSDFieldType(sqlType: S3_FIELD_TYPES): OSD_FIEL
     case S3_FIELD_TYPES.LONG:
     case S3_FIELD_TYPES.FLOAT:
     case S3_FIELD_TYPES.DOUBLE:
+    case S3_FIELD_TYPES.TINYINT:
+    case S3_FIELD_TYPES.SMALLINT:
+    case S3_FIELD_TYPES.BIGINT:
       return OSD_FIELD_TYPES.NUMBER;
     case S3_FIELD_TYPES.KEYWORD:
     case S3_FIELD_TYPES.STRING:

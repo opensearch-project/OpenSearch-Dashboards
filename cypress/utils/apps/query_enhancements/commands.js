@@ -118,9 +118,24 @@ Cypress.Commands.add('setQueryLanguage', (value) => {
     message: value,
   });
 
+  // adding wait here as sometimes the button clicks doesn't register
+  cy.wait(2000);
+
   cy.getElementByTestId(`queryEditorLanguageSelector`).click();
   cy.get(`[class~="languageSelector__menuItem"]`).contains(value).click({
     force: true,
+  });
+
+  // Sometimes the syntax highlighter opens automatically. Closing it here if it does that
+  cy.wait(1000);
+  cy.get('body').then(($body) => {
+    const popovers = $body.find('.euiPopoverTitle');
+
+    for (const popover of popovers) {
+      if (popover.textContent === 'Syntax options') {
+        cy.getElementByTestId('languageReferenceButton').click();
+      }
+    }
   });
 });
 
@@ -215,39 +230,4 @@ Cypress.Commands.add('setQuickSelectTime', (direction, time, timeUnit) => {
   cy.get('[aria-label="Time value"]').clear().type(time);
   cy.get('[aria-label="Time unit"]').select(timeUnit);
   cy.get('.euiButton').contains('Apply').click();
-});
-
-Cypress.Commands.add('setRelativeTopNavDate', (time, timeUnit) => {
-  const opts = { log: false };
-
-  /* Find any one of the two buttons that change/open the date picker:
-   *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
-   *      * in some versions of OUI, the switch will open the date selection dialog as well
-   *   * if `superDatePickerstartDatePopoverButton` is found, it will open the date selection dialog
-   */
-  cy.getElementsByTestIds(
-    ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
-    opts
-  )
-    .should('be.visible')
-    .invoke('attr', 'data-test-subj')
-    .then((testId) => {
-      cy.getElementByTestId(testId, opts).should('be.visible').click(opts);
-    });
-
-  /* While we surely are in the date selection mode, we don't know if the date selection dialog
-   * is open or not. Looking for a tab and if it is missing, click on the dialog opener.
-   */
-  cy.whenTestIdNotFound('superDatePickerAbsoluteTab', () => {
-    cy.getElementByTestId('superDatePickerstartDatePopoverButton', opts)
-      .should('be.visible')
-      .click(opts);
-  });
-
-  // Click absolute tab
-  cy.getElementByTestId('superDatePickerRelativeTab', opts).click(opts);
-
-  cy.getElementByTestId('superDatePickerRelativeDateInputNumber').clear().type(time);
-  cy.getElementByTestId('superDatePickerRelativeDateInputUnitSelector').select(timeUnit);
-  cy.getElementByTestId('querySubmitButton').click();
 });

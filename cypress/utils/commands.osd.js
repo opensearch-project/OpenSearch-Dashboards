@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment';
 import { TestFixtureHandler } from '../lib/test_fixture_handler';
 import initCommandNamespace from './command_namespace';
+import { DATASOURCE_NAME, PATHS } from './constants';
 
 /**
  * This file houses all the commands specific to OSD. For commands that are used across the project please move it to the general commands file
@@ -187,7 +189,7 @@ cy.osd.add('deleteAllDataSources', () => {
   }
 
   cy.visit('app/dataSources');
-  cy.waitForLoader(true);
+  cy.osd.waitForLoader(true);
   cy.wait(2000);
 
   cy.get('body').then(($body) => {
@@ -212,4 +214,297 @@ cy.osd.add('deleteAllDataSources', () => {
       cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
     }
   });
+});
+
+cy.osd.add(
+  // navigates to the workspace HomePage of a given workspace
+  'navigateToWorkSpaceHomePage',
+  (workspaceName) => {
+    // Selecting the correct workspace
+    cy.visit('/app/workspace_list#');
+    cy.openWorkspaceDashboard(workspaceName);
+    // wait until page loads
+    if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'osd') {
+      cy.getElementByTestId('headerAppActionMenu').should('be.visible');
+    } else {
+      cy.getElementByTestId('breadcrumbs').should('be.visible');
+    }
+  }
+);
+
+cy.osd.add(
+  //navigate to workspace specific pages
+  'navigateToWorkSpaceSpecificPage',
+  (opts) => {
+    const { workspaceName, page, isEnhancement = false } = opts;
+    // Navigating to the WorkSpace Home Page
+    cy.osd.navigateToWorkSpaceHomePage(workspaceName);
+
+    // Check for toggleNavButton and handle accordingly
+    // If collapsibleNavShrinkButton is shown which means toggleNavButton is already clicked, try clicking the app link directly
+    // Using collapsibleNavShrinkButton is more robust than using toggleNavButton due to another toggleNavButton item on discover page
+    cy.get('body').then(($body) => {
+      const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
+
+      if (shrinkButton.length === 0) {
+        cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
+      }
+
+      cy.getElementByTestId(`collapsibleNavAppLink-${page}`).should('exist').click();
+    });
+
+    cy.osd.waitForLoader(isEnhancement);
+  }
+);
+
+cy.osd.add('waitForLoader', (isEnhancement = false) => {
+  const opts = { log: false };
+
+  Cypress.log({
+    name: 'waitForPageLoad',
+    displayName: 'wait',
+    message: 'page load',
+  });
+
+  // Use recentItemsSectionButton for query enhancement, otherwise use homeIcon
+  cy.getElementByTestId(isEnhancement ? 'recentItemsSectionButton' : 'homeIcon', opts).should(
+    'be.visible'
+  );
+});
+
+cy.osd.add('grabDataSourceId', (workspaceName, dataSourceName) => {
+  // IN OSD environment, we are grabbing the DATASOURCE_ID in addDataSource command.
+  // In other environments, we need to grab it manually
+  if (Cypress.env('CYPRESS_RUNTIME_ENV') !== 'osd') {
+    cy.osd.navigateToWorkSpaceSpecificPage({
+      workspaceName,
+      page: 'dataSources',
+      isEnhancement: true,
+    });
+    cy.get('span').contains(dataSourceName).click();
+    cy.url().then(($url) => {
+      const urlParts = $url.split('/');
+      const dataSourceId = urlParts[urlParts.length - 1];
+      cy.wrap(dataSourceId).as('DATASOURCE_ID');
+    });
+  }
+});
+
+cy.osd.add('deleteAllOldWorkspaces', () => {
+  cy.visit('/app/workspace_list#/');
+  cy.get('h1').contains('Workspaces').should('be.visible');
+
+  cy.get('.application')
+    .find('a')
+    .then(($links) => {
+      for (let i = 0; i < $links.length; i++) {
+        const link = $links[i];
+        const wsName = link.textContent;
+
+        // the first portion of the ws name is the epoch time it was created in seconds,
+        // see: getRandomizedWorkspaceName() util
+        const epochTimeCreated = Number(wsName.split('-')[0]);
+
+        if (!Number.isNaN(epochTimeCreated)) {
+          const currentEpoch = moment().unix();
+          const timeDiff = currentEpoch - epochTimeCreated;
+
+          // if ws was created more than 1 hr ago, then delete it
+          if (timeDiff > 3600) {
+            cy.get('.application')
+              .find('table input')
+              // ignore first element as that is select all checkbox
+              .eq(1 + i)
+              .click();
+          }
+        }
+      }
+    });
+
+  cy.get('.application').then(($application) => {
+    const deleteButton = $application.find('[data-test-subj="multi-deletion-button"]');
+    if (deleteButton.length) {
+      cy.getElementByTestId('multi-deletion-button').click();
+      cy.getElementByTestId('delete-workspace-modal-input').type('delete');
+      cy.getElementByTestId('delete-workspace-modal-confirm').click();
+
+      // wait until modal is gone
+      cy.getElementByTestId('delete-workspace-modal-input').should('not.exist');
+    }
+  });
+});
+
+// this currently only works with data-logs-1. If we ever need data from data-logs-2, we should update this.
+cy.osd.add('setupWorkspaceAndDataSourceWithIndices', (workspaceName, indices) => {
+  // Load test data
+  cy.osd.setupTestData(
+    PATHS.SECONDARY_ENGINE,
+    indices.map((index) => `cypress/fixtures/query_enhancements/data_logs_1/${index}.mapping.json`),
+    indices.map((index) => `cypress/fixtures/query_enhancements/data_logs_1/${index}.data.ndjson`)
+  );
+
+  // Add data source
+  cy.osd.addDataSource({
+    name: DATASOURCE_NAME,
+    url: PATHS.SECONDARY_ENGINE,
+    authType: 'no_auth',
+  });
+
+  // delete any old workspaces and potentially conflicting one
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteAllOldWorkspaces();
+
+  // create workspace
+  cy.visit('/app/home');
+  cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+});
+
+// this currently only works with data-logs-1.
+cy.osd.add('cleanupWorkspaceAndDataSourceAndIndices', (workspaceName, indices) => {
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+  for (const index of indices) {
+    cy.osd.deleteIndex(index);
+  }
+});
+
+cy.osd.add('ensureTopNavExists', () => {
+  const MAX_RETRY = 3;
+
+  const getTopNavOrRetry = (attempt = 1) => {
+    const opts = { log: false };
+
+    cy.get('body', opts).then(($body) => {
+      const superDatePickerstartDatePopoverButtonEl = $body.find(
+        '[data-test-subj="superDatePickerstartDatePopoverButton"]'
+      );
+      const superDatePickerShowDatesButton = $body.find(
+        '[data-test-subj="superDatePickerShowDatesButton"]'
+      );
+
+      if (
+        !superDatePickerstartDatePopoverButtonEl.length &&
+        !superDatePickerShowDatesButton.length
+      ) {
+        if (attempt < MAX_RETRY) {
+          cy.log(`Top Nav not found, reloading and retrying... (attempt ${attempt})`);
+          cy.reload();
+          cy.wait(2000, opts);
+          return getTopNavOrRetry(attempt + 1);
+        } else {
+          cy.log(`Failed to find Top Nav after attempting ${MAX_RETRY} times`);
+        }
+      }
+    });
+  };
+
+  return getTopNavOrRetry();
+});
+
+cy.osd.add('setTopNavDate', (start, end, submit = true) => {
+  cy.osd.ensureTopNavExists();
+
+  const opts = { log: false };
+
+  Cypress.log({
+    name: 'setTopNavDate',
+    displayName: 'set date',
+    message: `Start: ${start} :: End: ${end}`,
+  });
+
+  /* Find any one of the two buttons that change/open the date picker:
+   *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
+   *      * in some versions of OUI, the switch will open the date selection dialog as well
+   *   * if `superDatePickerstartDatePopoverButton` is found, it will open the date selection dialog
+   */
+  cy.getElementsByTestIds(
+    ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
+    opts
+  )
+    .should('be.visible')
+    .invoke('attr', 'data-test-subj')
+    .then((testId) => {
+      cy.getElementByTestId(testId, opts).should('be.visible').click(opts);
+    });
+
+  /* While we surely are in the date selection mode, we don't know if the date selection dialog
+   * is open or not. Looking for a tab and if it is missing, click on the dialog opener.
+   */
+  cy.whenTestIdNotFound('superDatePickerAbsoluteTab', () => {
+    cy.getElementByTestId('superDatePickerstartDatePopoverButton', opts)
+      .should('be.visible')
+      .click(opts);
+  });
+
+  // Click absolute tab
+  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).click(opts);
+
+  // Type absolute start date
+  cy.getElementByTestId('superDatePickerAbsoluteDateInput', opts)
+    .click(opts)
+    .clear(opts)
+    .type(start, {
+      ...opts,
+      delay: 0, // add a delay here, cypress sometimes fails to type all the content into the input.
+    });
+
+  // Click end date
+  cy.getElementByTestId('superDatePickerendDatePopoverButton', opts).last(opts).click(opts);
+
+  // Click absolute tab
+  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).last(opts).click(opts);
+
+  // Type absolute end date
+  cy.getElementByTestId('superDatePickerAbsoluteDateInput', opts)
+    .last(opts)
+    .click(opts)
+    .clear(opts)
+    .type(end, {
+      ...opts,
+      delay: 0, // add a delay here, cypress sometimes fails to type all the content into the input.
+    });
+
+  // Close popup
+  cy.getElementByTestId('superDatePickerendDatePopoverButton', opts).click(opts);
+
+  if (submit) {
+    cy.updateTopNav(opts);
+  }
+});
+
+cy.osd.add('setRelativeTopNavDate', (time, timeUnit) => {
+  cy.osd.ensureTopNavExists();
+
+  const opts = { log: false };
+
+  /* Find any one of the two buttons that change/open the date picker:
+   *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
+   *      * in some versions of OUI, the switch will open the date selection dialog as well
+   *   * if `superDatePickerstartDatePopoverButton` is found, it will open the date selection dialog
+   */
+  cy.getElementsByTestIds(
+    ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
+    opts
+  )
+    .should('be.visible')
+    .invoke('attr', 'data-test-subj')
+    .then((testId) => {
+      cy.getElementByTestId(testId, opts).should('be.visible').click(opts);
+    });
+
+  /* While we surely are in the date selection mode, we don't know if the date selection dialog
+   * is open or not. Looking for a tab and if it is missing, click on the dialog opener.
+   */
+  cy.whenTestIdNotFound('superDatePickerAbsoluteTab', () => {
+    cy.getElementByTestId('superDatePickerstartDatePopoverButton', opts)
+      .should('be.visible')
+      .click(opts);
+  });
+
+  // Click absolute tab
+  cy.getElementByTestId('superDatePickerRelativeTab', opts).click(opts);
+
+  cy.getElementByTestId('superDatePickerRelativeDateInputNumber').clear().type(time);
+  cy.getElementByTestId('superDatePickerRelativeDateInputUnitSelector').select(timeUnit);
+  cy.getElementByTestId('querySubmitButton').click();
 });

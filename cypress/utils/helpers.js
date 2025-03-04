@@ -27,8 +27,11 @@ export const prepareTestSuite = (testSuiteName, runTestSuiteCallback) => {
   } else {
     loginMethods.forEach(({ name, method }) => {
       describe(`${testSuiteName} Test with ${name}`, () => {
-        beforeEach(() => {
+        before(() => {
           cy.session(name, () => {
+            cy.task('getNewAwsCredentials').then((awsCredentials) => {
+              Cypress.env('AWS_CREDENTIALS', awsCredentials);
+            });
             cy[method]();
           });
         });

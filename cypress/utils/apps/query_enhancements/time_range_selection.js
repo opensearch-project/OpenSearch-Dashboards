@@ -12,7 +12,6 @@ import { DatasetTypes, QueryLanguages } from './constants';
  * @param {QueryEnhancementLanguage} language - the query language name
  * @returns {number|undefined}
  */
-
 const getExpectedHitCountRelativeQuickTimeSelect = (datasetType, language) => {
   switch (datasetType) {
     case DatasetTypes.INDEX_PATTERN.name:
@@ -53,9 +52,9 @@ const getExpectedHitCountAbsoluteTimeSelect = (datasetType, language) => {
     case DatasetTypes.INDEX_PATTERN.name:
       switch (language) {
         case QueryLanguages.DQL.name:
-          return '10,894';
+          return '10,904';
         case QueryLanguages.Lucene.name:
-          return '10,894';
+          return '10,904';
         case QueryLanguages.SQL.name:
           return undefined;
         case QueryLanguages.PPL.name:
@@ -71,7 +70,7 @@ const getExpectedHitCountAbsoluteTimeSelect = (datasetType, language) => {
         case QueryLanguages.SQL.name:
           return undefined;
         case QueryLanguages.PPL.name:
-          // TODO: Update this to 10,894 once Histogram is supported on 2.17
+          // TODO: Update this to 10,904 once Histogram is supported on 2.17
           return undefined;
         default:
           throw new Error(

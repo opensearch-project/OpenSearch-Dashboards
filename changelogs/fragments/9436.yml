@@ -1,0 +1,2 @@
+fix:
+- Make PPL handle miliseconds in date fields ([#9436](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9436))

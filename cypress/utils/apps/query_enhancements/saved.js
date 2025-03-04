@@ -328,15 +328,19 @@ export const verifySavedSearchInAssetsPage = (
   },
   workspaceName
 ) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName: workspaceName,
     page: 'objects',
     isEnhancement: true,
   });
 
-  // TODO: Currently this test will only work if the last saved object is the relevant savedSearch
-  // Update below to make it work without that requirement.
-  cy.getElementByTestId('euiCollapsedItemActionsButton').last().click();
+  cy.getElementByTestId('savedObjectsTableRowTitle')
+    .contains(saveName)
+    .parent()
+    .parent()
+    .siblings('.euiTableRowCell--hasActions')
+    .find('[data-test-subj="euiCollapsedItemActionsButton"]')
+    .click();
 
   cy.intercept('POST', '/w/*/api/saved_objects/_bulk_get').as('savedObjectResponse');
   cy.getElementByTestId('savedObjectsTableAction-inspect').click();
@@ -461,7 +465,7 @@ export const updateSavedSearchAndSaveAndVerify = (
   datasourceName,
   saveAsNew
 ) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName: workspaceName,
     page: 'discover',
     isEnhancement: true,
@@ -503,11 +507,25 @@ export const updateSavedSearchAndSaveAndVerify = (
  * @param {string} workspaceName - name of workspace
  */
 export const navigateToDashboardAndOpenSavedSearchPanel = (workspaceName) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'dashboards',
     isEnhancement: true,
   });
+
+  // adding a wait as cy.click sometimes fails with the error "...failed because the page updated while this command was executing"
+  cy.wait(1000);
+
+  // TODO: Try to remove this logic below
+  // There is a bug in some environments where the new item button is not rendered correctly on Cypress.
+  // is not reproducible manually
+  cy.get('body').then(($body) => {
+    const newItemButton = $body.find('[data-test-id="newItemButton"]');
+    if (!newItemButton.length) {
+      cy.reload();
+    }
+  });
+
   cy.getElementByTestId('newItemButton').click();
   // using DQL as it supports date picker
   setDatePickerDatesAndSearchIfRelevant(QueryLanguages.DQL.name);

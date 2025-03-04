@@ -20,6 +20,27 @@ export const visualizationTitlesWithInspectOptions = [
 ];
 
 /**
+ * Returns the query string to use for a given dataset+language
+ * @param {string} dataset - the dataset name to use
+ * @param {QueryEnhancementLanguage} language - the name of query language
+ * @returns {string}
+ */
+export const getQueryString = (dataset, language) => {
+  switch (language) {
+    case QueryLanguages.DQL.name:
+      return '';
+    case QueryLanguages.Lucene.name:
+      return '';
+    case QueryLanguages.SQL.name:
+      return `SELECT * FROM ${dataset} ORDER BY timestamp`;
+    case QueryLanguages.PPL.name:
+      return `source = ${dataset} | sort timestamp`;
+    default:
+      throw new Error(`getQueryString encountered unsupported language: ${language}`);
+  }
+};
+
+/**
  * Returns the SavedSearchTestConfig for the provided dataset, datasetType, and language
  * @param {string} dataset - the dataset name
  * @param {QueryEnhancementDataset} datasetType - the type of the dataset
@@ -31,6 +52,7 @@ export const generateInspectTestConfiguration = (dataset, datasetType, language)
     dataset,
     datasetType,
     language: language.name,
+    queryString: getQueryString(dataset, language.name),
     testName: `dataset: ${datasetType} and language: ${language.name}`,
   };
 };
