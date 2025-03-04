@@ -30,6 +30,8 @@ const runSavedSearchTests = () => {
   describe('saved search', () => {
     // TODO: Currently we cannot convert this into a "before" and "after" due to us grabbing several aliases that are required by postRequestSaveSearch()
     beforeEach(() => {
+      cy.clearLocalStorage();
+      cy.clearAllSessionStorage();
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,
         INDEX_WITH_TIME_2,
