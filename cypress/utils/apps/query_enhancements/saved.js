@@ -334,9 +334,13 @@ export const verifySavedSearchInAssetsPage = (
     isEnhancement: true,
   });
 
-  // TODO: Currently this test will only work if the last saved object is the relevant savedSearch
-  // Update below to make it work without that requirement.
-  cy.getElementByTestId('euiCollapsedItemActionsButton').last().click();
+  cy.getElementByTestId('savedObjectsTableRowTitle')
+    .contains(saveName)
+    .parent()
+    .parent()
+    .siblings('.euiTableRowCell--hasActions')
+    .find('[data-test-subj="euiCollapsedItemActionsButton"]')
+    .click();
 
   cy.intercept('POST', '/w/*/api/saved_objects/_bulk_get').as('savedObjectResponse');
   cy.getElementByTestId('savedObjectsTableAction-inspect').click();
@@ -511,6 +515,16 @@ export const navigateToDashboardAndOpenSavedSearchPanel = (workspaceName) => {
 
   // adding a wait as cy.click sometimes fails with the error "...failed because the page updated while this command was executing"
   cy.wait(1000);
+
+  // TODO: Try to remove this logic below
+  // There is a bug in some environments where the new item button is not rendered correctly on Cypress.
+  // is not reproducible manually
+  cy.get('body').then(($body) => {
+    const newItemButton = $body.find('[data-test-id="newItemButton"]');
+    if (!newItemButton.length) {
+      cy.reload();
+    }
+  });
 
   cy.getElementByTestId('newItemButton').click();
   // using DQL as it supports date picker
