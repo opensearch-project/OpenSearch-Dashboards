@@ -77,8 +77,6 @@ Cypress.Commands.add('measureComponentPerformance', (opts) => {
     cy.window().then((win) => {
       win.performance.mark(`${fieldName}_start`);
 
-      cy.getElementByTestId(`${componentTestId}`).should('exist');
-
       cy.get('@component')
         .should('exist')
         .then(($el) => {
