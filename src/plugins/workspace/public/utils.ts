@@ -226,20 +226,23 @@ export const getDataSourcesList = (
   targetWorkspaces?: string[]
 ) => {
   return client
-    .find({
-      type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
-      fields: [
-        'id',
-        'title',
-        'auth',
-        'description',
-        'dataSourceEngineType',
-        'type',
-        'connectionId',
-      ],
-      perPage: 10000,
-      workspaces: targetWorkspaces,
-    })
+    .find(
+      {
+        type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+        fields: [
+          'id',
+          'title',
+          'auth',
+          'description',
+          'dataSourceEngineType',
+          'type',
+          'connectionId',
+        ],
+        perPage: 10000,
+        workspaces: targetWorkspaces,
+      },
+      { withoutClientBasePath: true }
+    )
     .then((response) => {
       const objects = response?.savedObjects;
       if (objects) {

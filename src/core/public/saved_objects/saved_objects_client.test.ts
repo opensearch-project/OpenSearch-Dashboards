@@ -521,9 +521,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "prependOptions": Object {
-                "withoutClientBasePath": true,
-              },
+              "prependOptions": undefined,
               "query": Object {
                 "default_search_operator": "OR",
                 "fields": Array [
@@ -562,9 +560,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "prependOptions": Object {
-                "withoutClientBasePath": true,
-              },
+              "prependOptions": undefined,
               "query": Object {},
             },
           ],

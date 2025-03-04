@@ -42,7 +42,7 @@ import {
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
-import { HttpFetchOptions, HttpSetup } from '../http';
+import { HttpFetchOptions, HttpSetup, PrependOptions } from '../http';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
@@ -373,7 +373,8 @@ export class SavedObjectsClient {
    * @returns A find result with objects matching the specified search.
    */
   public find = <T = unknown>(
-    options: SavedObjectsFindOptions
+    options: SavedObjectsFindOptions,
+    prependOptions?: PrependOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
     const renameMap = {
@@ -404,9 +405,6 @@ export class SavedObjectsClient {
     // a query param
     if (query.has_reference) query.has_reference = JSON.stringify(query.has_reference);
 
-    // if no workspaces are provided, we need to remove the client base path
-    const prependOptions =
-      query.workspaces === undefined ? { withoutClientBasePath: true } : undefined;
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
       query,
