@@ -6,16 +6,27 @@
 import { HttpStart } from '../../../../core/public';
 import { PreviewResponse } from '../types';
 
-export async function previewFile(
-  http: HttpStart,
-  file: File,
-  createMode: boolean,
-  fileExtension: string,
-  indexName: string,
-  previewCount: number,
-  delimiter?: string,
-  selectedDataSourceId?: string
-) {
+export interface PreviewFileProps {
+  http: HttpStart;
+  file: File;
+  createMode: boolean;
+  fileExtension: string;
+  indexName: string;
+  previewCount: number;
+  delimiter?: string;
+  selectedDataSourceId?: string;
+}
+
+export async function previewFile({
+  http,
+  file,
+  createMode,
+  fileExtension,
+  indexName,
+  previewCount,
+  selectedDataSourceId,
+  delimiter,
+}: PreviewFileProps) {
   const formData = new FormData();
   formData.append('file', file);
   const query = {

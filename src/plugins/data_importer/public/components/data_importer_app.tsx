@@ -44,7 +44,7 @@ import { ImportTextContentBody } from './import_text_content';
 import { ImportFileContentBody } from './import_file_content';
 import { CSV_FILE_TYPE, CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 import { DelimiterSelect } from './delimiter_select';
-import { previewFile } from '../lib/preview';
+import { previewFile } from '../lib/preview_file';
 import { PreviewComponent } from './preview_table';
 import { catIndices } from '../lib/cat_indices';
 
@@ -152,16 +152,16 @@ export const DataImporterPluginApp = ({
         const fileExtension = extname(inputFile.name);
         setIsLoadingPreview(true);
         try {
-          const response = await previewFile(
+          const response = await previewFile({
             http,
-            inputFile,
+            file: inputFile,
             createMode,
             fileExtension,
-            indexName!,
-            config.filePreviewDocumentsCount,
+            indexName: indexName!,
+            previewCount: config.filePreviewDocumentsCount,
             delimiter,
-            dataSourceId
-          );
+            selectedDataSourceId: dataSourceId,
+          });
           setIsLoadingPreview(false);
           if (response) {
             setFilePreviewData(response);

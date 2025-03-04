@@ -23,7 +23,7 @@ describe('catIndices()', () => {
       dataSourceId: 'data-source-id',
     },
   ])(
-    'should call /api/data_importer/_cat_indices with the correct args',
+    'should call /api/data_importer/_cat_indices with the correct args when dataSourceId is $dataSourceId',
     async ({ http, dataSourceId }) => {
       const response = await catIndices({ http, dataSourceId });
       expect(response.indices).toMatchObject([...mockIndexNames]);

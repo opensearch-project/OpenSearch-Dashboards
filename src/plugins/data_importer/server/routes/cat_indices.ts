@@ -4,17 +4,12 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { schema, TypeOf } from '@osd/config-schema';
+import { schema } from '@osd/config-schema';
 import _ from 'lodash';
 import { CatIndicesIndicesRecord } from '@opensearch-project/opensearch/api/types';
-import { configSchema } from '../../config';
 import { decideClient } from '../utils/util';
 
-export function catIndicesRoute(
-  router: IRouter,
-  config: TypeOf<typeof configSchema>,
-  dataSourceEnabled: boolean
-) {
+export function catIndicesRoute(router: IRouter, dataSourceEnabled: boolean) {
   router.get(
     {
       path: '/api/data_importer/_cat_indices',

@@ -82,7 +82,7 @@ describe('importFile()', () => {
       selectedDataSourceId: 'datasource-json',
     },
   ])(
-    'should call /api/data_importer/_import_file with the correct args',
+    'should call /api/data_importer/_import_file with the correct args for a $fileExtension file',
     async ({
       http,
       file,
