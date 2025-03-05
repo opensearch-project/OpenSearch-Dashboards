@@ -14,6 +14,7 @@ import {
 } from '../shared/types';
 import { PromQLLexer } from './.generated/PromQLLexer';
 import { PromQLParser } from './.generated/PromQLParser';
+import { getNamesFromInstantSelector } from './instant_selector_visitor';
 
 const tokenDictionary: any = {};
 
@@ -80,30 +81,31 @@ export function enrichAutocompleteResult(
   tokenStream: TokenStream,
   cursorTokenIndex: number,
   cursor: CursorPosition,
-  query: string
+  query: string,
+  tree: ParseTree
 ): PromQLAutocompleteResult {
   const {
     shouldSuggestLabels,
     shouldSuggestLabelValues,
     ...suggestionsFromRules
   } = processVisitedRules(rules, cursorTokenIndex, tokenStream);
-  // const suggestTemplates = shouldSuggestTemplates(query, cursor);
   const result: PromQLAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
   };
 
   if (shouldSuggestLabels || shouldSuggestLabelValues) {
-    // send out visitor that gets symbol table
-    // table should contain:
-    // -> local metric name
-    // -> local label name
+    // TODO: cursor.column should incorporate line num as well, it needs to be perfectly matched with parser
+    const { metricName: metric, labelName: label } = getNamesFromInstantSelector(
+      cursor.column - 1,
+      tree
+    );
 
     if (shouldSuggestLabels) {
-      // result.suggestLabels = symbolTable.metricName
+      result.suggestLabels = metric;
     }
     if (shouldSuggestLabelValues) {
-      // result.suggestLabelValues = symbolTable.metricName, symbolTable.labelName
+      result.suggestLabelValues = { metric, label };
     }
   }
 

@@ -85,7 +85,8 @@ export type EnrichAutocompleteResult<A extends AutocompleteResultBase> = (
   tokenStream: TokenStream,
   cursorTokenIndex: number,
   cursor: CursorPosition,
-  query: string
+  query: string,
+  tree: ParseTree
 ) => A;
 
 export interface CursorPosition {
@@ -106,7 +107,7 @@ export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase 
 export interface PromQLAutocompleteResult extends AutocompleteResultBase {
   suggestMetrics?: boolean;
   suggestLabels?: string;
-  suggestLabelValues?: string;
+  suggestLabelValues?: { metric?: string; label?: string };
   suggestTimeRangeUnits?: boolean;
 }
 
