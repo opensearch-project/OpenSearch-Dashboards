@@ -433,11 +433,11 @@ const getSavedObjectPostBody = (config, workspaceId, datasourceId, indexPatternI
  * @param {SavedTestConfig} config - the relevant config for the test case
  */
 export const postRequestSaveSearch = (config) => {
-  cy.get('@WORKSPACE_ID').then((workspaceId) => {
-    cy.get('@DATASOURCE_ID').then((datasourceId) => {
-      cy.get('@INDEX_PATTERN_ID').then((indexPatternId) => {
+  return cy.get('@WORKSPACE_ID').then((workspaceId) => {
+    return cy.get('@DATASOURCE_ID').then((datasourceId) => {
+      return cy.get('@INDEX_PATTERN_ID').then((indexPatternId) => {
         // POST a saved search
-        cy.request({
+        return cy.request({
           method: 'POST',
           url: `/w/${workspaceId}/api/saved_objects/search?overwrite=true`,
           headers: {

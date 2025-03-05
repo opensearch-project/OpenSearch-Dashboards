@@ -19,22 +19,22 @@ export const RecentQueriesDataTypes = {
 export const BaseQuery = {
   INDEX_PATTERN: {
     'OpenSearch SQL': {
-      query: `SELECT * FROM `,
-      where: ' WHERE ',
+      query: 'SELECT * FROM',
+      where: 'WHERE',
     },
     PPL: {
-      query: `source = `,
-      where: ' | where ',
+      query: 'source =',
+      where: '| where',
     },
   },
   INDEXES: {
     'OpenSearch SQL': {
-      query: `SELECT * FROM `,
-      where: ' WHERE ',
+      query: 'SELECT * FROM',
+      where: 'WHERE',
     },
     PPL: {
-      query: `source = `,
-      where: ' | where ',
+      query: 'source =',
+      where: '| where',
     },
   },
 };

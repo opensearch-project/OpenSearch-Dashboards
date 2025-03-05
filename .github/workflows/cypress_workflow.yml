@@ -6,7 +6,9 @@ on:
     branches: ['**']
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
       - '.lycheeignore'
+      - 'CODEOWNERS'
       - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:

@@ -30,6 +30,8 @@ const runSavedSearchTests = () => {
   describe('saved search', () => {
     // TODO: Currently we cannot convert this into a "before" and "after" due to us grabbing several aliases that are required by postRequestSaveSearch()
     beforeEach(() => {
+      cy.clearLocalStorage();
+      cy.clearAllSessionStorage();
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,
         INDEX_WITH_TIME_2,
@@ -90,14 +92,20 @@ const runSavedSearchTests = () => {
 
       it(`should successfully update a saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
-        postRequestSaveSearch(config);
-        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
+        cy.wrap(null).then(() => {
+          return postRequestSaveSearch(config).then(() => {
+            updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
+          });
+        });
       });
 
       it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
-        postRequestSaveSearch(config);
-        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, true);
+        cy.wrap(null).then(() => {
+          return postRequestSaveSearch(config).then(() => {
+            updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, true);
+          });
+        });
       });
     });
   });
