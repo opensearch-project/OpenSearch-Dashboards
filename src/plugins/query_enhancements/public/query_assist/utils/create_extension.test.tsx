@@ -215,7 +215,7 @@ describe('CreateExtension', () => {
     expect(summaryPanels).toHaveLength(0);
   });
 
-  it('should render the query assist panel if it is enabled', async () => {
+  it('should render the summary panel if it is enabled', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
     const modifiedConfig: ConfigSchema['queryAssist'] = {
       supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
