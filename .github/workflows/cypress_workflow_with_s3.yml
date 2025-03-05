@@ -68,7 +68,7 @@ jobs:
         if: ${{ inputs.specs == '' }}
         shell: bash
         run: |
-          DASHBOARDS_SPEC="cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/04/s3_dataset.spec.js"
+          DASHBOARDS_SPEC="$(yarn --silent osd:ciGroupS3)"
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 

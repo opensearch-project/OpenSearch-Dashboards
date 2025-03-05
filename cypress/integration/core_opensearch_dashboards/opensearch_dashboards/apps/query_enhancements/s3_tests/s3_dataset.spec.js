@@ -89,6 +89,8 @@ const s3DatasetTestSuite = () => {
         beforeEach(() => {
           // Create workspace
           cy.deleteWorkspaceByName(workspace);
+          cy.clearLocalStorage();
+          cy.clearAllSessionStorage();
           cy.osd.deleteAllOldWorkspaces();
           cy.visit('/app/home');
           cy.osd.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, workspace);
@@ -100,10 +102,6 @@ const s3DatasetTestSuite = () => {
         });
         afterEach(() => {
           cy.deleteWorkspaceByName(workspace);
-          cy.window().then((win) => {
-            win.localStorage.clear();
-            win.sessionStorage.clear();
-          });
         });
 
         it('with SQL', function () {
