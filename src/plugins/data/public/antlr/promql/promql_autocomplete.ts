@@ -9,13 +9,11 @@ import {
   AutocompleteData,
   AutocompleteResultBase,
   CursorPosition,
-  ProcessVisitedRulesResult,
-  TableContextSuggestion,
   PromQLAutocompleteResult,
+  ProcessPromQLVisitedRulesResult,
 } from '../shared/types';
 import { PromQLLexer } from './.generated/PromQLLexer';
 import { PromQLParser } from './.generated/PromQLParser';
-import { TableQueryPosition } from './table';
 
 const tokenDictionary: any = {};
 
@@ -23,32 +21,56 @@ const tokenDictionary: any = {};
 export function getIgnoredTokens(): number[] {
   const tokens: any = [];
 
+  for (let token = PromQLParser.ADD; token <= PromQLParser.POW; token++) {
+    tokens.push(token);
+  }
+  for (let token = PromQLParser.LEFT_BRACE; token <= PromQLParser.RIGHT_BRACKET; token++) {
+    tokens.push(token);
+  }
+
   return tokens;
 }
 
 const ignoredTokens = new Set(getIgnoredTokens());
 
-const rulesToVisit = new Set([]);
+const rulesToVisit = new Set([
+  PromQLParser.RULE_metricName,
+  PromQLParser.RULE_labelName,
+  PromQLParser.RULE_labelValue,
+  PromQLParser.RULE_duration,
+]);
 
 export function processVisitedRules(
   rules: c3.CandidatesCollection['rules'],
   cursorTokenIndex: number,
   tokenStream: TokenStream
-): ProcessVisitedRulesResult<PromQLAutocompleteResult> {
+): ProcessPromQLVisitedRulesResult<PromQLAutocompleteResult> {
+  let suggestMetrics = false;
+  let shouldSuggestLabels = false;
+  let shouldSuggestLabelValues = false;
+  let suggestTimeRangeUnits = false;
+
   for (const [ruleId, _] of rules) {
     switch (ruleId) {
-      default:
+      case PromQLParser.RULE_metricName:
+        suggestMetrics = true;
+        break;
+      case PromQLParser.RULE_labelName:
+        shouldSuggestLabels = true;
+        break;
+      case PromQLParser.RULE_labelValue:
+        shouldSuggestLabelValues = true;
+        break;
+      case PromQLParser.RULE_duration:
+        suggestTimeRangeUnits = true;
         break;
     }
   }
 
-  return {};
+  return { suggestMetrics, shouldSuggestLabels, shouldSuggestLabelValues, suggestTimeRangeUnits };
 }
 
-export function getParseTree(
-  parser: PromQLParser,
-  type?: TableQueryPosition['type'] | 'select'
-): ParseTree {
+export function getParseTree(parser: PromQLParser): ParseTree {
   return parser.expression();
 }
 
@@ -61,42 +83,29 @@ export function enrichAutocompleteResult(
   query: string
 ): PromQLAutocompleteResult {
   const {
-    shouldSuggestColumns,
-    shouldSuggestColumnAliases,
-    shouldSuggestConstraints,
+    shouldSuggestLabels,
+    shouldSuggestLabelValues,
     ...suggestionsFromRules
   } = processVisitedRules(rules, cursorTokenIndex, tokenStream);
   // const suggestTemplates = shouldSuggestTemplates(query, cursor);
   const result: PromQLAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
-    suggestColumns: shouldSuggestColumns ? ({} as TableContextSuggestion) : undefined,
   };
 
-  // TODO: include symbol table here or not at all
-  // const contextSuggestionsNeeded =
-  //   shouldSuggestColumns || shouldSuggestConstraints || shouldSuggestColumnAliases;
-  // if (contextSuggestionsNeeded) {
-  //   const visitor = new OpenSearchSqlSymbolTableVisitor();
-  //   const { tableContextSuggestion, suggestColumnAliases } = getContextSuggestions(
-  //     PromQLLexer,
-  //     PromQLParser,
-  //     visitor,
-  //     tokenDictionary,
-  //     getParseTree,
-  //     tokenStream,
-  //     cursor,
-  //     query
-  //   );
+  if (shouldSuggestLabels || shouldSuggestLabelValues) {
+    // send out visitor that gets symbol table
+    // table should contain:
+    // -> local metric name
+    // -> local label name
 
-  //   if (shouldSuggestColumns) {
-  //     result.suggestColumns = tableContextSuggestion;
-  //   }
-
-  //   if (shouldSuggestColumnAliases && suggestColumnAliases) {
-  //     result.suggestColumnAliases = suggestColumnAliases;
-  //   }
-  // }
+    if (shouldSuggestLabels) {
+      // result.suggestLabels = symbolTable.metricName
+    }
+    if (shouldSuggestLabelValues) {
+      // result.suggestLabelValues = symbolTable.metricName, symbolTable.labelName
+    }
+  }
 
   return result;
 }

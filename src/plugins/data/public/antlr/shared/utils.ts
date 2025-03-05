@@ -6,7 +6,7 @@
 import { from } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { CharStream, Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
+import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
 import { monaco } from '@osd/monaco';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryStringContract } from '../../query';
@@ -225,6 +225,7 @@ const singleParseQuery = <
 
   const suggestKeywords: KeywordSuggestion[] = [];
   const { tokens, rules } = core.collectCandidates(cursorTokenIndex, context);
+  // console.log('tokens and rules', tokens, rules);
   tokens.forEach((_, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');

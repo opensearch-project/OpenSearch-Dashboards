@@ -40,6 +40,40 @@ export const getSuggestions = async ({
 
     const finalSuggestions: QuerySuggestion[] = [];
 
+    if (suggestions.suggestMetrics) {
+      finalSuggestions.push(
+        ...[
+          'prometheus_engine_queries',
+          'prometheus_http_requests_total',
+          'prometheus_sd_dns_lookups_total',
+        ].map((af) => ({
+          text: `${af}`,
+          type: monaco.languages.CompletionItemKind.Method,
+          detail: SuggestionItemDetailsTags.AggregateFunction,
+        }))
+      );
+    }
+
+    if (suggestions.suggestLabels) {
+      finalSuggestions.push(
+        ...['job', 'method', 'instance'].map((af) => ({
+          text: `${af}`,
+          type: monaco.languages.CompletionItemKind.File,
+          detail: SuggestionItemDetailsTags.Table,
+        }))
+      );
+    }
+
+    if (suggestions.suggestTimeRangeUnits) {
+      finalSuggestions.push(
+        ...['ms', 's', 'd'].map((af) => ({
+          text: `${af}`,
+          type: monaco.languages.CompletionItemKind.Constant,
+          detail: SuggestionItemDetailsTags.Command,
+        }))
+      );
+    }
+
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
         ...suggestions.suggestKeywords.map((sk) => ({
