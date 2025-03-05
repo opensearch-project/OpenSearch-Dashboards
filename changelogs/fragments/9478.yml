@@ -1,0 +1,2 @@
+fix:
+- Add error handling page for stale state in workspace plugin to prevent stuck in loading ([#9478](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9478))
