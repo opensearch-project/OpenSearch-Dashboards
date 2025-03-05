@@ -314,9 +314,9 @@ export class WorkspacePlugin
       core.http.basePath.getBasePath()
     );
 
-    const workspaceError = core.workspaces.workspaceError$;
+    const workspaceError$ = core.workspaces.workspaceError$;
 
-    workspaceError.subscribe({
+    workspaceError$.subscribe({
       error: ({ reason }) => {
         if (reason === WorkspaceError.WORKSPACE_IS_STALE) {
           this.handleFatalError(
@@ -329,7 +329,7 @@ export class WorkspacePlugin
       },
     });
 
-    if (!workspaceError.hasError && workspaceId) {
+    if (!workspaceError$.hasError && workspaceId) {
       const result = await workspaceClient.enterWorkspace(workspaceId);
       if (!result.success) {
         this.handleFatalError(core, result?.error);
