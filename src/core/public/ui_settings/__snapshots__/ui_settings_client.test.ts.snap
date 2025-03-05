@@ -82,6 +82,9 @@ Object {
   "dateFormat": Object {
     "value": "bar",
   },
+  "theme:enableUserControl": Object {
+    "value": false,
+  },
 }
 `;
 
@@ -93,6 +96,9 @@ Object {
   },
   "dateFormat": Object {
     "value": "Browser",
+  },
+  "theme:enableUserControl": Object {
+    "value": false,
   },
 }
 `;
@@ -111,6 +117,9 @@ Object {
     "userValue": "foo",
     "value": "bar",
   },
+  "theme:enableUserControl": Object {
+    "value": false,
+  },
 }
 `;
 
@@ -123,6 +132,9 @@ Object {
   "dateFormat": Object {
     "userValue": "foo",
     "value": "Browser",
+  },
+  "theme:enableUserControl": Object {
+    "value": false,
   },
 }
 `;
@@ -140,6 +152,9 @@ Object {
   "dateFormat": Object {
     "value": "bar",
   },
+  "theme:enableUserControl": Object {
+    "value": false,
+  },
 }
 `;
 
@@ -152,6 +167,9 @@ Object {
   "dateFormat": Object {
     "userValue": "foo",
     "value": "bar",
+  },
+  "theme:enableUserControl": Object {
+    "value": false,
   },
 }
 `;

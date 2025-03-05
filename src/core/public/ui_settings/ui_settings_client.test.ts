@@ -34,20 +34,45 @@ import { materialize, take, toArray } from 'rxjs/operators';
 import { UiSettingsClient } from './ui_settings_client';
 
 let done$: Subject<unknown>;
+let mockStorage: { [key: string]: string };
 
-function setup(options: { defaults?: any; initialSettings?: any } = {}) {
+function setup(options: { defaults?: any; initialSettings?: any; localStorage?: any } = {}) {
   const {
     defaults = {
       dateFormat: { value: 'Browser' },
       aLongNumeral: { value: `${BigInt(Number.MAX_SAFE_INTEGER) + 11n}`, type: 'number' },
+      'theme:enableUserControl': { value: false },
     },
     initialSettings = {},
+    localStorage = {},
   } = options;
 
   const batchSet = jest.fn(() => ({
     settings: {},
   }));
   done$ = new Subject();
+
+  // Mock localStorage
+  mockStorage = { ...localStorage };
+  const localStorageMock = {
+    getItem: jest.fn((key) => mockStorage[key]),
+    setItem: jest.fn((key, value) => {
+      mockStorage[key] = value.toString();
+    }),
+    removeItem: jest.fn((key) => {
+      delete mockStorage[key];
+    }),
+    clear: jest.fn(() => {
+      Object.keys(mockStorage).forEach((key) => delete mockStorage[key]);
+    }),
+  };
+  Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+  // Initialize localStorage with provided values
+  if (localStorage.uiSettings) {
+    window.localStorage.setItem('uiSettings', localStorage.uiSettings);
+  }
+
   const client = new UiSettingsClient({
     defaults,
     initialSettings,
@@ -57,11 +82,88 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
     done$,
   });
 
-  return { client, batchSet };
+  return { client, batchSet, localStorage: localStorageMock };
 }
+
+beforeEach(() => {
+  mockStorage = {};
+});
 
 afterEach(() => {
   done$.complete();
+  window.localStorage.clear();
+  jest.resetAllMocks();
+});
+
+describe('#getWithBrowserSettings', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  afterEach(() => {
+    window.localStorage.clear();
+    done$.complete();
+    jest.resetAllMocks();
+  });
+
+  it('returns correct values when user control is enabled', () => {
+    const { client } = setup({
+      defaults: {
+        'theme:enableUserControl': { value: true },
+        testSetting: { value: 'defaultValue' },
+      },
+      initialSettings: {
+        testSetting: { userValue: 'advancedValue' },
+      },
+      localStorage: {
+        uiSettings: JSON.stringify({
+          testSetting: { userValue: 'browserValue' },
+        }),
+      },
+    });
+
+    const result = client.getWithBrowserSettings('testSetting');
+    expect(result).toEqual({
+      advancedSettingValue: 'advancedValue',
+      browserValue: 'browserValue',
+      defaultValue: 'defaultValue',
+    });
+  });
+
+  it('returns correct values when user control is disabled', () => {
+    const { client } = setup({
+      defaults: {
+        'theme:enableUserControl': { value: false },
+        testSetting: { value: 'defaultValue' },
+      },
+      initialSettings: {
+        testSetting: { userValue: 'advancedValue' },
+      },
+    });
+
+    const result = client.getWithBrowserSettings('testSetting');
+    expect(result).toEqual({
+      advancedSettingValue: 'advancedValue',
+      browserValue: undefined,
+      defaultValue: 'defaultValue',
+    });
+  });
+
+  it('returns correct values for a setting with only a default value', () => {
+    const { client } = setup({
+      defaults: {
+        'theme:enableUserControl': { value: true },
+        testSetting: { value: 'defaultValue' },
+      },
+    });
+
+    const result = client.getWithBrowserSettings('testSetting');
+    expect(result).toEqual({
+      advancedSettingValue: undefined,
+      browserValue: undefined,
+      defaultValue: 'defaultValue',
+    });
+  });
 });
 
 describe('#getDefault', () => {

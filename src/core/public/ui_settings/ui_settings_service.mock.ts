@@ -49,6 +49,7 @@ const createSetupContractMock = () => {
     getUpdate$: jest.fn(),
     getSaved$: jest.fn(),
     getUpdateErrors$: jest.fn(),
+    getWithBrowserSettings: jest.fn(),
   };
   setupContract.get$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getUpdate$.mockReturnValue(new Rx.Subject<any>());

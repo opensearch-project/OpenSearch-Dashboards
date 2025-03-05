@@ -1,0 +1,2 @@
+fix:
+- [BUG] Allow user Theme Selection retain theme selection ([#7787](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7787))
