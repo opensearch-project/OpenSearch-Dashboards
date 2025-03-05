@@ -331,9 +331,9 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
           </EuiText>
         )}
         {summary && !loading && (
-          <div data-test-subj="queryAssist_summary_result">
+          <EuiText size="s" data-test-subj="queryAssist_summary_result">
             <EuiMarkdownFormat>{summary}</EuiMarkdownFormat>
-          </div>
+          </EuiText>
         )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
