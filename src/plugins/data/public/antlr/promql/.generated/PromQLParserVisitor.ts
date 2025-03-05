@@ -17,11 +17,16 @@ import { SubqueryOpContext } from "./PromQLParser.js";
 import { OffsetOpContext } from "./PromQLParser.js";
 import { VectorContext } from "./PromQLParser.js";
 import { ParensContext } from "./PromQLParser.js";
+import { MetricNameContext } from "./PromQLParser.js";
 import { InstantSelectorContext } from "./PromQLParser.js";
 import { LabelMatcherContext } from "./PromQLParser.js";
+import { LabelValueContext } from "./PromQLParser.js";
 import { LabelMatcherOperatorContext } from "./PromQLParser.js";
 import { LabelMatcherListContext } from "./PromQLParser.js";
 import { MatrixSelectorContext } from "./PromQLParser.js";
+import { TimeRangeContext } from "./PromQLParser.js";
+import { SubqueryRangeContext } from "./PromQLParser.js";
+import { DurationContext } from "./PromQLParser.js";
 import { OffsetContext } from "./PromQLParser.js";
 import { FunctionContext } from "./PromQLParser.js";
 import { ParameterContext } from "./PromQLParser.js";
@@ -135,6 +140,12 @@ export class PromQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result
      */
     visitParens?: (ctx: ParensContext) => Result;
     /**
+     * Visit a parse tree produced by `PromQLParser.metricName`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitMetricName?: (ctx: MetricNameContext) => Result;
+    /**
      * Visit a parse tree produced by `PromQLParser.instantSelector`.
      * @param ctx the parse tree
      * @return the visitor result
@@ -146,6 +157,12 @@ export class PromQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result
      * @return the visitor result
      */
     visitLabelMatcher?: (ctx: LabelMatcherContext) => Result;
+    /**
+     * Visit a parse tree produced by `PromQLParser.labelValue`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitLabelValue?: (ctx: LabelValueContext) => Result;
     /**
      * Visit a parse tree produced by `PromQLParser.labelMatcherOperator`.
      * @param ctx the parse tree
@@ -164,6 +181,24 @@ export class PromQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result
      * @return the visitor result
      */
     visitMatrixSelector?: (ctx: MatrixSelectorContext) => Result;
+    /**
+     * Visit a parse tree produced by `PromQLParser.timeRange`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitTimeRange?: (ctx: TimeRangeContext) => Result;
+    /**
+     * Visit a parse tree produced by `PromQLParser.subqueryRange`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitSubqueryRange?: (ctx: SubqueryRangeContext) => Result;
+    /**
+     * Visit a parse tree produced by `PromQLParser.duration`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitDuration?: (ctx: DurationContext) => Result;
     /**
      * Visit a parse tree produced by `PromQLParser.offset`.
      * @param ctx the parse tree

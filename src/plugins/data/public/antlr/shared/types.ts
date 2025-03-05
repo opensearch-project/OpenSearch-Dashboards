@@ -104,8 +104,10 @@ export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase 
 }
 
 export interface PromQLAutocompleteResult extends AutocompleteResultBase {
-  suggestSourcesOrTables?: SourceOrTableSuggestion;
-  suggestRenameAs?: boolean;
+  suggestMetrics?: boolean;
+  suggestLabels?: string;
+  suggestLabelValues?: string;
+  suggestTimeRangeUnits?: boolean;
 }
 
 export enum TableOrViewSuggestion {
@@ -148,6 +150,11 @@ export type ProcessVisitedRulesResult<A extends AutocompleteResultBase> = Partia
   shouldSuggestColumns?: boolean;
   shouldSuggestColumnAliases?: boolean;
   shouldSuggestConstraints?: boolean;
+};
+
+export type ProcessPromQLVisitedRulesResult<A extends AutocompleteResultBase> = Partial<A> & {
+  shouldSuggestLabels: boolean;
+  shouldSuggestLabelValues: boolean;
 };
 
 export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {

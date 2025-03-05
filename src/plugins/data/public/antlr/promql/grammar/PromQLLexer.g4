@@ -105,6 +105,8 @@ COUNT_VALUES : 'count_values';
 BOTTOMK      : 'bottomk';
 TOPK         : 'topk';
 QUANTILE     : 'quantile';
+LIMITK       : 'limitk';
+LIMIT_RATIO  : 'limit_ratio';
 
 // Function names
 ABS                : 'abs';
@@ -189,11 +191,9 @@ RIGHT_BRACKET : ']';
 
 COMMA: ',';
 
+COLON: ':';
+
 AT: '@';
-
-SUBQUERY_RANGE: LEFT_BRACKET DURATION ':' DURATION? RIGHT_BRACKET;
-
-TIME_RANGE: LEFT_BRACKET DURATION RIGHT_BRACKET;
 
 // The proper order (longest to the shortest) must be validated after parsing
 DURATION: ([0-9]+ ('ms' | [smhdwy]))+;

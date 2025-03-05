@@ -92,11 +92,11 @@ vectorMatchOp
     ;
 
 subqueryOp
-    : SUBQUERY_RANGE offsetOp?
+    : subqueryRange offsetOp?
     ;
 
 offsetOp
-    : OFFSET DURATION
+    : OFFSET duration
     ;
 
 vector
@@ -115,13 +115,21 @@ parens
 
 // Selectors
 
+metricName
+    : METRIC_NAME
+    ;
+
 instantSelector
-    : METRIC_NAME (LEFT_BRACE labelMatcherList? RIGHT_BRACE)?
+    : metricName (LEFT_BRACE labelMatcherList? RIGHT_BRACE)?
     | LEFT_BRACE labelMatcherList RIGHT_BRACE
     ;
 
 labelMatcher
-    : labelName labelMatcherOperator STRING
+    : labelName labelMatcherOperator labelValue
+    ;
+
+labelValue
+    : STRING
     ;
 
 labelMatcherOperator
@@ -136,12 +144,24 @@ labelMatcherList
     ;
 
 matrixSelector
-    : instantSelector TIME_RANGE
+    : instantSelector timeRange
+    ;
+
+timeRange
+    : LEFT_BRACKET duration RIGHT_BRACKET
+    ;
+
+subqueryRange
+    : LEFT_BRACKET duration COLON duration? RIGHT_BRACKET
+    ;
+
+duration
+    : (DURATION)+
     ;
 
 offset
-    : instantSelector OFFSET DURATION
-    | matrixSelector OFFSET DURATION
+    : instantSelector OFFSET duration
+    | matrixSelector OFFSET duration
     ;
 
 // Functions
@@ -261,6 +281,8 @@ aggregationOperators
     | BOTTOMK
     | TOPK
     | QUANTILE
+    | LIMITK
+    | LIMIT_RATIO
     ;
 
 // Vector one-to-one/one-to-many joins
@@ -288,7 +310,7 @@ groupRight
 
 labelName
     : keyword
-    | METRIC_NAME
+    | metricName
     | LABEL_NAME
     ;
 
