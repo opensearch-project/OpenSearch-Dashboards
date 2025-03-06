@@ -56,6 +56,11 @@ const createLangWorkerConfig = (lang) => ({
           },
         },
       },
+      // Process CSS files for Monaco editor
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
 });
