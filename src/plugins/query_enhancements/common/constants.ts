@@ -26,6 +26,7 @@ export const SEARCH_STRATEGY = {
 export const API = {
   SEARCH: `${BASE_API}/search`,
   PPL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.PPL}`,
+  PROMQL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.PROMQL}`,
   SQL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.SQL}`,
   SQL_ASYNC_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.SQL_ASYNC}`,
   PPL_ASYNC_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.PPL_ASYNC}`,
@@ -44,6 +45,7 @@ export const API = {
 
 export const URI = {
   PPL: '/_plugins/_ppl',
+  PROMQL: '/_plugins/_promql',
   SQL: '/_plugins/_sql',
   ASYNC_QUERY: '/_plugins/_async_query',
   ML: '/_plugins/_ml',
@@ -54,6 +56,7 @@ export const URI = {
 export const OPENSEARCH_API = {
   PANELS: `${URI.OBSERVABILITY}/object`,
   DATA_CONNECTIONS: URI.DATA_CONNECTIONS,
+  METRICS: URI.PROMQL,
 };
 
 export const UI_SETTINGS = {

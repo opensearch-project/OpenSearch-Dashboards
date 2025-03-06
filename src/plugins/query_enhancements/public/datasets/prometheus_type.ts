@@ -10,7 +10,7 @@ import {
   DataStructureCustomMeta,
   Dataset,
 } from '../../../data/common';
-import { DatasetTypeConfig } from '../../../data/public';
+import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
 import { DATASET } from '../../common';
 import PROMETHEUS_ICON from '../assets/prometheus_mark.svg';
 
@@ -20,7 +20,7 @@ export const prometheusTypeConfig: DatasetTypeConfig = {
   meta: {
     icon: { type: PROMETHEUS_ICON },
     tooltip: 'Prometheus',
-    searchOnLoad: true,
+    searchOnLoad: false,
   },
 
   toDataset: (path) => {
@@ -43,7 +43,7 @@ export const prometheusTypeConfig: DatasetTypeConfig = {
 
   fetch: async (services, path) => {
     const dataStructure = path[path.length - 1];
-    const indexPatterns = await fetchConnections(services.savedObjects.client);
+    const indexPatterns = await fetchConnections();
     return {
       ...dataStructure,
       columnHeader: 'Connections',
@@ -52,16 +52,21 @@ export const prometheusTypeConfig: DatasetTypeConfig = {
     };
   },
 
-  fetchFields: async (dataset: Dataset) => {
-    return [];
+  fetchFields: async () => {
+    return [
+      {
+        name: 'Time',
+        type: 'date',
+      },
+    ];
   },
 
   supportedLanguages: (dataset): string[] => {
-    return ['promql'];
+    return ['PROMQL'];
   },
 };
 
-const fetchConnections = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
+const fetchConnections = async (): Promise<DataStructure[]> => {
   // TODO: fetch from saved objects (type data-connection)
   return [
     {

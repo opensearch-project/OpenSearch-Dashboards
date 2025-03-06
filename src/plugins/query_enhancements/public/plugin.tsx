@@ -221,7 +221,7 @@ export class QueryEnhancementsPlugin
     // TODO: This will need to get updated when we're closer to dispatching queries
     const promqlLanguageConfig: LanguageConfig = {
       id: 'PROMQL',
-      title: 'PROMQL',
+      title: 'PromQL',
       search: new PPLSearchInterceptor({
         toasts: core.notifications.toasts,
         http: core.http,
