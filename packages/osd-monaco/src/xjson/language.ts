@@ -82,7 +82,7 @@ export const registerGrammarChecker = () => {
   };
 
   const onModelAdd = (model: monaco.editor.IModel) => {
-    if (model.getModeId() === ID) {
+    if (model.getLanguageId() === ID) {
       allDisposables.push(
         model.onDidChangeContent(async () => {
           updateAnnotations(model);

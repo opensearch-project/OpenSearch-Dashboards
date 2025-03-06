@@ -157,6 +157,7 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/src/dev/jest/setup/mocks.js',
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
+    '<rootDir>/src/dev/jest/setup/monaco_mock.js',
   ],
   coverageDirectory: '<rootDir>/target/opensearch-dashboards-coverage/jest',
   coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],

@@ -41,8 +41,8 @@ const createSavedQuery = (config) => {
 
   cy.setQueryLanguage(config.language);
   setDatePickerDatesAndSearchIfRelevant(config.language);
-
   setQueryConfigurations(config);
+  cy.osd.waitForLoader(true);
   verifyDiscoverPageState(config);
 
   cy.saveQuery(`${workspaceName}-${config.saveName}`, ' ', true, true);
@@ -66,9 +66,11 @@ const loadSavedQuery = (config) => {
     'Aug 30, 2020 @ 00:00:00.000'
   );
 
+  cy.osd.waitForLoader(true);
   cy.loadSavedQuery(`${workspaceName}-${config.saveName}`);
   // wait for saved queries to load.
   cy.getElementByTestId('docTable').should('be.visible');
+  cy.osd.waitForLoader(true);
   verifyDiscoverPageState(config);
 };
 
@@ -77,16 +79,18 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
     cy.deleteAllFilters();
   }
   setDatePickerDatesAndSearchIfRelevant(config.language);
-
   setQueryConfigurations(config);
+  cy.osd.waitForLoader(true);
   verifyDiscoverPageState(config);
   validateSaveAsNewQueryMatchingNameHasError(`${workspaceName}-${config.saveName}`);
   cy.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
 
   cy.reload();
+  cy.osd.waitForLoader(true);
   cy.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
+  cy.osd.waitForLoader(true);
   verifyDiscoverPageState(config);
 };
 
