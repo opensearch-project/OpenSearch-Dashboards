@@ -51,7 +51,7 @@ export class DataImporterPlugin
     importFileRoute(router, this.config, this.fileParsers, !!dataSource);
     importTextRoute(router, this.config, this.fileParsers, !!dataSource);
     previewRoute(router, this.config, this.fileParsers, !!dataSource);
-    catIndicesRoute(router, this.config, !!dataSource);
+    catIndicesRoute(router, !!dataSource);
 
     return {
       registerFileParser: (fileType, fileParser) => {

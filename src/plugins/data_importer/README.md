@@ -29,4 +29,7 @@ data_importer.maxFileSizeBytes: 100000000
 
 # Configure character limit for text data
 data_importer.maxTextCount: 10000
+
+# Configure the max document count the data importer will parse when previewing data
+data_importer.filePreviewDocumentsCount: 10
 ```
