@@ -1,0 +1,2 @@
+security:
+- [CVE-2023-28155][CVE-2023-44270][CVE-2024-55565] Resolve the CVE ([#9503](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9503))
