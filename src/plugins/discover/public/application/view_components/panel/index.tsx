@@ -21,6 +21,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { DiscoverViewServices } from '../../../build_services';
 import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';
+import { MetricsSidebar } from '../../components/sidebar/metrics_sidebar';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverPanel(props: ViewProps) {
@@ -103,6 +104,10 @@ export default function DiscoverPanel(props: ViewProps) {
   const isEnhancementsEnabledOverride = services.uiSettings.get(
     UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED
   );
+
+  if (indexPattern?.id === 'promql1') {
+    return <MetricsSidebar />;
+  }
 
   return (
     <DiscoverSidebar

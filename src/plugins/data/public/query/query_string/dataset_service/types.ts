@@ -91,6 +91,8 @@ export interface DatasetTypeConfig {
     dataset: Dataset,
     services?: Partial<IDataPluginServices>
   ) => Promise<DatasetField[]>;
+
+  fetchMetrics: (dataset: Dataset, services?: Partial<IDataPluginServices>) => Promise<string[]>;
   /**
    * Retrieves the supported query languages for this dataset type.
    * @returns {Promise<string[]>} A promise that resolves to an array of supported language ids.

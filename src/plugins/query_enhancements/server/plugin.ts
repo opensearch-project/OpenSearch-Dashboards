@@ -20,6 +20,7 @@ import {
   pplAsyncSearchStrategyProvider,
   pplRawSearchStrategyProvider,
   pplSearchStrategyProvider,
+  promqlSearchStrategyProvider,
   sqlAsyncSearchStrategyProvider,
   sqlSearchStrategyProvider,
 } from './search';
@@ -53,6 +54,7 @@ export class QueryEnhancementsPlugin
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
     const pplRawSearchStrategy = pplRawSearchStrategyProvider(this.config$, this.logger, client);
+    const promqlSearchStrategy = promqlSearchStrategyProvider(this.config$, this.logger, client);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
     const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
       this.config$,
@@ -67,6 +69,7 @@ export class QueryEnhancementsPlugin
 
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_RAW, pplRawSearchStrategy);
+    data.search.registerSearchStrategy(SEARCH_STRATEGY.PROMQL, promqlSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL_ASYNC, sqlAsyncSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_ASYNC, pplAsyncSearchStrategy);
@@ -92,6 +95,7 @@ export class QueryEnhancementsPlugin
     defineRoutes(this.logger, router, client, {
       ppl: pplSearchStrategy,
       sql: sqlSearchStrategy,
+      promql: promqlSearchStrategy,
       sqlasync: sqlAsyncSearchStrategy,
       pplasync: pplAsyncSearchStrategy,
     });
