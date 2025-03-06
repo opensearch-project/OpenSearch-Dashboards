@@ -14,7 +14,12 @@ interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   value: string;
   onChange: (value: string) => void;
   editorDidMount: (editor: any) => void;
-  provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+  provideCompletionItems: (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
+  ) => Promise<monaco.languages.CompletionList>;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   footerItems?: any;
   queryStatus?: QueryStatus;
@@ -87,6 +92,104 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
         }, 500);
       });
 
+      // Add a custom status bar with the "Tab to insert, ESC to close window" message
+      const addCustomStatusBar = () => {
+        // Find the suggestion widget
+        const editorElement = editor.getDomNode();
+        if (!editorElement) return;
+
+        // Use a MutationObserver to detect when the suggestion widget is shown
+        const observer = new MutationObserver(() => {
+          // Check if the suggestion widget is visible
+          const suggestWidget = editorElement.querySelector(
+            '.monaco-editor .suggest-widget.visible'
+          );
+          if (!suggestWidget) return;
+
+          // Get the suggestion list container (the widget itself)
+          const suggestWidgetElement = suggestWidget as HTMLElement;
+
+          // Check if our custom status bar already exists
+          let statusBar = document.querySelector('.custom-suggest-widget-status-bar');
+
+          // If the status bar doesn't exist, create it
+          if (!statusBar) {
+            statusBar = document.createElement('div');
+            statusBar.className = 'custom-suggest-widget-status-bar';
+            statusBar.textContent = 'Tab to insert, ESC to close window';
+
+            // Position it absolutely to avoid taking vertical space
+            const statusBarStyle = statusBar as HTMLElement;
+            statusBarStyle.style.position = 'absolute';
+            statusBarStyle.style.bottom = '0';
+            statusBarStyle.style.left = '0';
+            statusBarStyle.style.zIndex = '10';
+
+            // Add it to the document body so we can position it independently
+            document.body.appendChild(statusBar);
+          }
+
+          // Get the exact dimensions and position of the suggestion widget
+          const widgetRect = suggestWidgetElement.getBoundingClientRect();
+          const statusBarElement = statusBar as HTMLElement;
+
+          // Position the status bar at the bottom of the suggestion widget
+          statusBarElement.style.width = `${widgetRect.width}px`;
+          statusBarElement.style.left = `${widgetRect.left}px`;
+          statusBarElement.style.top = `${widgetRect.bottom}px`;
+
+          // Make sure it's visible
+          statusBarElement.style.display = 'block';
+        });
+
+        // Start observing the editor DOM for changes
+        observer.observe(editorElement, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+        });
+
+        // Also listen for keyboard events that might trigger suggestions
+        editor.onKeyUp(() => {
+          // Check if the suggestion widget is visible
+          const suggestWidget = editorElement.querySelector(
+            '.monaco-editor .suggest-widget.visible'
+          );
+          if (!suggestWidget) {
+            // Hide the status bar if suggestions are not visible
+            const statusBar = document.querySelector('.custom-suggest-widget-status-bar');
+            if (statusBar) {
+              (statusBar as HTMLElement).style.display = 'none';
+            }
+            return;
+          }
+
+          // Update the position of the status bar
+          const statusBar = document.querySelector('.custom-suggest-widget-status-bar');
+          if (!statusBar) return;
+
+          const suggestWidgetElement = suggestWidget as HTMLElement;
+          const widgetRect = suggestWidgetElement.getBoundingClientRect();
+          const statusBarElement = statusBar as HTMLElement;
+
+          statusBarElement.style.width = `${widgetRect.width}px`;
+          statusBarElement.style.left = `${widgetRect.left}px`;
+          statusBarElement.style.top = `${widgetRect.bottom}px`;
+          statusBarElement.style.display = 'block';
+        });
+
+        // Clean up the status bar when editor loses focus
+        editor.onDidBlurEditorText(() => {
+          const statusBar = document.querySelector('.custom-suggest-widget-status-bar');
+          if (statusBar) {
+            (statusBar as HTMLElement).style.display = 'none';
+          }
+        });
+      };
+
+      // Call the function to set up the observer and add the custom status bar
+      addCustomStatusBar();
+
       return () => {
         focusDisposable.dispose();
         blurDisposable.dispose();
@@ -135,11 +238,21 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
             overviewRulerLanes: 0,
             hideCursorInOverviewRuler: true,
             cursorStyle: 'line',
-            wordBasedSuggestions: false,
+            // Replace wordBasedSuggestions with suggest.showWords
+            suggest: {
+              showWords: false,
+              // Ensure all suggestions are shown
+              snippetsPreventQuickSuggestions: false,
+              // Don't filter suggestions
+              filterGraceful: false,
+            },
           }}
           suggestionProvider={{
-            provideCompletionItems,
             triggerCharacters: [' '],
+            // Make sure all parameters are passed to the provideCompletionItems function
+            provideCompletionItems: async (model, position, context, token) => {
+              return provideCompletionItems(model, position, context, token);
+            },
           }}
           languageConfiguration={{
             autoClosingPairs: [
@@ -164,12 +277,16 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
           <div className="queryEditor__footer" data-test-subj="queryEditorFooter">
             {footerItems && (
               <Fragment>
-                {footerItems.start?.map((item) => (
-                  <div className="queryEditor__footerItem">{item}</div>
+                {footerItems.start?.map((item: React.ReactNode, index: number) => (
+                  <div key={index} className="queryEditor__footerItem">
+                    {item}
+                  </div>
                 ))}
                 <div className="queryEditor__footerSpacer" />
-                {footerItems.end?.map((item) => (
-                  <div className="queryEditor__footerItem">{item}</div>
+                {footerItems.end?.map((item: React.ReactNode, index: number) => (
+                  <div key={index} className="queryEditor__footerItem">
+                    {item}
+                  </div>
                 ))}
               </Fragment>
             )}

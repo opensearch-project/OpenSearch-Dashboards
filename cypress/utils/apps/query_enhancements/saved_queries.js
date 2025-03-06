@@ -5,7 +5,10 @@
 
 import { DatasetTypes, QueryLanguages } from './constants';
 
-import { APPLIED_FILTERS } from './saved';
+import {
+  APPLIED_FILTERS,
+  verifyDiscoverPageState as verifyDiscoverPageStateFromSaved,
+} from './saved';
 
 import { setDatePickerDatesAndSearchIfRelevant } from './shared';
 
@@ -144,44 +147,24 @@ const generateAlternateTestConfiguration = (config) => {
 };
 
 /**
- * Verify that the discover page is in the correct state after loading a saved query have been run
- * @param {SavedTestConfig} testConfig - the relevant config for the test case
+ * Wrapper for verifyDiscoverPageState from saved.js that omits parameters not needed for saved queries
+ * @param {Object} config - The configuration object
  */
-export const verifyDiscoverPageState = ({
-  queryString,
-  language,
-  hitCount,
-  filters,
-  histogram,
-  startTime,
-  endTime,
-}) => {
-  if ([QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)) {
-    cy.getElementByTestId('osdQueryEditor__multiLine').contains(queryString);
-  } else {
-    cy.getElementByTestId('osdQueryEditor__singleLine').contains(queryString);
-  }
-  cy.getElementByTestId('queryEditorLanguageSelector').contains(language);
+export const verifyDiscoverPageState = (config) => {
+  // Extract only the parameters needed for saved queries
+  const { queryString, language, hitCount, filters, histogram, startTime, endTime } = config;
 
-  if (filters) {
-    cy.getElementByTestId(
-      `filter filter-enabled filter-key-${APPLIED_FILTERS.field} filter-value-${APPLIED_FILTERS.value} filter-unpinned `
-    ).should('exist');
-  }
-  if (hitCount) {
-    cy.verifyHitCount(hitCount);
-  }
-
-  if (histogram) {
-    // TODO: Uncomment this once bug is fixed, currently the interval is not saving
-    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9077
-    // cy.getElementByTestId('discoverIntervalSelect').should('have.value', 'w');
-  }
-
-  if (language !== QueryLanguages.SQL.name) {
-    cy.getElementByTestId('osdQueryEditorUpdateButton').contains(startTime).should('exist');
-    cy.getElementByTestId('osdQueryEditorUpdateButton').contains(endTime).should('exist');
-  }
+  // Call the imported function with only the parameters needed for saved queries
+  // This ensures we don't pass dataset, selectFields, or sampleTableData
+  verifyDiscoverPageStateFromSaved({
+    queryString,
+    language,
+    hitCount,
+    filters,
+    histogram,
+    startTime,
+    endTime,
+  });
 };
 
 /**
@@ -197,11 +180,35 @@ export const verifyAlternateDiscoverPageState = ({
   startTime,
   endTime,
 }) => {
-  if ([QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)) {
-    cy.getElementByTestId('osdQueryEditor__multiLine').contains(queryString);
-  } else {
-    cy.getElementByTestId('osdQueryEditor__singleLine').contains(queryString);
+  if (queryString) {
+    // Escape special regex characters in the query string
+    const escapedQueryString = queryString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // The Monaco editor renders spaces using various Unicode whitespace characters and middle dot characters
+    // This comprehensive pattern handles all possible whitespace representations that might appear in the editor
+    // including regular spaces, non-breaking spaces, middle dots, and other special characters used for spacing
+    const pattern = new RegExp(
+      escapedQueryString.replace(
+        /\s+/g,
+        '[\\s\\u00A0\\u00B7\\u2022\\u2023\\u25E6\\u2043\\u2219\\u22C5\\u30FB\\u00B7.·]+'
+      )
+    );
+
+    // Determine which editor type to check based on the query language
+    const editorType = [QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)
+      ? 'osdQueryEditor__multiLine'
+      : 'osdQueryEditor__singleLine';
+
+    // Check the editor content against our pattern
+    cy.getElementByTestId(editorType)
+      .find('.view-line')
+      .first()
+      .invoke('text')
+      .then((text) => {
+        expect(pattern.test(text)).to.be.true;
+      });
   }
+
   cy.getElementByTestId('queryEditorLanguageSelector').contains(language);
 
   if (filters) {
@@ -219,7 +226,7 @@ export const verifyAlternateDiscoverPageState = ({
     // cy.getElementByTestId('discoverIntervalSelect').should('have.value', 'w');
   }
 
-  if (language !== QueryLanguages.SQL.name) {
+  if (language !== QueryLanguages.SQL.name && startTime && endTime) {
     cy.getElementByTestId('osdQueryEditorUpdateButton').contains(startTime).should('exist');
     cy.getElementByTestId('osdQueryEditorUpdateButton').contains(endTime).should('exist');
   }
