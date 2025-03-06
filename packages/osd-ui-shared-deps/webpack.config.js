@@ -88,6 +88,26 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
             },
           },
         ],
+        // Exclude Monaco's codicon CSS which is binary and can't be processed by the standard CSS loader
+        exclude: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*codicon.*\.css$/,
+      },
+      // Special handling for Monaco's codicon CSS
+      {
+        test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*codicon.*\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
+      // Handle Monaco's codicon font files
+      {
+        test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*\.ttf$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'fonts/',
+            },
+          },
+        ],
       },
       {
         test: /\.scss$/,
@@ -150,6 +170,15 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   resolve: {
     alias: {
       moment: MOMENT_SRC,
+      // Add aliases for Monaco 0.30.1 paths
+      'monaco-editor/esm/vs/editor/contrib/hover/browser/hover':
+        'monaco-editor/esm/vs/editor/contrib/hover/browser/hover',
+      'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints':
+        'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints',
+      'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController':
+        'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController',
+      'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations':
+        'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations',
     },
     extensions: ['.js', '.ts'],
   },
