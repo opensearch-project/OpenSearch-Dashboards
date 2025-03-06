@@ -10,6 +10,7 @@
   flex-direction: column;
 
   &_results {
+    border: none;
     margin-left: $euiSizeM;
     position: relative;
   }

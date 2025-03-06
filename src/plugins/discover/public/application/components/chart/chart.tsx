@@ -110,11 +110,9 @@ export const DiscoverChart = ({
   );
 
   const histogramHeader = (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexGroup direction="row" gutterSize="s">
-        <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="xs">
       <EuiFlexItem grow={false}>{isTimeBased && timeChartHeader}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
