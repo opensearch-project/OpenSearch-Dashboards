@@ -12,7 +12,6 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart, search } from '../../../../../data/public';
-import { HitsCounter } from './hits_counter';
 import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_header';
 import { DiscoverHistogram } from './histogram/histogram';
 import { DiscoverServices } from '../../../build_services';
@@ -25,9 +24,6 @@ interface DiscoverChartProps {
   chartData?: Chart;
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
-  hits: number;
-  resetQuery: () => void;
-  showResetButton?: boolean;
   isTimeBased?: boolean;
   services: DiscoverServices;
   isEnhancementsEnabled: boolean;
@@ -39,11 +35,8 @@ export const DiscoverChart = ({
   chartData,
   config,
   data,
-  hits,
-  resetQuery,
   isTimeBased,
   services,
-  showResetButton = false,
   isEnhancementsEnabled,
   discoverOptions,
 }: DiscoverChartProps) => {
@@ -71,16 +64,6 @@ export const DiscoverChart = ({
   );
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const hitsCounter = (
-    <div className="dscChart__hitsCounter" data-test-subj="dscChartHitsCounter">
-      <HitsCounter
-        hits={hits > 0 ? hits : 0}
-        showResetButton={showResetButton}
-        onResetQuery={resetQuery}
-      />
-    </div>
-  );
-
   const timeChartHeader = (
     <div className="dscChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
       <TimechartHeader
@@ -90,6 +73,7 @@ export const DiscoverChart = ({
         options={search.aggs.intervalOptions}
         onChangeInterval={onChangeInterval}
         stateInterval={interval || ''}
+        isEnhancementsEnabled={isEnhancementsEnabled}
       />
     </div>
   );
@@ -119,7 +103,6 @@ export const DiscoverChart = ({
       data-test-subj="dscChartChartheader"
     >
       <EuiFlexItem grow={false}>{toggle}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{hitsCounter}</EuiFlexItem>
       <EuiFlexItem grow={true} style={{ justifyContent: 'flex-start' }}>
         {isTimeBased && timeChartHeader}
       </EuiFlexItem>
@@ -129,7 +112,6 @@ export const DiscoverChart = ({
   const histogramHeader = (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexGroup direction="row" gutterSize="s">
-        <EuiFlexItem grow={true}>{hitsCounter}</EuiFlexItem>
         <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem grow={false}>{isTimeBased && timeChartHeader}</EuiFlexItem>

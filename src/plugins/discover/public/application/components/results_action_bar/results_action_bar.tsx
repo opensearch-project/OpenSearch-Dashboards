@@ -1,0 +1,49 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import './results_action_bar.scss';
+
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { HitsCounter } from '../chart/hits_counter';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+
+export interface DiscoverResultsActionBarProps {
+  hits?: number;
+  showResetButton?: boolean;
+  resetQuery(): void;
+  rows?: OpenSearchSearchHit[];
+}
+
+export const DiscoverResultsActionBar = ({
+  hits,
+  showResetButton = false,
+  resetQuery,
+  rows,
+}: DiscoverResultsActionBarProps) => {
+  return (
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="none"
+      justifyContent="spaceBetween"
+      className="dscResultsActionBar"
+      data-test-subj="dscResultsActionBar"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexStart">
+          <EuiFlexItem grow={false}>
+            <HitsCounter
+              hits={hits}
+              showResetButton={showResetButton}
+              onResetQuery={resetQuery}
+              rows={rows}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      {/* TODO: We will allow extensions to be added here */}
+    </EuiFlexGroup>
+  );
+};

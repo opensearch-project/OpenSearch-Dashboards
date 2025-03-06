@@ -24,8 +24,8 @@ import { getNewDiscoverSetting, setNewDiscoverSetting } from '../../components/u
 
 export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { uiSettings, data, core, storage } = services;
-  const { indexPattern, savedSearch } = useDiscoverContext();
+  const { uiSettings, data, storage } = services;
+  const { indexPattern } = useDiscoverContext();
   const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
   const [isOptionsOpen, setOptionsOpen] = useState(false);
   const [useLegacy, setUseLegacy] = useState(!getNewDiscoverSetting(storage));
@@ -87,12 +87,7 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
       chartData={chartData}
       config={uiSettings}
       data={data}
-      hits={hits}
-      resetQuery={() => {
-        core.application.navigateToApp('discover', { path: `#/view/${savedSearch?.id}` });
-      }}
       services={services}
-      showResetButton={!!savedSearch && !!savedSearch.id}
       isTimeBased={isTimeBased}
       isEnhancementsEnabled={isEnhancementsEnabled}
       discoverOptions={discoverOptions}
