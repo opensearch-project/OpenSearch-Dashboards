@@ -35,7 +35,7 @@ export const setupSearchUseCase = (contentManagement: ContentManagementPluginSet
       getStartedSection,
       {
         id: SECTIONS.DIFFERENT_SEARCH_TYPES,
-        order: 2000,
+        order: 3000,
         title: i18n.translate('home.searchOverview.differentSearchTypes.title', {
           defaultMessage: 'Try out different search techniques',
         }),
@@ -45,7 +45,7 @@ export const setupSearchUseCase = (contentManagement: ContentManagementPluginSet
       },
       {
         id: SECTIONS.CONFIG_EVALUATE_SEARCH,
-        order: 3000,
+        order: 2000,
         title: i18n.translate('home.searchOverview.configEvaluate.title', {
           defaultMessage: 'Configure and evaluate search',
         }),
