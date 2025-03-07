@@ -34,7 +34,7 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
     indexPattern,
   ]);
 
-  if (!hits) return null;
+  if (!hits || !isTimeBased) return null;
 
   const discoverOptions = (
     <EuiPopover
