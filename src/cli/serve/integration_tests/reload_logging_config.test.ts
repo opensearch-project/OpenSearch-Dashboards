@@ -67,7 +67,7 @@ function watchFileUntil(path: string, matcher: RegExp, timeout: number) {
 
     Fs.watchFile(path, () => {
       try {
-        const contents = Fs.readFileSync(path, 'utf-8');
+        const contents = Fs.readFileSync(path, 'utf8');
 
         if (matcher.test(contents)) {
           clearTimeout(timeoutHandle);

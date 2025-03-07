@@ -6,7 +6,9 @@ on:
     branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+']
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
       - '.lycheeignore'
+      - 'CODEOWNERS'
       - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:
@@ -26,7 +28,7 @@ on:
 env:
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
-  CYPRESS_BROWSER: 'chromium'
+  CYPRESS_BROWSER: 'electron'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
@@ -45,10 +47,10 @@ jobs:
     name: Run cypress tests with S3
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -90,7 +92,7 @@ jobs:
 
       - name: Run OpenSearch
         run: |
-          /bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"
+          /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"
           sleep 30
         shell: bash
 
@@ -108,30 +110,25 @@ jobs:
           start: ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
-
-      - name: Upload Dashboards screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dashboards-cypress-screenshots-s3
-          path: cypress/screenshots
-          retention-days: 1
-          overwrite: true
-
-      - name: Upload Dashboards repo videos
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: dashboards-cypress-videos-s3
-          path: cypress/videos
-          retention-days: 1
-          overwrite: true
-
-      - name: Upload Dashboards repo results
-        uses: actions/upload-artifact@v4
+           # Compress and upload artifacts for Dashboards repo
+      
+      - name: Compress Dashboards repo artifacts
         if: always()
+        run: |
+          mkdir -p dashboard-artifacts-s3
+            for dir in screenshots videos results; do
+              if [ -d "cypress/$dir" ]; then
+                cp -r "cypress/$dir" dashboard-artifacts-s3/
+              fi
+          done
+          tar -czf dashboards-cypress-artifacts-s3.tar.gz -C dashboard-artifacts-s3 .
+        shell: bash
+
+      - name: Upload Dashboards repo artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: dashboards-cypress-results-s3
-          path: cypress/results
+          name: dashboards-cypress-artifacts-s3
+          path: dashboards-cypress-artifacts-s3.tar.gz
           retention-days: 1
           overwrite: true

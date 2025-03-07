@@ -34,7 +34,7 @@ import { createOpenSearchDashboardsSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
-  const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
+  const certificateAuthorities = [readFileSync(CA_CERT_PATH, 'utf8')];
 
   return {
     testFiles: [require.resolve('./')],

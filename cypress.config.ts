@@ -16,8 +16,9 @@ module.exports = defineConfig({
     runMode: 2,
     openMode: 0,
   },
-  viewportWidth: 2000,
-  viewportHeight: 1320,
+  numTestsKeptInMemory: 5,
+  viewportWidth: 1920,
+  viewportHeight: 1080,
   env: {
     ENGINE: {
       name: 'default',

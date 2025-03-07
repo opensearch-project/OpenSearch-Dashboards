@@ -13,10 +13,15 @@ interface Props {
   history: History;
   isEmptyState?: boolean;
   dataTestSubj: string;
-  featureFlagStatus: boolean;
+  featureFlagStatus?: boolean;
 }
 
-export const CreateButton = ({ history, isEmptyState, dataTestSubj, featureFlagStatus }: Props) => {
+export const CreateButton = ({
+  history,
+  isEmptyState,
+  dataTestSubj,
+  featureFlagStatus = false,
+}: Props) => {
   return (
     <EuiSmallButton
       data-test-subj={dataTestSubj}
