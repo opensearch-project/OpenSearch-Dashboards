@@ -32,6 +32,7 @@ import {
 import { getPreloadedStore } from './utils/state_management';
 import { opensearchFilters } from '../../data/public';
 import { setUsageCollector } from './services';
+import { WorkspaceAvailability } from '../../../../src/core/public';
 
 export class DataExplorerPlugin
   implements
@@ -86,6 +87,7 @@ export class DataExplorerPlugin
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
