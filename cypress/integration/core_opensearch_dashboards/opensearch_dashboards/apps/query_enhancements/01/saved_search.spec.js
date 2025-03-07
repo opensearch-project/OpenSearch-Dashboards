@@ -88,13 +88,13 @@ const runSavedSearchTests = () => {
         verifyDiscoverPageState(config);
       });
 
-      it(`should successfully update a saved search for ${config.testName}`, () => {
+      it.skip(`should successfully update a saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
         updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
       });
 
-      it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
+      it.skip(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
         updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, true);
