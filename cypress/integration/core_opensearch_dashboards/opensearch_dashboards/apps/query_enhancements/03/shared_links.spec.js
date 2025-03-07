@@ -6,22 +6,24 @@
 import {
   INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
-  SECONDARY_ENGINE,
-} from '../../../../../utils/constants';
+  DATASOURCE_NAME,
+} from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   setHistogramIntervalIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
-import { QueryLanguages } from '../../../../../utils/apps/query_enhancements/constants';
-import { selectFieldFromSidebar } from '../../../../../utils/apps/query_enhancements/sidebar';
-import { verifyShareUrl } from '../../../../../utils/apps/query_enhancements/shared_links';
-import { setSort } from '../../../../../utils/apps/query_enhancements/table';
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
+import { selectFieldFromSidebar } from '../../../../../../utils/apps/query_enhancements/sidebar';
+import {
+  verifyShareUrl,
+  openShareMenuWithRetry,
+} from '../../../../../../utils/apps/query_enhancements/shared_links';
+import { setSort } from '../../../../../../utils/apps/query_enhancements/table';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 const generateShareUrlsTestConfiguration = (dataset, datasetType, language) => {
   const baseConfig = {
@@ -60,26 +62,28 @@ export const runSharedLinksTests = () => {
       interval: 'w',
       filter: ['category', 'Network'],
     };
-    beforeEach(() => {
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
-      );
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
-        authType: 'no_auth',
+
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.createWorkspaceIndexPatterns({
+        workspaceName: workspaceName,
+        indexPattern: INDEX_WITH_TIME_1,
+        timefieldName: 'timestamp',
+        dataSource: DATASOURCE_NAME,
+        isEnhancement: true,
       });
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
+    beforeEach(() => {
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspaceName,
+        page: 'discover',
+        isEnhancement: true,
+      });
+    });
+
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
     generateAllTestConfigurations(generateShareUrlsTestConfiguration, {
@@ -87,28 +91,11 @@ export const runSharedLinksTests = () => {
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
-        beforeEach(() => {
-          if (config.datasetType === 'INDEX_PATTERN') {
-            cy.createWorkspaceIndexPatterns({
-              workspaceName: workspaceName,
-              indexPattern: INDEX_WITH_TIME_1,
-              timefieldName: 'timestamp',
-              dataSource: datasourceName,
-              isEnhancement: true,
-            });
-          }
-          cy.navigateToWorkSpaceSpecificPage({
-            workspaceName: workspaceName,
-            page: 'discover',
-            isEnhancement: true,
-          });
-        });
-
         const queryString = getQueryString(config);
 
         it(`should handle shared document links correctly for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, datasourceName, config.datasetType);
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
@@ -153,12 +140,15 @@ export const runSharedLinksTests = () => {
 
         it(`should persist state in shared links for ${config.testName}`, () => {
           // Set dataset and language
-          cy.setDataset(config.dataset, datasourceName, config.datasetType);
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
           // Set interval
           setHistogramIntervalIfRelevant(config.language, testData.interval);
+
+          // scroll to top
+          cy.getElementByTestId('dscCanvas').scrollTo('top', { ensureScrollable: false });
 
           // Set query
           cy.setQueryEditor(queryString, { parseSpecialCharSequences: false });
@@ -177,11 +167,11 @@ export const runSharedLinksTests = () => {
           });
 
           // Test snapshot url
-          cy.getElementByTestId('shareTopNavButton').click();
+          openShareMenuWithRetry();
           cy.getElementByTestId('copyShareUrlButton')
             .invoke('attr', 'data-share-url')
             .then((url) => {
-              verifyShareUrl(url, config, testData, datasourceName, queryString);
+              verifyShareUrl(url, config, testData, DATASOURCE_NAME, queryString);
             });
 
           // Test short url
@@ -198,15 +188,15 @@ export const runSharedLinksTests = () => {
             })
             .then((response) => {
               const redirectUrl = response.headers.location;
-              verifyShareUrl(redirectUrl, config, testData, datasourceName, queryString);
+              verifyShareUrl(redirectUrl, config, testData, DATASOURCE_NAME, queryString);
             });
 
           // Test saved object url
           // Before save, export as saved object is disabled
           cy.getElementByTestId('exportAsSavedObject').find('input').should('be.disabled');
           cy.saveSearch(config.saveName);
-          cy.waitForLoader(true);
-          cy.getElementByTestId('shareTopNavButton').click();
+          cy.osd.waitForLoader(true);
+          openShareMenuWithRetry();
           cy.getElementByTestId('exportAsSavedObject').find('input').should('not.be.disabled');
           cy.getElementByTestId('exportAsSavedObject').click();
           // Get saved search ID
@@ -229,4 +219,4 @@ export const runSharedLinksTests = () => {
   });
 };
 
-runSharedLinksTests();
+prepareTestSuite('Shared Links', runSharedLinksTests);

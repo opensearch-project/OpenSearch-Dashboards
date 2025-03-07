@@ -4,80 +4,60 @@
  */
 
 import {
+  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   QueryLanguages,
-  SECONDARY_ENGINE,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateDisplayTestConfiguration,
   getLanguageReferenceTestText,
-} from '../../../../../utils/apps/query_enhancements/language_specific_display';
+} from '../../../../../../utils/apps/query_enhancements/language_specific_display';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 export const runDisplayTests = () => {
   describe('Language-Specific Display', () => {
-    beforeEach(() => {
-      // Load test data
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
-          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
-        ],
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`,
-          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.data.ndjson`,
-        ]
-      );
-      // Add data source
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
-        authType: 'no_auth',
-      });
-
-      // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
-        dataSource: datasourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspaceName);
-      // // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITH_TIME_2);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
     });
 
     generateAllTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
       it(`should correctly display all UI components for ${config.testName}`, () => {
-        cy.navigateToWorkSpaceSpecificPage({
+        cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'discover',
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, datasourceName, config.datasetType);
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         cy.setQueryLanguage(config.language);
+
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         // testing the query editor
@@ -118,6 +98,11 @@ export const runDisplayTests = () => {
           cy.getElementByTestId('discoverQueryHits').should('be.visible');
           cy.getElementByTestId('dscTimechart').should('be.visible');
         }
+
+        // testing whether sort appears or not
+        cy.getElementByTestId('docTableHeaderFieldSort_timestamp').should(
+          config.sort ? 'exist' : 'not.exist'
+        );
 
         // testing the language information popup button
         cy.getElementByTestId('languageReferenceButton').click();
@@ -163,4 +148,4 @@ export const runDisplayTests = () => {
   });
 };
 
-runDisplayTests();
+prepareTestSuite('Language Specific Display', runDisplayTests);

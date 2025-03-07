@@ -1,0 +1,2 @@
+test:
+- Use before/after to speed up test ([#9439](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9439))

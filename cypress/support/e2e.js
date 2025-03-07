@@ -4,9 +4,9 @@
  */
 
 import '../utils/commands';
+import '../utils/commands.osd';
 import '../utils/apps/commands';
-import '../utils/dashboards/workspace-plugin/commands';
-import '../utils/dashboards/commands';
+import '../utils/dashboards/workspace_plugin/commands';
 
 // TODO: Remove this after https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5476 is resolved
 const scopedHistoryNavigationError = /^[^(ScopedHistory instance has fell out of navigation scope)]/;
@@ -15,4 +15,13 @@ Cypress.on('uncaught:exception', (err) => {
   if (scopedHistoryNavigationError.test(err.message)) {
     return false;
   }
+});
+
+Cypress.on('test:before:run', () => {
+  Cypress.automation('remote:debugger:protocol', {
+    command: 'Emulation.setTimezoneOverride',
+    params: {
+      timezoneId: 'UTC',
+    },
+  });
 });

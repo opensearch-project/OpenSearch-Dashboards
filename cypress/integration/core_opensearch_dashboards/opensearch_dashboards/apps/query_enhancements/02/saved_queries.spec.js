@@ -4,11 +4,11 @@
  */
 
 import {
+  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
-  SECONDARY_ENGINE,
-} from '../../../../../utils/constants';
+} from '../../../../../../utils/constants';
 
 import {
   verifyDiscoverPageState,
@@ -17,28 +17,27 @@ import {
   updateAndVerifySavedQuery,
   SAVE_AS_NEW_QUERY_SUFFIX,
   validateSaveAsNewQueryMatchingNameHasError,
-} from '../../../../../utils/apps/query_enhancements/saved_queries';
+} from '../../../../../../utils/apps/query_enhancements/saved_queries';
 
 import {
   getRandomizedWorkspaceName,
-  getRandomizedDatasourceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateAllTestConfigurations,
-} from '../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/query_enhancements/shared';
 
-import { generateSavedTestConfiguration } from '../../../../../utils/apps/query_enhancements/saved';
+import { generateSavedTestConfiguration } from '../../../../../../utils/apps/query_enhancements/saved';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasourceName = getRandomizedDatasourceName();
 
 const createSavedQuery = (config) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'discover',
     isEnhancement: true,
   });
 
-  cy.setDataset(config.dataset, datasourceName, config.datasetType);
+  cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
   cy.setQueryLanguage(config.language);
   setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -46,11 +45,11 @@ const createSavedQuery = (config) => {
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
 
-  cy.saveQuery(config.saveName, ' ', true, true);
+  cy.saveQuery(`${workspaceName}-${config.saveName}`, ' ', true, true);
 };
 
 const loadSavedQuery = (config) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'discover',
     isEnhancement: true,
@@ -58,7 +57,7 @@ const loadSavedQuery = (config) => {
 
   cy.getElementByTestId('discoverNewButton').click();
   // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
-  cy.setDataset(config.dataset, datasourceName, config.datasetType);
+  cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
   cy.setQueryLanguage(config.language);
 
   setDatePickerDatesAndSearchIfRelevant(
@@ -67,7 +66,7 @@ const loadSavedQuery = (config) => {
     'Aug 30, 2020 @ 00:00:00.000'
   );
 
-  cy.loadSaveQuery(config.saveName);
+  cy.loadSavedQuery(`${workspaceName}-${config.saveName}`);
   // wait for saved queries to load.
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
@@ -81,70 +80,55 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
 
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
-  validateSaveAsNewQueryMatchingNameHasError(config.saveName);
-  cy.updateSaveQuery(saveAsNewQueryName, true, true, true);
+  validateSaveAsNewQueryMatchingNameHasError(`${workspaceName}-${config.saveName}`);
+  cy.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
 
   cy.reload();
-  cy.loadSaveQuery(saveAsNewQueryName);
+  cy.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
 };
 
 const deleteSavedQuery = (saveAsNewQueryName) => {
-  cy.navigateToWorkSpaceSpecificPage({
+  cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
     page: 'discover',
     isEnhancement: true,
   });
 
-  cy.deleteSaveQuery(saveAsNewQueryName);
-  verifyQueryDoesNotExistInSavedQueries(saveAsNewQueryName);
+  cy.deleteSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
+  verifyQueryDoesNotExistInSavedQueries(`${workspaceName}-${saveAsNewQueryName}`);
 };
 
-// This spec assumes data.savedQueriesNewUI.enabled is true.
-export const runSavedQueriesUITests = () => {
+const runSavedQueriesUITests = () => {
   describe('saved queries UI', () => {
-    beforeEach(() => {
-      // Load test data
-      cy.setupTestData(
-        SECONDARY_ENGINE.url,
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
-          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.mapping.json`,
-        ],
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`,
-          `cypress/fixtures/query_enhancements/data_logs_2/${INDEX_WITH_TIME_2}.data.ndjson`,
-        ]
-      );
-      // Add data source
-      cy.addDataSource({
-        name: datasourceName,
-        url: SECONDARY_ENGINE.url,
-        authType: 'no_auth',
-      });
-
-      // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(datasourceName, workspaceName);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
-        dataSource: datasourceName,
+        dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
     });
 
     afterEach(() => {
-      // No need to explicitly delete all saved queries as deleting the workspace will delete associated saved queries
-      cy.deleteWorkspaceByName(workspaceName);
-      // // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.deleteDataSourceByName(datasourceName);
-      cy.deleteIndex(INDEX_WITH_TIME_1);
-      cy.deleteIndex(INDEX_WITH_TIME_2);
+      cy.window().then((win) => {
+        win.localStorage.clear();
+        win.sessionStorage.clear();
+      });
+    });
+
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
     });
 
     const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
@@ -163,4 +147,4 @@ export const runSavedQueriesUITests = () => {
   });
 };
 
-runSavedQueriesUITests();
+prepareTestSuite('Saved Queries', runSavedQueriesUITests);
