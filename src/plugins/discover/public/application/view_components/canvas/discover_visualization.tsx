@@ -12,7 +12,7 @@ import { useDiscoverContext } from '../context';
 
 import { SearchData } from '../utils';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { useVisualizationType } from '../utils/use_visualization_type';
+import { useVisualizationType } from '../utils/use_visualization_types';
 
 export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -22,6 +22,7 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
     },
     expressions: { ReactExpressionRenderer },
   } = services;
+  const { indexPattern } = useDiscoverContext();
 
   console.log('DiscoverVisualization rows:', rows);
 
@@ -37,7 +38,7 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
 
   useEffect(() => {
     async function loadExpression() {
-      const exp = await toExpression(searchContext);
+      const exp = await toExpression(searchContext, rows, indexPattern);
       setExpression(exp);
     }
 

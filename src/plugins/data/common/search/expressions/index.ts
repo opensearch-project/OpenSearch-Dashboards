@@ -30,3 +30,4 @@
 
 export * from './opensearchaggs';
 export * from './utils';
+export * from './discoverSearch';
