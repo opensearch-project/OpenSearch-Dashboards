@@ -51,7 +51,7 @@ export type LegacyOpenSearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'lo
     | 'apiVersion'
     | 'customHeaders'
     | 'logQueries'
-    | 'requestHeadersWhitelist'
+    | 'requestHeadersAllowlist'
     | 'sniffOnStart'
     | 'sniffOnConnectionFault'
     | 'hosts'

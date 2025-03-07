@@ -153,8 +153,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
         set('opensearch.password', process.env.OPENSEARCH_PASSWORD);
       }
 
-      if (!get('opensearch.requestHeadersWhitelist')) {
-        set('opensearch.requestHeadersWhitelist', ['authorization', 'securitytenant']);
+      if (!get('opensearch.requestHeadersAllowlist')) {
+        set('opensearch.requestHeadersAllowlist', ['authorization', 'securitytenant']);
       }
 
       if (!get('opensearch_security.multitenancy.enabled')) {

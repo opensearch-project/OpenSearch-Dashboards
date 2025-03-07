@@ -47,7 +47,7 @@ export type OpenSearchClientConfig = Pick<
   | 'logQueries'
   | 'sniffOnStart'
   | 'sniffOnConnectionFault'
-  | 'requestHeadersWhitelist'
+  | 'requestHeadersAllowlist'
   | 'sniffInterval'
   | 'hosts'
   | 'username'

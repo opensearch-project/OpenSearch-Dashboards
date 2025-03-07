@@ -50,9 +50,9 @@ const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 };
 
 const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if ((settings.server?.xsrf?.whitelist ?? []).length > 0) {
+  if ((settings.server?.xsrf?.allowlist ?? []).length > 0) {
     log(
-      'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +
+      'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.allowlist]. ' +
         'Instead, supply the "osd-xsrf" header.'
     );
   }
@@ -155,11 +155,6 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   unusedFromRoot('opensearch.preserveHost'),
   unusedFromRoot('opensearch.startupTimeout'),
-  renameFromRootWithoutMap('server.xsrf.whitelist', 'server.xsrf.allowlist'),
-  renameFromRootWithoutMap(
-    'server.compression.referrerWhitelist',
-    'server.compression.referrerAllowlist'
-  ),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
