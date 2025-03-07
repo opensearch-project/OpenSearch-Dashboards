@@ -75,14 +75,14 @@ jobs:
     name: Run cypress tests (osd:ciGroup${{ matrix.spec_group }}) ${{ inputs.UNIQUE_ID}}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: ./${{ env.OSD_PATH }}
           repository: ${{ env.TEST_REPO }}
           ref: '${{ env.TEST_BRANCH }}'
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: './${{ env.OSD_PATH }}/.nvmrc'
           registry-url: 'https://registry.npmjs.org'

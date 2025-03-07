@@ -1,4 +1,4 @@
-name: Build Release & Plugins
+name: Build and install plugins
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout OpenSearch Dashboards
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -98,7 +98,7 @@ jobs:
             ref: main
     steps:
       - name: Checkout OpenSearch Dashboards
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -110,7 +110,7 @@ jobs:
         run: npm install -g yarn@1.22.10
 
       - name: Checkout Plugin
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ matrix.plugin.repo }}
           ref: ${{ matrix.plugin.ref }}

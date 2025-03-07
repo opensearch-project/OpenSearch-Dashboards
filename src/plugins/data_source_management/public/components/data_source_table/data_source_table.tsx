@@ -89,15 +89,20 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
-    /* Browser - Page Title */
     chrome.docTitle.change(
       i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourcesTitle', {
         defaultMessage: 'Data Sources',
       })
     );
 
-    /* fetch data sources*/
-    fetchDataSources();
+    // Create an asyncto await fetchDataSources
+    (async () => {
+      try {
+        await fetchDataSources();
+      } finally {
+        setIsLoading(false);
+      }
+    })();
   });
 
   const associateDataSourceButton = DataSourceAssociation && [
@@ -119,29 +124,22 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     [notifications.toasts]
   );
 
-  const fetchDataSources = useCallback(() => {
+  const fetchDataSources = useCallback(async () => {
     setIsLoading(true);
-    return getDataSources(savedObjects.client)
-      .then((response: DataSourceTableItem[]) => {
-        return fetchDataSourceConnections(response, http, notifications, false);
-      })
-      .then((finalData) => {
-        setDataSources(finalData);
-      })
-      .catch(() => {
-        setDataSources([]);
-        handleDisplayToastMessage({
-          message: i18n.translate(
-            'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
-            {
-              defaultMessage: 'Error occurred while fetching the records for Data sources.',
-            }
-          ),
-        });
-      })
-      .finally(() => {
-        setIsLoading(false);
+    try {
+      const response = await getDataSources(savedObjects.client);
+      const finalData = await fetchDataSourceConnections(response, http, notifications, false);
+      setDataSources(finalData);
+    } catch (error) {
+      setDataSources([]);
+      handleDisplayToastMessage({
+        message: i18n.translate('dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg', {
+          defaultMessage: 'Error occurred while fetching the records for Data sources.',
+        }),
       });
+    } finally {
+      setIsLoading(false);
+    }
   }, [handleDisplayToastMessage, http, notifications, savedObjects.client]);
 
   const onDissociate = useCallback(

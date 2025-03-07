@@ -120,19 +120,31 @@ export const fetchDataSourceConnections = async (
   http: HttpSetup | undefined,
   notifications: NotificationsStart | undefined,
   directQueryTable: boolean,
-  hideLocalCluster: boolean
+  hideLocalCluster: boolean = false
 ) => {
   try {
-    const directQueryConnectionsPromises = dataSources.map((ds) =>
-      getDirectQueryConnections(ds.id, http!).catch(() => [])
-    );
+    // Add timeout to each promise
+    const directQueryConnectionsPromises = dataSources.map(async (ds) => {
+      try {
+        const result = await Promise.race([
+          getDirectQueryConnections(ds.id, http!),
+          new Promise((_, reject) => setTimeout(() => reject('timeout'), 1500)),
+        ]);
+        return result;
+      } catch (error) {
+        return [];
+      }
+    });
+
     const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
     const directQueryConnections = directQueryConnectionsResult.flat();
+
     const localClusterConnections =
       directQueryTable && !hideLocalCluster ? await getLocalClusterConnections(http!) : undefined;
+
     return mergeDataSourcesWithConnections(
       dataSources,
-      directQueryConnections,
+      directQueryConnections as DataSourceTableItem[],
       localClusterConnections
     );
   } catch (error) {
@@ -141,7 +153,7 @@ export const fetchDataSourceConnections = async (
         defaultMessage: 'Cannot fetch data sources',
       })
     );
-    return [];
+    return dataSources; // Return original data instead of empty array
   }
 };
 

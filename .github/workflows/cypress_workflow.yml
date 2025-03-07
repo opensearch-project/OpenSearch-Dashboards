@@ -6,7 +6,9 @@ on:
     branches: ['**']
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
       - '.lycheeignore'
+      - 'CODEOWNERS'
       - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:
@@ -32,7 +34,7 @@ env:
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
-  CYPRESS_BROWSER: 'chromium'
+  CYPRESS_BROWSER: 'electron'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
@@ -142,13 +144,13 @@ jobs:
           echo "SOURCE_BRANCH=${{ steps.get_pr_info.outputs.head_ref }}" >> $GITHUB_ENV
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: ${{ env.SOURCE_REPO }}
           ref: '${{ env.SOURCE_BRANCH }}'
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -165,7 +167,7 @@ jobs:
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
       - name: Checkout FT repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: ${{ env.FTR_PATH }}
           repository: ${{ env.TEST_REPO }}
@@ -218,7 +220,7 @@ jobs:
       # Run tests based on configuration
       - name: Run FT repo tests
         if: matrix.test_location == 'ftr'
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v6
         with:
           working-directory: ${{ env.FTR_PATH }}
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
@@ -247,7 +249,7 @@ jobs:
       - name: Run OpenSearch
         if: matrix.config == 'query_enhanced'
         run: |
-          /bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"
+          /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"
           sleep 30
         shell: bash
 
@@ -265,6 +267,7 @@ jobs:
           start: ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
+
       - name: Run Dashboards Cypress tests without query enhancements
         if: matrix.test_location == 'source' && matrix.config == 'dashboard'
         uses: cypress-io/github-action@v6
@@ -274,58 +277,46 @@ jobs:
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
-      # Screenshots are only captured on failure, will change this once we do visual regression tests
-      - name: Upload FT repo screenshots
-        uses: actions/upload-artifact@v4
-        if: failure() && matrix.test_location == 'ftr'
-        with:
-          name: ftr-cypress-screenshots-${{ matrix.group }}
-          path: ${{ env.FTR_PATH }}/cypress/screenshots
-          retention-days: 1
-          overwrite: true
-
-      - name: Upload FT repo videos
-        uses: actions/upload-artifact@v4
-        if: failure() && matrix.test_location == 'ftr'
-        with:
-          name: ftr-cypress-videos-${{ matrix.group }}
-          path: ${{ env.FTR_PATH }}/cypress/videos
-          retention-days: 1
-          overwrite: true
-
-      - name: Upload FT repo results
-        uses: actions/upload-artifact@v4
+      # Compress and upload artifacts for FT repo
+      - name: Compress FT repo artifacts
         if: always() && matrix.test_location == 'ftr'
-        with:
-          name: ftr-cypress-results-${{ matrix.group }}
-          path: ${{ env.FTR_PATH }}/cypress/results
-          retention-days: 1
-          overwrite: true
+        run: |
+          mkdir -p ftr-artifacts
+          for dir in screenshots videos results; do
+            if [ -d "${{ env.FTR_PATH }}/cypress/$dir" ]; then
+              cp -r "${{ env.FTR_PATH }}/cypress/$dir" ftr-artifacts/
+            fi
+          done
+          tar -czf ftr-cypress-artifacts-${{ matrix.group }}.tar.gz -C ftr-artifacts .
+        shell: bash
 
-      - name: Upload Dashboards screenshots
-        if: failure() && matrix.test_location == 'source'
+      - name: Upload FT repo artifacts
+        if: always() && matrix.test_location == 'ftr'
         uses: actions/upload-artifact@v4
         with:
-          name: dashboards-cypress-screenshots-${{ matrix.group }}
-          path: cypress/screenshots
+          name: ftr-cypress-artifacts-${{ matrix.group }}
+          path: ftr-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
-          overwrite: true
 
-      - name: Upload Dashboards repo videos
-        uses: actions/upload-artifact@v4
-        if: failure() && matrix.test_location == 'source'
-        with:
-          name: dashboards-cypress-videos-${{ matrix.group }}
-          path: cypress/videos
-          retention-days: 1
-          overwrite: true
-
-      - name: Upload Dashboards repo results
-        uses: actions/upload-artifact@v4
+      # Compress and upload artifacts for Dashboards repo
+      - name: Compress Dashboards repo artifacts
         if: always() && matrix.test_location == 'source'
+        run: |
+          mkdir -p dashboard-artifacts
+            for dir in screenshots videos results; do
+              if [ -d "cypress/$dir" ]; then
+                cp -r "cypress/$dir" dashboard-artifacts/
+              fi
+          done
+          tar -czf dashboards-cypress-artifacts-${{ matrix.group }}.tar.gz -C dashboard-artifacts .
+        shell: bash
+
+      - name: Upload Dashboards repo artifacts
+        if: always() && matrix.test_location == 'source'
+        uses: actions/upload-artifact@v4
         with:
-          name: dashboards-cypress-results-${{ matrix.group }}
-          path: cypress/results
+          name: dashboards-cypress-artifacts-${{ matrix.group }}
+          path: dashboards-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
           overwrite: true
 
