@@ -1,0 +1,2 @@
+fix:
+- Should not show summary if there is no response ([#9480](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9480))
