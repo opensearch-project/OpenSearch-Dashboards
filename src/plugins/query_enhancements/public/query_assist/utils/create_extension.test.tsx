@@ -229,7 +229,7 @@ describe('CreateExtension', () => {
       mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
-    const component = extension.getComponent?.(dependencies);
+    const component = extension.getBottomPanel?.(dependencies);
 
     if (!component) throw new Error('QueryEditorExtensions Component is undefined');
 
