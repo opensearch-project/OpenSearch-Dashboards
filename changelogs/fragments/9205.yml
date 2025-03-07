@@ -1,0 +1,2 @@
+infra:
+- Add path alias support for webpack and babel ([#9205](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9205))
