@@ -11,6 +11,7 @@ import dateMath from '@elastic/datemath';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import classNames from 'classnames';
 import { DataPublicPluginStart, search } from '../../../../../data/public';
 import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_header';
 import { DiscoverHistogram } from './histogram/histogram';
@@ -132,7 +133,10 @@ export const DiscoverChart = ({
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
-            className="dscTimechart"
+            className={classNames('dscTimechart', {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              dscTimechart__nonEnhanced: !isEnhancementsEnabled,
+            })}
             data-test-subj="dscTimechart"
           >
             <div className="dscHistogram" data-test-subj="discoverChart">

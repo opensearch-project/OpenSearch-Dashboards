@@ -69,18 +69,20 @@ export function HitsCounter({ hits, showResetButton, onResetQuery, rows }: HitsC
       >
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <FormattedMessage
-              id="discover.hitsResultTitle"
-              defaultMessage="{rowsCount, plural, one {Result} other {Results}}"
-              values={{ rowsCount }}
-            />{' '}
-            (<span data-test-subj="discoverQueryRowsCount">{rowsCount.toLocaleString()}</span>
-            {hits ? (
-              <>
-                /<span data-test-subj="discoverQueryHits">{hits.toLocaleString()}</span>
-              </>
-            ) : null}
-            )
+            <strong>
+              <FormattedMessage
+                id="discover.hitsResultTitle"
+                defaultMessage="{rowsCount, plural, one {Result} other {Results}}"
+                values={{ rowsCount }}
+              />{' '}
+              (<span data-test-subj="discoverQueryRowsCount">{rowsCount.toLocaleString()}</span>
+              {hits ? (
+                <>
+                  /<span data-test-subj="discoverQueryHits">{hits.toLocaleString()}</span>
+                </>
+              ) : null}
+              )
+            </strong>
           </EuiText>
         </EuiFlexItem>
         {showResetButton && (

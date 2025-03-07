@@ -7,6 +7,10 @@
     fill-opacity: 0.5;
     stroke-width: 1;
   }
+
+  &__nonEnhanced {
+    border-bottom: $ouiBorderThin;
+  }
 }
 
 .dscHistogram {

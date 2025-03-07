@@ -11,6 +11,8 @@
 
   &_results {
     border: none;
+    border-top: $ouiBorderThin;
+    padding-top: $euiSizeXS;
     margin-left: $euiSizeM;
     position: relative;
   }
