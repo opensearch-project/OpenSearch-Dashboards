@@ -26,6 +26,7 @@ const dataMock = dataPluginMock.createSetupContract();
 const queryStringMock = dataMock.query.queryString as jest.Mocked<QueryStringContract>;
 const mockIsQuerySummaryCollapsed$ = new BehaviorSubject(true);
 const mockresultSummaryEnabled$ = new BehaviorSubject(true);
+const mockIsSummaryAgentAvailable$ = new BehaviorSubject(true);
 
 const mockQueryWithIndexPattern = {
   query: '',
@@ -67,7 +68,7 @@ describe('CreateExtension', () => {
 
   const config: ConfigSchema['queryAssist'] = {
     supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
-    summary: { enabled: false },
+    summary: { enabled: false, branding: { label: '' } },
   };
 
   it('should be enabled if at least one language is configured', async () => {
@@ -77,6 +78,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
+      mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
@@ -93,6 +95,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
+      mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
@@ -109,6 +112,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
+      mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
     const meta = await extension.getDataStructureMeta?.('mock-data-source-id2');
@@ -134,6 +138,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
+      mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
     const metas = await Promise.all(
@@ -151,6 +156,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
+      mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
     const component = extension.getComponent?.(dependencies);
@@ -171,6 +177,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
+      mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
     const banner = extension.getBanner?.({
@@ -194,6 +201,7 @@ describe('CreateExtension', () => {
       dataMock,
       config,
       mockIsQuerySummaryCollapsed$,
+      mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
     const component = extension.getComponent?.(dependencies);
@@ -211,13 +219,14 @@ describe('CreateExtension', () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
     const modifiedConfig: ConfigSchema['queryAssist'] = {
       supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
-      summary: { enabled: true },
+      summary: { enabled: true, branding: { label: '' } },
     };
     const extension = createQueryAssistExtension(
       coreSetupMock,
       dataMock,
       modifiedConfig,
       mockIsQuerySummaryCollapsed$,
+      mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
     const component = extension.getComponent?.(dependencies);

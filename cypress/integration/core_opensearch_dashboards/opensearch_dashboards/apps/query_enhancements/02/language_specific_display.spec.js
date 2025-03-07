@@ -9,7 +9,6 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   QueryLanguages,
-  PATHS,
 } from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
@@ -26,31 +25,11 @@ const workspaceName = getRandomizedWorkspaceName();
 
 export const runDisplayTests = () => {
   describe('Language-Specific Display', () => {
-    beforeEach(() => {
-      // Load test data
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`,
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_2}.mapping.json`,
-        ],
-        [
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`,
-          `cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_2}.data.ndjson`,
-        ]
-      );
-      // Add data source
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: PATHS.SECONDARY_ENGINE,
-        authType: 'no_auth',
-      });
-
-      // Create workspace
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
@@ -60,11 +39,11 @@ export const runDisplayTests = () => {
       });
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspaceName);
-      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_2);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
     });
 
     generateAllTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
