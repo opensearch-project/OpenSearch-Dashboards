@@ -316,7 +316,7 @@ jobs:
         if: failure() && matrix.test_location == 'source'
         with:
           name: dashboards-cypress-videos-${{ matrix.group }}
-          path: cypress/videos
+          path: cypress/${{ matrix.group }}/videos/
           retention-days: 1
           overwrite: true
 
