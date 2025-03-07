@@ -34,11 +34,11 @@ env:
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
-  CYPRESS_BROWSER: 'electron'
+  CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
+  NODE_OPTIONS: '--max-old-space-size=8048 --dns-result-order=ipv4first'
   COMMENT_TAG: '[MANUAL CYPRESS TEST RUN RESULTS]'
   COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
   COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'
