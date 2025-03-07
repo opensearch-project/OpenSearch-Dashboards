@@ -1,0 +1,2 @@
+test:
+- Add retry mechanism for flaky share menu test ([#9352](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9352))

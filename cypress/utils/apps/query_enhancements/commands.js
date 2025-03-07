@@ -3,7 +3,87 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-Cypress.Commands.add('setQueryEditor', (value, opts = {}, submit = true) => {
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000;
+
+const forceFocusEditor = () => {
+  return cy
+    .get('.globalQueryEditor .react-monaco-editor-container')
+    .click({ force: true })
+    .wait(200) // Give editor time to register focus
+    .get('.inputarea')
+    .focus()
+    .wait(200); // Wait for focus to take effect
+};
+
+const clearMonacoEditor = () => {
+  return cy
+    .get('.globalQueryEditor .react-monaco-editor-container')
+    .should('exist')
+    .should('be.visible')
+    .then(() => {
+      // First ensure we have focus
+      return forceFocusEditor().then(() => {
+        // Try different key combinations for selection
+        return cy
+          .get('.inputarea')
+          .type('{ctrl}a', { force: true })
+          .wait(100)
+          .type('{backspace}', { force: true })
+          .wait(100)
+          .type('{meta}a', { force: true })
+          .wait(100)
+          .type('{backspace}', { force: true });
+      });
+    });
+};
+
+const isEditorEmpty = () => {
+  return cy
+    .get('.globalQueryEditor .react-monaco-editor-container')
+    .find('.view-line')
+    .invoke('text')
+    .then((text) => text.trim() === '');
+};
+
+Cypress.Commands.add('clearQueryEditor', () => {
+  const clearWithRetry = (attempt = 1) => {
+    cy.log(`Attempt ${attempt} to clear editor`);
+
+    return forceFocusEditor()
+      .then(() => clearMonacoEditor())
+      .then(() => {
+        return isEditorEmpty().then((isEmpty) => {
+          cy.log(`is editor empty: ${isEmpty}`);
+
+          if (isEmpty) {
+            return; // Editor is cleared, we're done
+          }
+
+          if (attempt < MAX_RETRIES) {
+            cy.log(`Editor not cleared, retrying... (attempt ${attempt})`);
+            cy.wait(RETRY_DELAY); // Wait before next attempt
+            return clearWithRetry(attempt + 1);
+          } else {
+            cy.log('Failed to clear editor after all attempts');
+            // Instead of throwing error, try one last time with extra waiting
+            return cy.wait(2000).then(forceFocusEditor).then(clearMonacoEditor);
+          }
+        });
+      });
+  };
+
+  return clearWithRetry();
+});
+
+Cypress.Commands.add('setQueryEditor', (value, options = {}) => {
+  const defaults = {
+    submit: true,
+  };
+
+  // Extract our command-specific options
+  const { submit = defaults.submit, ...typeOptions } = options;
+
   Cypress.log({
     name: 'setQueryEditor',
     displayName: 'set query',
@@ -15,14 +95,16 @@ Cypress.Commands.add('setQueryEditor', (value, opts = {}, submit = true) => {
   cy.getElementByTestId('headerGlobalNav').click();
 
   // clear the editor first and then set
-  cy.get('.globalQueryEditor .react-monaco-editor-container')
-    .click()
-    .focused()
-    .type('{ctrl}a')
-    .type('{backspace}')
-    .type('{meta}a')
-    .type('{backspace}')
-    .type(value, opts);
+  clearMonacoEditor().then(() => {
+    return cy
+      .get('.inputarea')
+      .should('be.visible')
+      .wait(200)
+      .type(value, {
+        force: true,
+        ...typeOptions, // Pass through all other options to type command
+      });
+  });
 
   if (submit) {
     cy.updateTopNav({ log: false });
@@ -36,105 +118,23 @@ Cypress.Commands.add('setQueryLanguage', (value) => {
     message: value,
   });
 
+  // adding wait here as sometimes the button clicks doesn't register
+  cy.wait(2000);
+
   cy.getElementByTestId(`queryEditorLanguageSelector`).click();
   cy.get(`[class~="languageSelector__menuItem"]`).contains(value).click({
     force: true,
   });
-});
 
-/**
- * Creates a new data source connection with basic auth
- * It also saves the created data source's id to the alias @DATASOURCE_ID
- * @param {Object} options Configuration options for the data source
- * @param {string} options.name The name/title for the data source
- * @param {string} options.url The endpoint URL for the data source
- * @param {string} options.authType The authentication type (e.g. 'no_auth', 'basic_auth', etc.)
- * @param {Object} [options.credentials] Optional credentials for auth types that require them
- * @param {string} [options.credentials.username] Username for basic auth
- * @param {string} [options.credentials.password] Password for basic auth
- */
-Cypress.Commands.add('addDataSource', (options) => {
-  const { name, url, authType = 'no_auth', credentials = {} } = options;
-
-  // Visit the create data source page
-  cy.visit('app/management/opensearch-dashboards/dataSources/create');
-
-  // Intercept the create request to verify success
-  cy.intercept('POST', '/api/saved_objects/data-source').as('createDataSourceRequest');
-
-  // Select OpenSearch card
-  cy.getElementByTestId('datasource_card_opensearch').click();
-
-  // Fill in basic info
-  cy.get('[name="dataSourceTitle"]').type(name);
-  cy.get('[name="endpoint"]').type(url);
-
-  // Select auth type
-  cy.getElementByTestId('createDataSourceFormAuthTypeSelect').click();
-  cy.get(`button[id="${authType}"]`).click();
-
-  // Handle credentials if provided and required
-  if (authType === 'basic_auth' && credentials.username && credentials.password) {
-    cy.get('[name="username"]').type(credentials.username);
-    cy.get('[name="password"]').type(credentials.password);
-  }
-
-  // Submit form. Adding 'force' as sometimes a popover hides the button
-  cy.getElementByTestId('createDataSourceButton').click({ force: true });
-
-  // Wait for successful creation
-  cy.wait('@createDataSourceRequest').then((interception) => {
-    expect(interception.response.statusCode).to.equal(200);
-    // save the created data source ID as an alias
-    cy.wrap(interception.response.body.id).as('DATASOURCE_ID');
-  });
-
-  // Verify redirect to data sources list page
-  cy.location('pathname', { timeout: 6000 }).should(
-    'include',
-    'app/management/opensearch-dashboards/dataSources'
-  );
-});
-
-Cypress.Commands.add('deleteDataSourceByName', (dataSourceName) => {
-  // Navigate to the dataSource Management page
-  cy.visit('app/dataSources');
-
-  // Find the anchor text corresponding to specified dataSource
-  cy.get('a').contains(dataSourceName).click();
-
-  // Delete the dataSource connection
-  cy.getElementByTestId('editDatasourceDeleteIcon').click();
-  cy.getElementByTestId('confirmModalConfirmButton').click();
-});
-
-// Deletes all data sources. This command should only be used for convenience during development
-// and should never be used in production
-Cypress.Commands.add('deleteAllDataSources', () => {
-  cy.visit('app/dataSources');
-  cy.waitForLoader(true);
-  cy.wait(2000);
-
+  // Sometimes the syntax highlighter opens automatically. Closing it here if it does that
+  cy.wait(1000);
   cy.get('body').then(($body) => {
-    const hasEmptyState = $body.find('[data-test-subj="datasourceTableEmptyState"]').length > 0;
-    const hasDataSources = $body.find('[data-test-subj="checkboxSelectAll"]').length > 0;
-    cy.log('hasEmptyState');
-    cy.log(hasEmptyState);
-    cy.log('hasDataSources');
-    cy.log(hasDataSources);
+    const popovers = $body.find('.euiPopoverTitle');
 
-    if (hasEmptyState) {
-      cy.log('No data sources to delete');
-    } else if (hasDataSources) {
-      cy.log('Need to clean out data sources');
-      cy.getElementByTestId('checkboxSelectAll')
-        .should('exist')
-        .should('not.be.disabled')
-        .check({ force: true });
-
-      cy.getElementByTestId('deleteDataSourceConnections').should('be.visible').click();
-
-      cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
+    for (const popover of popovers) {
+      if (popover.textContent === 'Syntax options') {
+        cy.getElementByTestId('languageReferenceButton').click();
+      }
     }
   });
 });
@@ -181,6 +181,19 @@ Cypress.Commands.add('setIndexPatternAsDataset', (indexPattern, dataSourceName) 
   );
 });
 
+Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
+  switch (type) {
+    case 'INDEX_PATTERN':
+      cy.setIndexPatternAsDataset(dataset, dataSourceName);
+      break;
+    case 'INDEXES':
+      cy.setIndexAsDataset(dataset, dataSourceName);
+      break;
+    default:
+      throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
+  }
+});
+
 Cypress.Commands.add(
   'setIndexPatternFromAdvancedSelector',
   (indexPattern, dataSourceName, language, finalAction = 'submit') => {
@@ -211,58 +224,10 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
-  switch (type) {
-    case 'INDEX_PATTERN':
-      cy.setIndexPatternAsDataset(dataset, dataSourceName);
-      break;
-    case 'INDEXES':
-      cy.setIndexAsDataset(dataset, dataSourceName);
-      break;
-    default:
-      throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
-  }
-});
-
 Cypress.Commands.add('setQuickSelectTime', (direction, time, timeUnit) => {
   cy.getElementByTestId('superDatePickerToggleQuickMenuButton').click();
   cy.get('[aria-label="Time tense"]').select(direction);
   cy.get('[aria-label="Time value"]').clear().type(time);
   cy.get('[aria-label="Time unit"]').select(timeUnit);
   cy.get('.euiButton').contains('Apply').click();
-});
-
-Cypress.Commands.add('setRelativeTopNavDate', (time, timeUnit) => {
-  const opts = { log: false };
-
-  /* Find any one of the two buttons that change/open the date picker:
-   *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
-   *      * in some versions of OUI, the switch will open the date selection dialog as well
-   *   * if `superDatePickerstartDatePopoverButton` is found, it will open the date selection dialog
-   */
-  cy.getElementsByTestIds(
-    ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
-    opts
-  )
-    .should('be.visible')
-    .invoke('attr', 'data-test-subj')
-    .then((testId) => {
-      cy.getElementByTestId(testId, opts).should('be.visible').click(opts);
-    });
-
-  /* While we surely are in the date selection mode, we don't know if the date selection dialog
-   * is open or not. Looking for a tab and if it is missing, click on the dialog opener.
-   */
-  cy.whenTestIdNotFound('superDatePickerAbsoluteTab', () => {
-    cy.getElementByTestId('superDatePickerstartDatePopoverButton', opts)
-      .should('be.visible')
-      .click(opts);
-  });
-
-  // Click absolute tab
-  cy.getElementByTestId('superDatePickerRelativeTab', opts).click(opts);
-
-  cy.getElementByTestId('superDatePickerRelativeDateInputNumber').clear().type(time);
-  cy.getElementByTestId('superDatePickerRelativeDateInputUnitSelector').select(timeUnit);
-  cy.getElementByTestId('querySubmitButton').click();
 });
