@@ -35,9 +35,7 @@ const runRecentQueryTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-    });
 
-    beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
         page: 'discover',
@@ -61,9 +59,9 @@ const runRecentQueryTests = () => {
       .forEach((config) => {
         it(`check max queries for ${config.testName}`, () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
-          setDatePickerDatesAndSearchIfRelevant(config.language);
-          const currentLang = BaseQuery[config.datasetType][config.language];
+          cy.setQueryLanguage(config.language.name);
+          setDatePickerDatesAndSearchIfRelevant(config.language.name);
+          const currentLang = BaseQuery[config.datasetType][config.language.name];
           const currentBaseQuery = currentLang.query;
           const currentWhereStatement = currentLang.where;
           TestQueries.forEach((query) => {
@@ -88,7 +86,7 @@ const runRecentQueryTests = () => {
               // check table after changing language and returning to the language under test
               action: () => {
                 cy.setQueryLanguage(config.oppositeLang);
-                cy.setQueryLanguage(config.language);
+                cy.setQueryLanguage(config.language.name);
                 cy.wrap(null).then(() => {
                   // force Cypress to run this method in order
                   reverseList.unshift(config.defaultQuery);
@@ -101,7 +99,7 @@ const runRecentQueryTests = () => {
                 cy.setIndexAsDataset(
                   config.alternativeDataset,
                   DATASOURCE_NAME,
-                  config.language,
+                  config.language.name,
                   "I don't want to use the time filter"
                 );
                 cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
@@ -114,14 +112,23 @@ const runRecentQueryTests = () => {
             {
               // check table after visiting a different URL and coming back to the workspace
               action: () => {
-                cy.visit('/app/workspace_initial');
+                cy.osd.navigateToWorkSpaceSpecificPage({
+                  workspaceName: workspace,
+                  page: 'workspace_detail',
+                  isEnhancement: true,
+                });
                 cy.osd.navigateToWorkSpaceSpecificPage({
                   workspaceName: workspace,
                   page: 'discover',
                   isEnhancement: true,
                 });
-                cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
-                  force: true,
+                cy.url().then(($url) => {
+                  if (!$url.includes(config.language.apiName)) {
+                    cy.setQueryLanguage(config.language.name);
+                  }
+                  cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
+                    force: true,
+                  });
                 });
               },
             },
@@ -146,9 +153,9 @@ const runRecentQueryTests = () => {
 
         it(`check duplicate query for ${config.testName}`, () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
-          setDatePickerDatesAndSearchIfRelevant(config.language);
-          const currentLang = BaseQuery[config.datasetType][config.language];
+          cy.setQueryLanguage(config.language.name);
+          setDatePickerDatesAndSearchIfRelevant(config.language.name);
+          const currentLang = BaseQuery[config.datasetType][config.language.name];
           const currentBaseQuery = currentLang.query;
           const currentWhereStatement = currentLang.where;
           const testQueries = [
@@ -173,10 +180,10 @@ const runRecentQueryTests = () => {
         //Caveat: the commands for reading the system's clipboard is OS-dependent.
         it(`check running and copying recent queries for ${config.testName}`, () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
-          setDatePickerDatesAndSearchIfRelevant(config.language);
+          cy.setQueryLanguage(config.language.name);
+          setDatePickerDatesAndSearchIfRelevant(config.language.name);
           // Precondition: run some queries first
-          const currentLang = BaseQuery[config.datasetType][config.language];
+          const currentLang = BaseQuery[config.datasetType][config.language.name];
           const currentBaseQuery = currentLang.query + config.dataset + currentLang.where;
           const queries = [...TestQueries].splice(0, 3);
           queries.forEach((query) => {
@@ -206,7 +213,7 @@ const runRecentQueryTests = () => {
             .then(($row) => {
               cy.get('[aria-label="Copy recent query"]').eq(1).click({ force: true });
               cy.wait(1000); // Give the clipboard some time to update
-              const expectedQuery = $row.text().replace(QueryRegex[config.language], '$1');
+              const expectedQuery = $row.text().replace(QueryRegex[config.language.name], '$1');
               cy.get('[aria-label="Copy recent query"]').eq(1).focus();
               cy.task('readClipboard').then((clipboardText) => {
                 expect(clipboardText).to.eq(expectedQuery);
