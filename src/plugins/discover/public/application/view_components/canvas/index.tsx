@@ -28,6 +28,7 @@ import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_ty
 import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
+import { DiscoverVisualization } from './discover_visualization';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
@@ -171,6 +172,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
             (isEnhancementsEnabled ? (
               <>
                 <MemoizedDiscoverChartContainer {...fetchState} />
+                <MemoizedDiscoverVisualization {...fetchState} />
                 <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
               </>
             ) : (
@@ -197,3 +199,4 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
 
 const MemoizedDiscoverTable = React.memo(DiscoverTable);
 const MemoizedDiscoverChartContainer = React.memo(DiscoverChartContainer);
+const MemoizedDiscoverVisualization = React.memo(DiscoverVisualization);
