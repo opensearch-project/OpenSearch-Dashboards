@@ -86,7 +86,7 @@
     "release_note:generate": "scripts/use_node scripts/generate_release_note",
     "cypress:run-without-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=false",
     "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
-    "osd:ciGroup10": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/01/(?!saved_search\\.spec\\.js$)*.spec.js\"",
+    "osd:ciGroup10": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/01/*.spec.js,!cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/01/saved_search.spec.js\"",
     "osd:ciGroup11": "echo \"cypress/integration/dashboard_sanity_test.spec.ts\"",
     "osd:ciGroup12": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/02/*.spec.js\"",
     "osd:ciGroup13": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/03/*.spec.js\"",
