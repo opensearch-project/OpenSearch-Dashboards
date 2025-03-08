@@ -3,19 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { index } from 'mathjs';
 import {
   buildExpression,
   buildExpressionFunction,
-  ExpressionFunctionOpenSearchDashboards,
   IExpressionLoaderParams,
   SerializedFieldFormat,
 } from '../../../../../../../expressions/public';
 import { OpenSearchSearchHit } from '../../../../doc_views/doc_views_types';
 import { VislibDimensions } from '../../../../../../../visualizations/public';
 import { IndexPattern } from '../../../../../../../data/public';
+import { createVisualizationConfigs } from '../../../../components/chart/utils/create_visualization_configs';
+import { DiscoverViewServices } from '../../../../../build_services';
 
 export const toExpression = async (
+  services: DiscoverViewServices,
   searchContext: IExpressionLoaderParams['searchContext'],
   rows: OpenSearchSearchHit[],
   indexPattern: IndexPattern
@@ -27,7 +28,7 @@ export const toExpression = async (
   });
 
   // Determine dimensions and its config for the visualization
-  const dimensions = await buildVislibDimensions(vis, params);
+  const dimensions = await buildVislibDimensions(services, indexPattern, rows[0]);
   const valueAxes = getValueAxes(dimensions.y);
 
   // TODO: what do we want to put in this "vis config"?
@@ -52,14 +53,23 @@ export const toExpression = async (
 // The rules are mainly for metrics visualizations
 // For non-metrics visualizations, there are more scenarios to consider and we should refine this function
 export const buildVislibDimensions = async (
-  row: OpenSearchSearchHit,
-  vis: any,
-  params: any
+  services: DiscoverViewServices,
+  dataset: IndexPattern,
+  row: OpenSearchSearchHit
 ): Promise<VislibDimensions> => {
   // need the current columns
   // need the column schema to determine what is x and what is y
   // we can have the index pattern fields schema passed down
   // but how can we get the aggregated fields schema?
+
+  // We always build x-axis as date histogram using the time field defined in the dataset
+  // We build y-axis using the non-time field in the columns
+  const configs = dataset.timeFieldName
+    ? createVisualizationConfigs(dataset, 'auto', services.data, row)
+    : null;
+
+  const dimensions = getDimensions(configs, services.data);
+
   const x = {
     accessor: 0,
     format: {

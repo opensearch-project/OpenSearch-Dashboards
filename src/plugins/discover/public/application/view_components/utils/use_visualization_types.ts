@@ -6,6 +6,9 @@
 import { IconType } from '@elastic/eui';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
 import { createLineConfig } from '../../components/visualizations/vislib/line/line_vis_type';
+import { DiscoverViewServices } from '../../../build_services';
+import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
 
 export interface VisualizationType<T = any> {
   readonly name: string;
@@ -15,7 +18,10 @@ export interface VisualizationType<T = any> {
   readonly stage?: 'production';
   readonly ui: {};
   readonly toExpression: (
-    searchContext: IExpressionLoaderParams['searchContext']
+    services: DiscoverViewServices,
+    searchContext: IExpressionLoaderParams['searchContext'],
+    rows: OpenSearchSearchHit[],
+    indexPattern: IndexPattern
   ) => Promise<string | undefined>;
   readonly hierarchicalData?: boolean | ((vis: { params: T }) => boolean);
 }

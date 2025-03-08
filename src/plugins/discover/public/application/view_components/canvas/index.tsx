@@ -128,7 +128,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     }
   };
   const showSaveQuery = !!capabilities.discover?.saveQuery;
-  console.log('DiscoverCanvas rows:', rows);
 
   return (
     <EuiPanel

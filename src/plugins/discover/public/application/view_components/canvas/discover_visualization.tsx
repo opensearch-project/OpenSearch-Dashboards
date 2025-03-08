@@ -7,7 +7,6 @@ import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { useDiscoverContext } from '../context';
 
 import { SearchData } from '../utils';
@@ -21,13 +20,12 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
       query: { filterManager, queryString, timefilter },
     },
     expressions: { ReactExpressionRenderer },
+    Î,
   } = services;
   const { indexPattern } = useDiscoverContext();
 
-  console.log('DiscoverVisualization rows:', rows);
-
   // Get configs and expression utils from a specific visualization type
-  const { toExpression, ui } = useVisualizationType();
+  const { toExpression } = useVisualizationType();
   //   const { aggConfigs, indexPattern } = useAggs();
   const [expression, setExpression] = useState<string>();
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
@@ -38,12 +36,15 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
 
   useEffect(() => {
     async function loadExpression() {
-      const exp = await toExpression(searchContext, rows, indexPattern);
+      if (!rows || !indexPattern) {
+        return;
+      }
+      const exp = await toExpression(services, searchContext, rows, indexPattern);
       setExpression(exp);
     }
 
     loadExpression();
-  }, [toExpression, searchContext]);
+  }, [toExpression, searchContext, rows, indexPattern, services]);
 
   useLayoutEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {

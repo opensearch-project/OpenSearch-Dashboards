@@ -143,7 +143,7 @@ export const DiscoverChart = ({
 
   console.log('hits', hits);
   console.log('rows', rows);
-  if (rows?.length) {
+  if (rows?.length && hits === 0) {
     return <div>{JSON.stringify(rows.map((r) => r._source)) + '/n'}</div>;
   }
 

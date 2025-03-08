@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
-
-import { VisualizationType } from '../../../../view_components/utils/use_visualization_type';
+import { VisualizationType } from '../../../../view_components/utils/use_visualization_types';
 import { toExpression } from './to_expression';
 
 export interface LineOptionsDefaults {
