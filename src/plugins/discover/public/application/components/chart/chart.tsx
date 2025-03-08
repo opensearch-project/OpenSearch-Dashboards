@@ -25,10 +25,8 @@ interface DiscoverChartProps {
   chartData?: Chart;
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
-  isTimeBased?: boolean;
   services: DiscoverServices;
   isEnhancementsEnabled: boolean;
-  discoverOptions: any;
 }
 
 export const DiscoverChart = ({
@@ -36,10 +34,8 @@ export const DiscoverChart = ({
   chartData,
   config,
   data,
-  isTimeBased,
   services,
   isEnhancementsEnabled,
-  discoverOptions,
 }: DiscoverChartProps) => {
   const { refetch$ } = useDiscoverContext();
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -105,15 +101,14 @@ export const DiscoverChart = ({
     >
       <EuiFlexItem grow={false}>{toggle}</EuiFlexItem>
       <EuiFlexItem grow={true} style={{ justifyContent: 'flex-start' }}>
-        {isTimeBased && timeChartHeader}
+        {timeChartHeader}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 
   const histogramHeader = (
     <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="xs">
-      <EuiFlexItem grow={false}>{isTimeBased && timeChartHeader}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{timeChartHeader}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -127,7 +122,7 @@ export const DiscoverChart = ({
       data-test-subj="dscChartWrapper"
     >
       {isEnhancementsEnabled ? queryEnhancedHistogramHeader : histogramHeader}
-      {isTimeBased && chartData && showHistogram && (
+      {chartData && showHistogram && (
         <EuiFlexItem grow={false}>
           <section
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
