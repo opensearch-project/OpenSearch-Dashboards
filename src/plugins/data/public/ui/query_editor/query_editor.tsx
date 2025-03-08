@@ -222,7 +222,9 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
   const provideCompletionItems = async (
     model: monaco.editor.ITextModel,
-    position: monaco.Position
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
   ): Promise<monaco.languages.CompletionList> => {
     const dataset = queryString.getQuery().dataset;
     const indexPattern = dataset ? await getIndexPatterns().get(dataset.id) : undefined;
