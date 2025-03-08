@@ -33,8 +33,29 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { HitsCounter, HitsCounterProps } from './hits_counter';
 import { findTestSubject } from 'test_utils/helpers';
+import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
 
-describe('hits counter', function () {
+const mockRow1: OpenSearchSearchHit = {
+  fields: {},
+  sort: [],
+  _source: {},
+  _id: '1',
+  _index: 'idx1',
+  _type: '',
+  _score: 1,
+};
+const mockRow2: OpenSearchSearchHit = {
+  fields: {},
+  sort: [],
+  _source: {},
+  _id: '2',
+  _index: 'idx1',
+  _score: 1,
+  _type: '',
+};
+const mockRows = [mockRow1, mockRow2];
+
+describe('hits counter', () => {
   let props: HitsCounterProps;
   let component: ReactWrapper<HitsCounterProps>;
 
@@ -42,7 +63,8 @@ describe('hits counter', function () {
     props = {
       onResetQuery: jest.fn(),
       showResetButton: true,
-      hits: 2,
+      hits: 10,
+      rows: mockRows,
     };
   });
 
@@ -58,21 +80,44 @@ describe('hits counter', function () {
     expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
   });
 
-  it('expect to render the number of hits', function () {
+  it('expect to render the number of rows', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
-    const hits = findTestSubject(component, 'discoverQueryHits');
-    expect(hits.text()).toBe('2');
+    const rows = findTestSubject(component, 'discoverQueryRowsCount');
+    expect(rows.text()).toBe(props.rows?.length.toString());
   });
 
-  it('expect to render 1,899 hits if 1899 hits given', function () {
-    component = mountWithIntl(
-      <HitsCounter hits={1899} showResetButton={false} onResetQuery={jest.fn()} />
-    );
+  it('expect to render the number of hits', () => {
+    component = mountWithIntl(<HitsCounter {...props} />);
+    const hits = findTestSubject(component, 'discoverQueryHits');
+    expect(hits.text()).toBe(props.hits?.toString());
+  });
+
+  it('expect to render 1,899 hits if 1899 hits given', () => {
+    const hitCount = 1899;
+    component = mountWithIntl(<HitsCounter {...props} hits={hitCount} />);
     const hits = findTestSubject(component, 'discoverQueryHits');
     expect(hits.text()).toBe('1,899');
   });
 
-  it('should reset query', function () {
+  it('expect to render 1,899 rows if 1,899 hits given', () => {
+    const rows = Array(1899).fill(mockRow1);
+    component = mountWithIntl(<HitsCounter {...props} rows={rows} />);
+    const rowsEl = findTestSubject(component, 'discoverQueryRowsCount');
+    expect(rowsEl.text()).toBe('1,899');
+  });
+
+  it('expect to render 0 for rows if rows is not provided', () => {
+    component = mountWithIntl(<HitsCounter {...props} rows={undefined} />);
+    const rowsEl = findTestSubject(component, 'discoverQueryRowsCount');
+    expect(rowsEl.text()).toBe('0');
+  });
+
+  it('does not render hits if it is undefined', () => {
+    component = mountWithIntl(<HitsCounter {...props} hits={undefined} />);
+    expect(component.exists('[data-test-subj="discoverQueryHits"]')).toBeFalsy();
+  });
+
+  it('should reset query', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     findTestSubject(component, 'resetSavedSearch').simulate('click');
     expect(props.onResetQuery).toHaveBeenCalled();

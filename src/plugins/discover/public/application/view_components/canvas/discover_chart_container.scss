@@ -1,7 +1,3 @@
-.dscResultCount {
-  padding-top: $euiSizeXS;
-}
-
 .dscTimechart {
   display: block;
   position: relative;
@@ -10,6 +6,10 @@
   .series > rect {
     fill-opacity: 0.5;
     stroke-width: 1;
+  }
+
+  &__nonEnhanced {
+    border-bottom: $ouiBorderThin;
   }
 }
 

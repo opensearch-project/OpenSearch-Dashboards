@@ -20,8 +20,8 @@
   .dscChart__chartheader {
     align-items: center;
   }
+}
 
-  .dscResultCount {
-    padding-top: 0;
-  }
+.dscChart__TimechartHeader {
+  padding-top: $euiSizeXS;
 }
