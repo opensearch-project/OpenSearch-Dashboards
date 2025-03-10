@@ -5,7 +5,7 @@
 
 .queryAssist {
   &.queryAssist__summary {
-    margin-top: $euiSizeXS;
+    margin: $euiSizeS $euiSizeXS 0;
   }
 
   &.queryAssist__summary_banner {
@@ -15,7 +15,11 @@
   }
 
   &.queryAssist__callout {
-    margin-top: $euiSizeXS;
+    margin-top: $euiSizeS;
+  }
+
+  &.queryAssist__banner {
+    margin-bottom: $euiSizeS;
   }
 
   .queryAssist__popoverWrapper {
