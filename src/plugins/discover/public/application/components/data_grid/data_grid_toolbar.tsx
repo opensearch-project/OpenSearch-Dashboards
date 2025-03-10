@@ -13,6 +13,9 @@ import {
 import React, { useState } from 'react';
 import { useLocalStorage } from 'react-use';
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 const AddtitionalControls = ({
   setLineCount,
   lineCount,
@@ -58,6 +61,9 @@ const AddtitionalControls = ({
   );
 };
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export const useToolbarOptions = (): {
   toolbarOptions: EuiDataGridToolBarVisibilityOptions | boolean;
   lineCount: number;
