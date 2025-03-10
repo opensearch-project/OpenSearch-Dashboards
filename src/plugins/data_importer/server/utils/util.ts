@@ -42,7 +42,7 @@ export const determineMapping = (
   };
 };
 
-export const determineType = (
+const determineType = (
   value: any,
   currentNestedCount: number,
   nestedObjectsLimit: number
@@ -82,7 +82,7 @@ export const determineType = (
   }
 };
 
-export const determineNumberType = (value: number) => {
+const determineNumberType = (value: number) => {
   if (Number.isSafeInteger(value)) {
     return DYNAMIC_MAPPING_TYPES.INTEGER;
   } else if (!Number.isInteger(value)) {
@@ -92,8 +92,35 @@ export const determineNumberType = (value: number) => {
   }
 };
 
-export const isValidDate = (date: string) => {
+const isValidDate = (date: string) => {
   return (
     moment(date, moment.ISO_8601, true).isValid() || moment(date, moment.RFC_2822, true).isValid()
   );
+};
+
+export const fetchDepthLimit = async (client: OpenSearchClient) => {
+  const defaultLimit = 20;
+
+  try {
+    const clusterSettings = (
+      await client.cluster.getSettings({
+        include_defaults: true,
+        filter_path: '**.depth.limit',
+      })
+    ).body;
+
+    const defaultSettingsRaw = Number(clusterSettings.defaults?.indices?.mapping?.depth?.limit);
+    const defaultSettings = !isNaN(defaultSettingsRaw) ? defaultSettingsRaw : defaultLimit;
+
+    const persistentSettingsRaw = Number(clusterSettings.persistent.indices?.mapping?.depth?.limit);
+    const persistentSettings = !isNaN(persistentSettingsRaw) ? persistentSettingsRaw : defaultLimit;
+
+    const transientSettingsRaw = Number(clusterSettings.transient.indices?.mapping?.depth?.limit);
+    const transientSettings = !isNaN(transientSettingsRaw) ? transientSettingsRaw : defaultLimit;
+
+    // To ensure maximum compatibility, we're only considering the minimum of all 3 settings
+    return Math.min(defaultSettings, persistentSettings, transientSettings);
+  } catch (e) {
+    return defaultLimit;
+  }
 };
