@@ -101,6 +101,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
+    "**/axios": "^1.8.2",
     "**/@babel/traverse": "^7.23.2",
     "**/@cypress/request": "^3.0.0",
     "**/@types/node": "~18.7.0",
