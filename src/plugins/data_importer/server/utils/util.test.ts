@@ -3,11 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { decideClient, determineMapping, validateEnabledFileTypes } from './util';
-import { coreMock } from '../../../../core/server/mocks';
+import { decideClient, determineMapping, fetchDepthLimit, validateEnabledFileTypes } from './util';
+import { coreMock, opensearchServiceMock } from '../../../../core/server/mocks';
 import { FileParserService } from '../parsers/file_parser_service';
 import { IFileParser } from '../types';
-import { MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
+import {
+  ClusterGetSettingsResponse,
+  MappingTypeMapping,
+} from '@opensearch-project/opensearch/api/types';
+import { ApiResponse } from '@opensearch-project/opensearch';
 
 describe('util', () => {
   describe('decideClient()', () => {
@@ -736,6 +740,119 @@ describe('util', () => {
 
     it('should error out when the object is too deeply nested', () => {
       expect(() => determineMapping(document, 4)).toThrowError();
+    });
+  });
+
+  describe('fetchDepthLimit()', () => {
+    interface CreateMockSettingsResponseProps {
+      persistentSettingsLimit?: number;
+      transientSettingsLimit?: number;
+      defaultSettingsLimit?: number;
+    }
+
+    const generateSettingsObject = (limit: number) => {
+      return {
+        indices: {
+          mapping: {
+            depth: {
+              limit,
+            },
+          },
+        },
+      };
+    };
+
+    const createMockResponse = ({
+      persistentSettingsLimit,
+      transientSettingsLimit,
+      defaultSettingsLimit,
+    }: CreateMockSettingsResponseProps): Pick<ApiResponse<ClusterGetSettingsResponse>, 'body'> => {
+      return {
+        body: {
+          defaults: {
+            ...(defaultSettingsLimit && generateSettingsObject(defaultSettingsLimit)),
+          },
+          persistent: {
+            ...(persistentSettingsLimit && generateSettingsObject(persistentSettingsLimit)),
+          },
+          transient: {
+            ...(transientSettingsLimit && generateSettingsObject(transientSettingsLimit)),
+          },
+        },
+      };
+    };
+
+    const mockClient = opensearchServiceMock.createOpenSearchClient();
+
+    beforeEach(() => {
+      mockClient.cluster.getSettings.mockClear();
+    });
+
+    it.each([
+      {
+        defaultSettingsLimit: undefined,
+        persistentSettingsLimit: undefined,
+        transientSettingsLimit: undefined,
+        expected: 20,
+      },
+      {
+        defaultSettingsLimit: 3,
+        persistentSettingsLimit: undefined,
+        transientSettingsLimit: undefined,
+        expected: 3,
+      },
+      {
+        defaultSettingsLimit: undefined,
+        persistentSettingsLimit: 5,
+        transientSettingsLimit: undefined,
+        expected: 5,
+      },
+      {
+        defaultSettingsLimit: undefined,
+        persistentSettingsLimit: undefined,
+        transientSettingsLimit: 25,
+        expected: 20,
+      },
+      {
+        defaultSettingsLimit: 4,
+        persistentSettingsLimit: 9,
+        transientSettingsLimit: undefined,
+        expected: 4,
+      },
+      {
+        defaultSettingsLimit: 22,
+        persistentSettingsLimit: undefined,
+        transientSettingsLimit: 26,
+        expected: 20,
+      },
+      {
+        defaultSettingsLimit: 9,
+        persistentSettingsLimit: undefined,
+        transientSettingsLimit: 11,
+        expected: 9,
+      },
+      {
+        defaultSettingsLimit: 18,
+        persistentSettingsLimit: 22,
+        transientSettingsLimit: 24,
+        expected: 18,
+      },
+    ])(
+      'should return $expected as the depth limit when persistentSettingsLimit = $persistentSettingsLimit, transientSettingsLimit = $transientSettingsLimit, and defaultSettingsLimit = $defaultSettingsLimit',
+      async (testCase) => {
+        const mockedResponse = opensearchServiceMock.createApiResponse<ClusterGetSettingsResponse>(
+          createMockResponse({ ...testCase })
+        );
+        mockClient.cluster.getSettings.mockResolvedValue(mockedResponse);
+
+        expect(await fetchDepthLimit(mockClient)).toEqual(testCase.expected);
+      }
+    );
+
+    it('should return the defaultLimit of 20 when the call to "_cluster/settings" fails', async () => {
+      mockClient.cluster.getSettings.mockRejectedValue(new Error('Something went wrong'));
+
+      expect(await fetchDepthLimit(mockClient)).toEqual(20);
     });
   });
 });
