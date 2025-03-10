@@ -29,7 +29,6 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
-import { monaco } from '@osd/monaco';
 import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
   getEmptyValueSuggestions,
@@ -49,28 +48,11 @@ export class AutocompleteService {
   }
 
   private readonly querySuggestionProviders: Map<string, QuerySuggestionGetFn> = new Map();
-  private readonly syntaxHighlightingProviders: Map<
-    string,
-    monaco.languages.TokensProvider
-  > = new Map();
   private getValueSuggestions?: ValueSuggestionsGetFn;
 
   private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
     if (language && provider && this.autocompleteConfig.querySuggestions.enabled) {
       this.querySuggestionProviders.set(language, provider);
-    }
-  };
-
-  private addLanguageProviders = (
-    language: string,
-    querySuggestionProvider: QuerySuggestionGetFn,
-    syntaxHighlightingProvider: monaco.languages.TokensProvider
-  ): void => {
-    if (language && querySuggestionProvider && this.autocompleteConfig.querySuggestions.enabled) {
-      this.querySuggestionProviders.set(language, querySuggestionProvider);
-    }
-    if (language && syntaxHighlightingProvider) {
-      this.syntaxHighlightingProviders.set(language, syntaxHighlightingProvider);
     }
   };
 
@@ -80,16 +62,6 @@ export class AutocompleteService {
 
     if (provider) {
       return provider(args);
-    }
-  };
-
-  private getSyntaxHighlightingProvider: (
-    language: string
-  ) => monaco.languages.TokensProvider | undefined = (language) => {
-    const provider = this.syntaxHighlightingProviders.get(language);
-
-    if (provider) {
-      return provider;
     }
   };
 
@@ -103,7 +75,6 @@ export class AutocompleteService {
 
     return {
       addQuerySuggestionProvider: this.addQuerySuggestionProvider,
-      addLanguageProviders: this.addLanguageProviders,
 
       /** @obsolete **/
       /** please use "getProvider" only from the start contract **/
@@ -117,14 +88,12 @@ export class AutocompleteService {
       getQuerySuggestions: this.getQuerySuggestions,
       hasQuerySuggestions: this.hasQuerySuggestions,
       getValueSuggestions: this.getValueSuggestions!,
-      getSyntaxHighlightingProvider: this.getSyntaxHighlightingProvider,
     };
   }
 
   /** @internal **/
   public clearProviders(): void {
     this.querySuggestionProviders.clear();
-    this.syntaxHighlightingProviders.clear();
   }
 }
 

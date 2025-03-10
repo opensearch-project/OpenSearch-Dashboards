@@ -94,9 +94,7 @@ import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
 import { getSuggestions as getSQLSuggestions } from './antlr/opensearch_sql/code_completion';
 import { getSuggestions as getDQLSuggestions } from './antlr/dql/code_completion';
 import { getSuggestions as getPPLSuggestions } from './antlr/opensearch_ppl/code_completion';
-import { getSuggestions as getPromQLSuggestions } from './antlr/promql/code_completion';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
-import { PromQLTokensProvider } from './antlr/promql/syntaxHighlighterTokensProvider/tokens_provider';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -179,8 +177,8 @@ export class DataPublicPlugin
     );
 
     const autoComplete = this.autocomplete.setup(core);
-    autoComplete.addLanguageProviders('SQL', getPromQLSuggestions, new PromQLTokensProvider());
-    autoComplete.addLanguageProviders('kuery', getPromQLSuggestions, new PromQLTokensProvider());
+    autoComplete.addQuerySuggestionProvider('SQL', getSQLSuggestions);
+    autoComplete.addQuerySuggestionProvider('kuery', getDQLSuggestions);
     autoComplete.addQuerySuggestionProvider('PPL', getPPLSuggestions);
 
     const useNewSavedQueriesUI =

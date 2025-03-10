@@ -8,18 +8,13 @@ import { monaco } from '@osd/monaco';
 import React, { Fragment, useCallback, useRef, useState } from 'react';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 import { QueryStatus, ResultStatus } from '../../../query';
-import { PromQLTokensProvider } from '../../../antlr/promql/syntaxHighlighterTokensProvider/tokens_provider';
 
 interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   languageId: string;
   value: string;
   onChange: (value: string) => void;
   editorDidMount: (editor: any) => void;
-  languageProviders: {
-    provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
-    triggerCharacters: string[];
-    syntaxHighlightingProvider?: monaco.languages.TokensProvider;
-  };
+  provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   footerItems?: any;
   queryStatus?: QueryStatus;
@@ -67,7 +62,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   value,
   onChange,
   editorDidMount,
-  languageProviders,
+  provideCompletionItems,
   prepend,
   footerItems,
   queryStatus,
@@ -143,10 +138,9 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
             wordBasedSuggestions: false,
           }}
           suggestionProvider={{
-            provideCompletionItems: languageProviders.provideCompletionItems,
-            triggerCharacters: languageProviders.triggerCharacters,
+            provideCompletionItems,
+            triggerCharacters: [' '],
           }}
-          tokensProvider={new PromQLTokensProvider()}
           languageConfiguration={{
             autoClosingPairs: [
               {
@@ -170,11 +164,11 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
           <div className="queryEditor__footer" data-test-subj="queryEditorFooter">
             {footerItems && (
               <Fragment>
-                {footerItems.start?.map((item: any) => (
+                {footerItems.start?.map((item) => (
                   <div className="queryEditor__footerItem">{item}</div>
                 ))}
                 <div className="queryEditor__footerSpacer" />
-                {footerItems.end?.map((item: any) => (
+                {footerItems.end?.map((item) => (
                   <div className="queryEditor__footerItem">{item}</div>
                 ))}
               </Fragment>

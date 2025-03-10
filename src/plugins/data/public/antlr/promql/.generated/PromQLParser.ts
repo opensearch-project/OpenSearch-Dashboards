@@ -133,9 +133,10 @@ export class PromQLParser extends antlr.Parser {
     public static readonly COLON = 120;
     public static readonly AT = 121;
     public static readonly DURATION = 122;
-    public static readonly IDENTIFIER = 123;
-    public static readonly WS = 124;
-    public static readonly SL_COMMENT = 125;
+    public static readonly METRIC_NAME = 123;
+    public static readonly LABEL_NAME = 124;
+    public static readonly WS = 125;
+    public static readonly SL_COMMENT = 126;
     public static readonly RULE_expression = 0;
     public static readonly RULE_vectorOperation = 1;
     public static readonly RULE_unaryOp = 2;
@@ -223,8 +224,8 @@ export class PromQLParser extends antlr.Parser {
         "PRESENT_OVER_TIME", "ACOS", "ACOSH", "ASIN", "ASINH", "ATAN", "ATANH", 
         "COS", "COSH", "SIN", "SINH", "TAN", "TANH", "DEG", "PI", "RAD", 
         "LEFT_BRACE", "RIGHT_BRACE", "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET", 
-        "RIGHT_BRACKET", "COMMA", "COLON", "AT", "DURATION", "IDENTIFIER", 
-        "WS", "SL_COMMENT"
+        "RIGHT_BRACKET", "COMMA", "COLON", "AT", "DURATION", "METRIC_NAME", 
+        "LABEL_NAME", "WS", "SL_COMMENT"
     ];
     public static readonly ruleNames = [
         "expression", "vectorOperation", "unaryOp", "powOp", "multOp", "addOp", 
@@ -297,8 +298,9 @@ export class PromQLParser extends antlr.Parser {
             {
             this.state = 92;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 0, this.context) ) {
-            case 1:
+            switch (this.tokenStream.LA(1)) {
+            case PromQLParser.ADD:
+            case PromQLParser.SUB:
                 {
                 this.state = 88;
                 this.unaryOp();
@@ -306,12 +308,102 @@ export class PromQLParser extends antlr.Parser {
                 this.vectorOperation(9);
                 }
                 break;
-            case 2:
+            case PromQLParser.NUMBER:
+            case PromQLParser.STRING:
+            case PromQLParser.SUM:
+            case PromQLParser.MIN:
+            case PromQLParser.MAX:
+            case PromQLParser.AVG:
+            case PromQLParser.GROUP:
+            case PromQLParser.STDDEV:
+            case PromQLParser.STDVAR:
+            case PromQLParser.COUNT:
+            case PromQLParser.COUNT_VALUES:
+            case PromQLParser.BOTTOMK:
+            case PromQLParser.TOPK:
+            case PromQLParser.QUANTILE:
+            case PromQLParser.LIMITK:
+            case PromQLParser.LIMIT_RATIO:
+            case PromQLParser.ABS:
+            case PromQLParser.ABSENT:
+            case PromQLParser.ABSENT_OVER_TIME:
+            case PromQLParser.CEIL:
+            case PromQLParser.CHANGES:
+            case PromQLParser.CLAMP:
+            case PromQLParser.CLAMP_MAX:
+            case PromQLParser.CLAMP_MIN:
+            case PromQLParser.DAY_OF_MONTH:
+            case PromQLParser.DAY_OF_WEEK:
+            case PromQLParser.DAY_OF_YEAR:
+            case PromQLParser.DAYS_IN_MONTH:
+            case PromQLParser.DELTA:
+            case PromQLParser.DERIV:
+            case PromQLParser.EXP:
+            case PromQLParser.FLOOR:
+            case PromQLParser.HISTOGRAM_COUNT:
+            case PromQLParser.HISTOGRAM_SUM:
+            case PromQLParser.HISTOGRAM_FRACTION:
+            case PromQLParser.HISTOGRAM_QUANTILE:
+            case PromQLParser.HOLT_WINTERS:
+            case PromQLParser.HOUR:
+            case PromQLParser.IDELTA:
+            case PromQLParser.INCREASE:
+            case PromQLParser.IRATE:
+            case PromQLParser.LABEL_JOIN:
+            case PromQLParser.LABEL_REPLACE:
+            case PromQLParser.LN:
+            case PromQLParser.LOG2:
+            case PromQLParser.LOG10:
+            case PromQLParser.MINUTE:
+            case PromQLParser.MONTH:
+            case PromQLParser.PREDICT_LINEAR:
+            case PromQLParser.RATE:
+            case PromQLParser.RESETS:
+            case PromQLParser.ROUND:
+            case PromQLParser.SCALAR:
+            case PromQLParser.SGN:
+            case PromQLParser.SORT:
+            case PromQLParser.SORT_DESC:
+            case PromQLParser.SQRT:
+            case PromQLParser.TIME:
+            case PromQLParser.TIMESTAMP:
+            case PromQLParser.VECTOR:
+            case PromQLParser.YEAR:
+            case PromQLParser.AVG_OVER_TIME:
+            case PromQLParser.MIN_OVER_TIME:
+            case PromQLParser.MAX_OVER_TIME:
+            case PromQLParser.SUM_OVER_TIME:
+            case PromQLParser.COUNT_OVER_TIME:
+            case PromQLParser.QUANTILE_OVER_TIME:
+            case PromQLParser.STDDEV_OVER_TIME:
+            case PromQLParser.STDVAR_OVER_TIME:
+            case PromQLParser.LAST_OVER_TIME:
+            case PromQLParser.PRESENT_OVER_TIME:
+            case PromQLParser.ACOS:
+            case PromQLParser.ACOSH:
+            case PromQLParser.ASIN:
+            case PromQLParser.ASINH:
+            case PromQLParser.ATAN:
+            case PromQLParser.ATANH:
+            case PromQLParser.COS:
+            case PromQLParser.COSH:
+            case PromQLParser.SIN:
+            case PromQLParser.SINH:
+            case PromQLParser.TAN:
+            case PromQLParser.TANH:
+            case PromQLParser.DEG:
+            case PromQLParser.PI:
+            case PromQLParser.RAD:
+            case PromQLParser.LEFT_BRACE:
+            case PromQLParser.LEFT_PAREN:
+            case PromQLParser.METRIC_NAME:
                 {
                 this.state = 91;
                 this.vector();
                 }
                 break;
+            default:
+                throw new antlr.NoViableAltException(this);
             }
             this.context!.stop = this.tokenStream.LT(-1);
             this.state = 129;
@@ -507,6 +599,7 @@ export class PromQLParser extends antlr.Parser {
     public powOp(): PowOpContext {
         let localContext = new PowOpContext(this.context, this.state);
         this.enterRule(localContext, 6, PromQLParser.RULE_powOp);
+        let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
@@ -514,14 +607,14 @@ export class PromQLParser extends antlr.Parser {
             this.match(PromQLParser.POW);
             this.state = 136;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 3, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if (_la === 23 || _la === 24) {
                 {
                 this.state = 135;
                 this.grouping();
                 }
-                break;
             }
+
             }
         }
         catch (re) {
@@ -555,14 +648,14 @@ export class PromQLParser extends antlr.Parser {
             }
             this.state = 140;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 4, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if (_la === 23 || _la === 24) {
                 {
                 this.state = 139;
                 this.grouping();
                 }
-                break;
             }
+
             }
         }
         catch (re) {
@@ -596,14 +689,14 @@ export class PromQLParser extends antlr.Parser {
             }
             this.state = 144;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 5, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if (_la === 23 || _la === 24) {
                 {
                 this.state = 143;
                 this.grouping();
                 }
-                break;
             }
+
             }
         }
         catch (re) {
@@ -637,24 +730,24 @@ export class PromQLParser extends antlr.Parser {
             }
             this.state = 148;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 6, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if (_la === 28) {
                 {
                 this.state = 147;
                 this.match(PromQLParser.BOOL);
                 }
-                break;
             }
+
             this.state = 151;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 7, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if (_la === 23 || _la === 24) {
                 {
                 this.state = 150;
                 this.grouping();
                 }
-                break;
             }
+
             }
         }
         catch (re) {
@@ -688,14 +781,14 @@ export class PromQLParser extends antlr.Parser {
             }
             this.state = 155;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 8, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if (_la === 23 || _la === 24) {
                 {
                 this.state = 154;
                 this.grouping();
                 }
-                break;
             }
+
             }
         }
         catch (re) {
@@ -714,6 +807,7 @@ export class PromQLParser extends antlr.Parser {
     public orOp(): OrOpContext {
         let localContext = new OrOpContext(this.context, this.state);
         this.enterRule(localContext, 16, PromQLParser.RULE_orOp);
+        let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
@@ -721,14 +815,14 @@ export class PromQLParser extends antlr.Parser {
             this.match(PromQLParser.OR);
             this.state = 159;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 9, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if (_la === 23 || _la === 24) {
                 {
                 this.state = 158;
                 this.grouping();
                 }
-                break;
             }
+
             }
         }
         catch (re) {
@@ -762,14 +856,14 @@ export class PromQLParser extends antlr.Parser {
             }
             this.state = 163;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 10, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if (_la === 23 || _la === 24) {
                 {
                 this.state = 162;
                 this.grouping();
                 }
-                break;
             }
+
             }
         }
         catch (re) {
@@ -948,7 +1042,7 @@ export class PromQLParser extends antlr.Parser {
             this.enterOuterAlt(localContext, 1);
             {
             this.state = 185;
-            this.match(PromQLParser.IDENTIFIER);
+            this.match(PromQLParser.METRIC_NAME);
             }
         }
         catch (re) {
@@ -969,40 +1063,51 @@ export class PromQLParser extends antlr.Parser {
         this.enterRule(localContext, 30, PromQLParser.RULE_instantSelector);
         let _la: number;
         try {
-            this.enterOuterAlt(localContext, 1);
-            {
-            this.state = 188;
+            this.state = 199;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 13, this.context) ) {
-            case 1:
+            switch (this.tokenStream.LA(1)) {
+            case PromQLParser.METRIC_NAME:
+                this.enterOuterAlt(localContext, 1);
                 {
                 this.state = 187;
                 this.metricName();
+                this.state = 193;
+                this.errorHandler.sync(this);
+                switch (this.interpreter.adaptivePredict(this.tokenStream, 14, this.context) ) {
+                case 1:
+                    {
+                    this.state = 188;
+                    this.match(PromQLParser.LEFT_BRACE);
+                    this.state = 190;
+                    this.errorHandler.sync(this);
+                    _la = this.tokenStream.LA(1);
+                    if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 4292873728) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 4294967295) !== 0) || ((((_la - 64)) & ~0x1F) === 0 && ((1 << (_la - 64)) & 4294967295) !== 0) || ((((_la - 96)) & ~0x1F) === 0 && ((1 << (_la - 96)) & 402784255) !== 0)) {
+                        {
+                        this.state = 189;
+                        this.labelMatcherList();
+                        }
+                    }
+
+                    this.state = 192;
+                    this.match(PromQLParser.RIGHT_BRACE);
+                    }
+                    break;
+                }
                 }
                 break;
-            }
-            this.state = 195;
-            this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 15, this.context) ) {
-            case 1:
+            case PromQLParser.LEFT_BRACE:
+                this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 190;
+                this.state = 195;
                 this.match(PromQLParser.LEFT_BRACE);
-                this.state = 192;
-                this.errorHandler.sync(this);
-                _la = this.tokenStream.LA(1);
-                if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 4292873728) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 4294967295) !== 0) || ((((_la - 64)) & ~0x1F) === 0 && ((1 << (_la - 64)) & 4294967295) !== 0) || ((((_la - 96)) & ~0x1F) === 0 && ((1 << (_la - 96)) & 134348799) !== 0)) {
-                    {
-                    this.state = 191;
-                    this.labelMatcherList();
-                    }
-                }
-
-                this.state = 194;
+                this.state = 196;
+                this.labelMatcherList();
+                this.state = 197;
                 this.match(PromQLParser.RIGHT_BRACE);
                 }
                 break;
-            }
+            default:
+                throw new antlr.NoViableAltException(this);
             }
         }
         catch (re) {
@@ -1024,11 +1129,11 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 197;
+            this.state = 201;
             this.labelName();
-            this.state = 198;
+            this.state = 202;
             this.labelMatcherOperator();
-            this.state = 199;
+            this.state = 203;
             this.labelValue();
             }
         }
@@ -1051,7 +1156,7 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 201;
+            this.state = 205;
             this.match(PromQLParser.STRING);
             }
         }
@@ -1075,7 +1180,7 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 203;
+            this.state = 207;
             _la = this.tokenStream.LA(1);
             if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 1593344) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -1107,32 +1212,32 @@ export class PromQLParser extends antlr.Parser {
             let alternative: number;
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 205;
+            this.state = 209;
             this.labelMatcher();
-            this.state = 210;
+            this.state = 214;
             this.errorHandler.sync(this);
             alternative = this.interpreter.adaptivePredict(this.tokenStream, 16, this.context);
             while (alternative !== 2 && alternative !== antlr.ATN.INVALID_ALT_NUMBER) {
                 if (alternative === 1) {
                     {
                     {
-                    this.state = 206;
+                    this.state = 210;
                     this.match(PromQLParser.COMMA);
-                    this.state = 207;
+                    this.state = 211;
                     this.labelMatcher();
                     }
                     }
                 }
-                this.state = 212;
+                this.state = 216;
                 this.errorHandler.sync(this);
                 alternative = this.interpreter.adaptivePredict(this.tokenStream, 16, this.context);
             }
-            this.state = 214;
+            this.state = 218;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 119) {
                 {
-                this.state = 213;
+                this.state = 217;
                 this.match(PromQLParser.COMMA);
                 }
             }
@@ -1158,9 +1263,9 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 216;
+            this.state = 220;
             this.instantSelector();
-            this.state = 217;
+            this.state = 221;
             this.timeRange();
             }
         }
@@ -1183,11 +1288,11 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 219;
+            this.state = 223;
             this.match(PromQLParser.LEFT_BRACKET);
-            this.state = 220;
+            this.state = 224;
             this.duration();
-            this.state = 221;
+            this.state = 225;
             this.match(PromQLParser.RIGHT_BRACKET);
             }
         }
@@ -1211,23 +1316,23 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 223;
-            this.match(PromQLParser.LEFT_BRACKET);
-            this.state = 224;
-            this.duration();
-            this.state = 225;
-            this.match(PromQLParser.COLON);
             this.state = 227;
+            this.match(PromQLParser.LEFT_BRACKET);
+            this.state = 228;
+            this.duration();
+            this.state = 229;
+            this.match(PromQLParser.COLON);
+            this.state = 231;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 122) {
                 {
-                this.state = 226;
+                this.state = 230;
                 this.duration();
                 }
             }
 
-            this.state = 229;
+            this.state = 233;
             this.match(PromQLParser.RIGHT_BRACKET);
             }
         }
@@ -1251,7 +1356,7 @@ export class PromQLParser extends antlr.Parser {
             let alternative: number;
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 232;
+            this.state = 236;
             this.errorHandler.sync(this);
             alternative = 1;
             do {
@@ -1259,7 +1364,7 @@ export class PromQLParser extends antlr.Parser {
                 case 1:
                     {
                     {
-                    this.state = 231;
+                    this.state = 235;
                     this.match(PromQLParser.DURATION);
                     }
                     }
@@ -1267,7 +1372,7 @@ export class PromQLParser extends antlr.Parser {
                 default:
                     throw new antlr.NoViableAltException(this);
                 }
-                this.state = 234;
+                this.state = 238;
                 this.errorHandler.sync(this);
                 alternative = this.interpreter.adaptivePredict(this.tokenStream, 19, this.context);
             } while (alternative !== 2 && alternative !== antlr.ATN.INVALID_ALT_NUMBER);
@@ -1290,28 +1395,28 @@ export class PromQLParser extends antlr.Parser {
         let localContext = new OffsetContext(this.context, this.state);
         this.enterRule(localContext, 48, PromQLParser.RULE_offset);
         try {
-            this.state = 244;
+            this.state = 248;
             this.errorHandler.sync(this);
             switch (this.interpreter.adaptivePredict(this.tokenStream, 20, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 236;
+                this.state = 240;
                 this.instantSelector();
-                this.state = 237;
+                this.state = 241;
                 this.match(PromQLParser.OFFSET);
-                this.state = 238;
+                this.state = 242;
                 this.duration();
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 240;
+                this.state = 244;
                 this.matrixSelector();
-                this.state = 241;
+                this.state = 245;
                 this.match(PromQLParser.OFFSET);
-                this.state = 242;
+                this.state = 246;
                 this.duration();
                 }
                 break;
@@ -1337,37 +1442,37 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 246;
+            this.state = 250;
             this.functionNames();
-            this.state = 247;
+            this.state = 251;
             this.match(PromQLParser.LEFT_PAREN);
-            this.state = 256;
+            this.state = 260;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 22, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 3758096414) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 4294967295) !== 0) || ((((_la - 64)) & ~0x1F) === 0 && ((1 << (_la - 64)) & 4294967295) !== 0) || ((((_la - 96)) & ~0x1F) === 0 && ((1 << (_la - 96)) & 135004159) !== 0)) {
                 {
-                this.state = 248;
+                this.state = 252;
                 this.parameter();
-                this.state = 253;
+                this.state = 257;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
                 while (_la === 119) {
                     {
                     {
-                    this.state = 249;
+                    this.state = 253;
                     this.match(PromQLParser.COMMA);
-                    this.state = 250;
+                    this.state = 254;
                     this.parameter();
                     }
                     }
-                    this.state = 255;
+                    this.state = 259;
                     this.errorHandler.sync(this);
                     _la = this.tokenStream.LA(1);
                 }
                 }
-                break;
             }
-            this.state = 258;
+
+            this.state = 262;
             this.match(PromQLParser.RIGHT_PAREN);
             }
         }
@@ -1388,20 +1493,20 @@ export class PromQLParser extends antlr.Parser {
         let localContext = new ParameterContext(this.context, this.state);
         this.enterRule(localContext, 52, PromQLParser.RULE_parameter);
         try {
-            this.state = 262;
+            this.state = 266;
             this.errorHandler.sync(this);
             switch (this.interpreter.adaptivePredict(this.tokenStream, 23, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 260;
+                this.state = 264;
                 this.literal();
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 261;
+                this.state = 265;
                 this.vectorOperation(0);
                 }
                 break;
@@ -1427,35 +1532,35 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 264;
+            this.state = 268;
             this.match(PromQLParser.LEFT_PAREN);
-            this.state = 273;
+            this.state = 277;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 25, this.context) ) {
-            case 1:
+            _la = this.tokenStream.LA(1);
+            if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 3758096414) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 4294967295) !== 0) || ((((_la - 64)) & ~0x1F) === 0 && ((1 << (_la - 64)) & 4294967295) !== 0) || ((((_la - 96)) & ~0x1F) === 0 && ((1 << (_la - 96)) & 135004159) !== 0)) {
                 {
-                this.state = 265;
+                this.state = 269;
                 this.parameter();
-                this.state = 270;
+                this.state = 274;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
                 while (_la === 119) {
                     {
                     {
-                    this.state = 266;
+                    this.state = 270;
                     this.match(PromQLParser.COMMA);
-                    this.state = 267;
+                    this.state = 271;
                     this.parameter();
                     }
                     }
-                    this.state = 272;
+                    this.state = 276;
                     this.errorHandler.sync(this);
                     _la = this.tokenStream.LA(1);
                 }
                 }
-                break;
             }
-            this.state = 275;
+
+            this.state = 279;
             this.match(PromQLParser.RIGHT_PAREN);
             }
         }
@@ -1479,7 +1584,7 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 277;
+            this.state = 281;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 43)) & ~0x1F) === 0 && ((1 << (_la - 43)) & 4294967295) !== 0) || ((((_la - 75)) & ~0x1F) === 0 && ((1 << (_la - 75)) & 4294967295) !== 0) || ((((_la - 107)) & ~0x1F) === 0 && ((1 << (_la - 107)) & 63) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -1507,64 +1612,64 @@ export class PromQLParser extends antlr.Parser {
         let localContext = new AggregationContext(this.context, this.state);
         this.enterRule(localContext, 58, PromQLParser.RULE_aggregation);
         try {
-            this.state = 295;
+            this.state = 299;
             this.errorHandler.sync(this);
             switch (this.interpreter.adaptivePredict(this.tokenStream, 28, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 279;
+                this.state = 283;
                 this.aggregationOperators();
-                this.state = 280;
+                this.state = 284;
                 this.parameterList();
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 282;
+                this.state = 286;
                 this.aggregationOperators();
-                this.state = 285;
+                this.state = 289;
                 this.errorHandler.sync(this);
                 switch (this.tokenStream.LA(1)) {
                 case PromQLParser.BY:
                     {
-                    this.state = 283;
+                    this.state = 287;
                     this.by();
                     }
                     break;
                 case PromQLParser.WITHOUT:
                     {
-                    this.state = 284;
+                    this.state = 288;
                     this.without();
                     }
                     break;
                 default:
                     throw new antlr.NoViableAltException(this);
                 }
-                this.state = 287;
+                this.state = 291;
                 this.parameterList();
                 }
                 break;
             case 3:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 289;
-                this.aggregationOperators();
-                this.state = 290;
-                this.parameterList();
                 this.state = 293;
+                this.aggregationOperators();
+                this.state = 294;
+                this.parameterList();
+                this.state = 297;
                 this.errorHandler.sync(this);
                 switch (this.tokenStream.LA(1)) {
                 case PromQLParser.BY:
                     {
-                    this.state = 291;
+                    this.state = 295;
                     this.by();
                     }
                     break;
                 case PromQLParser.WITHOUT:
                     {
-                    this.state = 292;
+                    this.state = 296;
                     this.without();
                     }
                     break;
@@ -1594,9 +1699,9 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 297;
+            this.state = 301;
             this.match(PromQLParser.BY);
-            this.state = 298;
+            this.state = 302;
             this.labelNameList();
             }
         }
@@ -1619,9 +1724,9 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 300;
+            this.state = 304;
             this.match(PromQLParser.WITHOUT);
-            this.state = 301;
+            this.state = 305;
             this.labelNameList();
             }
         }
@@ -1645,7 +1750,7 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 303;
+            this.state = 307;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 29)) & ~0x1F) === 0 && ((1 << (_la - 29)) & 16383) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -1675,38 +1780,132 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 307;
+            this.state = 311;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case PromQLParser.ON:
                 {
-                this.state = 305;
+                this.state = 309;
                 this.on_();
                 }
                 break;
             case PromQLParser.IGNORING:
                 {
-                this.state = 306;
+                this.state = 310;
                 this.ignoring();
                 }
                 break;
             default:
                 throw new antlr.NoViableAltException(this);
             }
-            this.state = 311;
+            this.state = 315;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 30, this.context) ) {
-            case 1:
+            switch (this.tokenStream.LA(1)) {
+            case PromQLParser.GROUP_LEFT:
                 {
-                this.state = 309;
+                this.state = 313;
                 this.groupLeft();
                 }
                 break;
-            case 2:
+            case PromQLParser.GROUP_RIGHT:
                 {
-                this.state = 310;
+                this.state = 314;
                 this.groupRight();
                 }
+                break;
+            case PromQLParser.NUMBER:
+            case PromQLParser.STRING:
+            case PromQLParser.ADD:
+            case PromQLParser.SUB:
+            case PromQLParser.SUM:
+            case PromQLParser.MIN:
+            case PromQLParser.MAX:
+            case PromQLParser.AVG:
+            case PromQLParser.GROUP:
+            case PromQLParser.STDDEV:
+            case PromQLParser.STDVAR:
+            case PromQLParser.COUNT:
+            case PromQLParser.COUNT_VALUES:
+            case PromQLParser.BOTTOMK:
+            case PromQLParser.TOPK:
+            case PromQLParser.QUANTILE:
+            case PromQLParser.LIMITK:
+            case PromQLParser.LIMIT_RATIO:
+            case PromQLParser.ABS:
+            case PromQLParser.ABSENT:
+            case PromQLParser.ABSENT_OVER_TIME:
+            case PromQLParser.CEIL:
+            case PromQLParser.CHANGES:
+            case PromQLParser.CLAMP:
+            case PromQLParser.CLAMP_MAX:
+            case PromQLParser.CLAMP_MIN:
+            case PromQLParser.DAY_OF_MONTH:
+            case PromQLParser.DAY_OF_WEEK:
+            case PromQLParser.DAY_OF_YEAR:
+            case PromQLParser.DAYS_IN_MONTH:
+            case PromQLParser.DELTA:
+            case PromQLParser.DERIV:
+            case PromQLParser.EXP:
+            case PromQLParser.FLOOR:
+            case PromQLParser.HISTOGRAM_COUNT:
+            case PromQLParser.HISTOGRAM_SUM:
+            case PromQLParser.HISTOGRAM_FRACTION:
+            case PromQLParser.HISTOGRAM_QUANTILE:
+            case PromQLParser.HOLT_WINTERS:
+            case PromQLParser.HOUR:
+            case PromQLParser.IDELTA:
+            case PromQLParser.INCREASE:
+            case PromQLParser.IRATE:
+            case PromQLParser.LABEL_JOIN:
+            case PromQLParser.LABEL_REPLACE:
+            case PromQLParser.LN:
+            case PromQLParser.LOG2:
+            case PromQLParser.LOG10:
+            case PromQLParser.MINUTE:
+            case PromQLParser.MONTH:
+            case PromQLParser.PREDICT_LINEAR:
+            case PromQLParser.RATE:
+            case PromQLParser.RESETS:
+            case PromQLParser.ROUND:
+            case PromQLParser.SCALAR:
+            case PromQLParser.SGN:
+            case PromQLParser.SORT:
+            case PromQLParser.SORT_DESC:
+            case PromQLParser.SQRT:
+            case PromQLParser.TIME:
+            case PromQLParser.TIMESTAMP:
+            case PromQLParser.VECTOR:
+            case PromQLParser.YEAR:
+            case PromQLParser.AVG_OVER_TIME:
+            case PromQLParser.MIN_OVER_TIME:
+            case PromQLParser.MAX_OVER_TIME:
+            case PromQLParser.SUM_OVER_TIME:
+            case PromQLParser.COUNT_OVER_TIME:
+            case PromQLParser.QUANTILE_OVER_TIME:
+            case PromQLParser.STDDEV_OVER_TIME:
+            case PromQLParser.STDVAR_OVER_TIME:
+            case PromQLParser.LAST_OVER_TIME:
+            case PromQLParser.PRESENT_OVER_TIME:
+            case PromQLParser.ACOS:
+            case PromQLParser.ACOSH:
+            case PromQLParser.ASIN:
+            case PromQLParser.ASINH:
+            case PromQLParser.ATAN:
+            case PromQLParser.ATANH:
+            case PromQLParser.COS:
+            case PromQLParser.COSH:
+            case PromQLParser.SIN:
+            case PromQLParser.SINH:
+            case PromQLParser.TAN:
+            case PromQLParser.TANH:
+            case PromQLParser.DEG:
+            case PromQLParser.PI:
+            case PromQLParser.RAD:
+            case PromQLParser.LEFT_BRACE:
+            case PromQLParser.LEFT_PAREN:
+            case PromQLParser.METRIC_NAME:
+                break;
+            default:
                 break;
             }
             }
@@ -1730,9 +1929,9 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 313;
+            this.state = 317;
             this.match(PromQLParser.ON);
-            this.state = 314;
+            this.state = 318;
             this.labelNameList();
             }
         }
@@ -1755,9 +1954,9 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 316;
+            this.state = 320;
             this.match(PromQLParser.IGNORING);
-            this.state = 317;
+            this.state = 321;
             this.labelNameList();
             }
         }
@@ -1780,14 +1979,14 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 319;
+            this.state = 323;
             this.match(PromQLParser.GROUP_LEFT);
-            this.state = 321;
+            this.state = 325;
             this.errorHandler.sync(this);
             switch (this.interpreter.adaptivePredict(this.tokenStream, 31, this.context) ) {
             case 1:
                 {
-                this.state = 320;
+                this.state = 324;
                 this.labelNameList();
                 }
                 break;
@@ -1813,14 +2012,14 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 323;
+            this.state = 327;
             this.match(PromQLParser.GROUP_RIGHT);
-            this.state = 325;
+            this.state = 329;
             this.errorHandler.sync(this);
             switch (this.interpreter.adaptivePredict(this.tokenStream, 32, this.context) ) {
             case 1:
                 {
-                this.state = 324;
+                this.state = 328;
                 this.labelNameList();
                 }
                 break;
@@ -1844,7 +2043,7 @@ export class PromQLParser extends antlr.Parser {
         let localContext = new LabelNameContext(this.context, this.state);
         this.enterRule(localContext, 76, PromQLParser.RULE_labelName);
         try {
-            this.state = 329;
+            this.state = 334;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case PromQLParser.AND:
@@ -1944,15 +2143,22 @@ export class PromQLParser extends antlr.Parser {
             case PromQLParser.RAD:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 327;
+                this.state = 331;
                 this.keyword();
                 }
                 break;
-            case PromQLParser.IDENTIFIER:
+            case PromQLParser.METRIC_NAME:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 328;
-                this.match(PromQLParser.IDENTIFIER);
+                this.state = 332;
+                this.metricName();
+                }
+                break;
+            case PromQLParser.LABEL_NAME:
+                this.enterOuterAlt(localContext, 3);
+                {
+                this.state = 333;
+                this.match(PromQLParser.LABEL_NAME);
                 }
                 break;
             default:
@@ -1979,35 +2185,35 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 331;
+            this.state = 336;
             this.match(PromQLParser.LEFT_PAREN);
-            this.state = 340;
+            this.state = 345;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 4292873728) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 4294967295) !== 0) || ((((_la - 64)) & ~0x1F) === 0 && ((1 << (_la - 64)) & 4294967295) !== 0) || ((((_la - 96)) & ~0x1F) === 0 && ((1 << (_la - 96)) & 134348799) !== 0)) {
+            if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 4292873728) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 4294967295) !== 0) || ((((_la - 64)) & ~0x1F) === 0 && ((1 << (_la - 64)) & 4294967295) !== 0) || ((((_la - 96)) & ~0x1F) === 0 && ((1 << (_la - 96)) & 402784255) !== 0)) {
                 {
-                this.state = 332;
-                this.labelName();
                 this.state = 337;
+                this.labelName();
+                this.state = 342;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
                 while (_la === 119) {
                     {
                     {
-                    this.state = 333;
+                    this.state = 338;
                     this.match(PromQLParser.COMMA);
-                    this.state = 334;
+                    this.state = 339;
                     this.labelName();
                     }
                     }
-                    this.state = 339;
+                    this.state = 344;
                     this.errorHandler.sync(this);
                     _la = this.tokenStream.LA(1);
                 }
                 }
             }
 
-            this.state = 342;
+            this.state = 347;
             this.match(PromQLParser.RIGHT_PAREN);
             }
         }
@@ -2028,83 +2234,83 @@ export class PromQLParser extends antlr.Parser {
         let localContext = new KeywordContext(this.context, this.state);
         this.enterRule(localContext, 80, PromQLParser.RULE_keyword);
         try {
-            this.state = 357;
+            this.state = 362;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case PromQLParser.AND:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 344;
+                this.state = 349;
                 this.match(PromQLParser.AND);
                 }
                 break;
             case PromQLParser.OR:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 345;
+                this.state = 350;
                 this.match(PromQLParser.OR);
                 }
                 break;
             case PromQLParser.UNLESS:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 346;
+                this.state = 351;
                 this.match(PromQLParser.UNLESS);
                 }
                 break;
             case PromQLParser.BY:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 347;
+                this.state = 352;
                 this.match(PromQLParser.BY);
                 }
                 break;
             case PromQLParser.WITHOUT:
                 this.enterOuterAlt(localContext, 5);
                 {
-                this.state = 348;
+                this.state = 353;
                 this.match(PromQLParser.WITHOUT);
                 }
                 break;
             case PromQLParser.ON:
                 this.enterOuterAlt(localContext, 6);
                 {
-                this.state = 349;
+                this.state = 354;
                 this.match(PromQLParser.ON);
                 }
                 break;
             case PromQLParser.IGNORING:
                 this.enterOuterAlt(localContext, 7);
                 {
-                this.state = 350;
+                this.state = 355;
                 this.match(PromQLParser.IGNORING);
                 }
                 break;
             case PromQLParser.GROUP_LEFT:
                 this.enterOuterAlt(localContext, 8);
                 {
-                this.state = 351;
+                this.state = 356;
                 this.match(PromQLParser.GROUP_LEFT);
                 }
                 break;
             case PromQLParser.GROUP_RIGHT:
                 this.enterOuterAlt(localContext, 9);
                 {
-                this.state = 352;
+                this.state = 357;
                 this.match(PromQLParser.GROUP_RIGHT);
                 }
                 break;
             case PromQLParser.OFFSET:
                 this.enterOuterAlt(localContext, 10);
                 {
-                this.state = 353;
+                this.state = 358;
                 this.match(PromQLParser.OFFSET);
                 }
                 break;
             case PromQLParser.BOOL:
                 this.enterOuterAlt(localContext, 11);
                 {
-                this.state = 354;
+                this.state = 359;
                 this.match(PromQLParser.BOOL);
                 }
                 break;
@@ -2124,7 +2330,7 @@ export class PromQLParser extends antlr.Parser {
             case PromQLParser.LIMIT_RATIO:
                 this.enterOuterAlt(localContext, 12);
                 {
-                this.state = 355;
+                this.state = 360;
                 this.aggregationOperators();
                 }
                 break;
@@ -2200,7 +2406,7 @@ export class PromQLParser extends antlr.Parser {
             case PromQLParser.RAD:
                 this.enterOuterAlt(localContext, 13);
                 {
-                this.state = 356;
+                this.state = 361;
                 this.functionNames();
                 }
                 break;
@@ -2228,7 +2434,7 @@ export class PromQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 359;
+            this.state = 364;
             _la = this.tokenStream.LA(1);
             if(!(_la === 1 || _la === 2)) {
             this.errorHandler.recoverInline(this);
@@ -2285,7 +2491,7 @@ export class PromQLParser extends antlr.Parser {
     }
 
     public static readonly _serializedATN: number[] = [
-        4,1,125,362,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,
+        4,1,126,367,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,
         7,6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,
         13,2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,
         20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,
@@ -2299,123 +2505,126 @@ export class PromQLParser extends antlr.Parser {
         3,6,152,8,6,1,7,1,7,3,7,156,8,7,1,8,1,8,3,8,160,8,8,1,9,1,9,3,9,
         164,8,9,1,10,1,10,3,10,168,8,10,1,11,1,11,1,11,1,12,1,12,1,12,1,
         12,1,12,1,12,1,12,3,12,180,8,12,1,13,1,13,1,13,1,13,1,14,1,14,1,
-        15,3,15,189,8,15,1,15,1,15,3,15,193,8,15,1,15,3,15,196,8,15,1,16,
-        1,16,1,16,1,16,1,17,1,17,1,18,1,18,1,19,1,19,1,19,5,19,209,8,19,
-        10,19,12,19,212,9,19,1,19,3,19,215,8,19,1,20,1,20,1,20,1,21,1,21,
-        1,21,1,21,1,22,1,22,1,22,1,22,3,22,228,8,22,1,22,1,22,1,23,4,23,
-        233,8,23,11,23,12,23,234,1,24,1,24,1,24,1,24,1,24,1,24,1,24,1,24,
-        3,24,245,8,24,1,25,1,25,1,25,1,25,1,25,5,25,252,8,25,10,25,12,25,
-        255,9,25,3,25,257,8,25,1,25,1,25,1,26,1,26,3,26,263,8,26,1,27,1,
-        27,1,27,1,27,5,27,269,8,27,10,27,12,27,272,9,27,3,27,274,8,27,1,
-        27,1,27,1,28,1,28,1,29,1,29,1,29,1,29,1,29,1,29,3,29,286,8,29,1,
-        29,1,29,1,29,1,29,1,29,1,29,3,29,294,8,29,3,29,296,8,29,1,30,1,30,
-        1,30,1,31,1,31,1,31,1,32,1,32,1,33,1,33,3,33,308,8,33,1,33,1,33,
-        3,33,312,8,33,1,34,1,34,1,34,1,35,1,35,1,35,1,36,1,36,3,36,322,8,
-        36,1,37,1,37,3,37,326,8,37,1,38,1,38,3,38,330,8,38,1,39,1,39,1,39,
-        1,39,5,39,336,8,39,10,39,12,39,339,9,39,3,39,341,8,39,1,39,1,39,
-        1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,
-        3,40,358,8,40,1,41,1,41,1,41,0,1,2,42,0,2,4,6,8,10,12,14,16,18,20,
-        22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,
-        66,68,70,72,74,76,78,80,82,0,9,1,0,3,4,1,0,5,7,1,0,13,18,2,0,9,9,
-        11,11,2,0,11,11,23,23,3,0,12,12,14,14,19,20,1,0,43,112,1,0,29,42,
-        1,0,1,2,381,0,84,1,0,0,0,2,92,1,0,0,0,4,132,1,0,0,0,6,134,1,0,0,
-        0,8,138,1,0,0,0,10,142,1,0,0,0,12,146,1,0,0,0,14,153,1,0,0,0,16,
-        157,1,0,0,0,18,161,1,0,0,0,20,165,1,0,0,0,22,169,1,0,0,0,24,179,
-        1,0,0,0,26,181,1,0,0,0,28,185,1,0,0,0,30,188,1,0,0,0,32,197,1,0,
-        0,0,34,201,1,0,0,0,36,203,1,0,0,0,38,205,1,0,0,0,40,216,1,0,0,0,
-        42,219,1,0,0,0,44,223,1,0,0,0,46,232,1,0,0,0,48,244,1,0,0,0,50,246,
-        1,0,0,0,52,262,1,0,0,0,54,264,1,0,0,0,56,277,1,0,0,0,58,295,1,0,
-        0,0,60,297,1,0,0,0,62,300,1,0,0,0,64,303,1,0,0,0,66,307,1,0,0,0,
-        68,313,1,0,0,0,70,316,1,0,0,0,72,319,1,0,0,0,74,323,1,0,0,0,76,329,
-        1,0,0,0,78,331,1,0,0,0,80,357,1,0,0,0,82,359,1,0,0,0,84,85,3,2,1,
-        0,85,86,5,0,0,1,86,1,1,0,0,0,87,88,6,1,-1,0,88,89,3,4,2,0,89,90,
-        3,2,1,9,90,93,1,0,0,0,91,93,3,24,12,0,92,87,1,0,0,0,92,91,1,0,0,
-        0,93,129,1,0,0,0,94,95,10,11,0,0,95,96,3,6,3,0,96,97,3,2,1,11,97,
-        128,1,0,0,0,98,99,10,8,0,0,99,100,3,8,4,0,100,101,3,2,1,9,101,128,
-        1,0,0,0,102,103,10,7,0,0,103,104,3,10,5,0,104,105,3,2,1,8,105,128,
-        1,0,0,0,106,107,10,6,0,0,107,108,3,12,6,0,108,109,3,2,1,7,109,128,
-        1,0,0,0,110,111,10,5,0,0,111,112,3,14,7,0,112,113,3,2,1,6,113,128,
-        1,0,0,0,114,115,10,4,0,0,115,116,3,16,8,0,116,117,3,2,1,5,117,128,
-        1,0,0,0,118,119,10,3,0,0,119,120,3,18,9,0,120,121,3,2,1,4,121,128,
-        1,0,0,0,122,123,10,2,0,0,123,124,5,121,0,0,124,128,3,2,1,3,125,126,
-        10,10,0,0,126,128,3,20,10,0,127,94,1,0,0,0,127,98,1,0,0,0,127,102,
-        1,0,0,0,127,106,1,0,0,0,127,110,1,0,0,0,127,114,1,0,0,0,127,118,
-        1,0,0,0,127,122,1,0,0,0,127,125,1,0,0,0,128,131,1,0,0,0,129,127,
-        1,0,0,0,129,130,1,0,0,0,130,3,1,0,0,0,131,129,1,0,0,0,132,133,7,
-        0,0,0,133,5,1,0,0,0,134,136,5,8,0,0,135,137,3,66,33,0,136,135,1,
-        0,0,0,136,137,1,0,0,0,137,7,1,0,0,0,138,140,7,1,0,0,139,141,3,66,
-        33,0,140,139,1,0,0,0,140,141,1,0,0,0,141,9,1,0,0,0,142,144,7,0,0,
-        0,143,145,3,66,33,0,144,143,1,0,0,0,144,145,1,0,0,0,145,11,1,0,0,
-        0,146,148,7,2,0,0,147,149,5,28,0,0,148,147,1,0,0,0,148,149,1,0,0,
-        0,149,151,1,0,0,0,150,152,3,66,33,0,151,150,1,0,0,0,151,152,1,0,
-        0,0,152,13,1,0,0,0,153,155,7,3,0,0,154,156,3,66,33,0,155,154,1,0,
-        0,0,155,156,1,0,0,0,156,15,1,0,0,0,157,159,5,10,0,0,158,160,3,66,
-        33,0,159,158,1,0,0,0,159,160,1,0,0,0,160,17,1,0,0,0,161,163,7,4,
-        0,0,162,164,3,66,33,0,163,162,1,0,0,0,163,164,1,0,0,0,164,19,1,0,
-        0,0,165,167,3,44,22,0,166,168,3,22,11,0,167,166,1,0,0,0,167,168,
-        1,0,0,0,168,21,1,0,0,0,169,170,5,27,0,0,170,171,3,46,23,0,171,23,
-        1,0,0,0,172,180,3,50,25,0,173,180,3,58,29,0,174,180,3,30,15,0,175,
-        180,3,40,20,0,176,180,3,48,24,0,177,180,3,82,41,0,178,180,3,26,13,
-        0,179,172,1,0,0,0,179,173,1,0,0,0,179,174,1,0,0,0,179,175,1,0,0,
-        0,179,176,1,0,0,0,179,177,1,0,0,0,179,178,1,0,0,0,180,25,1,0,0,0,
-        181,182,5,115,0,0,182,183,3,2,1,0,183,184,5,116,0,0,184,27,1,0,0,
-        0,185,186,5,123,0,0,186,29,1,0,0,0,187,189,3,28,14,0,188,187,1,0,
-        0,0,188,189,1,0,0,0,189,195,1,0,0,0,190,192,5,113,0,0,191,193,3,
-        38,19,0,192,191,1,0,0,0,192,193,1,0,0,0,193,194,1,0,0,0,194,196,
-        5,114,0,0,195,190,1,0,0,0,195,196,1,0,0,0,196,31,1,0,0,0,197,198,
-        3,76,38,0,198,199,3,36,18,0,199,200,3,34,17,0,200,33,1,0,0,0,201,
-        202,5,2,0,0,202,35,1,0,0,0,203,204,7,5,0,0,204,37,1,0,0,0,205,210,
-        3,32,16,0,206,207,5,119,0,0,207,209,3,32,16,0,208,206,1,0,0,0,209,
-        212,1,0,0,0,210,208,1,0,0,0,210,211,1,0,0,0,211,214,1,0,0,0,212,
-        210,1,0,0,0,213,215,5,119,0,0,214,213,1,0,0,0,214,215,1,0,0,0,215,
-        39,1,0,0,0,216,217,3,30,15,0,217,218,3,42,21,0,218,41,1,0,0,0,219,
-        220,5,117,0,0,220,221,3,46,23,0,221,222,5,118,0,0,222,43,1,0,0,0,
-        223,224,5,117,0,0,224,225,3,46,23,0,225,227,5,120,0,0,226,228,3,
-        46,23,0,227,226,1,0,0,0,227,228,1,0,0,0,228,229,1,0,0,0,229,230,
-        5,118,0,0,230,45,1,0,0,0,231,233,5,122,0,0,232,231,1,0,0,0,233,234,
-        1,0,0,0,234,232,1,0,0,0,234,235,1,0,0,0,235,47,1,0,0,0,236,237,3,
-        30,15,0,237,238,5,27,0,0,238,239,3,46,23,0,239,245,1,0,0,0,240,241,
-        3,40,20,0,241,242,5,27,0,0,242,243,3,46,23,0,243,245,1,0,0,0,244,
-        236,1,0,0,0,244,240,1,0,0,0,245,49,1,0,0,0,246,247,3,56,28,0,247,
-        256,5,115,0,0,248,253,3,52,26,0,249,250,5,119,0,0,250,252,3,52,26,
-        0,251,249,1,0,0,0,252,255,1,0,0,0,253,251,1,0,0,0,253,254,1,0,0,
-        0,254,257,1,0,0,0,255,253,1,0,0,0,256,248,1,0,0,0,256,257,1,0,0,
-        0,257,258,1,0,0,0,258,259,5,116,0,0,259,51,1,0,0,0,260,263,3,82,
-        41,0,261,263,3,2,1,0,262,260,1,0,0,0,262,261,1,0,0,0,263,53,1,0,
-        0,0,264,273,5,115,0,0,265,270,3,52,26,0,266,267,5,119,0,0,267,269,
-        3,52,26,0,268,266,1,0,0,0,269,272,1,0,0,0,270,268,1,0,0,0,270,271,
-        1,0,0,0,271,274,1,0,0,0,272,270,1,0,0,0,273,265,1,0,0,0,273,274,
-        1,0,0,0,274,275,1,0,0,0,275,276,5,116,0,0,276,55,1,0,0,0,277,278,
-        7,6,0,0,278,57,1,0,0,0,279,280,3,64,32,0,280,281,3,54,27,0,281,296,
-        1,0,0,0,282,285,3,64,32,0,283,286,3,60,30,0,284,286,3,62,31,0,285,
-        283,1,0,0,0,285,284,1,0,0,0,286,287,1,0,0,0,287,288,3,54,27,0,288,
-        296,1,0,0,0,289,290,3,64,32,0,290,293,3,54,27,0,291,294,3,60,30,
-        0,292,294,3,62,31,0,293,291,1,0,0,0,293,292,1,0,0,0,294,296,1,0,
-        0,0,295,279,1,0,0,0,295,282,1,0,0,0,295,289,1,0,0,0,296,59,1,0,0,
-        0,297,298,5,21,0,0,298,299,3,78,39,0,299,61,1,0,0,0,300,301,5,22,
-        0,0,301,302,3,78,39,0,302,63,1,0,0,0,303,304,7,7,0,0,304,65,1,0,
-        0,0,305,308,3,68,34,0,306,308,3,70,35,0,307,305,1,0,0,0,307,306,
-        1,0,0,0,308,311,1,0,0,0,309,312,3,72,36,0,310,312,3,74,37,0,311,
-        309,1,0,0,0,311,310,1,0,0,0,311,312,1,0,0,0,312,67,1,0,0,0,313,314,
-        5,23,0,0,314,315,3,78,39,0,315,69,1,0,0,0,316,317,5,24,0,0,317,318,
-        3,78,39,0,318,71,1,0,0,0,319,321,5,25,0,0,320,322,3,78,39,0,321,
-        320,1,0,0,0,321,322,1,0,0,0,322,73,1,0,0,0,323,325,5,26,0,0,324,
-        326,3,78,39,0,325,324,1,0,0,0,325,326,1,0,0,0,326,75,1,0,0,0,327,
-        330,3,80,40,0,328,330,5,123,0,0,329,327,1,0,0,0,329,328,1,0,0,0,
-        330,77,1,0,0,0,331,340,5,115,0,0,332,337,3,76,38,0,333,334,5,119,
-        0,0,334,336,3,76,38,0,335,333,1,0,0,0,336,339,1,0,0,0,337,335,1,
-        0,0,0,337,338,1,0,0,0,338,341,1,0,0,0,339,337,1,0,0,0,340,332,1,
-        0,0,0,340,341,1,0,0,0,341,342,1,0,0,0,342,343,5,116,0,0,343,79,1,
-        0,0,0,344,358,5,9,0,0,345,358,5,10,0,0,346,358,5,11,0,0,347,358,
-        5,21,0,0,348,358,5,22,0,0,349,358,5,23,0,0,350,358,5,24,0,0,351,
-        358,5,25,0,0,352,358,5,26,0,0,353,358,5,27,0,0,354,358,5,28,0,0,
-        355,358,3,64,32,0,356,358,3,56,28,0,357,344,1,0,0,0,357,345,1,0,
-        0,0,357,346,1,0,0,0,357,347,1,0,0,0,357,348,1,0,0,0,357,349,1,0,
-        0,0,357,350,1,0,0,0,357,351,1,0,0,0,357,352,1,0,0,0,357,353,1,0,
-        0,0,357,354,1,0,0,0,357,355,1,0,0,0,357,356,1,0,0,0,358,81,1,0,0,
-        0,359,360,7,8,0,0,360,83,1,0,0,0,37,92,127,129,136,140,144,148,151,
-        155,159,163,167,179,188,192,195,210,214,227,234,244,253,256,262,
-        270,273,285,293,295,307,311,321,325,329,337,340,357
+        15,1,15,1,15,3,15,191,8,15,1,15,3,15,194,8,15,1,15,1,15,1,15,1,15,
+        3,15,200,8,15,1,16,1,16,1,16,1,16,1,17,1,17,1,18,1,18,1,19,1,19,
+        1,19,5,19,213,8,19,10,19,12,19,216,9,19,1,19,3,19,219,8,19,1,20,
+        1,20,1,20,1,21,1,21,1,21,1,21,1,22,1,22,1,22,1,22,3,22,232,8,22,
+        1,22,1,22,1,23,4,23,237,8,23,11,23,12,23,238,1,24,1,24,1,24,1,24,
+        1,24,1,24,1,24,1,24,3,24,249,8,24,1,25,1,25,1,25,1,25,1,25,5,25,
+        256,8,25,10,25,12,25,259,9,25,3,25,261,8,25,1,25,1,25,1,26,1,26,
+        3,26,267,8,26,1,27,1,27,1,27,1,27,5,27,273,8,27,10,27,12,27,276,
+        9,27,3,27,278,8,27,1,27,1,27,1,28,1,28,1,29,1,29,1,29,1,29,1,29,
+        1,29,3,29,290,8,29,1,29,1,29,1,29,1,29,1,29,1,29,3,29,298,8,29,3,
+        29,300,8,29,1,30,1,30,1,30,1,31,1,31,1,31,1,32,1,32,1,33,1,33,3,
+        33,312,8,33,1,33,1,33,3,33,316,8,33,1,34,1,34,1,34,1,35,1,35,1,35,
+        1,36,1,36,3,36,326,8,36,1,37,1,37,3,37,330,8,37,1,38,1,38,1,38,3,
+        38,335,8,38,1,39,1,39,1,39,1,39,5,39,341,8,39,10,39,12,39,344,9,
+        39,3,39,346,8,39,1,39,1,39,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,
+        40,1,40,1,40,1,40,1,40,1,40,3,40,363,8,40,1,41,1,41,1,41,0,1,2,42,
+        0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,
+        46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,0,9,1,0,
+        3,4,1,0,5,7,1,0,13,18,2,0,9,9,11,11,2,0,11,11,23,23,3,0,12,12,14,
+        14,19,20,1,0,43,112,1,0,29,42,1,0,1,2,387,0,84,1,0,0,0,2,92,1,0,
+        0,0,4,132,1,0,0,0,6,134,1,0,0,0,8,138,1,0,0,0,10,142,1,0,0,0,12,
+        146,1,0,0,0,14,153,1,0,0,0,16,157,1,0,0,0,18,161,1,0,0,0,20,165,
+        1,0,0,0,22,169,1,0,0,0,24,179,1,0,0,0,26,181,1,0,0,0,28,185,1,0,
+        0,0,30,199,1,0,0,0,32,201,1,0,0,0,34,205,1,0,0,0,36,207,1,0,0,0,
+        38,209,1,0,0,0,40,220,1,0,0,0,42,223,1,0,0,0,44,227,1,0,0,0,46,236,
+        1,0,0,0,48,248,1,0,0,0,50,250,1,0,0,0,52,266,1,0,0,0,54,268,1,0,
+        0,0,56,281,1,0,0,0,58,299,1,0,0,0,60,301,1,0,0,0,62,304,1,0,0,0,
+        64,307,1,0,0,0,66,311,1,0,0,0,68,317,1,0,0,0,70,320,1,0,0,0,72,323,
+        1,0,0,0,74,327,1,0,0,0,76,334,1,0,0,0,78,336,1,0,0,0,80,362,1,0,
+        0,0,82,364,1,0,0,0,84,85,3,2,1,0,85,86,5,0,0,1,86,1,1,0,0,0,87,88,
+        6,1,-1,0,88,89,3,4,2,0,89,90,3,2,1,9,90,93,1,0,0,0,91,93,3,24,12,
+        0,92,87,1,0,0,0,92,91,1,0,0,0,93,129,1,0,0,0,94,95,10,11,0,0,95,
+        96,3,6,3,0,96,97,3,2,1,11,97,128,1,0,0,0,98,99,10,8,0,0,99,100,3,
+        8,4,0,100,101,3,2,1,9,101,128,1,0,0,0,102,103,10,7,0,0,103,104,3,
+        10,5,0,104,105,3,2,1,8,105,128,1,0,0,0,106,107,10,6,0,0,107,108,
+        3,12,6,0,108,109,3,2,1,7,109,128,1,0,0,0,110,111,10,5,0,0,111,112,
+        3,14,7,0,112,113,3,2,1,6,113,128,1,0,0,0,114,115,10,4,0,0,115,116,
+        3,16,8,0,116,117,3,2,1,5,117,128,1,0,0,0,118,119,10,3,0,0,119,120,
+        3,18,9,0,120,121,3,2,1,4,121,128,1,0,0,0,122,123,10,2,0,0,123,124,
+        5,121,0,0,124,128,3,2,1,3,125,126,10,10,0,0,126,128,3,20,10,0,127,
+        94,1,0,0,0,127,98,1,0,0,0,127,102,1,0,0,0,127,106,1,0,0,0,127,110,
+        1,0,0,0,127,114,1,0,0,0,127,118,1,0,0,0,127,122,1,0,0,0,127,125,
+        1,0,0,0,128,131,1,0,0,0,129,127,1,0,0,0,129,130,1,0,0,0,130,3,1,
+        0,0,0,131,129,1,0,0,0,132,133,7,0,0,0,133,5,1,0,0,0,134,136,5,8,
+        0,0,135,137,3,66,33,0,136,135,1,0,0,0,136,137,1,0,0,0,137,7,1,0,
+        0,0,138,140,7,1,0,0,139,141,3,66,33,0,140,139,1,0,0,0,140,141,1,
+        0,0,0,141,9,1,0,0,0,142,144,7,0,0,0,143,145,3,66,33,0,144,143,1,
+        0,0,0,144,145,1,0,0,0,145,11,1,0,0,0,146,148,7,2,0,0,147,149,5,28,
+        0,0,148,147,1,0,0,0,148,149,1,0,0,0,149,151,1,0,0,0,150,152,3,66,
+        33,0,151,150,1,0,0,0,151,152,1,0,0,0,152,13,1,0,0,0,153,155,7,3,
+        0,0,154,156,3,66,33,0,155,154,1,0,0,0,155,156,1,0,0,0,156,15,1,0,
+        0,0,157,159,5,10,0,0,158,160,3,66,33,0,159,158,1,0,0,0,159,160,1,
+        0,0,0,160,17,1,0,0,0,161,163,7,4,0,0,162,164,3,66,33,0,163,162,1,
+        0,0,0,163,164,1,0,0,0,164,19,1,0,0,0,165,167,3,44,22,0,166,168,3,
+        22,11,0,167,166,1,0,0,0,167,168,1,0,0,0,168,21,1,0,0,0,169,170,5,
+        27,0,0,170,171,3,46,23,0,171,23,1,0,0,0,172,180,3,50,25,0,173,180,
+        3,58,29,0,174,180,3,30,15,0,175,180,3,40,20,0,176,180,3,48,24,0,
+        177,180,3,82,41,0,178,180,3,26,13,0,179,172,1,0,0,0,179,173,1,0,
+        0,0,179,174,1,0,0,0,179,175,1,0,0,0,179,176,1,0,0,0,179,177,1,0,
+        0,0,179,178,1,0,0,0,180,25,1,0,0,0,181,182,5,115,0,0,182,183,3,2,
+        1,0,183,184,5,116,0,0,184,27,1,0,0,0,185,186,5,123,0,0,186,29,1,
+        0,0,0,187,193,3,28,14,0,188,190,5,113,0,0,189,191,3,38,19,0,190,
+        189,1,0,0,0,190,191,1,0,0,0,191,192,1,0,0,0,192,194,5,114,0,0,193,
+        188,1,0,0,0,193,194,1,0,0,0,194,200,1,0,0,0,195,196,5,113,0,0,196,
+        197,3,38,19,0,197,198,5,114,0,0,198,200,1,0,0,0,199,187,1,0,0,0,
+        199,195,1,0,0,0,200,31,1,0,0,0,201,202,3,76,38,0,202,203,3,36,18,
+        0,203,204,3,34,17,0,204,33,1,0,0,0,205,206,5,2,0,0,206,35,1,0,0,
+        0,207,208,7,5,0,0,208,37,1,0,0,0,209,214,3,32,16,0,210,211,5,119,
+        0,0,211,213,3,32,16,0,212,210,1,0,0,0,213,216,1,0,0,0,214,212,1,
+        0,0,0,214,215,1,0,0,0,215,218,1,0,0,0,216,214,1,0,0,0,217,219,5,
+        119,0,0,218,217,1,0,0,0,218,219,1,0,0,0,219,39,1,0,0,0,220,221,3,
+        30,15,0,221,222,3,42,21,0,222,41,1,0,0,0,223,224,5,117,0,0,224,225,
+        3,46,23,0,225,226,5,118,0,0,226,43,1,0,0,0,227,228,5,117,0,0,228,
+        229,3,46,23,0,229,231,5,120,0,0,230,232,3,46,23,0,231,230,1,0,0,
+        0,231,232,1,0,0,0,232,233,1,0,0,0,233,234,5,118,0,0,234,45,1,0,0,
+        0,235,237,5,122,0,0,236,235,1,0,0,0,237,238,1,0,0,0,238,236,1,0,
+        0,0,238,239,1,0,0,0,239,47,1,0,0,0,240,241,3,30,15,0,241,242,5,27,
+        0,0,242,243,3,46,23,0,243,249,1,0,0,0,244,245,3,40,20,0,245,246,
+        5,27,0,0,246,247,3,46,23,0,247,249,1,0,0,0,248,240,1,0,0,0,248,244,
+        1,0,0,0,249,49,1,0,0,0,250,251,3,56,28,0,251,260,5,115,0,0,252,257,
+        3,52,26,0,253,254,5,119,0,0,254,256,3,52,26,0,255,253,1,0,0,0,256,
+        259,1,0,0,0,257,255,1,0,0,0,257,258,1,0,0,0,258,261,1,0,0,0,259,
+        257,1,0,0,0,260,252,1,0,0,0,260,261,1,0,0,0,261,262,1,0,0,0,262,
+        263,5,116,0,0,263,51,1,0,0,0,264,267,3,82,41,0,265,267,3,2,1,0,266,
+        264,1,0,0,0,266,265,1,0,0,0,267,53,1,0,0,0,268,277,5,115,0,0,269,
+        274,3,52,26,0,270,271,5,119,0,0,271,273,3,52,26,0,272,270,1,0,0,
+        0,273,276,1,0,0,0,274,272,1,0,0,0,274,275,1,0,0,0,275,278,1,0,0,
+        0,276,274,1,0,0,0,277,269,1,0,0,0,277,278,1,0,0,0,278,279,1,0,0,
+        0,279,280,5,116,0,0,280,55,1,0,0,0,281,282,7,6,0,0,282,57,1,0,0,
+        0,283,284,3,64,32,0,284,285,3,54,27,0,285,300,1,0,0,0,286,289,3,
+        64,32,0,287,290,3,60,30,0,288,290,3,62,31,0,289,287,1,0,0,0,289,
+        288,1,0,0,0,290,291,1,0,0,0,291,292,3,54,27,0,292,300,1,0,0,0,293,
+        294,3,64,32,0,294,297,3,54,27,0,295,298,3,60,30,0,296,298,3,62,31,
+        0,297,295,1,0,0,0,297,296,1,0,0,0,298,300,1,0,0,0,299,283,1,0,0,
+        0,299,286,1,0,0,0,299,293,1,0,0,0,300,59,1,0,0,0,301,302,5,21,0,
+        0,302,303,3,78,39,0,303,61,1,0,0,0,304,305,5,22,0,0,305,306,3,78,
+        39,0,306,63,1,0,0,0,307,308,7,7,0,0,308,65,1,0,0,0,309,312,3,68,
+        34,0,310,312,3,70,35,0,311,309,1,0,0,0,311,310,1,0,0,0,312,315,1,
+        0,0,0,313,316,3,72,36,0,314,316,3,74,37,0,315,313,1,0,0,0,315,314,
+        1,0,0,0,315,316,1,0,0,0,316,67,1,0,0,0,317,318,5,23,0,0,318,319,
+        3,78,39,0,319,69,1,0,0,0,320,321,5,24,0,0,321,322,3,78,39,0,322,
+        71,1,0,0,0,323,325,5,25,0,0,324,326,3,78,39,0,325,324,1,0,0,0,325,
+        326,1,0,0,0,326,73,1,0,0,0,327,329,5,26,0,0,328,330,3,78,39,0,329,
+        328,1,0,0,0,329,330,1,0,0,0,330,75,1,0,0,0,331,335,3,80,40,0,332,
+        335,3,28,14,0,333,335,5,124,0,0,334,331,1,0,0,0,334,332,1,0,0,0,
+        334,333,1,0,0,0,335,77,1,0,0,0,336,345,5,115,0,0,337,342,3,76,38,
+        0,338,339,5,119,0,0,339,341,3,76,38,0,340,338,1,0,0,0,341,344,1,
+        0,0,0,342,340,1,0,0,0,342,343,1,0,0,0,343,346,1,0,0,0,344,342,1,
+        0,0,0,345,337,1,0,0,0,345,346,1,0,0,0,346,347,1,0,0,0,347,348,5,
+        116,0,0,348,79,1,0,0,0,349,363,5,9,0,0,350,363,5,10,0,0,351,363,
+        5,11,0,0,352,363,5,21,0,0,353,363,5,22,0,0,354,363,5,23,0,0,355,
+        363,5,24,0,0,356,363,5,25,0,0,357,363,5,26,0,0,358,363,5,27,0,0,
+        359,363,5,28,0,0,360,363,3,64,32,0,361,363,3,56,28,0,362,349,1,0,
+        0,0,362,350,1,0,0,0,362,351,1,0,0,0,362,352,1,0,0,0,362,353,1,0,
+        0,0,362,354,1,0,0,0,362,355,1,0,0,0,362,356,1,0,0,0,362,357,1,0,
+        0,0,362,358,1,0,0,0,362,359,1,0,0,0,362,360,1,0,0,0,362,361,1,0,
+        0,0,363,81,1,0,0,0,364,365,7,8,0,0,365,83,1,0,0,0,37,92,127,129,
+        136,140,144,148,151,155,159,163,167,179,190,193,199,214,218,231,
+        238,248,257,260,266,274,277,289,297,299,311,315,325,329,334,342,
+        345,362
     ];
 
     private static __ATN: antlr.ATN;
@@ -2850,8 +3059,8 @@ export class MetricNameContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
-    public IDENTIFIER(): antlr.TerminalNode {
-        return this.getToken(PromQLParser.IDENTIFIER, 0)!;
+    public METRIC_NAME(): antlr.TerminalNode {
+        return this.getToken(PromQLParser.METRIC_NAME, 0)!;
     }
     public override get ruleIndex(): number {
         return PromQLParser.RULE_metricName;
@@ -3741,8 +3950,11 @@ export class LabelNameContext extends antlr.ParserRuleContext {
     public keyword(): KeywordContext | null {
         return this.getRuleContext(0, KeywordContext);
     }
-    public IDENTIFIER(): antlr.TerminalNode | null {
-        return this.getToken(PromQLParser.IDENTIFIER, 0);
+    public metricName(): MetricNameContext | null {
+        return this.getRuleContext(0, MetricNameContext);
+    }
+    public LABEL_NAME(): antlr.TerminalNode | null {
+        return this.getToken(PromQLParser.LABEL_NAME, 0);
     }
     public override get ruleIndex(): number {
         return PromQLParser.RULE_labelName;
