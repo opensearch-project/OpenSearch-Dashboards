@@ -106,6 +106,11 @@ export function createTheme(
       { token: 'operator.sql', foreground: standardizeColor(euiTheme.euiColorMediumShade) },
       { token: 'operator.swift', foreground: standardizeColor(euiTheme.euiColorMediumShade) },
       { token: 'predefined.sql', foreground: standardizeColor(euiTheme.euiColorMediumShade) },
+
+      { token: 'token', foreground: standardizeColor(euiTheme.euiColorVis8) },
+      { token: 'operator.boolean', foreground: standardizeColor(euiTheme.euiColorVis5) },
+      { token: 'operator.negate', foreground: standardizeColor(euiTheme.euiColorVis9) },
+      { token: 'operator.logical', foreground: standardizeColor(euiTheme.euiColorVis2) },
     ],
     colors: {
       'editor.foreground': standardizeColor(euiTheme.euiColorDarkestShade),
