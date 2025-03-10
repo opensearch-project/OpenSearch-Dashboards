@@ -126,22 +126,9 @@ export const createQueryAssistExtension = (
           dependencies={dependencies}
           http={http}
           data={data}
-          isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
-          isSummaryAgentAvailable$={isSummaryAgentAvailable$}
-          {...(config.summary.enabled && { resultSummaryEnabled$ })}
           question$={question$}
         >
           <QueryAssistBar dependencies={dependencies} />
-          {config.summary.enabled && (
-            <QueryAssistSummary
-              data={data}
-              http={http}
-              usageCollection={usageCollection}
-              dependencies={dependencies}
-              core={core}
-              brandingLabel={config.summary.branding.label}
-            />
-          )}
         </QueryAssistWrapper>
       );
     },
@@ -153,6 +140,30 @@ export const createQueryAssistExtension = (
             dependencies={dependencies}
             languages={config.supportedLanguages.map((conf) => conf.language)}
           />
+        </QueryAssistWrapper>
+      );
+    },
+    getBottomPanel: (dependencies) => {
+      return (
+        <QueryAssistWrapper
+          dependencies={dependencies}
+          http={http}
+          data={data}
+          isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
+          isSummaryAgentAvailable$={isSummaryAgentAvailable$}
+          {...(config.summary.enabled && { resultSummaryEnabled$ })}
+          question$={question$}
+        >
+          {config.summary.enabled && (
+            <QueryAssistSummary
+              data={data}
+              http={http}
+              usageCollection={usageCollection}
+              dependencies={dependencies}
+              core={core}
+              brandingLabel={config.summary.branding.label}
+            />
+          )}
         </QueryAssistWrapper>
       );
     },
