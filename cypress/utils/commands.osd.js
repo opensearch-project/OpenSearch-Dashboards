@@ -508,3 +508,10 @@ cy.osd.add('setRelativeTopNavDate', (time, timeUnit) => {
   cy.getElementByTestId('superDatePickerRelativeDateInputUnitSelector').select(timeUnit);
   cy.getElementByTestId('querySubmitButton').click();
 });
+
+cy.osd.add('verifyResultsCount', (count) => {
+  cy.getElementByTestId('discoverQueryRowsCount')
+    .scrollIntoView()
+    .should('be.visible')
+    .should('have.text', count.toLocaleString());
+});
