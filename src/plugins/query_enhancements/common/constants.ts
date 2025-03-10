@@ -48,6 +48,7 @@ export const URI = {
   PROMQL: '/_plugins/_promql',
   SQL: '/_plugins/_sql',
   ASYNC_QUERY: '/_plugins/_async_query',
+  DIRECT_QUERY_SYNC: '/_plugins/_directquery/_sync',
   ML: '/_plugins/_ml',
   OBSERVABILITY: '/_plugins/_observability',
   DATA_CONNECTIONS: '/_plugins/_query/_datasources',

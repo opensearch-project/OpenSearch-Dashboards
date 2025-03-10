@@ -8,15 +8,31 @@ import { Observable } from 'rxjs';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
+  IDataFrame,
   IDataFrameResponse,
-  IDataFrameWithAggs,
   IOpenSearchDashboardsSearchRequest,
-  Query,
-  createDataFrame,
 } from '../../../data/common';
-import { getFields, throwFacetError } from '../../common/utils';
+import { throwFacetError } from '../../common/utils';
 import { Facet } from '../utils';
-import { QueryAggConfig } from '../../common';
+import { SEARCH_STRATEGY } from '../../common';
+
+interface PrometheusResponse {
+  data: {
+    queryId: string;
+    result: string;
+    sessionId: string;
+  };
+  success: boolean;
+}
+
+interface MetricResult {
+  metric: Record<string, string>;
+  values: Array<[number, number]>;
+}
+
+interface PrometheusResult {
+  result: MetricResult[];
+}
 
 export const promqlSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -28,49 +44,24 @@ export const promqlSearchStrategyProvider = (
     client,
     logger,
     endpoint: 'enhancements.promqlQuery',
-    useJobs: false,
-    shimResponse: true, // TODO: is this needed?
   });
 
   return {
     search: async (context, request: any, options) => {
       try {
-        const query: Query = request.body.query;
-        const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
-        const rawResponse: any = await promqlFacet.describeQuery(context, request);
+        request.body.lang = SEARCH_STRATEGY.PROMQL;
+        const rawResponse = (await promqlFacet.describeQuery(
+          context,
+          request
+        )) as PrometheusResponse;
 
         if (!rawResponse.success) throwFacetError(rawResponse);
 
-        const dataFrame = createDataFrame({
-          name: query.dataset?.id,
-          schema: rawResponse.data.schema,
-          meta: aggConfig,
-          fields: getFields(rawResponse),
-        });
-
-        dataFrame.size = rawResponse.data.datarows.length;
-
-        if (usage) usage.trackSuccess(rawResponse.took);
-
-        if (aggConfig) {
-          for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
-            request.body.query.query = aggQueryString;
-            const rawAggs: any = await promqlFacet.describeQuery(context, request);
-            if (!rawAggs.success) continue;
-            (dataFrame as IDataFrameWithAggs).aggs = {};
-            (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
-              return {
-                key: hit[1],
-                value: hit[0],
-              };
-            });
-          }
-        }
+        const dataFrame = createDataFrame(rawResponse);
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,
           body: dataFrame,
-          took: rawResponse.took,
         } as IDataFrameResponse;
       } catch (e) {
         logger.error(`promqlSearchStrategy: ${e.message}`);
@@ -80,3 +71,49 @@ export const promqlSearchStrategyProvider = (
     },
   };
 };
+
+function createDataFrame(rawResponse: PrometheusResponse) {
+  const { result: series } = JSON.parse(rawResponse.data.result) as PrometheusResult;
+  const initDataFrame: IDataFrame = {
+    type: DATA_FRAME_TYPES.DEFAULT,
+    name: 'mock prometheus data',
+    schema: [{ name: 'Time', type: 'time', values: [] }],
+    fields: [{ name: 'Time', type: 'time', values: series[0].values.map((v) => v[0]) }],
+    size: 0,
+  };
+
+  const df = series.reduce((acc, metricResult, i) => {
+    const schema = getFieldSchema(metricResult);
+    acc.schema?.push(schema);
+    acc.fields?.push({
+      ...schema,
+      values: metricResult.values.map((v) => v[1]),
+    });
+    return acc;
+  }, initDataFrame);
+
+  df.size = df.fields[0].values.length;
+
+  return initDataFrame;
+}
+
+function getFieldSchema(metricResult: MetricResult) {
+  let name = '';
+  if (metricResult.metric) {
+    const metricLength = Object.keys(metricResult.metric).length;
+    Object.entries(metricResult.metric).forEach(([key, val], i) => {
+      if (key === '__name__') return;
+      name += `${key}="${val}"`;
+      if (i !== metricLength - 1) {
+        name += ', ';
+      }
+    });
+    name = `{${name}}`;
+  }
+
+  return {
+    name,
+    type: 'number',
+    values: [],
+  };
+}
