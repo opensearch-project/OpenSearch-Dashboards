@@ -9,6 +9,9 @@ import { i18n } from '@osd/i18n';
 import { IndexPatternField } from '../../../../../data/common';
 import { useDataGridContext } from './data_grid_table_context';
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export function getCellActions(field: IndexPatternField) {
   const cellActions = field.filterable
     ? [

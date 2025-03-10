@@ -8,6 +8,9 @@ import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getCellActions } from './data_grid_table_cell_actions';
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export function buildDataGridColumns(
   columnNames: string[],
   idxPattern: IndexPattern,
@@ -27,6 +30,9 @@ export function buildDataGridColumns(
   );
 }
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export function generateDataGridTableColumn(
   colName: string,
   idxPattern: IndexPattern,
@@ -72,6 +78,9 @@ export function generateDataGridTableColumn(
   return dataGridCol;
 }
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export function computeVisibleColumns(
   columnNames: string[],
   idxPattern: IndexPattern,

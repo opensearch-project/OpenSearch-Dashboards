@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
@@ -71,6 +70,9 @@ export const DataGridTable = ({
     adjustedColumns = [...adjustedColumns, '_source'];
   }
 
+  /**
+   * deprecated - we will no longer support newDiscoveredEnabled
+   */
   const newDiscoverEnabled = getNewDiscoverSetting(services.storage);
   const isQueryEnhancementEnabled = services.uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
 

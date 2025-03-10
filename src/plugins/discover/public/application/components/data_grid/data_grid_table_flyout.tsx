@@ -19,6 +19,9 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 interface Props {
   columns: string[];
   hit: OpenSearchSearchHit;
@@ -29,6 +32,9 @@ interface Props {
   onRemoveColumn: (column: string) => void;
 }
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export function DataGridFlyout({
   hit,
   columns,

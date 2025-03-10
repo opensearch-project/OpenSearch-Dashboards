@@ -18,6 +18,9 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { shortenDottedString } from '../../helpers';
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export function fetchSourceTypeDataCell(
   idxPattern: IndexPattern,
   row: Record<string, unknown>,
@@ -52,6 +55,9 @@ export function fetchSourceTypeDataCell(
   );
 }
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export const fetchTableDataCell = (
   idxPattern: IndexPattern,
   dataRows: OpenSearchSearchHit[] | undefined,
