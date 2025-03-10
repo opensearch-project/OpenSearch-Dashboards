@@ -16,6 +16,9 @@ import { getNewDiscoverSetting, setNewDiscoverSetting } from '../utils/local_sto
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 
+/**
+ * deprecated - we will no longer support this option. Only legacyDiscoverTable will be supported
+ */
 export const DiscoverOptions = () => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { storage } = services;

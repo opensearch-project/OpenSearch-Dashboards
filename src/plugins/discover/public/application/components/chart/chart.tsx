@@ -118,7 +118,10 @@ export const DiscoverChart = ({
     <EuiFlexGroup
       direction="column"
       gutterSize="none"
-      className={isEnhancementsEnabled ? 'dscChart__wrapper' : ''}
+      className={classNames('dscChart__wrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'dscChart__wrapper--enhancement': isEnhancementsEnabled,
+      })}
       data-test-subj="dscChartWrapper"
     >
       {isEnhancementsEnabled ? queryEnhancedHistogramHeader : histogramHeader}
@@ -128,10 +131,7 @@ export const DiscoverChart = ({
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
-            className={classNames('dscTimechart', {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              dscTimechart__nonEnhanced: !isEnhancementsEnabled,
-            })}
+            className="dscTimechart"
             data-test-subj="dscTimechart"
           >
             <div className="dscHistogram" data-test-subj="discoverChart">

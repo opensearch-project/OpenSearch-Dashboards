@@ -68,7 +68,15 @@ export function HitsCounter({ hits, showResetButton, onResetQuery, rows }: HitsC
         alignItems="center"
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText
+            size="s"
+            aria-label={i18n.translate('discover.hitsCounter', {
+              defaultMessage: `{rowsCount} {rowsCount, plural, one {row} other {rows}} shown${
+                !!hits && ' and {hits} {hits, plural, one {hit} other {hits}}'
+              }`,
+              values: { rowsCount, hits },
+            })}
+          >
             <strong>
               <FormattedMessage
                 id="discover.hitsResultTitle"

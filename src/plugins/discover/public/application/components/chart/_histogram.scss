@@ -12,10 +12,13 @@
 
 .dscChart__wrapper {
   border-bottom: 1px solid $euiColorLightShade;
-  padding: 8px;
-  gap: 8px;
-  flex-grow: 0;
-  flex-wrap: nowrap;
+
+  &--enhancement {
+    padding: 8px;
+    gap: 8px;
+    flex-grow: 0;
+    flex-wrap: nowrap;
+  }
 
   .dscChart__chartheader {
     align-items: center;
