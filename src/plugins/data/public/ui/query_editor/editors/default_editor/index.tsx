@@ -9,6 +9,7 @@ import { monaco } from '@osd/monaco';
 import { QueryStatus, ResultStatus } from '../../../../query';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { createEditor, SingleLineInput } from '../shared';
+import { PromQLTokensProvider } from '../../../../antlr/promql/syntaxHighlighterTokensProvider/tokens_provider';
 
 export interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
   languageId: string;
@@ -20,7 +21,10 @@ export interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
     end?: any[];
   };
   headerRef?: React.RefObject<HTMLDivElement>;
-  provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+  languageProviders: {
+    provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+    triggerCharacters: string[];
+  };
   queryStatus?: QueryStatus;
 }
 
@@ -31,7 +35,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   footerItems,
   editorDidMount,
   headerRef,
-  provideCompletionItems,
+  languageProviders,
   queryStatus,
 }) => {
   return (
@@ -58,9 +62,10 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
           wordBasedSuggestions: false,
         }}
         suggestionProvider={{
-          provideCompletionItems,
-          triggerCharacters: [' '],
+          provideCompletionItems: languageProviders.provideCompletionItems,
+          triggerCharacters: languageProviders.triggerCharacters,
         }}
+        tokensProvider={new PromQLTokensProvider()}
         languageConfiguration={{
           autoClosingPairs: [
             { open: '(', close: ')' },
