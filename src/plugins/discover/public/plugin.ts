@@ -34,6 +34,7 @@ import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from 
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { url } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../core/public';
+import { WorkspaceAvailability } from '../../../../src/core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { generateDocViewsUrl } from './application/components/doc_views/generate_doc_views_url';
@@ -265,6 +266,7 @@ export class DiscoverPlugin
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
