@@ -59,6 +59,11 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     method: 'POST',
     needBody: true,
   });
+  enhancements.promqlQuery = createAction(client, components, {
+    endpoint: URI.PROMQL,
+    method: 'POST',
+    needBody: true,
+  });
   enhancements.getDataConnectionById = createAction(client, components, {
     endpoint: OPENSEARCH_API.DATA_CONNECTIONS,
     method: 'GET',
@@ -82,6 +87,11 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
   enhancements.getDataConnections = createAction(client, components, {
     endpoint: OPENSEARCH_API.DATA_CONNECTIONS,
     method: 'GET',
+  });
+  enhancements.getMetrics = createAction(client, components, {
+    endpoint: OPENSEARCH_API.METRICS,
+    method: 'GET',
+    needBody: true,
   });
 
   enhancements.getObject = createAction(client, components, {
