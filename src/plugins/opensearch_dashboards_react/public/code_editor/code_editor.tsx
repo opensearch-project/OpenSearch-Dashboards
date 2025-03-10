@@ -90,13 +90,6 @@ export interface Props {
   languageConfiguration?: monaco.languages.LanguageConfiguration;
 
   /**
-   * Token provider for syntax highlighting
-   * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.TokensProvider.html
-   */
-  tokensProvider?: monaco.languages.TokensProvider;
-
-  /**
    * Function called before the editor is mounted in the view
    */
   editorWillMount?: () => void;
@@ -179,10 +172,6 @@ export class CodeEditor extends React.Component<Props, {}> {
 
       if (this.props.languageConfiguration) {
         monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
-      }
-
-      if (this.props.tokensProvider) {
-        monaco.languages.setTokensProvider(languageId, this.props.tokensProvider);
       }
     });
 

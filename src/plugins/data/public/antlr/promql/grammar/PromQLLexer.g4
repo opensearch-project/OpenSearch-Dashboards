@@ -198,7 +198,8 @@ AT: '@';
 // The proper order (longest to the shortest) must be validated after parsing
 DURATION: ([0-9]+ ('ms' | [smhdwy]))+;
 
-IDENTIFIER : [a-z_:] [a-z0-9_:]*;
+METRIC_NAME : [a-z_:] [a-z0-9_:]*;
+LABEL_NAME  : [a-z_] [a-z0-9_]*;
 
-WS         : [\r\t\n ]+   -> channel(HIDDEN);
+WS         : [\r\t\n ]+   -> channel(WHITESPACE);
 SL_COMMENT : '#' .*? '\n' -> channel(COMMENTS);
