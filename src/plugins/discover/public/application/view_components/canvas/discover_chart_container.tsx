@@ -36,6 +36,9 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
 
   if (!hits) return null;
 
+  /**
+   * deprecated - we will no longer support this option. Only legacyDiscoverTable will be supported
+   */
   const discoverOptions = (
     <EuiPopover
       button={
