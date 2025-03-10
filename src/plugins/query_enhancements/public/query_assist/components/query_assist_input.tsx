@@ -101,6 +101,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
           prepend={<EuiIcon type={assistantMark} />}
           append={<WarningBadge error={props.error} />}
           fullWidth
+          compressed
         />
         <EuiPortal>
           <SuggestionsComponent
