@@ -38,7 +38,7 @@ env:
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  NODE_OPTIONS: '--max-old-space-size=8048 --dns-result-order=ipv4first'
+  NODE_OPTIONS: '--max-semi-space-size=16 --max-old-space-size=8048 --dns-result-order=ipv4first'
   COMMENT_TAG: '[MANUAL CYPRESS TEST RUN RESULTS]'
   COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
   COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'

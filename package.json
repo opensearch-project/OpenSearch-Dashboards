@@ -78,7 +78,7 @@
     "uiFramework:compileCss": "cd packages/osd-ui-framework && yarn compileCss",
     "osd:watch": "scripts/use_node scripts/opensearch_dashboards --dev --logging.json=false",
     "build:types": "scripts/use_node scripts/remove.js ./target/types && tsc --p tsconfig.types.json",
-    "docs:acceptApiChanges": "scripts/use_node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
+    "docs:acceptApiChanges": "scripts/use_node --max-semi-space-size=16 --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "docs:generateDevDocs": "scripts/use_node scripts/generate_docs_sidebar.js",
     "osd:bootstrap": "scripts/use_node scripts/build_ts_refs && scripts/use_node scripts/register_git_hook",
     "spec_to_console": "scripts/use_node scripts/spec_to_console",

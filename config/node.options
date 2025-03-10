@@ -2,5 +2,8 @@
 ## See `node --help` and `node --v8-options` for available options
 ## Please note you should specify one option per line
 
+## max size of semi space in megabytes
+#--max-semi-space-size=16
+
 ## max size of old space in megabytes
 #--max-old-space-size=4096
