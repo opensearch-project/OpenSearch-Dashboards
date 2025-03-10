@@ -640,7 +640,7 @@ A sample telemetry report is shown below.
                                   "healthCheckDelayMs": 2500,
                                   "logQueries": false,
                                   "pingTimeoutMs": 30000,
-                                  "requestHeadersWhitelistConfigured": false,
+                                  "requestHeadersAllowlistConfigured": false,
                                   "requestTimeoutMs": 30000,
                                   "shardTimeoutMs": 30000,
                                   "ssl": {
@@ -661,11 +661,11 @@ A sample telemetry report is shown below.
                                   "socketTimeout": 120000,
                                   "compression": {
                                       "enabled": true,
-                                      "referrerWhitelistConfigured": false
+                                      "referrerAllowlistConfigured": false
                                   },
                                   "xsrf": {
                                       "disableProtection": false,
-                                      "whitelistConfigured": false
+                                      "allowlistConfigured": false
                                   },
                                   "requestId": {
                                       "allowFromAnyIp": false,

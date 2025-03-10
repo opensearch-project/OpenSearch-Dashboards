@@ -167,7 +167,7 @@ opensearch.username: 'admin'
 opensearch.password: 'your-password'
 opensearch.ignoreVersionMismatch: true
 opensearch.ssl.verificationMode: none
-opensearch.requestHeadersWhitelist: [authorization]
+opensearch.requestHeadersAllowlist: [authorization]
 opensearch_security.multitenancy.enabled: false
 opensearch_security.readonly_mode.roles: [kibana_read_only]
 opensearch_security.cookie.secure: false

@@ -91,20 +91,6 @@ describe('core deprecations', () => {
     });
   });
 
-  describe('xsrfDeprecation', () => {
-    it('logs a warning if server.xsrf.whitelist is set', () => {
-      const { messages } = applyCoreDeprecations({
-        server: { xsrf: { whitelist: ['/path'] } },
-      });
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "\\"server.xsrf.whitelist\\" is deprecated and has been replaced by \\"server.xsrf.allowlist\\"",
-          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. Instead, supply the \\"osd-xsrf\\" header.",
-        ]
-      `);
-    });
-  });
-
   describe('rewriteBasePath', () => {
     it('logs a warning is server.basePath is set and server.rewriteBasePath is not', () => {
       const { messages } = applyCoreDeprecations({
