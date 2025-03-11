@@ -122,7 +122,7 @@ jobs:
             exit 1
           fi
 
-            BASELINE=$(cat ./lighthouse_baseline.json)
+            BASELINE=$(cat ./baselines/lighthouse_baseline.json)
 
             FAILURES=$(jq --argjson baseline "$BASELINE" -r '[.[] | select(.passed==false) | {metric: .auditId, expected: ($baseline[.url][.auditId] // "N/A"), actual: (if .actual then (.actual | floor) else "N/A" end), url: .url}]' .lighthouseci/assertion-results.json)
 
