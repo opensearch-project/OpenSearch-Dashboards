@@ -34,20 +34,20 @@ export const setupSearchUseCase = (contentManagement: ContentManagementPluginSet
     sections: [
       getStartedSection,
       {
-        id: SECTIONS.DIFFERENT_SEARCH_TYPES,
+        id: SECTIONS.CONFIG_EVALUATE_SEARCH,
         order: 2000,
-        title: i18n.translate('home.searchOverview.differentSearchTypes.title', {
-          defaultMessage: 'Try out different search techniques',
+        title: i18n.translate('home.searchOverview.configEvaluate.title', {
+          defaultMessage: 'Configure and evaluate search',
         }),
         kind: 'card',
         grid: true,
         columns: 2,
       },
       {
-        id: SECTIONS.CONFIG_EVALUATE_SEARCH,
+        id: SECTIONS.DIFFERENT_SEARCH_TYPES,
         order: 3000,
-        title: i18n.translate('home.searchOverview.configEvaluate.title', {
-          defaultMessage: 'Configure and evaluate search',
+        title: i18n.translate('home.searchOverview.differentSearchTypes.title', {
+          defaultMessage: 'Try out different search techniques',
         }),
         kind: 'card',
         grid: true,
