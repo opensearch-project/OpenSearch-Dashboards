@@ -8,6 +8,9 @@ import { i18n } from '@osd/i18n';
 import { EuiToolTip, EuiSmallButtonIcon, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { useDataGridContext } from './data_grid_table_context';
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export const DocViewInspectButton = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
   const { inspectedHit, setInspectedHit, rows } = useDataGridContext();
   const currentInspected = rows[rowIndex];

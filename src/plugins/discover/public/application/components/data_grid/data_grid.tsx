@@ -30,6 +30,9 @@ export interface DataGridProps {
   isContextView?: boolean;
 }
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 const DataGridUI = ({
   columns,
   indexPattern,
@@ -150,4 +153,7 @@ const DataGridUI = ({
   );
 };
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export const DataGrid = React.memo(DataGridUI);
