@@ -324,7 +324,7 @@ describe('query assist summary', () => {
     expect(screen.queryByTestId('queryAssist_summary_buttons_thumbup')).not.toBeInTheDocument();
   });
 
-  it('should not fetch summary if data is empty', async () => {
+  it('should not display empty screen if result is empty', async () => {
     const firstPPL = 'source=test | stats COUNT() as count';
     const dataSetup = dataPluginMock.createSetupContract();
     dataSetup.search.df.df$ = new BehaviorSubject<IDataFrame | undefined>(undefined);
@@ -347,7 +347,7 @@ describe('query assist summary', () => {
         fields: [],
       });
     });
-    expect(screen.getByTestId('queryAssist_summary_empty_text')).toBeInTheDocument();
+    expect(screen.getByTestId('queryAssist_summary_can_not_generate')).toBeInTheDocument();
     expect(defaultCoreSetupMock.http.post).not.toHaveBeenCalled();
   });
 
