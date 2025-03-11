@@ -7,7 +7,7 @@ import { ParserRuleContext, ParseTree } from 'antlr4ng';
 import { InstantSelectorContext, LabelMatcherContext } from './.generated/PromQLParser';
 import { PromQLParserVisitor } from './.generated/PromQLParserVisitor';
 
-interface InstantSelectorResult {
+export interface InstantSelectorResult {
   metricName: string | undefined;
   labelName: string | undefined;
 }

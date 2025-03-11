@@ -16,7 +16,9 @@ import { PromQLLexer } from './.generated/PromQLLexer';
 import { PromQLParser } from './.generated/PromQLParser';
 import { getNamesFromInstantSelector } from './instant_selector_visitor';
 
-const tokenDictionary: any = {};
+const tokenDictionary: any = {
+  SPACE: PromQLParser.WS,
+};
 
 // These are keywords that we do not want to show in autocomplete
 export function getIgnoredTokens(): number[] {
