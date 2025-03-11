@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { FileParserService } from '../parsers/file_parser_service';
 import { configSchema } from '../../config';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
-import { decideClient, determineMapping } from '../utils/util';
+import { decideClient, determineMapping, fetchDepthLimit } from '../utils/util';
 import { FileStream } from '../types';
 
 export function previewRoute(
@@ -95,17 +95,10 @@ export function previewRoute(
       ).slice(0, request.query.previewCount);
 
       try {
-        // Ensure OpenSearch can handle the deeply nested objects
-        const nestedObjectsLimit =
-          (
-            await client.cluster.getSettings({
-              include_defaults: true,
-              filter_path: '**.nested_objects.limit',
-            })
-          ).body.defaults?.indices?.mapping?.nested_objects?.limit ?? 50000;
-
+        // Ensure OpenSearch can handle deep objects
+        const nestedObjectsLimit = await fetchDepthLimit(client);
         // Some documents may omit fields so we must merge into one large document
-        const predictedMapping = determineMapping(_.merge(documents), Number(nestedObjectsLimit));
+        const predictedMapping = determineMapping(_.merge(documents), nestedObjectsLimit);
 
         const existingMapping = !request.query.createMode
           ? (await client.indices.getMapping({ index: request.query.indexName })).body[
