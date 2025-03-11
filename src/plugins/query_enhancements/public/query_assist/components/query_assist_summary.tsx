@@ -260,6 +260,16 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       );
     }
 
+    if (!canGenerateSummary) {
+      return (
+        <EuiText size="s" data-test-subj="queryAssist_summary_can_not_generate">
+          {i18n.translate('queryEnhancements.queryAssist.summary.canNotGenerate', {
+            defaultMessage: 'Summary unavailable, please check if there were results.',
+          })}
+        </EuiText>
+      );
+    }
+
     if (summary) {
       return (
         <EuiText size="s" data-test-subj="queryAssist_summary_result">
@@ -275,7 +285,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         })}
       </EuiText>
     );
-  }, [loading, manualTriggerVisible, isQueryDirty, summary]);
+  }, [loading, manualTriggerVisible, isQueryDirty, summary, canGenerateSummary]);
 
   if (
     props.dependencies.isCollapsed ||
