@@ -61,11 +61,11 @@ function delay<T>(fn: (...args: any) => T, ms: number): Promise<T> {
 }
 
 // The current batch/queue of requests to fetch
-let requestsToFetch: SearchRequest[] = [];
-let requestOptions: ISearchOptions[] = [];
+const requestsToFetch: { [key: string]: SearchRequest[] } = {};
+const requestOptions: { [key: string]: ISearchOptions[] } = {};
 
 // The in-progress fetch (if there is one)
-let fetchInProgress: any = null;
+const fetchInProgress: { [key: string]: any } = {};
 
 /**
  * Delay fetching for a given amount of time, while batching up the requests to be fetched.
@@ -83,20 +83,33 @@ async function delayedFetch(
   if (ms === 0) {
     return callClient([request], [options], fetchHandlers)[0];
   }
+  const { dataSourceId, ...restRequest } = request;
+  const key = dataSourceId ?? '';
 
-  const i = requestsToFetch.length;
-  requestsToFetch = [...requestsToFetch, request];
-  requestOptions = [...requestOptions, options];
+  const i = requestsToFetch[key]?.length ?? 0;
+  /**
+   * The internal msearch API accepts only one data source per request.
+   * To search requests with different options across multiple data sources,
+   * they need to be grouped by data source and processed separately.
+   * After processing, the grouped arrays are cleared.
+   */
+  requestsToFetch[key] = [...(requestsToFetch[key] ?? []), restRequest];
+  requestOptions[key] = [...(requestOptions[key] ?? []), options];
 
   // Note: the typescript here only worked because `SearchResponse` was `any`
   // Since this code is legacy, I'm leaving the any here.
-  const responses: any[] = await (fetchInProgress =
-    fetchInProgress ||
+  const responses: any[] = await (fetchInProgress[key] =
+    fetchInProgress[key] ||
     delay(() => {
-      const response = callClient(requestsToFetch, requestOptions, fetchHandlers);
-      requestsToFetch = [];
-      requestOptions = [];
-      fetchInProgress = null;
+      const response = callClient(
+        requestsToFetch[key],
+        requestOptions[key],
+        fetchHandlers,
+        dataSourceId
+      );
+      delete requestsToFetch[key];
+      delete requestOptions[key];
+      delete fetchInProgress[key];
       return response;
     }, ms));
   return responses[i];

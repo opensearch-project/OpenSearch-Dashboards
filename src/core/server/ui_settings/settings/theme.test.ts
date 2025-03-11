@@ -57,6 +57,8 @@ describe('theme settings', () => {
 
     it('should only accept valid values', () => {
       expect(() => validate('v7')).not.toThrow();
+      expect(() => validate('v8')).not.toThrow();
+      expect(() => validate('v9')).not.toThrow();
       expect(() => validate('Next (preview)')).not.toThrow();
       expect(() => validate('v12')).toThrowErrorMatchingInlineSnapshot(`
         "types that failed validation:

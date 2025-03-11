@@ -7,7 +7,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiIcon,
+  EuiMarkdownFormat,
   EuiIconTip,
   EuiSmallButtonIcon,
   EuiSpacer,
@@ -27,8 +27,6 @@ import { DataPublicPluginSetup, QueryEditorExtensionDependencies } from '../../.
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { CoreSetup } from '../../../../../core/public';
 import { QueryAssistContextType } from '../../../common/query_assist';
-import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
-import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
 import { FeedbackStatus } from '../../../common/query_assist';
 
 export interface QueryContext {
@@ -43,6 +41,7 @@ interface QueryAssistSummaryProps {
   usageCollection?: UsageCollectionSetup;
   dependencies: QueryEditorExtensionDependencies;
   core: CoreSetup;
+  brandingLabel?: string;
 }
 
 export const convertResult = (body: IDataFrame) => {
@@ -119,9 +118,10 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
 
   const fetchSummary = useCallback(
     async (queryContext: QueryContext) => {
-      if (isEmpty(queryContext?.queryResults)) return;
-      setLoading(true);
       setSummary('');
+      if (isEmpty(queryContext?.queryResults)) return;
+      if (isQuerySummaryCollapsed) return;
+      setLoading(true);
       setFeedback(FeedbackStatus.NONE);
       const SUCCESS_METRIC = 'fetch_summary_success';
       try {
@@ -149,7 +149,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         setLoading(false);
       }
     },
-    [props.http, reportCountMetric, errorPrompt]
+    [props.http, reportCountMetric, errorPrompt, isQuerySummaryCollapsed]
   );
 
   useEffect(() => {
@@ -225,7 +225,6 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     return null;
   }
 
-  const isDarkMode = props.core.uiSettings.get('theme:darkMode');
   return (
     <EuiSplitPanel.Outer
       className="queryAssist queryAssist__summary"
@@ -236,13 +235,11 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       <EuiSplitPanel.Inner className={'queryAssist queryAssist__summary_banner'}>
         <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type={isDarkMode ? sparkleSolidSvg : sparkleHollowSvg} size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>
+                {`${props.brandingLabel} `}
                 {i18n.translate('queryEnhancements.queryAssist.summary.panelTitle', {
-                  defaultMessage: 'Response',
+                  defaultMessage: 'Summary',
                 })}
               </strong>
             </EuiText>
@@ -335,7 +332,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         )}
         {summary && !loading && (
           <EuiText size="s" data-test-subj="queryAssist_summary_result">
-            {summary}
+            <EuiMarkdownFormat>{summary}</EuiMarkdownFormat>
           </EuiText>
         )}
       </EuiSplitPanel.Inner>

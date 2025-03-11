@@ -30,8 +30,7 @@
 
 import React, { Component } from 'react';
 import { debounce } from 'lodash';
-// @ts-expect-error
-import { saveAs } from '@elastic/filesaver';
+import { saveAs } from 'file-saver';
 import {
   EuiSpacer,
   Query,
