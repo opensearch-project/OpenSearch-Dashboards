@@ -208,6 +208,11 @@ declare namespace Cypress {
        * Sets the top nav date to relative time
        */
       setRelativeTopNavDate(time: number, timeUnit: string): Chainable<any>;
+
+      /**
+       * Verifies the number of rows count
+       */
+      verifyResultsCount(count: number): Chainable<any>;
     };
   }
 }

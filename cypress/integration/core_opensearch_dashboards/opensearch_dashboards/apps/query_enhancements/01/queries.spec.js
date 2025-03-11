@@ -52,10 +52,12 @@ const queriesTestSuite = () => {
         cy.setQueryEditor(query);
         cy.osd.waitForLoader(true);
         cy.waitForSearch();
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
 
         // Query should persist across refresh
         cy.reload();
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
       });
 
@@ -68,10 +70,12 @@ const queriesTestSuite = () => {
         cy.setQueryEditor(query);
         cy.osd.waitForLoader(true);
         cy.waitForSearch();
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
 
         // Query should persist across refresh
         cy.reload();
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
       });
 
@@ -86,9 +90,15 @@ const queriesTestSuite = () => {
         );
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
 
+        cy.osd.verifyResultsCount(10);
+        cy.getElementByTestId('discoverQueryHits').should('not.exist');
+
         // Query should persist across refresh
         cy.reload();
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+
+        cy.osd.verifyResultsCount(10);
+        cy.getElementByTestId('discoverQueryHits').should('not.exist');
 
         cy.getElementByTestId('osdQueryEditor__multiLine')
           .find('.monaco-editor')
@@ -119,9 +129,13 @@ const queriesTestSuite = () => {
         cy.waitForSearch();
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
 
+        cy.osd.verifyResultsCount(10000);
+        cy.verifyHitCount('10,000');
+
         // Query should persist across refresh
         cy.reload();
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+        cy.osd.verifyResultsCount(10000);
         cy.verifyHitCount('10,000');
       });
     });
