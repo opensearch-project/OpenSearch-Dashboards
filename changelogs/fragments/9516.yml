@@ -1,2 +1,2 @@
 fix:
-- Fix null or undefined object conversion error ([#9516](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9516))
+- Fix data frame null or undefined object conversion error ([#9516](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9516))
