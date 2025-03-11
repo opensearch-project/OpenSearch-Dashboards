@@ -1,0 +1,2 @@
+fix:
+- Fix failed lint checker action ([#9515](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9515))
