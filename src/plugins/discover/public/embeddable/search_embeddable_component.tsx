@@ -21,6 +21,9 @@ interface SearchEmbeddableProps {
 }
 export type DiscoverEmbeddableProps = DataGridTableProps;
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export const DataGridTableMemoized = React.memo((props: DataGridTableProps) => (
   <DataGridTable {...props} />
 ));

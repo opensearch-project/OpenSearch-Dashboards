@@ -29,4 +29,3 @@
  */
 
 export { shortenDottedString } from './shorten_dotted_string';
-export { formatNumWithCommas } from './format_number_with_commas';

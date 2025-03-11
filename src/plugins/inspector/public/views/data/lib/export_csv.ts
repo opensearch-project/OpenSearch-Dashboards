@@ -29,9 +29,7 @@
  */
 
 import { isObject } from 'lodash';
-
-// @ts-ignore
-import { saveAs } from '@elastic/filesaver';
+import { saveAs } from 'file-saver';
 
 import { DataViewColumn, DataViewRow } from '../types';
 
