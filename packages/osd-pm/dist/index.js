@@ -27149,7 +27149,7 @@ function escapeArgument(arg, doubleEscapeMetaChars) {
     // Convert to string
     arg = `${arg}`;
 
-    // Algorithm below is based on https://qntm.org/cmd
+    // Algorithm below is based on https://qntm.org/cmd<!-- lychee-ignore -->
 
     // Sequence of backslashes followed by a double quote:
     // double up all the backslashes and escape the double quote
