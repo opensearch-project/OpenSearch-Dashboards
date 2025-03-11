@@ -5,13 +5,12 @@
 
 import { monaco } from '@osd/monaco';
 import { getSuggestions } from './code_completion';
-import { SQL_SYMBOLS } from './constants';
 import { IndexPattern } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
 import { QuerySuggestion } from '../../autocomplete';
 import * as utils from '../shared/utils';
 
-describe('sql code_completion', () => {
+describe('promql code_completion', () => {
   describe('getSuggestions', () => {
     const mockIndexPattern = {
       title: 'test-index',
@@ -39,7 +38,7 @@ describe('sql code_completion', () => {
         query,
         indexPattern: mockIndexPattern,
         position,
-        language: 'SQL',
+        language: 'PROMQL',
         selectionStart: 0,
         selectionEnd: 0,
         services: mockServices,
@@ -71,79 +70,48 @@ describe('sql code_completion', () => {
       expect(result).toEqual([]);
     });
 
-    it('should suggest table name when suggestViewsOrTables is true', async () => {
-      const result = await getSimpleSuggestions('SELECT * FROM ');
+    it('should suggest functions', async () => {
+      const result = await getSimpleSuggestions('');
 
       checkSuggestionsContain(result, {
-        text: 'test-index',
-        type: monaco.languages.CompletionItemKind.Struct,
-      });
-    });
-
-    it('should suggest columns when suggestColumns is true', async () => {
-      const result = await getSimpleSuggestions('SELECT * FROM test-index WHERE ');
-
-      checkSuggestionsContain(result, {
-        text: 'field1',
-        type: monaco.languages.CompletionItemKind.Field,
-      });
-    });
-
-    it('should suggest EQ for column value predicate', async () => {
-      const result = await getSimpleSuggestions('SELECT * FROM test-index WHERE field1 ');
-
-      checkSuggestionsContain(result, {
-        text: '=',
-        type: monaco.languages.CompletionItemKind.Operator,
-      });
-    });
-
-    it('should suggest LPAREN for column value predicate', async () => {
-      const result = await getSimpleSuggestions('SELECT * FROM test-index WHERE field1 IN ');
-
-      checkSuggestionsContain(result, {
-        text: '(',
+        text: 'rate',
         type: monaco.languages.CompletionItemKind.Keyword,
       });
     });
 
-    it('should suggest END_IN_TERMs for column value predicate', async () => {
-      const result = await getSimpleSuggestions(
-        "SELECT * FROM test-index WHERE field1 IN ( 'value' "
-      );
+    // TODO: update with a mocked metrics api call
+    it('should suggest metrics when suggestMetrics is true', async () => {
+      const result = await getSimpleSuggestions('');
 
-      [',', ')'].forEach((term) => {
-        checkSuggestionsContain(result, {
-          text: term,
-          type: monaco.languages.CompletionItemKind.Keyword,
-        });
+      checkSuggestionsContain(result, {
+        text: 'prometheus_http_requests_total',
+        type: monaco.languages.CompletionItemKind.Method,
       });
     });
 
-    it('should suggest aggregate functions when appropriate', async () => {
-      const result = await getSimpleSuggestions('SELECT * FROM test-index WHERE ');
+    it.skip('should suggest all labels when suggestLabels is true and NO metric specified', async () => {});
 
-      SQL_SYMBOLS.AGREGATE_FUNCTIONS.forEach((func) => {
-        checkSuggestionsContain(result, {
-          text: func,
-          type: monaco.languages.CompletionItemKind.Function,
-        });
-      });
-    });
+    it.skip('should suggest only necessary labels when suggestLabels is true and HAS metric specified', async () => {});
 
-    it('should suggest values after column names', async () => {
-      const mockedValues = ['value1', 'value2'];
-      jest.spyOn(utils, 'fetchColumnValues').mockResolvedValue(mockedValues);
+    it.skip('should suggest label values when suggestLabelValues is true', async () => {});
 
-      const result = await getSimpleSuggestions('SELECT * FROM test-index WHERE field1 = ');
+    it.skip('should suggest time range units', async () => {});
 
-      expect(utils.fetchColumnValues).toHaveBeenCalled();
-      mockedValues.forEach((val) => {
-        checkSuggestionsContain(result, {
-          text: val,
-          type: monaco.languages.CompletionItemKind.Value,
-        });
-      });
-    });
+    // TODO: mock like below for real calling of functions
+
+    // it.skip('should suggest values after column names', async () => {
+    //   const mockedValues = ['value1', 'value2'];
+    //   jest.spyOn(utils, 'fetchColumnValues').mockResolvedValue(mockedValues);
+
+    //   const result = await getSimpleSuggestions('SELECT * FROM test-index WHERE field1 = ');
+
+    //   expect(utils.fetchColumnValues).toHaveBeenCalled();
+    //   mockedValues.forEach((val) => {
+    //     checkSuggestionsContain(result, {
+    //       text: val,
+    //       type: monaco.languages.CompletionItemKind.Value,
+    //     });
+    //   });
+    // });
   });
 });
