@@ -319,7 +319,18 @@ describe('convertResult', () => {
       type: DATA_FRAME_TYPES.DEFAULT,
     };
 
-    const result = convertResult({ response });
+    // Custom date formatter
+    const customFormatter = (dateStr: string, type: OSD_FIELD_TYPES) => {
+      if (type === OSD_FIELD_TYPES.DATE) {
+        return moment.utc(dateStr).format('YYYY-MM-DDTHH:mm:ssZ');
+      }
+    };
+
+    const options: ISearchOptions = {
+      formatter: customFormatter,
+    };
+
+    const result = convertResult({ response, options });
     expect(result.hits.hits[0]._source.foo).toBe(null);
     expect(result.hits.hits[1]._source.foo).toBe(undefined);
   });
