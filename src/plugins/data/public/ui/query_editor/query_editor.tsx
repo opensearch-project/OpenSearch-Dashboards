@@ -269,6 +269,14 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     };
   };
 
+  const triggerCharacters = (() => {
+    // TODO: move into autocomplete service?
+    if (queryRef.current.language === 'PROMQL') {
+      return [' ', '(', '{', '[', '=', '"', ','];
+    }
+    return [' '];
+  })();
+
   const useQueryEditor = query.language !== 'kuery' && query.language !== 'lucene';
 
   const languageSelector = (
@@ -340,7 +348,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         </EuiButtonEmpty>,
       ],
     },
-    provideCompletionItems,
+    languageProviders: {
+      provideCompletionItems,
+      triggerCharacters,
+    },
     queryStatus: props.queryStatus,
   };
 
@@ -363,7 +374,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         onSubmit(newQuery, timefilter.getTime());
       });
     },
-    provideCompletionItems,
+    languageProviders: {
+      provideCompletionItems,
+      triggerCharacters,
+    },
     prepend: props.prepend,
     footerItems: {
       start: [
