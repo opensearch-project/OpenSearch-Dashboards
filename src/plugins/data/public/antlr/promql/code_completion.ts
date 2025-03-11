@@ -56,12 +56,28 @@ export const getSuggestions = async ({
 
     if (suggestions.suggestLabels) {
       finalSuggestions.push(
-        ...['job', 'method', 'instance'].map((af) => ({
+        ...['job', 'method', 'instance'].map((af: string) => ({
           text: `${af}`,
           type: monaco.languages.CompletionItemKind.File,
           detail: SuggestionItemDetailsTags.Table,
         }))
       );
+    }
+
+    const labelValueExample = new Map([
+      ['job', 'prometheus'],
+      ['method', 'GET'],
+      ['instance', 'localhost:9200'],
+    ]);
+    if (
+      suggestions.suggestLabelValues &&
+      labelValueExample.has(suggestions.suggestLabelValues.label ?? '')
+    ) {
+      finalSuggestions.push({
+        text: labelValueExample.get(suggestions.suggestLabelValues.label ?? 'instance')!,
+        type: monaco.languages.CompletionItemKind.File,
+        detail: SuggestionItemDetailsTags.Table,
+      });
     }
 
     if (suggestions.suggestTimeRangeUnits) {
