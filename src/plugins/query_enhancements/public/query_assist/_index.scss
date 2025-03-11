@@ -5,13 +5,13 @@
 
 .queryAssist {
   &.queryAssist__summary {
-    margin: $euiSizeS $euiSizeXS 0;
+    margin-top: $euiSizeS;
   }
 
   &.queryAssist__summary_banner {
     /* stylelint-disable  @osd/stylelint/no_restricted_values */
     background: lightOrDarkTheme(linear-gradient(to left, #edf7ff, #f9f4ff), $euiColorEmptyShade);
-    padding: $euiSizeXS;
+    padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSizeS;
   }
 
   &.queryAssist__callout {
