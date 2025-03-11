@@ -27149,8 +27149,6 @@ function escapeArgument(arg, doubleEscapeMetaChars) {
     // Convert to string
     arg = `${arg}`;
 
-    // Algorithm below is based on https://qntm.org/cmd
-
     // Sequence of backslashes followed by a double quote:
     // double up all the backslashes and escape the double quote
     arg = arg.replace(/(\\*)"/g, '$1$1\\"');
