@@ -29,6 +29,7 @@
  */
 
 import React from 'react';
+import { Resizable } from 'react-resizable';
 import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
 
@@ -36,6 +37,7 @@ import { monaco } from '@osd/monaco';
 
 import { LIGHT_THEME, DARK_THEME } from './editor_theme';
 
+import 'react-resizable/css/styles.css'; // Import resizable styles
 import './editor.scss';
 
 export interface Props {
@@ -113,10 +115,19 @@ export interface Props {
    * Whether the suggestion widget/window will be triggered upon clicking into the editor
    */
   triggerSuggestOnFocus?: boolean;
-}
 
-export class CodeEditor extends React.Component<Props, {}> {
+  /**
+   * Whether the editor should be manually resizable or not
+   */
+  resizable?: boolean;
+}
+export class CodeEditor extends React.Component<Props, { editorHeight: number }> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+
+  constructor(props: Props) {
+    super(props);
+    this.state = { editorHeight: (props.height as number) || 20 };
+  }
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -154,8 +165,23 @@ export class CodeEditor extends React.Component<Props, {}> {
     }
   };
 
+  // Handles user manual resizing
+  onResize = (_event: React.SyntheticEvent, { size }: { size: { height: number } }) => {
+    this.setState({ editorHeight: size.height }, () => {
+      if (this._editor) this._editor.layout();
+    });
+  };
+
+  // Handles auto-resizing when the parent container changes
+  _updateDimensions = () => {
+    if (this._editor) {
+      this._editor.layout();
+    }
+  };
+
   render() {
-    const { languageId, value, onChange, width, height, options } = this.props;
+    const { languageId, value, onChange, width, options, resizable = true } = this.props;
+    const { editorHeight } = this.state;
 
     monaco.languages.onLanguage(languageId, () => {
       if (this.props.suggestionProvider) {
@@ -175,29 +201,47 @@ export class CodeEditor extends React.Component<Props, {}> {
       }
     });
 
+    const editorComponent = (
+      <MonacoEditor
+        theme="euiColors"
+        language={languageId}
+        value={value}
+        onChange={onChange}
+        editorWillMount={this._editorWillMount}
+        editorDidMount={this._editorDidMount}
+        width="100%"
+        height={editorHeight}
+        options={options}
+      />
+    );
+
+    if (resizable) {
+      return (
+        <React.Fragment>
+          {/* Manual Resize */}
+          <Resizable
+            height={editorHeight}
+            width={width as number}
+            minConstraints={[100, 100]}
+            maxConstraints={[Infinity, 600]}
+            onResize={this.onResize}
+          >
+            <div style={{ width, height: editorHeight, overflow: 'hidden' }}>{editorComponent}</div>
+          </Resizable>
+
+          {/* Auto Resize */}
+          <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
+        </React.Fragment>
+      );
+    }
+
     return (
       <React.Fragment>
-        <MonacoEditor
-          theme="euiColors"
-          language={languageId}
-          value={value}
-          onChange={onChange}
-          editorWillMount={this._editorWillMount}
-          editorDidMount={this._editorDidMount}
-          width={width}
-          height={height}
-          options={options}
-        />
+        <div style={{ width, height: editorHeight, overflow: 'hidden' }}>{editorComponent}</div>
         <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
       </React.Fragment>
     );
   }
-
-  _updateDimensions = () => {
-    if (this._editor) {
-      this._editor.layout();
-    }
-  };
 }
 
 // React.lazy requires default export
