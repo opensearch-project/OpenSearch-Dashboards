@@ -57,7 +57,6 @@ export const formatError = (name: string, message: string, details: string) => {
 export const DIRECT_QUERY_BASE = '/api/directquery';
 export const PPL_BASE = `${DIRECT_QUERY_BASE}/ppl`;
 export const PPL_SEARCH = '/search';
-export const PROMQL_SEARCH = '/search';
 export const DSL_BASE = `${DIRECT_QUERY_BASE}/dsl`;
 export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
@@ -79,7 +78,6 @@ export const SECURITY_PLUGIN_ACCOUNT_API = '/api/v1/configuration/account';
 
 // Server route
 export const PPL_ENDPOINT = '/_plugins/_ppl';
-export const PROMQL_ENDPOINT = '/_plugins/_promql';
 export const SQL_ENDPOINT = '/_plugins/_sql';
 export const DSL_ENDPOINT = '/_plugins/_dsl';
 export const DATACONNECTIONS_ENDPOINT = '/_plugins/_query/_datasources';

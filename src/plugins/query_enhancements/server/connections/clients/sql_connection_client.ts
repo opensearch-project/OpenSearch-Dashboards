@@ -14,7 +14,7 @@ import {
   GetResourcesResponse,
 } from './base_connection_client';
 
-export class SqlConnectionClient extends BaseConnectionClient {
+export class SqlConnectionClient extends BaseConnectionClient<OpenSearchClient> {
   protected client: OpenSearchClient;
 
   constructor(context: RequestHandlerContext, _request: OpenSearchDashboardsRequest) {
@@ -22,7 +22,7 @@ export class SqlConnectionClient extends BaseConnectionClient {
     this.client = context.core.opensearch.client.asCurrentUser;
   }
 
-  async getResources(request: ClientRequest): Promise<GetResourcesResponse> {
+  async getResources<R>(request: ClientRequest): Promise<GetResourcesResponse<R>> {
     const _response = await this.client.transport.request({
       ...request,
       method: 'GET',

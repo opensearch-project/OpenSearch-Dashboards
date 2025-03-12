@@ -4,7 +4,6 @@
  */
 
 import { TransportRequestParams } from '@opensearch-project/opensearch/lib/Transport';
-import { OpenSearchClient } from 'src/core/server';
 
 export interface ResourcesQuery {
   dataSourceName: string; // SQL/DQS data source name (my_prometheus)
@@ -19,18 +18,16 @@ export interface ClientRequest {
   params: Partial<TransportRequestParams>;
 }
 
-type ResourceData = unknown;
-
-export interface GetResourcesResponse {
+export interface GetResourcesResponse<R> {
   nextToken?: string;
   status: string;
-  data: ResourceData[];
+  data: R[];
   type: string;
 }
 
-export abstract class BaseConnectionClient {
-  protected abstract client: OpenSearchClient;
+export abstract class BaseConnectionClient<C> {
+  protected abstract client: C;
   constructor() {}
 
-  abstract getResources(request: ClientRequest): Promise<GetResourcesResponse>;
+  abstract getResources<R>(request: ClientRequest): Promise<GetResourcesResponse<R>>;
 }

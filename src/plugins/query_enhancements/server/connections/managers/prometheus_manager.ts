@@ -3,11 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OpenSearchDashboardsRequest, RequestHandlerContext } from 'src/core/server';
+import {
+  OpenSearchClient,
+  OpenSearchDashboardsRequest,
+  RequestHandlerContext,
+} from 'src/core/server';
 import { BaseConnectionManager } from './base_connection_manager';
 import { ResourcesQuery } from '../clients/base_connection_client';
 
-export class PrometheusManager extends BaseConnectionManager {
+export class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
   getResourceURI(resourceType: string): string {
     switch (resourceType) {
       case 'labels':
