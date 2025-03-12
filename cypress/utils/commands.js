@@ -86,3 +86,68 @@ Cypress.Commands.add('setAdvancedSetting', (changes) => {
       }
     });
 });
+
+Cypress.Commands.add('measureComponentPerformance', (opts) => {
+  const { page, componentTestId, eventName, isDynamic = false } = opts;
+
+  cy.readFile('cypress/utils/performance_baselines.json').then((baselines) => {
+    const baseline = baselines[page][componentTestId][eventName];
+    const fieldName = `${page}_${componentTestId}_${eventName}`;
+
+    if (!baseline) {
+      cy.log(`No baseline found for component: ${fieldName}`);
+      return;
+    }
+
+    cy.window().then((win) => {
+      win.performance.mark(`${fieldName}_start`);
+
+      cy.get('@component')
+        .should('exist')
+        .then(($el) => {
+          // Check if finalRenderSelector is provided (indicating a dynamic component)
+          if (isDynamic) {
+            return new Cypress.Promise((resolve) => {
+              const observer = new MutationObserver(() => {
+                observer.disconnect();
+                resolve();
+              });
+
+              observer.observe($el[0], { childList: true, subtree: true });
+
+              // Fallback: If no changes detected in 3s, assume it's rendered
+              setTimeout(() => {
+                observer.disconnect();
+                resolve();
+              }, 3000);
+            });
+          }
+        });
+
+      // Now measure time
+      cy.window().then((win) => {
+        win.performance.mark(`${fieldName}_end`);
+        win.performance.measure(
+          `${fieldName}_render_time`,
+          `${fieldName}_start`,
+          `${fieldName}_end`
+        );
+
+        const measures = win.performance.getEntriesByName(`${fieldName}_render_time`);
+        if (measures.length > 0) {
+          const renderTime = measures[0].duration;
+          cy.log(`Render Time: ${renderTime.toFixed(2)}ms`);
+
+          if (renderTime > baseline.render_time) {
+            cy.task('logPerformance', {
+              metric: `${fieldName}_render_time`,
+              value: `exceeded: ${renderTime.toFixed(2)}ms > ${baseline.render_time}ms`,
+            });
+          }
+        } else {
+          cy.log('⚠️ Render time measurement failed.');
+        }
+      });
+    });
+  });
+});
