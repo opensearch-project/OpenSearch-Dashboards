@@ -9,14 +9,12 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HitsCounter } from '../chart/hits_counter';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import { DiscoverOptions } from '../discover_options/discover_options';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
   showResetButton?: boolean;
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
-  isEnhancementsEnabled: boolean;
 }
 
 export const DiscoverResultsActionBar = ({
@@ -24,7 +22,6 @@ export const DiscoverResultsActionBar = ({
   showResetButton = false,
   resetQuery,
   rows,
-  isEnhancementsEnabled,
 }: DiscoverResultsActionBarProps) => {
   return (
     <EuiFlexGroup
@@ -49,11 +46,6 @@ export const DiscoverResultsActionBar = ({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexStart">
           {/* TODO: We will allow extensions to be added here */}
-          {!isEnhancementsEnabled && (
-            <EuiFlexItem grow={false}>
-              <DiscoverOptions />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
