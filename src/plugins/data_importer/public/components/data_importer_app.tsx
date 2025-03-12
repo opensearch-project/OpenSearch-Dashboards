@@ -38,7 +38,7 @@ import {
 } from './import_type_selector';
 import { importFile } from '../lib/import_file';
 import { importText } from '../lib/import_text';
-import { ImportResponse } from '../types';
+import { ImportResponse, PreviewResponse } from '../types';
 import { PublicConfigSchema } from '../../config';
 import { ImportTextContentBody } from './import_text_content';
 import { ImportFileContentBody } from './import_file_content';
@@ -82,7 +82,10 @@ export const DataImporterPluginApp = ({
   const [dataType, setDataType] = useState<string | undefined>(
     config.enabledFileTypes.length > 0 ? config.enabledFileTypes[0] : undefined
   );
-  const [filePreviewData, setFilePreviewData] = useState<any>({});
+  const [filePreviewData, setFilePreviewData] = useState<PreviewResponse>({
+    documents: [],
+    predictedMapping: {},
+  });
   const [inputText, setText] = useState<string | undefined>();
   const [inputFile, setInputFile] = useState<File | undefined>();
   const [dataSourceId, setDataSourceId] = useState<string | undefined>();
@@ -114,7 +117,10 @@ export const DataImporterPluginApp = ({
   const onFileInput = (file?: File) => {
     setInputFile(file);
     if (!file) {
-      setFilePreviewData({});
+      setFilePreviewData({
+        documents: [],
+        predictedMapping: {},
+      });
     }
   };
 
@@ -179,7 +185,32 @@ export const DataImporterPluginApp = ({
           }
         } catch (error) {
           setIsLoadingPreview(false);
+          const errorMessage = error.body?.message ?? error;
+          notifications.toasts.addDanger(
+            i18n.translate('dataImporter.previewError', {
+              defaultMessage: `Preview failed: {errorMessage}`,
+              values: { errorMessage },
+            })
+          );
         }
+      }
+    }
+  };
+
+  const updateIndexSelector = async () => {
+    if (createMode) {
+      try {
+        const catIndicesResponse = await catIndices({ http, dataSourceId });
+        setIndexOptions(catIndicesResponse.indices.map((index: string) => ({ label: index })));
+        setCreateMode(false);
+      } catch (error) {
+        const errorMessage = error.body?.message ?? error;
+        notifications.toasts.addDanger(
+          i18n.translate('dataImporter.indicesFetchError', {
+            defaultMessage: `Failed to fetch indices: {errorMessage}`,
+            values: { errorMessage },
+          })
+        );
       }
     }
   };
@@ -198,7 +229,7 @@ export const DataImporterPluginApp = ({
           fileExtension: extname(inputFile!.name),
           delimiter,
           selectedDataSourceId: dataSourceId,
-          mapping: filePreviewData.mapping,
+          mapping: filePreviewData.predictedMapping,
         });
       } else if (importType === IMPORT_CHOICE_TEXT) {
         response = await importText({
@@ -209,14 +240,15 @@ export const DataImporterPluginApp = ({
           indexName: indexName!,
           delimiter,
           selectedDataSourceId: dataSourceId,
-          mapping: filePreviewData.mapping,
+          mapping: filePreviewData.predictedMapping,
         });
       }
     } catch (error) {
+      const errorMessage = error.body?.message ?? error;
       notifications.toasts.addDanger(
         i18n.translate('dataImporter.dataImportError', {
-          defaultMessage: `Data import failed: {error}`,
-          values: { error },
+          defaultMessage: `Data import failed: {errorMessage}`,
+          values: { errorMessage },
         })
       );
       return;
@@ -233,26 +265,21 @@ export const DataImporterPluginApp = ({
         })
       );
 
-      if (createMode) {
-        try {
-          const catIndicesResponse = await catIndices({ http, dataSourceId });
-          setIndexOptions(catIndicesResponse.indices.map((index: string) => ({ label: index })));
-          setCreateMode(false);
-        } catch (error) {
-          notifications.toasts.addDanger(
-            i18n.translate('dataImporter.indicesFetchError', {
-              defaultMessage: `Failed to fetch indices: {error}`,
-              values: { error },
-            })
-          );
-        }
-      }
+      await updateIndexSelector();
+    } else if (response && response.message.failedRows.length > 0) {
+      const failedRows = `${response.message.failedRows.join(', ')}`;
+      notifications.toasts.addDanger(
+        i18n.translate('dataImporter.dataImportSomeFailed', {
+          defaultMessage: `Some rows failed to ingest: {failedRows}`,
+          values: { failedRows },
+        })
+      );
+
+      await updateIndexSelector();
     } else {
-      const errorMessage = response ? `: ${response.message.message}` : '';
       notifications.toasts.addDanger(
         i18n.translate('dataImporter.dataImportFailed', {
-          defaultMessage: `Data import failed {errorMessage}`,
-          values: { errorMessage },
+          defaultMessage: `Data import failed`,
         })
       );
     }
@@ -264,10 +291,11 @@ export const DataImporterPluginApp = ({
         const response = await catIndices({ http, dataSourceId });
         setIndexOptions(response.indices.map((index: string) => ({ label: index })));
       } catch (error) {
+        const errorMessage = error.body?.message ?? error;
         notifications.toasts.addDanger(
           i18n.translate('dataImporter.indicesFetchError', {
-            defaultMessage: `Failed to fetch indices: {error}`,
-            values: { error },
+            defaultMessage: `Failed to fetch indices: {errorMessage}`,
+            values: { errorMessage },
           })
         );
       }

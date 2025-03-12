@@ -85,13 +85,12 @@ export function importTextRoute(
       }
 
       if (request.query.createMode) {
+        const mapping = request.body.mapping;
+
         try {
-          const mapping = request.body.mapping ? JSON.parse(request.body.mapping) : {};
           await client.indices.create({
             index: request.query.indexName,
-            body: {
-              mappings: mapping,
-            },
+            ...(mapping && { body: { mappings: JSON.parse(mapping) } }),
           });
         } catch (e) {
           return response.internalError({
@@ -127,7 +126,7 @@ export function importTextRoute(
         return response.ok({
           body: {
             message,
-            success: true,
+            success: message.failedRows.length < 1,
           },
         });
       } catch (e) {

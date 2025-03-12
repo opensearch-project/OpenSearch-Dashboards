@@ -4,14 +4,14 @@
  */
 
 import { Readable } from 'stream';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { opensearchClientMock } from '../../../../core/server/opensearch/client/mocks';
 import { CSVParser } from './csv_parser';
 import { CSVTestCaseFormat, INVALID_CSV_CASES, VALID_CSV_CASES } from './test_utils/csv_test_cases';
+import { opensearchServiceMock } from '../../../../core/server/mocks';
+import { IndexResponse } from '@opensearch-project/opensearch/api/types';
 
 describe('CSVParser', () => {
   const parser = new CSVParser();
-  const clientMock = opensearchClientMock.createOpenSearchClient();
+  const clientMock = opensearchServiceMock.createOpenSearchClient();
 
   describe('validateText()', () => {
     it.each<CSVTestCaseFormat>(VALID_CSV_CASES)(
@@ -49,6 +49,34 @@ describe('CSVParser', () => {
 
         expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
         expect(response.total).toBe(expected.length);
+        expect(response.failedRows.length).toBe(0);
+      }
+    );
+
+    it.each<CSVTestCaseFormat>(VALID_CSV_CASES)(
+      'should handle OpenSearch errors and show the correct failedRow',
+      async ({ rawStringArray, delimiter, expected }) => {
+        const mockSuccessfulResponse = opensearchServiceMock.createApiResponse<IndexResponse>();
+        clientMock.index
+          .mockRejectedValueOnce({})
+          .mockResolvedValueOnce(mockSuccessfulResponse)
+          .mockRejectedValueOnce({})
+          .mockResolvedValue(mockSuccessfulResponse);
+
+        const response = await parser.ingestText(rawStringArray.join(''), {
+          client: clientMock,
+          indexName: 'foo',
+          delimiter,
+        });
+
+        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+        expect(response.total).toBe(expected.length);
+        if (expected.length > 0) {
+          expect(response.failedRows).toContain(1);
+        }
+        if (expected.length > 2) {
+          expect(response.failedRows).toContain(3);
+        }
       }
     );
   });
@@ -73,17 +101,46 @@ describe('CSVParser', () => {
       }
     );
 
+    it.each<CSVTestCaseFormat>(VALID_CSV_CASES)(
+      'should handle OpenSearch errors and show the correct failedRow',
+      async ({ rawStringArray, delimiter, expected }) => {
+        const mockSuccessfulResponse = opensearchServiceMock.createApiResponse<IndexResponse>();
+        clientMock.index
+          .mockRejectedValueOnce({})
+          .mockResolvedValueOnce(mockSuccessfulResponse)
+          .mockRejectedValueOnce({})
+          .mockResolvedValue(mockSuccessfulResponse);
+
+        const validCSVFileStream = Readable.from(rawStringArray);
+        const response = await parser.ingestFile(validCSVFileStream, {
+          client: clientMock,
+          indexName: 'foo',
+          delimiter,
+        });
+
+        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+        expect(response.total).toBe(expected.length);
+        if (expected.length > 0) {
+          expect(response.failedRows).toContain(1);
+        }
+        if (expected.length > 2) {
+          expect(response.failedRows).toContain(3);
+        }
+      }
+    );
+
     it.each<CSVTestCaseFormat>(INVALID_CSV_CASES)(
       'should throw errors when attempting to ingest documents into OpenSearch',
       async ({ rawStringArray, delimiter, expected }) => {
         const invalidCSVFileStream = Readable.from(rawStringArray);
         try {
-          await parser.ingestFile(invalidCSVFileStream, {
+          const response = await parser.ingestFile(invalidCSVFileStream, {
             client: clientMock,
             indexName: 'foo',
             delimiter,
           });
-          expect(clientMock.index.mock.calls.length === expected.length).toBe(true);
+          expect(response.failedRows.length).toBeGreaterThan(0);
+          expect(clientMock.index.mock.calls.length).toBeLessThanOrEqual(expected.length);
           // eslint-disable-next-line no-empty
         } catch (_) {}
       }

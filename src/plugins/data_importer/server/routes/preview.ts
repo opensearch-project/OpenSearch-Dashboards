@@ -9,8 +9,9 @@ import _ from 'lodash';
 import { FileParserService } from '../parsers/file_parser_service';
 import { configSchema } from '../../config';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
-import { decideClient, determineMapping, fetchDepthLimit } from '../utils/util';
+import { decideClient, fetchDepthLimit, mergeCustomizerForPreview } from '../utils/util';
 import { FileStream } from '../types';
+import { determineMapping } from '../utils/determine_mapping';
 
 export function previewRoute(
   router: IRouter,
@@ -88,17 +89,29 @@ export function previewRoute(
       }
 
       const file = request.body.file as FileStream;
-      const documents = (
-        await parser.parseFile(file, request.query.previewCount, {
-          delimiter: request.query.delimiter,
-        })
-      ).slice(0, request.query.previewCount);
+      const documents: Array<Record<string, any>> = [];
+      try {
+        documents.push(
+          (
+            await parser.parseFile(file, request.query.previewCount, {
+              delimiter: request.query.delimiter,
+            })
+          ).slice(0, request.query.previewCount)
+        );
+      } catch (e) {
+        return response.badRequest({
+          body: `Error parsing file: ${e}`,
+        });
+      }
 
       try {
         // Ensure OpenSearch can handle deep objects
         const nestedObjectsLimit = await fetchDepthLimit(client);
         // Some documents may omit fields so we must merge into one large document
-        const predictedMapping = determineMapping(_.merge(documents), nestedObjectsLimit);
+        const predictedMapping = determineMapping(
+          _.mergeWith(documents, mergeCustomizerForPreview),
+          nestedObjectsLimit
+        );
 
         const existingMapping = !request.query.createMode
           ? (await client.indices.getMapping({ index: request.query.indexName })).body[

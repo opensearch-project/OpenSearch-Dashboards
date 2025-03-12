@@ -3,12 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MappingProperty, MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
 import _ from 'lodash';
 import moment from 'moment';
 import { FileParserService } from '../parsers/file_parser_service';
 import { OpenSearchClient, RequestHandlerContext } from '../../../../core/server';
-import { DYNAMIC_MAPPING_TYPES } from '../../common';
 
 export const decideClient = async (
   dataSourceEnabled: boolean,
@@ -31,70 +29,61 @@ export const validateEnabledFileTypes = (fileTypes: string[], fileParsers: FileP
   }
 };
 
-export const determineMapping = (
-  document: Record<string, any>,
-  nestedObjectsLimit: number
-): MappingTypeMapping => {
-  return {
-    dynamic: true,
-    date_detection: true,
-    ...determineType(document, 1, nestedObjectsLimit),
-  };
-};
-
-const determineType = (
-  value: any,
-  currentNestedCount: number,
-  nestedObjectsLimit: number
-): Record<string, MappingProperty> | MappingProperty => {
-  if (currentNestedCount >= nestedObjectsLimit) {
-    throw Error(`Current document exceeds nested object limit of ${nestedObjectsLimit}`);
-  }
-
-  switch (true) {
-    case Array.isArray(value) && value.length < 1:
-    case value == null:
-      return { type: DYNAMIC_MAPPING_TYPES.NULL };
-    case value === 'true' || value === 'false' || typeof value === 'boolean':
-      return { type: DYNAMIC_MAPPING_TYPES.BOOLEAN };
-    case !isNaN(Number(value)):
-      return { type: determineNumberType(Number(value)) };
-    case isValidDate(_.toString(value)):
-      return { type: DYNAMIC_MAPPING_TYPES.DATE };
-    case Array.isArray(value) && value.length > 0:
-      return determineType(value[0], currentNestedCount, nestedObjectsLimit);
-    case value && typeof value === 'object' && !Array.isArray(value):
-      const properties: Record<string, MappingProperty> = {};
-      Object.keys(value).forEach((key) => {
-        properties[key] = determineType(value[key], currentNestedCount + 1, nestedObjectsLimit);
-      });
-      return { properties };
-    default:
-      return {
-        type: DYNAMIC_MAPPING_TYPES.TEXT,
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
-          },
-        },
-      };
-  }
-};
-
-const determineNumberType = (value: number) => {
-  if (Number.isSafeInteger(value)) {
-    return DYNAMIC_MAPPING_TYPES.INTEGER;
-  } else if (!Number.isInteger(value)) {
-    return DYNAMIC_MAPPING_TYPES.FLOAT;
-  } else {
-    return DYNAMIC_MAPPING_TYPES.DOUBLE;
-  }
-};
-
-const isValidDate = (date: string) => {
+export const isValidDate = (date: string) => {
   return (
     moment(date, moment.ISO_8601, true).isValid() || moment(date, moment.RFC_2822, true).isValid()
+  );
+};
+
+export const isBooleanType = (value: any) => {
+  return value === 'true' || value === 'false' || typeof value === 'boolean';
+};
+
+export const isNumericType = (value: any) => {
+  return !isNaN(Number(value));
+};
+
+export const mergeCustomizerForPreview = (objValue: any, srcValue: any) => {
+  if (!isBooleanType(objValue) && !isNumericType(objValue)) {
+    return objValue;
+  } else {
+    return srcValue;
+  }
+};
+
+const flattenObject = (obj: Record<string, any>) => {
+  const result: Record<string, any> = {};
+  for (const key of Object.keys(obj)) {
+    if (obj[key] && typeof obj[key] === 'object') {
+      const nested = flattenObject(obj[key]);
+      if (Object.keys(nested).length === 0) {
+        result[`${key}.`] = null;
+      }
+      for (const nestedKey of Object.keys(nested)) {
+        result[`${key}.${nestedKey}`] = nested[nestedKey];
+      }
+    } else {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+};
+
+export const isValidObject = (obj: Record<string, any>) => {
+  if (Object.keys(obj).length === 0) {
+    return false;
+  }
+
+  const flattenedObject = flattenObject(obj);
+
+  if (Object.keys(flattenedObject).length === 0) {
+    return false;
+  }
+
+  const keys = Object.keys(flattenedObject).map((key) => key.replace(/\s/g, ''));
+  return keys.every(
+    (key) =>
+      key.length > 0 && !key.startsWith('.') && !key.endsWith('.') && !!!key.match(/(\.\.)+/g)
   );
 };
 

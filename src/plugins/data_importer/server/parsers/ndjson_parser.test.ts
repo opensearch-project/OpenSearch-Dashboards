@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { opensearchClientMock } from '../../../../core/server/opensearch/client/mocks';
+import { IndexResponse } from '@opensearch-project/opensearch/api/types';
+import { opensearchServiceMock } from '../../../../core/server/mocks';
 import { NDJSONParser } from './ndjson_parser';
 import {
   INVALID_NDJSON_TEST_CASES,
@@ -15,7 +15,7 @@ import { Readable } from 'stream';
 
 describe('NDJSONParser', () => {
   const parser = new NDJSONParser();
-  const clientMock = opensearchClientMock.createOpenSearchClient();
+  const clientMock = opensearchServiceMock.createOpenSearchClient();
 
   describe('validateText()', () => {
     it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
@@ -49,6 +49,32 @@ describe('NDJSONParser', () => {
         expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
       }
     );
+
+    it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
+      'should handle OpenSearch errors and show the correct failedRow',
+      async ({ rawString, expected }) => {
+        const mockSuccessfulResponse = opensearchServiceMock.createApiResponse<IndexResponse>();
+        clientMock.index
+          .mockResolvedValueOnce(mockSuccessfulResponse)
+          .mockRejectedValueOnce({})
+          .mockRejectedValueOnce({})
+          .mockResolvedValue(mockSuccessfulResponse);
+
+        const response = await parser.ingestText(rawString.join('\n'), {
+          client: clientMock,
+          indexName: 'foo',
+        });
+
+        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+        expect(response.total).toBe(expected.length);
+        if (expected.length > 1) {
+          expect(response.failedRows).toContain(2);
+        }
+        if (expected.length > 2) {
+          expect(response.failedRows).toContain(3);
+        }
+      }
+    );
   });
 
   describe('ingestFile()', () => {
@@ -70,18 +96,47 @@ describe('NDJSONParser', () => {
       }
     );
 
+    it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
+      'should handle OpenSearch errors and show the correct failedRow',
+      async ({ rawString, expected }) => {
+        const mockSuccessfulResponse = opensearchServiceMock.createApiResponse<IndexResponse>();
+        clientMock.index
+          .mockRejectedValueOnce({})
+          .mockResolvedValueOnce(mockSuccessfulResponse)
+          .mockRejectedValueOnce({})
+          .mockResolvedValue(mockSuccessfulResponse);
+
+        const validNDJSONFileStream = Readable.from(rawString.join('\n'));
+        const response = await parser.ingestFile(validNDJSONFileStream, {
+          client: clientMock,
+          indexName: 'foo',
+        });
+
+        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+        expect(response.total).toBe(expected.length);
+        if (expected.length > 1) {
+          expect(response.failedRows).toContain(1);
+        }
+        if (expected.length > 2) {
+          expect(response.failedRows).toContain(3);
+        }
+      }
+    );
+
     it.each<NDJSONTestCaseFormat>(INVALID_NDJSON_TEST_CASES)(
       'should throw an error for invalid NDJSON',
-      async ({ rawString, expected }) => {
+      async ({ rawString }) => {
         const invalidNDJSONFileStream = Readable.from(rawString.join('\n'));
-        expect(
-          parser.ingestFile(invalidNDJSONFileStream, {
+        try {
+          const response = await parser.ingestFile(invalidNDJSONFileStream, {
             client: clientMock,
             indexName: 'foo',
-          })
-        ).rejects.toThrow();
+          });
 
-        expect(clientMock.index.mock.calls.length <= expected.length).toBe(true);
+          expect(response.failedRows.length).toBeGreaterThan(0);
+          expect(clientMock.index.mock.calls.length).toBeLessThanOrEqual(rawString.length);
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
       }
     );
   });

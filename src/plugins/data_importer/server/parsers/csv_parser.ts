@@ -6,6 +6,7 @@
 import { parseStream, parseString } from 'fast-csv';
 import { Readable } from 'stream';
 import { IFileParser, IngestOptions, ParseOptions, ValidationOptions } from '../types';
+import { isValidObject } from '../utils/util';
 
 export class CSVParser implements IFileParser {
   public async validateText(text: string, options: ValidationOptions) {
@@ -14,16 +15,11 @@ export class CSVParser implements IFileParser {
     }
     return await new Promise<boolean>((resolve, reject) => {
       parseString(text, { headers: true, delimiter: options.delimiter })
-        .validate((row: any) => {
-          for (const key in row) {
-            if (!!!key) {
-              return false;
-            }
-          }
-          return true;
-        })
+        .validate((row: Record<string, any>) => isValidObject(row))
         .on('error', (error) => reject(error))
-        .on('data-invalid', () => reject(''))
+        .on('data-invalid', (_, rowNumber: number) =>
+          reject(new Error(`Row ${rowNumber} is invalid`))
+        )
         .on('data', () => {})
         .on('end', () => resolve(true));
     });
@@ -32,74 +28,101 @@ export class CSVParser implements IFileParser {
   public async ingestText(text: string, options: IngestOptions) {
     const { client, indexName, delimiter } = options;
 
+    const failedRows: number[] = [];
     const numDocuments = await new Promise<number>((resolve, reject) => {
+      const tasks: Array<Promise<void>> = [];
+      let totalRows = 0;
+
       parseString(text, { headers: true, delimiter })
         .on('data', async (row) => {
-          try {
-            await client.index({
-              index: indexName,
-              body: row,
-            });
-          } catch (e) {
-            reject(e);
-          }
+          const task = (async () => {
+            const curRow = ++totalRows;
+            try {
+              await client.index({
+                index: indexName,
+                body: row,
+              });
+            } catch (_) {
+              failedRows.push(curRow);
+            }
+          })();
+          tasks.push(task);
         })
-        .on('error', (error) => reject(error))
-        .on('end', (rowCount: number) => resolve(rowCount));
+        .on('error', (e) =>
+          reject(new Error(`Stopped processing after ${totalRows} rows due to: ${e}`))
+        )
+        .on('end', async (rowCount: number) => {
+          await Promise.all(tasks);
+          resolve(rowCount);
+        });
     });
 
     return {
       total: numDocuments,
-      message: `Indexed ${numDocuments} documents`,
+      message: `Indexed ${numDocuments - failedRows.length} documents`,
+      failedRows: failedRows.sort((n1, n2) => n1 - n2),
     };
   }
 
   public async ingestFile(file: Readable, options: IngestOptions) {
     const { client, indexName, delimiter } = options;
 
+    if (!!!options.delimiter) {
+      throw new Error('Delimiter is required');
+    }
+
+    const failedRows: number[] = [];
     const numDocuments = await new Promise<number>((resolve, reject) => {
-      let numFailedDocuments = 0;
+      const tasks: Array<Promise<void>> = [];
+      let totalRows = 0;
 
       parseStream(file, { headers: true, delimiter })
-        .validate((row: any) => {
-          for (const key in row) {
-            if (!!!key) {
-              return false;
-            }
-          }
-          return true;
-        })
+        .validate((row: Record<string, any>) => isValidObject(row))
         .on('data', (row) => {
-          client.index({
-            index: indexName,
-            body: row,
-          });
+          const task = (async () => {
+            const curRow = ++totalRows;
+            try {
+              await client.index({
+                index: indexName,
+                body: row,
+              });
+            } catch (_) {
+              failedRows.push(curRow);
+            }
+          })();
+          tasks.push(task);
         })
-        .on('error', (error) => reject(error))
-        .on('data-invalid', () => numFailedDocuments++)
-        .on('end', (rowCount: number) => resolve(rowCount - numFailedDocuments));
+        .on('data-invalid', (_, rowCount: number) => {
+          totalRows++;
+          failedRows.push(rowCount);
+        })
+        .on('error', (e) =>
+          reject(new Error(`Stopped processing after ${totalRows} rows due to: ${e}`))
+        )
+        .on('end', async (rowCount: number) => {
+          await Promise.all(tasks);
+          resolve(rowCount);
+        });
     });
 
     return {
       total: numDocuments,
-      message: `Indexed ${numDocuments} documents`,
+      message: `Indexed ${numDocuments - failedRows.length} documents`,
+      failedRows: failedRows.sort((n1, n2) => n1 - n2),
     };
   }
 
   public async parseFile(file: Readable, limit: number, options: ParseOptions) {
     const { delimiter } = options;
 
+    if (!!!options.delimiter) {
+      throw new Error('Delimiter is required');
+    }
+
     const documents: Array<Record<string, any>> = [];
     await new Promise<void>((resolve, reject) => {
       parseStream(file, { headers: true, delimiter })
-        .validate((row: any) => {
-          for (const key in row) {
-            if (!!!key) {
-              return false;
-            }
-          }
-          return true;
-        })
+        .validate((row: Record<string, any>) => isValidObject(row))
         .on('data', (row) => {
           if (documents.length >= limit) {
             resolve();
@@ -108,7 +131,9 @@ export class CSVParser implements IFileParser {
           }
           documents.push(row);
         })
-        .on('data-invalid', () => reject('Invalid row'))
+        .on('data-invalid', (_, rowNumber: number) =>
+          reject(new Error(`Row ${rowNumber} is invalid`))
+        )
         .on('error', (error) => reject(error))
         .on('end', () => resolve());
     });

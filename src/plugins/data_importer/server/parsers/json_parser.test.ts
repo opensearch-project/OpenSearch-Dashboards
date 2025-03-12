@@ -4,6 +4,7 @@
  */
 
 import validJson from './test_utils/valid_json.json';
+import invalidJson from './test_utils/invalid_json.json';
 import { JSONParser } from './json_parser';
 import { opensearchServiceMock } from '../../../../core/server/mocks';
 import { Readable } from 'stream';
@@ -19,10 +20,15 @@ describe('JSONParser', () => {
       expect(await parser.validateText(JSON.stringify(validJson), {})).toBe(true);
     });
 
-    it('should throw error for invalid JSON', async () => {
+    it('should return false for invalid JSON', async () => {
       expect(await parser.validateText(JSON.stringify(invalidJsonString), {})).toBe(false);
     });
+
+    it('should return false for JSON with empty fields', async () => {
+      expect(await parser.validateText(JSON.stringify(invalidJson), {})).toBe(false);
+    });
   });
+
   describe('ingestText()', () => {
     beforeEach(() => {
       clientMock.index.mockClear();
@@ -40,12 +46,26 @@ describe('JSONParser', () => {
         body: validJson,
       });
     });
+
+    it('should handle OpenSearch errors and show the correct failedRow', async () => {
+      clientMock.index.mockRejectedValueOnce({});
+
+      const response = await parser.ingestText(JSON.stringify(validJson), {
+        client: clientMock,
+        indexName: 'foo',
+      });
+
+      expect(clientMock.index).toHaveBeenCalledTimes(1);
+      expect(response.total).toBe(1);
+      expect(response.failedRows).toMatchObject([1]);
+    });
   });
 
   describe('ingestFile()', () => {
     beforeEach(() => {
       clientMock.index.mockClear();
     });
+
     it('should ingest the document into OpenSearch', async () => {
       const validJsonFileStream = Readable.from([JSON.stringify(validJson)]);
       const response = await parser.ingestFile(validJsonFileStream, {
@@ -60,14 +80,38 @@ describe('JSONParser', () => {
       });
     });
 
-    it('should throw an error when attempting to ingest the document into OpenSearch', async () => {
+    it('should populate failedRows when attempting to ingest an invalid document into OpenSearch', async () => {
       const invalidJsonFileStream = Readable.from([invalidJsonString]);
-      expect(
-        parser.ingestFile(invalidJsonFileStream, {
-          client: clientMock,
-          indexName: 'foo',
-        })
-      ).rejects.toThrow();
+      const response = await parser.ingestFile(invalidJsonFileStream, {
+        client: clientMock,
+        indexName: 'foo',
+      });
+      expect(response.total).toBe(1);
+      expect(response.failedRows).toMatchObject([1]);
+    });
+
+    it('should populate failedRows when attempting to ingest the document with empty fields into OpenSearch', async () => {
+      const invalidJsonFileStream = Readable.from([JSON.stringify(invalidJson)]);
+      const response = await parser.ingestFile(invalidJsonFileStream, {
+        client: clientMock,
+        indexName: 'foo',
+      });
+      expect(response.total).toBe(1);
+      expect(response.failedRows).toMatchObject([1]);
+    });
+
+    it('should handle OpenSearch errors and show the correct failedRow', async () => {
+      clientMock.index.mockRejectedValueOnce({});
+
+      const validJSONFileStream = Readable.from(JSON.stringify(validJson));
+      const response = await parser.ingestFile(validJSONFileStream, {
+        client: clientMock,
+        indexName: 'foo',
+      });
+
+      expect(clientMock.index).toHaveBeenCalledTimes(1);
+      expect(response.total).toBe(1);
+      expect(response.failedRows).toMatchObject([1]);
     });
   });
 
@@ -82,6 +126,11 @@ describe('JSONParser', () => {
 
     it('should throw an error when attempting to parse the document', async () => {
       const invalidJsonFileStream = Readable.from([invalidJsonString]);
+      expect(parser.parseFile(invalidJsonFileStream, limit, {})).rejects.toThrow();
+    });
+
+    it('should throw an error when attempting to parse the document with empty fields', async () => {
+      const invalidJsonFileStream = Readable.from([JSON.stringify(invalidJson)]);
       expect(parser.parseFile(invalidJsonFileStream, limit, {})).rejects.toThrow();
     });
   });
