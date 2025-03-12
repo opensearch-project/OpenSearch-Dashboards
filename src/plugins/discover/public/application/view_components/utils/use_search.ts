@@ -400,12 +400,13 @@ export const useSearch = (services: DiscoverViewServices) => {
   useEffect(() => {
     const loadSavedSearch = async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
-
-      const savedSearchQuery = savedSearchInstance.searchSource.getField('query');
       const dataQuery = data.query.queryString.getQuery();
+      const defaultQuery = data.query.queryString.getDefaultQuery();
+      const isDataQueryDefault = dataQuery.query === defaultQuery.query;
+      const savedSearchQuery = savedSearchInstance.searchSource.getField('query');
 
-      // Use eixisting query, if not, use query from saved search
-      const query = dataQuery.query ? dataQuery : savedSearchQuery ?? dataQuery;
+      // Use eixisting query, if eixisting query match default, use query from saved search
+      const query = isDataQueryDefault ? savedSearchQuery ?? dataQuery : dataQuery;
 
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       if (isEnhancementsEnabled && query.dataset) {
