@@ -10086,6 +10086,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
               className="newAppTopNavExpander navToggleInLargeScreen eui-hideFor--xs eui-hideFor--s eui-hideFor--m"
               data-test-subj="toggleNavButton"
               onClick={[Function]}
+              style={Object {}}
             >
               <EuiButtonEmpty
                 aria-controls="mockId"
@@ -10126,6 +10127,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                 color="text"
                 data-test-subj="toggleNavButton"
                 onClick={[Function]}
+                style={Object {}}
               >
                 <button
                   aria-controls="mockId"
@@ -10136,6 +10138,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                   data-test-subj="toggleNavButton"
                   disabled={false}
                   onClick={[Function]}
+                  style={Object {}}
                   type="button"
                 >
                   <EuiButtonContent
@@ -19548,6 +19551,7 @@ exports[`Header renders page header with application title 1`] = `
               className="newPageTopNavExpander navToggleInLargeScreen eui-hideFor--xs eui-hideFor--s eui-hideFor--m"
               data-test-subj="toggleNavButton"
               onClick={[Function]}
+              style={Object {}}
             >
               <EuiButtonEmpty
                 aria-controls="mockId"
@@ -19588,6 +19592,7 @@ exports[`Header renders page header with application title 1`] = `
                 color="text"
                 data-test-subj="toggleNavButton"
                 onClick={[Function]}
+                style={Object {}}
               >
                 <button
                   aria-controls="mockId"
@@ -19598,6 +19603,7 @@ exports[`Header renders page header with application title 1`] = `
                   data-test-subj="toggleNavButton"
                   disabled={false}
                   onClick={[Function]}
+                  style={Object {}}
                   type="button"
                 >
                   <EuiButtonContent
