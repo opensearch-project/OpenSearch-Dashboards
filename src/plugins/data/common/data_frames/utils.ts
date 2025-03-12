@@ -63,6 +63,9 @@ export const convertResult = ({
       const hit: { [key: string]: any } = {};
 
       const processNestedFieldEntry = (field: any, value: any, formatter: any): any => {
+        if (!value) {
+          return value;
+        }
         Object.entries(value).forEach(([nestedField, nestedValue]) => {
           // Need to get the flattened field name for nested fields ex.products.created_on
           const flattenedFieldName = `${field.name}.${nestedField}`;

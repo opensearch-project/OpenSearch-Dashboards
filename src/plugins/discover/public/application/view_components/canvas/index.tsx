@@ -15,6 +15,7 @@ import { DiscoverNoResults } from '../../components/no_results/no_results';
 import { DiscoverNoIndexPatterns } from '../../components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../components/loading_spinner/loading_spinner';
+import { DiscoverResultsActionBar } from '../../components/results_action_bar/results_action_bar';
 import { setColumns, useDispatch, useSelector } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -32,13 +33,14 @@ import { HeaderVariant } from '../../../../../../core/public';
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const { data$, refetch$, indexPattern } = useDiscoverContext();
+  const { data$, refetch$, indexPattern, savedSearch } = useDiscoverContext();
   const {
     services: {
       uiSettings,
       capabilities,
       chrome: { setHeaderVariant },
       data,
+      core,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
   const { columns } = useSelector((state) => {
@@ -128,6 +130,18 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   };
   const showSaveQuery = !!capabilities.discover?.saveQuery;
 
+  const discoverResultsActionBar = (
+    <DiscoverResultsActionBar
+      hits={fetchState.hits}
+      showResetButton={!!savedSearch?.id}
+      resetQuery={() => {
+        core.application.navigateToApp('discover', { path: `#/view/${savedSearch?.id}` });
+      }}
+      rows={rows}
+      isEnhancementsEnabled={isEnhancementsEnabled}
+    />
+  );
+
   return (
     <EuiPanel
       panelRef={panelRef}
@@ -171,6 +185,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
             (isEnhancementsEnabled ? (
               <>
                 <MemoizedDiscoverChartContainer {...fetchState} />
+                {discoverResultsActionBar}
                 <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
               </>
             ) : (
@@ -181,6 +196,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
                 data-test-subj="dscCanvasResults"
               >
                 <MemoizedDiscoverChartContainer {...fetchState} />
+                {discoverResultsActionBar}
                 <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
               </EuiPanel>
             ))}

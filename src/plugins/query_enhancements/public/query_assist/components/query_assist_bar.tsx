@@ -43,7 +43,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   );
   const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
-  const { updateQuestion } = useQueryAssist();
+  const { updateQueryState } = useQueryAssist();
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
@@ -66,7 +66,6 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     setAgentError(undefined);
     previousQuestionRef.current = inputRef.current.value;
     persistedLog.add(inputRef.current.value);
-    updateQuestion(inputRef.current.value);
     const params: QueryAssistParameters = {
       question: inputRef.current.value,
       index: selectedIndex,
@@ -87,6 +86,10 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
         query: response.query,
         language: params.language,
         dataset: selectedDataset,
+      });
+      updateQueryState({
+        question: previousQuestionRef.current,
+        generatedQuery: response.query,
       });
       if (response.timeRange) services.data.query.timefilter.timefilter.setTime(response.timeRange);
       setCallOutType('query_generated');

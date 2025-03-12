@@ -19,6 +19,9 @@ export const configSchema = schema.object({
     ),
     summary: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
+      branding: schema.object({
+        label: schema.string({ defaultValue: '' }),
+      }),
     }),
   }),
 });

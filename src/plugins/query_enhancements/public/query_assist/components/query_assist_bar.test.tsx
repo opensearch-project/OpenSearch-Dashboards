@@ -25,9 +25,7 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
 
 jest.mock('../hooks', () => ({
   useGenerateQuery: jest.fn().mockReturnValue({ generateQuery: jest.fn(), loading: false }),
-  useQueryAssist: jest
-    .fn()
-    .mockReturnValue({ updateQuestion: jest.fn(), isQueryAssistCollapsed: false }),
+  useQueryAssist: jest.fn().mockReturnValue({ updateQueryState: jest.fn() }),
 }));
 
 jest.mock('./query_assist_input', () => ({
@@ -52,6 +50,10 @@ const dependencies: QueryEditorExtensionDependencies = {
   onSelectLanguage: jest.fn(),
   isCollapsed: false,
   setIsCollapsed: jest.fn(),
+  query: {
+    query: '',
+    language: '',
+  },
 };
 
 type Props = ComponentProps<typeof QueryAssistBar>;
