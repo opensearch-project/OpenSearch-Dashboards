@@ -1,0 +1,2 @@
+fix:
+- Make nav icon style compatible with sidecar ([#9514](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9514))
