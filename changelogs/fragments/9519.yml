@@ -1,0 +1,2 @@
+fix:
+- Discover summary regression when result is empty ([#9519](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9519))
