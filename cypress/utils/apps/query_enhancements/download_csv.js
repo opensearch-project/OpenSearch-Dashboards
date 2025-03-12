@@ -60,15 +60,15 @@ export const generateDownloadCsvTestConfigurations = () => {
 export const getQueryString = (dataset, language, hasTime) => {
   switch (language) {
     case QueryLanguages.DQL.name:
-      return 'bytes_transferred > 5000';
+      return 'bytes_transferred > 8900';
     case QueryLanguages.Lucene.name:
-      return 'bytes_transferred: {5000 TO *}';
+      return 'bytes_transferred: {8900 TO *}';
     case QueryLanguages.SQL.name:
-      return `SELECT * FROM ${dataset} WHERE bytes_transferred > 5000${
+      return `SELECT * FROM ${dataset} WHERE bytes_transferred > 8900${
         hasTime ? ' ORDER BY timestamp' : ''
       }`;
     case QueryLanguages.PPL.name:
-      return `source = ${dataset} | where bytes_transferred > 5000${
+      return `source = ${dataset} | where bytes_transferred > 8900${
         hasTime ? ' | sort timestamp' : ''
       }`;
     default:
@@ -90,9 +90,9 @@ export const getVisibleCountForLanguage = (language, hasTime) => {
       case QueryLanguages.Lucene.name:
         return 500;
       case QueryLanguages.SQL.name:
-        return 5026;
+        return 1087;
       case QueryLanguages.PPL.name:
-        return 5026;
+        return 1087;
     }
   } else {
     switch (language.name) {
@@ -101,9 +101,9 @@ export const getVisibleCountForLanguage = (language, hasTime) => {
       case QueryLanguages.Lucene.name:
         return 500;
       case QueryLanguages.SQL.name:
-        return 5032;
+        return 1119;
       case QueryLanguages.PPL.name:
-        return 5032;
+        return 1119;
     }
   }
 };
@@ -115,9 +115,9 @@ export const getVisibleCountForLanguage = (language, hasTime) => {
  */
 export const getMaxCount = (hasTime) => {
   if (hasTime) {
-    return 5026;
+    return 1087;
   } else {
-    return 5032;
+    return 1119;
   }
 };
 
@@ -182,7 +182,7 @@ export const getFirstRowForDownloadWithFields = (language, hasTime) => {
 
     return [time, bytesTransferred, name];
   } else {
-    return ['5,992', 'Orlando Hoppe'];
+    return ['9,468', 'Grant Borer'];
   }
 };
 
