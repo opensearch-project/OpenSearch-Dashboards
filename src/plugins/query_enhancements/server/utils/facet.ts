@@ -39,31 +39,24 @@ export class Facet {
     try {
       const query: Query = request.body.query;
       const dataSource = query.dataset?.dataSource;
-      // const meta = dataSource?.meta;
-      // const { format, lang } = request.body;
+      const meta = dataSource?.meta;
+      const { format, lang } = request.body;
       const params = {
         body: {
           query: query.query,
-          language: 'PROMQL',
-          maxResults: 1000,
-          timeout: 30,
-          sessionId: '1234',
-          options: {
-            queryType: 'range',
-            start: '1741124895',
-            end: '1741128495',
-            step: '14',
-          },
+          ...(meta?.name && { datasource: meta.name }),
+          ...(meta?.sessionId && {
+            sessionId: meta.sessionId,
+          }),
+          ...(lang && { lang }),
         },
+        ...(format !== 'jdbc' && { format }),
       };
       const clientId = dataSource?.id;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
         : this.defaultClient.asScoped(request).callAsCurrentUser;
-      const queryRes = await client(endpoint, {
-        ...params,
-        dataconnection: 'my_prometheus',
-      });
+      const queryRes = await client(endpoint, params);
       return {
         success: true,
         data: queryRes,

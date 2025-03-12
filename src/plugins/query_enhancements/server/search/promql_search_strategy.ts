@@ -11,18 +11,13 @@ import {
   IDataFrame,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
+  Query,
 } from '../../../data/common';
-import { throwFacetError } from '../../common/utils';
-import { Facet } from '../utils';
-import { SEARCH_STRATEGY } from '../../common';
 
 interface PrometheusResponse {
-  data: {
-    queryId: string;
-    result: string;
-    sessionId: string;
-  };
-  success: boolean;
+  queryId: string;
+  result: string;
+  sessionId: string;
 }
 
 interface MetricResult {
@@ -40,24 +35,39 @@ export const promqlSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const promqlFacet = new Facet({
-    client,
-    logger,
-    endpoint: 'enhancements.promqlQuery',
-  });
-
   return {
     search: async (context, request: any, options) => {
       try {
-        request.body.lang = SEARCH_STRATEGY.PROMQL;
-        const rawResponse = (await promqlFacet.describeQuery(
-          context,
-          request
+        const { body: requestBody } = request;
+        const { dataset, query, language }: Query = requestBody.query;
+        const dataSource = dataset?.dataSource;
+        const params = {
+          body: {
+            query,
+            language,
+            maxResults: 1000,
+            timeout: 30,
+            sessionId: '1234', // TODO: use appropriate session id
+            options: {
+              queryType: 'range',
+              start: '1741124895',
+              end: '1741128495',
+              step: '14', // TODO: determine appropriate steps
+            },
+          },
+          dataconnection: 'my_prometheus',
+        };
+
+        const clientId = dataSource?.id;
+        const queryClient = clientId
+          ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
+          : client.asScoped(request).callAsCurrentUser;
+        const queryRes = (await queryClient(
+          'enhancements.promqlQuery',
+          params
         )) as PrometheusResponse;
 
-        if (!rawResponse.success) throwFacetError(rawResponse);
-
-        const dataFrame = createDataFrame(rawResponse);
+        const dataFrame = createDataFrame(queryRes);
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,
@@ -73,7 +83,7 @@ export const promqlSearchStrategyProvider = (
 };
 
 function createDataFrame(rawResponse: PrometheusResponse) {
-  const { result: series } = JSON.parse(rawResponse.data.result) as PrometheusResult;
+  const { result: series } = JSON.parse(rawResponse.result) as PrometheusResult;
   const initDataFrame: IDataFrame = {
     type: DATA_FRAME_TYPES.DEFAULT,
     name: 'mock prometheus data',
@@ -87,7 +97,7 @@ function createDataFrame(rawResponse: PrometheusResponse) {
     acc.schema?.push(schema);
     acc.fields?.push({
       ...schema,
-      values: metricResult.values.map((v) => v[1]),
+      values: metricResult.values.map((v) => Number(v[1])),
     });
     return acc;
   }, initDataFrame);
