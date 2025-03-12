@@ -3,37 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime, filter, pairwise } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
-import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { search, UI_SETTINGS } from '../../../../../data/public';
+import { search, syncQueryStateWithUrl, UI_SETTINGS } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TimechartHeaderBucketInterval } from '../../components/chart/timechart_header';
-import { tabifyAggResponse } from '../../../opensearch_dashboards_services';
-import {
-  getDimensions,
-  buildPointSeriesData,
-  createHistogramConfigs,
-  Chart,
-} from '../../components/chart/utils';
-import { SavedSearch } from '../../../saved_searches';
-import { useSelector } from '../../utils/state_management';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
+  tabifyAggResponse,
 } from '../../../opensearch_dashboards_services';
+import {
+  buildPointSeriesData,
+  Chart,
+  createHistogramConfigs,
+  getDimensions,
+} from '../../components/chart/utils';
+import { SavedSearch } from '../../../saved_searches';
+import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
-import { syncQueryStateWithUrl } from '../../../../../data/public';
 import { trackQueryMetric } from '../../../ui_metric';
 
 export enum ResultStatus {
@@ -352,6 +350,52 @@ export const useSearch = (services: DiscoverViewServices) => {
     inspectorAdapters.requests,
   ]);
 
+  // This is a modified version of the above fetch that is to be used for CSV Download MAX option.
+  const fetchForMaxCsvOption = useCallback(
+    async (size: number) => {
+      const dataset = indexPattern;
+      if (!dataset) {
+        throw new Error('Dataset not found');
+      }
+
+      if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
+        throw new Error('Invalid time range');
+      }
+
+      const searchSource = await updateSearchSource({
+        indexPattern: dataset,
+        services,
+        sort,
+        searchSource: savedSearch?.searchSource,
+        histogramConfigs: undefined,
+        size,
+      });
+
+      try {
+        const query = searchSource.getField('query');
+        const languageConfig = data.query.queryString
+          .getLanguageService()
+          .getLanguage(query!.language);
+
+        // Execute the search
+        const fetchResp = await searchSource.fetch({
+          withLongNumeralsSupport: await services.uiSettings.get(
+            UI_SETTINGS.DATA_WITH_LONG_NUMERALS
+          ),
+          ...(languageConfig &&
+            languageConfig.fields?.formatter && {
+              formatter: languageConfig.fields.formatter,
+            }),
+        });
+
+        return fetchResp.hits.hits;
+      } catch (error: any) {
+        return error;
+      }
+    },
+    [indexPattern, timefilter, toastNotifications, data, services, sort, savedSearch?.searchSource]
+  );
+
   useEffect(() => {
     const fetch$ = merge(
       refetch$,
@@ -476,6 +520,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     indexPattern,
     savedSearch,
     inspectorAdapters,
+    fetchForMaxCsvOption,
   };
 };
 

@@ -33,13 +33,16 @@ const mockDefaultQuery = {
   language: 'default language',
 };
 
+const mockHitsCount = 50;
+const mockHits = new Array(50).fill({});
+
 const mockSavedSearch = {
   id: 'test-saved-search',
   title: 'Test Saved Search',
   searchSource: {
     setField: jest.fn(),
     getField: jest.fn().mockReturnValue(mockQuery),
-    fetch: jest.fn(),
+    fetch: jest.fn(() => ({ hits: { hits: mockHits } })),
     getSearchRequestBody: jest.fn().mockResolvedValue({}),
     getOwnField: jest.fn(),
     getDataFrame: jest.fn(() => ({ name: 'test-pattern' })),
@@ -359,5 +362,41 @@ describe('useSearch', () => {
         withLongNumeralsSupport: true,
       })
     );
+  });
+
+  it('should call fetch when fetchForMaxCsvOption is called', async () => {
+    const services = createMockServices();
+    const mockDatasetUpdates$ = new Subject();
+    services.data.query.queryString.getUpdates$ = jest.fn().mockReturnValue(mockDatasetUpdates$);
+
+    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
+    });
+
+    await act(async () => {
+      try {
+        await waitForNextUpdate({ timeout: 1000 });
+      } catch (_) {
+        // Do nothing.
+      }
+    });
+
+    await act(async () => {
+      const hits = await result.current.fetchForMaxCsvOption(mockHitsCount);
+      expect(hits.length).toBe(mockHitsCount);
+    });
+    expect(mockSavedSearch.searchSource.fetch).toHaveBeenLastCalledWith({
+      withLongNumeralsSupport: undefined,
+    });
   });
 });

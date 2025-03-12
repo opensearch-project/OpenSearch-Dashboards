@@ -1,0 +1,27 @@
+.dscDownloadCsv {
+  &__popover {
+    min-width: 260px;
+  }
+
+  &__titleWrapper {
+    text-transform: uppercase;
+    padding: $ouiSizeM $ouiSizeS;
+    border-bottom: $ouiBorderThin;
+  }
+
+  &__form {
+    padding: $ouiSizeS;
+  }
+
+  &__callout {
+    margin: $ouiSizeS 0;
+  }
+
+  &__calloutText {
+    color: $ouiColorWarningText;
+  }
+
+  &__submit {
+    margin-top: $ouiSizeS;
+  }
+}

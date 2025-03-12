@@ -139,6 +139,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       }}
       rows={rows}
       isEnhancementsEnabled={isEnhancementsEnabled}
+      indexPattern={indexPattern}
     />
   );
 
