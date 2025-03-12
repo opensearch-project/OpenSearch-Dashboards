@@ -60,7 +60,7 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     needBody: true,
   });
   enhancements.promqlQuery = createAction(client, components, {
-    endpoint: `${URI.DIRECT_QUERY_SYNC}`,
+    endpoint: URI.DIRECT_QUERY_SYNC,
     method: 'POST',
     needBody: true,
     paramKey: 'dataconnection',
