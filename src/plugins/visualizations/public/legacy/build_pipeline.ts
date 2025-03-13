@@ -385,6 +385,7 @@ export const buildVislibDimensions = async (
   }
 
   adjustVislibDimensionFormmaters(vis, dimensions);
+  console.log('dimensions', dimensions);
   return dimensions;
 };
 
@@ -449,6 +450,8 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       }
     }
   }
+
+  console.log('pipeline', pipeline);
 
   return pipeline;
 };

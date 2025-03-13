@@ -41,6 +41,7 @@ export const convertResult = ({
     return response;
   }
   const data = body as IDataFrame;
+  console.log(data);
   const hits: any[] = [];
   const searchResponse: SearchResponse<any> = {
     took: response.took,
