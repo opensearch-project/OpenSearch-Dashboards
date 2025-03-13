@@ -44,7 +44,9 @@ export const useDiscoverDownloadCsvToasts = () => {
         title: i18n.translate('discover.downloadCsvLoadingToast', {
           defaultMessage: 'Working on CSV file',
         }),
-        text: (
+        // TODO: Update the toast notification API to accept ReactNodes
+        // The underlying API supports this to be a React Node but we added a type on top of it to disable it for some reason
+        text: ((
           <EuiSmallButtonEmpty
             onClick={onAbort}
             color="danger"
@@ -54,7 +56,7 @@ export const useDiscoverDownloadCsvToasts = () => {
               defaultMessage: 'Cancel download',
             })}
           </EuiSmallButtonEmpty>
-        ),
+        ) as unknown) as string,
         'data-test-subj': 'dscDownloadCsvToastLoading',
       },
       // TODO: Putting a high number here as Infinity or Number.MAX_SAFE_INTEGER makes the toast go away right away
