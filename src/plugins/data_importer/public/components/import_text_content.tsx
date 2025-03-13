@@ -58,7 +58,9 @@ export const ImportTextContentBody = ({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiText>File Format: </EuiText>
+              <EuiText>
+                <h4>File Format: </h4>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiSelect

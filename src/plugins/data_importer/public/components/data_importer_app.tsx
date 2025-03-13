@@ -63,6 +63,8 @@ interface DataImporterPluginAppProps {
 }
 
 const ROWS_COUNT = 10;
+const EDITOR_TAB = 'editor';
+const PREVIEW_TAB = 'preview';
 
 export const DataImporterPluginApp = ({
   basename,
@@ -99,7 +101,10 @@ export const DataImporterPluginApp = ({
   const [visibleRows, setVisibleRows] = useState<number>(ROWS_COUNT);
   const [indexOptions, setIndexOptions] = useState<Array<{ label: string }>>([]);
   const [createMode, setCreateMode] = useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = useState<'editor' | 'preview'>('editor');
+
+  type TabType = typeof EDITOR_TAB | typeof PREVIEW_TAB;
+
+  const [selectedTab, setSelectedTab] = useState<TabType>(EDITOR_TAB);
 
   const onImportTypeChange = (type: ImportChoices) => {
     if (type === IMPORT_CHOICE_FILE) {
@@ -188,6 +193,13 @@ export const DataImporterPluginApp = ({
         }
       } catch (error) {
         setIsLoadingPreview(false);
+        const errorMessage = error.body?.message ?? error;
+        notifications.toasts.addDanger(
+          i18n.translate('dataImporter.previewError', {
+            defaultMessage: `Preview failed: {errorMessage}`,
+            values: { errorMessage },
+          })
+        );
       }
     } else if (importType === IMPORT_CHOICE_TEXT && inputText) {
       const fileExtension = `.${dataType}`;
@@ -222,6 +234,13 @@ export const DataImporterPluginApp = ({
         }
       } catch (error) {
         setIsLoadingPreview(false);
+        const errorMessage = error.body?.message ?? error;
+        notifications.toasts.addDanger(
+          i18n.translate('dataImporter.previewError', {
+            defaultMessage: `Preview failed: {errorMessage}`,
+            values: { errorMessage },
+          })
+        );
       }
     }
   };
