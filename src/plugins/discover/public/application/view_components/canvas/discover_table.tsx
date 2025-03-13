@@ -108,6 +108,8 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
     return <div>{'loading...'}</div>;
   }
 
+  console.log('DiscoverTable', rows);
+
   return (
     <DataGridTable
       columns={columns}

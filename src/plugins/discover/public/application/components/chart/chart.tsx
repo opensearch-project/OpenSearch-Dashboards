@@ -19,6 +19,7 @@ import { DiscoverServices } from '../../../build_services';
 import { Chart } from './utils';
 import { useDiscoverContext } from '../../view_components/context';
 import { setInterval, useDispatch, useSelector } from '../../utils/state_management';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
@@ -32,6 +33,7 @@ interface DiscoverChartProps {
   services: DiscoverServices;
   isEnhancementsEnabled: boolean;
   discoverOptions: any;
+  rows?: OpenSearchSearchHit[];
 }
 
 export const DiscoverChart = ({
@@ -46,6 +48,7 @@ export const DiscoverChart = ({
   showResetButton = false,
   isEnhancementsEnabled,
   discoverOptions,
+  rows,
 }: DiscoverChartProps) => {
   const { refetch$ } = useDiscoverContext();
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -137,6 +140,12 @@ export const DiscoverChart = ({
   );
 
   const showHistogram = !isEnhancementsEnabled || !isCollapsed;
+
+  console.log('hits', hits);
+  console.log('rows', rows);
+  if (rows?.length && hits === 0) {
+    return <div>{JSON.stringify(rows.map((r) => r._source)) + '/n'}</div>;
+  }
 
   return (
     <EuiFlexGroup

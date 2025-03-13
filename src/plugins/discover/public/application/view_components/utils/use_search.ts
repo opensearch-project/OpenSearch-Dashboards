@@ -288,6 +288,8 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       fetchStateRef.current.fieldCounts = fetchStateRef.current.fieldCounts!;
       fetchStateRef.current.rows = rows;
+      console.log('useSearch rows', rows);
+      console.log('useSearch chartData', chartData);
       data$.next({
         status: rows.length > 0 ? ResultStatus.READY : ResultStatus.NO_RESULTS,
         fieldCounts: fetchStateRef.current.fieldCounts,
