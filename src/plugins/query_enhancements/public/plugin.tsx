@@ -27,6 +27,7 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
+import { PromQLSearchInterceptor } from './search/promql_search_interceptor';
 
 export class QueryEnhancementsPlugin
   implements
@@ -222,14 +223,14 @@ export class QueryEnhancementsPlugin
     const promqlLanguageConfig: LanguageConfig = {
       id: 'PROMQL',
       title: 'PromQL',
-      search: new PPLSearchInterceptor({
+      search: new PromQLSearchInterceptor({
         toasts: core.notifications.toasts,
         http: core.http,
         uiSettings: core.uiSettings,
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      getQueryString: (currentQuery: Query) => '',
       fields: {
         sortable: false,
         filterable: false,

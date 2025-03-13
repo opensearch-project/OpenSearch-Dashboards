@@ -30,6 +30,7 @@ import {
   QueryEnhancementsPluginStart,
 } from './types';
 import { OpenSearchEnhancements } from './utils';
+import { PrometheusManager } from './connections/managers/prometheus_manager';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -103,6 +104,7 @@ export class QueryEnhancementsPlugin
     this.logger.info('queryEnhancements: Setup complete');
     return {
       defineSearchStrategyRoute: defineSearchStrategyRouteProvider(this.logger, router),
+      prometheusManager: new PrometheusManager(),
     };
   }
 
