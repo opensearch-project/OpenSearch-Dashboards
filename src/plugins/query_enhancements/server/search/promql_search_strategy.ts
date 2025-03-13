@@ -26,7 +26,9 @@ interface MetricResult {
 }
 
 interface PrometheusResult {
-  result: MetricResult[];
+  data: {
+    result: MetricResult[];
+  };
 }
 
 export const promqlSearchStrategyProvider = (
@@ -83,7 +85,8 @@ export const promqlSearchStrategyProvider = (
 };
 
 function createDataFrame(rawResponse: PrometheusResponse) {
-  const { result: series } = JSON.parse(rawResponse.result) as PrometheusResult;
+  const result = JSON.parse(rawResponse.result) as PrometheusResult;
+  const series = result.data.result;
   const initDataFrame: IDataFrame = {
     type: DATA_FRAME_TYPES.DEFAULT,
     name: 'mock prometheus data',
