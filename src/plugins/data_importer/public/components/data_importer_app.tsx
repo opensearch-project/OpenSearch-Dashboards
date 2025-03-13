@@ -20,6 +20,8 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiFormRow,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 import { extname } from 'path';
 import {
@@ -97,6 +99,7 @@ export const DataImporterPluginApp = ({
   const [visibleRows, setVisibleRows] = useState<number>(ROWS_COUNT);
   const [indexOptions, setIndexOptions] = useState<Array<{ label: string }>>([]);
   const [createMode, setCreateMode] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<'editor' | 'preview'>('editor');
 
   const onImportTypeChange = (type: ImportChoices) => {
     if (type === IMPORT_CHOICE_FILE) {
@@ -153,46 +156,72 @@ export const DataImporterPluginApp = ({
   };
 
   const previewData = async () => {
-    if (importType === IMPORT_CHOICE_FILE) {
-      if (inputFile) {
-        const fileExtension = extname(inputFile.name);
-        setIsLoadingPreview(true);
-        try {
-          const response = await previewFile({
-            http,
-            file: inputFile,
-            createMode,
-            fileExtension,
-            indexName: indexName!,
-            previewCount: config.filePreviewDocumentsCount,
-            delimiter,
-            selectedDataSourceId: dataSourceId,
-          });
-          setIsLoadingPreview(false);
-          if (response) {
-            setFilePreviewData(response);
-            notifications.toasts.addSuccess(
-              i18n.translate('dataImporter.previewSuccess', {
-                defaultMessage: `Preview successful`,
-              })
-            );
-          } else {
-            notifications.toasts.addDanger(
-              i18n.translate('dataImporter.previewFailed', {
-                defaultMessage: `Preview failed`,
-              })
-            );
-          }
-        } catch (error) {
-          setIsLoadingPreview(false);
-          const errorMessage = error.body?.message ?? error;
+    if (importType === IMPORT_CHOICE_FILE && inputFile) {
+      const fileExtension = extname(inputFile.name);
+      setIsLoadingPreview(true);
+      try {
+        const response = await previewFile({
+          http,
+          file: inputFile,
+          createMode,
+          fileExtension,
+          indexName: indexName!,
+          previewCount: config.filePreviewDocumentsCount,
+          delimiter,
+          selectedDataSourceId: dataSourceId,
+        });
+        setIsLoadingPreview(false);
+        if (response) {
+          setFilePreviewData(response);
+          notifications.toasts.addSuccess(
+            i18n.translate('dataImporter.previewSuccess', {
+              defaultMessage: `Preview successful`,
+            })
+          );
+          setSelectedTab('preview');
+        } else {
           notifications.toasts.addDanger(
-            i18n.translate('dataImporter.previewError', {
-              defaultMessage: `Preview failed: {errorMessage}`,
-              values: { errorMessage },
+            i18n.translate('dataImporter.previewFailed', {
+              defaultMessage: `Preview failed`,
             })
           );
         }
+      } catch (error) {
+        setIsLoadingPreview(false);
+      }
+    } else if (importType === IMPORT_CHOICE_TEXT && inputText) {
+      const fileExtension = `.${dataType}`;
+      const textBlob = new Blob([inputText], { type: 'text/plain' });
+      setIsLoadingPreview(true);
+      try {
+        const response = await previewFile({
+          http,
+          file: new File([textBlob], `imported_text.${dataType}`, { type: 'text/plain' }),
+          createMode,
+          fileExtension,
+          indexName: indexName!,
+          previewCount: config.filePreviewDocumentsCount,
+          delimiter,
+          selectedDataSourceId: dataSourceId,
+        });
+        setIsLoadingPreview(false);
+        if (response) {
+          setFilePreviewData(response);
+          notifications.toasts.addSuccess(
+            i18n.translate('dataImporter.previewSuccess', {
+              defaultMessage: `Preview successful`,
+            })
+          );
+          setSelectedTab('preview');
+        } else {
+          notifications.toasts.addDanger(
+            i18n.translate('dataImporter.previewFailed', {
+              defaultMessage: `Preview failed`,
+            })
+          );
+        }
+      } catch (error) {
+        setIsLoadingPreview(false);
       }
     }
   };
@@ -443,11 +472,9 @@ export const DataImporterPluginApp = ({
                         onFileUpdate={onFileInput}
                       />
                     )}
-                    {importType === IMPORT_CHOICE_FILE && (
-                      <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
-                        Preview
-                      </EuiButton>
-                    )}
+                    <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
+                      Preview
+                    </EuiButton>
                     <EuiSpacer size="s" />
                     <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
                       Import
@@ -455,13 +482,46 @@ export const DataImporterPluginApp = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>
                     {importType === IMPORT_CHOICE_TEXT && (
-                      <ImportTextContentBody
-                        onTextChange={onTextInput}
-                        enabledFileTypes={config.enabledFileTypes}
-                        initialFileType={dataType!}
-                        characterLimit={config.maxTextCount}
-                        onFileTypeChange={onDataTypeChange}
-                      />
+                      <>
+                        <EuiTabs>
+                          <EuiTab
+                            onClick={() => setSelectedTab('editor')}
+                            isSelected={selectedTab === 'editor'}
+                          >
+                            Editor
+                          </EuiTab>
+                          <EuiTab
+                            onClick={() => setSelectedTab('preview')}
+                            isSelected={selectedTab === 'preview'}
+                          >
+                            Preview
+                          </EuiTab>
+                        </EuiTabs>
+                        {selectedTab === 'editor' && (
+                          <ImportTextContentBody
+                            onTextChange={onTextInput}
+                            enabledFileTypes={config.enabledFileTypes}
+                            initialFileType={dataType!}
+                            characterLimit={config.maxTextCount}
+                            onFileTypeChange={onDataTypeChange}
+                          />
+                        )}
+                        {selectedTab === 'preview' && (
+                          <div>
+                            {isLoadingPreview ? (
+                              <EuiLoadingSpinner size="xl" />
+                            ) : (
+                              <PreviewComponent
+                                previewData={filePreviewData.documents || []}
+                                visibleRows={visibleRows}
+                                loadMoreRows={loadMoreRows}
+                                predictedMapping={filePreviewData.predictedMapping || {}}
+                                existingMapping={filePreviewData.existingMapping || {}}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </>
                     )}
                     {importType === IMPORT_CHOICE_FILE && (
                       <div>
