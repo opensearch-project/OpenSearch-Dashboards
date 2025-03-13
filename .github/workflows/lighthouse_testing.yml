@@ -128,8 +128,13 @@ jobs:
 
             UNIQUE_FAILURE_URLS=$(echo "$FAILURES" | jq '[.[] | .url] | unique')
 
+            if [ ! -f ".lighthouseci/links.json" ]; then
+              echo "⚠️ No .lighthouseci/links.json file found. Creating an empty JSON object..."
+              echo "{}" > .lighthouseci/links.json
+            fi
+
             # Load the URL to report mapping from links.json
-            URL_REPORT_MAP=$(jq -c '.' .lighthouseci/links.json)
+              URL_REPORT_MAP=$(jq -c '.' .lighthouseci/links.json)
 
             # Append report URLs to failed assertions
             FAILURES_WITH_REPORTS=$(jq --argjson url_report_map "$URL_REPORT_MAP" '

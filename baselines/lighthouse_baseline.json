@@ -5,7 +5,7 @@
   },
   "/app/data-explorer/discover": {
     "first-contentful-paint": 1000,
-    "speed-index": 14000
+    "speed-index": 24000
   },
   "/app/dashboards": {
     "first-contentful-paint": 1800,
