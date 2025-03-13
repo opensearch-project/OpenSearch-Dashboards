@@ -6,6 +6,7 @@
 import React from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { MAX_DOWNLOAD_CSV_COUNT } from './constants';
 
 export const DiscoverDownloadCsvCallout = () => {
   return (
@@ -17,7 +18,8 @@ export const DiscoverDownloadCsvCallout = () => {
       <EuiText size="s" className="dscDownloadCsv__calloutText">
         <FormattedMessage
           id="discover.downloadCsvCallout"
-          defaultMessage="There is a limit of 10,000 total result downloads."
+          defaultMessage="There is a limit of {max} total result downloads."
+          values={{ max: MAX_DOWNLOAD_CSV_COUNT.toLocaleString() }}
         />
       </EuiText>
     </EuiCallOut>

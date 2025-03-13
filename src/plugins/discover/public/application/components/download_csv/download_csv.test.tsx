@@ -12,6 +12,14 @@ import { IndexPattern } from '../../../../../data/common';
 import { useDiscoverDownloadCsv } from './use_download_csv';
 import { DownloadCsvFormId } from './constants';
 
+jest.mock('./use_download_csv_toasts', () => ({
+  useDiscoverDownloadCsvToasts: () => ({
+    onSuccess: jest.fn(),
+    onError: jest.fn(),
+    onLoading: jest.fn(),
+  }),
+}));
+
 jest.mock('./use_download_csv', () => ({
   useDiscoverDownloadCsv: jest.fn(),
 }));

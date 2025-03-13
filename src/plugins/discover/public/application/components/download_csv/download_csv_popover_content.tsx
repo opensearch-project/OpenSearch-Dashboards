@@ -24,8 +24,9 @@ export const DiscoverDownloadCsvPopoverContent = ({
   const [selectedOption, setSelectedOption] = useState<DownloadCsvFormId>(
     DownloadCsvFormId.Visible
   );
-  const showMaxOption = hitsCount > rowsCount;
-  const maxCountStr = Math.min(hitsCount, MAX_DOWNLOAD_CSV_COUNT).toLocaleString();
+  const maxCount = Math.min(hitsCount, MAX_DOWNLOAD_CSV_COUNT);
+  const showMaxOption = maxCount > rowsCount;
+  const maxCountStr = maxCount.toLocaleString();
 
   return (
     <div className="dscDownloadCsv__popover" data-test-subj="dscDownloadCsvPopoverContent">

@@ -96,5 +96,12 @@ describe('DiscoverDownloadCsvPopoverContent', () => {
         new RegExp(`${MAX_DOWNLOAD_CSV_COUNT.toLocaleString()}`)
       );
     });
+
+    it('hides max rowsCount === MAX_DOWNLOAD_CSV_COUNT', () => {
+      render(
+        <TestHarness hitsCount={MAX_DOWNLOAD_CSV_COUNT * 2} rowsCount={MAX_DOWNLOAD_CSV_COUNT} />
+      );
+      expect(screen.queryByTestId('dscDownloadCsvOptionMax')).not.toBeInTheDocument();
+    });
   });
 });

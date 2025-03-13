@@ -5,7 +5,7 @@
 
 import './download_csv.scss';
 import React, { useState } from 'react';
-import { EuiGlobalToastList, EuiPopover } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_content';
 import { DiscoverDownloadCsvButton } from './download_csv_button';
 import { useDiscoverDownloadCsv } from './use_download_csv';
@@ -22,7 +22,7 @@ export interface DiscoverDownloadCsvProps {
 
 export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownloadCsvProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { toasts, onSuccess, onError, onLoading, onDismiss } = useDiscoverDownloadCsvToasts();
+  const { onSuccess, onError, onLoading } = useDiscoverDownloadCsvToasts();
   const { isLoading, downloadCsvForOption } = useDiscoverDownloadCsv({
     rows,
     hits,
@@ -40,25 +40,22 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
   };
 
   return (
-    <>
-      <EuiPopover
-        button={
-          <DiscoverDownloadCsvButton
-            disabled={isLoading}
-            openPopover={() => setIsPopoverOpen(true)}
-          />
-        }
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-      >
-        <DiscoverDownloadCsvPopoverContent
-          rowsCount={rows?.length || 0}
-          hitsCount={hits || 0}
-          downloadForOption={handleDownloadCsvForOption}
+    <EuiPopover
+      button={
+        <DiscoverDownloadCsvButton
+          disabled={isLoading}
+          openPopover={() => setIsPopoverOpen(true)}
         />
-      </EuiPopover>
-      <EuiGlobalToastList toasts={toasts} dismissToast={onDismiss} toastLifeTimeMs={6000} />
-    </>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+    >
+      <DiscoverDownloadCsvPopoverContent
+        rowsCount={rows?.length || 0}
+        hitsCount={hits || 0}
+        downloadForOption={handleDownloadCsvForOption}
+      />
+    </EuiPopover>
   );
 };
