@@ -6,6 +6,7 @@
 import { parse } from 'ndjson';
 import { Readable } from 'stream';
 import { IFileParser, IngestOptions, ParseOptions, ValidationOptions } from '../types';
+import { isValidObject } from '../utils/util';
 
 export class NDJSONParser implements IFileParser {
   public async validateText(text: string, _: ValidationOptions) {
@@ -17,8 +18,14 @@ export class NDJSONParser implements IFileParser {
     return await new Promise<boolean>((promise, reject) => {
       stringStream
         .pipe(parse({ strict: true }))
-        .on('error', (e: any) => reject(e))
-        .on('data', () => {})
+        .on('error', (e) => reject(e))
+        .on('data', (document: Record<string, any>) => {
+          if (!isValidObject(document)) {
+            reject(
+              new Error(`The following document has empty fields: ${JSON.stringify(document)}`)
+            );
+          }
+        })
         .on('end', () => promise(true));
     });
   }
@@ -30,23 +37,27 @@ export class NDJSONParser implements IFileParser {
     stringStream.push(text);
     stringStream.push(null);
 
-    const numDocuments = await new Promise<number>((promise, reject) => {
+    const failedRows: number[] = [];
+    const numDocuments = await new Promise<number>((promise) => {
       const tasks: Array<Promise<void>> = [];
       let numDocumentsCount = 0;
 
       stringStream
         .pipe(parse({ strict: true }))
-        .on('error', (e: any) => reject(e))
-        .on('data', async (document: object) => {
+        .on('error', (_) => {
+          const curRow = ++numDocumentsCount;
+          failedRows.push(curRow);
+        })
+        .on('data', (document: Record<string, any>) => {
           const task = (async () => {
+            const curRow = ++numDocumentsCount;
             try {
               await client.index({
                 index: indexName,
                 body: document,
               });
-              numDocumentsCount++;
             } catch (e) {
-              reject(e);
+              failedRows.push(curRow);
             }
           })();
           tasks.push(task);
@@ -59,29 +70,38 @@ export class NDJSONParser implements IFileParser {
 
     return {
       total: numDocuments,
-      message: `Indexed ${numDocuments} documents`,
+      message: `Indexed ${numDocuments - failedRows.length} documents`,
+      failedRows: failedRows.sort((n1, n2) => n1 - n2),
     };
   }
 
   public async ingestFile(file: Readable, options: IngestOptions) {
     const { client, indexName } = options;
 
+    const failedRows: number[] = [];
     const numDocuments = await new Promise<number>((resolve, reject) => {
       const tasks: Array<Promise<void>> = [];
       let numDocumentsCount = 0;
+
       file
         .pipe(parse({ strict: true }))
-        .on('error', (e: any) => reject(e))
-        .on('data', async (document: object) => {
+        .on('error', (e) =>
+          reject(new Error(`Stopped processing after ${numDocumentsCount} rows due to: ${e}`))
+        )
+        .on('data', (document: Record<string, any>) => {
           const task = (async () => {
-            try {
-              await client.index({
-                index: indexName,
-                body: document,
-              });
-              numDocumentsCount++;
-            } catch (e) {
-              reject(e);
+            const curRow = ++numDocumentsCount;
+            if (!isValidObject(document)) {
+              failedRows.push(curRow);
+            } else {
+              try {
+                await client.index({
+                  index: indexName,
+                  body: document,
+                });
+              } catch (_) {
+                failedRows.push(curRow);
+              }
             }
           })();
           tasks.push(task);
@@ -94,7 +114,8 @@ export class NDJSONParser implements IFileParser {
 
     return {
       total: numDocuments,
-      message: `Indexed ${numDocuments} documents`,
+      message: `Indexed ${numDocuments - failedRows.length} documents`,
+      failedRows: failedRows.sort((n1, n2) => n1 - n2),
     };
   }
 
@@ -103,8 +124,14 @@ export class NDJSONParser implements IFileParser {
     await new Promise<void>((resolve, reject) => {
       file
         .pipe(parse({ strict: true }))
-        .on('error', (e: any) => reject(e))
+        .on('error', (e) => reject(e))
         .on('data', (document: Record<string, any>) => {
+          if (!isValidObject(document)) {
+            reject(
+              new Error(`The following document has empty fields: ${JSON.stringify(document)}`)
+            );
+          }
+
           if (documents.length >= limit) {
             resolve();
             file.destroy();

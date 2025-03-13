@@ -25,6 +25,7 @@ export interface ImportResponse {
   message: {
     total: number;
     message: string;
+    failedRows: number[];
   };
   success: boolean;
 }

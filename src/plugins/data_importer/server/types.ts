@@ -41,8 +41,15 @@ export interface IngestOptions {
 }
 
 export interface IngestResponse {
+  /**
+   * Total count of documents in file successfully or unsuccessfully parsed/ingested
+   */
   total: number;
   message: string;
+  /**
+   * List of row numbers that failed to be parsed/ingested
+   */
+  failedRows: number[];
 }
 
 export interface ValidationOptions {
