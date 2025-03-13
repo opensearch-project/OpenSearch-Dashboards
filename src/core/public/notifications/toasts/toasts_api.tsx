@@ -47,7 +47,7 @@ import { I18nStart } from '../../i18n';
 export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
   id?: string;
   title?: string | MountPoint;
-  text?: ReactNode | MountPoint;
+  text?: ReactNode | MountPoint | null;
 };
 
 export type Toast = ToastInputFields & {
