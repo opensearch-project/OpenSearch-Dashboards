@@ -88,6 +88,8 @@ const s3DatasetTestSuite = () => {
         beforeEach(() => {
           // Create workspace
           cy.deleteWorkspaceByName(workspace);
+          cy.clearLocalStorage();
+          cy.clearAllSessionStorage();
           cy.osd.deleteAllOldWorkspaces();
           cy.visit('/app/home');
           cy.osd.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, workspace);
