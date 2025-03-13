@@ -121,6 +121,7 @@ export interface Props {
    */
   resizable?: boolean;
 }
+
 export class CodeEditor extends React.Component<Props, { editorHeight: number }> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
 
