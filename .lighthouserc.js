@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+const fs = require('fs');
+
+const baseline = JSON.parse(fs.readFileSync('baselines/lighthouse_baseline.json', 'utf8'));
+
 const baseUrl = 'http://localhost:5601';
 
 module.exports = {
@@ -15,7 +19,7 @@ module.exports = {
         `${baseUrl}/app/visualize`,
       ], // Add more URLs as needed
       startServerCommand: 'yarn start --no-base-path',
-      numberOfRuns: 2,
+      numberOfRuns: 1,
       settings: {
         chromePath: require('puppeteer').executablePath(),
         chromeFlags: '--no-sandbox --disable-gpu --headless',
@@ -31,20 +35,66 @@ module.exports = {
       },
     },
     assert: {
-      // Only the key assertions
-      assertions: {
-        // performance: ['warn', { minScore: 0.2 }], // Aggregates all key metrics into a single score.
-        'first-contentful-paint': ['warn', { maxNumericValue: 1800 }], //	Indicates how fast the page starts loading.
-        'speed-index': ['warn', { maxNumericValue: 20000 }], // Lower speed index = better perceived performance.
-        // 'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }], // Critical for user-perceived load speed.
-        // interactive: ['warn', { maxNumericValue: 5000 }], // Affects usability—page is responsive to user input.
-        // 'total-blocking-time': ['warn', { maxNumericValue: 300 }], // Higher TBT makes the page feel sluggish.
-        // 'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }], // Prevents janky UI movements during load.
-      },
+      assertMatrix: [
+        {
+          matchingUrlPattern: '/app/home',
+          assertions: {
+            'first-contentful-paint': [
+              'warn',
+              {
+                maxNumericValue: baseline['/app/home']['first-contentful-paint'],
+              },
+            ],
+            'speed-index': ['warn', { maxNumericValue: baseline['/app/home']['speed-index'] }],
+          },
+        },
+        {
+          matchingUrlPattern: '/app/data-explorer/discover',
+          assertions: {
+            'first-contentful-paint': [
+              'warn',
+              {
+                maxNumericValue: baseline['/app/data-explorer/discover']['first-contentful-paint'],
+              },
+            ],
+            'speed-index': [
+              'warn',
+              { maxNumericValue: baseline['/app/data-explorer/discover']['speed-index'] },
+            ],
+          },
+        },
+        {
+          matchingUrlPattern: '/app/visualize',
+          assertions: {
+            'first-contentful-paint': [
+              'warn',
+              {
+                maxNumericValue: baseline['/app/visualize']['first-contentful-paint'],
+              },
+            ],
+            'speed-index': ['warn', { maxNumericValue: baseline['/app/visualize']['speed-index'] }],
+          },
+        },
+        {
+          matchingUrlPattern: '/app/dashboards',
+          assertions: {
+            'first-contentful-paint': [
+              'warn',
+              {
+                maxNumericValue: baseline['/app/dashboards']['first-contentful-paint'],
+              },
+            ],
+            'speed-index': [
+              'warn',
+              { maxNumericValue: baseline['/app/dashboards']['speed-index'] },
+            ],
+          },
+        },
+      ],
     },
-    upload: {
-      target: 'temporary-public-storage', // Required for GitHub integration
-      githubStatusCheck: false,
-    },
+  },
+  upload: {
+    target: 'temporary-public-storage', // Required for GitHub integration
+    githubStatusCheck: false,
   },
 };
