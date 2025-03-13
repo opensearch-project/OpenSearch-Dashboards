@@ -58,7 +58,6 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setHistoricalDataRange();
-      await PageObjects.discover.switchDiscoverTable('new');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();

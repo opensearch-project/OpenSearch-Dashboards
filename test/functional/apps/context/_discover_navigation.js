@@ -47,7 +47,6 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.switchDiscoverTable('new');
 
       for (const columnName of TEST_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItemAdd(columnName);

@@ -47,7 +47,6 @@ export default function ({ getService, getPageObjects }) {
     beforeEach(async function () {
       await browser.refresh();
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.switchDiscoverTable('new');
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });

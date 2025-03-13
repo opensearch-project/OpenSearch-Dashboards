@@ -43,7 +43,6 @@ export default function ({ getService, getPageObjects }) {
   describe('context size', function contextSize() {
     before(async function () {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.switchDiscoverTable('new');
       await opensearchDashboardsServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
