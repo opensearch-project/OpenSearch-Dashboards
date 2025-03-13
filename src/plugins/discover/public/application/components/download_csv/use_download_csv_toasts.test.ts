@@ -5,10 +5,15 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { getServices } from '../../../opensearch_dashboards_services';
+import { useDiscoverContext } from '../../view_components/context';
 import {
   useDiscoverDownloadCsvToasts,
   DiscoverDownloadCsvToastId,
 } from './use_download_csv_toasts';
+
+jest.mock('../../view_components/context', () => ({
+  useDiscoverContext: jest.fn(),
+}));
 
 jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: jest.fn(),
@@ -16,8 +21,10 @@ jest.mock('../../../opensearch_dashboards_services', () => ({
 
 const mockAddInfo = jest.fn();
 const mockRemove = jest.fn();
+const mockWarning = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddDanger = jest.fn();
+const mockAbort = jest.fn();
 
 describe('useDiscoverDownloadCsvToasts', () => {
   beforeEach(() => {
@@ -27,16 +34,29 @@ describe('useDiscoverDownloadCsvToasts', () => {
         remove: mockRemove,
         addSuccess: mockAddSuccess,
         addDanger: mockAddDanger,
+        addWarning: mockWarning,
+      },
+    }));
+    (useDiscoverContext as jest.MockedFunction<any>).mockImplementation(() => ({
+      fetchForMaxCsvStateRef: {
+        current: {
+          abortController: {
+            abort: mockAbort,
+          },
+        },
       },
     }));
   });
 
   afterEach(() => {
     (getServices as jest.MockedFunction<any>).mockClear();
+    (useDiscoverContext as jest.MockedFunction<any>).mockClear();
     mockAddInfo.mockClear();
     mockRemove.mockClear();
     mockAddSuccess.mockClear();
     mockAddDanger.mockClear();
+    mockAbort.mockClear();
+    mockWarning.mockClear();
   });
 
   it('calling onLoading adds loading toast', () => {
@@ -45,6 +65,18 @@ describe('useDiscoverDownloadCsvToasts', () => {
     expect(mockAddInfo).toHaveBeenCalledWith(
       expect.objectContaining({ id: DiscoverDownloadCsvToastId.Loading }),
       expect.anything()
+    );
+  });
+
+  it('calling onAbort cancel calls abort', () => {
+    const { result } = renderHook(useDiscoverDownloadCsvToasts);
+    result.current.onAbort();
+    expect(mockAbort).toHaveBeenCalled();
+    expect(mockRemove).toHaveBeenCalled();
+    expect(mockWarning).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: DiscoverDownloadCsvToastId.Cancelled,
+      })
     );
   });
 

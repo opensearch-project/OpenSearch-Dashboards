@@ -109,6 +109,9 @@ export const useSearch = (services: DiscoverViewServices) => {
     abortController: undefined,
     fieldCounts: {},
   });
+  const fetchForMaxCsvStateRef = useRef<{ abortController: AbortController | undefined }>({
+    abortController: undefined,
+  });
   const inspectorAdapters = {
     requests: new RequestAdapter(),
   };
@@ -362,6 +365,11 @@ export const useSearch = (services: DiscoverViewServices) => {
         throw new Error('Invalid time range');
       }
 
+      // Abort any in-progress requests before fetching again
+      if (fetchForMaxCsvStateRef.current.abortController)
+        fetchForMaxCsvStateRef.current.abortController.abort();
+      fetchForMaxCsvStateRef.current.abortController = new AbortController();
+
       const searchSource = await updateSearchSource({
         indexPattern: dataset,
         services,
@@ -371,29 +379,32 @@ export const useSearch = (services: DiscoverViewServices) => {
         size,
       });
 
-      try {
-        const query = searchSource.getField('query');
-        const languageConfig = data.query.queryString
-          .getLanguageService()
-          .getLanguage(query!.language);
+      const query = searchSource.getField('query');
+      const languageConfig = data.query.queryString
+        .getLanguageService()
+        .getLanguage(query!.language);
 
-        // Execute the search
-        const fetchResp = await searchSource.fetch({
-          withLongNumeralsSupport: await services.uiSettings.get(
-            UI_SETTINGS.DATA_WITH_LONG_NUMERALS
-          ),
-          ...(languageConfig &&
-            languageConfig.fields?.formatter && {
-              formatter: languageConfig.fields.formatter,
-            }),
-        });
+      // Execute the search
+      const fetchResp = await searchSource.fetch({
+        abortSignal: fetchForMaxCsvStateRef.current.abortController.signal,
+        withLongNumeralsSupport: await services.uiSettings.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS),
+        ...(languageConfig &&
+          languageConfig.fields?.formatter && {
+            formatter: languageConfig.fields.formatter,
+          }),
+      });
 
-        return fetchResp.hits.hits;
-      } catch (error: any) {
-        return error;
-      }
+      return fetchResp.hits.hits;
     },
-    [indexPattern, timefilter, toastNotifications, data, services, sort, savedSearch?.searchSource]
+    [
+      indexPattern,
+      timefilter,
+      toastNotifications,
+      services,
+      sort,
+      savedSearch?.searchSource,
+      data.query.queryString,
+    ]
   );
 
   useEffect(() => {
@@ -521,6 +532,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     savedSearch,
     inspectorAdapters,
     fetchForMaxCsvOption,
+    fetchForMaxCsvStateRef,
   };
 };
 

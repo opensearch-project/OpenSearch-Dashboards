@@ -29,7 +29,7 @@
  */
 
 import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import * as Rx from 'rxjs';
 
 import { ErrorToast } from './error_toast';
@@ -47,7 +47,7 @@ import { I18nStart } from '../../i18n';
 export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
   id?: string;
   title?: string | MountPoint;
-  text?: string | MountPoint;
+  text?: ReactNode | MountPoint;
 };
 
 export type Toast = ToastInputFields & {

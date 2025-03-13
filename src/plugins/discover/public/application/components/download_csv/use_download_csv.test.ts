@@ -9,7 +9,7 @@ import moment from 'moment';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useDiscoverContext } from '../../view_components/context';
 import { useSelector } from '../../utils/state_management';
-import { IndexPattern } from '../../../../../data/common';
+import { AbortError, IndexPattern } from '../../../../../data/common';
 import { setServices } from '../../../opensearch_dashboards_services';
 import { discoverPluginMock } from '../../../mocks';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
@@ -322,6 +322,20 @@ describe('useDiscoverDownloadCsv', () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Max);
       });
       expect(mockOnError).toHaveBeenCalled();
+      expect(mockOnSuccess).not.toHaveBeenCalled();
+    });
+
+    it('does not call onError if !hits and Max option', async () => {
+      (useDiscoverContext as jest.MockedFunction<any>).mockImplementation(() => ({
+        fetchForMaxCsvOption: () => {
+          throw new AbortError();
+        },
+      }));
+      const { result } = renderHook(() => useDiscoverDownloadCsv(mockProps));
+      await act(async () => {
+        await result.current.downloadCsvForOption(DownloadCsvFormId.Max);
+      });
+      expect(mockOnError).not.toHaveBeenCalled();
       expect(mockOnSuccess).not.toHaveBeenCalled();
     });
   });

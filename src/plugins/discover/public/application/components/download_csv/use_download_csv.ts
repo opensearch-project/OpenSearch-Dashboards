@@ -105,7 +105,10 @@ export const useDiscoverDownloadCsv = ({
       saveDataAsCsv(csvData);
       onSuccess();
     } catch (err) {
-      onError();
+      // Abort is handled by use_download_csv_toasts
+      if (err.name !== 'AbortError') {
+        onError();
+      }
     } finally {
       setIsLoading(false);
     }
