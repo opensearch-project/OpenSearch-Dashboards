@@ -8,9 +8,10 @@ import {
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
 } from 'src/core/server';
-import { BaseConnectionManager } from './base_connection_manager';
+import { BaseConnectionManager, ClientFactory } from './base_connection_manager';
 import { GetResourcesResponse } from '../clients/base_connection_client';
 import { URI } from '../../../common/constants';
+import { PromQLConnectionClient } from '../clients/promql_connection_client';
 
 const BASE_RESOURCE_API = 'api/v1';
 
@@ -60,6 +61,14 @@ export type PrometheusResourceQuery = CommonQuery &
   (LabelsQuery | LabelValuesQuery | MetricMetadataQuery | AlertsQuery);
 
 export class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
+  constructor() {
+    super();
+    const clientFactory = (
+      context: RequestHandlerContext,
+      request: OpenSearchDashboardsRequest
+    ): PromQLConnectionClient => new PromQLConnectionClient(context, request);
+    this.setClientFactory(clientFactory);
+  }
   private getResourceURI(query: PrometheusResourceQuery): string {
     const { resourceType, resourceName } = query;
     switch (resourceType) {
