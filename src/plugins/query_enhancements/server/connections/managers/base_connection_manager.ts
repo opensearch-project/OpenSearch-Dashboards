@@ -8,7 +8,7 @@ import { SqlConnectionClient } from '../clients/sql_connection_client';
 
 import type { BaseConnectionClient, ResourcesQuery } from '../clients/base_connection_client';
 
-export type ClientFactory<C> = (
+type ClientFactory<C> = (
   context: RequestHandlerContext,
   request: OpenSearchDashboardsRequest
 ) => BaseConnectionClient<C>;

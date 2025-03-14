@@ -8,7 +8,7 @@ import {
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
 } from 'src/core/server';
-import { BaseConnectionManager, ClientFactory } from './base_connection_manager';
+import { BaseConnectionManager } from './base_connection_manager';
 import { GetResourcesResponse } from '../clients/base_connection_client';
 import { URI } from '../../../common/constants';
 import { PromQLConnectionClient } from '../clients/promql_connection_client';
