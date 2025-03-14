@@ -20,7 +20,7 @@ import {
 import './preview_table.scss';
 
 interface PreviewComponentProps {
-  previewData: any[];
+  previewData: Array<Record<string, any>>;
   visibleRows: number;
   loadMoreRows: () => void;
   predictedMapping: Record<string, any>;
