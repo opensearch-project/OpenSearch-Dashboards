@@ -1,7 +1,5 @@
-.dscDownloadCsv {
-  &__popover {
-    min-width: 260px;
-  }
+.dscDownloadCsvPopoverContent {
+  min-width: 260px;
 
   &__titleWrapper {
     text-transform: uppercase;
@@ -11,14 +9,6 @@
 
   &__form {
     padding: $ouiSizeS;
-  }
-
-  &__callout {
-    margin: $ouiSizeS 0;
-  }
-
-  &__calloutText {
-    color: $ouiColorWarningText;
   }
 
   &__submit {

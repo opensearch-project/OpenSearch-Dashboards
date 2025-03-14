@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './download_csv.scss';
 import React, { useState } from 'react';
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiSmallButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_content';
-import { DiscoverDownloadCsvButton } from './download_csv_button';
 import { useDiscoverDownloadCsv } from './use_download_csv';
 import { DownloadCsvFormId } from './constants';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
@@ -32,6 +31,7 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
     onLoading,
   });
 
+  const openPopover = () => setIsPopoverOpen(true);
   const closePopover = () => setIsPopoverOpen(false);
 
   const handleDownloadCsvForOption = async (option: DownloadCsvFormId) => {
@@ -42,10 +42,15 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
   return (
     <EuiPopover
       button={
-        <DiscoverDownloadCsvButton
+        <EuiSmallButtonEmpty
+          data-test-subj="dscDownloadCsvButton"
           disabled={isLoading}
-          openPopover={() => setIsPopoverOpen(true)}
-        />
+          iconType="download"
+          iconSide="left"
+          onClick={openPopover}
+        >
+          <FormattedMessage id="discover.downloadCsvButtonText" defaultMessage="Download as CSV" />
+        </EuiSmallButtonEmpty>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

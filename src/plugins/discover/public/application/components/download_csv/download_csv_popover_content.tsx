@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { EuiSmallButton, EuiText } from '@elastic/eui';
+import './download_csv_popover_content.scss';
+import React, { useMemo, useState } from 'react';
+import { EuiCompressedRadioGroup, EuiSmallButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
 import { DiscoverDownloadCsvCallout } from './download_csv_callout';
-import { DiscoverDownloadCsvOptions } from './download_csv_options';
 
 export interface DiscoverDownloadCsvPopoverContentProps {
   downloadForOption: (option: DownloadCsvFormId) => Promise<void>;
@@ -24,31 +24,71 @@ export const DiscoverDownloadCsvPopoverContent = ({
   const [selectedOption, setSelectedOption] = useState<DownloadCsvFormId>(
     DownloadCsvFormId.Visible
   );
-  const maxCount = Math.min(hitsCount, MAX_DOWNLOAD_CSV_COUNT);
-  const showMaxOption = maxCount > rowsCount;
-  const maxCountStr = maxCount.toLocaleString();
+
+  const { showMaxOption, maxCountString, rowsCountString } = useMemo<{
+    showMaxOption: boolean;
+    maxCountString: string;
+    rowsCountString: string;
+  }>(() => {
+    const maxCount = Math.min(hitsCount, MAX_DOWNLOAD_CSV_COUNT);
+    return {
+      showMaxOption: maxCount > rowsCount,
+      maxCountString: maxCount.toLocaleString(),
+      rowsCountString: rowsCount.toLocaleString(),
+    };
+  }, [hitsCount, rowsCount]);
+
+  const downloadOptions = useMemo(() => {
+    const options = [
+      {
+        id: DownloadCsvFormId.Visible,
+        label: (
+          <FormattedMessage
+            id="discover.downloadCsvOptionVisible"
+            defaultMessage="Visible ({rowCount})"
+            values={{ rowCount: rowsCountString }}
+          />
+        ),
+        ['data-test-subj']: 'dscDownloadCsvOptionVisible',
+      },
+    ];
+
+    if (showMaxOption) {
+      options.push({
+        id: DownloadCsvFormId.Max,
+        label: (
+          <FormattedMessage
+            id="discover.downloadCsvOptionMax"
+            defaultMessage="Max available ({max})"
+            values={{ max: maxCountString }}
+          />
+        ),
+        ['data-test-subj']: 'dscDownloadCsvOptionMax',
+      });
+    }
+
+    return options;
+  }, [maxCountString, rowsCountString, showMaxOption]);
 
   return (
-    <div className="dscDownloadCsv__popover" data-test-subj="dscDownloadCsvPopoverContent">
-      <div className="dscDownloadCsv__titleWrapper">
-        <EuiText data-test-subj="dscDownloadCsvTitle" size="m" className="dscDownloadCsv__title">
+    <div className="dscDownloadCsvPopoverContent" data-test-subj="dscDownloadCsvPopoverContent">
+      <div className="dscDownloadCsvPopoverContent__titleWrapper">
+        <EuiText data-test-subj="dscDownloadCsvTitle" size="m">
           <strong>
             <FormattedMessage id="discover.downloadCsvTitle" defaultMessage="Download as CSV" />
           </strong>
         </EuiText>
       </div>
-      <div className="dscDownloadCsv__form">
-        <DiscoverDownloadCsvOptions
-          showMaxOption={showMaxOption}
-          maxCountString={maxCountStr}
-          rowsCountString={rowsCount.toLocaleString()}
-          selectedOption={selectedOption}
-          setSelectedOption={setSelectedOption}
+      <div className="dscDownloadCsvPopoverContent__form">
+        <EuiCompressedRadioGroup
+          options={downloadOptions}
+          onChange={setSelectedOption as (option: string) => void}
+          idSelected={selectedOption}
         />
         {showMaxOption && <DiscoverDownloadCsvCallout />}
         <EuiSmallButton
           data-test-subj="dscDownloadCsvSubmit"
-          className="dscDownloadCsv__submit"
+          className="dscDownloadCsvPopoverContent__submit"
           onClick={() => downloadForOption(selectedOption)}
           fullWidth={true}
         >
