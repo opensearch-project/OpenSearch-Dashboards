@@ -110,7 +110,7 @@ if (comparatorOperator === '>') {
   }
 }
 
-// =3 is ~3.0.0 and =3.1 is ~3.1.0
+// =3 is ~3.0.0 and =3.1 is ^2.13.0
 if (comparatorOperator === '=' && (!comparatorVersion.minor || !comparatorVersion.patch)) {
   comparatorOperator = '~';
 }

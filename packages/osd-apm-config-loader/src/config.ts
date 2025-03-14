@@ -132,7 +132,7 @@ export class ApmConfiguration {
     const dataPath: string = get(this.rawOpenSearchDashboardsConfig, 'path.data') || getDataPath();
     try {
       const filename = join(dataPath, 'uuid');
-      return readFileSync(filename, 'utf-8');
+      return readFileSync(filename, 'utf8');
     } catch (e) {} // eslint-disable-line no-empty
   }
 

@@ -18,7 +18,7 @@ jest.mock('./services', () => ({
 
 describe('vegaVisualizationClientWrapper()', () => {
   const loadHJSONStringFromFile = (filepath: string) => {
-    return readFileSync(join(__dirname, filepath)).toString();
+    return readFileSync(join(__dirname, filepath), 'utf8').toString();
   };
 
   const getAttributesGivenSpec = (spec: string) => {

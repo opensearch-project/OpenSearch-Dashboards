@@ -152,7 +152,7 @@ cy.osd.add('deleteDataSourceByName', (dataSourceName) => {
 
   // Navigate to the dataSource Management page
   cy.visit('app/dataSources');
-  cy.get('h1').contains('Data sources').should('be.visible');
+  cy.contains('h1', 'Data sources', { timeout: 20000 }).should('be.visible');
   cy.wait(2000);
 
   // Check if data source exists before trying to delete

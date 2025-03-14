@@ -162,7 +162,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
         })
         .then((finalData) => {
           return featureFlagStatus
-            ? finalData.filter((item) => item.relatedConnections?.length > 0)
+            ? finalData.filter((item: any) => item.relatedConnections?.length > 0)
             : finalData;
         })
         .catch(() => {

@@ -120,19 +120,31 @@ export const fetchDataSourceConnections = async (
   http: HttpSetup | undefined,
   notifications: NotificationsStart | undefined,
   directQueryTable: boolean,
-  hideLocalCluster: boolean
+  hideLocalCluster: boolean = false
 ) => {
   try {
-    const directQueryConnectionsPromises = dataSources.map((ds) =>
-      getDirectQueryConnections(ds.id, http!).catch(() => [])
-    );
+    // Add timeout to each promise
+    const directQueryConnectionsPromises = dataSources.map(async (ds) => {
+      try {
+        const result = await Promise.race([
+          getDirectQueryConnections(ds.id, http!),
+          new Promise((_, reject) => setTimeout(() => reject('timeout'), 1500)),
+        ]);
+        return result;
+      } catch (error) {
+        return [];
+      }
+    });
+
     const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
     const directQueryConnections = directQueryConnectionsResult.flat();
+
     const localClusterConnections =
       directQueryTable && !hideLocalCluster ? await getLocalClusterConnections(http!) : undefined;
+
     return mergeDataSourcesWithConnections(
       dataSources,
-      directQueryConnections,
+      directQueryConnections as DataSourceTableItem[],
       localClusterConnections
     );
   } catch (error) {
@@ -141,7 +153,7 @@ export const fetchDataSourceConnections = async (
         defaultMessage: 'Cannot fetch data sources',
       })
     );
-    return [];
+    return dataSources; // Return original data instead of empty array
   }
 };
 
@@ -544,10 +556,14 @@ export const isPluginInstalled = async (
 ): Promise<boolean> => {
   try {
     const response = await http.get('/api/status');
-    const pluginExists = response.status.statuses.some((status: { id: string }) =>
-      status.id.includes(pluginId)
-    );
-    return pluginExists;
+    // Check if response.status and response.status.statuses exist before using them
+    if (response && response.status && Array.isArray(response.status.statuses)) {
+      const pluginExists = response.status.statuses.some((status: { id: string }) =>
+        status.id.includes(pluginId)
+      );
+      return pluginExists;
+    }
+    return false;
   } catch (error) {
     notifications.toasts.addDanger(`Error checking ${pluginId} Plugin Installation status.`);
     // eslint-disable-next-line no-console

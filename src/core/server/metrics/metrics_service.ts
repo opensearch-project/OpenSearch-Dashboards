@@ -99,7 +99,7 @@ export class MetricsService
 
   public async stop() {
     if (this.collectInterval) {
-      clearInterval(this.collectInterval);
+      clearInterval((this.collectInterval as unknown) as NodeJS.Timeout);
     }
     this.metrics$.complete();
   }
