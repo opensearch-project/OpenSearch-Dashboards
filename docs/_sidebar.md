@@ -13,6 +13,7 @@
   - [Openapi](openapi/README.md)
   - Plugins
     - discover
+      - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
       - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
