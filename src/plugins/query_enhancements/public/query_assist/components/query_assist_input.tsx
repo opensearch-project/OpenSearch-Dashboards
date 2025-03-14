@@ -87,8 +87,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={() => setIsSuggestionsVisible(true)}
           placeholder={
-            props.previousQuestion ||
-            (props.selectedIndex
+            props.selectedIndex
               ? i18n.translate('queryEnhancements.queryAssist.input.placeholderWithIndex', {
                   defaultMessage:
                     'Ask a natural language question about {selectedIndex} to generate a query',
@@ -96,7 +95,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
                 })
               : i18n.translate('queryEnhancements.queryAssist.input.placeholderWithoutIndex', {
                   defaultMessage: 'Select an index to ask a question',
-                }))
+                })
           }
           prepend={<EuiIcon type={assistantMark} />}
           append={<WarningBadge error={props.error} />}
