@@ -1,0 +1,2 @@
+fix:
+- Correctly show selected cols from saved search ([#9523](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9523))

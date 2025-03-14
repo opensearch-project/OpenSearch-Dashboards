@@ -16,17 +16,10 @@ import { DiscoverNoIndexPatterns } from '../../components/no_index_patterns/no_i
 import { DiscoverUninitialized } from '../../components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../components/loading_spinner/loading_spinner';
 import { DiscoverResultsActionBar } from '../../components/results_action_bar/results_action_bar';
-import { setColumns, useDispatch, useSelector } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { filterColumns } from '../utils/filter_columns';
-import {
-  DEFAULT_COLUMNS_SETTING,
-  MODIFY_COLUMNS_ON_SWITCH,
-  QUERY_ENHANCEMENT_ENABLED_SETTING,
-} from '../../../../common';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
-import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
 
@@ -43,23 +36,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       core,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { columns } = useSelector((state) => {
-    const stateColumns = state.discover.columns;
-
-    // check if stateColumns is not undefined, otherwise use buildColumns
-    return {
-      columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
-    };
-  });
   const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
-  const filteredColumns = filterColumns(
-    columns,
-    indexPattern,
-    uiSettings.get(DEFAULT_COLUMNS_SETTING),
-    uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
-  );
-  const dispatch = useDispatch();
-  const prevIndexPattern = useRef(indexPattern);
 
   const [fetchState, setFetchState] = useState<SearchData>({
     status: data$.getValue().status,
@@ -107,13 +84,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       subscription.unsubscribe();
     };
   }, [data$, fetchState]);
-
-  useEffect(() => {
-    if (indexPattern !== prevIndexPattern.current) {
-      dispatch(setColumns({ columns: filteredColumns }));
-      prevIndexPattern.current = indexPattern;
-    }
-  }, [dispatch, filteredColumns, indexPattern]);
 
   useEffect(() => {
     setHeaderVariant?.(HeaderVariant.APPLICATION);
