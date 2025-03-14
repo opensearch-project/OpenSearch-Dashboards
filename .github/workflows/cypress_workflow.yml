@@ -274,6 +274,63 @@ jobs:
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
+      - name: Read Performance Metrics
+        id: read-metrics
+        run: |
+          echo "MATRIX_GROUP=${{ matrix.group }}" >> $GITHUB_ENV 
+
+          if [ -f ./cypress/performance_metrics.json ]; then
+            PERFORMANCE_MESSAGE=$(jq -r 'to_entries | map("• ❌ **\(.key)**: \(.value)") | join("\n")' ./cypress/performance_metrics.json)
+            echo "PERFORMANCE_MESSAGE<<EOF" >> $GITHUB_ENV
+            echo "$PERFORMANCE_MESSAGE" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          else
+            echo "PERFORMANCE_MESSAGE=No performance issues detected 🎉" >> $GITHUB_ENV
+          fi
+
+      - name: Upload Performance Metrics
+        uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('./cypress/performance_metrics.json') != '' }}
+        with:
+          name: performance-metrics-${{ matrix.group }}
+          path: ./cypress/performance_metrics.json
+          retention-days: 1
+
+      - name: Post or Update Performance Metrics Comment
+        if: env.PERFORMANCE_MESSAGE != 'No performance issues detected 🎉'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.payload.pull_request.number;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number
+            });
+
+            const existingComment = comments.find(comment => comment.body.includes("🚀 **Component Performance Metrics**"));
+            const newEntry = `**CI Group: ${process.env.MATRIX_GROUP}**\n\n${process.env.PERFORMANCE_MESSAGE}\n\n`;
+
+            let updatedMessage;
+            if (existingComment) {
+              updatedMessage = existingComment.body + "\n\n" + newEntry;  // Append new entry
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: updatedMessage
+              });
+            } else {
+              updatedMessage = `🚀 **Component Performance Metrics**\n\n${newEntry}\n\n🔍 **Please review and optimize if necessary.**`;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                body: updatedMessage
+              });
+            }
+
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - name: Upload FT repo screenshots
         uses: actions/upload-artifact@v4
@@ -328,6 +385,10 @@ jobs:
           path: cypress/results
           retention-days: 1
           overwrite: true
+
+      - name: Fail PR on Performance Issues
+        if: env.PERFORMANCE_MESSAGE != 'No performance issues detected 🎉'
+        run: exit 1
 
   add-comment:
     needs: [cypress-tests]
