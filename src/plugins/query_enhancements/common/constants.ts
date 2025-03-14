@@ -41,6 +41,9 @@ export const API = {
   AGENT_API: {
     CONFIG_EXISTS: `${BASE_API_ASSISTANT}/agent_config/_exists`,
   },
+  RESOURCES: {
+    BASE_PROMETHEUS: `${BASE_API}/prometheus`,
+  },
 };
 
 export const URI = {

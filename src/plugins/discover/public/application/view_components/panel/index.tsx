@@ -105,7 +105,8 @@ export default function DiscoverPanel(props: ViewProps) {
     UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED
   );
 
-  if (indexPattern?.id === 'promql1') {
+  // TODO: this should check dataset type
+  if (indexPattern?.id === 'my_prometheus') {
     return <MetricsSidebar />;
   }
 
