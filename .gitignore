@@ -28,6 +28,7 @@ target
 /test/*/screenshots/visual_regression_gallery.html
 cypress/videos/*
 cypress/screenshots/*
+cypress/downloads/*
 /html_docs
 .eslintcache
 /data
