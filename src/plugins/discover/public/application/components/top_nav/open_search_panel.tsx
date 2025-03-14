@@ -58,6 +58,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
       core: { uiSettings, savedObjects, application },
       addBasePath,
       data,
+      filterManager,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
 
@@ -92,6 +93,9 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
             },
           ]}
           onChoose={(id) => {
+            // Reset query app filters before loading saved search
+            filterManager.setAppFilters([]);
+            data.query.queryString.clearQuery();
             application.navigateToApp('discover', { path: `#/view/${id}` });
             onClose();
           }}
