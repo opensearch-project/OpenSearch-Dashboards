@@ -45,28 +45,15 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    const dataset = this.queryService.queryString.getQuery().dataset;
-    const datasetType = dataset?.type;
-
-    if (datasetType) {
-      const datasetTypeConfig = this.queryService.queryString
-        .getDatasetService()
-        .getType(datasetType);
-
-      if (
-        dataset?.timeFieldName &&
-        datasetTypeConfig?.languageOverrides?.PPL?.hideDatePicker === false
-      ) {
-        request.params = {
-          ...request.params,
-          body: {
-            ...request.params.body,
-            timeRange: this.queryService.timefilter.timefilter.getTime(),
-          },
-        };
-      }
-    }
-
-    return this.runSearch(request, options.abortSignal);
+    return this.runSearch(
+      {
+        ...request.params,
+        body: {
+          ...request.params.body,
+          timeRange: this.queryService.timefilter.timefilter.getTime(),
+        },
+      },
+      options.abortSignal
+    );
   }
 }

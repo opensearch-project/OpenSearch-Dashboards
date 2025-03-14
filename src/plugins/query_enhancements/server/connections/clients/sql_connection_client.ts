@@ -23,16 +23,14 @@ export class SqlConnectionClient extends BaseConnectionClient<OpenSearchClient> 
   }
 
   async getResources<R>(request: ClientRequest): Promise<GetResourcesResponse<R>> {
-    const _response = await this.client.transport.request({
+    const response = await this.client.transport.request({
       ...request,
       method: 'GET',
-      path: `/_plugins${request.path}`,
     });
-    // additional logic to extract {@link GetResourcesResponse} from raw response
     return {
       status: 'success',
-      data: [],
-      type: 'sql',
+      data: response.body.data,
+      type: 'promql',
     };
   }
 }

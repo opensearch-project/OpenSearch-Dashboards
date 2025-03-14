@@ -7,7 +7,8 @@ import { TransportRequestParams } from '@opensearch-project/opensearch/lib/Trans
 
 export interface ResourcesQuery {
   dataSourceName: string; // SQL/DQS data source name (my_prometheus)
-  resourceType: string; // prometheus
+  resourceType: string;
+  resourceName?: string;
   // dataConnectionId: string; // or the API can take the data-connection saved object ID instead
   query: Record<string, string>; // query params for raw prometheus API
 }
