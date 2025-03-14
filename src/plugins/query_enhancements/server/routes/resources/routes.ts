@@ -6,7 +6,7 @@
 import { schema } from '@osd/config-schema';
 import { ILegacyClusterClient, IRouter } from 'opensearch-dashboards/server';
 import {
-  PrometheusManager,
+  prometheusManager,
   PrometheusResourceQuery,
 } from '../../connections/managers/prometheus_manager';
 import { BASE_API } from '../../../common';
@@ -36,7 +36,7 @@ export function registerResourceRoutes(router: IRouter, defaultClient: ILegacyCl
     async (context, request, response) => {
       const { dataConnectionId, dataConnectionType, resourceType, resourceName } = request.params;
       if (dataConnectionType === 'prometheus') {
-        const resources = await new PrometheusManager().getResources(context, request, {
+        const resources = await prometheusManager.getResources(context, request, {
           dataSourceName: dataConnectionId,
           resourceType,
           resourceName,

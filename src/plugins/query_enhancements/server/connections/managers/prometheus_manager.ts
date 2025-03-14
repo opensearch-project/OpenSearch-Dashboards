@@ -60,7 +60,7 @@ interface AlertsQuery {
 export type PrometheusResourceQuery = CommonQuery &
   (LabelsQuery | LabelValuesQuery | MetricMetadataQuery | AlertsQuery);
 
-export class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
+class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
   constructor() {
     super();
     const clientFactory = (
@@ -101,3 +101,6 @@ export class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
     });
   }
 }
+
+// we must export as singleton so all changes to clientFactory are respected across plugins
+export const prometheusManager = new PrometheusManager();
