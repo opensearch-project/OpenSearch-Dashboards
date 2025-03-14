@@ -396,6 +396,7 @@ describe('useSearch', () => {
       expect(hits.length).toBe(mockHitsCount);
     });
     expect(mockSavedSearch.searchSource.fetch).toHaveBeenLastCalledWith({
+      abortSignal: expect.anything(),
       withLongNumeralsSupport: undefined,
     });
   });
