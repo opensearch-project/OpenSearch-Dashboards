@@ -36,7 +36,7 @@ export class PromQLConnectionClient extends BaseConnectionClient<OpenSearchClien
     } catch (err) {
       return {
         status: 'failed',
-        data: [],
+        data: [] as R,
         type: 'promq',
       };
     }

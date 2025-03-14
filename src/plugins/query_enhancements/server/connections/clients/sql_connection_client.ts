@@ -36,7 +36,7 @@ export class SqlConnectionClient extends BaseConnectionClient<OpenSearchClient> 
     } catch (err) {
       return {
         status: 'failed',
-        data: [],
+        data: [] as R,
         type: 'sql',
       };
     }

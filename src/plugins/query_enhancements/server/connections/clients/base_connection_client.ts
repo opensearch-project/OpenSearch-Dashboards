@@ -7,6 +7,8 @@ import { TransportRequestParams } from '@opensearch-project/opensearch/lib/Trans
 
 export interface ResourcesQuery {
   dataSourceName: string;
+  resourceType: string;
+  resourceName?: string;
   query: Record<string, string>;
 }
 
@@ -19,7 +21,7 @@ export interface ClientRequest {
 export interface GetResourcesResponse<R> {
   nextToken?: string;
   status: string;
-  data: R[];
+  data: R;
   type: string;
 }
 
