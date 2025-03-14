@@ -163,7 +163,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.switchDiscoverTable('new');
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await retry.try(async function () {
@@ -282,7 +281,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.switchDiscoverTable('new');
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -379,7 +377,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.switchDiscoverTable('new');
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -479,7 +476,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.switchDiscoverTable('new');
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {

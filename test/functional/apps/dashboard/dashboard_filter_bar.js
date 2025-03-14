@@ -194,7 +194,6 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultDataRange();
-        await PageObjects.discover.switchDiscoverTable('new');
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();

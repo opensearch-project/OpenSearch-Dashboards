@@ -42,7 +42,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       // TODO: change back to setDefaultRange() once we resolve
       // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5241
       await PageObjects.timePicker.setDefaultRangeForDiscover();
-      await PageObjects.discover.switchDiscoverTable('new');
     });
 
     it('should show custom doc views', async () => {
