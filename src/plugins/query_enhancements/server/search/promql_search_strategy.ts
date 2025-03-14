@@ -52,8 +52,8 @@ export const promqlSearchStrategyProvider = (
             sessionId: '1234', // TODO: use appropriate session id
             options: {
               queryType: 'range',
-              start: '1741124895',
-              end: '1741128495',
+              start: '1741907000',
+              end: '1741907122',
               step: '14', // TODO: determine appropriate steps
             },
           },

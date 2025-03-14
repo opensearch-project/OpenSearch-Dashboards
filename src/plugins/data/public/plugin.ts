@@ -95,6 +95,7 @@ import { getSuggestions as getSQLSuggestions } from './antlr/opensearch_sql/code
 import { getSuggestions as getDQLSuggestions } from './antlr/dql/code_completion';
 import { getSuggestions as getPPLSuggestions } from './antlr/opensearch_ppl/code_completion';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
+import { discoverSearch } from './search/expressions/discoverSearch';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -143,6 +144,7 @@ export class DataPublicPlugin
 
     expressions.registerFunction(opensearchaggs);
     expressions.registerFunction(indexPatternLoad);
+    expressions.registerFunction(discoverSearch);
 
     const searchService = this.searchService.setup(core, {
       usageCollection,
