@@ -131,7 +131,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     let nextQuery = null;
-    if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
+    if (nextProps.query && nextProps.query.query !== prevState.query?.query) {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
