@@ -208,7 +208,7 @@
     "deep-freeze-strict": "^1.1.1",
     "del": "^6.1.1",
     "dns-sync": "npm:@amoo-miki/dns-sync@^0.2.1",
-    "elastic-apm-node": "^3.43.0",
+    "elastic-apm-node": "^4.10.0",
     "elasticsearch": "^16.7.0",
     "execa": "^4.0.2",
     "expiry-js": "0.1.7",
@@ -514,7 +514,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": ">=14.20.1 <19",
+    "node": ">=14.20.1 <21",
     "yarn": "^1.22.10"
   }
 }

@@ -1,0 +1,3 @@
+security:
+- Bump NodeJS to 20.18.1 "Iron" due to pending NodeJS v18 "Hydrogen" EOL (April '25) ([#9171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9171))
+- Bump elastic-apm-node to 4.10.0 to support NodeJS v20 ([#9171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9171))
