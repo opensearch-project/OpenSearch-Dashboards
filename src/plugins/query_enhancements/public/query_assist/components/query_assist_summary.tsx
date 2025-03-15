@@ -17,7 +17,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import { IDataFrame } from 'src/plugins/data/common';
 import { v4 as uuidv4 } from 'uuid';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryAssistState, useQueryAssist } from '../hooks';
@@ -150,7 +150,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         filter((value) => !isEmpty(value) && !isEmpty(value?.fields))
       )
       .subscribe((df) => {
-        if (df && currentQueryStateRef.current.question) {
+        if (df) {
           setResults(convertResult(df));
         }
       });
@@ -274,7 +274,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       return (
         <EuiText size="s" data-test-subj="queryAssist_summary_can_not_generate">
           {i18n.translate('queryEnhancements.queryAssist.summary.canNotGenerate', {
-            defaultMessage: 'Summary unavailable, please check if there were results.',
+            defaultMessage: 'Summary unavailable, please check if there were results or errors.',
           })}
         </EuiText>
       );
