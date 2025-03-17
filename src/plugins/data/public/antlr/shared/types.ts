@@ -153,8 +153,14 @@ export type ProcessVisitedRulesResult<A extends AutocompleteResultBase> = Partia
   shouldSuggestConstraints?: boolean;
 };
 
+export enum LabelOrigin {
+  LabelMatcher,
+  AggregationList,
+  VectorMatchGrouping,
+}
+
 export type ProcessPromQLVisitedRulesResult<A extends AutocompleteResultBase> = Partial<A> & {
-  shouldSuggestLabels: boolean;
+  shouldSuggestLabels: LabelOrigin | undefined;
   shouldSuggestLabelValues: boolean;
 };
 
