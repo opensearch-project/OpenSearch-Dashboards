@@ -301,6 +301,11 @@ cy.osd.add('deleteAllOldWorkspaces', () => {
         const link = $links[i];
         const wsName = link.textContent;
 
+        // If we have multiple pages of ws, then we do not want to select the links for the paginated results
+        if (!wsName.includes('-')) {
+          continue;
+        }
+
         // the first portion of the ws name is the epoch time it was created in seconds,
         // see: getRandomizedWorkspaceName() util
         const epochTimeCreated = Number(wsName.split('-')[0]);
