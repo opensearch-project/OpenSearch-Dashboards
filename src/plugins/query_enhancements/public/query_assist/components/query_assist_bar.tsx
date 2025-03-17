@@ -82,6 +82,10 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       } else {
         services.notifications.toasts.addError(error, { title: 'Failed to generate results' });
       }
+      updateQueryState({
+        question: previousQuestionRef.current,
+        generatedQuery: '', // query generate failed, set it to empty
+      });
     } else if (response) {
       services.data.query.queryString.setQuery({
         query: response.query,
