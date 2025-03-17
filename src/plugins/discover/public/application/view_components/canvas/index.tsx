@@ -108,6 +108,8 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
         core.application.navigateToApp('discover', { path: `#/view/${savedSearch?.id}` });
       }}
       rows={rows}
+      isEnhancementsEnabled={isEnhancementsEnabled}
+      indexPattern={indexPattern}
     />
   );
 
