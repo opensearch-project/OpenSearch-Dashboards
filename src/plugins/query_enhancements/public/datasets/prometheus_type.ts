@@ -70,7 +70,7 @@ const fetchConnections = async (): Promise<DataStructure[]> => {
   // TODO: fetch from saved objects (type data-connection)
   return [
     {
-      id: 'promql1',
+      id: 'my_prometheus',
       title: 'Prometheus connection 1',
       type: DATASET.PROMETHEUS,
       meta: {
