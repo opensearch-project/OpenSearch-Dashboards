@@ -1,2 +1,0 @@
-fix:
-- Correctly load saved search query in query editor ([#9541](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9541))

@@ -1,5 +1,0 @@
-chore:
-- Replace `@elastic/filesaver` in favor of `file-saver`. ([#9484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9484))
-
-breaking:
-- Remove `@elastic/filesaver` ([#9484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9484))

@@ -1,2 +1,0 @@
-test:
-- [Cypress Test] Add and Refactor TESTID-140 sidebar spec and clean up ([#9154](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9154))
