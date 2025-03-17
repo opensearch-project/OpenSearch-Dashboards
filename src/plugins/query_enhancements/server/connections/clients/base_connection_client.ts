@@ -6,10 +6,10 @@
 import { TransportRequestParams } from '@opensearch-project/opensearch/lib/Transport';
 
 export interface ResourcesQuery {
-  dataSourceName: string; // SQL/DQS data source name (my_prometheus)
-  resourceType: string; // prometheus
-  // dataConnectionId: string; // or the API can take the data-connection saved object ID instead
-  query: Record<string, string>; // query params for raw prometheus API
+  dataSourceName: string;
+  resourceType: string;
+  resourceName?: string;
+  query: Record<string, string>;
 }
 
 export interface ClientRequest {
@@ -21,7 +21,7 @@ export interface ClientRequest {
 export interface GetResourcesResponse<R> {
   nextToken?: string;
   status: string;
-  data: R[];
+  data: R;
   type: string;
 }
 
