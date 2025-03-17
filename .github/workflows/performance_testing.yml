@@ -12,6 +12,9 @@ on:
       - '.github/workflows/**' # Ignore GitHub workflow files
       - 'docs/**' # Ignore entire docs directory
 
+permissions:
+  pull-requests: write
+
 jobs:
   bundle-analyzer:
     runs-on: ubuntu-latest
