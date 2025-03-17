@@ -2,13 +2,12 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import moment from 'moment';
+
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionFunctionOpenSearchDashboards,
   IExpressionLoaderParams,
-  SerializedFieldFormat,
 } from '../../../../../../../expressions/public';
 import { OpenSearchSearchHit } from '../../../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../../../../../data/public';
