@@ -18,22 +18,25 @@ import {
 // Query 500 samples by default
 const TARGET_SAMPLES = 500;
 
-interface PrometheusResponse {
-  queryId: string;
-  result: string;
-  sessionId: string;
-}
-
 interface MetricResult {
   metric: Record<string, string>;
   values: Array<[number, number]>;
 }
 
-interface PrometheusResult {
-  data: {
-    result: MetricResult[];
+interface PrometheusResponse {
+  queryId: string;
+  sessionId: string;
+  results: {
+    [connectionId: string]: {
+      data: {
+        resultType: string;
+        result: MetricResult[];
+      };
+    };
   };
 }
+
+const DATA_CONNECTION = 'my_prometheus'; // TODO: update based on data connection saved object response
 
 export const promqlSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -67,7 +70,7 @@ export const promqlSearchStrategyProvider = (
               step: step.toString(),
             },
           },
-          dataconnection: 'my_prometheus',
+          dataconnection: DATA_CONNECTION,
         };
 
         const clientId = dataSource?.id;
@@ -95,13 +98,12 @@ export const promqlSearchStrategyProvider = (
 };
 
 function createDataFrame(rawResponse: PrometheusResponse) {
-  const result = JSON.parse(rawResponse.result) as PrometheusResult;
-  const series = result.data.result;
+  const series = rawResponse.results[DATA_CONNECTION].data.result;
   const initDataFrame: IDataFrame = {
     type: DATA_FRAME_TYPES.DEFAULT,
-    name: 'mock prometheus data',
+    name: DATA_CONNECTION,
     schema: [{ name: 'Time', type: 'time', values: [] }],
-    fields: [{ name: 'Time', type: 'time', values: series[0].values.map((v) => v[0]) }],
+    fields: [{ name: 'Time', type: 'time', values: series[0].values.map((v) => v[0] * 1000) }],
     size: 0,
   };
 
