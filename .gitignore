@@ -28,6 +28,7 @@ target
 /test/*/screenshots/visual_regression_gallery.html
 cypress/videos/*
 cypress/screenshots/*
+cypress/downloads/*
 /html_docs
 .eslintcache
 /data
@@ -75,6 +76,6 @@ snapshots.js
 # Ignore the generated antlr files
 /src/plugins/data/public/antlr/**/grammar/.antlr/
 
-#Ignore the lighthousereport generatated
+# Ignore the lighthousereport generatated
 .lighthouserc.js
 .lhci_output.json
