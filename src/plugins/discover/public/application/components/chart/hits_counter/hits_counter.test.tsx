@@ -74,9 +74,7 @@ describe('hits counter', () => {
   });
 
   it('HitsCounter not renders a button when the showResetButton property is false', () => {
-    component = mountWithIntl(
-      <HitsCounter hits={2} showResetButton={false} onResetQuery={jest.fn()} />
-    );
+    component = mountWithIntl(<HitsCounter {...props} showResetButton={false} />);
     expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
   });
 
@@ -106,8 +104,8 @@ describe('hits counter', () => {
     expect(rowsEl.text()).toBe('1,899');
   });
 
-  it('expect to render 0 for rows if rows is not provided', () => {
-    component = mountWithIntl(<HitsCounter {...props} rows={undefined} />);
+  it('expect to render 0 for rows if rows is empty', () => {
+    component = mountWithIntl(<HitsCounter {...props} rows={[]} />);
     const rowsEl = findTestSubject(component, 'discoverQueryRowsCount');
     expect(rowsEl.text()).toBe('0');
   });
