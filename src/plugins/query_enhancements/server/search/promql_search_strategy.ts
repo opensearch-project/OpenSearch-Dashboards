@@ -5,6 +5,7 @@
 
 import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
+import dateMath from '@elastic/datemath';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
@@ -13,6 +14,9 @@ import {
   IOpenSearchDashboardsSearchRequest,
   Query,
 } from '../../../data/common';
+
+// Query 500 samples by default
+const TARGET_SAMPLES = 500;
 
 interface PrometheusResponse {
   queryId: string;
@@ -41,6 +45,12 @@ export const promqlSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const { body: requestBody } = request;
+        const timeRange = {
+          start: dateMath.parse(requestBody.timeRange.from)!.unix(),
+          end: dateMath.parse(requestBody.timeRange.to, { roundUp: true })!.unix(),
+        };
+        const duration = timeRange.end - timeRange.start;
+        const step = Math.floor(duration / TARGET_SAMPLES);
         const { dataset, query, language }: Query = requestBody.query;
         const dataSource = dataset?.dataSource;
         const params = {
@@ -52,9 +62,9 @@ export const promqlSearchStrategyProvider = (
             sessionId: '1234', // TODO: use appropriate session id
             options: {
               queryType: 'range',
-              start: '1741124895',
-              end: '1741128495',
-              step: '14', // TODO: determine appropriate steps
+              start: timeRange.start.toString(),
+              end: timeRange.end.toString(),
+              step: step.toString(),
             },
           },
           dataconnection: 'my_prometheus',

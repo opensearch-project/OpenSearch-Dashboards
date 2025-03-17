@@ -4,11 +4,9 @@
  */
 
 import { trimEnd } from 'lodash';
-import { Observable } from 'rxjs';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
-  IOpenSearchDashboardsSearchResponse,
   ISearchOptions,
   SearchInterceptor,
   SearchInterceptorDeps,
@@ -22,38 +20,21 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
 
-    deps.startServices.then(([coreStart, depsStart]) => {
+    deps.startServices.then(([_coreStart, depsStart]) => {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
     });
   }
 
-  protected runSearch(
-    request: IOpenSearchDashboardsSearchRequest,
-    signal?: AbortSignal
-  ): Observable<IOpenSearchDashboardsSearchResponse> {
+  public search(_request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
     const context: EnhancedFetchContext = {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${SEARCH_STRATEGY.PROMQL}`),
-      signal,
+      signal: options.abortSignal,
       body: {
-        pollQueryResultsParams: request.params?.pollQueryResultsParams,
-        timeRange: request.params?.body?.timeRange,
+        timeRange: this.queryService.timefilter.timefilter.getTime(),
       },
     };
 
     return fetch(context, this.queryService.queryString.getQuery());
-  }
-
-  public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    return this.runSearch(
-      {
-        ...request.params,
-        body: {
-          ...request.params.body,
-          timeRange: this.queryService.timefilter.timefilter.getTime(),
-        },
-      },
-      options.abortSignal
-    );
   }
 }
