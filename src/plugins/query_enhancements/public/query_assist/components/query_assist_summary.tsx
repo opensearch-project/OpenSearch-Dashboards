@@ -173,7 +173,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         generatedQuery: queryContext.query,
       };
 
-      const SUCCESS_METRIC = 'fetch_summary_success';
+      const SUCCESS_METRIC = 'generated';
       try {
         const actualSampleSize = Math.min(sampleSize, queryContext?.queryResults?.length);
         const dataString = JSON.stringify(queryContext?.queryResults?.slice(0, actualSampleSize));
