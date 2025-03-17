@@ -76,10 +76,7 @@ export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
   },
   fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-    console.log('visConfigParams', visConfigParams);
-    console.log('context', context);
     const convertedData = vislibSeriesResponseHandler(context, visConfigParams.dimensions);
-    console.log('convertedData', convertedData);
 
     return {
       type: 'render',

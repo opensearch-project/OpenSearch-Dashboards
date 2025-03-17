@@ -22,7 +22,7 @@ import { DiscoverChart } from '../../components/chart/chart';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { getNewDiscoverSetting, setNewDiscoverSetting } from '../../components/utils/local_storage';
 
-export const DiscoverChartContainer = ({ hits, bucketInterval, chartData, rows }: SearchData) => {
+export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { uiSettings, data, core, storage } = services;
   const { indexPattern, savedSearch } = useDiscoverContext();
@@ -96,7 +96,6 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData, rows }
       isTimeBased={isTimeBased}
       isEnhancementsEnabled={isEnhancementsEnabled}
       discoverOptions={discoverOptions}
-      rows={rows}
     />
   );
 };

@@ -126,6 +126,5 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
 
   // @ts-expect-error
   delete chart.aspects;
-  console.log('chart', chart);
   return chart;
 };

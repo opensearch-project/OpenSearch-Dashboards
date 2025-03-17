@@ -102,7 +102,6 @@ export const createLineVegaSpecFn = (
     // Apply other formatting changes to the spec (show vis data, hide axes, etc.) based on the
     // vis augmenter config. Mostly used for customizing the views on the view events flyout.
     spec = augmentEventChartSpec(visAugmenterConfig, spec);
-    console.log('vegaSpec', spec);
     return JSON.stringify(spec);
   },
 });

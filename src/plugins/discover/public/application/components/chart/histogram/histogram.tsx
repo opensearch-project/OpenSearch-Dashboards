@@ -230,7 +230,6 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     }
 
     const data = chartData.values;
-    console.log('histogram chart data', data);
 
     /**
      * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].

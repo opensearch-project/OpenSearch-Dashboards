@@ -16,7 +16,7 @@ import {
 } from '../../../data/common';
 
 // Query 500 samples by default
-const TARGET_SAMPLES = 500;
+const TARGET_SAMPLES = 9;
 
 interface MetricResult {
   metric: Record<string, string>;

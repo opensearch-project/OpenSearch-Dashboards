@@ -94,9 +94,6 @@ export const createVegaFn = (
       visParams: { spec: args.spec },
     });
 
-    console.log('response in vega', response);
-    console.log('args in vega', args.spec);
-
     return {
       type: 'render',
       as: 'visualization',
