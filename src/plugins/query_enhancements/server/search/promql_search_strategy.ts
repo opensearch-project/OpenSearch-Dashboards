@@ -28,10 +28,8 @@ interface PrometheusResponse {
   sessionId: string;
   results: {
     [connectionId: string]: {
-      data: {
-        resultType: string;
-        result: MetricResult[];
-      };
+      resultType: string;
+      result: MetricResult[];
     };
   };
 }
@@ -98,28 +96,32 @@ export const promqlSearchStrategyProvider = (
 };
 
 function createDataFrame(rawResponse: PrometheusResponse) {
-  const series = rawResponse.results[DATA_CONNECTION].data.result;
-  const initDataFrame: IDataFrame = {
-    type: DATA_FRAME_TYPES.DEFAULT,
-    name: DATA_CONNECTION,
-    schema: [{ name: 'Time', type: 'time', values: [] }],
-    fields: [{ name: 'Time', type: 'time', values: series[0].values.map((v) => v[0] * 1000) }],
-    size: 0,
-  };
+  try {
+    const series = rawResponse.results[DATA_CONNECTION].result;
+    const initDataFrame: IDataFrame = {
+      type: DATA_FRAME_TYPES.DEFAULT,
+      name: DATA_CONNECTION,
+      schema: [{ name: 'Time', type: 'time', values: [] }],
+      fields: [{ name: 'Time', type: 'time', values: series[0].values.map((v) => v[0] * 1000) }],
+      size: 0,
+    };
 
-  const df = series.reduce((acc, metricResult, i) => {
-    const schema = getFieldSchema(metricResult);
-    acc.schema?.push(schema);
-    acc.fields?.push({
-      ...schema,
-      values: metricResult.values.map((v) => Number(v[1])),
-    });
-    return acc;
-  }, initDataFrame);
+    const df = series.reduce((acc, metricResult, i) => {
+      const schema = getFieldSchema(metricResult);
+      acc.schema?.push(schema);
+      acc.fields?.push({
+        ...schema,
+        values: metricResult.values.map((v) => Number(v[1])),
+      });
+      return acc;
+    }, initDataFrame);
 
-  df.size = df.fields[0].values.length;
+    df.size = df.fields[0].values.length;
 
-  return initDataFrame;
+    return initDataFrame;
+  } catch (err) {
+    return {};
+  }
 }
 
 function getFieldSchema(metricResult: MetricResult) {
