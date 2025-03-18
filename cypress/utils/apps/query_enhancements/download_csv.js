@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasetTypes, INDEX_WITH_TIME_1, INDEX_WITHOUT_TIME_1, QueryLanguages } from './constants';
+import {
+  DatasetTypes,
+  DATASOURCE_NAME,
+  INDEX_WITH_TIME_1,
+  INDEX_WITHOUT_TIME_1,
+  QueryLanguages,
+} from './constants';
 import path from 'path';
 import moment from 'moment';
+import { setDatePickerDatesIfRelevant } from './shared';
 
 /**
  * The configurations needed for saved search/queries tests
@@ -216,4 +223,49 @@ export const downloadCsvAndVerify = (downloadOption, readCsvCallback) => {
     )
     // eslint-disable-next-line no-loop-func
   ).then(readCsvCallback);
+};
+
+/**
+ * Prepares the discover page for CSV download
+ * @param {DownloadCsvTestConfig} config - config data related to the test
+ * @param {string} workspaceName - workspace name
+ */
+export const prepareDiscoverPageForDownload = (config, workspaceName) => {
+  cy.osd.navigateToWorkSpaceSpecificPage({
+    workspaceName,
+    page: 'discover',
+    isEnhancement: true,
+  });
+
+  if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
+    cy.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
+  } else {
+    cy.setIndexAsDataset(
+      config.dataset,
+      DATASOURCE_NAME,
+      'PPL',
+      config.hasTime ? 'timestamp' : "I don't want to use the time filter",
+      'submit'
+    );
+  }
+
+  cy.setQueryLanguage(config.language.name);
+  if (config.hasTime) {
+    setDatePickerDatesIfRelevant(config.language.name);
+  }
+
+  cy.setQueryEditor(getQueryString(config.dataset, config.language.name, config.hasTime), {
+    parseSpecialCharSequences: false,
+  });
+
+  // waiting as there is no good way to verify that the query has loaded
+  cy.wait(2000);
+};
+
+/**
+ * Toggles fields for CSV Download. Used for both selecting and cleanup
+ */
+export const toggleFieldsForCsvDownload = () => {
+  cy.getElementByTestId('fieldToggle-bytes_transferred').click();
+  cy.getElementByTestId('fieldToggle-personal.name').click();
 };
