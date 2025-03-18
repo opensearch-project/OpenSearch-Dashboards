@@ -378,7 +378,7 @@ describe('SavedObjectsClient', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-03-18T02:12:38.478Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "query": Object {
                 "overwrite": false,
@@ -396,7 +396,7 @@ describe('SavedObjectsClient', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-03-18T02:12:38.478Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "query": Object {
                 "overwrite": true,
@@ -416,7 +416,7 @@ describe('SavedObjectsClient', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-03-18T02:12:38.478Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "query": Object {
                 "overwrite": undefined,
@@ -677,7 +677,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-03-18T02:12:38.513Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "query": Object {
                 "overwrite": false,
@@ -698,7 +698,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-03-18T02:12:38.513Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "query": Object {
                 "overwrite": true,
@@ -721,7 +721,7 @@ describe('SavedObjectsClientWithWorkspaceSet', () => {
           Array [
             "/api/saved_objects/_bulk_create",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"2025-03-18T02:12:38.513Z\\"}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
               "method": "POST",
               "query": Object {
                 "overwrite": undefined,
