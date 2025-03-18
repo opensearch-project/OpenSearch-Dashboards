@@ -208,7 +208,7 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.click('docTableExpandToggleColumn');
 
         // Add a field filter
-        await testSubjects.click('tableDocViewRow-@message > addInclusiveFilterButton');
+        await testSubjects.click('tableDocViewRow-@message addInclusiveFilterButton');
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
