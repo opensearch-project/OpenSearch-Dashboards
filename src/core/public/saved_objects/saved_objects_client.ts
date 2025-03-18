@@ -554,7 +554,12 @@ export class SavedObjectsClient {
     path: string,
     { method, query, body, prependOptions }: HttpFetchOptions
   ) {
-    return this.http.fetch(path, { method, query, body, prependOptions });
+    return this.http.fetch(path, {
+      method,
+      query,
+      body,
+      ...(prependOptions && { prependOptions }),
+    });
   }
 }
 
