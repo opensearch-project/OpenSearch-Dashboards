@@ -9,7 +9,6 @@ import {
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import {
-  DatasetTypes,
   DATASOURCE_NAME,
   INDEX_WITH_TIME_1,
   INDEX_WITHOUT_TIME_1,
@@ -23,8 +22,9 @@ import {
   getHeadersForDownloadWithFields,
   getHeadersForSourceDownload,
   getMaxCount,
-  getQueryString,
   getVisibleCountForLanguage,
+  prepareDiscoverPageForDownload,
+  toggleFieldsForCsvDownload,
 } from '../../../../../../utils/apps/query_enhancements/download_csv';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
@@ -54,6 +54,11 @@ const runDownloadCsvTests = () => {
       });
     });
 
+    afterEach(() => {
+      cy.clearAllSessionStorage();
+      cy.clearAllLocalStorage();
+    });
+
     after(() => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
         INDEX_WITH_TIME_1,
@@ -62,36 +67,8 @@ const runDownloadCsvTests = () => {
     });
 
     generateDownloadCsvTestConfigurations().forEach((config) => {
-      it(`should be able to download all CSV options for ${config.saveName}`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'discover',
-          isEnhancement: true,
-        });
-
-        if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
-        } else {
-          cy.setIndexAsDataset(
-            config.dataset,
-            DATASOURCE_NAME,
-            'PPL',
-            config.hasTime ? 'timestamp' : "I don't want to use the time filter",
-            'submit'
-          );
-        }
-
-        cy.setQueryLanguage(config.language.name);
-        if (config.hasTime) {
-          setDatePickerDatesAndSearchIfRelevant(config.language.name);
-        }
-
-        cy.setQueryEditor(getQueryString(config.dataset, config.language.name, config.hasTime), {
-          parseSpecialCharSequences: false,
-        });
-
-        // waiting as there is no good way to verify that the query has loaded
-        cy.wait(2000);
+      it(`should be able to download Visible option with default rows for ${config.saveName}`, () => {
+        prepareDiscoverPageForDownload(config, workspaceName);
 
         // eslint-disable-next-line no-loop-func
         downloadCsvAndVerify('Visible', (csvString) => {
@@ -105,25 +82,13 @@ const runDownloadCsvTests = () => {
             cy.wrap(data[1][0]).should('equal', getFirstRowTimeForSourceDownload(config.language));
           }
         });
+      });
 
-        if ([QueryLanguages.DQL.name, QueryLanguages.Lucene.name].includes(config.language.name)) {
-          // eslint-disable-next-line no-loop-func
-          downloadCsvAndVerify('Max', (csvString) => {
-            const { data } = Papa.parse(csvString);
-            cy.wrap(data).should('have.length', getMaxCount(config.hasTime) + 1);
-            cy.wrap(data[0]).should('deep.equal', getHeadersForSourceDownload(config.hasTime));
-            if (config.hasTime) {
-              cy.wrap(data[1][0]).should(
-                'equal',
-                getFirstRowTimeForSourceDownload(config.language)
-              );
-            }
-          });
-        }
+      it(`should be able to download Visible option with selected rows for ${config.saveName}`, () => {
+        prepareDiscoverPageForDownload(config, workspaceName);
 
-        // Select some fields
-        cy.getElementByTestId('fieldToggle-bytes_transferred').click();
-        cy.getElementByTestId('fieldToggle-personal.name').click();
+        // select some fields
+        toggleFieldsForCsvDownload();
 
         // eslint-disable-next-line no-loop-func
         downloadCsvAndVerify('Visible', (csvString) => {
@@ -139,8 +104,33 @@ const runDownloadCsvTests = () => {
           );
         });
 
-        if ([QueryLanguages.DQL.name, QueryLanguages.Lucene.name].includes(config.language.name)) {
-          // eslint-disable-next-line no-loop-func
+        // deselect the selected fields
+        toggleFieldsForCsvDownload();
+      });
+
+      if ([QueryLanguages.DQL.name, QueryLanguages.Lucene.name].includes(config.language.name)) {
+        it(`should be able to download Max option with default rows for ${config.saveName}`, () => {
+          prepareDiscoverPageForDownload(config, workspaceName);
+
+          downloadCsvAndVerify('Max', (csvString) => {
+            const { data } = Papa.parse(csvString);
+            cy.wrap(data).should('have.length', getMaxCount(config.hasTime) + 1);
+            cy.wrap(data[0]).should('deep.equal', getHeadersForSourceDownload(config.hasTime));
+            if (config.hasTime) {
+              cy.wrap(data[1][0]).should(
+                'equal',
+                getFirstRowTimeForSourceDownload(config.language)
+              );
+            }
+          });
+        });
+
+        it(`should be able to download Max option with selected rows for ${config.saveName}`, () => {
+          prepareDiscoverPageForDownload(config, workspaceName);
+
+          // select some fields
+          toggleFieldsForCsvDownload();
+
           downloadCsvAndVerify('Max', (csvString) => {
             const { data } = Papa.parse(csvString);
             cy.wrap(data).should('have.length', getMaxCount(config.hasTime) + 1);
@@ -152,12 +142,11 @@ const runDownloadCsvTests = () => {
               );
             }
           });
-        }
 
-        // deselect the selected fields
-        cy.getElementByTestId('fieldToggle-bytes_transferred').click();
-        cy.getElementByTestId('fieldToggle-personal.name').click();
-      });
+          // deselect the selected fields
+          toggleFieldsForCsvDownload();
+        });
+      }
     });
 
     it('Should be able to change the number of rows setting and have it download correct amount', () => {
