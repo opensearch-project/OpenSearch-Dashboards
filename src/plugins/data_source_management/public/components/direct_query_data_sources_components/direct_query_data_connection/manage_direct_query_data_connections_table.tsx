@@ -146,7 +146,8 @@ export const ManageDirectQueryDataConnectionsTable = ({
                 http,
                 notifications,
                 true,
-                getHideLocalCluster().enabled
+                getHideLocalCluster().enabled,
+                false
               )
             : response.map((dataConnection: DirectQueryDatasourceDetails) => ({
                 id: dataConnection.name,

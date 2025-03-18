@@ -70,6 +70,7 @@ export const EDIT = '/edit';
 export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const SECURITY_ROLES = '/api/v1/configuration/roles';
 export const EVENT_ANALYTICS = '/event_analytics';
+export const REMOTE_CLUSTER = '/remote_cluster';
 export const SAVED_OBJECTS = '/saved_objects';
 export const SAVED_QUERY = '/query';
 export const SAVED_VISUALIZATION = '/vis';
