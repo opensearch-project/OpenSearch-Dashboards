@@ -38,6 +38,7 @@ import {
 import { DataSourceError } from '../types';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../constants';
 import { DataConnectionSavedObjectAttributes } from '../../../data_source/common/data_connections';
+import { DataSourceEngineType } from '../../../data_source/common/data_sources';
 
 export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
   const endpoint = `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceId}`;
@@ -62,6 +63,27 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
   return directQueryConnections;
 };
 
+export const getRemoteClusterConnections = async (dataSourceId: string, http: HttpSetup) => {
+  const response = await http.get(`/remote_cluster/list`, {
+    query: {
+      dataSourceId,
+    },
+  });
+
+  const remoteClusterConnections: DataSourceTableItem[] = response.map(
+    (remoteClusterConnection: { connectionAlias: string }) => ({
+      id: `${dataSourceId}-${remoteClusterConnection.connectionAlias}`,
+      title: remoteClusterConnection.connectionAlias,
+      type: DataSourceEngineType.OpenSearchCrossCluster,
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      description: '',
+      parentId: dataSourceId,
+    })
+  );
+
+  return remoteClusterConnections;
+};
+
 export const getLocalClusterConnections = async (http: HttpSetup) => {
   const res = await http.get(`${DATACONNECTIONS_BASE}/dataSourceMDSId=`);
   const localClusterConnections: DataSourceTableItem[] = res.map(
@@ -84,9 +106,10 @@ export const getLocalClusterConnections = async (http: HttpSetup) => {
 export const mergeDataSourcesWithConnections = (
   dataSources: DataSourceTableItem[],
   directQueryConnections: DataSourceTableItem[],
+  remoteClusterConnections: DataSourceTableItem[],
   localClusterConnections?: DataSourceTableItem[]
 ): DataSourceTableItem[] => {
-  const dataSourcesList: DataSourceTableItem[] = [];
+  let dataSourcesList: DataSourceTableItem[] = [];
   dataSources.forEach((ds) => {
     const relatedConnections = directQueryConnections.filter(
       (directQueryConnection) => directQueryConnection.parentId === ds.id
@@ -112,6 +135,20 @@ export const mergeDataSourcesWithConnections = (
     });
   }
 
+  // Add the remoteCluster Connections to the parent connections as relatedConnections
+  dataSourcesList = dataSourcesList.map((ds) => {
+    const relatedRemoteConnections = remoteClusterConnections.filter(
+      (remoteConnection) => remoteConnection.parentId === ds.id
+    );
+
+    return {
+      ...ds,
+      relatedConnections: ds.relatedConnections
+        ? ds.relatedConnections.concat(relatedRemoteConnections)
+        : relatedRemoteConnections,
+    };
+  });
+
   return dataSourcesList;
 };
 
@@ -120,7 +157,8 @@ export const fetchDataSourceConnections = async (
   http: HttpSetup | undefined,
   notifications: NotificationsStart | undefined,
   directQueryTable: boolean,
-  hideLocalCluster: boolean = false
+  hideLocalCluster: boolean,
+  showRemoteOpensearchConnection: boolean = false
 ) => {
   try {
     const directQueryConnectionsPromises = dataSources.map((ds) =>
@@ -130,9 +168,22 @@ export const fetchDataSourceConnections = async (
     const directQueryConnections = directQueryConnectionsResult.flat();
     const localClusterConnections =
       directQueryTable && !hideLocalCluster ? await getLocalClusterConnections(http!) : undefined;
+
+    const remoteClusterConnectionsPromises = showRemoteOpensearchConnection
+      ? dataSources.map((ds) => {
+          if (ds.type === 'Opensearch' || ds.type === 'Elasticsearch') {
+            return getRemoteClusterConnections(ds.id, http!).catch(() => []);
+          }
+          return [];
+        })
+      : [];
+    const remoteClusterConnectionsResult = await Promise.all(remoteClusterConnectionsPromises);
+    const remoteClusterConnections = remoteClusterConnectionsResult.flat();
+
     return mergeDataSourcesWithConnections(
       dataSources,
       directQueryConnections,
+      remoteClusterConnections,
       localClusterConnections
     );
   } catch (error) {
