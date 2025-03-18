@@ -28,10 +28,8 @@ interface PrometheusResponse {
   sessionId: string;
   results: {
     [connectionId: string]: {
-      data: {
-        resultType: string;
-        result: MetricResult[];
-      };
+      resultType: string;
+      result: MetricResult[];
     };
   };
 }
@@ -97,7 +95,7 @@ export const promqlSearchStrategyProvider = (
 
 function createDataFrame(rawResponse: PrometheusResponse, datasetId: string) {
   try {
-    const series = rawResponse.results[datasetId].data.result;
+    const series = rawResponse.results[datasetId].result;
     const initDataFrame: IDataFrame = {
       type: DATA_FRAME_TYPES.DEFAULT,
       name: datasetId,
