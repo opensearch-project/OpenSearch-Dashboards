@@ -16,7 +16,7 @@ import {
 } from '../../../data/common';
 
 // Query 500 samples by default
-const TARGET_SAMPLES = 500;
+const AUTO_STEP_TARGET_SAMPLES = 500;
 
 interface MetricResult {
   metric: Record<string, string>;
@@ -36,8 +36,6 @@ interface PrometheusResponse {
   };
 }
 
-const DATA_CONNECTION = 'my_prometheus'; // TODO: update based on data connection saved object response
-
 export const promqlSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
@@ -53,14 +51,17 @@ export const promqlSearchStrategyProvider = (
           end: dateMath.parse(requestBody.timeRange.to, { roundUp: true })!.unix(),
         };
         const duration = timeRange.end - timeRange.start;
-        const step = Math.floor(duration / TARGET_SAMPLES);
+        // round to nearest ms step >= 1ms
+        const step =
+          requestBody.step ??
+          Math.max(Math.ceil((duration / AUTO_STEP_TARGET_SAMPLES) * 1000) / 1000, 0.001);
         const { dataset, query, language }: Query = requestBody.query;
-        const dataSource = dataset?.dataSource;
+        const datasetId = dataset?.id ?? '';
         const params = {
           body: {
             query,
             language,
-            maxResults: 1000,
+            maxResults: AUTO_STEP_TARGET_SAMPLES,
             timeout: 30,
             sessionId: '1234', // TODO: use appropriate session id
             options: {
@@ -70,19 +71,16 @@ export const promqlSearchStrategyProvider = (
               step: step.toString(),
             },
           },
-          dataconnection: DATA_CONNECTION,
+          dataconnection: datasetId,
         };
 
-        const clientId = dataSource?.id;
-        const queryClient = clientId
-          ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
-          : client.asScoped(request).callAsCurrentUser;
+        const queryClient = client.asScoped(request).callAsCurrentUser;
         const queryRes = (await queryClient(
           'enhancements.promqlQuery',
           params
         )) as PrometheusResponse;
 
-        const dataFrame = createDataFrame(queryRes);
+        const dataFrame = createDataFrame(queryRes, datasetId);
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,
@@ -97,29 +95,33 @@ export const promqlSearchStrategyProvider = (
   };
 };
 
-function createDataFrame(rawResponse: PrometheusResponse) {
-  const series = rawResponse.results[DATA_CONNECTION].data.result;
-  const initDataFrame: IDataFrame = {
-    type: DATA_FRAME_TYPES.DEFAULT,
-    name: DATA_CONNECTION,
-    schema: [{ name: 'Time', type: 'time', values: [] }],
-    fields: [{ name: 'Time', type: 'time', values: series[0].values.map((v) => v[0] * 1000) }],
-    size: 0,
-  };
+function createDataFrame(rawResponse: PrometheusResponse, datasetId: string) {
+  try {
+    const series = rawResponse.results[datasetId].data.result;
+    const initDataFrame: IDataFrame = {
+      type: DATA_FRAME_TYPES.DEFAULT,
+      name: datasetId,
+      schema: [{ name: 'Time', type: 'time', values: [] }],
+      fields: [{ name: 'Time', type: 'time', values: series[0].values.map((v) => v[0] * 1000) }],
+      size: 0,
+    };
 
-  const df = series.reduce((acc, metricResult, i) => {
-    const schema = getFieldSchema(metricResult);
-    acc.schema?.push(schema);
-    acc.fields?.push({
-      ...schema,
-      values: metricResult.values.map((v) => Number(v[1])),
-    });
-    return acc;
-  }, initDataFrame);
+    const df = series.reduce((acc, metricResult, i) => {
+      const schema = getFieldSchema(metricResult);
+      acc.schema?.push(schema);
+      acc.fields?.push({
+        ...schema,
+        values: metricResult.values.map((v) => Number(v[1])),
+      });
+      return acc;
+    }, initDataFrame);
 
-  df.size = df.fields[0].values.length;
+    df.size = df.fields[0].values.length;
 
-  return initDataFrame;
+    return initDataFrame;
+  } catch (err) {
+    return {};
+  }
 }
 
 function getFieldSchema(metricResult: MetricResult) {
