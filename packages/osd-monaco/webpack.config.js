@@ -46,13 +46,21 @@ const createLangWorkerConfig = (lang) => ({
   module: {
     rules: [
       {
-        test: /\.(js|ts)$/,
+        test: /\.worker\.ts$/, // Worker files
+        use: { loader: 'worker-loader' },
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.(js|ts|tsx)$/, // Add tsx files if you have them
+        // include: [
+        //   path.resolve(__dirname, 'node_modules/monaco-editor/'),
+        //   path.resolve(__dirname, 'src/'), // Ensure src directory is included if necessary
+        // ],
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+            presets: ['@babel/preset-env', '@babel/preset-typescript'],
           },
         },
       },
