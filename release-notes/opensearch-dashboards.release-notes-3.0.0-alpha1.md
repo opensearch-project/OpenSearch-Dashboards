@@ -60,6 +60,7 @@
  - Clear discover summary if t2ppl failed ([#9552](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9552))
  - Query-assist removed the placeholder of last ask question ([#9552](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9552))
  - Use markdown in discover summary ([#9553](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9553))
+ - Retry on file/folder deletion with Windows longpath support ([#9561](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9561))
 
 ### 🚞 Infrastructure
 
