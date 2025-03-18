@@ -1,2 +1,0 @@
-feat:
-- Update formatHit.formatField() to accept `type` as an argument ([#9469](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9469))

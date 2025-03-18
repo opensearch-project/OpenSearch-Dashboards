@@ -1,2 +1,0 @@
-chore:
-- Replace `formatNumWithCommas` with `toLocaleString` ([#9488](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9488))
