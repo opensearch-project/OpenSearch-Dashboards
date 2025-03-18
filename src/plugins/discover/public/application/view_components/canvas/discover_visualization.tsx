@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './discover_visualization.scss';
+
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
@@ -61,7 +63,7 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
   }, [services.data.query.state$]);
 
   return (
-    <EuiPanel className="vbCanvas" data-test-subj="visualizationLoader">
+    <EuiPanel className="discoverVisualization" data-test-subj="visualizationLoader">
       {expression ? (
         <ReactExpressionRenderer expression={expression} searchContext={searchContext} />
       ) : (

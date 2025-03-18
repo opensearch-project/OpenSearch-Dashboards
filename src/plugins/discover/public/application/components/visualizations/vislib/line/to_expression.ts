@@ -61,7 +61,11 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
   const xAxisParam = {
     field: 'timestamp_ms',
     type: 'temporal',
-    axis: { format: '%b %-d, %Y @ %H:%M:%S.%L', title: columns[0].name },
+    axis: { format: '%b %-d, %Y', title: columns[0].name },
+    scale: {
+      padding: 10,
+      nice: true, // Round the domain to nice values
+    },
   };
 
   const layer = [];
@@ -103,6 +107,7 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
       type: 'line',
       point: true,
       strokeWidth: 2,
+      interpolate: 'monotone',
     };
 
     const encodingParam = {
@@ -133,8 +138,9 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
 
   const spec = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    autosize: { type: 'fit', contains: 'padding' },
     data: { values: data },
-    transform: [{ calculate: `datum['${columns[0].field}'] * 1000`, as: 'timestamp_ms' }],
+    transform: [{ calculate: `datum['${columns[0].field}']`, as: 'timestamp_ms' }],
     layer,
     resolve: {
       scale: {
