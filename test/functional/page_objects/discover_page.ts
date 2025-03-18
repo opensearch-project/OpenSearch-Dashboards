@@ -106,7 +106,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
-      return await dataGridTable.getHeaderFields();
+      return await docTable.getHeaderFields();
     }
 
     public async openLoadSavedSearchPanel() {
@@ -203,12 +203,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getHitCount() {
       await header.waitUntilLoadingHasFinished();
       return await testSubjects.getVisibleText('discoverQueryHits');
-    }
-
-    public async getDocHeader() {
-      const table = this.dataGrid;
-      const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
-      return await docHeader.getVisibleText();
     }
 
     public async getDocTableRows() {
