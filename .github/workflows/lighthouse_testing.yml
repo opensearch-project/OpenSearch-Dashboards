@@ -8,6 +8,7 @@ permissions:
   contents: read
   pull-requests: write
   statuses: write
+  issues: write
 
 env:
   NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
