@@ -14,7 +14,10 @@ interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   value: string;
   onChange: (value: string) => void;
   editorDidMount: (editor: any) => void;
-  provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+  languageProviders: {
+    provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+    triggerCharacters: string[];
+  };
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   footerItems?: any;
   queryStatus?: QueryStatus;
@@ -62,7 +65,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   value,
   onChange,
   editorDidMount,
-  provideCompletionItems,
+  languageProviders,
   prepend,
   footerItems,
   queryStatus,
@@ -138,8 +141,8 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
             wordBasedSuggestions: false,
           }}
           suggestionProvider={{
-            provideCompletionItems,
-            triggerCharacters: [' '],
+            provideCompletionItems: languageProviders.provideCompletionItems,
+            triggerCharacters: languageProviders.triggerCharacters,
           }}
           languageConfiguration={{
             autoClosingPairs: [
@@ -164,11 +167,11 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
           <div className="queryEditor__footer" data-test-subj="queryEditorFooter">
             {footerItems && (
               <Fragment>
-                {footerItems.start?.map((item) => (
+                {footerItems.start?.map((item: any) => (
                   <div className="queryEditor__footerItem">{item}</div>
                 ))}
                 <div className="queryEditor__footerSpacer" />
-                {footerItems.end?.map((item) => (
+                {footerItems.end?.map((item: any) => (
                   <div className="queryEditor__footerItem">{item}</div>
                 ))}
               </Fragment>

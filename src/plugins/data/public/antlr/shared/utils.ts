@@ -207,9 +207,11 @@ const singleParseQuery = <
   const { tokenStream } = parser;
   const errorListener = new GeneralErrorListener(tokenDictionary.SPACE);
 
+  // console.clear();
+
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
-  getParseTree(parser);
+  const tree = getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);
   core.ignoredTokens = ignoredTokens;
@@ -223,6 +225,7 @@ const singleParseQuery = <
 
   const suggestKeywords: KeywordSuggestion[] = [];
   const { tokens, rules } = core.collectCandidates(cursorTokenIndex, context);
+  // console.log('tokens and rules', tokens, rules);
   tokens.forEach((_, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
@@ -237,12 +240,42 @@ const singleParseQuery = <
     });
   });
 
+  // console.log('Formatted Token Stream:');
+  // let index = 0;
+  // try {
+  //   while (true) {
+  //     const token = tokenStream.get(index);
+  //     if (!token) break;
+
+  //     const isCurrentToken = index === cursorTokenIndex;
+  //     const tokenInfo = `Token ${index}: ${token.text} (Type: ${token.type})`;
+
+  //     if (isCurrentToken) {
+  //       console.log(`%c${tokenInfo}`, 'background-color: red; font-weight: bold;');
+  //     } else {
+  //       console.log(tokenInfo);
+  //     }
+
+  //     index++;
+  //   }
+  // } catch (error) {
+  //   console.error('Error while iterating through token stream:', error);
+  // }
+
   const result: AutocompleteResultBase = {
     errors: errorListener.errors,
     suggestKeywords,
   };
 
-  return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
+  return enrichAutocompleteResult(
+    result,
+    rules,
+    tokenStream,
+    cursorTokenIndex,
+    cursor,
+    query,
+    tree
+  );
 };
 
 export const parseQuery = <
