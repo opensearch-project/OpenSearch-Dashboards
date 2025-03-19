@@ -46,7 +46,7 @@ export class WorkspaceIdConsumerWrapper {
     const workspaceIdsInUserOptions = options?.workspaces;
     let finalWorkspaces: string[] = [];
     if (options?.hasOwnProperty('workspaces')) {
-      // In order to get all data sources in workspace, use * to skip appending workspace id automatically
+      // In order to get all data sources in workspace
       finalWorkspaces = workspaceIdsInUserOptions || [];
     } else if (workspaceIdParsedFromRequest) {
       finalWorkspaces = [workspaceIdParsedFromRequest];
