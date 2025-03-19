@@ -139,11 +139,6 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
     data: { values: data },
     transform: [{ calculate: `datum['${columns[0].field}']`, as: 'timestamp_ms' }],
     layer,
-    resolve: {
-      scale: {
-        y: 'independent', // This is critical for multiple y-axes
-      },
-    },
     config: {
       axis: {
         labelFont: 'sans-serif',
