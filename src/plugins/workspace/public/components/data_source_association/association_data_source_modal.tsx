@@ -99,7 +99,7 @@ const convertConnectionToOption = ({
   key: connection.id,
   description: connection.description,
   append:
-    connection.relatedConnections && connection.relatedConnections.length > 0 ? (
+    connection?.relatedConnections && connection.relatedConnections.length > 0 ? (
       <EuiBadge>
         {i18n.translate('workspace.form.selectDataSource.optionBadge', {
           defaultMessage: '+ {relatedConnections} related',
@@ -119,7 +119,7 @@ const convertConnectionToOption = ({
     !connection?.parentId
       ? ('on' as const)
       : undefined,
-  prepend: connection.parentId ? (
+  prepend: connection?.parentId ? (
     <div style={{ marginLeft: '20px' }}>
       <ConnectionIcon connection={connection} logos={logos} />
     </div>
@@ -161,7 +161,7 @@ const convertConnectionsToOptions = ({
       }
 
       if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-        return [];
+        return [connection];
       }
       return [
         connection,
