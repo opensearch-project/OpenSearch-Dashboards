@@ -41,7 +41,6 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
         return;
       }
       const exp = await toExpression(services, searchContext, rows, indexPattern);
-      console.log('expression for vis in discover', exp);
       setExpression(exp);
     }
 
@@ -65,7 +64,11 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
   return (
     <EuiPanel className="discoverVisualization" data-test-subj="visualizationLoader">
       {expression ? (
-        <ReactExpressionRenderer expression={expression} searchContext={searchContext} />
+        <ReactExpressionRenderer
+          key={JSON.stringify(searchContext) + expression}
+          expression={expression}
+          searchContext={searchContext}
+        />
       ) : (
         <EuiFlexItem
           className="discoverVisualization__empty"

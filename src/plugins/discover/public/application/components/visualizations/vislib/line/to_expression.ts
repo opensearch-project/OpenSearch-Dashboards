@@ -55,9 +55,6 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
     return transformedRow;
   });
 
-  console.log('columns', columns);
-  console.log('data', data);
-
   const xAxisParam = {
     field: 'timestamp_ms',
     type: 'temporal',
@@ -159,6 +156,5 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
     },
   };
 
-  console.log('vega spec REAL', spec);
   return spec;
 };
