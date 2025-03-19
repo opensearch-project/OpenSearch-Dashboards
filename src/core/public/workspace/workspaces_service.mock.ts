@@ -32,6 +32,7 @@ const createWorkspacesStartContractMock = () => {
   const currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   const initialized$ = new BehaviorSubject<boolean>(false);
   const client$ = new BehaviorSubject<IWorkspaceClient | null>(null);
+  const workspaceError$ = new BehaviorSubject<string>('');
 
   return {
     currentWorkspaceId$,
@@ -39,6 +40,7 @@ const createWorkspacesStartContractMock = () => {
     currentWorkspace$,
     initialized$,
     client$,
+    workspaceError$,
   };
 };
 

@@ -36,6 +36,12 @@ interface WorkspaceObservables {
    * for consuming by others. For example, the `workspaceList` has been set, etc
    */
   initialized$: BehaviorSubject<boolean>;
+
+  /**
+   * The subject that use to emit workspace error during initialization, for exmaple,
+   * workspace stale state and workspace ID not found, which triggers the error page
+   */
+  workspaceError$: BehaviorSubject<string>;
 }
 
 export enum WorkspaceError {
@@ -43,7 +49,6 @@ export enum WorkspaceError {
 }
 
 export type WorkspacesSetup = WorkspaceObservables & {
-  workspaceError$: BehaviorSubject<string>;
   setClient: (client: IWorkspaceClient) => void;
 };
 
@@ -76,9 +81,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
             /**
              * Current workspace is stale
              */
-            this.workspaceError$.error({
-              reason: WorkspaceError.WORKSPACE_IS_STALE,
-            });
+            this.workspaceError$.next(WorkspaceError.WORKSPACE_IS_STALE);
           }
         }
       }
@@ -105,6 +108,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
       client$: this.client$,
+      workspaceError$: this.workspaceError$,
     };
   }
 

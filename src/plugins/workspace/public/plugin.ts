@@ -74,6 +74,7 @@ import { WorkspaceCollaboratorTypesService, UseCaseService } from './services';
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
 import { searchPages } from './components/global_search/search_pages_command';
+import { WorkspaceValidationService } from './services/workspace_validation_service';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -107,6 +108,7 @@ export class WorkspacePlugin
   private registeredUseCasesUpdaterSubscription?: Subscription;
   private workspaceAndUseCasesCombineSubscription?: Subscription;
   private useCase = new UseCaseService();
+  private workspaceValidationService = new WorkspaceValidationService();
   private workspaceClient?: WorkspaceClient;
   private collaboratorTypes = new WorkspaceCollaboratorTypesService();
   private collaboratorsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
@@ -261,21 +263,6 @@ export class WorkspacePlugin
     });
   }
 
-  /**
-   * Fatal error service does not support customized actions
-   * So we have to use a self-hosted page to show the errors and redirect.
-   */
-  private handleFatalError(core: CoreSetup<WorkspacePluginStartDeps>, error: unknown) {
-    (async () => {
-      const [{ application, chrome }] = await core.getStartServices();
-      chrome.setIsVisible(false);
-      application.navigateToApp(WORKSPACE_FATAL_ERROR_APP_ID, {
-        replace: true,
-        state: { error },
-      });
-    })();
-  }
-
   public async setup(
     core: CoreSetup<WorkspacePluginStartDeps>,
     {
@@ -314,42 +301,8 @@ export class WorkspacePlugin
       core.http.basePath.getBasePath()
     );
 
-    const workspaceError$ = core.workspaces.workspaceError$;
-
-    workspaceError$.subscribe({
-      error: ({ reason }) => {
-        if (reason === WorkspaceError.WORKSPACE_IS_STALE) {
-          this.handleFatalError(
-            core,
-            i18n.translate('workspace.error.workspaceIsStale', {
-              defaultMessage: 'Cannot find current workspace since it is stale',
-            })
-          );
-        }
-      },
-    });
-
-    if (!workspaceError$.hasError && workspaceId) {
-      const result = await workspaceClient.enterWorkspace(workspaceId);
-      if (!result.success) {
-        this.handleFatalError(core, result?.error);
-      } else {
-        /**
-         * If the workspace id is valid and user is currently on workspace_fatal_error page,
-         * we should redirect user to overview page of workspace.
-         */
-        (async () => {
-          const [{ application }] = await core.getStartServices();
-          const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
-            if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
-              application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
-            }
-            currentAppIdSubscription.unsubscribe();
-          });
-          // Add workspace id to recent workspaces.
-          recentWorkspaceManager.addRecentWorkspace(workspaceId);
-        })();
-      }
+    if (workspaceId) {
+      await workspaceClient.enterWorkspace(workspaceId, core.workspaces.workspaceError$);
     }
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
@@ -637,6 +590,8 @@ export class WorkspacePlugin
       workspaceConfigurableApps$: this.getWorkspaceConfigurableApps$(core),
     });
 
+    this.workspaceValidationService.start(core);
+
     this.registeredUseCasesUpdaterSubscription = useCaseStart
       .getRegisteredUseCases$()
       .subscribe((registeredUseCases) => {
@@ -737,5 +692,6 @@ export class WorkspacePlugin
     this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
     this.useCase.stop();
     this.collaboratorTypes.stop();
+    this.workspaceValidationService.stop();
   }
 }

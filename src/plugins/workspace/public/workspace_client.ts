@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { BehaviorSubject } from 'rxjs';
 import {
   HttpFetchError,
   HttpFetchOptions,
@@ -137,11 +138,16 @@ export class WorkspaceClient implements IWorkspaceClient {
   /**
    * This method will check if a valid workspace can be found by the given workspace id,
    * If so, perform a side effect of updating the core.workspace.currentWorkspaceId$.
+   * If not, trigger the workspace client-sider error.
    *
    * @param id workspace id
+   * @param workspaceError$ a stream to emit workspace error
    * @returns {Promise<IResponse<null>>} result for this operation
    */
-  public async enterWorkspace(id: string): Promise<IResponse<null>> {
+  public async enterWorkspace(
+    id: string,
+    workspaceError$: BehaviorSubject<string>
+  ): Promise<IResponse<null>> {
     const workspaceResp = await this.get(id);
     if (workspaceResp.success) {
       this.workspaces.currentWorkspaceId$.next(id);
@@ -150,6 +156,7 @@ export class WorkspaceClient implements IWorkspaceClient {
         result: null,
       };
     } else {
+      workspaceError$.next(workspaceResp.error!);
       return workspaceResp;
     }
   }
