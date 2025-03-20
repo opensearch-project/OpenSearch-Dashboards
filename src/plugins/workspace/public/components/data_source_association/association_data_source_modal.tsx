@@ -99,9 +99,7 @@ const convertConnectionToOption = ({
   key: connection.id,
   description: connection.description,
   append:
-    mode === AssociationDataSourceModalMode.DirectQueryConnections &&
-    connection.relatedConnections &&
-    connection.relatedConnections.length > 0 ? (
+    connection?.relatedConnections && connection.relatedConnections.length > 0 ? (
       <EuiBadge>
         {i18n.translate('workspace.form.selectDataSource.optionBadge', {
           defaultMessage: '+ {relatedConnections} related',
@@ -111,13 +109,23 @@ const convertConnectionToOption = ({
         })}
       </EuiBadge>
     ) : undefined,
-  disabled: connection.connectionType === DataSourceConnectionType.DirectQueryConnection,
+  disabled: !!(
+    connection.connectionType === DataSourceConnectionType.DirectQueryConnection ||
+    connection?.parentId
+  ),
   checked:
     connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
-    selectedConnectionIds.includes(connection.id)
+    selectedConnectionIds.includes(connection.id) &&
+    !connection?.parentId
       ? ('on' as const)
       : undefined,
-  prepend: <ConnectionIcon connection={connection} logos={logos} />,
+  prepend: connection?.parentId ? (
+    <div style={{ marginLeft: '20px' }}>
+      <ConnectionIcon connection={connection} logos={logos} />
+    </div>
+  ) : (
+    <ConnectionIcon connection={connection} logos={logos} />
+  ),
   parentId: connection.parentId,
 });
 
@@ -152,16 +160,13 @@ const convertConnectionsToOptions = ({
         return [];
       }
 
-      if (showDirectQueryConnections) {
-        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-          return [];
-        }
-        return [
-          connection,
-          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
-        ];
+      if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
+        return [connection];
       }
-      return [connection];
+      return [
+        connection,
+        ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
+      ];
     })
     .map((connection) =>
       convertConnectionToOption({ connection, selectedConnectionIds, logos, mode })
