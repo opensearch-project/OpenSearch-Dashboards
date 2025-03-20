@@ -194,7 +194,6 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultDataRange();
-        await PageObjects.discover.switchDiscoverTable('new');
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
@@ -206,10 +205,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
 
         // Expand a doc row
-        await testSubjects.click('docTableExpandToggleColumn-0');
+        await testSubjects.click('docTableExpandToggleColumn');
 
         // Add a field filter
-        await testSubjects.click('tableDocViewRow-@message > addInclusiveFilterButton');
+        await testSubjects.click('tableDocViewRow-@message addInclusiveFilterButton');
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
