@@ -1,2 +1,2 @@
 fix:
-- Update the graph ([#9581](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9581))
+- Permissions for github workflow in bundler performance testing ci ([#9581](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9581))
