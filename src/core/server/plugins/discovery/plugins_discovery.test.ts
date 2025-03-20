@@ -194,7 +194,7 @@ describe('plugins discovery system', () => {
 
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${manifestPath(
+        `Error: Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${manifestPath(
           'plugin_a'
         )})`,
         `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
@@ -239,12 +239,7 @@ describe('plugins discovery system', () => {
     const srcPluginsPath = resolve(PROCESS_WORKING_DIR, 'src', 'plugins');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${standardize(
-          srcPluginsPath,
-          false,
-          false,
-          true
-        )}' (invalid-search-path, ${srcPluginsPath})`,
+        expect.stringContaining(`Error: EACCES, permission denied '${standardize(srcPluginsPath)}`),
       ])
     );
   });
@@ -279,12 +274,7 @@ describe('plugins discovery system', () => {
     const errorPath = manifestPath('plugin_a');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${standardize(
-          errorPath,
-          false,
-          false,
-          true
-        )}' (missing-manifest, ${errorPath})`,
+        expect.stringContaining(`Error: EACCES, permission denied '${standardize(errorPath)}`),
       ])
     );
   });

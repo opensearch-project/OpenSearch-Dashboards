@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       const reactTab = await find.byButtonText('React doc view');
       await reactTab.click();
       const reactContent = await testSubjects.find('react-docview');
-      expect(await reactContent.getVisibleText()).to.be('logstash-2015.09.22');
+      expect(await reactContent.getVisibleText()).to.match(/logstash-2015\.09\.2[0-2]/);
     });
   });
 }

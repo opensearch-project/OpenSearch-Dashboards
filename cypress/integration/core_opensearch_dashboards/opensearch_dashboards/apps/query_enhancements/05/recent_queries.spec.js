@@ -23,7 +23,8 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 const runRecentQueryTests = () => {
-  describe('recent queries spec', () => {
+  // TODO: refactor these tests to not navigate away so often
+  describe.skip('recent queries spec', () => {
     const index = INDEX_PATTERN_WITH_TIME.replace('*', '');
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);

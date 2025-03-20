@@ -121,7 +121,7 @@ async function checkSuperfluousSymlinks(log, files) {
       }
 
       try {
-        const manifest = readFileSync(manifestPath);
+        const manifest = readFileSync(manifestPath, 'utf8');
         try {
           const json = JSON.parse(manifest);
           if (!json.dependencies || !Object.keys(json.dependencies).length) {
@@ -165,7 +165,7 @@ async function checkMissingSymlinks(log, files) {
       }
 
       try {
-        const manifest = readFileSync(path);
+        const manifest = readFileSync(path, 'utf8');
         try {
           const json = JSON.parse(manifest);
           if (json.dependencies && Object.keys(json.dependencies).length) {

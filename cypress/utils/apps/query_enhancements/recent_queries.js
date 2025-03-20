@@ -88,7 +88,7 @@ export const generateRecentQueriesTestConfiguration = (dataset, datasetType, lan
   return {
     dataset,
     datasetType: customDatasetType,
-    language: language.name,
+    language,
     oppositeLang: oppositeLang[language.name],
     alternativeDataset: '.opensearch-sap-log-types-config',
     defaultQuery: defaultQuery,
