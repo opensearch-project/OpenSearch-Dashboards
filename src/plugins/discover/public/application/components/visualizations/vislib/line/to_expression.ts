@@ -80,14 +80,11 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
   ];
 
   for (let i = 1; i < columns.length; i++) {
-    const colorIndex = (i - 1) % colorPalette.length;
-    const color = colorPalette[colorIndex];
-
     const yAxisParam = {
       field: columns[i].name,
       type: 'quantitative',
       scale: { zero: false },
-      axis: { titleColor: color, title: columns[i].name },
+      axis: { title: '' },
     };
 
     const tooltipParam = [
@@ -119,8 +116,10 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
           range: colorPalette.slice(0, columns.length - 1),
         },
         legend: {
-          title: 'Series',
-          labelExpr: "datum.label + ': ' + '" + columns[i].field + "'",
+          title: '',
+          labelExpr: "'" + columns[i].field + "'",
+          orient: 'bottom',
+          labelLimit: 999,
         },
       },
     };

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 
@@ -33,16 +33,14 @@ export const usePrometheus = (): PrometheusContext => {
   const [labelNames, setLabelNames] = useState<string[]>([]);
 
   const updateLabels = useCallback(async () => {
-    const labels = await prometheusResourceClient.getLabels('my_prometheus', selectedMetricName);
+    const labels = await prometheusResourceClient.getLabels('my_prometheus');
     setLabelNames(labels.sort());
-  }, [prometheusResourceClient, selectedMetricName]);
+  }, [prometheusResourceClient]);
 
   const updateMetrics = useCallback(async () => {
     const metricMetadata = await prometheusResourceClient.getMetricMetadata('my_prometheus');
     const metrics = Object.keys(metricMetadata).sort();
-    const defaultMetric = metrics[0];
     setMetricNames(metrics);
-    setSelectedMetricName(defaultMetric);
   }, [prometheusResourceClient]);
 
   useEffect(() => {
@@ -54,9 +52,11 @@ export const usePrometheus = (): PrometheusContext => {
   }, [selectedMetricName, updateLabels]);
 
   useEffect(() => {
-    data.query.queryString.setQuery({
-      query: selectedMetricName,
-    });
+    if (selectedMetricName) {
+      data.query.queryString.setQuery({
+        query: selectedMetricName,
+      });
+    }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [selectedMetricName]);
 
