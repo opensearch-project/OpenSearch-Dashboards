@@ -1,0 +1,16 @@
+.data-source-expanded-table thead {
+    display: none;
+  }
+  
+.data-source-table [id^="row"][id$="expansion"] > td:first-child > div:first-child {
+padding: 0;
+}
+  
+.data-source-table-expanded-row:first-child > td {
+border-top: 0;
+}
+
+.data-source-table-expanded-row:last-child > td {
+border-bottom: 0;
+}
+  
