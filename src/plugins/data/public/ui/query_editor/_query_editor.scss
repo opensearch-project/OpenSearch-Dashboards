@@ -199,24 +199,46 @@
   }
 }
 
-.suggest-widget {
-  position: relative;
+/* Fix for Monaco Editor suggestion widget width mismatch */
+.monaco-editor .suggest-widget {
+  /* We don't override the width here to maintain Monaco's default behavior */
 
-  &.visible::after {
-    position: absolute;
-    height: auto;
-    bottom: calc(-1 * ($euiFontSizeXS * 2 + $euiSizeXS) + 1px);
-    left: 0;
-    width: 100%;
-    background-color: $euiColorLightestShade;
-    border: $euiBorderThin;
-    padding: $euiSizeXS;
-    text-align: left;
-    color: $euiColorDarkShade;
-    font-size: $euiFontSizeXS;
-    content: "Tab to insert, ESC to close window";
-    display: block;
+  /* Target the suggestion list to ensure it has the same width as the widget */
+  .monaco-list {
+    width: 100% !important;
   }
+
+  /* Target the list rows to ensure they have the same width */
+  .monaco-list-row {
+    width: 100% !important;
+  }
+}
+
+/* Style for our custom status bar */
+.custom-suggest-widget-status-bar {
+  /* Base styles */
+  background-color: $euiColorLightestShade;
+  border: $euiBorderThin;
+  color: $euiColorDarkShade;
+  font-size: $euiFontSizeXS;
+  text-align: left;
+  box-sizing: border-box;
+
+  /* Fixed height and alignment for consistent appearance */
+  height: 24px;
+  line-height: 24px;
+  padding: 0 $euiSizeXS;
+
+  /* Absolute positioning to avoid taking vertical space */
+  position: absolute;
+  z-index: 10;
+  display: none;
+
+  /* Ensure proper appearance */
+  box-shadow: 0 2px 4px transparentize($euiShadowColorLarge, 0.8);
+  border-top: none;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .queryEditor__progress {

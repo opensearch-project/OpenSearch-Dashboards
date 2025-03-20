@@ -44,4 +44,7 @@ import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Ne
 import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
 
+// Import CSS for Monaco editor icons
+import 'monaco-editor/esm/vs/base/browser/ui/codicons/codicon/codicon.css';
+
 export { monaco };

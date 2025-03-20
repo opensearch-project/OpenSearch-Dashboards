@@ -60,11 +60,11 @@ const runSavedSearchTests = () => {
         });
 
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
-
         setSearchConfigurations(config);
+        cy.osd.waitForLoader(true);
+
         verifyDiscoverPageState(config);
         cy.saveSearch(config.saveName);
 
@@ -83,8 +83,8 @@ const runSavedSearchTests = () => {
 
         cy.getElementByTestId('discoverNewButton').click();
         cy.setQueryLanguage(config.language);
-        cy.loadSaveSearch(config.saveName);
         setDatePickerDatesAndSearchIfRelevant(config.language);
+        cy.loadSaveSearch(config.saveName);
         verifyDiscoverPageState(config);
       });
 

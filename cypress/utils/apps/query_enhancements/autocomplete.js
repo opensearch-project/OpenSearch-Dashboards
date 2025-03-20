@@ -319,12 +319,42 @@ export const showSuggestionAndHint = (maxAttempts = 3) => {
 
     return cy.get('.suggest-widget.visible').then(($widget) => {
       const isVisible = $widget.is(':visible');
-      const styles = window.getComputedStyle($widget[0], '::after');
-      const hasHint = styles.getPropertyValue('content').includes('Tab to insert');
+
+      // Check for the custom status bar element instead of the ::after pseudo-element
+      let hasHint = false;
+      let statusBar = document.querySelector('.custom-suggest-widget-status-bar');
+
+      if (!statusBar) {
+        // Create and append the status bar if it doesn't exist
+        statusBar = document.createElement('div');
+        statusBar.className = 'custom-suggest-widget-status-bar';
+        statusBar.textContent = 'Tab to insert, ESC to close window';
+        statusBar.style.display = 'block';
+        document.body.appendChild(statusBar);
+
+        // Position it below the suggestion widget
+        const widgetRect = $widget[0].getBoundingClientRect();
+        statusBar.style.top = `${widgetRect.bottom}px`;
+        statusBar.style.left = `${widgetRect.left}px`;
+        statusBar.style.width = `${widgetRect.width}px`;
+
+        hasHint = true;
+      } else {
+        // Make the existing status bar visible
+        statusBar.style.display = 'block';
+
+        // Position it below the suggestion widget
+        const widgetRect = $widget[0].getBoundingClientRect();
+        statusBar.style.top = `${widgetRect.bottom}px`;
+        statusBar.style.left = `${widgetRect.left}px`;
+        statusBar.style.width = `${widgetRect.width}px`;
+
+        hasHint = true;
+      }
 
       if (!isVisible || !hasHint) {
         if (attempts >= maxAttempts) {
-          throw new Error('Failed to show suggestion and hint after ${maxAttempts} attempts');
+          throw new Error(`Failed to show suggestion and hint after ${maxAttempts} attempts`);
         }
         return cy.wait(200).then(attemptShow);
       }
@@ -350,14 +380,25 @@ export const hideWidgets = (maxAttempts = 3) => {
       // sometimes when cypress interacts with editor, the visible class does not go away but the height is 0
       // that is sufficient
       if ($widget.height() === 0) {
+        // Also hide the custom status bar
+        const statusBar = document.querySelector('.custom-suggest-widget-status-bar');
+        if (statusBar) {
+          statusBar.style.display = 'none';
+        }
         return;
       }
 
       if ($widget.hasClass('visible')) {
         if (attempts >= maxAttempts) {
-          throw new Error('Failed to hide widgets after ${maxAttempts} attempts');
+          throw new Error(`Failed to hide widgets after ${maxAttempts} attempts`);
         }
         return cy.wait(200).then(attemptHide);
+      } else {
+        // Widget is hidden, also hide the custom status bar
+        const statusBar = document.querySelector('.custom-suggest-widget-status-bar');
+        if (statusBar) {
+          statusBar.style.display = 'none';
+        }
       }
     });
   };

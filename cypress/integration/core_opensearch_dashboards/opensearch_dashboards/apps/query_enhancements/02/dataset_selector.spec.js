@@ -66,6 +66,7 @@ export const runDatasetSelectorTests = () => {
           cy.setIndexAsDataset(config.dataset, DATASOURCE_NAME, config.language);
         }
         setDatePickerDatesAndSearchIfRelevant(config.language);
+        cy.osd.waitForLoader(true);
 
         verifyDiscoverPageState({
           dataset: config.dataset,
