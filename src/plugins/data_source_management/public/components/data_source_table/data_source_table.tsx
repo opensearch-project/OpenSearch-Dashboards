@@ -41,6 +41,7 @@ import {
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
+import './data_source_table.scss';
 
 /* Table config */
 const pagination = {
@@ -139,7 +140,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           columns={columns}
           className="data-source-expanded-table"
           rowProps={{
-            className: 'direct-query-expanded-row',
+            className: 'data-source-table-expanded-row',
           }}
         />
       );
@@ -473,6 +474,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           sorting={sorting}
           search={search}
           loading={isLoading}
+          className="data-source-table"
         />
       </>
     );
