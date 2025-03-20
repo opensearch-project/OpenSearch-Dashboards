@@ -1,0 +1,2 @@
+fix:
+- Fix potential memory leak in getDirectQueryConnections ([#9575](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9575))

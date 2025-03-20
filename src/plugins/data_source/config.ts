@@ -41,7 +41,7 @@ export const configSchema = schema.object({
     ),
   }),
   clientPool: schema.object({
-    size: schema.number({ defaultValue: 5 }),
+    size: schema.number({ defaultValue: 10 }),
   }),
   audit: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
