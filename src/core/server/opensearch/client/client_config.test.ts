@@ -39,7 +39,7 @@ const createConfig = (parts: Partial<OpenSearchClientConfig> = {}): OpenSearchCl
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
-    requestHeadersWhitelist: ['authorization'],
+    requestHeadersAllowlist: ['authorization'],
     hosts: ['http://localhost:80'],
     ...parts,
   };

@@ -86,7 +86,7 @@ test('set correct defaults', () => {
       "optimizedHealthcheck": undefined,
       "password": undefined,
       "pingTimeout": "PT30S",
-      "requestHeadersWhitelist": Array [
+      "requestHeadersAllowlist": Array [
         "authorization",
       ],
       "requestTimeout": "PT30S",
@@ -124,23 +124,23 @@ test('#hosts accepts both string and array of strings', () => {
   expect(configValue.hosts).toEqual(['http://some.host:1234', 'https://some.another.host']);
 });
 
-test('#requestHeadersWhitelist accepts both string and array of strings', () => {
+test('#requestHeadersAllowlist accepts both string and array of strings', () => {
   let configValue = new OpenSearchConfig(
-    config.schema.validate({ requestHeadersWhitelist: 'token' })
+    config.schema.validate({ requestHeadersAllowlist: 'token' })
   );
-  expect(configValue.requestHeadersWhitelist).toEqual(['token']);
+  expect(configValue.requestHeadersAllowlist).toEqual(['token']);
 
   configValue = new OpenSearchConfig(
-    config.schema.validate({ requestHeadersWhitelist: ['token'] })
+    config.schema.validate({ requestHeadersAllowlist: ['token'] })
   );
-  expect(configValue.requestHeadersWhitelist).toEqual(['token']);
+  expect(configValue.requestHeadersAllowlist).toEqual(['token']);
 
   configValue = new OpenSearchConfig(
     config.schema.validate({
-      requestHeadersWhitelist: ['token', 'X-Forwarded-Proto'],
+      requestHeadersAllowlist: ['token', 'X-Forwarded-Proto'],
     })
   );
-  expect(configValue.requestHeadersWhitelist).toEqual(['token', 'X-Forwarded-Proto']);
+  expect(configValue.requestHeadersAllowlist).toEqual(['token', 'X-Forwarded-Proto']);
 });
 
 describe('reads files', () => {
@@ -437,12 +437,12 @@ describe('deprecations', () => {
     `);
   });
 
-  it('logs a warning if elasticsearch.requestHeadersWhitelist is set and opensearch.requestHeadersWhitelist is not', () => {
-    const { messages } = applyLegacyDeprecations({ requestHeadersWhitelist: [''] });
+  it('logs a warning if elasticsearch.requestHeadersAllowlist is set and opensearch.requestHeadersAllowlist is not', () => {
+    const { messages } = applyLegacyDeprecations({ requestHeadersAllowlist: [''] });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"elasticsearch.requestHeadersWhitelist\\" is deprecated and has been replaced by \\"opensearch.requestHeadersWhitelist\\"",
-        "\\"opensearch.requestHeadersWhitelist\\" is deprecated and has been replaced by \\"opensearch.requestHeadersAllowlist\\"",
+        "\\"elasticsearch.requestHeadersAllowlist\\" is deprecated and has been replaced by \\"opensearch.requestHeadersAllowlist\\"",
+        "\\"opensearch.requestHeadersAllowlist\\" is deprecated and has been replaced by \\"opensearch.requestHeadersAllowlist\\"",
       ]
     `);
   });

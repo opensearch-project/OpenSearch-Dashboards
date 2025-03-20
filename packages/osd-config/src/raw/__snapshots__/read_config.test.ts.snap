@@ -97,7 +97,7 @@ Object {
   "bar": "pre-val1-mid-val2-post",
   "foo": 1,
   "opensearch": Object {
-    "requestHeadersWhitelist": Array [
+    "requestHeadersAllowlist": Array [
       "val1",
       "val2",
     ],

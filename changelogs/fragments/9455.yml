@@ -1,0 +1,5 @@
+breaking:
+- Server.xsrf.whitelist -> server.xsrf.allowlist ([#9455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9455))
+- Server.compression.referrerWhitelist -> server.compression.referrerAllowlist ([#9455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9455))
+- Opensearch.requestHeadersWhitelist -> opensearch.requestHeadersAllowlist ([#9455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9455))
+- Opensearch.requestHeadersWhitelistConfigured -> opensearch.requestHeadersAllowlistConfigured ([#9455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9455))

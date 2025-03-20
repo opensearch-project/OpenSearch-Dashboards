@@ -45,7 +45,7 @@ const createStartContractMock = () => {
             logQueries: false,
             numberOfHostsConfigured: 1,
             pingTimeoutMs: 30000,
-            requestHeadersWhitelistConfigured: false,
+            requestHeadersAllowlistConfigured: false,
             requestTimeoutMs: 30000,
             shardTimeoutMs: 30000,
             sniffIntervalMs: -1,
@@ -65,7 +65,7 @@ const createStartContractMock = () => {
             basePathConfigured: false,
             compression: {
               enabled: true,
-              referrerWhitelistConfigured: false,
+              referrerAllowlistConfigured: false,
             },
             keepaliveTimeout: 120000,
             maxPayloadInBytes: 1048576,
@@ -110,7 +110,7 @@ const createStartContractMock = () => {
             },
             xsrf: {
               disableProtection: false,
-              whitelistConfigured: false,
+              allowlistConfigured: false,
             },
           },
           logging: {
