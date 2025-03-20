@@ -13,10 +13,13 @@ import { OpenSearchSearchHit } from '../../../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../../../../../data/public';
 import { DiscoverViewServices } from '../../../../../build_services';
 
+type Source = Record<string, number | string>;
+type Row = OpenSearchSearchHit<Source>;
+
 export const toExpression = async (
   services: DiscoverViewServices,
   searchContext: IExpressionLoaderParams['searchContext'],
-  rows: OpenSearchSearchHit[],
+  rows: Row[],
   indexPattern: IndexPattern
 ) => {
   const opensearchDashboards = buildExpressionFunction<ExpressionFunctionOpenSearchDashboards>(
@@ -29,7 +32,7 @@ export const toExpression = async (
     query: JSON.stringify(searchContext!.query || []),
   });
 
-  const vegaSpec = createVegaSpec(rows, indexPattern);
+  const vegaSpec = createVegaSpec(rows);
 
   const vega = buildExpressionFunction<any>('vega', {
     spec: JSON.stringify(vegaSpec),
@@ -38,7 +41,7 @@ export const toExpression = async (
   return buildExpression([opensearchDashboards, opensearchDashboardsContext, vega]).toString();
 };
 
-const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern) => {
+const createVegaSpec = (rows: Row[]) => {
   const columns = Object.keys(rows[0]._source).map((column, index) => {
     return {
       field: column,
@@ -47,8 +50,8 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
     };
   });
 
-  const data = rows.map((row: OpenSearchSearchHit) => {
-    const transformedRow: Record<string, any> = {};
+  const data = rows.map((row: Row) => {
+    const transformedRow: Source = {};
     for (const column of columns) {
       transformedRow[column.name] = row._source[column.field];
     }
@@ -80,14 +83,11 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
   ];
 
   for (let i = 1; i < columns.length; i++) {
-    const colorIndex = (i - 1) % colorPalette.length;
-    const color = colorPalette[colorIndex];
-
     const yAxisParam = {
       field: columns[i].name,
       type: 'quantitative',
       scale: { zero: false },
-      axis: { titleColor: color, title: columns[i].name },
+      axis: { title: '' },
     };
 
     const tooltipParam = [
@@ -119,8 +119,10 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
           range: colorPalette.slice(0, columns.length - 1),
         },
         legend: {
-          title: 'Series',
-          labelExpr: "datum.label + ': ' + '" + columns[i].field + "'",
+          title: '',
+          labelExpr: "'" + columns[i].field + "'",
+          orient: 'bottom',
+          labelLimit: 999,
         },
       },
     };

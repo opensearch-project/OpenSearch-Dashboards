@@ -41,6 +41,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
 import { IUiStart } from './ui';
 import { DataStorage } from '../common';
+import { ResourceClientFactory } from './resources/resource_client_factory';
 
 export interface DataPublicPluginEnhancements {
   search?: SearchEnhancements;
@@ -123,6 +124,8 @@ export interface DataPublicPluginStart {
    * {@link DataSourceStart}
    */
   dataSources: DataSourceStart;
+
+  resourceClientFactory: ResourceClientFactory;
 }
 
 export interface IDataPluginServices extends Partial<CoreStart> {

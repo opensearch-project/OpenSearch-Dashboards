@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from 'react';
-
-const PROMETHEUS_ENDPOINT = 'http://127.0.0.1:9090';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DiscoverViewServices } from '../../../build_services';
 
 interface PrometheusDataSourceMetadata {
-  selectedMetricName: string | null;
+  selectedMetricName?: string;
   metricNames: string[];
   labelNames: string[];
 }
@@ -21,24 +21,32 @@ export interface PrometheusContext {
 }
 
 export const usePrometheus = (): PrometheusContext => {
-  const [selectedMetricName, setSelectedMetricName] = useState<string | null>(null);
+  const {
+    services: { data },
+  } = useOpenSearchDashboards<DiscoverViewServices>();
+  const prometheusResourceClient = useMemo(() => {
+    return data.resourceClientFactory.create('prometheus');
+  }, [data.resourceClientFactory]);
+
+  const [selectedMetricName, setSelectedMetricName] = useState<string | undefined>();
   const [metricNames, setMetricNames] = useState<string[]>([]);
   const [labelNames, setLabelNames] = useState<string[]>([]);
 
   const updateLabels = useCallback(async () => {
-    const query = selectedMetricName ? `?match[]=${selectedMetricName}` : '';
-    const response = await fetch(`${PROMETHEUS_ENDPOINT}/api/v1/labels${query}`).then((r) =>
-      r.json()
-    );
-    setLabelNames(response.data.slice(1));
-  }, [selectedMetricName]);
+    const labels = await prometheusResourceClient.getLabels('my_prometheus');
+    setLabelNames(labels.sort());
+  }, [prometheusResourceClient]);
 
   const updateMetrics = useCallback(async () => {
-    const response = await fetch(`${PROMETHEUS_ENDPOINT}/api/v1/label/__name__/values`).then((r) =>
-      r.json()
-    );
-    setMetricNames(response.data);
-  }, []);
+    const metricMetadata = await prometheusResourceClient.getMetricMetadata('my_prometheus');
+    const metrics = Object.keys(metricMetadata).sort();
+    setMetricNames(metrics);
+
+    if (!data.query.queryString.getQuery().query) {
+      setSelectedMetricName(metrics[0]);
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [prometheusResourceClient]);
 
   useEffect(() => {
     updateMetrics();
@@ -47,6 +55,15 @@ export const usePrometheus = (): PrometheusContext => {
   useEffect(() => {
     updateLabels();
   }, [selectedMetricName, updateLabels]);
+
+  useEffect(() => {
+    if (selectedMetricName) {
+      data.query.queryString.setQuery({
+        query: selectedMetricName,
+      });
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [selectedMetricName]);
 
   return {
     metadata: {

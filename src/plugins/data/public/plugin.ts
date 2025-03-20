@@ -95,6 +95,7 @@ import { getSuggestions as getSQLSuggestions } from './antlr/opensearch_sql/code
 import { getSuggestions as getDQLSuggestions } from './antlr/dql/code_completion';
 import { getSuggestions as getPPLSuggestions } from './antlr/opensearch_ppl/code_completion';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
+import { ResourceClientFactory } from './resources/resource_client_factory';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -287,6 +288,7 @@ export class DataPublicPlugin
         dataSourceService,
         dataSourceFactory,
       },
+      resourceClientFactory: new ResourceClientFactory(core.http),
     };
 
     registerDefaultDataSource(dataServices);

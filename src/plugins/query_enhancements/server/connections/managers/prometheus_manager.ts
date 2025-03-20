@@ -43,7 +43,7 @@ interface CommonQuery {
 }
 interface LabelsQuery {
   resourceType: typeof PROMETHEUS_RESOURCE_TYPES.LABELS;
-  resourceName: undefined;
+  resourceName?: string;
 }
 interface LabelValuesQuery {
   resourceType: typeof PROMETHEUS_RESOURCE_TYPES.LABEL_VALUES;
@@ -73,14 +73,15 @@ class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
     const { resourceType, resourceName } = query;
     switch (resourceType) {
       case PROMETHEUS_RESOURCE_TYPES.LABELS:
-        return `${BASE_RESOURCE_API}/labels`;
+        const labelsQueryString = resourceName ? `?match[]=${resourceName}` : '';
+        return `${BASE_RESOURCE_API}/labels${labelsQueryString}`;
       case PROMETHEUS_RESOURCE_TYPES.ALERTS:
         return `${BASE_RESOURCE_API}/alerts`;
       case PROMETHEUS_RESOURCE_TYPES.LABEL_VALUES:
         return `${BASE_RESOURCE_API}/label/${resourceName}/values`;
       case PROMETHEUS_RESOURCE_TYPES.METRIC_METADATA:
-        const queryString = resourceName ? `?metric=${resourceName}` : '';
-        return `${BASE_RESOURCE_API}/metadata${queryString}`;
+        const metricMetadataQueryString = resourceName ? `?metric=${resourceName}` : '';
+        return `${BASE_RESOURCE_API}/metadata${metricMetadataQueryString}`;
 
       default:
         throw Error(`unknown resource type: ${resourceType}`);

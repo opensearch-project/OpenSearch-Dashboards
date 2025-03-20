@@ -20,7 +20,7 @@ export interface ClientRequest {
 
 export interface GetResourcesResponse<R> {
   nextToken?: string;
-  status: string;
+  status: 'success' | 'failed';
   data: R;
   type: string;
 }
