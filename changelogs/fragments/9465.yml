@@ -1,0 +1,2 @@
+fix:
+- Prevent user from visiting discover when out of a workspace ([#9465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9465))

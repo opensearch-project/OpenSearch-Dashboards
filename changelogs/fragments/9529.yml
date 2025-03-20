@@ -1,2 +1,0 @@
-fix:
-- Correctly load saved search from snapshot URL ([#9529](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9529))
