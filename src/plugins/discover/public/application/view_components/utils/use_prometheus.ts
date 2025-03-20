@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 
@@ -41,6 +41,11 @@ export const usePrometheus = (): PrometheusContext => {
     const metricMetadata = await prometheusResourceClient.getMetricMetadata('my_prometheus');
     const metrics = Object.keys(metricMetadata).sort();
     setMetricNames(metrics);
+
+    if (!data.query.queryString.getQuery().query) {
+      setSelectedMetricName(metrics[0]);
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [prometheusResourceClient]);
 
   useEffect(() => {
