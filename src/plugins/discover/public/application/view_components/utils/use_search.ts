@@ -109,6 +109,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     (state) => state.discover
   );
   const indexPattern = useIndexPattern(services);
+
   const skipInitialFetch = useRef(false);
   const {
     data,
@@ -354,6 +355,13 @@ export const useSearch = (services: DiscoverViewServices) => {
       if (isJSONString(errorBody.message)) {
         errorBody.message = JSON.parse(errorBody.message);
       }
+
+      toastNotifications.addError(error, {
+        title: i18n.translate('discover.searchQueryError', {
+          defaultMessage: 'Error in query editor',
+        }),
+        toastMessage: JSON.stringify(errorBody?.message),
+      });
 
       data$.next({
         status: ResultStatus.ERROR,
