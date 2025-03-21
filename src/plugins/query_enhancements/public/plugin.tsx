@@ -20,6 +20,7 @@ import { createQueryAssistExtension } from './query_assist';
 import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
 import { setData, setStorage } from './services';
+import { getSQLSuggestions, getPPLSuggestions } from './autocomplete';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
@@ -200,6 +201,11 @@ export class QueryEnhancementsPlugin
       ],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
+
+    // Register SQL and PPL autocomplete providers
+    data.autocomplete.addQuerySuggestionProvider('SQL', getSQLSuggestions);
+    data.autocomplete.addQuerySuggestionProvider('PPL', getPPLSuggestions);
+
     data.__enhance({
       editor: {
         queryEditorExtension: createQueryAssistExtension(
