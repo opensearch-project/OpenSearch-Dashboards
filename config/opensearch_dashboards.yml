@@ -378,6 +378,3 @@
 # opensearchDashboards.dashboardAdmin.users: ["dashboard_admin"]
 
 # Set the value to true to enable the new UI for savedQueries in Discover
-opensearch.ignoreVersionMismatch: true
-data.savedQueriesNewUI.enabled: true
-data_source.enabled: true
