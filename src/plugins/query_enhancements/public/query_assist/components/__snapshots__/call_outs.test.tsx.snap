@@ -13,7 +13,7 @@ exports[`CallOuts spec should display empty_index call out 1`] = `
         aria-hidden="true"
         class="euiCallOutHeader__icon"
         color="inherit"
-        data-euiicon-type="iInCircle"
+        data-euiicon-type="help"
       />
       <span
         class="euiCallOutHeader__title"
@@ -40,7 +40,7 @@ exports[`CallOuts spec should display empty_query call out 1`] = `
         aria-hidden="true"
         class="euiCallOutHeader__icon"
         color="inherit"
-        data-euiicon-type="iInCircle"
+        data-euiicon-type="help"
       />
       <span
         class="euiCallOutHeader__title"
