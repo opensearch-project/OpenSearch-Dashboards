@@ -91,9 +91,7 @@ import { DataSourceFactory } from './data_sources/datasource';
 import { registerDefaultDataSource } from './data_sources/register_default_datasource';
 import { DefaultDslDataSource } from './data_sources/default_datasource';
 import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
-import { getSuggestions as getSQLSuggestions } from './antlr/opensearch_sql/code_completion';
 import { getSuggestions as getDQLSuggestions } from './antlr/dql/code_completion';
-import { getSuggestions as getPPLSuggestions } from './antlr/opensearch_ppl/code_completion';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
 
 declare module '../../ui_actions/public' {
@@ -177,9 +175,7 @@ export class DataPublicPlugin
     );
 
     const autoComplete = this.autocomplete.setup(core);
-    autoComplete.addQuerySuggestionProvider('SQL', getSQLSuggestions);
     autoComplete.addQuerySuggestionProvider('kuery', getDQLSuggestions);
-    autoComplete.addQuerySuggestionProvider('PPL', getPPLSuggestions);
 
     const useNewSavedQueriesUI =
       core.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&

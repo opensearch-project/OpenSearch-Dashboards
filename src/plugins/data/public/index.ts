@@ -306,6 +306,28 @@ export {
   AutocompleteStart,
 } from './autocomplete';
 
+// Export shared utilities for query suggestions
+export {
+  fetchColumnValues,
+  formatFieldsToSuggestions,
+  formatValuesToSuggestions,
+  parseQuery,
+} from './antlr/shared/utils';
+export { SuggestionItemDetailsTags } from './antlr/shared/constants';
+
+// Export ANTLR-related types and constants for SQL
+export { SQL_SUGGESTION_IMPORTANCE, SQL_SYMBOLS } from './antlr/opensearch_sql/constants';
+export { openSearchSqlAutocompleteData } from './antlr/opensearch_sql/opensearch_sql_autocomplete';
+export { getOpenSearchSqlAutoCompleteSuggestions } from './antlr/opensearch_sql/code_completion';
+
+// Export ANTLR-related types and constants for PPL
+export {
+  PPL_AGGREGATE_FUNCTIONS,
+  PPL_SUGGESTION_IMPORTANCE,
+} from './antlr/opensearch_ppl/constants';
+export { openSearchPplAutocompleteData } from './antlr/opensearch_ppl/opensearch_ppl_autocomplete';
+export { getOpenSearchPplAutoCompleteSuggestions } from './antlr/opensearch_ppl/code_completion';
+
 /*
  * Search:
  */
