@@ -22,7 +22,6 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupType,
   ALL_USE_CASE_ID,
-  WorkspaceError,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -55,7 +54,6 @@ import {
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
-import { recentWorkspaceManager } from './recent_workspace_manager';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { WorkspaceListCard } from './components/service_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
@@ -109,7 +107,6 @@ export class WorkspacePlugin
   private workspaceAndUseCasesCombineSubscription?: Subscription;
   private useCase = new UseCaseService();
   private workspaceValidationService = new WorkspaceValidationService();
-  private workspaceClient?: WorkspaceClient;
   private collaboratorTypes = new WorkspaceCollaboratorTypesService();
   private collaboratorsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
 
@@ -272,11 +269,6 @@ export class WorkspacePlugin
       contentManagement,
     }: WorkspacePluginSetupDeps
   ) {
-    const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
-    await workspaceClient.init();
-    this.workspaceClient = workspaceClient;
-    core.workspaces.setClient(workspaceClient);
-
     this.useCase.setup({
       chrome: core.chrome,
       getStartServices: core.getStartServices,
@@ -301,12 +293,11 @@ export class WorkspacePlugin
       core.http.basePath.getBasePath()
     );
 
-    if (workspaceId) {
-      await workspaceClient.enterWorkspace(workspaceId, core.workspaces.workspaceError$);
-    }
+    this.workspaceValidationService.setup(core, workspaceId);
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
       const [coreStart, { navigation }] = await core.getStartServices();
+      const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
 
       const services = {
         ...coreStart,
@@ -455,6 +446,7 @@ export class WorkspacePlugin
             coreStart,
             { contentManagement: contentManagementStart, navigation: navigationStart },
           ] = await core.getStartServices();
+          const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
           const services = {
             ...coreStart,
             workspaceClient,
@@ -491,6 +483,7 @@ export class WorkspacePlugin
             coreStart,
             { contentManagement: contentManagementStart, navigation: navigationStart },
           ] = await core.getStartServices();
+          const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
           const services = {
             ...coreStart,
             workspaceClient,
@@ -659,9 +652,10 @@ export class WorkspacePlugin
     navigation: NavigationPublicPluginStart
   ) {
     if (contentManagement) {
+      const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
       const services: Services = {
         ...coreStart,
-        workspaceClient: this.workspaceClient!,
+        workspaceClient,
         navigationUI: navigation.ui,
         collaboratorTypes: this.collaboratorTypes,
       };
