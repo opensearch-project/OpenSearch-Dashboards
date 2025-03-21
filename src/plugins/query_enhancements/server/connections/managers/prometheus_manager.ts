@@ -14,12 +14,14 @@ import { URI } from '../../../common/constants';
 import { PromQLConnectionClient } from '../clients/promql_connection_client';
 
 const BASE_RESOURCE_API = 'api/v1';
+const BASE_ALERT_MANAGER_API = 'alertmanager/api/v2';
 
 const PROMETHEUS_RESOURCE_TYPES = {
   LABELS: 'labels',
   LABEL_VALUES: 'label_values',
   METRIC_METADATA: 'metric_metadata',
   ALERTS: 'alerts',
+  ALERTS_GROUPS: 'alert_manager_alert_groups',
 } as const;
 
 // docs: https://prometheus.io/docs/concepts/metric_types/#metric-types
@@ -81,7 +83,8 @@ class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
       case PROMETHEUS_RESOURCE_TYPES.METRIC_METADATA:
         const queryString = resourceName ? `?metric=${resourceName}` : '';
         return `${BASE_RESOURCE_API}/metadata${queryString}`;
-
+      case PROMETHEUS_RESOURCE_TYPES.ALERTS_GROUPS:
+        return `${BASE_ALERT_MANAGER_API}/alerts/groups`;
       default:
         throw Error(`unknown resource type: ${resourceType}`);
     }
