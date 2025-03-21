@@ -131,9 +131,12 @@ export const DataGridTable = ({
     ];
   }, []);
 
-  const table = useMemo(
-    () => (
+  const tableKey = useMemo(() => `${columns.join(',')}-${rows.length}`, [columns, rows.length]);
+
+  const table = useMemo(() => {
+    return (
       <EuiDataGrid
+        key={tableKey}
         aria-labelledby="aria-labelledby"
         columns={dataGridTableColumns}
         columnVisibility={dataGridTableColumnsVisibility}
@@ -146,19 +149,19 @@ export const DataGridTable = ({
         toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
         rowHeightsOptions={rowHeightsOptions}
       />
-    ),
-    [
-      dataGridTableColumns,
-      dataGridTableColumnsVisibility,
-      leadingControlColumns,
-      pagination,
-      renderCellValue,
-      rowCount,
-      sorting,
-      isToolbarVisible,
-      rowHeightsOptions,
-    ]
-  );
+    );
+  }, [
+    tableKey,
+    dataGridTableColumns,
+    dataGridTableColumnsVisibility,
+    leadingControlColumns,
+    pagination,
+    renderCellValue,
+    rowCount,
+    sorting,
+    isToolbarVisible,
+    rowHeightsOptions,
+  ]);
 
   return (
     <DiscoverGridContextProvider
