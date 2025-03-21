@@ -3,17 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { workspaceClientMock, WorkspaceClientMock } from '../workspace_client.mock';
 import { coreMock } from '../../../../core/public/mocks';
 import { WorkspaceValidationService } from './workspace_validation_service';
 import { waitFor } from '@testing-library/dom';
 import { WORKSPACE_FATAL_ERROR_APP_ID } from '../../common/constants';
 import { WorkspaceError } from '../../../../core/public';
 
-const setupWorkspaceValidationStart = (options?: {
-  initialError?: any;
-  isInitialized?: boolean;
-  currentAppId?: string;
-}) => {
+const setupWorkspaceValidationStart = () => {
   const core = coreMock.createStart();
 
   core.application.currentAppId$.subscribe = jest.fn();
@@ -33,12 +30,38 @@ const setupWorkspaceValidationStart = (options?: {
 };
 
 describe('WorkspaceValidationService', () => {
+  describe('#setup', () => {
+    beforeEach(() => {
+      WorkspaceClientMock.mockClear();
+      Object.values(workspaceClientMock).forEach((item) => item.mockClear());
+    });
+
+    it('should initialize workspace validation service and enter workspace', async () => {
+      const core = coreMock.createSetup();
+      const service = new WorkspaceValidationService();
+      await service.setup(core, 'test-workspace-123');
+
+      expect(WorkspaceClientMock).toBeCalledTimes(1);
+      expect(core.workspaces.setClient).toHaveBeenCalled();
+      expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(1);
+    });
+
+    it('should not enter workspace it workspace id is not set', async () => {
+      const core = coreMock.createSetup();
+      const service = new WorkspaceValidationService();
+      await service.setup(core, '');
+
+      expect(WorkspaceClientMock).toBeCalledTimes(1);
+      expect(core.workspaces.setClient).toHaveBeenCalled();
+      expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
+    });
+  });
+
   describe('#start', () => {
     it('should handle successful workspace initialization', async () => {
       const { core, service, initialized$ } = setupWorkspaceValidationStart();
 
       service.start(core);
-
       initialized$.next(true);
 
       await waitFor(() => {
@@ -48,12 +71,9 @@ describe('WorkspaceValidationService', () => {
     });
 
     it('should redirect from error page to workspace detail when workspace becomes valid', async () => {
-      const { core, service, initialized$ } = setupWorkspaceValidationStart({
-        currentAppId: WORKSPACE_FATAL_ERROR_APP_ID,
-      });
+      const { core, service, initialized$ } = setupWorkspaceValidationStart();
 
       service.start(core);
-
       initialized$.next(true);
 
       await waitFor(() => {
@@ -65,7 +85,6 @@ describe('WorkspaceValidationService', () => {
       const { core, service, workspaceError$, initialized$ } = setupWorkspaceValidationStart();
 
       service.start(core);
-
       workspaceError$.next(WorkspaceError.WORKSPACE_IS_STALE);
       initialized$.next(false);
 

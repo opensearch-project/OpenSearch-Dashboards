@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
 import { first } from 'rxjs/operators';
-import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
+import { coreMock } from '../../../core/public/mocks';
 import {
   ChromeBreadcrumb,
   NavGroupStatus,
@@ -66,101 +66,6 @@ describe('Workspace plugin', () => {
     expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
-  });
-
-  it('#setup when workspace id is in url and enterWorkspace return error', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        } as any)
-    );
-    workspaceClientMock.enterWorkspace.mockResolvedValue({
-      success: false,
-      error: 'error',
-    });
-    const setupMock = getSetupMock();
-    const applicationStartMock = applicationServiceMock.createStartContract();
-    const chromeStartMock = chromeServiceMock.createStartContract();
-    setupMock.getStartServices.mockImplementation(() => {
-      return Promise.resolve([
-        {
-          application: applicationStartMock,
-          chrome: chromeStartMock,
-        },
-        {},
-        {},
-      ]) as any;
-    });
-
-    const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock, {
-      management: managementPluginMock.createSetupContract(),
-    });
-    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
-    expect(WorkspaceClientMock).toBeCalledTimes(1);
-    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
-    expect(setupMock.getStartServices).toBeCalledTimes(2);
-    await waitFor(
-      () => {
-        expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
-          replace: true,
-          state: {
-            error: 'error',
-          },
-        });
-      },
-      {
-        container: document.body,
-      }
-    );
-    windowSpy.mockRestore();
-  });
-
-  it('#setup when workspace id is in url and enterWorkspace return success', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        } as any)
-    );
-    workspaceClientMock.enterWorkspace.mockResolvedValue({
-      success: true,
-      error: 'error',
-    });
-    const setupMock = getSetupMock();
-    const applicationStartMock = applicationServiceMock.createStartContract();
-    const chromeStartMock = chromeServiceMock.createStartContract();
-    let currentAppIdSubscriber: Subscriber<string> | undefined;
-    setupMock.getStartServices.mockImplementation(() => {
-      return Promise.resolve([
-        {
-          application: {
-            ...applicationStartMock,
-            currentAppId$: new Observable((subscriber) => {
-              currentAppIdSubscriber = subscriber;
-            }),
-          },
-          chrome: chromeStartMock,
-        },
-        {},
-        {},
-      ]) as any;
-    });
-
-    const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock, {
-      management: managementPluginMock.createSetupContract(),
-    });
-    currentAppIdSubscriber?.next(WORKSPACE_FATAL_ERROR_APP_ID);
-    expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_DETAIL_APP_ID);
-    windowSpy.mockRestore();
   });
 
   it('#setup should register workspace list with a visible application and register to settingsAndSetup nav group', async () => {
@@ -368,43 +273,108 @@ describe('Workspace plugin', () => {
     expect(result.ui.AddCollaboratorsModal).toBe(AddCollaboratorsModal);
   });
 
-  it('#setup should handle fatal error when workspace is stale', async () => {
-    const setupMock = coreMock.createSetup();
-    const applicationStartMock = applicationServiceMock.createStartContract();
-    const chromeStartMock = chromeServiceMock.createStartContract();
+  it('#start should handle fatal error when workspace is stale', async () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
+          },
+        } as any)
+    );
 
-    setupMock.getStartServices.mockImplementation(() => {
-      return Promise.resolve([
-        {
-          application: applicationStartMock,
-          chrome: chromeStartMock,
-        },
-        {},
-        {},
-      ]) as any;
+    const setupMock = coreMock.createSetup();
+
+    const workspacePlugin = new WorkspacePlugin();
+
+    await workspacePlugin.setup(setupMock, {});
+
+    expect(WorkspaceClientMock).toBeCalledTimes(1);
+    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId', expect.any(Object));
+
+    const startMock = coreMock.createStart();
+    startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_DETAIL_APP_ID);
+    workspacePlugin.start(startMock, getMockDependencies());
+
+    startMock.workspaces.workspaceError$.next(WorkspaceError.WORKSPACE_IS_STALE);
+    startMock.workspaces.initialized$.next(true);
+
+    expect(startMock.application.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
+      replace: true,
+      state: {
+        error: 'Cannot find current workspace since it is stale',
+      },
+    });
+    windowSpy.mockRestore();
+  });
+
+  it('#start when workspace id is in url and enterWorkspace return success', async () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
+          },
+        } as any)
+    );
+    workspaceClientMock.enterWorkspace.mockResolvedValue({
+      success: true,
+      error: 'error',
     });
 
     const workspacePlugin = new WorkspacePlugin();
-    const workspaceError = new Error('Workspace is stale');
-    Object.assign(workspaceError, {
-      reason: WorkspaceError.WORKSPACE_IS_STALE,
-    });
-    setupMock.workspaces.workspaceError$.error(workspaceError);
+    await workspacePlugin.setup(getSetupMock(), {});
 
-    await workspacePlugin.setup(setupMock, {});
-    await waitFor(
-      () => {
-        expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
-          replace: true,
-          state: {
-            error: 'Cannot find current workspace since it is stale',
+    expect(WorkspaceClientMock).toBeCalledTimes(1);
+    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId', expect.any(Object));
+
+    const startMock = coreMock.createStart();
+    workspacePlugin.start(startMock, getMockDependencies());
+
+    // Simulate on error page but no errror case
+    startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_FATAL_ERROR_APP_ID);
+    startMock.workspaces.initialized$.next(true);
+
+    expect(startMock.application.navigateToApp).toBeCalledWith(WORKSPACE_DETAIL_APP_ID);
+    windowSpy.mockRestore();
+  });
+
+  it('#start when workspace id is in url and enterWorkspace return error', async () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
           },
-        });
-      },
-      {
-        container: document.body,
-      }
+        } as any)
     );
+
+    const workspacePlugin = new WorkspacePlugin();
+
+    await workspacePlugin.setup(getSetupMock(), {});
+
+    expect(WorkspaceClientMock).toBeCalledTimes(1);
+    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId', expect.any(Object));
+
+    const startMock = coreMock.createStart();
+    startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_DETAIL_APP_ID);
+    workspacePlugin.start(startMock, getMockDependencies());
+
+    // Simulate the workspace error case
+    startMock.workspaces.initialized$.next(true);
+    startMock.workspaces.workspaceError$.next('error');
+
+    expect(startMock.application.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
+      replace: true,
+      state: {
+        error: 'error',
+      },
+    });
+
+    windowSpy.mockRestore();
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {
@@ -479,9 +449,7 @@ describe('Workspace plugin', () => {
       name: 'foo',
     });
 
-    await waitFor(() => {
-      expect(navGroupUpdater$.next).toHaveBeenCalled();
-    });
+    expect(navGroupUpdater$.next).toHaveBeenCalled();
   });
 
   it('#start register workspace dropdown menu at left navigation bottom when start', async () => {
@@ -569,7 +537,7 @@ describe('Workspace plugin', () => {
     const mockApp = {
       id: 'dashboards',
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-    };
+    } as any;
 
     const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
 

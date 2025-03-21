@@ -8,13 +8,19 @@ import { i18n } from '@osd/i18n';
 
 import { recentWorkspaceManager } from '../recent_workspace_manager';
 import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_FATAL_ERROR_APP_ID } from '../../common/constants';
-import { getWorkspaceIdFromUrl } from '../../../../core/public/utils';
-import { ApplicationStart, ChromeStart, CoreStart, WorkspaceError } from '../../../../core/public';
+import {
+  ApplicationStart,
+  ChromeStart,
+  CoreSetup,
+  CoreStart,
+  WorkspaceError,
+} from '../../../../core/public';
+import { WorkspaceClient } from '../workspace_client';
 
 export class WorkspaceValidationService {
+  private workspaceClient?: WorkspaceClient;
+  private workspaceId: string | undefined;
   private workspaceValidationSubscription?: Subscription;
-
-  constructor() {}
 
   /**
    * Fatal error service does not support customized actions
@@ -28,17 +34,24 @@ export class WorkspaceValidationService {
     });
   }
 
-  setup() {}
+  async setup(core: CoreSetup, workspaceId: string) {
+    this.workspaceId = workspaceId;
 
-  start(core: CoreStart) {
-    const { workspaces, application, http, chrome } = core;
+    const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
+    await workspaceClient.init();
+    core.workspaces.setClient(workspaceClient);
+    this.workspaceClient = workspaceClient;
 
-    const workspaceError$ = workspaces.workspaceError$;
+    if (workspaceId) {
+      await this.workspaceClient.enterWorkspace(workspaceId, core.workspaces.workspaceError$);
+    }
+  }
 
-    const workspaceId = getWorkspaceIdFromUrl(window.location.href, http.basePath.getBasePath());
+  async start(core: CoreStart) {
+    const { workspaces, application, chrome } = core;
 
     this.workspaceValidationSubscription = combineLatest([
-      workspaceError$,
+      workspaces.workspaceError$,
       workspaces.initialized$,
     ]).subscribe({
       next: ([reason, initialized]) => {
@@ -47,7 +60,6 @@ export class WorkspaceValidationService {
            * If the workspace id is valid and user is currently on workspace_fatal_error page,
            * we should redirect user to overview page of workspace.
            */
-
           const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
             if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
               application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
@@ -55,7 +67,7 @@ export class WorkspaceValidationService {
             currentAppIdSubscription.unsubscribe();
           });
           // Add workspace id to recent workspaces.
-          recentWorkspaceManager.addRecentWorkspace(workspaceId);
+          recentWorkspaceManager.addRecentWorkspace(this.workspaceId!);
         }
         if (reason) {
           this.handleFatalError(
