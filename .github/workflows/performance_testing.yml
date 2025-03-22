@@ -13,8 +13,10 @@ on:
       - 'docs/**' # Ignore entire docs directory
 
 permissions:
+  contents: read
+  issues: write
   pull-requests: write
-
+  
 jobs:
   bundle-analyzer:
     runs-on: ubuntu-latest
