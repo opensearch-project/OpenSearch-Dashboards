@@ -281,6 +281,7 @@
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/makelogs": "^6.1.0",
     "@faker-js/faker": "^7.6.0",
+    "@lhci/cli": "^0.14.0",
     "@microsoft/api-documenter": "^7.13.78",
     "@microsoft/api-extractor": "^7.19.3",
     "@osd/babel-preset": "1.0.0",
@@ -476,6 +477,7 @@
     "postcss": "^8.4.31",
     "prettier": "^2.1.1",
     "prop-types": "^15.7.2",
+    "puppeteer": "^24.1.1",
     "react": "^16.14.0",
     "react-grid-layout": "^0.16.2",
     "react-markdown": "^4.3.1",
@@ -511,6 +513,7 @@
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.30.0",
     "vinyl-fs": "^3.0.3",
+    "wait-on": "^8.0.2",
     "xml2js": "^0.5.0",
     "xmlbuilder": "13.0.2",
     "zlib": "^1.0.5"
