@@ -1,0 +1,2 @@
+fix:
+- Update the vega version to fix security threat ([#9579](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9579))
