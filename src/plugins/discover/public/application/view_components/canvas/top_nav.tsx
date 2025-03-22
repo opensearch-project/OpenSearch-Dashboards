@@ -93,6 +93,10 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
       };
       setQueryStatus(result);
     });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [data$]);
 
   useEffect(() => {
