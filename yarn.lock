@@ -14527,12 +14527,10 @@ react-markdown@^4.3.1:
     unist-util-visit "^1.3.0"
     xtend "^4.0.1"
 
-react-monaco-editor@~0.52.0:
-  version "0.52.0"
-  resolved "https://registry.yarnpkg.com/react-monaco-editor/-/react-monaco-editor-0.52.0.tgz#69a7c450a22830064d2fc1b446674b1b7da0f540"
-  integrity sha512-jhQSekf2JABbcpN45gKZlWfTS0QcBOZAbAWKGyfqy/KEcMXTwJpCOYGcn2Ur11SUUxWJUzhKjE2fx9BGBc5S8g==
-  dependencies:
-    prop-types "^15.8.1"
+react-monaco-editor@0.58.0:
+  version "0.58.0"
+  resolved "https://registry.yarnpkg.com/react-monaco-editor/-/react-monaco-editor-0.58.0.tgz#da2285d27d29be1080b7558c25e0fc5050e3fdfb"
+  integrity sha512-e8JH0TQEzO96Wd/EXgzc9M9tQK1pxBECD+8GNob9slMURcCM36TiVrgc4topWCDGYxRuMj8IEkaX+s3eQcUUqw==
 
 react-redux@^7.1.0, react-redux@^7.2.0:
   version "7.2.6"
