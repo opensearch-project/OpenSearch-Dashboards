@@ -57,6 +57,7 @@ export const prometheusTypeConfig: DatasetTypeConfig = {
       {
         name: 'Time',
         type: 'date',
+        aggregatable: true,
       },
     ];
   },
