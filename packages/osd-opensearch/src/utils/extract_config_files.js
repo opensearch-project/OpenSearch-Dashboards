@@ -75,5 +75,5 @@ function copyFileSync(src, dest) {
     fs.mkdirSync(destPath, { recursive: true });
   }
 
-  fs.writeFileSync(dest, fs.readFileSync(src));
+  fs.writeFileSync(dest, fs.readFileSync(src, 'utf8'));
 }
