@@ -233,7 +233,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       selectionEnd: model.getOffsetAt(position),
       language: queryRef.current.language,
       indexPattern,
-      datasetType: dataset?.type,
+      dataset,
       position,
       services,
     });

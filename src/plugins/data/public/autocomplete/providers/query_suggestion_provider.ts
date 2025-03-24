@@ -29,6 +29,7 @@
  */
 
 import { monaco } from '@osd/monaco';
+import { Dataset } from 'src/plugins/data/common';
 import { IFieldType, IndexPattern } from '../../../common/index_patterns';
 import { IDataPluginServices } from '../../types';
 
@@ -48,7 +49,7 @@ export type QuerySuggestionGetFn = (
 export interface QuerySuggestionGetFnArgs {
   language: string;
   indexPattern: IndexPattern | undefined;
-  datasetType?: string;
+  dataset?: Dataset;
   query: string;
   selectionStart: number;
   selectionEnd: number;

@@ -25,28 +25,26 @@ export const getSuggestions = async ({
   selectionStart,
   selectionEnd,
   indexPattern,
-  datasetType,
+  dataset,
   position,
   query,
   services,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
-  if (!services || !services.appName || !indexPattern) return [];
+  if (!services || !services.appName || !indexPattern || !dataset) return [];
   try {
     const { lineNumber, column } = position || {};
     const suggestions = getOpenSearchPromQLAutoCompleteSuggestions(query, {
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
     });
+    const prometheusResourceClient = services.data.resourceClientFactory.create('prometheus');
 
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestMetrics) {
+      const metrics = await prometheusResourceClient.getMetricMetadata(dataset.id);
       finalSuggestions.push(
-        ...[
-          'prometheus_engine_queries',
-          'prometheus_http_requests_total',
-          'prometheus_sd_dns_lookups_total',
-        ].map((af) => ({
+        ...Object.keys(metrics).map((af) => ({
           text: `${af}`,
           type: monaco.languages.CompletionItemKind.Method,
           detail: SuggestionItemDetailsTags.AggregateFunction,
@@ -54,9 +52,13 @@ export const getSuggestions = async ({
       );
     }
 
-    if (suggestions.suggestLabels) {
+    if (suggestions.suggestLabels || suggestions.suggestLabels === '') {
+      const labels = await prometheusResourceClient.getLabels(
+        dataset.id,
+        suggestions.suggestLabels !== '' ? suggestions.suggestLabels : undefined
+      );
       finalSuggestions.push(
-        ...['job', 'method', 'instance'].map((af: string) => ({
+        ...labels.map((af: string) => ({
           text: `${af}`,
           type: monaco.languages.CompletionItemKind.File,
           detail: SuggestionItemDetailsTags.Table,
@@ -64,23 +66,23 @@ export const getSuggestions = async ({
       );
     }
 
-    const labelValueExample = new Map([
-      ['job', 'prometheus'],
-      ['method', 'GET'],
-      ['instance', 'localhost:9200'],
-    ]);
-    if (
-      suggestions.suggestLabelValues &&
-      labelValueExample.has(suggestions.suggestLabelValues.label ?? '')
-    ) {
-      finalSuggestions.push({
-        text: labelValueExample.get(suggestions.suggestLabelValues.label ?? 'instance')!,
-        type: monaco.languages.CompletionItemKind.File,
-        detail: SuggestionItemDetailsTags.Table,
-      });
+    if (suggestions.suggestLabelValues && suggestions.suggestLabelValues.label) {
+      // TODO: update when we can get metric name passed in
+      const labelValues = await prometheusResourceClient.getLabelValues(
+        dataset.id,
+        suggestions.suggestLabelValues.label
+      );
+      finalSuggestions.push(
+        ...labelValues.map((af: string) => ({
+          text: `${af}`,
+          type: monaco.languages.CompletionItemKind.File,
+          detail: SuggestionItemDetailsTags.Table,
+        }))
+      );
     }
 
     if (suggestions.suggestTimeRangeUnits) {
+      // TODO: fix duration unit suggestions
       finalSuggestions.push(
         ...['ms', 's', 'd'].map((af) => ({
           text: `${af}`,

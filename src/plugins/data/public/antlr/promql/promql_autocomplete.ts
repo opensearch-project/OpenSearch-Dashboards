@@ -115,7 +115,7 @@ export function enrichAutocompleteResult(
     );
 
     if (shouldSuggestLabels !== undefined) {
-      result.suggestLabels = metric;
+      result.suggestLabels = metric ?? ''; // explicitly set to empty string since labels can be suggested without a metric
     }
     if (shouldSuggestLabelValues) {
       result.suggestLabelValues = { metric, label };
