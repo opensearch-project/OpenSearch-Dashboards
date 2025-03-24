@@ -15,14 +15,10 @@ import {
   WorkspaceAttribute,
   OpenSearchDashboardsRequest,
   SavedObjectsClientContract,
-  CURRENT_USER_PLACEHOLDER,
+  CURRENT_WORKSPACE_PLACEHOLDER,
 } from '../../../../core/server';
 import { WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { Logger } from '../../../../core/server';
-import {
-  DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
-  DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID,
-} from '../../../data_source_management/common';
 
 /**
  * This saved object client wrapper offers methods to get and update UI settings considering
@@ -55,21 +51,12 @@ export class WorkspaceUiSettingsClientWrapper {
       options: SavedObjectsBaseOptions = {}
     ): Promise<SavedObject<T>> => {
       const { requestWorkspaceId } = getWorkspaceState(wrapperOptions.request);
+      // Getting ui settings within a workspace has higher priority if the same setting was defined in both places
+      // if requestWorkspaceId is given and the id is prefixed with placeholder,
+      // we just return the ui settings stored in workspace metadata
 
-      /**
-       * When getting ui settings within a workspace, it will combine the workspace ui settings with
-       * the global ui settings and workspace ui settings have higher priority if the same setting
-       * was defined in both places
-       */
-      if (type === 'config' && requestWorkspaceId) {
-        const configObject = await wrapperOptions.client.get<Record<string, any>>(
-          'config',
-          id,
-          options
-        );
-
+      if (type === 'config' && requestWorkspaceId && id.startsWith(CURRENT_WORKSPACE_PLACEHOLDER)) {
         let workspaceObject: SavedObject<WorkspaceAttribute> | null = null;
-
         try {
           workspaceObject = await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).get<
             WorkspaceAttribute
@@ -77,23 +64,15 @@ export class WorkspaceUiSettingsClientWrapper {
         } catch (e) {
           this.logger.error(`Unable to get workspaceObject with id: ${requestWorkspaceId}`);
         }
+        return {
+          attributes: workspaceObject?.attributes?.uiSettings || {},
+        } as SavedObject<T>;
+      }
 
-        const workspaceLevelDefaultDS =
-          workspaceObject?.attributes?.uiSettings?.[DEFAULT_DATA_SOURCE_UI_SETTINGS_ID];
-
-        const workspaceLevelDefaultIndex =
-          workspaceObject?.attributes?.uiSettings?.[DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID];
-
-        configObject.attributes = {
-          ...configObject.attributes,
-          ...(workspaceObject ? workspaceObject.attributes.uiSettings : {}),
-          // Workspace level default data source value should not extend global UIsettings value.
-          [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: workspaceLevelDefaultDS,
-          // Workspace level default index pattern value should not extend global UIsettings value.
-          [DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID]: workspaceLevelDefaultIndex,
-        };
-
-        return configObject as SavedObject<T>;
+      // since in UI_settings, we will get from all scope and merge
+      // if the requestWorkspaceId is undefined, we need to manually remove the placeholder to get global config
+      if (id.startsWith(CURRENT_WORKSPACE_PLACEHOLDER)) {
+        id = id.replace(`${CURRENT_WORKSPACE_PLACEHOLDER}_`, '');
       }
 
       return wrapperOptions.client.get(type, id, options);
@@ -108,16 +87,18 @@ export class WorkspaceUiSettingsClientWrapper {
       const { requestWorkspaceId } = getWorkspaceState(wrapperOptions.request);
 
       /**
-       * When updating ui settings within a workspace, it will update the workspace ui settings,
+       * When updating ui settings within a workspace, it will just update the workspace ui settings,
        * the global ui settings will remain unchanged.
-       * Skip updating workspace level setting if the request is updating user level setting specifically.
        */
-      if (type === 'config' && requestWorkspaceId && !id.startsWith(CURRENT_USER_PLACEHOLDER)) {
+      if (type === 'config' && requestWorkspaceId && id.startsWith(CURRENT_WORKSPACE_PLACEHOLDER)) {
+        id = id.replace(`${CURRENT_WORKSPACE_PLACEHOLDER}_`, '');
+
         const configObject = await wrapperOptions.client.get<Record<string, any>>(
           'config',
           id,
           options
         );
+
         const savedObjectsClient = this.getWorkspaceTypeEnabledClient(wrapperOptions.request);
 
         const workspaceObject = await savedObjectsClient.get<WorkspaceAttribute>(
@@ -140,6 +121,12 @@ export class WorkspaceUiSettingsClientWrapper {
         }
 
         return configObject as SavedObjectsUpdateResponse<T>;
+      }
+      // for the workspace scope settings
+      // if the requestWorkspaceId is not defined
+      // then we need to skip updating workspace level setting by manually removing the placeholder
+      if (id.startsWith(CURRENT_WORKSPACE_PLACEHOLDER)) {
+        id = id.replace(`${CURRENT_WORKSPACE_PLACEHOLDER}_`, '');
       }
       return wrapperOptions.client.update(type, id, attributes, options);
     };

@@ -360,6 +360,7 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
   CURRENT_USER_PLACEHOLDER,
+  CURRENT_WORKSPACE_PLACEHOLDER,
   UiSettingScope,
 } from './ui_settings';
 

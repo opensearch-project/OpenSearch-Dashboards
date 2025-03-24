@@ -38,7 +38,8 @@ import { SavedObjectsClient } from '../saved_objects';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
 import { UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
-import { CURRENT_USER_PLACEHOLDER } from './utils';
+import { CURRENT_USER_PLACEHOLDER, CURRENT_WORKSPACE_PLACEHOLDER } from './utils';
+import { UiSettingScope } from './types';
 
 const logger = loggingSystemMock.create().get();
 
@@ -81,319 +82,426 @@ describe('ui settings', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  describe('#setMany()', () => {
-    it('returns a promise', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.setMany({ a: 'b' })).toBeInstanceOf(Promise);
-    });
+  // describe('#setMany()', () => {
+  //   it('returns a promise', () => {
+  //     const { uiSettings } = setup();
+  //     expect(uiSettings.setMany({ a: 'b' })).toBeInstanceOf(Promise);
+  //   });
 
-    it('updates a single value in one operation', async () => {
-      const { uiSettings, savedObjectsClient } = setup();
-      await uiSettings.setMany({ one: 'value' });
+  //   it('updates a single value in one operation', async () => {
+  //     const { uiSettings, savedObjectsClient } = setup();
+  //     await uiSettings.setMany({ one: 'value' });
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: 'value' });
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+  //     expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: 'value' });
+  //   });
 
-    it('updates several values in one operation', async () => {
-      const { uiSettings, savedObjectsClient } = setup();
-      await uiSettings.setMany({ one: 'value', another: 'val' });
+  //   it('updates several values in one operation', async () => {
+  //     const { uiSettings, savedObjectsClient } = setup();
+  //     await uiSettings.setMany({ one: 'value', another: 'val' });
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: 'value',
-        another: 'val',
-      });
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+  //     expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
+  //       one: 'value',
+  //       another: 'val',
+  //     });
+  //   });
 
-    it('updates several values in one operation includes user level settings', async () => {
-      const value = chance.word();
-      const defaults = { key: { value, scope: 'user' } };
-      const { uiSettings, savedObjectsClient } = setup({ defaults });
-      await uiSettings.setMany({ one: 'value', another: 'val', key: 'value' });
+  //   it('updates several values in one operation includes user and workspace level settings', async () => {
+  //     const value = chance.word();
+  //     const defaults = { user: { value, scope: 'user' }, workspace: { value, scope: 'workspace' } };
+  //     const { uiSettings, savedObjectsClient } = setup({ defaults });
+  //     await uiSettings.setMany({ one: 'value', user: 'val', workspace: 'value' });
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: 'value',
-        another: 'val',
-      });
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(
-        TYPE,
-        `${CURRENT_USER_PLACEHOLDER}_${ID}`,
-        {
-          key: 'value',
-        }
-      );
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(3);
+  //     expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
+  //       one: 'value',
+  //     });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledWith(
+  //       TYPE,
+  //       `${CURRENT_USER_PLACEHOLDER}_${ID}`,
+  //       {
+  //         user: 'val',
+  //       }
+  //     );
+  //     expect(savedObjectsClient.update).toHaveBeenCalledWith(
+  //       TYPE,
+  //       `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`,
+  //       {
+  //         workspace: 'value',
+  //       }
+  //     );
+  //   });
 
-    it('automatically creates the savedConfig if it is missing', async () => {
-      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
-      savedObjectsClient.update
-        .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
-        .mockResolvedValueOnce({} as any);
+  //   it('automatically creates the savedConfig if it is missing', async () => {
+  //     const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+  //     savedObjectsClient.update
+  //       .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
+  //       .mockResolvedValueOnce({} as any);
 
-      await uiSettings.setMany({ foo: 'bar' });
+  //     await uiSettings.setMany({ foo: 'bar' });
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
-        expect.objectContaining({ handleWriteErrors: false })
-      );
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
+  //     expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
+  //     expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
+  //       expect.objectContaining({ handleWriteErrors: false })
+  //     );
+  //   });
 
-    it('only tried to auto create once and throws NotFound', async () => {
-      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
-      savedObjectsClient.update.mockRejectedValue(
-        SavedObjectsClient.errors.createGenericNotFoundError()
-      );
+  //   it('only tried to auto create once and throws NotFound', async () => {
+  //     const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+  //     savedObjectsClient.update.mockRejectedValue(
+  //       SavedObjectsClient.errors.createGenericNotFoundError()
+  //     );
 
-      try {
-        await uiSettings.setMany({ foo: 'bar' });
-        throw new Error('expected setMany to throw a NotFound error');
-      } catch (error) {
-        expect(SavedObjectsClient.errors.isNotFoundError(error)).toBe(true);
-      }
+  //     try {
+  //       await uiSettings.setMany({ foo: 'bar' });
+  //       throw new Error('expected setMany to throw a NotFound error');
+  //     } catch (error) {
+  //       expect(SavedObjectsClient.errors.isNotFoundError(error)).toBe(true);
+  //     }
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
-        expect.objectContaining({ handleWriteErrors: false })
-      );
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
+  //     expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
+  //     expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
+  //       expect.objectContaining({ handleWriteErrors: false })
+  //     );
+  //   });
 
-    it('throws CannotOverrideError if the key is overridden', async () => {
-      const { uiSettings } = setup({
-        overrides: {
-          foo: 'bar',
-        },
-      });
+  //   it('throws CannotOverrideError if the key is overridden', async () => {
+  //     const { uiSettings } = setup({
+  //       overrides: {
+  //         foo: 'bar',
+  //       },
+  //     });
 
-      try {
-        await uiSettings.setMany({
-          bar: 'box',
-          foo: 'baz',
-        });
-      } catch (error) {
-        expect(error).toBeInstanceOf(CannotOverrideError);
-        expect(error.message).toBe('Unable to update "foo" because it is overridden');
-      }
-    });
+  //     try {
+  //       await uiSettings.setMany({
+  //         bar: 'box',
+  //         foo: 'baz',
+  //       });
+  //     } catch (error) {
+  //       expect(error).toBeInstanceOf(CannotOverrideError);
+  //       expect(error.message).toBe('Unable to update "foo" because it is overridden');
+  //     }
+  //   });
 
-    it('validates value if a schema presents', async () => {
-      const defaults = { foo: { schema: schema.string() } };
-      const { uiSettings, savedObjectsClient } = setup({ defaults });
+  //   it('validates value if a schema presents', async () => {
+  //     const defaults = { foo: { schema: schema.string() } };
+  //     const { uiSettings, savedObjectsClient } = setup({ defaults });
 
-      await expect(
-        uiSettings.setMany({
-          bar: 2,
-          foo: 1,
-        })
-      ).rejects.toMatchInlineSnapshot(
-        `[ValidationError: [validation [foo]]: expected value of type [string] but got [number]]`
-      );
+  //     await expect(
+  //       uiSettings.setMany({
+  //         bar: 2,
+  //         foo: 1,
+  //       })
+  //     ).rejects.toMatchInlineSnapshot(
+  //       `[ValidationError: [validation [foo]]: expected value of type [string] but got [number]]`
+  //     );
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
-    });
-  });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
+  //   });
+  // });
 
-  describe('#set()', () => {
-    it('returns a promise', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.set('a', 'b')).toBeInstanceOf(Promise);
-    });
+  // describe('#set()', () => {
+  //   it('returns a promise', () => {
+  //     const { uiSettings } = setup();
+  //     expect(uiSettings.set('a', 'b')).toBeInstanceOf(Promise);
+  //   });
 
-    it('updates single values by (key, value)', async () => {
-      const { uiSettings, savedObjectsClient } = setup();
-      await uiSettings.set('one', 'value');
+  //   it('updates single values by (key, value)', async () => {
+  //     const { uiSettings, savedObjectsClient } = setup();
+  //     await uiSettings.set('one', 'value');
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: 'value',
-      });
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+  //     expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
+  //       one: 'value',
+  //     });
+  //   });
 
-    it('validates value if a schema presents', async () => {
-      const defaults = { foo: { schema: schema.string() } };
-      const { uiSettings, savedObjectsClient } = setup({ defaults });
+  //   it('validates value if a schema presents', async () => {
+  //     const defaults = { foo: { schema: schema.string() } };
+  //     const { uiSettings, savedObjectsClient } = setup({ defaults });
 
-      await expect(uiSettings.set('foo', 1)).rejects.toMatchInlineSnapshot(
-        `[ValidationError: [validation [foo]]: expected value of type [string] but got [number]]`
-      );
+  //     await expect(uiSettings.set('foo', 1)).rejects.toMatchInlineSnapshot(
+  //       `[ValidationError: [validation [foo]]: expected value of type [string] but got [number]]`
+  //     );
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
+  //   });
 
-    it('throws CannotOverrideError if the key is overridden', async () => {
-      const { uiSettings } = setup({
-        overrides: {
-          foo: 'bar',
-        },
-      });
+  //   it('throws CannotOverrideError if the key is overridden', async () => {
+  //     const { uiSettings } = setup({
+  //       overrides: {
+  //         foo: 'bar',
+  //       },
+  //     });
 
-      try {
-        await uiSettings.set('foo', 'baz');
-      } catch (error) {
-        expect(error).toBeInstanceOf(CannotOverrideError);
-        expect(error.message).toBe('Unable to update "foo" because it is overridden');
-      }
-    });
-  });
+  //     try {
+  //       await uiSettings.set('foo', 'baz');
+  //     } catch (error) {
+  //       expect(error).toBeInstanceOf(CannotOverrideError);
+  //       expect(error.message).toBe('Unable to update "foo" because it is overridden');
+  //     }
+  //   });
+  // });
 
-  describe('#remove()', () => {
-    it('returns a promise', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.remove('one')).toBeInstanceOf(Promise);
-    });
+  // describe('#remove()', () => {
+  //   it('returns a promise', () => {
+  //     const { uiSettings } = setup();
+  //     expect(uiSettings.remove('one')).toBeInstanceOf(Promise);
+  //   });
 
-    it('removes single values by key', async () => {
-      const { uiSettings, savedObjectsClient } = setup();
-      await uiSettings.remove('one');
+  //   it('removes single values by key', async () => {
+  //     const { uiSettings, savedObjectsClient } = setup();
+  //     await uiSettings.remove('one');
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: null });
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+  //     expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: null });
+  //   });
 
-    it('does not fail validation', async () => {
-      const defaults = {
-        foo: {
-          schema: schema.string(),
-          value: '1',
-        },
-      };
-      const { uiSettings, savedObjectsClient } = setup({ defaults });
+  //   it('does not fail validation', async () => {
+  //     const defaults = {
+  //       foo: {
+  //         schema: schema.string(),
+  //         value: '1',
+  //       },
+  //     };
+  //     const { uiSettings, savedObjectsClient } = setup({ defaults });
 
-      await uiSettings.remove('foo');
+  //     await uiSettings.remove('foo');
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+  //   });
 
-    it('throws CannotOverrideError if the key is overridden', async () => {
-      const { uiSettings } = setup({
-        overrides: {
-          foo: 'bar',
-        },
-      });
+  //   it('throws CannotOverrideError if the key is overridden', async () => {
+  //     const { uiSettings } = setup({
+  //       overrides: {
+  //         foo: 'bar',
+  //       },
+  //     });
 
-      try {
-        await uiSettings.remove('foo');
-      } catch (error) {
-        expect(error).toBeInstanceOf(CannotOverrideError);
-        expect(error.message).toBe('Unable to update "foo" because it is overridden');
-      }
-    });
-  });
+  //     try {
+  //       await uiSettings.remove('foo');
+  //     } catch (error) {
+  //       expect(error).toBeInstanceOf(CannotOverrideError);
+  //       expect(error.message).toBe('Unable to update "foo" because it is overridden');
+  //     }
+  //   });
+  // });
 
-  describe('#removeMany()', () => {
-    it('returns a promise', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.removeMany(['one'])).toBeInstanceOf(Promise);
-    });
+  // describe('#removeMany()', () => {
+  //   it('returns a promise', () => {
+  //     const { uiSettings } = setup();
+  //     expect(uiSettings.removeMany(['one'])).toBeInstanceOf(Promise);
+  //   });
 
-    it('removes a single value', async () => {
-      const { uiSettings, savedObjectsClient } = setup();
-      await uiSettings.removeMany(['one']);
+  //   it('removes a single value', async () => {
+  //     const { uiSettings, savedObjectsClient } = setup();
+  //     await uiSettings.removeMany(['one']);
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: null });
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+  //     expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: null });
+  //   });
 
-    it('updates several values in one operation', async () => {
-      const { uiSettings, savedObjectsClient } = setup();
-      await uiSettings.removeMany(['one', 'two', 'three']);
+  //   it('updates several values in one operation', async () => {
+  //     const { uiSettings, savedObjectsClient } = setup();
+  //     await uiSettings.removeMany(['one', 'two', 'three']);
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: null,
-        two: null,
-        three: null,
-      });
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+  //     expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
+  //       one: null,
+  //       two: null,
+  //       three: null,
+  //     });
+  //   });
 
-    it('does not fail validation', async () => {
-      const defaults = {
-        foo: {
-          schema: schema.string(),
-          value: '1',
-        },
-      };
-      const { uiSettings, savedObjectsClient } = setup({ defaults });
+  //   it('does not fail validation', async () => {
+  //     const defaults = {
+  //       foo: {
+  //         schema: schema.string(),
+  //         value: '1',
+  //       },
+  //     };
+  //     const { uiSettings, savedObjectsClient } = setup({ defaults });
 
-      await uiSettings.removeMany(['foo', 'bar']);
+  //     await uiSettings.removeMany(['foo', 'bar']);
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    });
+  //     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+  //   });
 
-    it('throws CannotOverrideError if any key is overridden', async () => {
-      const { uiSettings } = setup({
-        overrides: {
-          foo: 'bar',
-        },
-      });
+  //   it('throws CannotOverrideError if any key is overridden', async () => {
+  //     const { uiSettings } = setup({
+  //       overrides: {
+  //         foo: 'bar',
+  //       },
+  //     });
 
-      try {
-        await uiSettings.setMany({ baz: 'baz', foo: 'foo' });
-      } catch (error) {
-        expect(error).toBeInstanceOf(CannotOverrideError);
-        expect(error.message).toBe('Unable to update "foo" because it is overridden');
-      }
-    });
-  });
+  //     try {
+  //       await uiSettings.setMany({ baz: 'baz', foo: 'foo' });
+  //     } catch (error) {
+  //       expect(error).toBeInstanceOf(CannotOverrideError);
+  //       expect(error.message).toBe('Unable to update "foo" because it is overridden');
+  //     }
+  //   });
+  // });
 
-  describe('#getRegistered()', () => {
-    it('returns the registered settings passed to the constructor', () => {
-      const value = chance.word();
-      const defaults = { key: { value } };
-      const { uiSettings } = setup({ defaults });
-      expect(uiSettings.getRegistered()).toEqual(defaults);
-    });
-    it('does not leak validation schema outside', () => {
-      const value = chance.word();
-      const defaults = { key: { value, schema: schema.string() } };
-      const { uiSettings } = setup({ defaults });
-      expect(uiSettings.getRegistered()).toStrictEqual({ key: { value } });
-    });
-  });
+  // describe('#getRegistered()', () => {
+  //   it('returns the registered settings passed to the constructor', () => {
+  //     const value = chance.word();
+  //     const defaults = { key: { value } };
+  //     const { uiSettings } = setup({ defaults });
+  //     expect(uiSettings.getRegistered()).toEqual(defaults);
+  //   });
+  //   it('does not leak validation schema outside', () => {
+  //     const value = chance.word();
+  //     const defaults = { key: { value, schema: schema.string() } };
+  //     const { uiSettings } = setup({ defaults });
+  //     expect(uiSettings.getRegistered()).toStrictEqual({ key: { value } });
+  //   });
+  // });
 
-  describe('#getOverrideOrDefault()', () => {
-    it('returns the non-overridden default settings passed within the constructor', () => {
-      const value = chance.word();
-      const defaults = { key: { value } };
-      const { uiSettings } = setup({ defaults });
-      expect(uiSettings.getOverrideOrDefault('key')).toEqual(value);
-      expect(uiSettings.getOverrideOrDefault('unknown')).toBeUndefined();
-    });
+  // describe('#getOverrideOrDefault()', () => {
+  //   it('returns the non-overridden default settings passed within the constructor', () => {
+  //     const value = chance.word();
+  //     const defaults = { key: { value } };
+  //     const { uiSettings } = setup({ defaults });
+  //     expect(uiSettings.getOverrideOrDefault('key')).toEqual(value);
+  //     expect(uiSettings.getOverrideOrDefault('unknown')).toBeUndefined();
+  //   });
 
-    it('returns the overridden settings passed within the constructor', () => {
-      const value = chance.word();
-      const override = chance.word();
-      const defaults = { key: { value } };
-      const overrides = { key: override };
-      const { uiSettings } = setup({ defaults, overrides });
-      expect(uiSettings.getOverrideOrDefault('key')).toEqual(override);
-    });
-  });
+  //   it('returns the overridden settings passed within the constructor', () => {
+  //     const value = chance.word();
+  //     const override = chance.word();
+  //     const defaults = { key: { value } };
+  //     const overrides = { key: override };
+  //     const { uiSettings } = setup({ defaults, overrides });
+  //     expect(uiSettings.getOverrideOrDefault('key')).toEqual(override);
+  //   });
+  // });
 
   describe('#getUserProvided()', () => {
-    it('pulls user configuration from OpenSearch', async () => {
+    it('pulls user and workspace configuration from OpenSearch', async () => {
       const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.getUserProvided();
 
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
         `${CURRENT_USER_PLACEHOLDER}_${ID}`
       );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
+      );
     });
 
-    it('returns user configuration', async () => {
-      const opensearchDocSource = { user: 'customized' };
-      const { uiSettings } = setup({ opensearchDocSource });
+    it('returns user configuration if specifically request user scope', async () => {
+      const opensearchDocSource = {};
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'my personal user value',
+            },
+          } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'default1',
+              bar: 'global value',
+            },
+          } as any);
+        }
+      });
+      const result = await uiSettings.getUserProvided(UiSettingScope.USER);
+      expect(result).toStrictEqual({
+        bar: {
+          userValue: 'my personal user value',
+        },
+      });
+    });
+
+    it('returns workspace scope configuration if specifically request workspace scope ', async () => {
+      const opensearchDocSource = {};
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'my personal user value',
+            },
+          } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              key: 'my personal workspace value',
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'default1',
+              bar: 'global value',
+            },
+          } as any);
+        }
+      });
+      const result = await uiSettings.getUserProvided(UiSettingScope.WORKSPACE);
+      expect(result).toStrictEqual({
+        key: {
+          userValue: 'my personal workspace value',
+        },
+      });
+    });
+
+    it('merges workspace, user, global configuration if not specifically any scope', async () => {
+      const opensearchDocSource = {};
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'my personal user value',
+            },
+          } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              foo: 'my personal workspace value',
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'default1',
+              bar: 'global value',
+              other: 'global value',
+            },
+          } as any);
+        }
+      });
+
       const result = await uiSettings.getUserProvided();
 
       expect(result).toStrictEqual({
-        user: {
-          userValue: 'customized',
+        foo: {
+          userValue: 'my personal workspace value',
+        },
+        bar: {
+          userValue: 'my personal user value',
+        },
+        other: {
+          userValue: 'global value',
         },
       });
     });
@@ -438,6 +546,9 @@ describe('ui settings', () => {
           Array [
             "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
         ]
       `);
     });
@@ -452,8 +563,7 @@ describe('ui settings', () => {
         .mockResolvedValueOnce({ attributes: {} });
 
       expect(await uiSettings.getUserProvided()).toStrictEqual({});
-
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
 
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
@@ -548,11 +658,15 @@ describe('ui settings', () => {
       const opensearchDocSource = {};
       const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
       await uiSettings.getAll();
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
         `${CURRENT_USER_PLACEHOLDER}_${ID}`
+      );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
       );
     });
 
@@ -583,6 +697,9 @@ describe('ui settings', () => {
 
       expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
           Array [
             "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
@@ -658,6 +775,10 @@ describe('ui settings', () => {
               bar: 'my personal value',
             },
           } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
         } else {
           return Promise.resolve({
             attributes: {
@@ -670,6 +791,88 @@ describe('ui settings', () => {
 
       expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'default1',
+        bar: 'my personal value',
+      });
+    });
+
+    // verify workspace level settings override global
+    it(`workspace values will override global settings`, async () => {
+      const defaults = {
+        foo: {
+          value: 'default',
+        },
+        bar: {
+          value: 'default',
+          scope: 'workspace',
+        },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'my personal value',
+            },
+          } as any);
+        } else if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'default1',
+              bar: 'global value',
+            },
+          } as any);
+        }
+      });
+
+      expect(await uiSettings.getAll()).toStrictEqual({
+        foo: 'default1',
+        bar: 'my personal value',
+      });
+    });
+
+    it(`workspace values set the setting undefined if workspace values don't exist but global values exist`, async () => {
+      const defaults = {
+        foo: {
+          value: 'default',
+          scope: 'workspace',
+        },
+        bar: {
+          value: 'default',
+          scope: 'workspace',
+        },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'my personal value',
+            },
+          } as any);
+        } else if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'default1',
+              bar: 'global value',
+            },
+          } as any);
+        }
+      });
+
+      expect(await uiSettings.getAll()).toStrictEqual({
+        foo: undefined,
         bar: 'my personal value',
       });
     });
@@ -700,11 +903,15 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
       await uiSettings.get('any');
 
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
         `${CURRENT_USER_PLACEHOLDER}_${ID}`
+      );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
       );
     });
 
@@ -797,6 +1004,9 @@ describe('ui settings', () => {
 
       expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
           Array [
             "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],

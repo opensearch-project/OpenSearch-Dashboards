@@ -208,6 +208,18 @@ export function getUiSettings(
       schema: schema.nullable(schema.string()),
       scope: workspaceEnabled ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL,
     },
+    defaultDataSource: {
+      name: i18n.translate('data.advancedSettings.defaultDataSourceTitle', {
+        defaultMessage: 'Default Data Source',
+      }),
+      value: null,
+      type: 'string',
+      description: i18n.translate('data.advancedSettings.defaultDataSource', {
+        defaultMessage: 'The data source to access if no data source is set',
+      }),
+      schema: schema.nullable(schema.string()),
+      scope: workspaceEnabled ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL,
+    },
     [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: {
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
