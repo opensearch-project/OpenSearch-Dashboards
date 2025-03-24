@@ -175,7 +175,7 @@ export class UiSettingsClient implements IUiSettingsClient {
             for (const [key, value] of Object.entries(copy)) {
               // If the key belongs to workspace scope, exists in userProvided and has value, set it to undefined first
               if (this.workspaceLevelSettingsKeys.includes(key) && value !== null) {
-                copy[key].userValue = undefined as T;
+                copy[key].userValue = undefined;
               }
             }
           }
