@@ -36,13 +36,18 @@ export function registerResourceRoutes(router: IRouter, defaultClient: ILegacyCl
     async (context, request, response) => {
       const { dataConnectionId, dataConnectionType, resourceType, resourceName } = request.params;
       if (dataConnectionType === 'prometheus') {
-        const resources = await prometheusManager.getResources(context, request, {
+        const resourcesResponse = await prometheusManager.getResources(context, request, {
           dataSourceName: dataConnectionId,
           resourceType,
           resourceName,
           query: request.query,
         } as PrometheusResourceQuery);
-        return response.ok({ body: resources }) as any;
+
+        if (resourcesResponse.status === 'failed') {
+          return response.internalError();
+        }
+
+        return response.ok({ body: resourcesResponse }) as any;
       }
     }
   );
