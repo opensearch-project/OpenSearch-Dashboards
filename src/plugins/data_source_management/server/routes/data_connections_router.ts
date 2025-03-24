@@ -222,7 +222,9 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
         let dataConnectionsresponse;
         if (dataSourceEnabled && dataSourceMDSId) {
           const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
-          dataConnectionsresponse = await client.callAPI('ppl.getDataConnections');
+          dataConnectionsresponse = await client.callAPI('ppl.getDataConnections', {
+            requestTimeout: 5000, // Enforce timeout to avoid hanging requests
+          });
         } else {
           dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
