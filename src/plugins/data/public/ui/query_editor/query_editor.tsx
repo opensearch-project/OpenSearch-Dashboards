@@ -233,7 +233,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       selectionEnd: model.getOffsetAt(position),
       language: queryRef.current.language,
       indexPattern,
-      datasetType: dataset?.type,
+      dataset,
       position,
       services,
     });
@@ -268,6 +268,14 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       incomplete: false,
     };
   };
+
+  const triggerCharacters = (() => {
+    // TODO: move into autocomplete service?
+    if (queryRef.current.language === 'PROMQL') {
+      return [' ', '(', '{', '[', '=', '"', ','];
+    }
+    return [' '];
+  })();
 
   const useQueryEditor = query.language !== 'kuery' && query.language !== 'lucene';
 
@@ -340,7 +348,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         </EuiButtonEmpty>,
       ],
     },
-    provideCompletionItems,
+    languageProviders: {
+      provideCompletionItems,
+      triggerCharacters,
+    },
     queryStatus: props.queryStatus,
   };
 
@@ -363,7 +374,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         onSubmit(newQuery, timefilter.getTime());
       });
     },
-    provideCompletionItems,
+    languageProviders: {
+      provideCompletionItems,
+      triggerCharacters,
+    },
     prepend: props.prepend,
     footerItems: {
       start: [

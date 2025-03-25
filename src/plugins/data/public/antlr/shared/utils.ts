@@ -209,7 +209,7 @@ const singleParseQuery = <
 
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
-  getParseTree(parser);
+  const tree = getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);
   core.ignoredTokens = ignoredTokens;
@@ -242,7 +242,15 @@ const singleParseQuery = <
     suggestKeywords,
   };
 
-  return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
+  return enrichAutocompleteResult(
+    result,
+    rules,
+    tokenStream,
+    cursorTokenIndex,
+    cursor,
+    query,
+    tree
+  );
 };
 
 export const parseQuery = <

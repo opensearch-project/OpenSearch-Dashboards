@@ -35,7 +35,7 @@ export const getSuggestions = async ({
   selectionStart,
   selectionEnd,
   indexPattern,
-  datasetType,
+  dataset,
   position,
   query,
   services,
@@ -111,7 +111,7 @@ export const getSuggestions = async ({
                   indexPattern.fields.find(
                     (field) => field.name === suggestions.suggestValuesForColumn
                   ),
-                  datasetType
+                  dataset?.type
                 ).catch(() => []),
                 (val: any) => (typeof val === 'string' ? `'${val}' ` : `${val} `)
               )
