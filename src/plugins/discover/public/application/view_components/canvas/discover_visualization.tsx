@@ -5,7 +5,7 @@
 
 import './discover_visualization.scss';
 
-import { EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -14,6 +14,8 @@ import { useDiscoverContext } from '../context';
 import { SearchData } from '../utils';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
 import { useVisualizationType } from '../utils/use_visualization_types';
+import { showSaveModal } from '../../../../../saved_objects/public';
+import { SavedObjectSaveModal } from './discover_visualization_save_modal';
 
 export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -69,13 +71,39 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
     };
   }, [queryString, services.data.query.state$]);
 
+  const saveAction = () => {
+    const onSave = () => {};
+    const saveModal = (
+      <SavedObjectSaveModal
+        onSave={onSave}
+        onClose={() => {}}
+        description={'Save your metric visualization and add it to a dashboard.'}
+        dashboards={[
+          { id: 'dashboard1', title: 'Dashboard 1' },
+          { id: 'dashboard2', title: 'Dashboard 2' },
+        ]}
+      />
+    );
+    showSaveModal(saveModal, services.i18n.Context);
+  };
+
   return enableViz && expression ? (
     <EuiPanel className="discoverVisualization" data-test-subj="visualizationLoader">
-      <ReactExpressionRenderer
-        key={JSON.stringify(searchContext) + expression}
-        expression={expression}
-        searchContext={searchContext}
-      />
+      <div style={{ position: 'relative', width: '100%', height: '100%', flex: '1 1 auto' }}>
+        <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 100 }}>
+          <EuiButton size="s" onClick={saveAction}>
+            Add to Dashboard
+          </EuiButton>
+        </div>
+
+        <div style={{ width: '100%', height: '100%', paddingTop: '40px' }}>
+          <ReactExpressionRenderer
+            key={JSON.stringify(searchContext) + expression}
+            expression={expression}
+            searchContext={searchContext}
+          />
+        </div>
+      </div>
     </EuiPanel>
   ) : (
     <></>
