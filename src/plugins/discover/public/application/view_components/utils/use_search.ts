@@ -34,16 +34,11 @@ import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { trackQueryMetric } from '../../../ui_metric';
 
-function isJSONString(text: any) {
-  if (typeof text !== 'string') {
-    return false;
-  }
-
+function safeJSONParse(text: any) {
   try {
-    JSON.parse(text);
-    return true;
+    return JSON.parse(text);
   } catch (error) {
-    return false;
+    return text;
   }
 }
 
@@ -69,11 +64,13 @@ export interface SearchData {
       error?: {
         error?: string;
         message?: {
-          error?: {
-            reason?: string;
-            details: string;
-            type?: string;
-          };
+          error?:
+            | string
+            | {
+                reason?: string;
+                details: string;
+                type?: string;
+              };
           status?: number;
         };
         statusCode?: number;
@@ -338,22 +335,54 @@ export const useSearch = (services: DiscoverViewServices) => {
         data.search.showError(error as Error);
         return;
       }
+      // TODO: Create a unify error response at server side
       let errorBody;
       try {
+        // Normal search strategy failed query, return HttpFetchError
+        /*
+          @type {HttpFetchError}
+          {
+            body: {
+              error: string,
+              statusCode: number,
+              message: JSONstring,
+            },
+            ...
+          }
+        */
         errorBody = JSON.parse(error.body);
       } catch (e) {
         if (error.body) {
           errorBody = error.body;
         } else {
+          // Async search strategy failed query, return Error
+          /*
+            @type {Error}
+            {
+              message: string,
+              stack: string,
+            }
+          */
           errorBody = error;
         }
       }
 
-      // Currently error message is sent as encoded JSON string, which requires extra parsing
-      // TODO: Confirm error contract
-      if (isJSONString(errorBody.message)) {
-        errorBody.message = JSON.parse(errorBody.message);
-      }
+      // Error message can be sent as encoded JSON string, which requires extra parsing
+      /*
+        errorBody: {
+          error: string,
+          statusCode: number,
+          message: {
+            error: {
+              reason: string;
+              details: string;
+              type: string;
+            };
+            status: number;
+          }
+        }
+      */
+      errorBody.message = safeJSONParse(errorBody.message);
 
       data$.next({
         status: ResultStatus.ERROR,
