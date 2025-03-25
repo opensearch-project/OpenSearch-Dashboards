@@ -76,7 +76,10 @@ export function processVisitedRules(
         shouldSuggestLabelValues = true;
         break;
       case PromQLParser.RULE_duration:
-        suggestTimeRangeUnits = true;
+        // duration units should be suggested if the last character is a decimal, if the previous
+        // input is invalid it will not enter duration rule
+        if (/[0-9]$/.test(tokenStream.get(cursorTokenIndex)?.text ?? ''))
+          suggestTimeRangeUnits = true;
         break;
     }
   }

@@ -81,13 +81,13 @@ export const getSuggestions = async ({
       );
     }
 
-    if (suggestions.suggestTimeRangeUnits) {
-      // TODO: fix duration unit suggestions
+    if (suggestions.suggestTimeRangeUnits && lineNumber && column) {
       finalSuggestions.push(
-        ...['ms', 's', 'd'].map((af) => ({
+        ...['ms', 's', 'm', 'h', 'd', 'w', 'y'].map((af) => ({
           text: `${af}`,
           type: monaco.languages.CompletionItemKind.Constant,
           detail: SuggestionItemDetailsTags.Command,
+          replacePosition: new monaco.Range(lineNumber, column, lineNumber, column), // remove duration token association
         }))
       );
     }

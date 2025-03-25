@@ -43,11 +43,13 @@ options {
     caseInsensitive = true;
 }
 
-fragment NUMERAL: [0-9]+ ('.' [0-9]+)?;
+fragment NUMERAL: [0-9]* '.'? [0-9]+;
 
-fragment SCIENTIFIC_NUMBER: NUMERAL ('e' [-+]? NUMERAL)?;
+fragment SCIENTIFIC_NUMBER: NUMERAL ([e] [-+]? [0-9]+)?;
 
-NUMBER: NUMERAL | SCIENTIFIC_NUMBER;
+fragment HEXADECIMAL: '0' [x] [0-9a-f]+;
+
+NUMBER: [-+]? NUMERAL | SCIENTIFIC_NUMBER | HEXADECIMAL | 'nan' | 'inf';
 
 STRING: '\'' (~('\'' | '\\') | '\\' .)* '\'' | '"' (~('"' | '\\') | '\\' .)* '"';
 
