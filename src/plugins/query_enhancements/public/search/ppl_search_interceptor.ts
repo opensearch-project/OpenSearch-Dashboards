@@ -95,6 +95,11 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     const datasetService = queryString.getDatasetService();
     if (datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker === false)
       return query;
+    if (
+      typeof query.query === 'string' &&
+      !query.query.toLowerCase().replace(/\s/g, '').startsWith('source=')
+    )
+      return query;
 
     const [baseQuery, ...afterPipeParts] = query.query.split('|');
     const afterPipe = afterPipeParts.length > 0 ? ` | ${afterPipeParts.join('|').trim()}` : '';
