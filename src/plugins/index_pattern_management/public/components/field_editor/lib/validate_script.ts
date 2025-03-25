@@ -38,6 +38,7 @@ export const executeScript = async ({
   query,
   additionalFields = [],
   http,
+  dataSourceId,
 }: ExecuteScriptParams): Promise<ExecuteScriptResult> => {
   return http
     .post('/internal/index-pattern-management/preview_scripted_field', {
@@ -48,6 +49,9 @@ export const executeScript = async ({
         query,
         additionalFields,
       }),
+      query: {
+        dataSourceId,
+      },
     })
     .then((res) => ({
       status: res.statusCode,
@@ -64,17 +68,20 @@ export const isScriptValid = async ({
   script,
   indexPatternTitle,
   http,
+  dataSourceId,
 }: {
   name: string;
   script: string;
   indexPatternTitle: string;
   http: HttpStart;
+  dataSourceId?: string;
 }) => {
   const scriptResponse = await executeScript({
     name,
     script,
     indexPatternTitle,
     http,
+    dataSourceId,
   });
 
   if (scriptResponse.status !== 200) {
