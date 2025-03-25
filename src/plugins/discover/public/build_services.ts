@@ -59,6 +59,7 @@ import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataExplorerServices } from '../../data_explorer/public';
 import { Storage } from '../../opensearch_dashboards_utils/public';
+import { createSavedMetricLoader, SavedMetric } from './saved_metric_viz';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -81,6 +82,7 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
+  getSavedMetricById: (id?: string) => Promise<SavedMetric>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
   storage: Storage;
@@ -99,6 +101,7 @@ export function buildServices(
     overlays: core.overlays,
   };
   const savedObjectService = createSavedSearchesLoader(services);
+  const savedMetricService = createSavedMetricLoader(services);
   const storage = new Storage(localStorage);
 
   return {
@@ -112,6 +115,7 @@ export function buildServices(
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
+    getSavedMetricById: async (id?: string) => savedMetricService.get(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,

@@ -51,8 +51,10 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export interface OnSaveProps {
-  newTitle: string;
-  newDescription: string;
+  title: string;
+  selectedOption: string;
+  newDashboardTitle: string;
+  existingDashboardTitle: string;
 }
 
 interface Props {
@@ -195,8 +197,10 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
   private saveSavedObject = async () => {
     await this.props.onSave({
-      newTitle: this.state.title,
-      newDescription: this.state.visualizationDescription,
+      title: this.state.title,
+      selectedOption: this.state.selectedOption,
+      newDashboardTitle: this.state.newDashboardTitle,
+      existingDashboardTitle: this.state.existingDashboardTitle,
     });
   };
 
