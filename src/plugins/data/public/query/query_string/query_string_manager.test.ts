@@ -234,6 +234,23 @@ describe('QueryStringManager', () => {
       expect(updateCount).toBe(1); // Should not increment
     });
 
+    test('wiil trigger updates when set force to true even new query equals current query', () => {
+      const initialQuery = { query: 'test', language: 'sql' };
+      let updateCount = 0;
+
+      // Subscribe to updates
+      service.getUpdates$().subscribe(() => {
+        updateCount++;
+      });
+
+      service.setQuery(initialQuery);
+      expect(updateCount).toBe(1);
+
+      // Set same query again
+      service.setQuery({ ...initialQuery }, true);
+      expect(updateCount).toBe(2); // Should increment
+    });
+
     test('handles undefined supportedLanguages gracefully', () => {
       service.setQuery({ query: 'test', language: 'sql' });
 

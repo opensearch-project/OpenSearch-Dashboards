@@ -165,10 +165,12 @@ export class QueryStringManager {
    * Updates the query.
    * @param {Query} query
    */
-  public setQuery = (query: Partial<Query>) => {
+  public setQuery = (query: Partial<Query>, force: boolean = false) => {
     const curQuery = this.query$.getValue();
     let newQuery = { ...curQuery, ...query };
-    if (!isEqual(curQuery, newQuery)) {
+    // If the current query is different from the new query, or the user explicitly set force to true,
+    // then proceed with updating the query.
+    if (!isEqual(curQuery, newQuery) || force) {
       // Check if dataset changed and if new dataset has language restrictions
       if (newQuery.dataset && !isEqual(curQuery.dataset, newQuery.dataset)) {
         // Get supported languages for the dataset
