@@ -51,12 +51,11 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
     async (context, request, res) => {
       const { index, name, script, query, additionalFields } = request.body;
       const { dataSourceId } = request.query;
-      const client =
-        dataSourceId && context.dataSource
-          ? await context.dataSource.opensearch.getClient(dataSourceId)
-          : context.core.opensearch.client.asCurrentUser;
-
       try {
+        const client =
+          dataSourceId && context.dataSource
+            ? await context.dataSource.opensearch.getClient(dataSourceId)
+            : context.core.opensearch.client.asCurrentUser;
         const response = await client.search({
           index,
           _source: additionalFields && additionalFields.length > 0 ? additionalFields : undefined,
