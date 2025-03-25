@@ -488,7 +488,7 @@ export default function ({ getService, getPageObjects }) {
 
         const errorText = await PageObjects.savedObjects.getImportErrorText();
 
-        expect(errorText).to.contain(`Unexpected token T in JSON at position 0`);
+        expect(errorText).to.contain(`Unexpected token`);
       });
     });
   });

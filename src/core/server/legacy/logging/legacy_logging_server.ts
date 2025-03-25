@@ -29,7 +29,7 @@
  */
 
 import { ServerExtType } from '@hapi/hapi';
-import Podium from '@hapi/podium';
+import Podium = require('@hapi/podium');
 import { cleanControlSequences } from '@osd/std';
 // @ts-expect-error: implicit any for JS file
 import { Config } from '../../../../legacy/server/config';
