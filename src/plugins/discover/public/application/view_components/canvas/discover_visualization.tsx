@@ -105,40 +105,40 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
         });
         return { error };
       }
-      const saveModal = (
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => {}}
-          description={'Save your metric visualization and add it to a dashboard.'}
-          dashboards={[
-            { id: 'dashboard1', title: 'Dashboard 1' },
-            { id: 'dashboard2', title: 'Dashboard 2' },
-          ]}
-        />
-      );
-      showSaveModal(saveModal, services.i18n.Context);
     };
-
-    return enableViz && expression ? (
-      <EuiPanel className="discoverVisualization" data-test-subj="visualizationLoader">
-        <div style={{ position: 'relative', width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 100 }}>
-            <EuiButton size="s" onClick={saveAction}>
-              Add to Dashboard
-            </EuiButton>
-          </div>
-
-          <div style={{ width: '100%', height: '100%', paddingTop: '40px' }}>
-            <ReactExpressionRenderer
-              key={JSON.stringify(searchContext) + expression}
-              expression={expression}
-              searchContext={searchContext}
-            />
-          </div>
-        </div>
-      </EuiPanel>
-    ) : (
-      <></>
+    const saveModal = (
+      <SavedObjectSaveModal
+        onSave={onSave}
+        onClose={() => {}}
+        description={'Save your metric visualization and add it to a dashboard.'}
+        dashboards={[
+          { id: 'dashboard1', title: 'Dashboard 1' },
+          { id: 'dashboard2', title: 'Dashboard 2' },
+        ]}
+      />
     );
+    showSaveModal(saveModal, services.i18n.Context);
   };
+
+  return enableViz && expression ? (
+    <EuiPanel className="discoverVisualization" data-test-subj="visualizationLoader">
+      <div style={{ position: 'relative', width: '100%', height: '100%', flex: '1 1 auto' }}>
+        <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 100 }}>
+          <EuiButton size="s" onClick={saveAction}>
+            Add to Dashboard
+          </EuiButton>
+        </div>
+
+        <div style={{ width: '100%', height: '100%', paddingTop: '40px' }}>
+          <ReactExpressionRenderer
+            key={JSON.stringify(searchContext) + expression}
+            expression={expression}
+            searchContext={searchContext}
+          />
+        </div>
+      </div>
+    </EuiPanel>
+  ) : (
+    <></>
+  );
 };
