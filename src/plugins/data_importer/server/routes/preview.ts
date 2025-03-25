@@ -92,7 +92,7 @@ export function previewRoute(
       const documents: Array<Record<string, any>> = [];
       try {
         documents.push(
-          (
+          ...(
             await parser.parseFile(file, request.query.previewCount, {
               delimiter: request.query.delimiter,
             })
