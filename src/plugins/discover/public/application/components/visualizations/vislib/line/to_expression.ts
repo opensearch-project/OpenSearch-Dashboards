@@ -82,6 +82,11 @@ const createVegaSpec = (rows: Row[]) => {
     '#BAB0AC', // gray
   ];
 
+  const legendLabelMap: Record<string, string> = {};
+  for (let i = 1; i < columns.length; i++) {
+    legendLabelMap[columns[i].name] = columns[i].field;
+  }
+
   for (let i = 1; i < columns.length; i++) {
     const yAxisParam = {
       field: columns[i].name,
@@ -120,9 +125,14 @@ const createVegaSpec = (rows: Row[]) => {
         },
         legend: {
           title: '',
-          labelExpr: "'" + columns[i].field + "'",
+          labelExpr:
+            Object.entries(legendLabelMap)
+              .map(([key, value]) => `datum.value == '${key}' ? '${key} : ${value}'`)
+              .join(' : ') + ' : datum.label',
           orient: 'bottom',
           labelLimit: 999,
+          columns: Math.min(3, columns.length - 1), // Limit to 3 columns or fewer legends
+          padding: 10,
         },
       },
     };
