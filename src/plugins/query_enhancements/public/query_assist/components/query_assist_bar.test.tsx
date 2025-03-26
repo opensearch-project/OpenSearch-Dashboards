@@ -136,6 +136,26 @@ describe('QueryAssistBar', () => {
     });
   });
 
+  it('display callout for AgentError', async () => {
+    const generateQueryMock = jest.fn().mockResolvedValue({
+      error: new AgentError({
+        error: { type: 'mock-type', reason: 'mock-reason', details: 'mock-details' },
+        status: 404,
+      }),
+    });
+    (useGenerateQuery as jest.Mock).mockReturnValue({
+      generateQuery: generateQueryMock,
+      loading: false,
+    });
+    renderQueryAssistBar();
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'test query' } });
+    fireEvent.click(screen.getByRole('button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('query-assist-guard-callout')).toBeInTheDocument();
+    });
+  });
+
   it('passes agent errors to input', async () => {
     const generateQueryMock = jest.fn().mockResolvedValue({
       error: new AgentError({
