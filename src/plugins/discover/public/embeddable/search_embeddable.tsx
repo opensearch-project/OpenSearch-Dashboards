@@ -362,6 +362,7 @@ export class SearchEmbeddable
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
+    console.log('save search renderComponent');
     if (!this.searchProps) {
       return;
     }

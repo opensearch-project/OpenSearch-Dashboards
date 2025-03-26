@@ -80,6 +80,10 @@ export class MetricEmbeddable
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
+
+      if (this.metricProps) {
+        this.pushContainerStateParamsToProps(this.metricProps);
+      }
     });
   }
 
@@ -96,6 +100,7 @@ export class MetricEmbeddable
    * @param {Element} domNode
    */
   public render(node: HTMLElement) {
+    console.log('rendering metric embeddable', this.metricProps);
     if (!this.metricProps) {
       throw new Error('Metric scope not defined');
     }
@@ -123,8 +128,8 @@ export class MetricEmbeddable
   }
 
   public reload() {
-    if (this.node && this.metricProps) {
-      this.renderComponent(this.node, this.metricProps);
+    if (this.metricProps) {
+      this.pushContainerStateParamsToProps(this.metricProps, true);
     }
   }
 
@@ -136,9 +141,11 @@ export class MetricEmbeddable
     };
 
     this.metricProps = metricProps;
+    this.pushContainerStateParamsToProps(metricProps);
   }
 
   private renderComponent(node: HTMLElement, metricProps: MetricProps) {
+    console.log('save metric renderComponent');
     if (!this.metricProps) {
       return;
     }
@@ -148,5 +155,11 @@ export class MetricEmbeddable
 
     const MemorizedMetricEmbeddableComponent = React.memo(MetricEmbeddableComponent);
     ReactDOM.render(<MemorizedMetricEmbeddableComponent {...props} />, node);
+  }
+
+  private async pushContainerStateParamsToProps(metricProps: MetricProps, force: boolean = false) {
+    if (this.node) {
+      this.renderComponent(this.node, metricProps!);
+    }
   }
 }

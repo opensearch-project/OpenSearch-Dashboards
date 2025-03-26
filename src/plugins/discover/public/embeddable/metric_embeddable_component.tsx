@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import {
   DataGridTable,
   DataGridTableProps,
@@ -49,12 +49,10 @@ export function MetricEmbeddableComponent({ metricProps }: MetricEmbeddableProps
           data-test-subj="embeddedSavedMetric"
           className="eui-xScrollWithShadows eui-yScrollWithShadows"
         >
-          <EuiFlexItem
-            style={{ minHeight: 0 }}
-            className="osdDocTable__container"
-            data-test-subj="osdDocTableContainer"
-          >
-            <ReactExpressionRenderer expression={discoverEmbeddableProps.expression} />
+          <EuiFlexItem data-test-subj="metricEmbeddableContainer">
+            <EuiPanel data-test-subj="visualizationLoader">
+              <ReactExpressionRenderer expression={discoverEmbeddableProps.expression} />
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </OpenSearchDashboardsContextProvider>

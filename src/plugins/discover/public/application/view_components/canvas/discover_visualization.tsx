@@ -82,9 +82,13 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
     }: OnSaveProps) => {
       console.log('here in onSave');
       try {
-        console.log('savedMetric', savedMetric);
-        console.log('savedSearch', savedSearch);
+        if (!savedMetric) {
+          return;
+        }
+        savedMetric.title = title;
+        savedMetric.expression = expression!;
         const id = await savedMetric!.save({});
+        console.log('savedMetric', savedMetric);
         if (id) {
           toastNotifications.addSuccess({
             title: i18n.translate('discover.notifications.savedMetricTitle', {
