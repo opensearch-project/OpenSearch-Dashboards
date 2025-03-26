@@ -122,7 +122,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               />
             </EuiCompressedFormRow>
 
-            <EuiCompressedFormRow
+            {/* <EuiCompressedFormRow
               fullWidth
               label={<FormattedMessage id="discover.saveModal.addTo" defaultMessage="Add to" />}
             >
@@ -179,7 +179,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
                   onChange={this.onNewDashboardTitleChange}
                 />
               </EuiCompressedFormRow>
-            )}
+            )} */}
           </EuiForm>
         </EuiModalBody>
 

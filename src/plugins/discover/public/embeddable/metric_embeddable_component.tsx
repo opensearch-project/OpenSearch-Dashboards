@@ -17,6 +17,7 @@ import {
 } from '../../../opensearch_dashboards_react/public';
 import { MetricProps } from './metric_embeddable';
 import { DiscoverServices, DiscoverViewServices } from '../build_services';
+import { style } from '../../../expressions/common/expression_types/specs/style';
 
 interface MetricEmbeddableProps {
   metricProps: MetricProps;
@@ -28,8 +29,6 @@ export const DataGridTableMemoized = React.memo((props: DataGridTableProps) => (
 ));
 
 export function MetricEmbeddableComponent({ metricProps, services }: MetricEmbeddableProps) {
-  console.log('in metric embeddable component');
-
   const {
     expressions: { ReactExpressionRenderer },
   } = services;
@@ -49,7 +48,7 @@ export function MetricEmbeddableComponent({ metricProps, services }: MetricEmbed
           data-test-subj="embeddedSavedMetric"
           className="eui-xScrollWithShadows eui-yScrollWithShadows"
         >
-          <EuiFlexItem data-test-subj="metricEmbeddableContainer">
+          <EuiFlexItem data-test-subj="metricEmbeddableContainer" style={{ width: '100%' }}>
             <EuiPanel data-test-subj="visualizationLoader">
               <ReactExpressionRenderer expression={discoverEmbeddableProps.expression} />
             </EuiPanel>

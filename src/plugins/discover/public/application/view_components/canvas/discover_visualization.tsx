@@ -17,6 +17,7 @@ import { IExpressionLoaderParams } from '../../../../../expressions/public';
 import { useVisualizationType } from '../utils/use_visualization_types';
 import { showSaveModal } from '../../../../../saved_objects/public';
 import { OnSaveProps, SavedObjectSaveModal } from './discover_visualization_save_modal';
+import { getDashboardInstance } from 'src/plugins/dashboard/public/application/utils/get_dashboard_instance';
 
 export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -80,7 +81,6 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
       newDashboardTitle,
       existingDashboardTitle,
     }: OnSaveProps) => {
-      console.log('here in onSave');
       try {
         if (!savedMetric) {
           return;
@@ -88,7 +88,7 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
         savedMetric.title = title;
         savedMetric.expression = expression!;
         const id = await savedMetric!.save({});
-        console.log('savedMetric', savedMetric);
+
         if (id) {
           toastNotifications.addSuccess({
             title: i18n.translate('discover.notifications.savedMetricTitle', {

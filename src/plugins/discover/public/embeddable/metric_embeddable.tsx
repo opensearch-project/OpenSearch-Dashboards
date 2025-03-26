@@ -126,12 +126,12 @@ export class MetricEmbeddable
    * @param {Element} domNode
    */
   public render(domNode: HTMLElement) {
-    console.log('render in metric!');
     if (!this.metricProps) {
       throw new Error('Metric scope not defined');
     }
     const containerDiv = document.createElement('div');
     containerDiv.className = `metric panel-content panel-content--fullWidth`;
+    containerDiv.setAttribute('style', 'width: 100%;');
     domNode.appendChild(containerDiv);
 
     this.domNode = containerDiv;
@@ -141,20 +141,6 @@ export class MetricEmbeddable
       this.domNode
     );
   }
-
-  // this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
-  //   onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
-  //     this.onContainerError(error);
-  //   },
-  // });
-
-  // div.setAttribute('data-test-subj', 'metricLoader');
-  // div.setAttribute('data-shared-item', '');
-
-  // this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
-  // this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
-
-  // this.updateHandler();
 
   public destroy() {
     super.destroy();
@@ -168,14 +154,6 @@ export class MetricEmbeddable
 
   public reload() {}
 
-  private async updateHandler() {
-    this.abortController = new AbortController();
-    const abortController = this.abortController;
-    if (this.handler && !abortController.signal.aborted) {
-      this.handler.update(this.metricProps?.expression);
-    }
-  }
-
   private initializeMetricProps() {
     const metricProps: MetricProps = {
       title: this.savedMetric.title,
@@ -185,24 +163,4 @@ export class MetricEmbeddable
 
     this.metricProps = metricProps;
   }
-
-  // private renderComponent(node: HTMLElement, metricProps: MetricProps) {
-  //   console.log('save metric renderComponent');
-  //   if (!this.metricProps) {
-  //     return;
-  //   }
-  //   const props = {
-  //     metricProps,
-  //   };
-
-  //   const MemorizedMetricEmbeddableComponent = React.memo(MetricEmbeddableComponent);
-  //   ReactDOM.render(<MemorizedMetricEmbeddableComponent {...props} />, node);
-  // }
-
-  // private async pushContainerStateParamsToProps(metricProps: MetricProps, force: boolean = false) {
-  //   await this.fetch();
-  //   if (this.node) {
-  //     this.renderComponent(this.node, metricProps!);
-  //   }
-  // }
 }
