@@ -38,6 +38,7 @@ import { search } from '../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { ExpressionsStart } from '../../expressions/public';
 
 let services: DiscoverServices | null = null;
 let uiActions: UiActionsStart;
@@ -93,6 +94,8 @@ export const syncHistoryLocations = () => {
 export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHistory>(
   'scopedHistory'
 );
+
+export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export { unhashUrl, redirectWhenMissing } from '../../opensearch_dashboards_utils/public';

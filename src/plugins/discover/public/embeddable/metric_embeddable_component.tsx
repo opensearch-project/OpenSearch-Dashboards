@@ -16,18 +16,20 @@ import {
   useOpenSearchDashboards,
 } from '../../../opensearch_dashboards_react/public';
 import { MetricProps } from './metric_embeddable';
-import { DiscoverViewServices } from '../build_services';
+import { DiscoverServices, DiscoverViewServices } from '../build_services';
 
 interface MetricEmbeddableProps {
   metricProps: MetricProps;
+  services: DiscoverServices;
 }
 
 export const DataGridTableMemoized = React.memo((props: DataGridTableProps) => (
   <DataGridTable {...props} />
 ));
 
-export function MetricEmbeddableComponent({ metricProps }: MetricEmbeddableProps) {
-  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+export function MetricEmbeddableComponent({ metricProps, services }: MetricEmbeddableProps) {
+  console.log('in metric embeddable component');
+
   const {
     expressions: { ReactExpressionRenderer },
   } = services;
@@ -36,8 +38,6 @@ export function MetricEmbeddableComponent({ metricProps }: MetricEmbeddableProps
     expression: metricProps.expression,
     title: metricProps.title,
   };
-
-  console.log('expression in embeddable', discoverEmbeddableProps.expression);
 
   return (
     <I18nProvider>

@@ -60,6 +60,7 @@ import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataExplorerServices } from '../../data_explorer/public';
 import { Storage } from '../../opensearch_dashboards_utils/public';
 import { createSavedMetricLoader, SavedMetric } from './saved_metric_viz';
+import { ExpressionsStart } from '../../expressions/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -86,6 +87,7 @@ export interface DiscoverServices {
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
   storage: Storage;
+  expressions: ExpressionsStart;
 }
 
 export function buildServices(
@@ -131,6 +133,7 @@ export function buildServices(
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
     storage,
+    expressions: plugins.expressions,
   };
 }
 

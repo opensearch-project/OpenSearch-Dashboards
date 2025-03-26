@@ -52,6 +52,7 @@ import {
   syncHistoryLocations,
   getServices,
   setUsageCollector,
+  setExpressions,
 } from './opensearch_dashboards_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { buildServices } from './build_services';
@@ -422,6 +423,7 @@ export class DiscoverPlugin
       }
       const services = buildServices(core, plugins, this.initializerContext);
       setServices(services);
+      setExpressions(plugins.expressions);
       this.servicesInitialized = true;
 
       return { core, plugins };
