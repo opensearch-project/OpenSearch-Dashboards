@@ -458,7 +458,7 @@ describe('Fetch', () => {
 
     it('should make requests for NDJSON content', async () => {
       const content = readFileSync(join(__dirname, '_import_objects.ndjson'), {
-        encoding: 'utf-8',
+        encoding: 'utf8',
       });
       const body = new FormData();
 

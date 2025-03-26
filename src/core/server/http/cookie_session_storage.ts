@@ -109,9 +109,13 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
     }
   }
   public set(sessionValue: T) {
+    // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+    // @ts-ignore: cookieAuth is added by the hapi-auth-cookie plugin
     return this.request.cookieAuth.set(sessionValue);
   }
   public clear() {
+    // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+    // @ts-ignore: cookieAuth is added by the hapi-auth-cookie plugin
     return this.request.cookieAuth.clear();
   }
 }
@@ -129,7 +133,7 @@ function validateOptions(options: SessionStorageCookieOptions<any>) {
  * @param server - hapi server to create SessionStorage for
  * @param cookieOptions - cookies configuration
  */
-export async function createCookieSessionStorageFactory<T>(
+export async function createCookieSessionStorageFactory<T extends Record<string, any>>(
   log: Logger,
   server: Server,
   cookieOptions: SessionStorageCookieOptions<T>,
@@ -143,10 +147,14 @@ export async function createCookieSessionStorageFactory<T>(
     log.debug('Clearing invalid session cookie');
     // need to use Hapi toolkit to clear cookie with defined options
     if (req) {
+      // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+      // @ts-ignore: cookieAuth is added by the hapi-auth-cookie plugin
       (req.cookieAuth as any).h.unstate(cookieOptions.name, { path });
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+  // @ts-ignore: cookieAuth is added by the hapi-auth-cookie plugin
   await server.register({ plugin: hapiAuthCookie });
 
   server.auth.strategy('security-cookie', 'cookie', {
