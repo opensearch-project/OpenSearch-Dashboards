@@ -29,3 +29,4 @@
  */
 
 export { searchSavedObjectType } from './search';
+export { metricSavedObjectType } from './metric';

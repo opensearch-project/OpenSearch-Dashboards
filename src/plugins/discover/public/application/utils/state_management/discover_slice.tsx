@@ -43,6 +43,10 @@ export interface DiscoverState {
    */
   savedSearch?: string;
   /**
+   * id of the used saved metric
+   */
+  savedMetric?: string;
+  /**
    * dirty flag to indicate if the saved search has been modified
    * since the last save
    */
@@ -71,6 +75,7 @@ const initialState: DiscoverState = {
 
 export const getPreloadedState = async ({
   getSavedSearchById,
+  getSavedMetricById,
   uiSettings: config,
 }: DiscoverServices): Promise<DefaultViewState<DiscoverState>> => {
   const preloadedState: DefaultViewState<DiscoverState> = {
@@ -83,6 +88,7 @@ export const getPreloadedState = async ({
   const savedSearchId = matchPath<{ id?: string }>(hashPath, {
     path: '#/view/:id',
   })?.params.id;
+  console.log('savedSearchId in discover slice', savedSearchId);
 
   if (savedSearchId) {
     const savedSearchInstance = await getSavedSearchById(savedSearchId);

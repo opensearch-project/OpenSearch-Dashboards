@@ -35,6 +35,7 @@ import {
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
 import { trackQueryMetric } from '../../../ui_metric';
+import { SavedMetric } from '../../../saved_metric_viz';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -87,6 +88,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   const { pathname } = useLocation();
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
+  const [savedMetric, setSavedMetric] = useState<SavedMetric | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval, savedQuery } = useSelector(
     (state) => state.discover
   );
@@ -96,6 +98,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     data,
     filterManager,
     getSavedSearchById,
+    getSavedMetricById,
     core,
     toastNotifications,
     osdUrlStateStorage,
@@ -396,10 +399,24 @@ export const useSearch = (services: DiscoverViewServices) => {
     shouldSearchOnPageLoad,
   ]);
 
+  // Get savedMetric if it exists
+  useEffect(() => {
+    (async () => {
+      const savedMetricInstance = await getSavedMetricById('');
+      setSavedMetric(savedMetricInstance);
+      console.log('savedMetricInstance', savedMetricInstance);
+    })();
+    // This effect will only run when getSavedMetricById is called, which is
+    // only called when the component is first mounted.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getSavedMetricById]);
+
   // Get savedSearch if it exists
   useEffect(() => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
+      console.log('savedSearchId', savedSearchId);
+      console.log('savedSearchInstance', savedSearchInstance);
 
       const query =
         savedSearchInstance.searchSource.getField('query') || data.query.queryString.getQuery();
@@ -475,6 +492,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     refetch$,
     indexPattern,
     savedSearch,
+    savedMetric,
     inspectorAdapters,
   };
 };

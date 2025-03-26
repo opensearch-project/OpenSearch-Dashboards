@@ -52,6 +52,7 @@ import {
   syncHistoryLocations,
   getServices,
   setUsageCollector,
+  setExpressions,
 } from './opensearch_dashboards_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { buildServices } from './build_services';
@@ -78,6 +79,8 @@ declare module '../../share/public' {
 }
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { ExpressionsPublicPlugin, ExpressionsStart } from '../../expressions/public';
+import { createSavedMetricLoader } from './saved_metric_viz';
+import { MetricEmbeddableFactory } from './embeddable/metric_embeddable_factory';
 
 /**
  * @public
@@ -98,6 +101,7 @@ export interface DiscoverSetup {
 
 export interface DiscoverStart {
   savedSearchLoader: SavedObjectLoader;
+  savedMetricLoader: SavedObjectLoader;
 
   /**
    * `share` plugin URL generator for Discover app. Use it to generate links into
@@ -419,6 +423,7 @@ export class DiscoverPlugin
       }
       const services = buildServices(core, plugins, this.initializerContext);
       setServices(services);
+      setExpressions(plugins.expressions);
       this.servicesInitialized = true;
 
       return { core, plugins };
@@ -429,6 +434,13 @@ export class DiscoverPlugin
     return {
       urlGenerator: this.urlGenerator,
       savedSearchLoader: createSavedSearchesLoader({
+        savedObjectsClient: core.savedObjects.client,
+        indexPatterns: plugins.data.indexPatterns,
+        search: plugins.data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      }),
+      savedMetricLoader: createSavedMetricLoader({
         savedObjectsClient: core.savedObjects.client,
         indexPatterns: plugins.data.indexPatterns,
         search: plugins.data.search,
@@ -457,6 +469,8 @@ export class DiscoverPlugin
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices);
+    const metricFactory = new MetricEmbeddableFactory(getStartServices);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    plugins.embeddable.registerEmbeddableFactory(metricFactory.type, metricFactory);
   }
 }
