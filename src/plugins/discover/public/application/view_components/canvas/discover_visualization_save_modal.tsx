@@ -60,7 +60,6 @@ export interface OnSaveProps {
 interface Props {
   onSave: (props: OnSaveProps) => void;
   onClose: () => void;
-  confirmButtonLabel?: React.ReactNode;
   description?: string;
   dashboards: Array<{ id: string; title: string }>;
 }
@@ -103,7 +102,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiForm component="form" onSubmit={this.onFormSubmit} id="discover.saveModalForm">
+          <EuiForm component="form" id="discover.saveModalForm">
             <EuiText size="s" color="subdued">
               {this.props.description}
             </EuiText>
@@ -196,6 +195,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
   }
 
   private saveSavedObject = async () => {
+    console.log('here in saving saved object');
     await this.props.onSave({
       title: this.state.title,
       selectedOption: this.state.selectedOption,
@@ -222,24 +222,15 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     });
   };
 
-  private onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    this.saveSavedObject();
-  };
-
   private renderConfirmButton = () => {
     const { title, newDashboardTitle, existingDashboardTitle } = this.state;
 
-    let confirmLabel: string | React.ReactNode = i18n.translate(
+    const confirmLabel: string | React.ReactNode = i18n.translate(
       'discover.saveModal.saveButtonLabel',
       {
         defaultMessage: 'Save',
       }
     );
-
-    if (this.props.confirmButtonLabel) {
-      confirmLabel = this.props.confirmButtonLabel;
-    }
 
     return (
       <EuiSmallButton
@@ -253,6 +244,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         }
         type="submit"
         form="discoveraveModalForm"
+        onClick={this.saveSavedObject}
       >
         {confirmLabel}
       </EuiSmallButton>

@@ -27,7 +27,7 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
     expressions: { ReactExpressionRenderer },
     toastNotifications,
   } = services;
-  const { indexPattern, savedMetric } = useDiscoverContext();
+  const { indexPattern, savedMetric, savedSearch } = useDiscoverContext();
 
   // Get configs and expression utils from a specific visualization type
   const { toExpression } = useVisualizationType();
@@ -80,7 +80,10 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
       newDashboardTitle,
       existingDashboardTitle,
     }: OnSaveProps) => {
+      console.log('here in onSave');
       try {
+        console.log('savedMetric', savedMetric);
+        console.log('savedSearch', savedSearch);
         const id = await savedMetric!.save({});
         if (id) {
           toastNotifications.addSuccess({

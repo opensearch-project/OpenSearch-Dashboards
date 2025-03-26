@@ -78,6 +78,8 @@ declare module '../../share/public' {
 }
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { ExpressionsPublicPlugin, ExpressionsStart } from '../../expressions/public';
+import { createSavedMetricLoader } from './saved_metric_viz';
+import { MetricEmbeddableFactory } from './embeddable/metric_embeddable_factory';
 
 /**
  * @public
@@ -98,6 +100,7 @@ export interface DiscoverSetup {
 
 export interface DiscoverStart {
   savedSearchLoader: SavedObjectLoader;
+  savedMetricLoader: SavedObjectLoader;
 
   /**
    * `share` plugin URL generator for Discover app. Use it to generate links into
@@ -435,6 +438,13 @@ export class DiscoverPlugin
         chrome: core.chrome,
         overlays: core.overlays,
       }),
+      savedMetricLoader: createSavedMetricLoader({
+        savedObjectsClient: core.savedObjects.client,
+        indexPatterns: plugins.data.indexPatterns,
+        search: plugins.data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      }),
     };
   }
 
@@ -457,6 +467,8 @@ export class DiscoverPlugin
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices);
+    const metricFactory = new MetricEmbeddableFactory(getStartServices);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    plugins.embeddable.registerEmbeddableFactory(metricFactory.type, metricFactory);
   }
 }

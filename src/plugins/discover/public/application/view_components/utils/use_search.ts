@@ -402,20 +402,21 @@ export const useSearch = (services: DiscoverViewServices) => {
   // Get savedMetric if it exists
   useEffect(() => {
     (async () => {
-      if (savedMetric) {
-        const savedMetricInstance = await getSavedMetricById('');
-        setSavedMetric(savedMetricInstance);
-      }
+      const savedMetricInstance = await getSavedMetricById('');
+      setSavedMetric(savedMetricInstance);
+      console.log('savedMetricInstance', savedMetricInstance);
     })();
     // This effect will only run when getSavedMetricById is called, which is
     // only called when the component is first mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getSavedMetricById, savedMetric]);
+  }, [getSavedMetricById]);
 
   // Get savedSearch if it exists
   useEffect(() => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
+      console.log('savedSearchId', savedSearchId);
+      console.log('savedSearchInstance', savedSearchInstance);
 
       const query =
         savedSearchInstance.searchSource.getField('query') || data.query.queryString.getQuery();

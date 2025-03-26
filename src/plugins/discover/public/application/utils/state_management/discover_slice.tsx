@@ -88,6 +88,7 @@ export const getPreloadedState = async ({
   const savedSearchId = matchPath<{ id?: string }>(hashPath, {
     path: '#/view/:id',
   })?.params.id;
+  console.log('savedSearchId in discover slice', savedSearchId);
 
   if (savedSearchId) {
     const savedSearchInstance = await getSavedSearchById(savedSearchId);
