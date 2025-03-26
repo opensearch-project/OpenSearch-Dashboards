@@ -291,35 +291,12 @@ export const showSuggestionAndHint = (maxAttempts = 3) => {
     return cy.get('.suggest-widget.visible').then(($widget) => {
       const isVisible = $widget.is(':visible');
 
-      // Check for the custom status bar element instead of the ::after pseudo-element
+      // Check for the default Monaco status bar
       let hasHint = false;
-      let statusBar = document.querySelector('.custom-suggest-widget-status-bar');
 
-      if (!statusBar) {
-        // Create and append the status bar if it doesn't exist
-        statusBar = document.createElement('div');
-        statusBar.className = 'custom-suggest-widget-status-bar';
-        statusBar.textContent = 'Tab to insert, ESC to close window';
-        statusBar.style.display = 'block';
-        document.body.appendChild(statusBar);
-
-        // Position it below the suggestion widget
-        const widgetRect = $widget[0].getBoundingClientRect();
-        statusBar.style.top = `${widgetRect.bottom}px`;
-        statusBar.style.left = `${widgetRect.left}px`;
-        statusBar.style.width = `${widgetRect.width}px`;
-
-        hasHint = true;
-      } else {
-        // Make the existing status bar visible
-        statusBar.style.display = 'block';
-
-        // Position it below the suggestion widget
-        const widgetRect = $widget[0].getBoundingClientRect();
-        statusBar.style.top = `${widgetRect.bottom}px`;
-        statusBar.style.left = `${widgetRect.left}px`;
-        statusBar.style.width = `${widgetRect.width}px`;
-
+      // Look for the default Monaco status bar
+      const statusBar = $widget.find('.suggest-status-bar');
+      if (statusBar.length > 0) {
         hasHint = true;
       }
 
@@ -351,11 +328,7 @@ export const hideWidgets = (maxAttempts = 3) => {
       // sometimes when cypress interacts with editor, the visible class does not go away but the height is 0
       // that is sufficient
       if ($widget.height() === 0) {
-        // Also hide the custom status bar
-        const statusBar = document.querySelector('.custom-suggest-widget-status-bar');
-        if (statusBar) {
-          statusBar.style.display = 'none';
-        }
+        // The default Monaco status bar will be hidden automatically
         return;
       }
 
@@ -365,11 +338,7 @@ export const hideWidgets = (maxAttempts = 3) => {
         }
         return cy.wait(200).then(attemptHide);
       } else {
-        // Widget is hidden, also hide the custom status bar
-        const statusBar = document.querySelector('.custom-suggest-widget-status-bar');
-        if (statusBar) {
-          statusBar.style.display = 'none';
-        }
+        // The default Monaco status bar will be hidden automatically
       }
     });
   };

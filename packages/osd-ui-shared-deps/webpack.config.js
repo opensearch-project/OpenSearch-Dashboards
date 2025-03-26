@@ -170,15 +170,6 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   resolve: {
     alias: {
       moment: MOMENT_SRC,
-      // Add aliases for Monaco 0.30.1 paths
-      'monaco-editor/esm/vs/editor/contrib/hover/browser/hover':
-        'monaco-editor/esm/vs/editor/contrib/hover/browser/hover',
-      'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints':
-        'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints',
-      'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController':
-        'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController',
-      'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations':
-        'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations',
     },
     extensions: ['.js', '.ts'],
   },

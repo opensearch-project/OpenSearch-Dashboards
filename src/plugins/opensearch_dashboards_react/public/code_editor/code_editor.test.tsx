@@ -80,7 +80,7 @@ test('editor mount setup', () => {
           activeParameter: 0,
           activeSignature: 0,
         },
-        dispose: () => {}, // Add dispose method required by SignatureHelpResult
+        dispose: () => {},
       }),
   };
   const hoverProvider = {

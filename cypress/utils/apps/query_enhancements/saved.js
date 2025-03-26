@@ -352,13 +352,6 @@ export const verifyDiscoverPageState = ({
       const hasDataFields = $body.find('[data-test-subj="osdDocTableCellDataField"]').length > 0;
 
       if (hasDataFields) {
-        // Log the actual number of data fields found for debugging
-        cy.log(
-          `Found ${
-            $body.find('[data-test-subj="osdDocTableCellDataField"]').length
-          } osdDocTableCellDataField elements`
-        );
-
         // Only check the data if we have enough elements
         cy.getElementByTestId('osdDocTableCellDataField').then(($fields) => {
           sampleTableData.forEach(([index, value]) => {
