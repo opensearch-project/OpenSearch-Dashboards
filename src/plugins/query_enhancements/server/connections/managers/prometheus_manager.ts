@@ -14,12 +14,15 @@ import { URI } from '../../../common/constants';
 import { PromQLConnectionClient } from '../clients/promql_connection_client';
 
 const BASE_RESOURCE_API = 'api/v1';
+const BASE_ALERT_MANAGER_API = 'alertmanager/api/v2';
 
 const PROMETHEUS_RESOURCE_TYPES = {
   LABELS: 'labels',
   LABEL_VALUES: 'label_values',
   METRIC_METADATA: 'metric_metadata',
   ALERTS: 'alerts',
+  ALERTS_GROUPS: 'alert_manager_alert_groups',
+  RULES: 'rules',
 } as const;
 
 // docs: https://prometheus.io/docs/concepts/metric_types/#metric-types
@@ -57,8 +60,23 @@ interface AlertsQuery {
   resourceType: typeof PROMETHEUS_RESOURCE_TYPES.ALERTS;
   resourceName: undefined;
 }
+interface AlertsGroupsQuery {
+  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.ALERTS_GROUPS;
+  resourceName: undefined;
+}
+interface RulesQuery {
+  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.RULES;
+  resourceName: undefined;
+}
 export type PrometheusResourceQuery = CommonQuery &
-  (LabelsQuery | LabelValuesQuery | MetricMetadataQuery | AlertsQuery);
+  (
+    | LabelsQuery
+    | LabelValuesQuery
+    | MetricMetadataQuery
+    | AlertsQuery
+    | AlertsGroupsQuery
+    | RulesQuery
+  );
 
 class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
   constructor() {
@@ -82,7 +100,10 @@ class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
       case PROMETHEUS_RESOURCE_TYPES.METRIC_METADATA:
         const metricMetadataQueryString = resourceName ? `?metric=${resourceName}` : '';
         return `${BASE_RESOURCE_API}/metadata${metricMetadataQueryString}`;
-
+      case PROMETHEUS_RESOURCE_TYPES.ALERTS_GROUPS:
+        return `${BASE_ALERT_MANAGER_API}/alerts/groups`;
+      case PROMETHEUS_RESOURCE_TYPES.RULES:
+        return `${BASE_RESOURCE_API}/rules`;
       default:
         throw Error(`unknown resource type: ${resourceType}`);
     }
@@ -94,11 +115,8 @@ class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
     query: PrometheusResourceQuery
   ): Promise<GetResourcesResponse<R>> {
     return this.getClient(context, request).getResources<R>({
-      query,
       path: `${URI.DIRECT_QUERY.RESOURCES}/${query.dataSourceName}/${this.getResourceURI(query)}`,
-      params: {
-        querystring: new URLSearchParams(query.query).toString(),
-      },
+      querystring: new URLSearchParams(query.query).toString(),
     });
   }
 }
