@@ -291,7 +291,7 @@ describe('QueryStringManager', () => {
       expect(updateCount).toBe(1); // Should not increment
     });
 
-    test('wiil trigger updates when set force to true even new query equals current query', () => {
+    test('will trigger updates when set force to true even new query equals current query', () => {
       const initialQuery = { query: 'test', language: 'sql' };
       let updateCount = 0;
 
