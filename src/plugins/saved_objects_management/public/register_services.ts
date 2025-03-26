@@ -79,6 +79,11 @@ export const registerServices = async (
       title: 'searches',
       service: discover.savedSearchLoader,
     });
+    registry.register({
+      id: 'savedMetric',
+      title: 'metric',
+      service: discover.savedMetricLoader,
+    });
   }
 
   if (visBuilder) {

@@ -47,6 +47,8 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
     showPagination: true,
   } as DiscoverEmbeddableProps;
 
+  console.log('save search embeddable', discoverEmbeddableProps);
+
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>

@@ -28,33 +28,17 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/server';
-import { uiSettings } from './ui_settings';
-import { capabilitiesProvider } from './capabilities_provider';
-import { metricSavedObjectType, searchSavedObjectType } from './saved_objects';
+import { SavedObjectsType } from 'opensearch-dashboards/server';
 
-export class DiscoverServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
-    core.capabilities.registerProvider(capabilitiesProvider);
-    core.capabilities.registerSwitcher(async (request, capabilites) => {
-      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
-        discover: {
-          createShortUrl: false,
-          save: false,
-          saveQuery: false,
-        },
-      });
-    });
-    core.uiSettings.register(uiSettings);
-    core.savedObjects.registerType(searchSavedObjectType);
-    core.savedObjects.registerType(metricSavedObjectType);
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    return {};
-  }
-
-  public stop() {}
-}
+export const metricSavedObjectType: SavedObjectsType = {
+  name: 'metric',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: {
+    properties: {
+      expression: { type: 'text' },
+      searchContext: { type: 'text' },
+      title: { type: 'text' },
+    },
+  },
+};

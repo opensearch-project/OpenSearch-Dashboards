@@ -37,6 +37,7 @@ import {
 import { Filter, IIndexPattern, TimeRange, Query } from 'src/plugins/data/public';
 import { SortOrder } from '../saved_searches/types';
 import { SavedSearch } from '../saved_searches';
+import { SavedMetric } from '../saved_metric_viz';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -58,5 +59,22 @@ export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput
 }
 
 export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
+  type: string;
+}
+
+export interface MetricInput extends EmbeddableInput {
+  expression: string;
+  searchContext?: string;
+}
+
+export interface MetricOutput extends EmbeddableOutput {
+  editable: boolean;
+}
+
+export interface IMetricEmbeddable extends IEmbeddable<MetricInput, MetricOutput> {
+  getSavedMetric(): SavedMetric;
+}
+
+export interface MetricEmbeddable extends Embeddable<MetricInput, MetricOutput> {
   type: string;
 }
