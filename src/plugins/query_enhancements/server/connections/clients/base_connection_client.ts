@@ -12,11 +12,7 @@ export interface ResourcesQuery {
   query: Record<string, string>;
 }
 
-export interface ClientRequest {
-  query: ResourcesQuery;
-  path: string;
-  params: Partial<TransportRequestParams>;
-}
+export type ClientRequest = Omit<TransportRequestParams, 'method'>;
 
 export interface GetResourcesResponse<R> {
   nextToken?: string;

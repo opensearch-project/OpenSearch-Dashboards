@@ -27,6 +27,8 @@ export function registerResourceRoutes(router: IRouter, defaultClient: ILegacyCl
             schema.literal('label_values'),
             schema.literal('metric_metadata'),
             schema.literal('alerts'),
+            schema.literal('alert_manager_alert_groups'),
+            schema.literal('rules'),
           ]),
           resourceName: schema.maybe(schema.string()),
         }),
