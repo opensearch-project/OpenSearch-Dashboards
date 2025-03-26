@@ -1,0 +1,2 @@
+chore
+- [Enhancement] Extended caching mechanism used for async operations ([#9417](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9417))
