@@ -1,0 +1,2 @@
+fix:
+- Revert change 9eae14851672fad87d077856c2af47a8e181b671 ([#8549](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8549))
