@@ -49,7 +49,7 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...Object.entries(metrics).map(([af, [{ type }]]) => ({
           text: `${af}`,
-          type: monaco.languages.CompletionItemKind.Method,
+          type: monaco.languages.CompletionItemKind.Field,
           detail: `${type}`,
         }))
       );
@@ -64,8 +64,8 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...labels.map((af: string) => ({
           text: `${af}`,
-          type: monaco.languages.CompletionItemKind.File,
-          detail: SuggestionItemDetailsTags.Table,
+          type: monaco.languages.CompletionItemKind.Class,
+          detail: 'label',
         }))
       );
     }
@@ -80,8 +80,8 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...labelValues.map((af: string) => ({
           text: `${af}`,
-          type: monaco.languages.CompletionItemKind.File,
-          detail: SuggestionItemDetailsTags.Table,
+          type: monaco.languages.CompletionItemKind.Interface,
+          detail: 'value',
         }))
       );
     }
@@ -90,12 +90,14 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...['ms', 's', 'm', 'h', 'd', 'w', 'y'].map((af) => ({
           text: `${af}`,
-          type: monaco.languages.CompletionItemKind.Constant,
+          type: monaco.languages.CompletionItemKind.Unit,
           detail: SuggestionItemDetailsTags.Command,
           replacePosition: new monaco.Range(lineNumber, column, lineNumber, column), // remove duration token association
         }))
       );
     }
+
+    // TODO: bring functions to be suggested here, and give it a function type
 
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
