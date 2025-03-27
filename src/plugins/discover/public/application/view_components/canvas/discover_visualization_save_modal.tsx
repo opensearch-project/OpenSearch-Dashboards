@@ -92,10 +92,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           <EuiModalHeaderTitle>
             <EuiText size="s">
               <h2>
-                <FormattedMessage
-                  id="discover.saveModal.saveTitle"
-                  defaultMessage="Add metric to dashboard"
-                />
+                <FormattedMessage id="discover.saveModal.saveTitle" defaultMessage="Save" />
               </h2>
             </EuiText>
           </EuiModalHeaderTitle>
@@ -195,7 +192,6 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
   }
 
   private saveSavedObject = async () => {
-    console.log('here in saving saved object');
     await this.props.onSave({
       title: this.state.title,
       selectedOption: this.state.selectedOption,

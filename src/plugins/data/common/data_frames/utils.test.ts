@@ -295,4 +295,43 @@ describe('convertResult', () => {
     const result = convertResult({ response });
     expect(result.hits.hits[0]._source.timestamp).toBe(mockDateString);
   });
+
+  it('should handle null or undefined objects', () => {
+    const response: IDataFrameResponse = {
+      took: 100,
+      timed_out: false,
+      _shards: {
+        total: 2,
+        successful: 2,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      body: {
+        fields: [{ name: 'foo', type: 'object', values: [null, undefined] }],
+        size: 2,
+        name: 'test-index',
+      },
+      type: DATA_FRAME_TYPES.DEFAULT,
+    };
+
+    // Custom date formatter
+    const customFormatter = (dateStr: string, type: OSD_FIELD_TYPES) => {
+      if (type === OSD_FIELD_TYPES.DATE) {
+        return moment.utc(dateStr).format('YYYY-MM-DDTHH:mm:ssZ');
+      }
+    };
+
+    const options: ISearchOptions = {
+      formatter: customFormatter,
+    };
+
+    const result = convertResult({ response, options });
+    expect(result.hits.hits[0]._source.foo).toBe(null);
+    expect(result.hits.hits[1]._source.foo).toBe(undefined);
+  });
 });
