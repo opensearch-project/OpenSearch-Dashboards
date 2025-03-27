@@ -67,9 +67,9 @@ export const PreviewComponent = ({
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <EuiText>
-          <h3>
+          <h4>
             Preview Data ({loadedRows}/{totalRows})
-          </h3>
+          </h4>
         </EuiText>
         <EuiFieldSearch
           placeholder="Search..."
