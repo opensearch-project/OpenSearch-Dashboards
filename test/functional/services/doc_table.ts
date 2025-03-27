@@ -197,6 +197,15 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
         return detailsRow.findByTestSubject('~docViewer');
       });
     }
+
+    /**
+     * Clicks to remove a specified column from the data grid.
+     *
+     * @param {string} columnName - The name of the column to be removed.
+     */
+    async clickRemoveColumn(columnName: string) {
+      await testSubjects.click(`docTableRemoveHeader-${columnName}`);
+    }
   }
 
   return new DocTable();

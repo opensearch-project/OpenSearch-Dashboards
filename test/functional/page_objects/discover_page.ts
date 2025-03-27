@@ -42,7 +42,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const defaultFindTimeout = config.get('timeouts.find');
   const opensearchChart = getService('opensearchChart');
   const docTable = getService('docTable');
-  const dataGridTable = getService('dataGrid');
   const comboBox = getService('comboBox');
 
   /*
@@ -106,7 +105,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
-      return await dataGridTable.getHeaderFields();
+      return await docTable.getHeaderFields();
     }
 
     public async openLoadSavedSearchPanel() {
@@ -352,7 +351,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async removeHeaderColumn(columnName: string) {
-      await dataGridTable.clickRemoveColumn(columnName);
+      await docTable.clickRemoveColumn(columnName);
     }
 
     public async openSidebarFieldFilter() {
@@ -436,14 +435,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     /**
-     * Retrieves data grid table values.
+     * Retrieves docTable row values
      *
-     * This function fetches the values present in a data grid table.
-     *
-     * @returns {Promise<string[][]>} A promise resolving to the table values.
+     * @returns {Promise<string[]>} A promise resolving to the table rows.
      */
-    public async getDataGridTableValues(): Promise<string[][]> {
-      return await dataGridTable.getDataGridTableValues();
+    public async getDocTableRowsText(): Promise<string[]> {
+      return await docTable.getRowsText();
     }
 
     /**
