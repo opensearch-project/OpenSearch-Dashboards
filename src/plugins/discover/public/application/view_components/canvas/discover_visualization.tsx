@@ -115,7 +115,7 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
       <SavedObjectSaveModal
         onSave={onSave}
         onClose={() => {}}
-        description={'Save your metric visualization and add it to a dashboard.'}
+        description={'Save your metric visual'}
         dashboards={[
           { id: 'dashboard1', title: 'Dashboard 1' },
           { id: 'dashboard2', title: 'Dashboard 2' },
