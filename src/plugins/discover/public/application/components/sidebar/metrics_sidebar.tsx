@@ -44,10 +44,7 @@ export const MetricsSidebar = () => {
           <EuiSplitPanel.Inner grow={false} paddingSize="s" className="dscSideBar_searchContainer">
             <MetricsSelector prometheusContext={prometheusContext} />
           </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner
-            className="eui-yScroll dscSideBar_fieldListContainer"
-            paddingSize="none"
-          >
+          <EuiSplitPanel.Inner className="eui-yScroll" paddingSize="none">
             <EuiDroppable droppableId="PROMETHEUS_LABELS" spacing="l">
               <>
                 {prometheusContext.metadata.labelNames.length > 0 && (

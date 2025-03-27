@@ -6,8 +6,8 @@
 import './discover_visualization.scss';
 import { i18n } from '@osd/i18n';
 
-import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { EuiButton, EuiPanel } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useDiscoverContext } from '../context';
@@ -17,7 +17,6 @@ import { IExpressionLoaderParams } from '../../../../../expressions/public';
 import { useVisualizationType } from '../utils/use_visualization_types';
 import { showSaveModal } from '../../../../../saved_objects/public';
 import { OnSaveProps, SavedObjectSaveModal } from './discover_visualization_save_modal';
-import { getDashboardInstance } from 'src/plugins/dashboard/public/application/utils/get_dashboard_instance';
 
 export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -99,7 +98,6 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
             }),
             'data-test-subj': 'saveSearchSuccess',
           });
-          console.log('succesfully saved metric id', id);
           return { id };
         }
       } catch (error) {
@@ -132,7 +130,7 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
       <div style={{ position: 'relative', width: '100%', height: '100%', flex: '1 1 auto' }}>
         <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 100 }}>
           <EuiButton size="s" onClick={saveAction}>
-            Add to Dashboard
+            Save Visual
           </EuiButton>
         </div>
 
