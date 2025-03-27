@@ -391,6 +391,42 @@ export const createQuery = (config, useKeyboard = false) => {
 };
 
 // =======================================
+// Monaco Editor Parsing Utilities
+// =======================================
+
+/**
+ * Verifies the query string in Monaco editor
+ * The Monaco editor renders spaces using various Unicode whitespace characters and middle dot characters
+ * This function handles all possible whitespace representations that might appear in the editor
+ * @param {string} queryString - The query string to verify
+ * @param {string} editorType - The editor type selector (e.g., 'osdQueryEditor__multiLine' or 'osdQueryEditor__singleLine')
+ */
+export const verifyMonacoEditorContent = (queryString, editorType) => {
+  if (!queryString) return;
+
+  // Escape special regex characters in the query string
+  const escapedQueryString = queryString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  // This comprehensive pattern handles all possible whitespace representations that might appear in the editor
+  // including regular spaces, non-breaking spaces, middle dots, and other special characters used for spacing
+  const pattern = new RegExp(
+    escapedQueryString.replace(
+      /\s+/g,
+      '[\\s\\u00A0\\u00B7\\u2022\\u2023\\u25E6\\u2043\\u2219\\u22C5\\u30FB\\u00B7.·]+'
+    )
+  );
+
+  // Check the editor content against our pattern
+  cy.getElementByTestId(editorType)
+    .find('.view-line')
+    .first()
+    .invoke('text')
+    .then((text) => {
+      expect(pattern.test(text)).to.be.true;
+    });
+};
+
+// =======================================
 // Test Configuration Generators
 // =======================================
 

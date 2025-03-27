@@ -14,6 +14,7 @@ import {
   END_TIME,
 } from './constants';
 import { setDatePickerDatesAndSearchIfRelevant } from './shared';
+import { verifyMonacoEditorContent } from './autocomplete';
 
 /**
  * The fields to select for saved search. Also takes shape of the API for saved search
@@ -272,33 +273,14 @@ export const verifyDiscoverPageState = ({
     cy.getElementByTestId('datasetSelectorButton').contains(dataset);
   }
 
-  // Escape special regex characters in the query string
-  const escapedQueryString = queryString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-  // The Monaco editor renders spaces using various Unicode whitespace characters and middle dot characters
-  // This comprehensive pattern handles all possible whitespace representations that might appear in the editor
-  // including regular spaces, non-breaking spaces, middle dots, and other special characters used for spacing
-  const pattern = new RegExp(
-    escapedQueryString.replace(
-      /\s+/g,
-      '[\\s\\u00A0\\u00B7\\u2022\\u2023\\u25E6\\u2043\\u2219\\u22C5\\u30FB\\u00B7.·]+'
-    )
-  );
-
   if (queryString) {
     // Determine which editor type to check based on the query language
     const editorType = [QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)
       ? 'osdQueryEditor__multiLine'
       : 'osdQueryEditor__singleLine';
 
-    // Check the editor content against our pattern
-    cy.getElementByTestId(editorType)
-      .find('.view-line')
-      .first()
-      .invoke('text')
-      .then((text) => {
-        expect(pattern.test(text)).to.be.true;
-      });
+    // Use the helper function to verify the Monaco editor content
+    verifyMonacoEditorContent(queryString, editorType);
   }
   cy.getElementByTestId('queryEditorLanguageSelector').contains(language);
 
