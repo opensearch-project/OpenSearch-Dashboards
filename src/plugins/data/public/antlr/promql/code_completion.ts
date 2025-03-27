@@ -47,10 +47,10 @@ export const getSuggestions = async ({
     if (suggestions.suggestMetrics) {
       const metrics = await prometheusResourceClient.getMetricMetadata(dataset.id);
       finalSuggestions.push(
-        ...Object.keys(metrics).map((af) => ({
+        ...Object.entries(metrics).map(([af, [{ type }]]) => ({
           text: `${af}`,
           type: monaco.languages.CompletionItemKind.Method,
-          detail: SuggestionItemDetailsTags.AggregateFunction,
+          detail: `${type}`,
         }))
       );
     }
