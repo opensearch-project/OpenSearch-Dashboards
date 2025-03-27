@@ -180,50 +180,19 @@ export const verifyAlternateDiscoverPageState = ({
   startTime,
   endTime,
 }) => {
-  if (queryString) {
-    // Escape special regex characters in the query string
-    const escapedQueryString = queryString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    // The Monaco editor renders spaces using various Unicode whitespace characters and middle dot characters
-    // This comprehensive pattern handles all possible whitespace representations that might appear in the editor
-    // including regular spaces, non-breaking spaces, middle dots, and other special characters used for spacing
-    const pattern = new RegExp(
-      escapedQueryString.replace(
-        /\s+/g,
-        '[\\s\\u00A0\\u00B7\\u2022\\u2023\\u25E6\\u2043\\u2219\\u22C5\\u30FB\\u00B7.·]+'
-      )
-    );
-
-    // Determine which editor type to check based on the query language
-    const editorType = [QueryLanguages.SQL.name, QueryLanguages.PPL.name].includes(language)
-      ? 'osdQueryEditor__multiLine'
-      : 'osdQueryEditor__singleLine';
-
-    // Check the editor content against our pattern
-    cy.getElementByTestId(editorType)
-      .find('.view-line')
-      .first()
-      .invoke('text')
-      .then((text) => {
-        expect(pattern.test(text)).to.be.true;
-      });
-  }
-
-  cy.getElementByTestId('queryEditorLanguageSelector').contains(language);
+  verifyDiscoverPageStateFromSaved({
+    queryString,
+    language,
+    hitCount,
+    histogram,
+    startTime,
+    endTime,
+  });
 
   if (filters) {
     cy.getElementByTestId(
       `filter filter-enabled filter-key-${ALTERNATE_APPLIED_FILTERS.field} filter-value-${ALTERNATE_APPLIED_FILTERS.value} filter-unpinned filter-negated`
     ).should('exist');
-  }
-  if (hitCount) {
-    cy.verifyHitCount(hitCount);
-  }
-
-  if (histogram) {
-    // TODO: Uncomment this once bug is fixed, currently the interval is not saving
-    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9077
-    // cy.getElementByTestId('discoverIntervalSelect').should('have.value', 'w');
   }
 
   if (language !== QueryLanguages.SQL.name && startTime && endTime) {
