@@ -66,6 +66,9 @@ export function processVisitedRules(
           if (rule.ruleList.at(-3) === PromQLParser.RULE_aggregation) {
             shouldSuggestLabels = LabelOrigin.AggregationList;
           } else if (rule.ruleList.at(-3) === PromQLParser.RULE_grouping) {
+            // TODO: below query's by grouping does not take in metric name
+            // topk (3, sum by (job, le)
+            // (rate(prometheus_http_requests_total[5m])))
             shouldSuggestLabels = LabelOrigin.VectorMatchGrouping;
           }
         } else if (rule.ruleList.at(-1) === PromQLParser.RULE_labelMatcher) {

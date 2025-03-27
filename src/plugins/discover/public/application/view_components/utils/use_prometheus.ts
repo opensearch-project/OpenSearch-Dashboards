@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
+import { PrometheusResourceClient } from '../../../../../data/public';
 
 interface PrometheusDataSourceMetadata {
   selectedMetricName?: string;
@@ -28,7 +29,7 @@ export const usePrometheus = (): PrometheusContext => {
     services: { data },
   } = useOpenSearchDashboards<DiscoverViewServices>();
   const prometheusResourceClient = useMemo(() => {
-    return data.resourceClientFactory.create('prometheus');
+    return data.resourceClientFactory.get('prometheus') as PrometheusResourceClient;
   }, [data.resourceClientFactory]);
 
   const [selectedMetricName, setSelectedMetricName] = useState<string | undefined>();

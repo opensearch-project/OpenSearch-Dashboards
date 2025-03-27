@@ -9,6 +9,7 @@ import { openSearchPromQLAutocompleteData } from './promql_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { parseQuery } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
+import { PrometheusResourceClient } from '../../resources/prometheus_resource_client';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -37,7 +38,9 @@ export const getSuggestions = async ({
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
     });
-    const prometheusResourceClient = services.data.resourceClientFactory.create('prometheus');
+    const prometheusResourceClient = services.data.resourceClientFactory.get(
+      'prometheus'
+    ) as PrometheusResourceClient;
 
     const finalSuggestions: QuerySuggestion[] = [];
 
@@ -53,6 +56,7 @@ export const getSuggestions = async ({
     }
 
     if (suggestions.suggestLabels || suggestions.suggestLabels === '') {
+      // TODO: figure out why partial label being typed will always appear regardless of metric before it
       const labels = await prometheusResourceClient.getLabels(
         dataset.id,
         suggestions.suggestLabels !== '' ? suggestions.suggestLabels : undefined
@@ -67,6 +71,7 @@ export const getSuggestions = async ({
     }
 
     if (suggestions.suggestLabelValues && suggestions.suggestLabelValues.label) {
+      // TODO: match what's already typed to the suggestion name so that it appears when being typed
       // TODO: update when we can get metric name passed in
       const labelValues = await prometheusResourceClient.getLabelValues(
         dataset.id,

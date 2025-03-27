@@ -253,6 +253,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       wordUntil.endColumn
     );
 
+    // TODO: figure out how to get decimals in duration to keep suggestion window open with each change
     return {
       suggestions:
         suggestions && suggestions.length > 0
@@ -277,6 +278,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
   const triggerCharacters = (() => {
     // TODO: move into autocomplete service?
+    // TODO: figure out why the first load doesn't have these triggers
     if (queryRef.current.language === 'PROMQL') {
       return [' ', '(', '{', '[', '=', '"', ','];
     }
