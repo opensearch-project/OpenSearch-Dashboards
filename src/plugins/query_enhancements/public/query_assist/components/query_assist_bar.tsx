@@ -86,11 +86,15 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
         generatedQuery: '', // query generate failed, set it to empty
       });
     } else if (response) {
-      services.data.query.queryString.setQuery({
-        query: response.query,
-        language: params.language,
-        dataset: selectedDataset,
-      });
+      // force setQuery to proceed with updating the query
+      services.data.query.queryString.setQuery(
+        {
+          query: response.query,
+          language: params.language,
+          dataset: selectedDataset,
+        },
+        true
+      );
       updateQueryState({
         question: previousQuestionRef.current,
         generatedQuery: response.query,
