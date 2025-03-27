@@ -72,7 +72,7 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
 
       if (updateBaselines) {
         log.debug('Updating baseline snapshot');
-        await writeFileAsync(baselinePath, readFileSync(sessionPath));
+        await writeFileAsync(baselinePath, readFileSync(sessionPath, 'utf8'));
         return 0;
       } else {
         await mkdirAsync(FAILURE_DIRECTORY, { recursive: true });

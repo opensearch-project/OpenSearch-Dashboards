@@ -98,7 +98,11 @@ export const registerFindRoute = (
         ...req.query,
         fields: undefined,
         searchFields: [...searchFields],
-        workspaces: req.query.workspaces ? Array<string>().concat(req.query.workspaces) : undefined,
+        ...(req.query.workspaces
+          ? {
+              workspaces: Array<string>().concat(req.query.workspaces),
+            }
+          : {}),
       } as SavedObjectsFindOptions;
 
       const findResponse = await client.find<any>(findOptions);
