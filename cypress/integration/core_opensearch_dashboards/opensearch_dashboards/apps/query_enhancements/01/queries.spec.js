@@ -11,6 +11,7 @@ import {
 } from '../../../../../../utils/apps/constants';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { verifyDiscoverPageState } from '../../../../../../utils/apps/query_enhancements/saved';
 
 const workspace = getRandomizedWorkspaceName();
 
@@ -50,8 +51,7 @@ const queriesTestSuite = () => {
 
         const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
-        cy.osd.waitForLoader(true);
-        cy.waitForSearch();
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
 
         // Query should persist across refresh
@@ -66,8 +66,8 @@ const queriesTestSuite = () => {
 
         const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
-        cy.osd.waitForLoader(true);
-        cy.waitForSearch();
+
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
 
         // Query should persist across refresh
@@ -79,12 +79,16 @@ const queriesTestSuite = () => {
         cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('OpenSearch SQL');
 
-        // Default SQL query should be set
-        cy.osd.waitForLoader(true);
-        cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-          `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`
-        );
+        // Use the more robust verifyDiscoverPageState function
+        verifyDiscoverPageState({
+          dataset: `${INDEX_WITH_TIME_1}*`,
+          queryString: `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`,
+          language: 'OpenSearch SQL',
+        });
+
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+        cy.osd.verifyResultsCount(10);
+        cy.getElementByTestId('discoverQueryHits').should('not.exist');
 
         // Query should persist across refresh
         cy.reload();
@@ -113,16 +117,29 @@ const queriesTestSuite = () => {
 
         // Default PPL query should be set
         cy.osd.waitForLoader(true);
-        cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-          `source = ${INDEX_WITH_TIME_1}*`
-        );
-        cy.waitForSearch();
+
+        // Use the more robust verifyDiscoverPageState function to check editor content
+        // This handles Monaco editor's special whitespace characters better
+        verifyDiscoverPageState({
+          dataset: `${INDEX_WITH_TIME_1}*`,
+          queryString: `source = ${INDEX_WITH_TIME_1}*`,
+          language: 'PPL',
+          hitCount: '10,000',
+        });
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+        cy.osd.verifyResultsCount(10000);
 
         // Query should persist across refresh
         cy.reload();
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
-        cy.verifyHitCount('10,000');
+
+        // Verify the state again after reload
+        verifyDiscoverPageState({
+          dataset: `${INDEX_WITH_TIME_1}*`,
+          queryString: `source = ${INDEX_WITH_TIME_1}*`,
+          language: 'PPL',
+          hitCount: '10,000',
+        });
       });
     });
   });

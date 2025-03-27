@@ -37,6 +37,14 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   languageProviders,
   queryStatus,
 }) => {
+  // Simple wrapper for editorDidMount
+  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    // Call the original editorDidMount function
+    editorDidMount(editor);
+
+    // Return the original editor instance
+    return editor;
+  };
   return (
     <div className="defaultEditor" data-test-subj="osdQueryEditor__multiLine">
       <div ref={headerRef} className="defaultEditor__header" data-test-subj="defaultEditorHeader" />
@@ -45,7 +53,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         languageId={languageId}
         value={value}
         onChange={onChange}
-        editorDidMount={editorDidMount}
+        editorDidMount={handleEditorDidMount}
         options={{
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
@@ -58,10 +66,19 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
           wrappingIndent: 'same',
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 1,
-          wordBasedSuggestions: false,
+          // Configure suggestion behavior
+          suggest: {
+            snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
+            filterGraceful: false, // Don't filter suggestions
+            showStatusBar: true, // Enable the built-in status bar with default text
+            showWords: false, // Disable word-based suggestions
+          },
+          acceptSuggestionOnEnter: 'off',
         }}
         suggestionProvider={{
-          provideCompletionItems: languageProviders.provideCompletionItems,
+          provideCompletionItems: async (model, position, context, token) => {
+            return languageProviders.provideCompletionItems(model, position, context, token);
+          },
           triggerCharacters: languageProviders.triggerCharacters,
         }}
         languageConfiguration={{
@@ -117,4 +134,4 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   );
 };
 
-export const createDefaultEditor = createEditor(SingleLineInput, null, DefaultInput);
+export const createDefaultEditor = createEditor(SingleLineInput, null, [], DefaultInput);

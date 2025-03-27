@@ -73,7 +73,15 @@ test('editor mount setup', () => {
     }),
   };
   const signatureProvider = {
-    provideSignatureHelp: () => ({ signatures: [], activeParameter: 0, activeSignature: 0 }),
+    provideSignatureHelp: () =>
+      Promise.resolve({
+        value: {
+          signatures: [],
+          activeParameter: 0,
+          activeSignature: 0,
+        },
+        dispose: () => {},
+      }),
   };
   const hoverProvider = {
     provideHover: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
