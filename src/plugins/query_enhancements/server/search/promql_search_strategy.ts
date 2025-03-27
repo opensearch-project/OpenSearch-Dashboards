@@ -15,8 +15,9 @@ import {
   Query,
 } from '../../../data/common';
 
-// Query 500 samples by default
-const AUTO_STEP_TARGET_SAMPLES = 500;
+// This creates an upper bound for data points sent to the frontend (targetSamples * maxSeries)
+const AUTO_STEP_TARGET_SAMPLES = 50;
+const MAX_SERIES = 20;
 
 interface MetricResult {
   metric: Record<string, string>;
@@ -105,6 +106,10 @@ function createDataFrame(rawResponse: PrometheusResponse, datasetId: string) {
     };
 
     const df = series.reduce((acc, metricResult, i) => {
+      if (i >= MAX_SERIES) {
+        return acc;
+      }
+
       const schema = getFieldSchema(metricResult);
       acc.schema?.push(schema);
       acc.fields?.push({
