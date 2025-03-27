@@ -23,6 +23,7 @@ export class ResourceClientFactory {
       switch (dataConnectionType) {
         case 'prometheus':
           this.resourceClients.set(dataConnectionType, new PrometheusResourceClient(this.http));
+          break;
         default:
           throw new Error(`Connection type unsupported: ${dataConnectionType}`);
       }
