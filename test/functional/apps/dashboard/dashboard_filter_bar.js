@@ -204,12 +204,8 @@ export default function ({ getService, getPageObjects }) {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
 
-        // Expand a doc row
-        const toggles = await testSubjects.findAll('docTableExpandToggleColumn');
-        await toggles[0].click();
-
         // Add a field filter
-        await testSubjects.click('tableDocViewRow-@message addInclusiveFilterButton');
+        await testSubjects.click('filterForValue:first-of-type');
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
