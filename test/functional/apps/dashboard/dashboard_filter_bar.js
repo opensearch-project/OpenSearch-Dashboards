@@ -205,7 +205,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
 
         // Expand a doc row
-        await testSubjects.findAll('docTableExpandToggleColumn')[0].click();
+        const toggles = await testSubjects.findAll('docTableExpandToggleColumn');
+        await toggles[0].click();
 
         // Add a field filter
         await testSubjects.click('tableDocViewRow-@message addInclusiveFilterButton');

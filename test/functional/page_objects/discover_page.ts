@@ -440,7 +440,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
      * @returns {Promise<string[]>} A promise resolving to the table rows.
      */
     public async getDocTableRowsText(): Promise<string[]> {
-      return await docTable.getRowsText();
+      return await docTable.getDocTableValues();
     }
 
     /**

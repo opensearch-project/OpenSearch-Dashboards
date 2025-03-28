@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }) {
       await browser.get(newUrl.toString(), false);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const headers = await PageObjects.discover.getColumnHeaders();
+      const headers = await testSubjects.findAll('docTableHeaderField');
       // will be zero because the query inserted in the url doesn't match anything
       expect(headers.length).to.be(0);
     });
