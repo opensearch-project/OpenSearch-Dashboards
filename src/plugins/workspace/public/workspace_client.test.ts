@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { httpServiceMock, workspacesServiceMock } from '../../../core/public/mocks';
 import { WorkspaceClient } from './workspace_client';
 
@@ -17,6 +18,8 @@ const getWorkspaceClient = () => {
 };
 
 describe('#WorkspaceClient', () => {
+  const mockWorkspaceError$ = new BehaviorSubject<string>('');
+
   it('#init', async () => {
     const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
     await workspaceClient.init();
@@ -34,12 +37,12 @@ describe('#WorkspaceClient', () => {
     httpSetupMock.fetch.mockResolvedValue({
       success: false,
     });
-    const result = await workspaceClient.enterWorkspace('foo');
+    const result = await workspaceClient.enterWorkspace('foo', mockWorkspaceError$);
     expect(result.success).toEqual(false);
     httpSetupMock.fetch.mockResolvedValue({
       success: true,
     });
-    const successResult = await workspaceClient.enterWorkspace('foo');
+    const successResult = await workspaceClient.enterWorkspace('foo', mockWorkspaceError$);
     expect(workspaceMock.currentWorkspaceId$.getValue()).toEqual('foo');
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/foo', {
       method: 'GET',
@@ -52,7 +55,7 @@ describe('#WorkspaceClient', () => {
     httpSetupMock.fetch.mockResolvedValue({
       success: true,
     });
-    await workspaceClient.enterWorkspace('foo');
+    await workspaceClient.enterWorkspace('foo', mockWorkspaceError$);
     expect(workspaceClient.getCurrentWorkspaceId()).toEqual({
       success: true,
       result: 'foo',
@@ -67,7 +70,7 @@ describe('#WorkspaceClient', () => {
         name: 'foo',
       },
     });
-    await workspaceClient.enterWorkspace('foo');
+    await workspaceClient.enterWorkspace('foo', mockWorkspaceError$);
     expect(await workspaceClient.getCurrentWorkspace()).toEqual({
       success: true,
       result: {
