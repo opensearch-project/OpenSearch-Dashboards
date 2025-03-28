@@ -16,7 +16,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { QueryAssistParameters } from '../../../common/query_assist';
 import { getStorage } from '../../services';
 import { useGenerateQuery } from '../hooks';
-import { getPersistedLog, AgentError, ProhibitedQueryError, appendQueryPrompt } from '../utils';
+import { getPersistedLog, AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
@@ -71,8 +71,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     previousQuestionRef.current = inputRef.current.value;
     persistedLog.add(inputRef.current.value);
     const params: QueryAssistParameters = {
-      // Only append query prompt in request payload
-      question: appendQueryPrompt(inputRef.current.value),
+      question: inputRef.current.value,
       index: selectedIndex,
       language: props.dependencies.language,
       dataSourceId: selectedDataset?.dataSource?.id,
@@ -91,11 +90,15 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
         generatedQuery: '', // query generate failed, set it to empty
       });
     } else if (response) {
-      services.data.query.queryString.setQuery({
-        query: response.query,
-        language: params.language,
-        dataset: selectedDataset,
-      });
+      // force setQuery to proceed with updating the query
+      services.data.query.queryString.setQuery(
+        {
+          query: response.query,
+          language: params.language,
+          dataset: selectedDataset,
+        },
+        true
+      );
       updateQueryState({
         question: previousQuestionRef.current,
         generatedQuery: response.query,
