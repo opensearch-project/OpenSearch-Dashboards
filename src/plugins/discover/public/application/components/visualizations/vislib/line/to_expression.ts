@@ -131,8 +131,8 @@ const createVegaSpec = (rows: Row[]) => {
               .join(' : ') + ' : datum.label',
           orient: 'bottom',
           labelLimit: 999,
-          columns: Math.min(3, columns.length - 1), // Limit to 3 columns or fewer legends
-          padding: 10,
+          columns: Math.min(2, columns.length - 1), // Limit to 3 columns or fewer legends
+          padding: 4,
         },
       },
     };

@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {
   DATA_STRUCTURE_META_TYPES,
   DataStructure,
   DataStructureCustomMeta,
   Dataset,
 } from '../../../data/common';
-import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
+import { DatasetTypeConfig } from '../../../data/public';
 import { DATASET } from '../../common';
 import PROMETHEUS_ICON from '../assets/prometheus_mark.svg';
 
