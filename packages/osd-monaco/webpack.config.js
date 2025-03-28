@@ -56,6 +56,24 @@ const createLangWorkerConfig = (lang) => ({
           },
         },
       },
+      // Process CSS files for Monaco editor
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
+      // Handle font files for codicons
+      {
+        test: /\.(woff|woff2|ttf|eot)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'fonts/',
+            },
+          },
+        ],
+      },
     ],
   },
 });

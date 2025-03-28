@@ -77,7 +77,7 @@ export async function readTelemetryFile<T extends object>(
 ): Promise<T | undefined> {
   try {
     if (isFileReadable(configPath)) {
-      const yaml = readFileSync(configPath);
+      const yaml = readFileSync(configPath, 'utf8');
       const data = load(yaml.toString());
 
       // don't bother returning empty objects

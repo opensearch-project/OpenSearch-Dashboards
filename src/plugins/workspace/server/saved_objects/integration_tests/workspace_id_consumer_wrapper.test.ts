@@ -280,7 +280,7 @@ describe('workspace_id_consumer integration test', () => {
           'file',
           Buffer.from(
             [JSON.stringify(getResultFoo.body), JSON.stringify(getResultBar.body)].join('\n'),
-            'utf-8'
+            'utf8'
           ),
           'tmp.ndjson'
         )
@@ -361,7 +361,7 @@ describe('workspace_id_consumer integration test', () => {
                 id: 'bar',
               }),
             ].join('\n'),
-            'utf-8'
+            'utf8'
           ),
           'tmp.ndjson'
         )
