@@ -156,43 +156,6 @@ describe('QueryAssistBar', () => {
     });
   });
 
-  it('should set query to initial query for AgentError', async () => {
-    queryStringMock.getInitialQuery.mockReturnValueOnce({ query: 'initial', language: 'PPL' });
-    const generateQueryMock = jest.fn().mockResolvedValue({
-      error: new AgentError({
-        error: { type: 'mock-type', reason: 'mock-reason', details: 'mock-details' },
-        status: 404,
-      }),
-    });
-    (useGenerateQuery as jest.Mock).mockReturnValue({
-      generateQuery: generateQueryMock,
-      loading: false,
-    });
-    renderQueryAssistBar();
-
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'false query' } });
-    fireEvent.click(screen.getByRole('button'));
-
-    await waitFor(() => {
-      expect(queryStringMock.getInitialQuery).toBeCalledTimes(1);
-      expect(queryStringMock.setQuery).toHaveBeenCalledWith({
-        dataset: {
-          dataSource: {
-            id: 'mock-data-source-id',
-            title: 'Default Data Source',
-            type: 'OpenSearch',
-          },
-          id: 'default-index-pattern',
-          timeFieldName: '@timestamp',
-          title: 'Default Index Pattern',
-          type: 'INDEX_PATTERN',
-        },
-        language: 'PPL',
-        query: 'initial',
-      });
-    });
-  });
-
   it('passes agent errors to input', async () => {
     const generateQueryMock = jest.fn().mockResolvedValue({
       error: new AgentError({

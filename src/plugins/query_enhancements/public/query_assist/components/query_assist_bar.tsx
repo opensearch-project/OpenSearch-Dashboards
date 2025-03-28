@@ -87,14 +87,6 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
         question: previousQuestionRef.current,
         generatedQuery: '', // query generate failed, set it to empty
       });
-
-      // if the return error, then we will replace the previous query with the initial query
-      const initialQuery = services.data.query.queryString.getInitialQuery().query;
-      services.data.query.queryString.setQuery({
-        query: initialQuery,
-        language: params.language,
-        dataset: selectedDataset,
-      });
     } else if (response) {
       services.data.query.queryString.setQuery({
         query: response.query,
