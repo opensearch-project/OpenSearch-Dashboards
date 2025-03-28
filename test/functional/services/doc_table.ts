@@ -218,7 +218,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
      */
     getTextFromCell(cCell: any): string {
       // navigate the nested structure and get the text
-      return cCell.children()[0].children().text();
+      return cCell.children().first().children().text();
     }
 
     /**

@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
   const opensearchArchiver = getService('opensearchArchiver');
@@ -204,8 +205,16 @@ export default function ({ getService, getPageObjects }) {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
 
+        // Expand a doc row
+        const expandButtons = await find.allByCssSelector(
+          '[data-test-subj="docTableExpandToggleColumn"]'
+        );
+        await expandButtons[0].click();
+
         // Add a field filter
-        await testSubjects.click('filterForValue:first-of-type');
+        await find.clickByCssSelector(
+          '[data-test-subj="tableDocViewRow-@message"] [data-test-subj="addInclusiveFilterButton"]'
+        );
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
