@@ -34,7 +34,9 @@ export default function DiscoverPanel(props: ViewProps) {
     indexPatterns,
     application,
   } = services;
+  const queryString = services.data.query.queryString;
   const { data$, indexPattern } = useDiscoverContext();
+  const [datasetType, setDatasetType] = useState<string | undefined>();
   const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
 
   const { columns } = useSelector((state) => {
@@ -44,6 +46,22 @@ export default function DiscoverPanel(props: ViewProps) {
       columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
     };
   });
+
+  /**
+   * Note: there's a bug where the query dataset and the index pattern become
+   * entirely out of sync. due to that the temporary index pattern is not a
+   * reliable source of truth for determining the dataset type.
+   *
+   * TODO: refactor once we have a proper state management pattern on the platform
+   */
+  useEffect(() => {
+    const subscription = queryString.getUpdates$().subscribe((query) => {
+      setDatasetType(query.dataset?.type);
+    });
+
+    return subscription.unsubscribe;
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   const prevColumns = useRef(columns);
   const dispatch = useDispatch();
@@ -106,7 +124,7 @@ export default function DiscoverPanel(props: ViewProps) {
   );
 
   // TODO: this should check dataset type
-  if (indexPattern?.id === 'my_prometheus') {
+  if (datasetType === 'PROMETHEUS') {
     return <MetricsSidebar />;
   }
 

@@ -20,6 +20,9 @@ export interface PrometheusContext {
   };
 }
 
+// TODO: use id from temp index pattern
+const CONNECTION_ID = 'my_prometheus';
+
 export const usePrometheus = (): PrometheusContext => {
   const {
     services: { data },
@@ -33,13 +36,12 @@ export const usePrometheus = (): PrometheusContext => {
   const [labelNames, setLabelNames] = useState<string[]>([]);
 
   const updateLabels = useCallback(async () => {
-    const labels = await prometheusResourceClient.getLabels('my_prometheus');
-    setLabelNames(labels.sort());
+    const labels = await prometheusResourceClient.getLabels(CONNECTION_ID);
+    setLabelNames(labels);
   }, [prometheusResourceClient]);
 
   const updateMetrics = useCallback(async () => {
-    const metricMetadata = await prometheusResourceClient.getMetricMetadata('my_prometheus');
-    const metrics = Object.keys(metricMetadata).sort();
+    const metrics = await prometheusResourceClient.getMetrics(CONNECTION_ID);
     setMetricNames(metrics);
 
     if (!data.query.queryString.getQuery().query) {

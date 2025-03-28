@@ -19,6 +19,7 @@ const BASE_ALERT_MANAGER_API = 'alertmanager/api/v2';
 const PROMETHEUS_RESOURCE_TYPES = {
   LABELS: 'labels',
   LABEL_VALUES: 'label_values',
+  METRICS: 'metrics',
   METRIC_METADATA: 'metric_metadata',
   ALERTS: 'alerts',
   ALERTS_GROUPS: 'alert_manager_alert_groups',
@@ -52,6 +53,10 @@ interface LabelValuesQuery {
   resourceType: typeof PROMETHEUS_RESOURCE_TYPES.LABEL_VALUES;
   resourceName: string;
 }
+interface MetricsQuery {
+  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.METRICS;
+  resourceName: undefined;
+}
 interface MetricMetadataQuery {
   resourceType: typeof PROMETHEUS_RESOURCE_TYPES.METRIC_METADATA;
   resourceName?: string;
@@ -68,10 +73,12 @@ interface RulesQuery {
   resourceType: typeof PROMETHEUS_RESOURCE_TYPES.RULES;
   resourceName: undefined;
 }
-export type PrometheusResourceQuery = CommonQuery &
+export type PrometheusResourceQuery = OpenSearchDashboardsRequest &
+  CommonQuery &
   (
     | LabelsQuery
     | LabelValuesQuery
+    | MetricsQuery
     | MetricMetadataQuery
     | AlertsQuery
     | AlertsGroupsQuery
@@ -97,6 +104,8 @@ class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
         return `${BASE_RESOURCE_API}/alerts`;
       case PROMETHEUS_RESOURCE_TYPES.LABEL_VALUES:
         return `${BASE_RESOURCE_API}/label/${resourceName}/values`;
+      case PROMETHEUS_RESOURCE_TYPES.METRICS:
+        return `${BASE_RESOURCE_API}/label/__name__/values`;
       case PROMETHEUS_RESOURCE_TYPES.METRIC_METADATA:
         const metricMetadataQueryString = resourceName ? `?metric=${resourceName}` : '';
         return `${BASE_RESOURCE_API}/metadata${metricMetadataQueryString}`;
@@ -111,7 +120,7 @@ class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
 
   getResources<R extends PrometheusResource>(
     context: RequestHandlerContext,
-    request: OpenSearchDashboardsRequest,
+    request: PrometheusResourceQuery,
     query: PrometheusResourceQuery
   ): Promise<GetResourcesResponse<R>> {
     return this.getClient(context, request).getResources<R>({

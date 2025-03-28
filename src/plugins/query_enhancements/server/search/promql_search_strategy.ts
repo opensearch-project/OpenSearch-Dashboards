@@ -18,6 +18,8 @@ import {
 // This creates an upper bound for data points sent to the frontend (targetSamples * maxSeries)
 const AUTO_STEP_TARGET_SAMPLES = 50;
 const MAX_SERIES = 20;
+// We'll want to re-evaluate this when we provide an affordance for step configuration
+const MAX_DATAPOINTS = AUTO_STEP_TARGET_SAMPLES * MAX_SERIES;
 
 interface MetricResult {
   metric: Record<string, string>;
@@ -49,18 +51,18 @@ export const promqlSearchStrategyProvider = (
           start: dateMath.parse(requestBody.timeRange.from)!.unix(),
           end: dateMath.parse(requestBody.timeRange.to, { roundUp: true })!.unix(),
         };
-        const duration = timeRange.end - timeRange.start;
+        const duration = (timeRange.end - timeRange.start) * 1000;
         // round to nearest ms step >= 1ms
         const step =
           requestBody.step ??
-          Math.max(Math.ceil((duration / AUTO_STEP_TARGET_SAMPLES) * 1000) / 1000, 0.001);
+          Math.max(Math.ceil(duration / AUTO_STEP_TARGET_SAMPLES) / 1000, 0.001);
         const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
         const params = {
           body: {
             query,
             language,
-            maxResults: AUTO_STEP_TARGET_SAMPLES,
+            maxResults: MAX_DATAPOINTS,
             timeout: 30,
             sessionId: '1234', // TODO: use appropriate session id
             options: {
@@ -94,6 +96,10 @@ export const promqlSearchStrategyProvider = (
   };
 };
 
+/**
+ * we'll need to model this transformation more robustly and remove some
+ * of the structural assumptions here moving past kubecon demo
+ */
 function createDataFrame(rawResponse: PrometheusResponse, datasetId: string) {
   try {
     const series = rawResponse.results[datasetId].result;

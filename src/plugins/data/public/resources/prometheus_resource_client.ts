@@ -9,6 +9,7 @@ import { BaseResourceClient } from './base_resource_client';
 const RESOURCE_TYPES = {
   LABELS: 'labels',
   LABEL_VALUES: 'label_values',
+  METRICS: 'metrics',
   METRIC_METADATA: 'metric_metadata',
 } as const;
 
@@ -33,7 +34,11 @@ export class PrometheusResourceClient extends BaseResourceClient {
     return this.get<string[]>(dataConnectionId, RESOURCE_TYPES.LABEL_VALUES, label);
   }
 
+  getMetrics(dataConnectionId: string) {
+    return this.get<string[]>(dataConnectionId, RESOURCE_TYPES.METRICS);
+  }
+
   getMetricMetadata(dataConnectionId: string, metric?: string) {
-    return this.get<MetricMetadata>(dataConnectionId, 'metric_metadata', metric);
+    return this.get<MetricMetadata>(dataConnectionId, RESOURCE_TYPES.METRIC_METADATA, metric);
   }
 }

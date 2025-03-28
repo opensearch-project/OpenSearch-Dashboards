@@ -129,10 +129,11 @@ export const useSearch = (services: DiscoverViewServices) => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
-      datasetPreference ||
-      uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch?.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false
+      (datasetPreference ||
+        uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+        savedSearch?.id !== undefined ||
+        timefilter.getRefreshInterval().pause === false) &&
+      queryString
     );
   }, [data.query, savedSearch, uiSettings, timefilter]);
 
@@ -404,19 +405,15 @@ export const useSearch = (services: DiscoverViewServices) => {
     (async () => {
       const savedMetricInstance = await getSavedMetricById('');
       setSavedMetric(savedMetricInstance);
-      console.log('savedMetricInstance', savedMetricInstance);
     })();
     // This effect will only run when getSavedMetricById is called, which is
     // only called when the component is first mounted.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getSavedMetricById]);
 
   // Get savedSearch if it exists
   useEffect(() => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
-      console.log('savedSearchId', savedSearchId);
-      console.log('savedSearchInstance', savedSearchInstance);
 
       const query =
         savedSearchInstance.searchSource.getField('query') || data.query.queryString.getQuery();
