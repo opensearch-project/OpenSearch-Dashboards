@@ -1,0 +1,2 @@
+fix:
+- Bump prismjs to 1.30.0 ([#9610](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9610))
