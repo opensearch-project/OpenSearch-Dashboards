@@ -258,17 +258,18 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       suggestions:
         suggestions && suggestions.length > 0
           ? suggestions
-              .filter((s) => 'detail' in s) // designed to remove suggestion not of type MonacoCompatible
+              .filter((s) => 'labelDescription' in s) // designed to remove suggestion not of type MonacoCompatible
               .map((s: MonacoCompatibleQuerySuggestion) => {
                 return {
-                  label: s.text,
+                  label: { label: s.text, description: s.labelDescription },
                   kind: s.type as monaco.languages.CompletionItemKind,
                   insertText: s.insertText ?? s.text,
                   insertTextRules: s.insertTextRules ?? undefined,
                   range: s.replacePosition ?? defaultRange,
-                  detail: s.detail,
+                  detail: s.detail ?? s.labelDescription,
                   command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
                   sortText: s.sortText ?? s.text, // when undefined, the falsy value will default to the label
+                  documentation: s.documentation,
                 };
               })
           : [],

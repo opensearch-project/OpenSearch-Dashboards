@@ -79,11 +79,13 @@ export interface MonacoCompatibleQuerySuggestion
   extends Pick<QuerySuggestionBasic, 'description' | 'cursorIndex'> {
   type: monaco.languages.CompletionItemKind;
   text: string;
-  detail: string;
+  labelDescription: string;
   insertText?: string;
   insertTextRules?: monaco.languages.CompletionItemInsertTextRule;
   replacePosition?: monaco.Range;
   sortText?: string;
+  documentation?: string | monaco.IMarkdownString;
+  detail?: string;
 }
 
 /** @public **/
