@@ -179,6 +179,10 @@ export default function ({ getService, getPageObjects }) {
       it('should sort scripted field value in Discover', async function () {
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
+        // stop sort by timestamp
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // start sort by timestamp
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sortedDataByTimeField = await PageObjects.discover.getDocTableRowsText();
@@ -187,8 +191,9 @@ export default function ({ getService, getPageObjects }) {
 
         // click the column sorting button to remove painless field sort
         // should sort only by time field
-        await testSubjects.click('dataGridColumnSortingButton');
-        await PageObjects.discover.removeSort(`${scriptedPainlessFieldName}`);
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sortedDataByPainlessField = await PageObjects.discover.getDocTableRowsText();
         expect(sortedDataByPainlessField[0]).contain('Sep 17, 2015 @ 06:32:29.479');
@@ -295,6 +300,10 @@ export default function ({ getService, getPageObjects }) {
       it('should sort scripted field value in Discover', async function () {
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
+        // stop sort by timestamp
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // start sort by timestamp
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sortedDataByTimeField = await PageObjects.discover.getDocTableRowsText();
@@ -303,8 +312,9 @@ export default function ({ getService, getPageObjects }) {
 
         // click the column sorting button to remove painless field sort
         // should sort only by time field
-        await testSubjects.click('dataGridColumnSortingButton');
-        await PageObjects.discover.removeSort(`${scriptedPainlessFieldName2}`);
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sortedDataByPainlessField = await PageObjects.discover.getDocTableRowsText();
         expect(sortedDataByPainlessField[0]).contain('Sep 17, 2015 @ 06:32:29.479');
