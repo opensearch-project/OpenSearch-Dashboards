@@ -244,8 +244,11 @@ export class PluginsSystem {
     // topological ordering. If the cloned graph is _not_ empty at the end, we
     // know we were not able to topologically order the graph. We exclude optional
     // dependencies that are not present in the plugins graph.
+    const sortedPluginMap = new Map<PluginName, PluginWrapper>(
+      [...this.plugins].sort(([a], [b]) => a.localeCompare(b))
+    );
     const pluginsDependenciesGraph = new Map(
-      [...this.plugins.entries()].map(([pluginName, plugin]) => {
+      [...sortedPluginMap.entries()].map(([pluginName, plugin]) => {
         return [
           pluginName,
           new Set([
