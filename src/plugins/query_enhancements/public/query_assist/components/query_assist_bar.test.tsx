@@ -6,7 +6,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ComponentProps, PropsWithChildren } from 'react';
 import { IntlProvider } from 'react-intl';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { QueryAssistBar } from '.';
 import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { DataStorage } from '../../../../data/common';
@@ -37,6 +37,11 @@ jest.mock('./query_assist_input', () => ({
   ),
 }));
 
+const dataSetupMock = dataPluginMock.createSetupContract(true);
+dataSetupMock.ui = {
+  isGeneratingppl$: new BehaviorSubject<boolean>(false),
+};
+
 const dataMock = dataPluginMock.createStartContract(true);
 const queryStringMock = dataMock.query.queryString as jest.Mocked<QueryStringContract>;
 const uiSettingsMock = uiSettingsServiceMock.createStartContract();
@@ -56,6 +61,10 @@ const dependencies: QueryEditorExtensionDependencies = {
   },
 };
 
+const dataPropsMock = {
+  data: dataSetupMock,
+};
+
 type Props = ComponentProps<typeof QueryAssistBar>;
 
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
@@ -63,7 +72,13 @@ const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
 );
 
 const renderQueryAssistBar = (overrideProps: Partial<Props> = {}) => {
-  const props: Props = Object.assign<Props, Partial<Props>>({ dependencies }, overrideProps);
+  const props: Props = Object.assign<Props, Partial<Props>>(
+    {
+      dependencies,
+      data: dataPropsMock.data,
+    },
+    overrideProps
+  );
   const component = render(<QueryAssistBar {...props} />, {
     wrapper: IntlWrapper,
   });

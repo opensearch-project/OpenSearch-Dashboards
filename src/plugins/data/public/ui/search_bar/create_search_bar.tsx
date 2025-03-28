@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
@@ -37,6 +38,7 @@ import { SearchBar, SearchBarOwnProps } from './';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
+import { useIfGeneratingppl } from './lib/use_if_generating_ppl';
 import { DataPublicPluginStart } from '../../types';
 import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
@@ -45,6 +47,7 @@ interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: DataStorage;
+  isGeneratingppl$: BehaviorSubject<boolean>;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -76,10 +79,16 @@ const defaultOnRefreshChange = (queryService: QueryStart) => {
 const defaultOnQuerySubmit = (
   props: StatefulSearchBarProps,
   queryService: QueryStart,
-  currentQuery: Query
+  currentQuery: Query,
+  isGeneratingppl: boolean = false,
+  abortControllerRef: React.MutableRefObject<AbortController | null>
 ) => {
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
-
+  // if it is generating ppl now, we need to abort current request
+  if (isGeneratingppl) {
+    abortControllerRef.current?.abort();
+    return;
+  }
   const { timefilter } = queryService.timefilter;
 
   return (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -87,6 +96,7 @@ const defaultOnQuerySubmit = (
       !_.isEqual(timefilter.getTime(), payload.dateRange) ||
       !_.isEqual(payload.query, currentQuery);
     if (isUpdate) {
+      abortControllerRef.current = new AbortController();
       timefilter.setTime(payload.dateRange);
       if (payload.query) {
         queryService.queryString.setQuery(payload.query);
@@ -129,14 +139,15 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data, isGeneratingppl$ }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
     const { useDefaultBehaviors } = props;
-
+    const abortControllerRef = useRef<AbortController>(null);
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
+    const isGeneratingppl = useIfGeneratingppl({ isGeneratingppl$ });
 
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
@@ -205,7 +216,13 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
-          onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+          onQuerySubmit={defaultOnQuerySubmit(
+            props,
+            data.query,
+            query,
+            isGeneratingppl,
+            abortControllerRef
+          )}
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { useEffect, useRef, useState } from 'react';
 import { IDataPluginServices } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -10,7 +11,11 @@ import { API } from '../../../common';
 import { QueryAssistParameters, QueryAssistResponse } from '../../../common/query_assist';
 import { formatError } from '../utils';
 
-export const useGenerateQuery = () => {
+interface Props {
+  isGeneratingppl$: BehaviorSubject<boolean>;
+}
+
+export const useGenerateQuery = (props: Props) => {
   const mounted = useRef(false);
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef<AbortController>();
@@ -34,6 +39,7 @@ export const useGenerateQuery = () => {
     abortControllerRef.current = new AbortController();
     setLoading(true);
     try {
+      props.isGeneratingppl$.next(true);
       const response = await services.http.post<QueryAssistResponse>(API.QUERY_ASSIST.GENERATE, {
         body: JSON.stringify(params),
         signal: abortControllerRef.current?.signal,
@@ -42,7 +48,10 @@ export const useGenerateQuery = () => {
     } catch (error) {
       if (mounted.current) return { error: formatError(error) };
     } finally {
-      if (mounted.current) setLoading(false);
+      if (mounted.current) {
+        setLoading(false);
+        props.isGeneratingppl$.next(false);
+      }
     }
     return {};
   };
