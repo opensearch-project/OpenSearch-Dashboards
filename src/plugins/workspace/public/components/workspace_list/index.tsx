@@ -127,7 +127,7 @@ export const WorkspaceListInner = ({
   useEffect(() => {
     setDefaultWorkspaceId(uiSettings?.get(DEFAULT_WORKSPACE));
     if (savedObjects) {
-      getDataSourcesList(savedObjects.client, ['*']).then((data) => {
+      getDataSourcesList(savedObjects.client).then((data) => {
         setAllDataSources(data);
       });
     }
