@@ -35,7 +35,7 @@ import Mustache from 'mustache';
 import { TemplateContext } from '../template_context';
 
 function generator(options: TemplateContext) {
-  const template = readFileSync(resolve(__dirname, './Dockerfile'));
+  const template = readFileSync(resolve(__dirname, './Dockerfile'), 'utf8');
   return Mustache.render(template.toString(), {
     packageManager: options.ubiImageFlavor ? 'microdnf' : 'yum',
     ...options,

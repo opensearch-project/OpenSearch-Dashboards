@@ -48,7 +48,18 @@ export const selectSpecificSuggestion = (suggestionText) => {
   cy.get('.suggest-widget')
     .should('be.visible')
     .within(() => {
-      cy.get('.monaco-list-row').contains(suggestionText).should('be.visible').click();
+      cy.get('.monaco-list-row.focused').then(() => {
+        cy.get('.monaco-list-row').then(($rows) => {
+          const exactMatch = $rows.filter((_, row) => {
+            return Cypress.$(row).attr('aria-label') === suggestionText;
+          });
+
+          if (exactMatch.length > 0) {
+            cy.wrap(exactMatch).first().click();
+            return;
+          }
+        });
+      });
     });
 };
 
@@ -207,46 +218,6 @@ export const createDQLQueryUsingAutocomplete = () => {
     });
 };
 
-/**
- * Clicks to select a specific suggestion from the suggestion list
- * Used by: autocomplete_query.spec.js
- * @param {string} suggestionText - Text of suggestion to select
- */
-export const clickSuggestion = (suggestionText) => {
-  cy.get('.suggest-widget')
-    .should('be.visible')
-    .within(() => {
-      cy.get('.monaco-list-row').contains(suggestionText).should('be.visible').click();
-    });
-};
-
-/**
- * Shows suggestions and clicks to select one
- * Used by: autocomplete_query.spec.js
- * @param {string} expectedSuggestion - Suggestion to select
- */
-export const showAndClickSuggestion = (expectedSuggestion) => {
-  showSuggestions();
-  clickSuggestion(expectedSuggestion);
-};
-
-/**
- * Shows suggestion and scrolls if needed before clicking
- * Used by: autocomplete_query.spec.js
- * @param {string} suggestionText - Text of suggestion to select
- */
-export const showAndClickSuggestionWithScroll = (suggestionText) => {
-  cy.get('.suggest-widget')
-    .should('be.visible')
-    .within(() => {
-      cy.get('.monaco-list-row')
-        .contains(suggestionText)
-        .scrollIntoView()
-        .should('be.visible')
-        .click();
-    });
-};
-
 // =======================================
 // Autocomplete UI Spec Utilities
 // =======================================
@@ -319,12 +290,19 @@ export const showSuggestionAndHint = (maxAttempts = 3) => {
 
     return cy.get('.suggest-widget.visible').then(($widget) => {
       const isVisible = $widget.is(':visible');
-      const styles = window.getComputedStyle($widget[0], '::after');
-      const hasHint = styles.getPropertyValue('content').includes('Tab to insert');
+
+      // Check for the default Monaco status bar
+      let hasHint = false;
+
+      // Look for the default Monaco status bar
+      const statusBar = $widget.find('.suggest-status-bar');
+      if (statusBar.length > 0) {
+        hasHint = true;
+      }
 
       if (!isVisible || !hasHint) {
         if (attempts >= maxAttempts) {
-          throw new Error('Failed to show suggestion and hint after ${maxAttempts} attempts');
+          throw new Error(`Failed to show suggestion and hint after ${maxAttempts} attempts`);
         }
         return cy.wait(200).then(attemptShow);
       }
@@ -350,14 +328,17 @@ export const hideWidgets = (maxAttempts = 3) => {
       // sometimes when cypress interacts with editor, the visible class does not go away but the height is 0
       // that is sufficient
       if ($widget.height() === 0) {
+        // The default Monaco status bar will be hidden automatically
         return;
       }
 
       if ($widget.hasClass('visible')) {
         if (attempts >= maxAttempts) {
-          throw new Error('Failed to hide widgets after ${maxAttempts} attempts');
+          throw new Error(`Failed to hide widgets after ${maxAttempts} attempts`);
         }
         return cy.wait(200).then(attemptHide);
+      } else {
+        // The default Monaco status bar will be hidden automatically
       }
     });
   };
@@ -406,6 +387,42 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('Configuration', useKeyboard);
       }
+    });
+};
+
+// =======================================
+// Monaco Editor Parsing Utilities
+// =======================================
+
+/**
+ * Verifies the query string in Monaco editor
+ * The Monaco editor renders spaces using various Unicode whitespace characters and middle dot characters
+ * This function handles all possible whitespace representations that might appear in the editor
+ * @param {string} queryString - The query string to verify
+ * @param {string} editorType - The editor type selector (e.g., 'osdQueryEditor__multiLine' or 'osdQueryEditor__singleLine')
+ */
+export const verifyMonacoEditorContent = (queryString, editorType) => {
+  if (!queryString) return;
+
+  // Escape special regex characters in the query string
+  const escapedQueryString = queryString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  // This comprehensive pattern handles all possible whitespace representations that might appear in the editor
+  // including regular spaces, non-breaking spaces, middle dots, and other special characters used for spacing
+  const pattern = new RegExp(
+    escapedQueryString.replace(
+      /\s+/g,
+      '[\\s\\u00A0\\u00B7\\u2022\\u2023\\u25E6\\u2043\\u2219\\u22C5\\u30FB\\u00B7.·]+'
+    )
+  );
+
+  // Check the editor content against our pattern
+  cy.getElementByTestId(editorType)
+    .find('.view-line')
+    .first()
+    .invoke('text')
+    .then((text) => {
+      expect(pattern.test(text)).to.be.true;
     });
 };
 

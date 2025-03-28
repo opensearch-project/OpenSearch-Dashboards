@@ -1,0 +1,186 @@
+name: Build and install plugins
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build'
+        default: '3.0.0'
+        required: true
+        type: string
+      plugin_ref:
+        description: 'Git ref (branch/tag) to use for all plugins'
+        required: false
+        type: string
+        default: 'main'
+
+env:
+  VERSION: ${{ inputs.version }}
+  PLUGIN_REF: ${{ inputs.plugin_ref }}
+
+jobs:
+  build_release:
+    name: Build OpenSearch Dashboards Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Yarn
+        run: npm install -g yarn@^1.22.10
+
+      - name: Bootstrap OSD Core
+        run: yarn osd bootstrap --single-version=loose
+
+      - name: Build Release Artifact
+        run: yarn build-platform --linux --skip-os-packages --release
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opensearch-dashboards-${{ env.VERSION }}
+          path: target/opensearch-dashboards-*.tar.gz
+          retention-days: 1
+
+  build_plugins:
+    name: Build Plugin ${{ matrix.plugin.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin:
+          - name: reportsDashboards
+            repo: opensearch-project/dashboards-reporting
+          - name: securityDashboards
+            repo: opensearch-project/security-dashboards-plugin
+          - name: queryWorkbenchDashboards
+            repo: opensearch-project/dashboards-query-workbench
+          - name: searchRelevanceDashboards
+            repo: opensearch-project/dashboards-search-relevance
+          - name: observabilityDashboards
+            repo: opensearch-project/dashboards-observability
+          - name: ganttChartDashboards
+            repo: opensearch-project/dashboards-visualizations
+          - name: assistantDashboards
+            repo: opensearch-project/dashboards-assistant
+          - name: flowFrameworkDashboards
+            repo: opensearch-project/dashboards-flow-framework
+          - name: notificationsDashboards
+            repo: opensearch-project/dashboards-notifications
+          - name: customImportMapDashboards
+            repo: opensearch-project/dashboards-maps
+          - name: anomalyDetectionDashboards
+            repo: opensearch-project/anomaly-detection-dashboards-plugin
+          - name: mlCommonsDashboards
+            repo: opensearch-project/ml-commons-dashboards
+          - name: indexManagementDashboards
+            repo: opensearch-project/index-management-dashboards-plugin
+          - name: alertingDashboards
+            repo: opensearch-project/alerting-dashboards-plugin
+          - name: queryInsightsDashboards
+            repo: opensearch-project/query-insights-dashboards
+    steps:
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Yarn
+        run: npm install -g yarn@^1.22.10
+
+      - name: Checkout Plugin
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.plugin.repo }}
+          ref: ${{ env.PLUGIN_REF }}
+          path: plugins/${{ matrix.plugin.name }}
+
+      - name: Bootstrap with Plugins
+        run: yarn osd bootstrap --single-version=loose
+
+      - name: Build Plugin
+        working-directory: plugins/${{ matrix.plugin.name }}
+        run: node ../../scripts/plugin_helpers build --opensearch-dashboards-version=${{ env.VERSION }} 2>&1 | tee build.log
+
+      - name: Upload Plugin Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.plugin.name }}-${{ env.VERSION }}
+          path: plugins/${{ matrix.plugin.name }}/build/*.zip
+          retention-days: 1
+
+      - name: Upload Build Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.plugin.name }}-${{ env.VERSION }}-failed-log
+          path: plugins/${{ matrix.plugin.name }}/build.log
+          retention-days: 1
+
+  assemble_release:
+    name: Assemble Final Release
+    needs: [build_release, build_plugins]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Release Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: opensearch-dashboards-${{ env.VERSION }}
+          path: ./
+
+      - name: Extract Release
+        run: |
+          # Create directories
+          mkdir -p target
+          mkdir -p opensearch-dashboards-${{ env.VERSION }}
+          
+          tar -xzf opensearch-dashboards-*.tar.gz -C opensearch-dashboards-${{ env.VERSION }} --strip-components=1
+
+      - name: Download All Plugin Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: plugins
+          pattern: "*-${{ env.VERSION }}"
+          merge-multiple: true
+
+      - name: Install Plugins
+        run: |
+          mkdir -p install_logs
+          cd plugins
+          for plugin in *.zip; do
+            if [ -f "$plugin" ]; then
+              plugin_name=$(basename "$plugin" .zip)
+              echo "Installing plugin: $plugin_name"
+              if ../opensearch-dashboards-${{ env.VERSION }}/bin/opensearch-dashboards-plugin install "file:$(pwd)/$plugin" 2>&1 | tee ../install_logs/${plugin_name}-install.log; then
+                echo "✅ Successfully installed $plugin_name"
+              else
+                echo "⚠️ Failed to install $plugin_name"
+              fi
+            fi
+          done
+
+      - name: Upload Install Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-install-logs
+          path: install_logs/
+          retention-days: 1
+
+      - name: Upload Final Release
+        uses: actions/upload-artifact@v4
+        with:
+          name: opensearch-dashboards-${{ env.VERSION }}-with-plugins
+          path: opensearch-dashboards-${{ env.VERSION }}/
+          retention-days: 1

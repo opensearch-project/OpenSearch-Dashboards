@@ -152,7 +152,7 @@ cy.osd.add('deleteDataSourceByName', (dataSourceName) => {
 
   // Navigate to the dataSource Management page
   cy.visit('app/dataSources');
-  cy.get('h1').contains('Data sources').should('be.visible');
+  cy.contains('h1', 'Data sources', { timeout: 20000 }).should('be.visible');
   cy.wait(2000);
 
   // Check if data source exists before trying to delete
@@ -216,21 +216,18 @@ cy.osd.add('deleteAllDataSources', () => {
   });
 });
 
-cy.osd.add(
-  // navigates to the workspace HomePage of a given workspace
-  'navigateToWorkSpaceHomePage',
-  (workspaceName) => {
-    // Selecting the correct workspace
-    cy.visit('/app/workspace_list#');
-    cy.openWorkspaceDashboard(workspaceName);
-    // wait until page loads
-    if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'osd') {
-      cy.getElementByTestId('headerAppActionMenu').should('be.visible');
-    } else {
-      cy.getElementByTestId('breadcrumbs').should('be.visible');
-    }
+// Navigates to the workspace HomePage of a given workspace
+cy.osd.add('navigateToWorkSpaceHomePage', (workspaceName) => {
+  // Selecting the correct workspace
+  cy.visit('/app/workspace_list#');
+  cy.openWorkspaceDashboard(workspaceName);
+  // wait until page loads
+  if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'osd') {
+    cy.getElementByTestId('headerAppActionMenu').should('be.visible');
+  } else {
+    cy.getElementByTestId('breadcrumbs').should('be.visible');
   }
-);
+});
 
 cy.osd.add(
   //navigate to workspace specific pages
@@ -256,6 +253,10 @@ cy.osd.add(
     cy.osd.waitForLoader(isEnhancement);
   }
 );
+
+cy.osd.add('wait', () => {
+  cy.wait(Cypress.env('WAIT_MS'));
+});
 
 cy.osd.add('waitForLoader', (isEnhancement = false) => {
   const opts = { log: false };

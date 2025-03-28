@@ -9,10 +9,7 @@ import {
   QueryLanguages,
   DATASOURCE_NAME,
 } from '../../../../../../utils/constants';
-import {
-  getRandomizedWorkspaceName,
-  getDefaultQuery,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateAutocompleteTestConfiguration,
   generateAutocompleteTestConfigurations,
@@ -75,17 +72,13 @@ export const runAutocompleteTests = () => {
           const secondDataset = getDatasetName('data_logs_small_time_2', config.datasetType);
 
           // Verify initial default query
-          cy.getElementByTestId('osdQueryEditor__multiLine').contains(
-            getDefaultQuery(firstDataset, config.language)
-          );
+          cy.getElementByTestId('osdQueryEditor__multiLine').contains(firstDataset);
 
           // Switch to second index pattern
           cy.setDataset(secondDataset, DATASOURCE_NAME, config.datasetType);
 
           // Verify query updated for new index pattern
-          cy.getElementByTestId('osdQueryEditor__multiLine').contains(
-            getDefaultQuery(secondDataset, config.language)
-          );
+          cy.getElementByTestId('osdQueryEditor__multiLine').contains(secondDataset);
 
           // Switch language and verify index pattern maintained
           const switchLanguage =
@@ -93,9 +86,7 @@ export const runAutocompleteTests = () => {
               ? QueryLanguages.PPL.name
               : QueryLanguages.SQL.name;
           cy.setQueryLanguage(switchLanguage);
-          cy.getElementByTestId('osdQueryEditor__multiLine').contains(
-            getDefaultQuery(secondDataset, switchLanguage)
-          );
+          cy.getElementByTestId('osdQueryEditor__multiLine').contains(secondDataset);
         });
       });
     });

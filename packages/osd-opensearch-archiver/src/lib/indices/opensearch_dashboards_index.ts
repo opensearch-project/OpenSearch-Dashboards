@@ -143,7 +143,7 @@ export async function cleanOpenSearchDashboardsIndices({
       },
     });
 
-    if (resp.body.total !== resp.body.deleted) {
+    if ('total' in resp.body && resp.body.total !== resp.body.deleted) {
       log.warning(
         'delete by query deleted %d of %d total documents, trying again',
         resp.body.deleted,
