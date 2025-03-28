@@ -177,11 +177,9 @@ export default function ({ getService, getPageObjects }) {
 
       //add a test to sort numeric scripted field
       it('should sort scripted field value in Discover', async function () {
-        await testSubjects.click(`dataGridHeaderCell-${scriptedPainlessFieldName}`);
-        await PageObjects.discover.clickTableHeaderListItem(scriptedPainlessFieldName, 'Sort A-Z');
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.click('dataGridHeaderCell-@timestamp');
-        await PageObjects.discover.clickTableHeaderListItem('@timestamp', 'Sort A-Z');
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sortedDataByTimeField = await PageObjects.discover.getDocTableRowsText();
         expect(sortedDataByTimeField[0]).contain('Sep 17, 2015 @ 10:53:14.181');
@@ -295,11 +293,9 @@ export default function ({ getService, getPageObjects }) {
 
       //add a test to sort string scripted field
       it('should sort scripted field value in Discover', async function () {
-        await testSubjects.click(`dataGridHeaderCell-${scriptedPainlessFieldName2}`);
-        await PageObjects.discover.clickTableHeaderListItem(scriptedPainlessFieldName2, 'Sort A-Z');
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.click('dataGridHeaderCell-@timestamp');
-        await PageObjects.discover.clickTableHeaderListItem('@timestamp', 'Sort A-Z');
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sortedDataByTimeField = await PageObjects.discover.getDocTableRowsText();
         expect(sortedDataByTimeField[0]).contain('Sep 17, 2015 @ 09:48:40.594');

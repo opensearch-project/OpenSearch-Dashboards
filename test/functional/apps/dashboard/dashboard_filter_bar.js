@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }) {
 
         // Expand a doc row
         const expandButtons = await find.allByCssSelector(
-          '[data-test-subj="docTableExpandToggleColumn"]'
+          '[data-test-subj="docTableExpandToggleColumn"] > [data-test-subj="docTableExpandToggleColumn"]'
         );
         await expandButtons[0].click();
 
