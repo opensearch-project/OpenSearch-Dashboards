@@ -43,6 +43,8 @@ const rulesToVisit = new Set([
   PromQLParser.RULE_labelName,
   PromQLParser.RULE_labelValue,
   PromQLParser.RULE_duration,
+  PromQLParser.RULE_aggregationOperators,
+  PromQLParser.RULE_functionNames,
 ]);
 
 export function processVisitedRules(
@@ -54,9 +56,15 @@ export function processVisitedRules(
   let shouldSuggestLabels;
   let shouldSuggestLabelValues = false;
   let suggestTimeRangeUnits = false;
+  let suggestAggregationOperators = false;
+  let suggestFunctionNames = false;
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
+      case PromQLParser.RULE_aggregationOperators:
+        suggestAggregationOperators = true;
+      case PromQLParser.RULE_functionNames:
+        suggestFunctionNames = true;
       case PromQLParser.RULE_metricName:
         suggestMetrics = true;
         break;
@@ -87,7 +95,14 @@ export function processVisitedRules(
     }
   }
 
-  return { suggestMetrics, shouldSuggestLabels, shouldSuggestLabelValues, suggestTimeRangeUnits };
+  return {
+    suggestMetrics,
+    shouldSuggestLabels,
+    shouldSuggestLabelValues,
+    suggestTimeRangeUnits,
+    suggestAggregationOperators,
+    suggestFunctionNames,
+  };
 }
 
 export function getParseTree(parser: PromQLParser): ParseTree {

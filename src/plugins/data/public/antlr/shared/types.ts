@@ -109,6 +109,8 @@ export interface PromQLAutocompleteResult extends AutocompleteResultBase {
   suggestLabels?: string;
   suggestLabelValues?: { metric?: string; label?: string };
   suggestTimeRangeUnits?: boolean;
+  suggestAggregationOperators?: boolean;
+  suggestFunctionNames?: boolean;
 }
 
 export enum TableOrViewSuggestion {

@@ -10,6 +10,7 @@ import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { parseQuery } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 import { PrometheusResourceClient } from '../../resources/prometheus_resource_client';
+import { aggregationOperators, functionNames } from './constants';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -50,7 +51,7 @@ export const getSuggestions = async ({
         ...Object.entries(metrics).map(([af, [{ type }]]) => ({
           text: `${af}`,
           type: monaco.languages.CompletionItemKind.Field,
-          detail: `${type}`,
+          detail: `${type} (metric)`,
         }))
       );
     }
@@ -97,7 +98,25 @@ export const getSuggestions = async ({
       );
     }
 
-    // TODO: bring functions to be suggested here, and give it a function type
+    if (suggestions.suggestFunctionNames) {
+      finalSuggestions.push(
+        ...functionNames.map((func) => ({
+          text: func,
+          type: monaco.languages.CompletionItemKind.Function,
+          detail: 'function',
+        }))
+      );
+    }
+
+    if (suggestions.suggestAggregationOperators) {
+      finalSuggestions.push(
+        ...aggregationOperators.map((agg) => ({
+          text: agg,
+          type: monaco.languages.CompletionItemKind.Function,
+          detail: 'aggregation operator',
+        }))
+      );
+    }
 
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
@@ -105,7 +124,7 @@ export const getSuggestions = async ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
           insertText: `${sk.value}`,
-          detail: SuggestionItemDetailsTags.Keyword,
+          detail: 'keyword',
         }))
       );
     }
