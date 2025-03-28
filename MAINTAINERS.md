@@ -33,6 +33,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Hailong Cui               | [Hailong-am](https://github.com/Hailong-am)         | Amazon      |
 | Justin Kim                | [angle943](https://github.com/angle943)             | Amazon      |
 | Joey Liu                  | [Maosaic](jiyili@amazon.com)                        | Amazon      |
+| Lin Wang                  | [wanglam](wonglam@amazon.com)                       | Amazon      |
 
 ## Emeritus
 
