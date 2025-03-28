@@ -121,11 +121,6 @@
 # For reference, the `threshold of memoryCircuitBreaker` = `max-old-space-size of NodeJS` * `opensearch.memoryCircuitBreaker.maxPercentage`
 #opensearch.memoryCircuitBreaker.maxPercentage: 1.0
 
-# DEPRECATED: Use opensearch.requestHeadersAllowlist
-# List of OpenSearch Dashboards client-side headers to send to OpenSearch. To send *no* client-side
-# headers, set this value to [] (an empty list).
-#opensearch.requestHeadersWhitelist: [ authorization ]
-
 # List of OpenSearch Dashboards client-side headers to send to OpenSearch. To send *no* client-side
 # headers, set this value to [] (an empty list).
 #opensearch.requestHeadersAllowlist: [ authorization ]

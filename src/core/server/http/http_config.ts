@@ -77,7 +77,7 @@ export const config = {
       }),
       compression: schema.object({
         enabled: schema.boolean({ defaultValue: true }),
-        referrerWhitelist: schema.maybe(
+        referrerAllowlist: schema.maybe(
           schema.arrayOf(
             schema.string({
               hostname: true,
@@ -93,7 +93,7 @@ export const config = {
       ),
       xsrf: schema.object({
         disableProtection: schema.boolean({ defaultValue: false }),
-        whitelist: schema.arrayOf(
+        allowlist: schema.arrayOf(
           schema.string({ validate: match(/^\//, 'must start with a slash') }),
           { defaultValue: [] }
         ),
@@ -117,8 +117,8 @@ export const config = {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
         }
-        if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
-          return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
+        if (!rawConfig.compression.enabled && rawConfig.compression.referrerAllowlist) {
+          return 'cannot use [compression.referrerAllowlist] when [compression.enabled] is set to false';
         }
 
         if (
@@ -151,9 +151,9 @@ export class HttpConfig {
   public basePath?: string;
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
-  public compression: { enabled: boolean; referrerWhitelist?: string[] };
+  public compression: { enabled: boolean; referrerAllowlist?: string[] };
   public csp: ICspConfig;
-  public xsrf: { disableProtection: boolean; whitelist: string[] };
+  public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
   /**

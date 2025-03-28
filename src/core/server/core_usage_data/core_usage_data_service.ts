@@ -172,8 +172,8 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           healthCheckDelayMs: opensearchConfig.healthCheck.delay.asMilliseconds(),
           logQueries: opensearchConfig.logQueries,
           pingTimeoutMs: opensearchConfig.pingTimeout.asMilliseconds(),
-          requestHeadersWhitelistConfigured: isConfigured.stringOrArray(
-            opensearchConfig.requestHeadersWhitelist,
+          requestHeadersAllowlistConfigured: isConfigured.stringOrArray(
+            opensearchConfig.requestHeadersAllowlist,
             ['authorization']
           ),
           requestTimeoutMs: opensearchConfig.requestTimeout.asMilliseconds(),
@@ -198,11 +198,11 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           socketTimeout: http.socketTimeout,
           compression: {
             enabled: http.compression.enabled,
-            referrerWhitelistConfigured: isConfigured.array(http.compression.referrerWhitelist),
+            referrerAllowlistConfigured: isConfigured.array(http.compression.referrerAllowlist),
           },
           xsrf: {
             disableProtection: http.xsrf.disableProtection,
-            whitelistConfigured: isConfigured.array(http.xsrf.whitelist),
+            allowlistConfigured: isConfigured.array(http.xsrf.allowlist),
           },
           requestId: {
             allowFromAnyIp: http.requestId.allowFromAnyIp,

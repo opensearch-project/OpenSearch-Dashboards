@@ -350,7 +350,7 @@ export const config: {
             hosts: Type<string | string[]>;
             username: Type<string | undefined>;
             password: Type<string | undefined>;
-            requestHeadersWhitelist: Type<string | string[]>;
+            requestHeadersAllowlist: Type<string | string[]>;
             customHeaders: Type<Record<string, string>>;
             shardTimeout: Type<import("moment").Duration>;
             requestTimeout: Type<import("moment").Duration>;
@@ -412,11 +412,11 @@ export interface CoreConfigUsageData {
         socketTimeout: number;
         compression: {
             enabled: boolean;
-            referrerWhitelistConfigured: boolean;
+            referrerAllowlistConfigured: boolean;
         };
         xsrf: {
             disableProtection: boolean;
-            whitelistConfigured: boolean;
+            allowlistConfigured: boolean;
         };
         requestId: {
             allowFromAnyIp: boolean;
@@ -445,7 +445,7 @@ export interface CoreConfigUsageData {
         sniffIntervalMs?: number;
         sniffOnConnectionFault: boolean;
         numberOfHostsConfigured: number;
-        requestHeadersWhitelistConfigured: boolean;
+        requestHeadersAllowlistConfigured: boolean;
         customHeadersConfigured: boolean;
         shardTimeoutMs: number;
         requestTimeoutMs: number;
@@ -1230,7 +1230,7 @@ export interface LegacyConfig {
 }
 
 // @public @deprecated (undocumented)
-export type LegacyOpenSearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<OpenSearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
+export type LegacyOpenSearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<OpenSearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersAllowlist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: OpenSearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
     requestTimeout?: OpenSearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
     sniffInterval?: OpenSearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];
@@ -1423,7 +1423,7 @@ export type OpenSearchClient = Omit<OpenSearchDashboardsClient, 'connectionPool'
 };
 
 // @public
-export type OpenSearchClientConfig = Pick<OpenSearchConfig, 'customHeaders' | 'logQueries' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password'> & {
+export type OpenSearchClientConfig = Pick<OpenSearchConfig, 'customHeaders' | 'logQueries' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersAllowlist' | 'sniffInterval' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: OpenSearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
     requestTimeout?: OpenSearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<OpenSearchConfig['ssl']>;
@@ -1442,7 +1442,7 @@ export class OpenSearchConfig {
     readonly logQueries: boolean;
     readonly password?: string;
     readonly pingTimeout: Duration;
-    readonly requestHeadersWhitelist: string[];
+    readonly requestHeadersAllowlist: string[];
     readonly requestTimeout: Duration;
     readonly shardTimeout: Duration;
     readonly sniffInterval: false | Duration;

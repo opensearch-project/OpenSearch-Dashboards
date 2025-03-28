@@ -48,7 +48,7 @@ test('parses minimally specified config', () => {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
-        requestHeadersWhitelist: [],
+        requestHeadersAllowlist: [],
       },
 
       logger.get()
@@ -89,7 +89,7 @@ test('parses fully specified config', () => {
       'http://domain.com:1234/opensearch',
       'https://opensearch.local',
     ],
-    requestHeadersWhitelist: [],
+    requestHeadersAllowlist: [],
     username: 'opensearch',
     password: 'changeme',
     pingTimeout: 12345,
@@ -190,7 +190,7 @@ test('parses config timeouts of moment.Duration type', () => {
         requestTimeout: duration(30, 's'),
         sniffInterval: duration(1, 'minute'),
         hosts: ['http://localhost:9200/opensearch'],
-        requestHeadersWhitelist: [],
+        requestHeadersAllowlist: [],
       },
 
       logger.get()
@@ -235,7 +235,7 @@ describe('#auth', () => {
           hosts: ['http://user:password@localhost/opensearch', 'https://opensearch.local'],
           username: 'opensearch',
           password: 'changeme',
-          requestHeadersWhitelist: [],
+          requestHeadersAllowlist: [],
         },
         logger.get(),
         { auth: false }
@@ -285,7 +285,7 @@ describe('#auth', () => {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
-          requestHeadersWhitelist: [],
+          requestHeadersAllowlist: [],
           password: 'changeme',
         },
         logger.get(),
@@ -325,7 +325,7 @@ describe('#auth', () => {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
-          requestHeadersWhitelist: [],
+          requestHeadersAllowlist: [],
           username: 'opensearch',
         },
         logger.get(),
@@ -367,7 +367,7 @@ describe('#customHeaders', () => {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
-        requestHeadersWhitelist: [],
+        requestHeadersAllowlist: [],
       },
       logger.get()
     );
@@ -387,7 +387,7 @@ describe('#log', () => {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
-        requestHeadersWhitelist: [],
+        requestHeadersAllowlist: [],
       },
       logger.get()
     );
@@ -431,7 +431,7 @@ describe('#log', () => {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
-        requestHeadersWhitelist: [],
+        requestHeadersAllowlist: [],
       },
       logger.get()
     );
@@ -490,7 +490,7 @@ describe('#log', () => {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
-        requestHeadersWhitelist: [],
+        requestHeadersAllowlist: [],
         log: customLogger,
       },
       logger.get()
@@ -511,7 +511,7 @@ describe('#ssl', () => {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
-          requestHeadersWhitelist: [],
+          requestHeadersAllowlist: [],
           ssl: { verificationMode: 'none' },
         },
         logger.get()
@@ -552,7 +552,7 @@ describe('#ssl', () => {
         sniffOnStart: true,
         sniffOnConnectionFault: true,
         hosts: ['https://opensearch.local'],
-        requestHeadersWhitelist: [],
+        requestHeadersAllowlist: [],
         ssl: { verificationMode: 'certificate' },
       },
       logger.get()
@@ -601,7 +601,7 @@ describe('#ssl', () => {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
-          requestHeadersWhitelist: [],
+          requestHeadersAllowlist: [],
           ssl: { verificationMode: 'full' },
         },
         logger.get()
@@ -643,7 +643,7 @@ describe('#ssl', () => {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
-          requestHeadersWhitelist: [],
+          requestHeadersAllowlist: [],
           ssl: { verificationMode: 'misspelled' as any },
         },
         logger.get()
@@ -661,7 +661,7 @@ describe('#ssl', () => {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
-          requestHeadersWhitelist: [],
+          requestHeadersAllowlist: [],
           ssl: {
             verificationMode: 'certificate',
             certificateAuthorities: ['content-of-ca-path'],
