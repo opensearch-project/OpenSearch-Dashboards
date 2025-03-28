@@ -283,6 +283,11 @@ export interface HttpFetchOptions extends HttpRequestInit {
   withLongNumeralsSupport?: boolean;
 
   prependOptions?: PrependOptions;
+
+  /**
+   *
+   */
+  pureFetch?: boolean;
 }
 
 /**
