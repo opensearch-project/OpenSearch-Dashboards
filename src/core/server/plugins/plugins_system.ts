@@ -244,6 +244,9 @@ export class PluginsSystem {
     // topological ordering. If the cloned graph is _not_ empty at the end, we
     // know we were not able to topologically order the graph. We exclude optional
     // dependencies that are not present in the plugins graph.
+
+    // plugins order is determined by the order in which they were added to the system,
+    // that depends on `readdir` to read the plugins directory which returns the files in a non-deterministic order.
     const sortedPluginMap = new Map<PluginName, PluginWrapper>(
       [...this.plugins].sort(([a], [b]) => a.localeCompare(b))
     );
