@@ -84,11 +84,8 @@ const defaultOnQuerySubmit = (
   abortControllerRef: React.MutableRefObject<AbortController | null>
 ) => {
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
-  // if it is generating ppl now, we need to abort current request
-  if (isGeneratingppl) {
-    abortControllerRef.current?.abort();
-    return;
-  }
+  if (isGeneratingppl) return;
+
   const { timefilter } = queryService.timefilter;
 
   return (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -148,6 +145,13 @@ export function createSearchBar({ core, storage, data, isGeneratingppl$ }: State
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
     const isGeneratingppl = useIfGeneratingppl({ isGeneratingppl$ });
+
+    // if it is generating ppl now, we need to abort current request
+    useEffect(() => {
+      if (isGeneratingppl) {
+        abortControllerRef.current?.abort();
+      }
+    }, [isGeneratingppl]);
 
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
