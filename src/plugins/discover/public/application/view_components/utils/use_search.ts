@@ -34,6 +34,19 @@ import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { trackQueryMetric } from '../../../ui_metric';
 
+function isJSONString(text: any) {
+  if (typeof text !== 'string') {
+    return false;
+  }
+
+  try {
+    JSON.parse(text);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
@@ -54,10 +67,17 @@ export interface SearchData {
   queryStatus?: {
     body?: {
       error?: {
-        reason?: string;
-        details: string;
+        error?: string;
+        message?: {
+          error?: {
+            reason?: string;
+            details: string;
+            type?: string;
+          };
+          status?: number;
+        };
+        statusCode?: number;
       };
-      statusCode?: number;
     };
     elapsedMs?: number;
     startTime?: number;
@@ -89,6 +109,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     (state) => state.discover
   );
   const indexPattern = useIndexPattern(services);
+
   const skipInitialFetch = useRef(false);
   const {
     data,
@@ -328,6 +349,19 @@ export const useSearch = (services: DiscoverViewServices) => {
           errorBody = error;
         }
       }
+
+      // Currently error message is sent as encoded JSON string, which requires extra parsing
+      // TODO: Confirm error contract
+      if (isJSONString(errorBody.message)) {
+        errorBody.message = JSON.parse(errorBody.message);
+      }
+
+      toastNotifications.addError(error, {
+        title: i18n.translate('discover.searchQueryError', {
+          defaultMessage: 'Error in query editor',
+        }),
+        toastMessage: JSON.stringify(errorBody?.message),
+      });
 
       data$.next({
         status: ResultStatus.ERROR,
