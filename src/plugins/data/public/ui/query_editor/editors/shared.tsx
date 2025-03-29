@@ -168,6 +168,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
             ],
           }}
           triggerSuggestOnFocus={true}
+          resizable={false}
         />
         <div className="queryEditor__progress" data-test-subj="queryEditorProgress">
           {queryStatus?.status === ResultStatus.LOADING && (

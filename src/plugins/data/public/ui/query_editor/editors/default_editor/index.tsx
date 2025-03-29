@@ -88,6 +88,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
           ],
         }}
         triggerSuggestOnFocus={true}
+        resizable={true}
       />
       <div className="defaultEditor__progress" data-test-subj="defaultEditorProgress">
         {queryStatus?.status === ResultStatus.LOADING && (
