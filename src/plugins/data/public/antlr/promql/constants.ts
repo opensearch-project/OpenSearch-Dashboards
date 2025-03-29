@@ -3,6 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export const prometheusDurationUnits = ['ms', 's', 'm', 'h', 'd', 'w', 'y'];
+
+export const prometheusDocumentationWebsite =
+  '[Prometheus Documentation](https://prometheus.io/docs/prometheus/latest/querying/basics/)';
+
+export const enum PromQLSuggestionItemDescriptions {
+  LABEL = 'label',
+  VALUE = 'value',
+  DURATION = 'duration unit',
+  FUNCTION = 'function',
+  AGGREGATION_OPERATOR = 'aggregation operator',
+  KEYWORD = 'keyword',
+}
+
 export const functionNames = [
   'abs',
   'absent',

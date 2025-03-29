@@ -9,7 +9,13 @@ import { openSearchPromQLAutocompleteData } from './promql_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { parseQuery } from '../shared/utils';
 import { PrometheusResourceClient } from '../../resources/prometheus_resource_client';
-import { aggregationOperators, functionNames } from './constants';
+import {
+  aggregationOperators,
+  functionNames,
+  prometheusDocumentationWebsite,
+  prometheusDurationUnits,
+  PromQLSuggestionItemDescriptions,
+} from './constants';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export interface SuggestionParams {
@@ -67,7 +73,7 @@ export const getSuggestions = async ({
         ...labels.map((af: string) => ({
           text: `${af}`,
           type: monaco.languages.CompletionItemKind.Class,
-          labelDescription: 'label',
+          labelDescription: PromQLSuggestionItemDescriptions.LABEL,
         }))
       );
     }
@@ -83,17 +89,17 @@ export const getSuggestions = async ({
         ...labelValues.map((af: string) => ({
           text: `${af}`,
           type: monaco.languages.CompletionItemKind.Interface,
-          labelDescription: 'value',
+          labelDescription: PromQLSuggestionItemDescriptions.VALUE,
         }))
       );
     }
 
     if (suggestions.suggestTimeRangeUnits && lineNumber && column) {
       finalSuggestions.push(
-        ...['ms', 's', 'm', 'h', 'd', 'w', 'y'].map((af) => ({
+        ...prometheusDurationUnits.map((af) => ({
           text: `${af}`,
           type: monaco.languages.CompletionItemKind.Unit,
-          labelDescription: 'duration unit',
+          labelDescription: PromQLSuggestionItemDescriptions.DURATION,
           replacePosition: new monaco.Range(lineNumber, column, lineNumber, column), // remove duration token association
         }))
       );
@@ -104,7 +110,7 @@ export const getSuggestions = async ({
         ...functionNames.map((func) => ({
           text: func,
           type: monaco.languages.CompletionItemKind.Function,
-          labelDescription: 'function',
+          labelDescription: PromQLSuggestionItemDescriptions.FUNCTION,
         }))
       );
     }
@@ -114,7 +120,7 @@ export const getSuggestions = async ({
         ...aggregationOperators.map((agg) => ({
           text: agg,
           type: monaco.languages.CompletionItemKind.Function,
-          labelDescription: 'aggregation operator',
+          labelDescription: PromQLSuggestionItemDescriptions.AGGREGATION_OPERATOR,
         }))
       );
     }
@@ -125,7 +131,7 @@ export const getSuggestions = async ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
           insertText: `${sk.value}`,
-          labelDescription: 'keyword',
+          labelDescription: PromQLSuggestionItemDescriptions.KEYWORD,
         }))
       );
     }
@@ -134,8 +140,7 @@ export const getSuggestions = async ({
     finalSuggestions.forEach(
       (sugg) =>
         (sugg.documentation = {
-          value:
-            '[Prometheus Documentation](https://prometheus.io/docs/prometheus/latest/querying/basics/)',
+          value: prometheusDocumentationWebsite,
         })
     );
 
