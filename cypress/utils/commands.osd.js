@@ -291,6 +291,41 @@ cy.osd.add('grabDataSourceId', (workspaceName, dataSourceName) => {
   }
 });
 
+cy.osd.add('grabIdsFromDiscoverPageUrl', () => {
+  cy.url().then(($url) => {
+    const workspaceIdMatch = $url.match(/\/w\/([^\/]+)\//);
+    const datasourceIdMatch = $url.match(/dataSource:\(id:'?([0-9a-f-]+)'?,/);
+    const indexPatternIdMatch = $url.match(/\),id:'?([0-9A-Za-z:_-]+)'?,/);
+
+    if (workspaceIdMatch && workspaceIdMatch[1]) {
+      cy.wrap(workspaceIdMatch[1]).as('WORKSPACE_ID');
+    }
+    if (datasourceIdMatch && datasourceIdMatch[1]) {
+      cy.wrap(datasourceIdMatch[1]).as('DATASOURCE_ID');
+    }
+    if (indexPatternIdMatch && indexPatternIdMatch[1]) {
+      cy.wrap(indexPatternIdMatch[1]).as('INDEX_PATTERN_ID');
+    }
+  });
+});
+
+cy.osd.add('deleteAllSavedSearches', (workspaceName) => {
+  cy.osd.navigateToWorkSpaceSpecificPage({
+    workspaceName,
+    page: 'objects',
+    isEnhancement: true,
+  });
+  cy.wait(2000);
+  cy.get('button.euiFilterButton').click();
+  cy.get('.euiFilterSelect__items')
+    .contains(/search/)
+    .click();
+  cy.wait(2000);
+  cy.getElementByTestId('checkboxSelectAll').click();
+  cy.getElementByTestId('savedObjectsManagementDelete').click();
+  cy.getElementByTestId('confirmModalConfirmButton').click();
+});
+
 cy.osd.add('deleteAllOldWorkspaces', () => {
   cy.visit('/app/workspace_list#/');
   cy.get('h1').contains('Workspaces').should('be.visible');
