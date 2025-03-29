@@ -8,7 +8,15 @@ import { CursorPosition, PromQLAutocompleteResult } from '../shared/types';
 import { openSearchPromQLAutocompleteData } from './promql_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { parseQuery } from '../shared/utils';
-import { SuggestionItemDetailsTags } from '../shared/constants';
+import { PrometheusResourceClient } from '../../resources/prometheus_resource_client';
+import {
+  aggregationOperators,
+  functionNames,
+  prometheusDocumentationWebsite,
+  prometheusDurationUnits,
+  PromQLSuggestionItemDescriptions,
+} from './constants';
+import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -37,22 +45,26 @@ export const getSuggestions = async ({
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
     });
-    const prometheusResourceClient = services.data.resourceClientFactory.create('prometheus');
+    const prometheusResourceClient = services.data.resourceClientFactory.get(
+      'prometheus'
+    ) as PrometheusResourceClient;
 
-    const finalSuggestions: QuerySuggestion[] = [];
+    const finalSuggestions: MonacoCompatibleQuerySuggestion[] = [];
 
     if (suggestions.suggestMetrics) {
       const metrics = await prometheusResourceClient.getMetricMetadata(dataset.id);
       finalSuggestions.push(
-        ...Object.keys(metrics).map((af) => ({
+        ...Object.entries(metrics).map(([af, [{ type, help }]]) => ({
           text: `${af}`,
-          type: monaco.languages.CompletionItemKind.Method,
-          detail: SuggestionItemDetailsTags.AggregateFunction,
+          type: monaco.languages.CompletionItemKind.Field,
+          labelDescription: `${type} (metric)`,
+          detail: help,
         }))
       );
     }
 
     if (suggestions.suggestLabels || suggestions.suggestLabels === '') {
+      // TODO: figure out why partial label being typed will always appear regardless of metric before it
       const labels = await prometheusResourceClient.getLabels(
         dataset.id,
         suggestions.suggestLabels !== '' ? suggestions.suggestLabels : undefined
@@ -60,13 +72,14 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...labels.map((af: string) => ({
           text: `${af}`,
-          type: monaco.languages.CompletionItemKind.File,
-          detail: SuggestionItemDetailsTags.Table,
+          type: monaco.languages.CompletionItemKind.Class,
+          labelDescription: PromQLSuggestionItemDescriptions.LABEL,
         }))
       );
     }
 
     if (suggestions.suggestLabelValues && suggestions.suggestLabelValues.label) {
+      // TODO: match what's already typed to the suggestion name so that it appears when being typed
       // TODO: update when we can get metric name passed in
       const labelValues = await prometheusResourceClient.getLabelValues(
         dataset.id,
@@ -75,19 +88,39 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...labelValues.map((af: string) => ({
           text: `${af}`,
-          type: monaco.languages.CompletionItemKind.File,
-          detail: SuggestionItemDetailsTags.Table,
+          type: monaco.languages.CompletionItemKind.Interface,
+          labelDescription: PromQLSuggestionItemDescriptions.VALUE,
         }))
       );
     }
 
     if (suggestions.suggestTimeRangeUnits && lineNumber && column) {
       finalSuggestions.push(
-        ...['ms', 's', 'm', 'h', 'd', 'w', 'y'].map((af) => ({
+        ...prometheusDurationUnits.map((af) => ({
           text: `${af}`,
-          type: monaco.languages.CompletionItemKind.Constant,
-          detail: SuggestionItemDetailsTags.Command,
+          type: monaco.languages.CompletionItemKind.Unit,
+          labelDescription: PromQLSuggestionItemDescriptions.DURATION,
           replacePosition: new monaco.Range(lineNumber, column, lineNumber, column), // remove duration token association
+        }))
+      );
+    }
+
+    if (suggestions.suggestFunctionNames) {
+      finalSuggestions.push(
+        ...functionNames.map((func) => ({
+          text: func,
+          type: monaco.languages.CompletionItemKind.Function,
+          labelDescription: PromQLSuggestionItemDescriptions.FUNCTION,
+        }))
+      );
+    }
+
+    if (suggestions.suggestAggregationOperators) {
+      finalSuggestions.push(
+        ...aggregationOperators.map((agg) => ({
+          text: agg,
+          type: monaco.languages.CompletionItemKind.Function,
+          labelDescription: PromQLSuggestionItemDescriptions.AGGREGATION_OPERATOR,
         }))
       );
     }
@@ -98,10 +131,18 @@ export const getSuggestions = async ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
           insertText: `${sk.value}`,
-          detail: SuggestionItemDetailsTags.Keyword,
+          labelDescription: PromQLSuggestionItemDescriptions.KEYWORD,
         }))
       );
     }
+
+    // add a link to prometheus documentation on every description
+    finalSuggestions.forEach(
+      (sugg) =>
+        (sugg.documentation = {
+          value: prometheusDocumentationWebsite,
+        })
+    );
 
     return finalSuggestions;
   } catch (error) {

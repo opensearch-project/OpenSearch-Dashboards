@@ -156,7 +156,7 @@ export const formatValuesToSuggestions = <T extends { toString(): string }>(
     return {
       text: val.toString(),
       type: monaco.languages.CompletionItemKind.Value,
-      detail: SuggestionItemDetailsTags.Value,
+      labelDescription: SuggestionItemDetailsTags.Value,
       sortText: i.toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
       ...(modifyInsertText && { insertText: modifyInsertText(val) }),
     };
@@ -178,7 +178,7 @@ export const formatFieldsToSuggestions = (
     return {
       text: field.name,
       type: monaco.languages.CompletionItemKind.Field,
-      detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
+      labelDescription: `Field: ${field.esTypes?.[0] ?? field.type}`,
       ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
       ...(sortTextImportance && { sortText: sortTextImportance }),
     };

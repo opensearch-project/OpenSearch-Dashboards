@@ -66,7 +66,7 @@ export const getSuggestions = async ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
           insertText: af + ' ',
-          detail: SuggestionItemDetailsTags.AggregateFunction,
+          labelDescription: SuggestionItemDetailsTags.AggregateFunction,
         }))
       );
     }
@@ -76,7 +76,7 @@ export const getSuggestions = async ({
         text: indexPattern.title,
         type: monaco.languages.CompletionItemKind.Struct,
         insertText: `${indexPattern.title} `,
-        detail: SuggestionItemDetailsTags.Table,
+        labelDescription: SuggestionItemDetailsTags.Table,
       });
     }
 
@@ -85,7 +85,7 @@ export const getSuggestions = async ({
         text: 'as',
         insertText: 'as ',
         type: monaco.languages.CompletionItemKind.Keyword,
-        detail: SuggestionItemDetailsTags.Keyword,
+        labelDescription: SuggestionItemDetailsTags.Keyword,
       });
     }
 
@@ -96,7 +96,7 @@ export const getSuggestions = async ({
           text: sk.value.toLowerCase(),
           insertText: `${sk.value.toLowerCase()} `,
           type: monaco.languages.CompletionItemKind.Keyword,
-          detail: SuggestionItemDetailsTags.Keyword,
+          labelDescription: SuggestionItemDetailsTags.Keyword,
           // sortText is the only option to sort suggestions, compares strings
           sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
         }))
