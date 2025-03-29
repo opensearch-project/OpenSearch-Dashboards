@@ -81,7 +81,8 @@ it('rewrites ftr reports with minimal changes', async () => {
     --- ftr.xml	[object Object]
     +++ ftr.xml
     @@ -1,53 +1,56 @@
-     ‹?xml version="1.0" encoding="utf-8"?›
+    -‹?xml version="1.0" encoding="utf-8"?›
+    +‹?xml version="1.0" encoding="utf8"?›
      ‹testsuites›
        ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71"›
          ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378"›
@@ -176,7 +177,10 @@ it('rewrites jest reports with minimal changes', async () => {
     ===================================================================
     --- jest.xml	[object Object]
     +++ jest.xml
-    @@ -3,13 +3,17 @@
+    @@ -1,15 +1,19 @@
+    -‹?xml version="1.0" encoding="utf-8"?›
+    +‹?xml version="1.0" encoding="utf8"?›
+     ‹testsuites name="jest" timestamp="2019-06-07T03:36:23" time="781.292" tests="5487" skipped="9"›
        ‹testsuite name="x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts"›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can start and end a process" time="1.316"/›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can force kill the process if langServer can not exit" time="3.182"/›
@@ -224,7 +228,8 @@ it('rewrites mocha reports with minimal changes', async () => {
     --- mocha.xml	[object Object]
     +++ mocha.xml
     @@ -1,13 +1,16 @@
-     ‹?xml version="1.0" encoding="utf-8"?›
+    -‹?xml version="1.0" encoding="utf-8"?›
+    +‹?xml version="1.0" encoding="utf8"?›
      ‹testsuites›
        ‹testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3"›
          ‹testcase name="code in multiple nodes &quot;before all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.121"›
@@ -302,7 +307,7 @@ it('rewrites cypress reports with minimal changes', async () => {
     +++ cypress.xml
     @@ -1,25 +1,16 @@
     -‹?xml version="1.0" encoding="UTF-8"?›
-    +‹?xml version="1.0" encoding="utf-8"?›
+    +‹?xml version="1.0" encoding="utf8"?›
      ‹testsuites name="Mocha Tests" time="16.198" tests="2" failures="1"›
     -  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/integration/timeline_flyout_button.spec.ts" failures="0" time="0"›
     -  ‹/testsuite›

@@ -14,7 +14,12 @@ interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   value: string;
   onChange: (value: string) => void;
   editorDidMount: (editor: any) => void;
-  provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+  provideCompletionItems: (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
+  ) => Promise<monaco.languages.CompletionList>;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   footerItems?: any;
   queryStatus?: QueryStatus;
@@ -69,7 +74,6 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
 }) => {
   const [editorIsFocused, setEditorIsFocused] = useState(false);
   const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
-
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorDidMount(editor);
@@ -135,11 +139,21 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
             overviewRulerLanes: 0,
             hideCursorInOverviewRuler: true,
             cursorStyle: 'line',
-            wordBasedSuggestions: false,
+            // Configure suggestion behavior
+            suggest: {
+              snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
+              filterGraceful: false, // Don't filter suggestions
+              showWords: false, // Disable word-based suggestions
+              showStatusBar: true, // Enable the built-in status bar
+            },
+            // Using Monaco's built-in status bar with default behavior
           }}
           suggestionProvider={{
-            provideCompletionItems,
             triggerCharacters: [' '],
+            // Make sure all parameters are passed to the provideCompletionItems function
+            provideCompletionItems: async (model, position, context, token) => {
+              return provideCompletionItems(model, position, context, token);
+            },
           }}
           languageConfiguration={{
             autoClosingPairs: [
@@ -165,12 +179,16 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
           <div className="queryEditor__footer" data-test-subj="queryEditorFooter">
             {footerItems && (
               <Fragment>
-                {footerItems.start?.map((item) => (
-                  <div className="queryEditor__footerItem">{item}</div>
+                {footerItems.start?.map((item: React.ReactNode, index: number) => (
+                  <div key={index} className="queryEditor__footerItem">
+                    {item}
+                  </div>
                 ))}
                 <div className="queryEditor__footerSpacer" />
-                {footerItems.end?.map((item) => (
-                  <div className="queryEditor__footerItem">{item}</div>
+                {footerItems.end?.map((item: React.ReactNode, index: number) => (
+                  <div key={index} className="queryEditor__footerItem">
+                    {item}
+                  </div>
                 ))}
               </Fragment>
             )}
