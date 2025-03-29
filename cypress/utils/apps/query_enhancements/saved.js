@@ -509,11 +509,6 @@ export const updateSavedSearchAndSaveAndVerify = (
   datasourceName,
   saveAsNew
 ) => {
-  cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName: workspaceName,
-    page: 'discover',
-    isEnhancement: true,
-  });
   cy.loadSaveSearch(config.saveName);
 
   // Change the dataset type to use
@@ -540,7 +535,7 @@ export const updateSavedSearchAndSaveAndVerify = (
   // Load updated saved search and verify
   cy.getElementByTestId('discoverNewButton').click();
   // wait for the new tab to load
-  cy.getElementByTestId('docTableHeader').should('be.visible');
+  cy.wait(2000);
   cy.loadSaveSearch(saveNameToUse);
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);

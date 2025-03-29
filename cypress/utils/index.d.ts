@@ -155,6 +155,17 @@ declare namespace Cypress {
       grabDataSourceId(workspaceName: string, dataSourceName: string): Chainable<any>;
 
       /**
+       * Grabs Workspace ID, dataSourceId, and indexPattern id from the URL of discover page
+       * Sets it in the alias @DATASOURCE_ID, @WORKSPACE_ID, @DATASOURCE_ID
+       */
+      grabIdsFromDiscoverPageUrl(): Chainable<any>;
+
+      /**
+       * Deletes all saved searches created
+       */
+      deleteAllSavedSearches(workspaceName: string): Chainable<any>;
+
+      /**
        * Deletes all workspaces that are older than a specified amount. This is to prevent ws buildup
        */
       deleteAllOldWorkspaces(): Chainable<any>;
