@@ -41,7 +41,6 @@ const createSavedQuery = (config) => {
 
   cy.setQueryLanguage(config.language);
   setDatePickerDatesAndSearchIfRelevant(config.language);
-  cy.wait(2000);
 
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
@@ -66,10 +65,8 @@ const loadSavedQuery = (config) => {
     'Aug 29, 2020 @ 00:00:00.000',
     'Aug 30, 2020 @ 00:00:00.000'
   );
-  cy.wait(2000);
 
   cy.loadSavedQuery(`${workspaceName}-${config.saveName}`);
-  cy.wait(2000);
   // wait for saved queries to load.
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
@@ -80,7 +77,6 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
     cy.deleteAllFilters();
   }
   setDatePickerDatesAndSearchIfRelevant(config.language);
-  cy.wait(2000);
 
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
@@ -89,7 +85,6 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
 
   cy.reload();
   cy.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
-  cy.wait(2000);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
@@ -130,10 +125,10 @@ const runSavedQueriesUITests = () => {
     });
 
     after(() => {
-      // cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-      //   INDEX_WITH_TIME_1,
-      //   INDEX_WITH_TIME_2,
-      // ]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
     });
 
     const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
