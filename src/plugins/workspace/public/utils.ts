@@ -580,7 +580,7 @@ export const getRemoteClusterConnections = async (dataSourceId: string, http: Ht
       name: remoteClusterConnection.connectionAlias,
       type: DataSourceEngineType.OpenSearchCrossCluster,
       connectionType: DataSourceConnectionType.OpenSearchConnection,
-      description: '',
+      description: 'OpenSearch (Cross cluster connection)',
       parentId: dataSourceId,
     })
   );

@@ -171,7 +171,10 @@ export const fetchDataSourceConnections = async (
 
     const remoteClusterConnectionsPromises = showRemoteOpensearchConnection
       ? dataSources.map((ds) => {
-          if (ds.type === 'Opensearch' || ds.type === 'Elasticsearch') {
+          if (
+            ds.type === DataSourceEngineType.OpenSearch ||
+            ds.type === DataSourceEngineType.Elasticsearch
+          ) {
             return getRemoteClusterConnections(ds.id, http!).catch(() => []);
           }
           return [];

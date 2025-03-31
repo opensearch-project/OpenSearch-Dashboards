@@ -42,6 +42,7 @@ import {
 import { LoadingMask } from '../loading_mask';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 import './data_source_table.scss';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 
 /* Table config */
 const pagination = {
@@ -148,11 +149,18 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
-  const fetchDataSources = useCallback(() => {
+  const fetchDataSources = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await getDataSources(savedObjects.client);
-      const finalData = await fetchDataSourceConnections(response, http, notifications, false, false, true);
+      const finalData = await fetchDataSourceConnections(
+        response,
+        http,
+        notifications,
+        false,
+        false,
+        true
+      );
       setDataSources(finalData);
     } catch (error) {
       setDataSources([]);
@@ -291,27 +299,27 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       name: i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourceField', {
         defaultMessage: 'Data source',
       }),
-      render: (
-        name: string,
-        index: {
-          id: string;
-          tags?: Array<{
-            key: string;
-            name: string;
-          }>;
-        }
-      ) => (
-        <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)} flush="left">
-            {name}
-          </EuiButtonEmpty>
-          {index.id === defaultDataSourceId ? (
-            <EuiBadge iconType="starFilled" iconSide="left">
-              Default
-            </EuiBadge>
-          ) : null}
-        </>
-      ),
+      render: (name: string, item: DataSourceTableItem) => {
+        const indentStyle =
+          item.type === DataSourceEngineType.OpenSearchCrossCluster ? { marginLeft: '20px' } : {};
+        return (
+          <>
+            <EuiButtonEmpty
+              size="xs"
+              {...reactRouterNavigate(history, `${item.id}`)}
+              style={indentStyle}
+              flush="left"
+            >
+              {name}
+            </EuiButtonEmpty>
+            {item.id === defaultDataSourceId ? (
+              <EuiBadge iconType="starFilled" iconSide="left">
+                Default
+              </EuiBadge>
+            ) : null}
+          </>
+        );
+      },
       dataType: 'string' as const,
       sortable: ({ title }: { title: string }) => title,
     },
