@@ -4,6 +4,9 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### 📈 Features/Enhancements
+ - Revert "[Query enhancement]feat: Append prompt for query assistant in request payload" ([#9607](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9607))
+
 ## [3.0.0-alpha1-2025-03-17](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.0.0)
 
 ### 💥 Breaking Changes

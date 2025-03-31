@@ -1,0 +1,2 @@
+fix:
+- Permissions for github workflow in bundler performance testing ci ([#9581](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9581))

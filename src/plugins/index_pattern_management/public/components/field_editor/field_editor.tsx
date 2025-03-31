@@ -799,6 +799,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         script: field.script as string,
         indexPatternTitle: indexPattern.title,
         http: this.context.services.http,
+        dataSourceId: indexPattern.dataSourceRef?.id,
       });
 
       if (!isValid) {

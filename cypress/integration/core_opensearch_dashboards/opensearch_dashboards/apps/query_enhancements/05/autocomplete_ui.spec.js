@@ -58,6 +58,7 @@ export const runAutocompleteTests = () => {
             cy.setQueryLanguage(config.language);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.clearQueryEditor();
+
             const editorType =
               config.language === QueryLanguages.DQL.name
                 ? 'osdQueryEditor__singleLine'
