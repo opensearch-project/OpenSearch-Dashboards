@@ -68,7 +68,7 @@ export const getSuggestions = async ({
             text: '=',
             insertText: '= ',
             type: monaco.languages.CompletionItemKind.Operator,
-            detail: SuggestionItemDetailsTags.Operator,
+            labelDescription: SuggestionItemDetailsTags.Operator,
             sortText: '0',
           });
           break;
@@ -78,7 +78,7 @@ export const getSuggestions = async ({
             text: '(',
             insertText: '( ',
             type: monaco.languages.CompletionItemKind.Keyword,
-            detail: SuggestionItemDetailsTags.Keyword,
+            labelDescription: SuggestionItemDetailsTags.Keyword,
             sortText: '0',
           });
           break;
@@ -88,14 +88,14 @@ export const getSuggestions = async ({
             text: ',',
             insertText: ', ',
             type: monaco.languages.CompletionItemKind.Keyword,
-            detail: SuggestionItemDetailsTags.Keyword,
+            labelDescription: SuggestionItemDetailsTags.Keyword,
             sortText: '0',
           });
           finalSuggestions.push({
             text: ')',
             insertText: ') ',
             type: monaco.languages.CompletionItemKind.Keyword,
-            detail: SuggestionItemDetailsTags.Keyword,
+            labelDescription: SuggestionItemDetailsTags.Keyword,
             sortText: '08',
           });
           break;
@@ -129,7 +129,7 @@ export const getSuggestions = async ({
           text: af,
           type: monaco.languages.CompletionItemKind.Function,
           insertText: `${af} `,
-          detail: SuggestionItemDetailsTags.AggregateFunction,
+          labelDescription: SuggestionItemDetailsTags.AggregateFunction,
         }))
       );
     }
@@ -139,7 +139,7 @@ export const getSuggestions = async ({
         text: indexPattern.title,
         type: monaco.languages.CompletionItemKind.Struct,
         insertText: `${indexPattern.title} `,
-        detail: SuggestionItemDetailsTags.Table,
+        labelDescription: SuggestionItemDetailsTags.Table,
       });
     }
 
@@ -150,7 +150,7 @@ export const getSuggestions = async ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
           insertText: `${sk.value} `,
-          detail: SuggestionItemDetailsTags.Keyword,
+          labelDescription: SuggestionItemDetailsTags.Keyword,
           sortText: SQL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(),
         }))
       );
