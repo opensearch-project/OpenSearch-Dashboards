@@ -31,6 +31,7 @@
 import { BehaviorSubject } from 'rxjs';
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { CoreStart } from 'src/core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { QueryStart, SavedQuery } from '../../query';
@@ -38,7 +39,6 @@ import { SearchBar, SearchBarOwnProps } from './';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
-import { useIfGeneratingppl } from './lib/use_if_generating_ppl';
 import { DataPublicPluginStart } from '../../types';
 import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
@@ -144,7 +144,7 @@ export function createSearchBar({ core, storage, data, isGeneratingppl$ }: State
     const abortControllerRef = useRef<AbortController>(null);
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
-    const isGeneratingppl = useIfGeneratingppl({ isGeneratingppl$ });
+    const isGeneratingppl = useObservable(isGeneratingppl$);
 
     // if it is generating ppl now, we need to abort current request
     useEffect(() => {
