@@ -26,7 +26,15 @@ describe('sqlSearchStrategyProvider', () => {
   let logger: Logger;
   let client: ILegacyClusterClient;
   let usage: SearchUsage;
-  const emptyRequestHandlerContext = ({} as unknown) as RequestHandlerContext;
+  const emptyRequestHandlerContext = ({
+    core: {
+      uiSettings: {
+        client: {
+          get: jest.fn(),
+        },
+      },
+    },
+  } as unknown) as RequestHandlerContext;
 
   beforeEach(() => {
     config$ = of({} as SharedGlobalConfig);
@@ -69,7 +77,6 @@ describe('sqlSearchStrategyProvider', () => {
       { name: 'field1', type: 'long' },
       { name: 'field2', type: 'text' },
     ]);
-
     const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       emptyRequestHandlerContext,

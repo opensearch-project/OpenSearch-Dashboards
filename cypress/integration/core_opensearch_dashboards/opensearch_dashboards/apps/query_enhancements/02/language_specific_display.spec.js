@@ -73,9 +73,11 @@ export const runDisplayTests = () => {
           if (config.language === QueryLanguages.SQL.name) {
             cy.getElementByTestId('osdQueryEditor__multiLine').contains('SELECT');
             cy.getElementByTestId('osdQueryEditor__multiLine').contains('FROM');
-            cy.getElementByTestId('osdQueryEditor__multiLine').contains('LIMIT');
           } else if (config.language === QueryLanguages.PPL.name) {
             cy.getElementByTestId('osdQueryEditor__multiLine').contains('source');
+            //TODO: Set the query to not include head 500 because https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9421
+            cy.setQueryEditor(`source = ${INDEX_PATTERN_WITH_TIME}`);
+            cy.waitForLoader(true);
           }
 
           cy.getElementByTestId('osdQueryEditorLanguageToggle').click();
