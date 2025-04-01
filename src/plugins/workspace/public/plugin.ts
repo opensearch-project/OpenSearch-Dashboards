@@ -293,7 +293,7 @@ export class WorkspacePlugin
       core.http.basePath.getBasePath()
     );
 
-    this.workspaceValidationService.setup(core, workspaceId);
+    await this.workspaceValidationService.setup(core, workspaceId);
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
       const [coreStart, { navigation }] = await core.getStartServices();

@@ -17,6 +17,14 @@ import {
 } from '../../../../core/public';
 import { WorkspaceClient } from '../workspace_client';
 
+/**
+ * A service to validate workspace entering state by handle triggered workspace errors.
+ *
+ * This service currently does the following validation:
+ * 1) If encounter workspace errors, such as workspace ID not found and workspace ID exsits but
+ * staled, redirect to error page with message.
+ * 2) If the workspace is validate but currently in error page, redirect to workspace detail page.
+ */
 export class WorkspaceValidationService {
   private workspaceClient?: WorkspaceClient;
   private workspaceId: string | undefined;
@@ -43,7 +51,7 @@ export class WorkspaceValidationService {
     this.workspaceClient = workspaceClient;
 
     if (workspaceId) {
-      await this.workspaceClient.enterWorkspace(workspaceId, core.workspaces.workspaceError$);
+      await this.workspaceClient.enterWorkspace(workspaceId);
     }
   }
 
