@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiFlexItem, EuiFlexGroup, EuiProgress, EuiResizableContainer } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
 import { QueryStatus, ResultStatus } from '../../../../query';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
@@ -34,6 +34,9 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   provideCompletionItems,
   queryStatus,
 }) => {
+  // Track if the editor is expanded beyond default height
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   // Simple wrapper for editorDidMount
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     // Call the original editorDidMount function
@@ -42,58 +45,91 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
     // Return the original editor instance
     return editor;
   };
+  
   return (
     <div className="defaultEditor" data-test-subj="osdQueryEditor__multiLine">
       <div ref={headerRef} className="defaultEditor__header" data-test-subj="defaultEditorHeader" />
-      <CodeEditor
-        height={100}
-        languageId={languageId}
-        value={value}
-        onChange={onChange}
-        editorDidMount={handleEditorDidMount}
-        options={{
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          fontSize: 12,
-          lineHeight: 20,
-          fontFamily: 'var(--font-code)',
-          lineNumbers: 'on',
-          folding: true,
-          wordWrap: 'on',
-          wrappingIndent: 'same',
-          lineDecorationsWidth: 0,
-          lineNumbersMinChars: 1,
-          // Configure suggestion behavior
-          suggest: {
-            snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
-            filterGraceful: false, // Don't filter suggestions
-            showStatusBar: true, // Enable the built-in status bar with default text
-            showWords: false, // Disable word-based suggestions
-          },
-          acceptSuggestionOnEnter: 'off',
-        }}
-        suggestionProvider={{
-          triggerCharacters: [' '],
-          provideCompletionItems: async (model, position, context, token) => {
-            return provideCompletionItems(model, position, context, token);
-          },
-        }}
-        languageConfiguration={{
-          autoClosingPairs: [
-            { open: '(', close: ')' },
-            { open: '[', close: ']' },
-            { open: '{', close: '}' },
-            { open: '"', close: '"' },
-            { open: "'", close: "'" },
-          ],
-        }}
-        triggerSuggestOnFocus={true}
-      />
+      
+      <EuiResizableContainer direction="vertical" className="defaultEditor__resizableContainer">
+        {(EuiResizablePanel, EuiResizableButton) => (
+          <>
+            <EuiResizablePanel
+              initialSize={100}
+              minSize="100px"
+              paddingSize="none"
+              className="defaultEditor__editorPanel"
+            >
+              <CodeEditor
+                languageId={languageId}
+                value={value}
+                onChange={onChange}
+                editorDidMount={handleEditorDidMount}
+                options={{
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  fontSize: 12,
+                  lineHeight: 20,
+                  fontFamily: 'var(--font-code)',
+                  lineNumbers: 'on',
+                  folding: true,
+                  wordWrap: 'on',
+                  wrappingIndent: 'same',
+                  lineDecorationsWidth: 0,
+                  lineNumbersMinChars: 1,
+                  // Configure suggestion behavior
+                  suggest: {
+                    snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
+                    filterGraceful: false, // Don't filter suggestions
+                    showStatusBar: true, // Enable the built-in status bar with default text
+                    showWords: false, // Disable word-based suggestions
+                  },
+                  acceptSuggestionOnEnter: 'off',
+                  automaticLayout: true, // Enable automatic layout adjustment
+                }}
+                suggestionProvider={{
+                  triggerCharacters: [' '],
+                  provideCompletionItems: async (model, position, context, token) => {
+                    return provideCompletionItems(model, position, context, token);
+                  },
+                }}
+                languageConfiguration={{
+                  autoClosingPairs: [
+                    { open: '(', close: ')' },
+                    { open: '[', close: ']' },
+                    { open: '{', close: '}' },
+                    { open: '"', close: '"' },
+                    { open: "'", close: "'" },
+                  ],
+                }}
+                triggerSuggestOnFocus={true}
+              />
+            </EuiResizablePanel>
+            
+            <EuiResizableButton 
+              data-test-subj="defaultEditorResizeHandle"
+              className="defaultEditor__resizeButton"
+            />
+            
+            <EuiResizablePanel
+              initialSize={0}
+              minSize="0px"
+              paddingSize="none"
+              className="defaultEditor__footerPanel"
+            >
+              <div style={{ display: 'none' }}>
+                {/* This panel is just a placeholder to make the resize button work */}
+              </div>
+            </EuiResizablePanel>
+          </>
+        )}
+      </EuiResizableContainer>
+      
       <div className="defaultEditor__progress" data-test-subj="defaultEditorProgress">
         {queryStatus?.status === ResultStatus.LOADING && (
           <EuiProgress size="xs" color="accent" position="absolute" />
         )}
       </div>
+      
       <div className="defaultEditor__footer" data-test-subj="defaultEditorFooter">
         {footerItems && (
           <EuiFlexGroup

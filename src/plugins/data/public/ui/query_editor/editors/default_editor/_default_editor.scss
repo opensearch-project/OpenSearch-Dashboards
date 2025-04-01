@@ -1,6 +1,7 @@
 .defaultEditor {
   border: $euiBorderThin;
   border-radius: $euiSizeXS;
+  position: relative;
 
   &__footer {
     padding-left: $euiSizeXS;
@@ -9,6 +10,58 @@
 
   &__progress {
     position: relative;
+  }
+
+  &__resizableContainer {
+    width: 100% !important;
+    min-height: 100px;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__editorPanel {
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  &__resizeButton {
+    height: 6px;
+    cursor: ns-resize;
+    background-color: $euiColorLightShade;
+    z-index: 10; /* Ensure the resize button is above other elements */
+    position: relative;
+    display: block !important; /* Force display */
+    
+    &:hover {
+      background-color: $euiColorPrimary;
+    }
+    
+    &:active {
+      background-color: $euiColorDarkShade;
+    }
+    
+    /* Add a visual indicator to make it more obvious */
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 2px;
+      background-color: $euiColorMediumShade;
+      border-radius: 1px;
+    }
+  }
+
+  /* Corner resize handle removed as requested */
+
+  &__footerPanel {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
   .monaco-editor {
