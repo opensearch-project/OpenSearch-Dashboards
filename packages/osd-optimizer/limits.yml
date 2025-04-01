@@ -44,8 +44,8 @@ pageLoadAssetSize:
   visTypeMetric: 61507
   visTypeTable: 95078
   visTypeTagcloud: 37575
-  visTypeTimeline: 51933
-  visTypeTimeseries: 155347
+  visTypeTimeline: 519
+  visTypeTimeseries: 1553
   visTypeVega: 153861
   visTypeVislib: 242982
   visTypeXy: 20255
