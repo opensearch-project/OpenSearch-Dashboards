@@ -12,12 +12,22 @@ import { testingIndex } from '../shared/constants';
  * Constants
  */
 
+// Use monaco.languages.CompletionItemKind enum values directly
+const operatorType = monaco.languages.CompletionItemKind.Operator;
+const fieldType = monaco.languages.CompletionItemKind.Field;
+const valueType = monaco.languages.CompletionItemKind.Value;
+
 const booleanOperatorSuggestions = [
-  { text: 'or', type: 11, detail: 'Operator', insertText: 'or ' },
-  { text: 'and', type: 11, detail: 'Operator', insertText: 'and ' },
+  { text: 'or', type: operatorType, detail: 'Operator', insertText: 'or ' },
+  { text: 'and', type: operatorType, detail: 'Operator', insertText: 'and ' },
 ];
 
-const notOperatorSuggestion = { text: 'not', type: 11, detail: 'Operator', insertText: 'not ' };
+const notOperatorSuggestion = {
+  text: 'not',
+  type: operatorType,
+  detail: 'Operator',
+  insertText: 'not ',
+};
 
 const fieldNameSuggestions: Array<{
   text: string;
@@ -25,19 +35,29 @@ const fieldNameSuggestions: Array<{
   insertText?: string;
   detail: string;
 }> = [
-  { text: 'Carrier', type: 3, insertText: 'Carrier : ', detail: 'Field: keyword' },
-  { text: 'DestCityName', type: 3, insertText: 'DestCityName : ', detail: 'Field: keyword' },
-  { text: 'DestCountry', type: 3, insertText: 'DestCountry : ', detail: 'Field: keyword' },
-  { text: 'DestWeather', type: 3, insertText: 'DestWeather : ', detail: 'Field: keyword' },
-  { text: 'DistanceMiles', type: 3, insertText: 'DistanceMiles ', detail: 'Field: float' },
-  { text: 'FlightDelay', type: 3, insertText: 'FlightDelay : ', detail: 'Field: boolean' },
-  { text: 'FlightNum', type: 3, insertText: 'FlightNum : ', detail: 'Field: keyword' },
-  { text: 'OriginWeather', type: 3, insertText: 'OriginWeather : ', detail: 'Field: keyword' },
-  { text: '_id', type: 3, insertText: '_id : ', detail: 'Field: _id' },
-  { text: '_index', type: 3, insertText: '_index : ', detail: 'Field: _index' },
-  { text: '_score', type: 3, insertText: '_score ', detail: 'Field: number' },
-  { text: '_source', type: 3, insertText: '_source ', detail: 'Field: _source' },
-  { text: '_type', type: 3, insertText: '_type : ', detail: 'Field: _type' },
+  { text: 'Carrier', type: fieldType, insertText: 'Carrier : ', detail: 'Field: keyword' },
+  {
+    text: 'DestCityName',
+    type: fieldType,
+    insertText: 'DestCityName : ',
+    detail: 'Field: keyword',
+  },
+  { text: 'DestCountry', type: fieldType, insertText: 'DestCountry : ', detail: 'Field: keyword' },
+  { text: 'DestWeather', type: fieldType, insertText: 'DestWeather : ', detail: 'Field: keyword' },
+  { text: 'DistanceMiles', type: fieldType, insertText: 'DistanceMiles ', detail: 'Field: float' },
+  { text: 'FlightDelay', type: fieldType, insertText: 'FlightDelay : ', detail: 'Field: boolean' },
+  { text: 'FlightNum', type: fieldType, insertText: 'FlightNum : ', detail: 'Field: keyword' },
+  {
+    text: 'OriginWeather',
+    type: fieldType,
+    insertText: 'OriginWeather : ',
+    detail: 'Field: keyword',
+  },
+  { text: '_id', type: fieldType, insertText: '_id : ', detail: 'Field: _id' },
+  { text: '_index', type: fieldType, insertText: '_index : ', detail: 'Field: _index' },
+  { text: '_score', type: fieldType, insertText: '_score ', detail: 'Field: number' },
+  { text: '_source', type: fieldType, insertText: '_source ', detail: 'Field: _source' },
+  { text: '_type', type: fieldType, insertText: '_type : ', detail: 'Field: _type' },
 ];
 
 const fieldNameWithNotSuggestions = fieldNameSuggestions.concat(notOperatorSuggestion);
@@ -50,29 +70,29 @@ const carrierValues = [
 ];
 
 const allCarrierValueSuggestions = [
-  { text: 'Logstash Airways', type: 13, detail: 'Value', insertText: '"Logstash Airways" ' },
-  { text: 'BeatsWest', type: 13, detail: 'Value', insertText: '"BeatsWest" ' },
+  { text: 'Logstash Airways', type: valueType, detail: 'Value', insertText: '"Logstash Airways" ' },
+  { text: 'BeatsWest', type: valueType, detail: 'Value', insertText: '"BeatsWest" ' },
   {
     text: 'OpenSearch Dashboards Airlines',
-    type: 13,
+    type: valueType,
     detail: 'Value',
     insertText: '"OpenSearch Dashboards Airlines" ',
   },
-  { text: 'OpenSearch-Air', type: 13, detail: 'Value', insertText: '"OpenSearch-Air" ' },
+  { text: 'OpenSearch-Air', type: valueType, detail: 'Value', insertText: '"OpenSearch-Air" ' },
 ];
 
 const logCarrierValueSuggestion = [
-  { text: 'Logstash Airways', type: 13, detail: 'Value', insertText: '"Logstash Airways" ' },
+  { text: 'Logstash Airways', type: valueType, detail: 'Value', insertText: '"Logstash Airways" ' },
 ];
 
 const openCarrierValueSuggestion = [
   {
     text: 'OpenSearch Dashboards Airlines',
-    type: 13,
+    type: valueType,
     detail: 'Value',
     insertText: '"OpenSearch Dashboards Airlines" ',
   },
-  { text: 'OpenSearch-Air', type: 13, detail: 'Value', insertText: '"OpenSearch-Air" ' },
+  { text: 'OpenSearch-Air', type: valueType, detail: 'Value', insertText: '"OpenSearch-Air" ' },
 ];
 
 const addPositionToValue = (vals: any, start: number, end: number) =>
