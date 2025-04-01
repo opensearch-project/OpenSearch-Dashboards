@@ -144,10 +144,7 @@ export class WorkspaceClient implements IWorkspaceClient {
    * @param workspaceError$ a stream to emit workspace error
    * @returns {Promise<IResponse<null>>} result for this operation
    */
-  public async enterWorkspace(
-    id: string,
-    workspaceError$: BehaviorSubject<string>
-  ): Promise<IResponse<null>> {
+  public async enterWorkspace(id: string): Promise<IResponse<null>> {
     const workspaceResp = await this.get(id);
     if (workspaceResp.success) {
       this.workspaces.currentWorkspaceId$.next(id);
@@ -156,7 +153,7 @@ export class WorkspaceClient implements IWorkspaceClient {
         result: null,
       };
     } else {
-      workspaceError$.next(workspaceResp.error!);
+      this.workspaces.workspaceError$.next(workspaceResp.error!);
       return workspaceResp;
     }
   }
