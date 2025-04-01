@@ -121,7 +121,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
           throw new Error('should have failed');
         } catch (err) {
           const { message } = err as Error;
-          expect(message).to.contain('Unexpected number');
+          expect(message).to.contain(`Expected property name or '}' in JSON at position 1`);
         }
       });
     });

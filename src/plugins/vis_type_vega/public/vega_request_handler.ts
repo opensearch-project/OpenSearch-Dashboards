@@ -92,8 +92,16 @@ export function createVegaRequestHandler(
       filters,
       opensearchQueryConfigs
     );
-    const { VegaParser } = await import('./data_model/vega_parser');
-    const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, getServiceSettings);
+
+    // Import the module directly to avoid circular dependency issues
+    const VegaParserModule = await import('./data_model/vega_parser');
+    const vp = new VegaParserModule.VegaParser(
+      visParams.spec,
+      searchAPI,
+      timeCache,
+      filtersDsl,
+      getServiceSettings
+    );
 
     return await vp.parseAsync();
   };
