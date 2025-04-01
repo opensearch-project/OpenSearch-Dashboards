@@ -12,7 +12,7 @@ pageLoadAssetSize:
   dataSource: 24232
   dataSourceManagement: 541476
   devTools: 66175
-  discover: 778790
+  discover: 848707
   embeddable: 242671
   expressions: 224120
   home: 75810
@@ -37,8 +37,8 @@ pageLoadAssetSize:
   uiActions: 95074
   urlForwarding: 32579
   usageCollection: 39762
-  visAugmenter: 119
-  visBuilder: 810
+  visAugmenter: 104145
+  visBuilder: 795681
   visDefaultEditor: 344621
   visTypeMarkdown: 30896
   visTypeMetric: 61507
