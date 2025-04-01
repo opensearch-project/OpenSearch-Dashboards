@@ -42,7 +42,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const defaultFindTimeout = config.get('timeouts.find');
   const opensearchChart = getService('opensearchChart');
   const docTable = getService('docTable');
-  const dataGridTable = getService('dataGrid');
   const comboBox = getService('comboBox');
 
   /*
@@ -106,7 +105,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
-      return await dataGridTable.getHeaderFields();
+      return await docTable.getHeaderFields();
     }
 
     public async openLoadSavedSearchPanel() {
@@ -203,12 +202,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getHitCount() {
       await header.waitUntilLoadingHasFinished();
       return await testSubjects.getVisibleText('discoverQueryHits');
-    }
-
-    public async getDocHeader() {
-      const table = this.dataGrid;
-      const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
-      return await docHeader.getVisibleText();
     }
 
     public async getDocTableRows() {
@@ -358,7 +351,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async removeHeaderColumn(columnName: string) {
-      await dataGridTable.clickRemoveColumn(columnName);
+      await docTable.clickRemoveColumn(columnName);
     }
 
     public async openSidebarFieldFilter() {
@@ -442,14 +435,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     /**
-     * Retrieves data grid table values.
+     * Retrieves docTable row values
      *
-     * This function fetches the values present in a data grid table.
-     *
-     * @returns {Promise<string[][]>} A promise resolving to the table values.
+     * @returns {Promise<string[]>} A promise resolving to the table rows.
      */
-    public async getDataGridTableValues(): Promise<string[][]> {
-      return await dataGridTable.getDataGridTableValues();
+    public async getDocTableRowsText(): Promise<string[]> {
+      return await docTable.getDocTableValues();
     }
 
     /**
@@ -515,35 +506,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       throw new Error(
         `Could not find a clickable list item for column "${columnName}" with list item "${title}".`
       );
-    }
-
-    public async switchDiscoverTable(tableType: string) {
-      await retry.try(async () => {
-        const optionsButton = await testSubjects.find('discoverOptionsButton');
-        await optionsButton.click();
-
-        const switchButton = await testSubjects.find('discoverOptionsLegacySwitch');
-        const isLegacyChecked = (await switchButton.getAttribute('aria-checked')) === 'true';
-
-        if (tableType === 'new' && isLegacyChecked) {
-          await switchButton.click();
-        } else if (tableType === 'legacy' && !isLegacyChecked) {
-          await switchButton.click();
-        }
-      });
-
-      // Wait for the query input to be visible
-      await this.waitForQueryInput();
-    }
-
-    async waitForQueryInput() {
-      // Wait for the query input to be visible
-      await retry.try(async () => {
-        const queryInputVisible = await testSubjects.exists('queryInput');
-        if (!queryInputVisible) {
-          throw new Error('Query input not yet visible');
-        }
-      });
     }
   }
 
