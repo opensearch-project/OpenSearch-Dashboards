@@ -163,7 +163,7 @@
     ]
   },
   "dependencies": {
-    "@aws-crypto/client-node": "^3.1.1",
+    "@aws-crypto/client-node": "^4.2.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/eui": "npm:@opensearch-project/oui@1.19.0",
     "@elastic/good": "^9.0.1-kibana3",
@@ -204,6 +204,7 @@
     "ajv": "^8.11.0",
     "antlr4-c3": "^3.4.1",
     "antlr4ng": "^3.0.4",
+    "aws-sdk": "2.1692.0",
     "bluebird": "3.5.5",
     "chalk": "^4.1.0",
     "chokidar": "^3.4.2",
