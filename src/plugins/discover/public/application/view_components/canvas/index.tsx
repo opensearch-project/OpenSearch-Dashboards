@@ -24,7 +24,7 @@ import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
 
 // eslint-disable-next-line import/no-default-export
-export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
+export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: ViewProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern, savedSearch } = useDiscoverContext();
   const {
@@ -108,7 +108,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         core.application.navigateToApp('discover', { path: `#/view/${savedSearch?.id}` });
       }}
       rows={rows}
-      isEnhancementsEnabled={isEnhancementsEnabled}
       indexPattern={indexPattern}
     />
   );

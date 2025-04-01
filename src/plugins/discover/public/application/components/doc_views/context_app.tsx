@@ -97,12 +97,9 @@ export function ContextApp({
           onFilter={onAddFilter}
           onMoveColumn={() => {}}
           onRemoveColumn={() => {}}
-          onSetColumns={() => {}}
           onSort={() => {}}
           sort={sort}
           rows={rows}
-          isToolbarVisible={false}
-          isContextView={true}
         />
       </div>
       <ActionBar
