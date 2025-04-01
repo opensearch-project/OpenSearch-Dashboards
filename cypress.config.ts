@@ -10,6 +10,7 @@ import webpackPreprocessor from '@cypress/webpack-preprocessor';
 
 module.exports = defineConfig({
   experimentalMemoryManagement: true,
+  numTestsKeptInMemory: 0,
   defaultCommandTimeout: 15000,
   requestTimeout: 60000,
   responseTimeout: 60000,
@@ -17,8 +18,9 @@ module.exports = defineConfig({
     runMode: 2,
     openMode: 0,
   },
-  viewportWidth: 2000,
-  viewportHeight: 1320,
+  numTestsKeptInMemory: 5,
+  viewportWidth: 1920,
+  viewportHeight: 1080,
   env: {
     ENGINE: {
       name: 'default',
@@ -45,6 +47,7 @@ module.exports = defineConfig({
     DATASOURCE_MANAGEMENT_ENABLED: false,
     ML_COMMONS_DASHBOARDS_ENABLED: true,
     WAIT_FOR_LOADER_BUFFER_MS: 0,
+    WAIT_MS: 2000,
     DISABLE_LOCAL_CLUSTER: false,
     CYPRESS_RUNTIME_ENV: 'osd',
   },

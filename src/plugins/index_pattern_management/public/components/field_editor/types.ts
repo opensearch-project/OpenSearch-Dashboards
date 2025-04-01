@@ -44,6 +44,7 @@ export interface ExecuteScriptParams {
   query?: Query['query'];
   additionalFields?: string[];
   http: HttpStart;
+  dataSourceId?: string;
 }
 
 export interface ExecuteScriptResult {

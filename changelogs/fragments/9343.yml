@@ -1,2 +1,0 @@
-fix:
-- Change from cluster to data sources for dataset selector column ([#9343](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9343))

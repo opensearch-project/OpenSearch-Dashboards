@@ -1,0 +1,2 @@
+fix:
+- Query assistant doesn't refresh generated ppl ([#9601](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9601))

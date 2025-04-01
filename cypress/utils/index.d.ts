@@ -202,7 +202,7 @@ declare namespace Cypress {
        * @example
        * cy.setTopNavDate('Oct 5, 2022 @ 00:57:06.429', 'Oct 6, 2022 @ 00:57:06.429')
        */
-      setTopNavDate(start: string, end: string): Chainable<any>;
+      setTopNavDate(start: string, end: string, submit?: boolean): Chainable<any>;
 
       /**
        * Sets the top nav date to relative time

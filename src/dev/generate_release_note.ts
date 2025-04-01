@@ -77,7 +77,7 @@ async function readFragments() {
 
     try {
       const fragmentPath = join(fragmentDirPath, fragmentFilename.name);
-      const fragmentContents = readFileSync(fragmentPath, { encoding: 'utf-8' });
+      const fragmentContents = readFileSync(fragmentPath, { encoding: 'utf8' });
 
       try {
         validateFragment(fragmentContents);
