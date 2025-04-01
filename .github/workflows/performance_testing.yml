@@ -1,7 +1,7 @@
 name: Performance Testing
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
     paths-ignore:
@@ -16,7 +16,7 @@ permissions:
   contents: read
   issues: write
   pull-requests: write
-  
+
 jobs:
   bundle-analyzer:
     runs-on: ubuntu-latest
@@ -47,15 +47,25 @@ jobs:
         # This command updates the limit and bundle size variation for the OpenSearch Dashboards platform plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --update-limits
 
-      - name: Read and comment bundle size variations
-        run: |
-          if [ -f packages/osd-optimizer/limits_delta.yml ]; then
-            echo "📊 **Bundle Size crossed 5% for below plugins**" > comment.txt
-            echo "" >> comment.txt
-            cat packages/osd-optimizer/limits_delta.yml >> comment.txt
-            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
-          else
-            echo "No bundle size variations detected, skipping comment."
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check and comment on bundle size variations
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = 'packages/osd-optimizer/limits_delta.yml';
+
+            if (fs.existsSync(path)) {
+              const fileContent = fs.readFileSync(path, 'utf8');
+              const body = `📊 **Bundle Size crossed 5% for below plugins**\n\n${fileContent}`;
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+              console.log('Added comment about bundle size variations');
+            } else {
+              console.log('No bundle size variations detected, skipping comment.');
+            }
