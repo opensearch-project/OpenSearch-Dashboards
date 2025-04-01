@@ -139,6 +139,8 @@ export default {
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '@opensearch-project/opensearch/aws':
       '<rootDir>/node_modules/@opensearch-project/opensearch/lib/aws',
+    '@opensearch-project/opensearch/lib/(.*)':
+      '<rootDir>/node_modules/@opensearch-project/opensearch/lib/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
     '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
@@ -157,6 +159,7 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/src/dev/jest/setup/mocks.js',
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
+    '<rootDir>/src/dev/jest/setup/monaco_mock.js',
   ],
   coverageDirectory: '<rootDir>/target/opensearch-dashboards-coverage/jest',
   coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],

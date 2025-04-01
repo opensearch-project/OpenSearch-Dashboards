@@ -25,9 +25,7 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
 
 jest.mock('../hooks', () => ({
   useGenerateQuery: jest.fn().mockReturnValue({ generateQuery: jest.fn(), loading: false }),
-  useQueryAssist: jest
-    .fn()
-    .mockReturnValue({ updateQuestion: jest.fn(), isQueryAssistCollapsed: false }),
+  useQueryAssist: jest.fn().mockReturnValue({ updateQueryState: jest.fn() }),
 }));
 
 jest.mock('./query_assist_input', () => ({
@@ -52,6 +50,10 @@ const dependencies: QueryEditorExtensionDependencies = {
   onSelectLanguage: jest.fn(),
   isCollapsed: false,
   setIsCollapsed: jest.fn(),
+  query: {
+    query: '',
+    language: '',
+  },
 };
 
 type Props = ComponentProps<typeof QueryAssistBar>;
@@ -201,21 +203,24 @@ describe('QueryAssistBar', () => {
       });
     });
 
-    expect(queryStringMock.setQuery).toHaveBeenCalledWith({
-      dataset: {
-        dataSource: {
-          id: 'mock-data-source-id',
-          title: 'Default Data Source',
-          type: 'OpenSearch',
+    expect(queryStringMock.setQuery).toHaveBeenCalledWith(
+      {
+        dataset: {
+          dataSource: {
+            id: 'mock-data-source-id',
+            title: 'Default Data Source',
+            type: 'OpenSearch',
+          },
+          id: 'default-index-pattern',
+          timeFieldName: '@timestamp',
+          title: 'Default Index Pattern',
+          type: 'INDEX_PATTERN',
         },
-        id: 'default-index-pattern',
-        timeFieldName: '@timestamp',
-        title: 'Default Index Pattern',
-        type: 'INDEX_PATTERN',
+        language: 'PPL',
+        query: 'generated query',
       },
-      language: 'PPL',
-      query: 'generated query',
-    });
+      true
+    );
     expect(screen.getByTestId('query-assist-query-generated-callout')).toBeInTheDocument();
   });
 });

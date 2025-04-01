@@ -13,7 +13,8 @@ import { createDataExplorerServicesMock } from '../../../../../data_explorer/pub
 import { DiscoverViewServices } from '../../../build_services';
 import { discoverPluginMock } from '../../../mocks';
 import { ResultStatus, useSearch } from './use_search';
-import { ISearchSource, UI_SETTINGS } from '../../../../../data/common';
+import { Filter, ISearchSource, UI_SETTINGS } from '../../../../../data/common';
+import { opensearchFilters } from 'src/plugins/data/public';
 
 jest.mock('./use_index_pattern', () => ({
   useIndexPattern: jest.fn().mockReturnValue(true),
@@ -22,6 +23,18 @@ jest.mock('./use_index_pattern', () => ({
 jest.mock('../../helpers/validate_time_range', () => ({
   validateTimeRange: jest.fn().mockReturnValue(true),
 }));
+
+const mockFilterA: Filter = {
+  meta: { disabled: false, negate: false, alias: 'test filter A' },
+  query: {},
+  $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
+};
+
+const mockFilterB: Filter = {
+  meta: { disabled: false, negate: false, alias: 'test filter B' },
+  query: {},
+  $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
+};
 
 const mockQuery = {
   query: 'test query',
@@ -33,15 +46,18 @@ const mockDefaultQuery = {
   language: 'default language',
 };
 
+const mockHitsCount = 50;
+const mockHits = new Array(50).fill({});
+
 const mockSavedSearch = {
   id: 'test-saved-search',
   title: 'Test Saved Search',
   searchSource: {
     setField: jest.fn(),
     getField: jest.fn().mockReturnValue(mockQuery),
-    fetch: jest.fn(),
+    fetch: jest.fn(() => ({ hits: { hits: mockHits } })),
     getSearchRequestBody: jest.fn().mockResolvedValue({}),
-    getOwnField: jest.fn(),
+    getOwnField: jest.fn().mockReturnValue(mockFilterB),
     getDataFrame: jest.fn(() => ({ name: 'test-pattern' })),
   },
   getFullPath: jest.fn(),
@@ -79,6 +95,7 @@ const createMockServices = (): DiscoverViewServices => {
     pause: false,
     value: 10,
   });
+  (services.filterManager.getAppFilters as jest.Mock).mockReturnValue([mockFilterA]);
   services.getSavedSearchById = jest.fn().mockResolvedValue(mockSavedSearch);
   return services;
 };
@@ -266,6 +283,9 @@ describe('useSearch', () => {
     });
 
     expect(services.data.query.queryString.setQuery).toBeCalledWith(mockQuery);
+    expect(services.filterManager.setAppFilters).toBeCalledWith(
+      expect.arrayContaining([mockFilterA, mockFilterB])
+    );
   });
 
   it('if no saved search, use get query', async () => {
@@ -359,5 +379,42 @@ describe('useSearch', () => {
         withLongNumeralsSupport: true,
       })
     );
+  });
+
+  it('should call fetch when fetchForMaxCsvOption is called', async () => {
+    const services = createMockServices();
+    const mockDatasetUpdates$ = new Subject();
+    services.data.query.queryString.getUpdates$ = jest.fn().mockReturnValue(mockDatasetUpdates$);
+
+    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
+    });
+
+    await act(async () => {
+      try {
+        await waitForNextUpdate({ timeout: 1000 });
+      } catch (_) {
+        // Do nothing.
+      }
+    });
+
+    await act(async () => {
+      const hits = await result.current.fetchForMaxCsvOption(mockHitsCount);
+      expect(hits.length).toBe(mockHitsCount);
+    });
+    expect(mockSavedSearch.searchSource.fetch).toHaveBeenLastCalledWith({
+      abortSignal: expect.anything(),
+      withLongNumeralsSupport: undefined,
+    });
   });
 });

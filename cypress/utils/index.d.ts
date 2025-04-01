@@ -158,6 +158,61 @@ declare namespace Cypress {
        * Deletes all workspaces that are older than a specified amount. This is to prevent ws buildup
        */
       deleteAllOldWorkspaces(): Chainable<any>;
+
+      /**
+       * Loads test data, adds data source, creates workspace, and optionally creates index patterns
+       */
+      setupWorkspaceAndDataSourceWithIndices(
+        workspaceName: string,
+        indices:
+          | 'data_logs_large_time_1'
+          | 'data_logs_large_time_2'
+          | 'data_logs_small_no_time_1'
+          | 'data_logs_small_no_time_2'
+          | 'data_logs_small_time_1'
+          | 'data_logs_small_time_2'
+      ): Chainable<any>;
+
+      /**
+       * Cleans up workspace, data source, and indices
+       */
+      cleanupWorkspaceAndDataSourceAndIndices(
+        workspaceName: string,
+        indices:
+          | 'data_logs_large_time_1'
+          | 'data_logs_large_time_2'
+          | 'data_logs_small_no_time_1'
+          | 'data_logs_small_no_time_2'
+          | 'data_logs_small_time_1'
+          | 'data_logs_small_time_2'
+      ): Chainable<any>;
+
+      /**
+       * Reloads until top nav exists in DOM or max attempt has been reached
+       * There is a bug where the top nav does not appear for cypress
+       * This issue has not been reproducible in manual testing,
+       * but if we do encounter this issue manually, this code should be removed
+       * and the bug fixed
+       */
+      ensureTopNavExists(): Chainable<any>;
+
+      /**
+       * Set the top nav date range.
+       * Date format: MMM D, YYYY @ HH:mm:ss.SSS
+       * @example
+       * cy.setTopNavDate('Oct 5, 2022 @ 00:57:06.429', 'Oct 6, 2022 @ 00:57:06.429')
+       */
+      setTopNavDate(start: string, end: string, submit?: boolean): Chainable<any>;
+
+      /**
+       * Sets the top nav date to relative time
+       */
+      setRelativeTopNavDate(time: number, timeUnit: string): Chainable<any>;
+
+      /**
+       * Verifies the number of rows count
+       */
+      verifyResultsCount(count: number): Chainable<any>;
     };
   }
 }

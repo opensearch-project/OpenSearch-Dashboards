@@ -33,3 +33,14 @@ export const getOsdSidecarPaddingStyle = (config: ISidecarConfig | undefined) =>
   }
   return {};
 };
+
+export const getSidecarLeftNavStyle = (config: ISidecarConfig | undefined) => {
+  // Only left style is required for left nav
+  if (!config?.isHidden && config?.dockedMode === SIDECAR_DOCKED_MODE.LEFT) {
+    const { paddingSize } = config;
+    return {
+      left: paddingSize,
+    };
+  }
+  return {};
+};

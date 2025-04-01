@@ -4,37 +4,21 @@
  */
 
 import {
-  INDEX_WITH_TIME_1,
   DATASOURCE_NAME,
+  INDEX_WITH_TIME_1,
   START_TIME,
   END_TIME,
 } from '../../../../../../utils/apps/constants';
-import { PATHS } from '../../../../../../utils/constants';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { verifyDiscoverPageState } from '../../../../../../utils/apps/query_enhancements/saved';
 
 const workspace = getRandomizedWorkspaceName();
 
 const queriesTestSuite = () => {
   describe('query enhancement queries', { scrollBehavior: false }, () => {
-    beforeEach(() => {
-      // Load test data
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.mapping.json`],
-        [`cypress/fixtures/query_enhancements/data_logs_1/${INDEX_WITH_TIME_1}.data.ndjson`]
-      );
-      // Add data source
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: PATHS.SECONDARY_ENGINE,
-        authType: 'no_auth',
-      });
-      // Create workspace and set up index pattern
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       // Create and select index pattern for ${INDEX_WITH_TIME_1}*
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspace,
@@ -44,6 +28,9 @@ const queriesTestSuite = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+    });
+
+    beforeEach(() => {
       // Go to discover page
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
@@ -52,56 +39,65 @@ const queriesTestSuite = () => {
       });
     });
 
-    afterEach(() => {
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteDataSourceByName(`${DATASOURCE_NAME}`);
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
     describe('send queries', () => {
-      it('with DQL', function () {
+      it('with DQL', () => {
+        cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('DQL');
-        cy.setTopNavDate(START_TIME, END_TIME);
+        cy.osd.setTopNavDate(START_TIME, END_TIME);
 
         const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
-        cy.osd.waitForLoader(true);
-        cy.waitForSearch();
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
 
         // Query should persist across refresh
         cy.reload();
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
       });
 
-      it('with Lucene', function () {
+      it('with Lucene', () => {
+        cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('Lucene');
-        cy.setTopNavDate(START_TIME, END_TIME);
+        cy.osd.setTopNavDate(START_TIME, END_TIME);
 
         const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
-        cy.osd.waitForLoader(true);
-        cy.waitForSearch();
+
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
 
         // Query should persist across refresh
         cy.reload();
+        cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
       });
 
-      it('with SQL', function () {
+      it('with SQL', () => {
+        cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('OpenSearch SQL');
 
-        // Default SQL query should be set
-        cy.osd.waitForLoader(true);
-        cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-          `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`
-        );
+        // Use the more robust verifyDiscoverPageState function
+        verifyDiscoverPageState({
+          dataset: `${INDEX_WITH_TIME_1}*`,
+          queryString: `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`,
+          language: 'OpenSearch SQL',
+        });
+
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+        cy.osd.verifyResultsCount(10);
+        cy.getElementByTestId('discoverQueryHits').should('not.exist');
 
         // Query should persist across refresh
         cy.reload();
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+
+        cy.osd.verifyResultsCount(10);
+        cy.getElementByTestId('discoverQueryHits').should('not.exist');
 
         cy.getElementByTestId('osdQueryEditor__multiLine')
           .find('.monaco-editor')
@@ -119,22 +115,36 @@ const queriesTestSuite = () => {
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
       });
 
-      it('with PPL', function () {
+      it('with PPL', () => {
+        cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.setQueryLanguage('PPL');
-        cy.setTopNavDate(START_TIME, END_TIME);
+        cy.osd.setTopNavDate(START_TIME, END_TIME);
 
         // Default PPL query should be set
         cy.osd.waitForLoader(true);
-        cy.getElementByTestId(`osdQueryEditor__multiLine`).contains(
-          `source = ${INDEX_WITH_TIME_1}*`
-        );
-        cy.waitForSearch();
+
+        // Use the more robust verifyDiscoverPageState function to check editor content
+        // This handles Monaco editor's special whitespace characters better
+        verifyDiscoverPageState({
+          dataset: `${INDEX_WITH_TIME_1}*`,
+          queryString: `source = ${INDEX_WITH_TIME_1}*`,
+          language: 'PPL',
+          hitCount: '10,000',
+        });
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+        cy.osd.verifyResultsCount(10000);
 
         // Query should persist across refresh
         cy.reload();
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
-        cy.verifyHitCount('10,000');
+
+        // Verify the state again after reload
+        verifyDiscoverPageState({
+          dataset: `${INDEX_WITH_TIME_1}*`,
+          queryString: `source = ${INDEX_WITH_TIME_1}*`,
+          language: 'PPL',
+          hitCount: '10,000',
+        });
       });
     });
   });

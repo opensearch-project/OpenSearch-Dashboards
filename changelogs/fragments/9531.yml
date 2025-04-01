@@ -1,0 +1,2 @@
+breaking:
+- Remove the deprecated "newExperience" table option in discover ([#9531](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9531))

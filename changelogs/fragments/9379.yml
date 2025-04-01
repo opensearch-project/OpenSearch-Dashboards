@@ -1,2 +1,0 @@
-fix:
-- Make PPL time column respect time zone and date format ([#9379](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9379))

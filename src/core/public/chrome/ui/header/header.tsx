@@ -61,7 +61,11 @@ import { WorkspaceObject, WorkspacesStart } from '../../../../public/workspace';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { useObservableValue } from '../../../utils';
-import { getOsdSidecarPaddingStyle, ISidecarConfig } from '../../../overlays';
+import {
+  getOsdSidecarPaddingStyle,
+  ISidecarConfig,
+  getSidecarLeftNavStyle,
+} from '../../../overlays';
 import {
   ChromeBranding,
   ChromeBreadcrumbEnricher,
@@ -178,6 +182,10 @@ export function Header({
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
+  }, [sidecarConfig]);
+
+  const sidecarLeftNavStyle = useMemo(() => {
+    return getSidecarLeftNavStyle(sidecarConfig);
   }, [sidecarConfig]);
 
   const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
@@ -321,6 +329,8 @@ export function Header({
           ? null
           : renderNavToggleWithExtraProps({
               className: 'navToggleInLargeScreen eui-hideFor--xs eui-hideFor--s eui-hideFor--m',
+              // Nav toggle button has a fixed position and its left size is 0 be default, it should have a left size if sidecar is docked to left.
+              style: sidecarLeftNavStyle,
             })}
         {renderNavToggleWithExtraProps({
           flush: 'both',

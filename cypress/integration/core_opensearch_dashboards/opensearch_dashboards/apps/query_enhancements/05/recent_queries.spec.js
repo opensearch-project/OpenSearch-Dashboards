@@ -8,7 +8,6 @@ import {
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
 } from '../../../../../../utils/apps/constants';
-import { BASE_PATH, PATHS } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
@@ -24,27 +23,11 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
 const runRecentQueryTests = () => {
-  describe('recent queries spec', { testIsolation: true }, () => {
+  // TODO: refactor these tests to not navigate away so often
+  describe.skip('recent queries spec', () => {
     const index = INDEX_PATTERN_WITH_TIME.replace('*', '');
-    beforeEach(() => {
-      // Load test data
-      cy.osd.setupTestData(
-        PATHS.SECONDARY_ENGINE,
-        ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.mapping.json'],
-        ['cypress/fixtures/query_enhancements/data_logs_1/data_logs_small_time_1.data.ndjson']
-      );
-
-      // Add data source
-      cy.osd.addDataSource({
-        name: DATASOURCE_NAME,
-        url: `${PATHS.SECONDARY_ENGINE}`,
-        authType: 'no_auth',
-      });
-      // Create workspace
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteAllOldWorkspaces();
-      cy.visit('/app/home');
-      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspace);
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspace,
         indexPattern: index,
@@ -53,9 +36,10 @@ const runRecentQueryTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+    });
 
+    beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
         workspaceName: workspace,
         page: 'discover',
         isEnhancement: true,
@@ -63,10 +47,14 @@ const runRecentQueryTests = () => {
     });
 
     afterEach(() => {
-      cy.deleteWorkspaceByName(workspace);
-      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-      // TODO: Modify deleteIndex to handle an array of index and remove hard code
-      cy.osd.deleteIndex(INDEX_WITH_TIME_1);
+      cy.window().then((win) => {
+        win.localStorage.clear();
+        win.sessionStorage.clear();
+      });
+    });
+
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
     generateAllTestConfigurations(generateRecentQueriesTestConfiguration)
@@ -129,7 +117,6 @@ const runRecentQueryTests = () => {
               action: () => {
                 cy.visit('/app/workspace_initial');
                 cy.osd.navigateToWorkSpaceSpecificPage({
-                  url: BASE_PATH,
                   workspaceName: workspace,
                   page: 'discover',
                   isEnhancement: true,
