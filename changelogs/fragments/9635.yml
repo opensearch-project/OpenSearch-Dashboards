@@ -1,0 +1,2 @@
+fix:
+- Fix failed performance testing CI ([#9635](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9635))
