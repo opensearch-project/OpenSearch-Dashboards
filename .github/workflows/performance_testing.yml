@@ -16,7 +16,7 @@ permissions:
   contents: read
   issues: write
   pull-requests: write
-  
+
 jobs:
   bundle-analyzer:
     runs-on: ubuntu-latest
@@ -47,15 +47,20 @@ jobs:
         # This command updates the limit and bundle size variation for the OpenSearch Dashboards platform plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --update-limits
 
-      - name: Read and comment bundle size variations
+      - name: Create or Update PR Comment
+        if: ${{ hashFiles('packages/osd-optimizer/limits_delta.yml') != '' }}
         run: |
-          if [ -f packages/osd-optimizer/limits_delta.yml ]; then
-            echo "📊 **Bundle Size crossed 5% for below plugins**" > comment.txt
-            echo "" >> comment.txt
-            cat packages/osd-optimizer/limits_delta.yml >> comment.txt
-            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
-          else
-            echo "No bundle size variations detected, skipping comment."
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "📊 **Bundle Size crossed 5% for below plugins**" > comment.txt
+          echo "" >> comment.txt
+          cat packages/osd-optimizer/limits_delta.yml >> comment.txt
+          echo "COMMENT_BODY<<EOF" >> "$GITHUB_ENV"
+          cat comment.txt >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+
+      - name: Post PR Comment
+        if: ${{ hashFiles('packages/osd-optimizer/limits_delta.yml') != '' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ env.COMMENT_BODY }}
+          edit-mode: replace
