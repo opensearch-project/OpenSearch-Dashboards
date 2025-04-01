@@ -51,4 +51,5 @@ export enum HeaderVariant {
   PAGE = 'page',
   APPLICATION = 'application',
   test = 'test',
+  test1 = 'test1',
 }
