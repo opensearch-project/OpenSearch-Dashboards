@@ -66,6 +66,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Clear discover summary if t2ppl failed ([#9552](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9552))
  - Query-assist removed the placeholder of last ask question ([#9552](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9552))
  - Use markdown in discover summary ([#9553](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9553))
+ - Trim the data source url when user is connecting to the data source. ([#9637](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9637))
 
 ### 🚞 Infrastructure
 
