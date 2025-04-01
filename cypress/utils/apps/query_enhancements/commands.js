@@ -95,7 +95,7 @@ Cypress.Commands.add('setQueryEditor', (value, options = {}) => {
   cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
 
   // clear the editor first and then set
-  clearMonacoEditor().then(() => {
+  cy.clearQueryEditor().then(() => {
     return cy
       .get('.inputarea')
       .should('be.visible')
