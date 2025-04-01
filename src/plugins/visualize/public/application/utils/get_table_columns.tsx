@@ -64,23 +64,6 @@ const getBadge = (item: VisualizationListItem) => {
         })}
       />
     );
-  } else if (item.stage === 'experimental') {
-    return (
-      <EuiBetaBadge
-        className="visListingTable__experimentalIcon"
-        label="Lab"
-        size="s"
-        color="subdued"
-        iconType={'beaker'}
-        title={i18n.translate('visualize.listing.experimentalTitle', {
-          defaultMessage: 'Experimental',
-        })}
-        tooltipContent={i18n.translate('visualize.listing.experimentalTooltip', {
-          defaultMessage:
-            'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
-        })}
-      />
-    );
   }
 };
 
