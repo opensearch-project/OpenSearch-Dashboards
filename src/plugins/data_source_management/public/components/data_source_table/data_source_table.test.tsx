@@ -102,7 +102,7 @@ describe('DataSourceTable', () => {
       });
       component.update();
       // @ts-ignore
-      expect(component.find(tableColumnHeaderIdentifier).first().props().isSorted).toBe(true);
+      expect(component.find(tableColumnHeaderIdentifier).at(1).props().isSorted).toBe(true);
       expect(uiSettings.get).toHaveBeenCalled();
     });
 

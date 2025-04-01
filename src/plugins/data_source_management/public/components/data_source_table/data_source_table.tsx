@@ -349,10 +349,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       name: i18n.translate('dataSourcesManagement.dataSourcesTable.relatedConnectionsField', {
         defaultMessage: 'Related connections',
       }),
-      align: 'right',
       truncateText: true,
       render: (relatedConnections: DataSourceTableItem[]) =>
-        relatedConnections ? relatedConnections.length : <EuiText>&mdash;</EuiText>,
+        relatedConnections && relatedConnections.length > 0 ? (
+          relatedConnections.length
+        ) : (
+          <EuiText>&mdash;</EuiText>
+        ),
     },
   ];
 

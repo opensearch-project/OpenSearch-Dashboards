@@ -149,7 +149,7 @@ describe('AssociationDataSourceModal', () => {
     });
     expect(screen.getByText('Associate direct query data sources')).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText('+ 1 related')).toBeInTheDocument();
+      expect(screen.getByText('+ 1 Direct query')).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'dqc1' })).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
       expect(screen.getByRole('option', { name: 'dqc1' })).toBeInTheDocument();
