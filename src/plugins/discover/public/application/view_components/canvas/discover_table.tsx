@@ -13,7 +13,6 @@ import {
   addColumn,
   moveColumn,
   removeColumn,
-  setColumns,
   setSort,
   useDispatch,
   useSelector,
@@ -88,7 +87,6 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
     dispatch(moveColumn({ columnName: col, destination }));
   };
 
-  const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
     dispatch(setSort(s));
     refetch$.next();
@@ -127,7 +125,6 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
       onFilter={onAddFilter as DocViewFilterFn}
       onMoveColumn={onMoveColumn}
       onRemoveColumn={onRemoveColumn}
-      onSetColumns={onSetColumns}
       onSort={onSetSort}
       sort={sort}
       rows={rows}
