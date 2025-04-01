@@ -7,7 +7,7 @@ import { getWorker } from './worker_store';
 
 // @ts-ignore
 window.MonacoEnvironment = {
-  getWorker: (workerId: string, label: string) => {
+  getWorker: (_: string, label: string) => {
     const workerSrc = getWorker(label);
     if (workerSrc) {
       const blob = new Blob([workerSrc], { type: 'application/javascript' });

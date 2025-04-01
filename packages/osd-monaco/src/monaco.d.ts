@@ -8,15 +8,15 @@ declare module 'monaco-editor/min/vs/editor/editor.main' {
 }
 
 declare module 'monaco-editor/min/vs/base/browser/ui/codicons/codicon/codicon.css' {
-  const content: any;
+  const content: string;
   export = content;
 }
 
 declare module 'monaco-editor/min/vs/language/json/json.worker' {
-  const content: any;
+  const content: string;
   export = content;
 }
 
 declare module 'monaco-editor/min/vs/editor/editor.worker' {
-  export function initialize(callback: any): void;
+  export function initialize(callback: () => void): void;
 }
