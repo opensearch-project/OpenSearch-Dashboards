@@ -535,7 +535,8 @@ export const updateSavedSearchAndSaveAndVerify = (
   // Load updated saved search and verify
   cy.getElementByTestId('discoverNewButton').click();
   // wait for the new tab to load
-  cy.wait(2000);
+  cy.getElementByTestId('loadingSpinnerText').should('not.exist');
+
   cy.loadSaveSearch(saveNameToUse);
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);

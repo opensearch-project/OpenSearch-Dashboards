@@ -28,7 +28,6 @@ const workspaceName = getRandomizedWorkspaceName();
 
 const runSavedSearchTests = () => {
   describe('saved search', () => {
-    // TODO: Currently we cannot convert this into a "before" and "after" due to us grabbing several aliases that are required by postRequestSaveSearch()
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,
@@ -87,7 +86,9 @@ const runSavedSearchTests = () => {
         setDatePickerDatesAndSearchIfRelevant(config.language);
         verifyDiscoverPageState(config);
 
-        cy.osd.deleteAllSavedSearches(workspaceName);
+        cy.get('@WORKSPACE_ID').then((workspaceId) => {
+          cy.osd.deleteSavedObjectsByType(workspaceId, 'search');
+        });
       });
 
       it(`should successfully update a saved search for ${config.testName}`, () => {
@@ -104,7 +105,9 @@ const runSavedSearchTests = () => {
         postRequestSaveSearch(config);
         updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
 
-        cy.osd.deleteAllSavedSearches(workspaceName);
+        cy.get('@WORKSPACE_ID').then((workspaceId) => {
+          cy.osd.deleteSavedObjectsByType(workspaceId, 'search');
+        });
       });
 
       it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
@@ -121,7 +124,9 @@ const runSavedSearchTests = () => {
         postRequestSaveSearch(config);
         updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, true);
 
-        cy.osd.deleteAllSavedSearches(workspaceName);
+        cy.get('@WORKSPACE_ID').then((workspaceId) => {
+          cy.osd.deleteSavedObjectsByType(workspaceId, 'search');
+        });
       });
     });
   });
