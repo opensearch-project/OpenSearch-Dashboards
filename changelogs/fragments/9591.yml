@@ -1,0 +1,2 @@
+refactor:
+- Moving SQL and PPL Provider Registration to Query Enhancements Plugin ([#9591](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9591))
