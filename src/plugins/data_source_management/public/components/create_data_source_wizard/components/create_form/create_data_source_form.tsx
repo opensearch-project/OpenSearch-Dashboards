@@ -373,6 +373,13 @@ export class CreateDataSourceForm extends React.Component<
     return null;
   };
 
+  handleUrlBlur = () => {
+    this.setState((prevState) => ({
+      endpoint: prevState.endpoint.trim(),
+    }));
+    this.validateEndpoint();
+  };
+
   description = [
     {
       renderComponent: (
@@ -629,7 +636,7 @@ export class CreateDataSourceForm extends React.Component<
                 )}
                 isInvalid={!!this.state.formErrorsByField.endpoint.length}
                 onChange={this.onChangeEndpoint}
-                onBlur={this.validateEndpoint}
+                onBlur={this.handleUrlBlur}
                 data-test-subj="createDataSourceFormEndpointField"
               />
             </EuiCompressedFormRow>
