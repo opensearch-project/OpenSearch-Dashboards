@@ -50,4 +50,5 @@ export enum HeaderControlsContainer {
 export enum HeaderVariant {
   PAGE = 'page',
   APPLICATION = 'application',
+  test = 'test',
 }
