@@ -77,7 +77,7 @@ class HttpAmazonESConnector extends HttpConnector {
     });
   }
 
-  async getAWSCredentials(reqParams) {
+  getAWSCredentials(reqParams) {
     if (reqParams.headers?.auth) {
       const awssigv4Cred = reqParams.headers.auth;
       const { accessKeyId, secretAccessKey, sessionToken } = awssigv4Cred.credentials;
@@ -92,7 +92,7 @@ class HttpAmazonESConnector extends HttpConnector {
     }
 
     // Use default credential provider chain
-    return await defaultProvider()();
+    return defaultProvider()();
   }
 
   createRequest(params, reqParams) {
