@@ -329,15 +329,15 @@ export class CreateDataSourceForm extends React.Component<
       credentials = {};
     } else if (authType === AuthType.UsernamePasswordType) {
       credentials = {
-        username: this.state.auth.credentials.username,
-        password: this.state.auth.credentials.password,
+        username: this.state.auth.credentials?.username,
+        password: this.state.auth.credentials?.password,
       } as UsernamePasswordTypedContent;
     } else if (authType === AuthType.SigV4) {
       credentials = {
-        region: this.state.auth.credentials.region,
-        accessKey: this.state.auth.credentials.accessKey,
-        secretKey: this.state.auth.credentials.secretKey,
-        service: this.state.auth.credentials.service || SigV4ServiceName.OpenSearch,
+        region: this.state.auth.credentials?.region,
+        accessKey: this.state.auth.credentials?.accessKey,
+        secretKey: this.state.auth.credentials?.secretKey,
+        service: this.state.auth.credentials?.service || SigV4ServiceName.OpenSearch,
       } as SigV4Content;
     } else {
       const currentCredentials = (credentials ?? {}) as { [key: string]: string };
@@ -351,7 +351,7 @@ export class CreateDataSourceForm extends React.Component<
     return {
       title: this.state.title,
       description: this.state.description,
-      endpoint: this.state.endpoint,
+      endpoint: this.state.endpoint.trim(),
       auth: { ...this.state.auth, credentials },
     };
   };
@@ -371,13 +371,6 @@ export class CreateDataSourceForm extends React.Component<
     }
 
     return null;
-  };
-
-  handleUrlBlur = () => {
-    this.setState((prevState) => ({
-      endpoint: prevState.endpoint.trim(),
-    }));
-    this.validateEndpoint();
   };
 
   description = [
@@ -636,7 +629,7 @@ export class CreateDataSourceForm extends React.Component<
                 )}
                 isInvalid={!!this.state.formErrorsByField.endpoint.length}
                 onChange={this.onChangeEndpoint}
-                onBlur={this.handleUrlBlur}
+                onBlur={this.validateEndpoint}
                 data-test-subj="createDataSourceFormEndpointField"
               />
             </EuiCompressedFormRow>
