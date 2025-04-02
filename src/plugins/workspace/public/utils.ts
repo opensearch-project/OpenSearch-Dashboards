@@ -595,27 +595,22 @@ export const fetchDataSourceConnections = async (
   mode: AssociationDataSourceModalMode
 ) => {
   try {
-    let directQueryConnections: DataSourceConnection[] = [];
-    let remoteClusterConnections: DataSourceConnection[] = [];
-    if (mode === AssociationDataSourceModalMode.DirectQueryConnections) {
-      directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
-        // Only data source saved object type needs to fetch data source connections, data connection type object not.
-        dataSources.filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE).map((ds) => ds.id),
-        http
-      );
-    } else {
-      const remoteClusterConnectionsPromises = dataSources.map((ds) => {
-        if (
-          ds.dataSourceEngineType === DataSourceEngineType.OpenSearch ||
-          ds.dataSourceEngineType === DataSourceEngineType.Elasticsearch
-        ) {
-          return getRemoteClusterConnections(ds.id, http!).catch(() => []);
-        }
-        return [];
-      });
-      const remoteClusterConnectionsResult = await Promise.all(remoteClusterConnectionsPromises);
-      remoteClusterConnections = remoteClusterConnectionsResult.flat();
-    }
+    const directQueryConnections =
+      mode === AssociationDataSourceModalMode.DirectQueryConnections
+        ? await fetchDataSourceConnectionsByDataSourceIds(
+            // Only data source saved object type needs to fetch data source connections, data connection type object not.
+            dataSources
+              .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+              .map((ds) => ds.id),
+            http
+          )
+        : [];
+
+    const remoteClusterConnections =
+      mode === AssociationDataSourceModalMode.OpenSearchConnections
+        ? await fetchRemoteClusterConnections(dataSources, http)
+        : [];
+
     return mergeDataSourcesWithConnections(
       dataSources,
       directQueryConnections,
@@ -630,6 +625,33 @@ export const fetchDataSourceConnections = async (
     );
     return [];
   }
+};
+
+export const fetchRemoteClusterConnections = async (
+  dataSources: DataSource[],
+  http: HttpSetup | undefined
+): Promise<DataSourceConnection[]> => {
+  if (!http) {
+    return [];
+  }
+
+  const remoteClusterConnections: DataSourceConnection[] = [];
+
+  for (const ds of dataSources) {
+    if (
+      ds.dataSourceEngineType === DataSourceEngineType.OpenSearch ||
+      ds.dataSourceEngineType === DataSourceEngineType.Elasticsearch
+    ) {
+      try {
+        const remoteClusterConnectionsResult = await getRemoteClusterConnections(ds.id, http);
+        remoteClusterConnections.push(...remoteClusterConnectionsResult);
+      } catch {
+        // Ignore errors when fetching remote cluster connections
+      }
+    }
+  }
+
+  return remoteClusterConnections;
 };
 
 export const getUseCase = (workspace: WorkspaceObject, availableUseCases: WorkspaceUseCase[]) => {

@@ -148,7 +148,7 @@ const convertConnectionToOption = ({
         ? ('on' as const)
         : undefined,
     prepend: connection?.parentId ? (
-      <div style={{ marginLeft: '20px' }}>
+      <div className="aligned-child-logo">
         <ConnectionIcon connection={connection} logos={logos} />
       </div>
     ) : (

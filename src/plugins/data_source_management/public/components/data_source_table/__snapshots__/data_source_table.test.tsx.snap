@@ -1542,16 +1542,15 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
-                                  style={Object {}}
                                 >
                                   <button
                                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
-                                    style={Object {}}
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -1802,16 +1801,15 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
-                                  style={Object {}}
                                 >
                                   <button
                                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
-                                    style={Object {}}
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -2062,16 +2060,15 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
-                                  style={Object {}}
                                 >
                                   <button
                                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
-                                    style={Object {}}
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -2322,16 +2319,15 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
-                                  style={Object {}}
                                 >
                                   <button
                                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
-                                    style={Object {}}
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -5612,16 +5608,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
-                                  style={Object {}}
                                 >
                                   <button
                                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
-                                    style={Object {}}
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -5881,16 +5876,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
-                                  style={Object {}}
                                 >
                                   <button
                                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
-                                    style={Object {}}
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -6150,16 +6144,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
-                                  style={Object {}}
                                 >
                                   <button
                                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
-                                    style={Object {}}
                                     type="button"
                                   >
                                     <EuiButtonContent

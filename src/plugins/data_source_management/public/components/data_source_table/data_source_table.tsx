@@ -300,14 +300,16 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         defaultMessage: 'Data source',
       }),
       render: (name: string, item: DataSourceTableItem) => {
-        const indentStyle =
-          item.type === DataSourceEngineType.OpenSearchCrossCluster ? { marginLeft: '20px' } : {};
         return (
           <>
             <EuiButtonEmpty
               size="xs"
               {...reactRouterNavigate(history, `${item.id}`)}
-              style={indentStyle}
+              className={
+                item.type === DataSourceEngineType.OpenSearchCrossCluster
+                  ? 'data-source-table-expanded-row_title'
+                  : ''
+              }
               flush="left"
             >
               {name}

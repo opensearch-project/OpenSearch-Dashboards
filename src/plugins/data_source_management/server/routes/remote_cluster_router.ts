@@ -13,7 +13,7 @@ export function registerRemoteClusterRoutes(router: IRouter) {
       path: `${REMOTE_CLUSTER}/list`,
       validate: {
         query: schema.object({
-          dataSourceId: schema.string(),
+          dataSourceId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -34,9 +34,14 @@ export function registerRemoteClusterRoutes(router: IRouter) {
         }));
         return response.ok({ body: remoteClusters });
       } catch (error) {
+        const errMessage = error?.meta?.body?.Message || 'Unknown Error';
         return response.custom({
-          statusCode: 503,
-          body: 'Not Supported',
+          statusCode: errMessage.includes(`'/_remote/info' is not allowed`)
+            ? 405
+            : error.statusCode,
+          body: {
+            message: errMessage,
+          },
         });
       }
     }
@@ -47,8 +52,8 @@ export function registerRemoteClusterRoutes(router: IRouter) {
       path: `${REMOTE_CLUSTER}/indexes`,
       validate: {
         query: schema.object({
-          dataSourceId: schema.string(),
-          connectionAlias: schema.string(),
+          dataSourceId: schema.maybe(schema.string()),
+          connectionAlias: schema.maybe(schema.string()),
         }),
       },
     },
@@ -65,9 +70,14 @@ export function registerRemoteClusterRoutes(router: IRouter) {
         const indexes = result.body.indices.map((index) => index.name);
         return response.ok({ body: indexes });
       } catch (error) {
+        const errMessage = error?.meta?.body?.Message || 'Unknown Error';
         return response.custom({
-          statusCode: error.statusCode || 503,
-          body: error.message,
+          statusCode: errMessage.includes(`'/_remote/info' is not allowed`)
+            ? 405
+            : error.statusCode,
+          body: {
+            message: errMessage,
+          },
         });
       }
     }
