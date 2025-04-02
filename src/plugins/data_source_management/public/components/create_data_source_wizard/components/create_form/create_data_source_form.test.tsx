@@ -161,7 +161,7 @@ describe('Datasource Management: Create Datasource form', () => {
   });
 
   /* Endpoint */
-  test('should trim endpoint when testing and creating data source', () => {
+  test('should pass trimmed endpoint when testing and creating data source', () => {
     /* set form fields */
     setAuthTypeValue(authTypeIdentifier, AuthType.UsernamePasswordType);
     changeTextFieldValue(titleIdentifier, 'test');
@@ -171,11 +171,16 @@ describe('Datasource Management: Create Datasource form', () => {
     changeTextFieldValue(passwordIdentifier, 'test123');
     findTestSubject(component, 'createDataSourceTestConnectionButton').simulate('click');
     findTestSubject(component, 'createDataSourceButton').simulate('click');
-    const testEndpoint =
-      mockTestConnectionHandler.mock.calls[mockTestConnectionHandler.mock.calls.length - 1][0];
-    const submitEndpoint = mockSubmitHandler.mock.calls[mockSubmitHandler.mock.calls.length - 1][0];
-    expect(testEndpoint.endpoint).toBe('https://testTrimEndpoint.com');
-    expect(submitEndpoint.endpoint).toBe('https://testTrimEndpoint.com');
+    expect(mockTestConnectionHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        endpoint: 'https://testTrimEndpoint.com',
+      })
+    );
+    expect(mockSubmitHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        endpoint: 'https://testTrimEndpoint.com',
+      })
+    );
   });
 
   /* No Auth - Username & Password */
