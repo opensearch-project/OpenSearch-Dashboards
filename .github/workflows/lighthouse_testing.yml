@@ -158,11 +158,17 @@ jobs:
             done <<< "$(echo "$FAILURES_WITH_REPORTS" | jq -c '.[]')"
 
             echo -e "$COMMENT" > comment.txt
-
-            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
+            echo "COMMENT_BODY<<EOF" >> "$GITHUB_ENV"
+            cat comment.txt >> "$GITHUB_ENV"
+            echo "EOF" >> "$GITHUB_ENV"
         continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN  }}
+
+      - name: Post PR Comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ env.COMMENT_BODY }}
+          edit-mode: replace
 
       - name: Cleanup Lighthouse Reports
         run: rm -f comment.txt && rm -rf .lighthouseci
