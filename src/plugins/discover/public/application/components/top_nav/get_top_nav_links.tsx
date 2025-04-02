@@ -189,7 +189,8 @@ const getLegacyTopNavLinks = (
               makeUrl={(searchId) => `#/view/${encodeURIComponent(searchId)}`}
             />
           </OpenSearchDashboardsContextProvider>
-        )
+        ),
+        { outsideClickCloses: true }
       );
     },
     iconType: 'folderOpen',

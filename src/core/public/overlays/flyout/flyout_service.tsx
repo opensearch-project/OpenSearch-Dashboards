@@ -109,6 +109,7 @@ export interface OverlayFlyoutOpenOptions {
   closeButtonAriaLabel?: string;
   ownFocus?: boolean;
   'data-test-subj'?: string;
+  outsideClickCloses?: boolean;
 }
 
 interface StartDeps {
