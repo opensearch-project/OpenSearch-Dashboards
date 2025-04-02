@@ -481,6 +481,21 @@ describe('Fetch', () => {
 
       expect(ndjson).toEqual(content);
     });
+
+    it('should make requests for text/event-stream content', async () => {
+      const body = 'data: ';
+      fetchMock.post('*', () => ({
+        body,
+        headers: { 'Content-Type': 'text/event-stream' },
+      }));
+
+      const data = await fetchInstance.post('/my/path', {
+        body,
+        asResponse: true,
+      });
+
+      expect(await data.response?.text()).toEqual(body);
+    });
   });
 
   describe('interception', () => {
