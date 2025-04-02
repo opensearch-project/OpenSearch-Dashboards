@@ -55,7 +55,7 @@ describe('request', function () {
     fakeReq.setSocketKeepAlive = sinon.stub();
     fakeReq.abort = sinon.stub();
 
-    sinon.stub(connector.httpClient, 'handleRequest').returns(fakeReq);
+    sinon.stub(connector, 'createRequest').returns(fakeReq);
 
     const cancel = connector.request({}, () => {});
 
@@ -63,8 +63,11 @@ describe('request', function () {
     setTimeout(() => {
       try {
         expect(cancel).to.be.a('function');
+
         cancel();
+
         expect(fakeReq.abort.called).to.be.true;
+
         done();
       } catch (e) {
         done(e);
@@ -79,12 +82,10 @@ describe('request', function () {
     fakeReq.setNoDelay = sinon.stub();
     fakeReq.setSocketKeepAlive = sinon.stub();
 
-    sinon
-      .stub(connector.httpClient, 'handleRequest')
-      .callsFake(function (request, options, callback) {
-        callback(error);
-        return fakeReq;
-      });
+    sinon.stub(connector.httpClient, 'handle').callsFake(function (request, options, callback) {
+      callback(error);
+      return fakeReq;
+    });
 
     connector.request({}, function (err) {
       try {

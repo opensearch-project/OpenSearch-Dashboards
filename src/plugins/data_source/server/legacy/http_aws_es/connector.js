@@ -32,20 +32,22 @@ class HttpAmazonESConnector extends HttpConnector {
     this.service = config.service || 'es';
   }
 
-  async request(params, cb) {
+  request(params, cb) {
     const reqParams = this.makeReqParams(params);
+    let request;
     let cancelled = false;
 
     const cancel = () => {
       cancelled = true;
+      request && request.abort();
     };
 
     try {
-      const creds = await this.getAWSCredentials(reqParams);
+      const creds = this.getAWSCredentials(reqParams);
       if (cancelled) return;
 
-      const request = await this.createRequest(params, reqParams);
-      await this.signRequest(request, creds);
+      request = this.createRequest(params, reqParams);
+      this.signRequest(request, creds);
 
       const hash = crypto
         .createHash('sha256')
@@ -53,8 +55,8 @@ class HttpAmazonESConnector extends HttpConnector {
         .digest('hex');
       request.headers['x-amz-content-sha256'] = hash;
 
-      const { response } = await this.httpClient.handle(request);
-      const body = await this.streamToString(response.body);
+      const { response } = this.httpClient.handle(request);
+      const body = this.streamToString(response.body);
 
       this.log.trace(params.method, reqParams, params.body, body, response.statusCode);
       cb(null, body, response.statusCode, response.headers);
