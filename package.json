@@ -350,7 +350,6 @@
     "@types/has-ansi": "^3.0.0",
     "@types/history": "^4.7.3",
     "@types/hjson": "^2.4.2",
-    "@types/http-aws-es": "6.0.2",
     "@types/jest": "^28.1.8",
     "@types/joi": "^13.4.2",
     "@types/jquery": "^3.3.31",
