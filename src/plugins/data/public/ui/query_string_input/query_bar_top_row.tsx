@@ -408,6 +408,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
             ? createPortal(renderUpdateButton(), props.datePickerRef!.current!)
             : renderUpdateButton()}
         </EuiFlexItem>
+        {/* Here is the place if we consider to add the button at top bar <EuiButton>Sync button should be here?</EuiButton> */}
       </EuiFlexGroup>
     </>
   );
