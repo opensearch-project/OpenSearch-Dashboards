@@ -291,6 +291,57 @@ cy.osd.add('grabDataSourceId', (workspaceName, dataSourceName) => {
   }
 });
 
+cy.osd.add('grabIdsFromDiscoverPageUrl', () => {
+  cy.url().then(($url) => {
+    const workspaceIdMatch = $url.match(/\/w\/([^\/]+)\//);
+    const datasourceIdMatch = $url.match(/dataSource:\(id:'?([0-9a-f-]+)'?,/);
+    const indexPatternIdMatch = $url.match(/\),id:'?([0-9A-Za-z:_-]+)'?,/);
+
+    if (workspaceIdMatch && workspaceIdMatch[1]) {
+      cy.wrap(workspaceIdMatch[1]).as('WORKSPACE_ID');
+    }
+    if (datasourceIdMatch && datasourceIdMatch[1]) {
+      cy.wrap(datasourceIdMatch[1]).as('DATASOURCE_ID');
+    }
+    if (indexPatternIdMatch && indexPatternIdMatch[1]) {
+      cy.wrap(indexPatternIdMatch[1]).as('INDEX_PATTERN_ID');
+    }
+  });
+});
+
+cy.osd.add('deleteSavedObject', (type, id, options = {}) => {
+  const url = `/api/saved_objects/${type}/${id}?force=true`;
+
+  cy.request({
+    method: 'DELETE',
+    url,
+    headers: {
+      'osd-xsrf': true,
+    },
+    failOnStatusCode: false,
+    ...options,
+  });
+});
+
+cy.osd.add('deleteSavedObjectsByType', (workspaceId, type, search) => {
+  const searchParams = new URLSearchParams({
+    fields: 'id',
+    type,
+    workspaces: workspaceId,
+  });
+  if (search) {
+    searchParams.set('search', search);
+  }
+
+  const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+
+  return cy.request(url).then((response) => {
+    response.body.saved_objects.map(({ id }) => {
+      cy.osd.deleteSavedObject(type, id);
+    });
+  });
+});
+
 cy.osd.add('deleteAllOldWorkspaces', () => {
   cy.visit('/app/workspace_list#/');
   cy.get('h1').contains('Workspaces').should('be.visible');
