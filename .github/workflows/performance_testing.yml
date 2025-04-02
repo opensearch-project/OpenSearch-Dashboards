@@ -50,12 +50,13 @@ jobs:
       - name: Create or Update PR Comment
         if: ${{ hashFiles('packages/osd-optimizer/limits_delta.yml') != '' }}
         run: |
-          echo "📊 **Bundle Size crossed 5% for below plugins**" > comment.txt
-          echo "" >> comment.txt
-          cat packages/osd-optimizer/limits_delta.yml >> comment.txt
-          echo "COMMENT_BODY<<EOF" >> "$GITHUB_ENV"
-          cat comment.txt >> "$GITHUB_ENV"
-          echo "EOF" >> "$GITHUB_ENV"
+          {
+            echo "COMMENT_BODY<<EOF"
+            echo "📊 **Bundle Size crossed 5% for below plugins**"
+            echo ""
+            cat packages/osd-optimizer/limits_delta.yml
+            echo "EOF"
+          } >> "$GITHUB_ENV"
 
       - name: Post PR Comment
         if: ${{ hashFiles('packages/osd-optimizer/limits_delta.yml') != '' }}
