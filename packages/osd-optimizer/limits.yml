@@ -40,12 +40,12 @@ pageLoadAssetSize:
   visAugmenter: 104145
   visBuilder: 795681
   visDefaultEditor: 344621
-  visTypeMarkdown: 30896
+  visTypeMarkdown: 30
   visTypeMetric: 61507
   visTypeTable: 95078
   visTypeTagcloud: 37575
   visTypeTimeline: 519
-  visTypeTimeseries: 1553
+  visTypeTimeseries: 15
   visTypeVega: 153861
   visTypeVislib: 242982
   visTypeXy: 20255
