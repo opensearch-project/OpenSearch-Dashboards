@@ -109,7 +109,7 @@ export const mergeDataSourcesWithConnections = (
   remoteClusterConnections: DataSourceTableItem[],
   localClusterConnections?: DataSourceTableItem[]
 ): DataSourceTableItem[] => {
-  let dataSourcesList: DataSourceTableItem[] = [];
+  const dataSourcesList: DataSourceTableItem[] = [];
   dataSources.forEach((ds) => {
     const relatedConnections = directQueryConnections.filter(
       (directQueryConnection) => directQueryConnection.parentId === ds.id
@@ -136,7 +136,7 @@ export const mergeDataSourcesWithConnections = (
   }
 
   // Add the remoteCluster Connections to the parent connections as relatedConnections
-  dataSourcesList = dataSourcesList.map((ds) => {
+  return dataSourcesList.map((ds) => {
     const relatedRemoteConnections = remoteClusterConnections.filter(
       (remoteConnection) => remoteConnection.parentId === ds.id
     );
@@ -148,8 +148,6 @@ export const mergeDataSourcesWithConnections = (
         : relatedRemoteConnections,
     };
   });
-
-  return dataSourcesList;
 };
 
 export const fetchDataSourceConnections = async (
@@ -157,7 +155,7 @@ export const fetchDataSourceConnections = async (
   http: HttpSetup | undefined,
   notifications: NotificationsStart | undefined,
   directQueryTable: boolean,
-  hideLocalCluster: boolean,
+  hideLocalCluster: boolean = false,
   showRemoteOpensearchConnection: boolean = false
 ) => {
   try {
@@ -169,19 +167,9 @@ export const fetchDataSourceConnections = async (
     const localClusterConnections =
       directQueryTable && !hideLocalCluster ? await getLocalClusterConnections(http!) : undefined;
 
-    const remoteClusterConnectionsPromises = showRemoteOpensearchConnection
-      ? dataSources.map((ds) => {
-          if (
-            ds.type === DataSourceEngineType.OpenSearch ||
-            ds.type === DataSourceEngineType.Elasticsearch
-          ) {
-            return getRemoteClusterConnections(ds.id, http!).catch(() => []);
-          }
-          return [];
-        })
+    const remoteClusterConnections = showRemoteOpensearchConnection
+      ? await fetchRemoteClusterConnections(dataSources, http)
       : [];
-    const remoteClusterConnectionsResult = await Promise.all(remoteClusterConnectionsPromises);
-    const remoteClusterConnections = remoteClusterConnectionsResult.flat();
 
     return mergeDataSourcesWithConnections(
       dataSources,
@@ -197,6 +185,33 @@ export const fetchDataSourceConnections = async (
     );
     return [];
   }
+};
+
+export const fetchRemoteClusterConnections = async (
+  dataSources: DataSourceTableItem[],
+  http: HttpSetup | undefined
+): Promise<DataSourceTableItem[]> => {
+  if (!http) {
+    return [];
+  }
+
+  const remoteClusterConnections: DataSourceTableItem[] = [];
+
+  for (const ds of dataSources) {
+    if (
+      ds.type === DataSourceEngineType.OpenSearch ||
+      ds.type === DataSourceEngineType.Elasticsearch
+    ) {
+      try {
+        const remoteClusterConnectionsResult = await getRemoteClusterConnections(ds.id, http);
+        remoteClusterConnections.push(...remoteClusterConnectionsResult);
+      } catch (error) {
+        // Ignore errors when fetching remote cluster connections
+      }
+    }
+  }
+
+  return remoteClusterConnections;
 };
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {

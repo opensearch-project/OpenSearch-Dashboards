@@ -33,6 +33,7 @@ import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
 import { ConnectionTypeIcon } from '../workspace_form/connection_type_icon';
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+import './association_data_source_modal.scss';
 
 const ConnectionIcon = ({
   connection: { connectionType, type },
@@ -148,7 +149,7 @@ const convertConnectionToOption = ({
         ? ('on' as const)
         : undefined,
     prepend: connection?.parentId ? (
-      <div style={{ marginLeft: '20px' }}>
+      <div className="aligned-child-logo">
         <ConnectionIcon connection={connection} logos={logos} />
       </div>
     ) : (
