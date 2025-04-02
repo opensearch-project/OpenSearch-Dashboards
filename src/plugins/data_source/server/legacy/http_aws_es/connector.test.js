@@ -4,11 +4,10 @@
  */
 
 const EventEmitter = require('events').EventEmitter;
-
-const AWS = require('aws-sdk');
 const expect = require('chai').expect;
 const Host = require('elasticsearch/src/lib/host');
 const sinon = require('sinon');
+const { defaultProvider } = require('@aws-sdk/credential-provider-node');
 
 const Connector = require('./connector');
 
@@ -29,16 +28,21 @@ describe('constructor', function () {
 describe('request', function () {
   let connector;
   beforeEach(function () {
-    AWS.config.update({
-      region: 'us-east-1',
+    // Instead of AWS.config.update, we'll configure the region through the connector
+    const host = new Host();
+    connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
     });
 
-    const host = new Host();
-    connector = new Connector(host, {});
-
+    // Mock the credentials
     sinon.stub(connector, 'getAWSCredentials').resolves({
-      secretAccessKey: 'abc',
       accessKeyId: 'abc',
+      secretAccessKey: 'abc',
+      // Optional if you need session tokens in your tests
+      // sessionToken: 'token'
     });
 
     this.signRequest = sinon.stub(connector, 'signRequest');
@@ -59,11 +63,8 @@ describe('request', function () {
     setTimeout(() => {
       try {
         expect(cancel).to.be.a('function');
-
         cancel();
-
         expect(fakeReq.abort.called).to.be.true;
-
         done();
       } catch (e) {
         done(e);
@@ -73,7 +74,6 @@ describe('request', function () {
 
   it('calls callback with error', function (done) {
     const error = new Error();
-
     const fakeReq = new EventEmitter();
 
     fakeReq.setNoDelay = sinon.stub();
