@@ -164,7 +164,13 @@
     ]
   },
   "dependencies": {
-    "@aws-crypto/client-node": "^3.1.1",
+    "@aws-crypto/client-node": "^4.2.0",
+    "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/client-sts": "^3.777.0",
+    "@aws-sdk/credential-provider-node": "^3.777.0",
+    "@aws-sdk/node-http-handler": "^3.374.0",
+    "@aws-sdk/protocol-http": "^3.374.0",
+    "@aws-sdk/signature-v4": "^3.374.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/eui": "npm:@opensearch-project/oui@1.19.0",
     "@elastic/good": "^9.0.1-kibana3",
@@ -344,7 +350,6 @@
     "@types/has-ansi": "^3.0.0",
     "@types/history": "^4.7.3",
     "@types/hjson": "^2.4.2",
-    "@types/http-aws-es": "6.0.2",
     "@types/jest": "^28.1.8",
     "@types/joi": "^13.4.2",
     "@types/jquery": "^3.3.31",
