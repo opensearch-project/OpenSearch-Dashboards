@@ -160,6 +160,24 @@ describe('Datasource Management: Create Datasource form', () => {
     expect(mockSubmitHandler).toHaveBeenCalled(); // should call submit as all fields are valid
   });
 
+  /* Endpoint */
+  test('should trim endpoint when testing and creating data source', () => {
+    /* set form fields */
+    setAuthTypeValue(authTypeIdentifier, AuthType.UsernamePasswordType);
+    changeTextFieldValue(titleIdentifier, 'test');
+    changeTextFieldValue(descriptionIdentifier, 'test');
+    changeTextFieldValue(endpointIdentifier, '       https://testTrimEndpoint.com       ');
+    changeTextFieldValue(usernameIdentifier, 'test123');
+    changeTextFieldValue(passwordIdentifier, 'test123');
+    findTestSubject(component, 'createDataSourceTestConnectionButton').simulate('click');
+    findTestSubject(component, 'createDataSourceButton').simulate('click');
+    const testEndpoint =
+      mockTestConnectionHandler.mock.calls[mockTestConnectionHandler.mock.calls.length - 1][0];
+    const submitEndpoint = mockSubmitHandler.mock.calls[mockSubmitHandler.mock.calls.length - 1][0];
+    expect(testEndpoint.endpoint).toBe('https://testTrimEndpoint.com');
+    expect(submitEndpoint.endpoint).toBe('https://testTrimEndpoint.com');
+  });
+
   /* No Auth - Username & Password */
   test('should create data source with No Auth when all fields are valid', () => {
     /* set form fields */

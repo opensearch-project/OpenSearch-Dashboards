@@ -329,15 +329,15 @@ export class CreateDataSourceForm extends React.Component<
       credentials = {};
     } else if (authType === AuthType.UsernamePasswordType) {
       credentials = {
-        username: this.state.auth.credentials?.username,
-        password: this.state.auth.credentials?.password,
+        username: this.state.auth.credentials.username,
+        password: this.state.auth.credentials.password,
       } as UsernamePasswordTypedContent;
     } else if (authType === AuthType.SigV4) {
       credentials = {
-        region: this.state.auth.credentials?.region,
-        accessKey: this.state.auth.credentials?.accessKey,
-        secretKey: this.state.auth.credentials?.secretKey,
-        service: this.state.auth.credentials?.service || SigV4ServiceName.OpenSearch,
+        region: this.state.auth.credentials.region,
+        accessKey: this.state.auth.credentials.accessKey,
+        secretKey: this.state.auth.credentials.secretKey,
+        service: this.state.auth.credentials.service || SigV4ServiceName.OpenSearch,
       } as SigV4Content;
     } else {
       const currentCredentials = (credentials ?? {}) as { [key: string]: string };

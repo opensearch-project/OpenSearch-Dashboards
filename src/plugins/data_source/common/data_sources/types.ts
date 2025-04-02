@@ -9,7 +9,7 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
   description?: string;
   endpoint: string;
-  dataSourceVersion?: string;
+  dataSourceVersion: string;
   dataSourceEngineType?: DataSourceEngineType;
   installedPlugins?: string[];
   auth: {
