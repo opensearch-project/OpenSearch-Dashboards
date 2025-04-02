@@ -1,0 +1,2 @@
+security:
+- Bump @babel/runtime to 7.26.10 and tar-fs to 1.2.2 for CVE-2025-27789 and CVE-2024-12905 ([#9649](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9649))
