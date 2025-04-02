@@ -164,6 +164,7 @@ jobs:
         continue-on-error: true
 
       - name: Post PR Comment
+        if: ${{ env.COMMENT_BODY != '' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
