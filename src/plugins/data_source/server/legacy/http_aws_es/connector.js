@@ -115,7 +115,7 @@ class HttpAmazonESConnector extends HttpConnector {
     return request;
   }
 
-  async signRequest(request, credentials) {
+  signRequest(request, credentials) {
     const signer = new SignatureV4({
       credentials,
       region: this.awsConfig.region,
@@ -123,7 +123,7 @@ class HttpAmazonESConnector extends HttpConnector {
       sha256: Sha256,
     });
 
-    return await signer.sign(request);
+    return signer.sign(request);
   }
 }
 
