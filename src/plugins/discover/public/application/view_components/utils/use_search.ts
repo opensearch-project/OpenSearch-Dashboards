@@ -356,13 +356,6 @@ export const useSearch = (services: DiscoverViewServices) => {
         errorBody.message = JSON.parse(errorBody.message);
       }
 
-      toastNotifications.addError(error, {
-        title: i18n.translate('discover.searchQueryError', {
-          defaultMessage: 'Error in query editor',
-        }),
-        toastMessage: JSON.stringify(errorBody?.message),
-      });
-
       data$.next({
         status: ResultStatus.ERROR,
         queryStatus: {
