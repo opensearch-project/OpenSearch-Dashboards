@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
@@ -24,6 +25,7 @@ export interface UiServiceStartDependencies {
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
+  private isGeneratingppl$ = new BehaviorSubject<boolean>(false);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     const { enhancements } = initializerContext.config.get<ConfigSchema>();
@@ -32,7 +34,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
   }
 
   public setup(core: CoreSetup, {}: UiServiceSetupDependencies): IUiSetup {
-    return {};
+    return { isGeneratingppl$: this.isGeneratingppl$ };
   }
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
@@ -40,6 +42,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       core,
       data: dataServices,
       storage,
+      isGeneratingppl$: this.isGeneratingppl$,
     });
 
     return {

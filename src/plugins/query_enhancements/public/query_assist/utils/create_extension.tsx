@@ -131,7 +131,7 @@ export const createQueryAssistExtension = (
           data={data}
           queryState$={assistQueryState$}
         >
-          <QueryAssistBar dependencies={dependencies} />
+          <QueryAssistBar data={data} dependencies={dependencies} />
         </QueryAssistWrapper>
       );
     },

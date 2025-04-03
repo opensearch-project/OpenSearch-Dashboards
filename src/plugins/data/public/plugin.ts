@@ -158,6 +158,8 @@ export class DataPublicPlugin
       notifications: core.notifications,
     });
 
+    const uiService = this.uiService.setup(core, {});
+
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
@@ -196,6 +198,7 @@ export class DataPublicPlugin
         if (enhancements.editor)
           queryService.queryString.getLanguageService().__enhance(enhancements.editor);
       },
+      ui: uiService,
     };
   }
 

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { act, renderHook } from '@testing-library/react-hooks/dom';
 import { coreMock } from '../../../../../core/public/mocks';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -17,6 +18,7 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
 }));
 
 describe('useGenerateQuery', () => {
+  const isGeneratingppl$ = new BehaviorSubject<boolean>(false);
   beforeEach(() => {
     (useOpenSearchDashboards as jest.MockedFunction<typeof useOpenSearchDashboards>)
       // @ts-ignore for this test we only need http implemented
@@ -33,7 +35,7 @@ describe('useGenerateQuery', () => {
 
   it('should generate results', async () => {
     mockHttp.post.mockResolvedValueOnce({ query: 'test query' });
-    const { result } = renderHook(() => useGenerateQuery());
+    const { result } = renderHook(() => useGenerateQuery({ isGeneratingppl$ }));
     const { generateQuery } = result.current;
 
     await act(async () => {
@@ -48,7 +50,7 @@ describe('useGenerateQuery', () => {
   });
 
   it('should handle errors', async () => {
-    const { result } = renderHook(() => useGenerateQuery());
+    const { result } = renderHook(() => useGenerateQuery({ isGeneratingppl$ }));
     const { generateQuery } = result.current;
     const mockError = new Error('mockError');
     mockHttp.post.mockRejectedValueOnce(mockError);
@@ -66,7 +68,7 @@ describe('useGenerateQuery', () => {
   });
 
   it('should abort previous call', async () => {
-    const { result } = renderHook(() => useGenerateQuery());
+    const { result } = renderHook(() => useGenerateQuery({ isGeneratingppl$ }));
     const { generateQuery, abortControllerRef } = result.current;
 
     await act(async () => {
@@ -79,7 +81,7 @@ describe('useGenerateQuery', () => {
   });
 
   it('should abort call with controller', async () => {
-    const { result } = renderHook(() => useGenerateQuery());
+    const { result } = renderHook(() => useGenerateQuery({ isGeneratingppl$ }));
     const { generateQuery, abortControllerRef } = result.current;
 
     await act(async () => {
