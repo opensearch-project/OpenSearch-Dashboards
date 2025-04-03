@@ -4,15 +4,15 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { getSuggestions } from './code_completion';
-import { IndexPattern } from '../../index_patterns';
-import { IDataPluginServices } from '../../types';
-import { QuerySuggestion } from '../../autocomplete';
-import * as utils from '../shared/utils';
-import { PPL_AGGREGATE_FUNCTIONS } from './constants';
+import { getPPLSuggestions } from './ppl_suggestions';
+import { IndexPattern } from '../../../data/public';
+import { IDataPluginServices } from '../../../data/public';
+import { QuerySuggestion } from '../../../data/public';
+import * as utils from '../../../data/public/antlr/shared/utils';
+import { PPL_AGGREGATE_FUNCTIONS } from '../../../data/public';
 
-describe('ppl code_completion', () => {
-  describe('getSuggestions', () => {
+describe('PPL suggestions', () => {
+  describe('getPPLSuggestions', () => {
     const mockIndexPattern = {
       title: 'test-index',
       fields: [
@@ -35,15 +35,17 @@ describe('ppl code_completion', () => {
       query: string,
       position: monaco.Position = new monaco.Position(1, query.length + 1)
     ) => {
-      return getSuggestions({
-        query,
-        indexPattern: mockIndexPattern,
-        position,
-        language: 'PPL',
-        selectionStart: 0,
-        selectionEnd: 0,
-        services: mockServices,
-      });
+      return (
+        getPPLSuggestions({
+          query,
+          indexPattern: mockIndexPattern,
+          position,
+          language: 'PPL',
+          selectionStart: 0,
+          selectionEnd: 0,
+          services: mockServices,
+        }) || []
+      ); // Ensure we always return an array
     };
 
     const checkSuggestionsContain = (
@@ -58,7 +60,7 @@ describe('ppl code_completion', () => {
     };
 
     it('should return empty array when required parameters are missing', async () => {
-      const result = await getSuggestions({
+      const result = await getPPLSuggestions({
         query: '',
         indexPattern: (null as unknown) as IndexPattern,
         position: mockPosition,
