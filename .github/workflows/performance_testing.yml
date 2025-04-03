@@ -1,17 +1,25 @@
 name: Performance Testing
 
 on:
-  pull_request_target:
-    types:
-      - opened
-      - synchronize # Triggers when new commits are pushed to the PR
-      - reopened # Runs when a PR is reopened
-      - labeled
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md' # Ignore documentation files
+      - '**/*.test.ts' # Ignore test files (TypeScript)
+      - '**/*.test.js' # Ignore test files (JavaScript)
+      - '**/__tests__/**' # Ignore test directories
+      - '.github/workflows/**' # Ignore GitHub workflow files
+      - 'docs/**' # Ignore entire docs directory
 
 jobs:
   bundle-analyzer:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
