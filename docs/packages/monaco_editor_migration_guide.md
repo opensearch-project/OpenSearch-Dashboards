@@ -5,12 +5,13 @@ This document provides detailed information about the API changes between monaco
 ## Table of Contents
 
 - [Overview](#overview)
-- [For Plugins Using CodeEditor Directly](#for-plugins-using-codeeditor-directly)
-- [For Plugins Extending CodeEditor or Using Monaco Directly](#for-plugins-extending-codeeditor-or-using-monaco-directly)
+- [For Plugins Using Code Editor Directly](#for-plugins-using-code-editor-directly)
+- [For Plugins Extending Code Editor or Using Monaco Editor Directly](#for-plugins-extending-code-editor-or-using-monaco-editor-directly)
 - [API Changes from 0.17.0 to 0.30.1](#api-changes-from-0170-to-0301)
 - [API Changes from 0.30.1 to 0.52.0](#api-changes-from-0301-to-0520)
 - [UI and Styling Changes](#ui-and-styling-changes)
 - [Worker Implementation Changes](#worker-implementation-changes)
+- [Understanding the Code Editor Component](#understanding-the-code-editor-component)
 - [Best Practices](#best-practices)
 
 ## Overview
@@ -20,11 +21,11 @@ OpenSearch Dashboards has upgraded the monaco-editor dependency from version 0.1
 1. First to version 0.30.1
 2. Then to version 0.52.0
 
-This upgrade includes significant API changes that affect the CodeEditor component, which is directly accessible to plugins.
+This upgrade includes significant API changes that affect the Code Editor component, which is directly accessible to plugins.
 
-## For Plugins Using CodeEditor Directly
+## For Plugins Using Code Editor Directly
 
-If your plugin uses the CodeEditor component directly without extending it or directly interacting with monaco-editor APIs, most changes will be transparent to you. However, there are some changes you should be aware of:
+If your plugin uses the Code Editor component directly without extending it or directly interacting with monaco-editor APIs, most changes will be transparent to you. However, there are some changes you should be aware of:
 
 ### Props That Have Changed
 
@@ -71,9 +72,9 @@ You'll notice some visual changes in the editor:
 
 These changes don't require code modifications but may affect the user experience.
 
-## For Plugins Extending CodeEditor or Using Monaco Directly
+## For Plugins Extending Code Editor or Using Monaco Editor Directly
 
-If your plugin extends the CodeEditor component or uses monaco-editor APIs directly, you'll need to make more significant changes:
+If your plugin extends the Code Editor component or uses monaco-editor APIs directly, you'll need to make more significant changes:
 
 ### Completion Provider Changes
 
@@ -264,9 +265,95 @@ window.MonacoEnvironment = {
 };
 ```
 
+## Understanding the Code Editor Component
+
+The Code Editor component is a powerful abstraction layer built on top of the Monaco Editor that simplifies integration while providing access to the most commonly used features. This section explains what the Code Editor is, how to use it in your plugins, and why you should prefer it over direct Monaco Editor usage.
+
+### What is the Code Editor?
+
+The Code Editor is a React component that wraps the Monaco Editor and provides:
+
+1. A simplified API for the most common Monaco Editor features
+2. Automatic resizing when the window or container size changes
+3. Consistent theming with OpenSearch Dashboards
+4. Easy configuration of language features like autocompletion, hover documentation, and function signatures
+
+### How to Use the Code Editor in Your Plugin
+
+To use the Code Editor in your plugin, follow these steps:
+
+1. **Import the component**:
+   ```typescript
+   import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
+   ```
+
+2. **Use it in your React component**:
+   ```typescript
+   <CodeEditor
+     height={100}
+     languageId="json" // or any other language ID
+     value={yourCodeString}
+     onChange={(newValue) => handleChange(newValue)}
+     options={{
+       minimap: { enabled: false },
+       scrollBeyondLastLine: false,
+       // Other Monaco Editor options...
+     }}
+   />
+   ```
+
+3. **Add autocompletion support** (optional):
+   ```typescript
+   <CodeEditor
+     // ... other props
+     suggestionProvider={{
+       triggerCharacters: ['.', ' '],
+       provideCompletionItems: async (model, position, context, token) => {
+         // Your completion logic here
+         return {
+           suggestions: [
+             // Your suggestions here
+           ]
+         };
+       },
+     }}
+   />
+   ```
+
+4. **Configure language features** (optional):
+   ```typescript
+   <CodeEditor
+     // ... other props
+     languageConfiguration={{
+       autoClosingPairs: [
+         { open: '(', close: ')' },
+         { open: '[', close: ']' },
+         { open: '{', close: '}' },
+         // Other pairs...
+       ],
+     }}
+   />
+   ```
+
+### Benefits of Using the Code Editor
+
+There are several advantages to using the Code Editor component instead of directly using Monaco Editor:
+
+1. **Simplified Integration**: The Code Editor handles the complex setup of Monaco Editor for you, including theme configuration and resize handling.
+
+2. **Consistent User Experience**: By using the Code Editor, you ensure that your editor has the same look and feel as other editors throughout OpenSearch Dashboards.
+
+3. **Automatic Resizing**: The Code Editor includes a resize detector that automatically adjusts the editor size when the window or container size changes, which Monaco Editor doesn't do by default.
+
+4. **Easy Access to Common Features**: The Code Editor provides simple props for configuring common features like autocompletion, hover documentation, and function signatures.
+
+5. **Future Compatibility**: When Monaco Editor is upgraded in the future, the Code Editor will be updated to handle any breaking changes, minimizing the impact on your plugin.
+
+6. **Still Flexible**: If you need access to advanced Monaco Editor features, you can still get the editor instance through the `editorDidMount` callback.
+
 ## Best Practices
 
-1. **Use the CodeEditor Component**: Whenever possible, use the CodeEditor component provided by OpenSearch Dashboards rather than directly using monaco-editor.
+1. **Use the Code Editor Component**: Whenever possible, use the Code Editor component provided by OpenSearch Dashboards rather than directly using monaco-editor. See the [Understanding the Code Editor Component](#understanding-the-code-editor-component) section for details on how to use it and its benefits.
 
 2. **Avoid Direct Dependencies on Monaco APIs**: Given monaco-editor's 0.x.y versioning scheme, its API is not considered stable. Minimize direct dependencies on monaco-editor APIs.
 

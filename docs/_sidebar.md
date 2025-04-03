@@ -11,6 +11,8 @@
     - [High_level_design](multi-datasource/high_level_design.md)
     - [User_stories](multi-datasource/user_stories.md)
   - [Openapi](openapi/README.md)
+  - Packages
+    - [Monaco_editor_migration_guide](packages/monaco_editor_migration_guide.md)
   - Plugins
     - discover
       - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
@@ -189,7 +191,6 @@
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
-  - [Monaco editor migration guide](monaco-editor-migration-guide.md)
   - [Theme](theme.md)
   - [CHANGELOG](../CHANGELOG.md)
   - [CODE_OF_CONDUCT](../CODE_OF_CONDUCT.md)
