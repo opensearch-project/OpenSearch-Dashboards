@@ -1,0 +1,2 @@
+feat:
+- Support streaming when content type is event stream ([#9647](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9647))

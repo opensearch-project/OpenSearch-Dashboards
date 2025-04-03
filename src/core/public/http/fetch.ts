@@ -53,6 +53,7 @@ interface Params {
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
+const EVENT_STREAM_CONTENT = /text\/event-stream/;
 
 const removedUndefined = (obj: Record<string, any> | undefined) => {
   return omitBy(obj, (v) => v === undefined);
@@ -195,6 +196,11 @@ export class Fetch {
         body = fetchOptions.withLongNumeralsSupport
           ? parse(await response.text())
           : await response.json();
+      } else if (EVENT_STREAM_CONTENT.test(contentType)) {
+        // Browsers often need to buffer the entire response before decompressing, which defeats the purpose of streaming.
+        // So for plugins who want to use streaming experience,
+        // please remember to set 'Content-Encoding' as 'identity' or ''
+        body = response.body;
       } else {
         const text = await response.text();
 
