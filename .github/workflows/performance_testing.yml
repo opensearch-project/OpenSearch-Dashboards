@@ -4,6 +4,9 @@ on:
   pull_request_target:
     types:
       - opened
+      - synchronize # Triggers when new commits are pushed to the PR
+      - reopened # Runs when a PR is reopened
+      - labeled
 
 jobs:
   bundle-analyzer:
