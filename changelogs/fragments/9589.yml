@@ -1,0 +1,5 @@
+fix:
+- Correctly show error message in DQL and PPL query editor ([#9589](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9589))
+
+feat:
+- Add toaster for query errors ([#9589](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9589))
