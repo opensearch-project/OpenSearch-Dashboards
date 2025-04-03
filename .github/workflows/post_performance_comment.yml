@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows:
       - 'Lighthouse Performance Testing'
-      - 'Bundle Size Testing' # Listen to both workflows
+      - 'Bundler Performance Testing' # Listen to both workflows
     types:
       - completed
 
