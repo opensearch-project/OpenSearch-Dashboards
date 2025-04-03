@@ -225,7 +225,28 @@ export class QueryStringManager {
    * Resets the query to the default one.
    */
   public clearQuery = () => {
-    this.setQuery(this.getDefaultQuery());
+    const curQuery = this.query$.getValue();
+    let newQuery = this.getDefaultQuery();
+    // Check if dataset changed and if new dataset has language restrictions
+    if (newQuery.dataset && !isEqual(curQuery.dataset, newQuery.dataset)) {
+      // Get supported languages for the dataset
+      const supportedLanguages = this.datasetService
+        .getType(newQuery.dataset.type)
+        ?.supportedLanguages(newQuery.dataset);
+
+      // If we have supported languages and current language isn't supported
+      if (supportedLanguages && !supportedLanguages.includes(newQuery.language)) {
+        // Get initial query with first supported language and new dataset
+        newQuery = this.getInitialQuery({
+          language: supportedLanguages[0],
+          dataset: newQuery.dataset,
+        });
+      }
+
+      // Add to recent datasets
+      this.datasetService.addRecentDataset(newQuery.dataset);
+    }
+    this.query$.next(newQuery);
   };
 
   // Todo: update this function to use the Query object when it is udpated, Query object should include time range and dataset
