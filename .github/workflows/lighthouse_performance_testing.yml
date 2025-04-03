@@ -108,10 +108,10 @@ jobs:
             exit 1
           fi
 
-          - name: Save Lighthouse Results as Artifact
-          run: |
-            mkdir -p artifacts
-            cp .lighthouseci/assertion-results.json artifacts/
+      - name: Save Lighthouse Results as Artifact
+        run: |
+          mkdir -p artifacts
+          cp .lighthouseci/assertion-results.json artifacts/
 
       - name: Upload Lighthouse Results Artifact
         uses: actions/upload-artifact@v4
