@@ -7,6 +7,7 @@ on:
       - synchronize # Triggers when new commits are pushed to the PR
       - reopened # Runs when a PR is reopened
       - labeled
+  workflow_dispatch:
 
 jobs:
   bundle-analyzer:
