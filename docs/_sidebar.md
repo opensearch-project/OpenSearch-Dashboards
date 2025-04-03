@@ -189,6 +189,7 @@
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
+  - [Monaco editor migration guide](monaco-editor-migration-guide.md)
   - [Theme](theme.md)
   - [CHANGELOG](../CHANGELOG.md)
   - [CODE_OF_CONDUCT](../CODE_OF_CONDUCT.md)
