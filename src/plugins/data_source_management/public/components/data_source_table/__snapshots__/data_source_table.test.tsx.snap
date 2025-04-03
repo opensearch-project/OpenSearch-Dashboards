@@ -293,8 +293,15 @@ exports[`DataSourceTable should get datasources successful should render normall
   >
     <EuiInMemoryTable
       allowNeutralSort={false}
+      className="data-source-table"
       columns={
         Array [
+          Object {
+            "align": "left",
+            "isExpander": true,
+            "render": [Function],
+            "width": "40px",
+          },
           Object {
             "dataType": "string",
             "field": "title",
@@ -319,7 +326,6 @@ exports[`DataSourceTable should get datasources successful should render normall
             "truncateText": true,
           },
           Object {
-            "align": "right",
             "field": "relatedConnections",
             "name": "Related connections",
             "render": [Function],
@@ -327,8 +333,10 @@ exports[`DataSourceTable should get datasources successful should render normall
           },
         ]
       }
+      isExpandable={true}
       isSelectable={true}
       itemId="id"
+      itemIdToExpandedRowMap={Object {}}
       items={
         Array [
           Object {
@@ -770,8 +778,15 @@ exports[`DataSourceTable should get datasources successful should render normall
           />
         </EuiSpacer>
         <EuiBasicTable
+          className="data-source-table"
           columns={
             Array [
+              Object {
+                "align": "left",
+                "isExpander": true,
+                "render": [Function],
+                "width": "40px",
+              },
               Object {
                 "dataType": "string",
                 "field": "title",
@@ -796,7 +811,6 @@ exports[`DataSourceTable should get datasources successful should render normall
                 "truncateText": true,
               },
               Object {
-                "align": "right",
                 "field": "relatedConnections",
                 "name": "Related connections",
                 "render": [Function],
@@ -804,8 +818,10 @@ exports[`DataSourceTable should get datasources successful should render normall
               },
             ]
           }
+          isExpandable={true}
           isSelectable={true}
           itemId="id"
+          itemIdToExpandedRowMap={Object {}}
           items={
             Array [
               Object {
@@ -877,7 +893,7 @@ exports[`DataSourceTable should get datasources successful should render normall
           tableLayout="fixed"
         >
           <div
-            className="euiBasicTable"
+            className="euiBasicTable data-source-table"
           >
             <div>
               <EuiTableHeaderMobile>
@@ -950,14 +966,14 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 Object {
                                   "isSortAscending": true,
                                   "isSorted": true,
-                                  "key": "_data_s_title_0",
+                                  "key": "_data_s_title_1",
                                   "name": "Data source",
                                   "onSort": [Function],
                                 },
                                 Object {
                                   "isSortAscending": undefined,
                                   "isSorted": false,
-                                  "key": "_data_s_description_2",
+                                  "key": "_data_s_description_3",
                                   "name": "Description",
                                   "onSort": [Function],
                                 },
@@ -1139,17 +1155,61 @@ exports[`DataSourceTable should get datasources successful should render normall
                         </EuiTableHeaderCellCheckbox>
                         <EuiTableHeaderCell
                           align="left"
-                          data-test-subj="tableHeaderCell_title_0"
+                          data-test-subj="tableHeaderCell_undefined_0"
+                          key="_computed_column_h_0"
+                          width="40px"
+                        >
+                          <td
+                            className="euiTableHeaderCell"
+                            data-test-subj="tableHeaderCell_undefined_0"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": "40px",
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": undefined,
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                    />
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
+                          </td>
+                        </EuiTableHeaderCell>
+                        <EuiTableHeaderCell
+                          align="left"
+                          data-test-subj="tableHeaderCell_title_1"
                           isSortAscending={true}
                           isSorted={true}
-                          key="_data_h_title_0"
+                          key="_data_h_title_1"
                           onSort={[Function]}
                         >
                           <th
                             aria-live="polite"
                             aria-sort="ascending"
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_title_0"
+                            data-test-subj="tableHeaderCell_title_1"
                             role="columnheader"
                             scope="col"
                             style={
@@ -1210,12 +1270,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
                           align="left"
-                          data-test-subj="tableHeaderCell_type_1"
-                          key="_data_h_type_1"
+                          data-test-subj="tableHeaderCell_type_2"
+                          key="_data_h_type_2"
                         >
                           <th
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_type_1"
+                            data-test-subj="tableHeaderCell_type_2"
                             role="columnheader"
                             scope="col"
                             style={
@@ -1256,9 +1316,9 @@ exports[`DataSourceTable should get datasources successful should render normall
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
                           align="left"
-                          data-test-subj="tableHeaderCell_description_2"
+                          data-test-subj="tableHeaderCell_description_3"
                           isSorted={false}
-                          key="_data_h_description_2"
+                          key="_data_h_description_3"
                           mobileOptions={
                             Object {
                               "show": false,
@@ -1270,7 +1330,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                             aria-live="polite"
                             aria-sort="none"
                             className="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
-                            data-test-subj="tableHeaderCell_description_2"
+                            data-test-subj="tableHeaderCell_description_3"
                             role="columnheader"
                             scope="col"
                             style={
@@ -1318,13 +1378,13 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </th>
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
-                          align="right"
-                          data-test-subj="tableHeaderCell_relatedConnections_3"
-                          key="_data_h_relatedConnections_3"
+                          align="left"
+                          data-test-subj="tableHeaderCell_relatedConnections_4"
+                          key="_data_h_relatedConnections_4"
                         >
                           <th
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_relatedConnections_3"
+                            data-test-subj="tableHeaderCell_relatedConnections_4"
                             role="columnheader"
                             scope="col"
                             style={
@@ -1334,11 +1394,11 @@ exports[`DataSourceTable should get datasources successful should render normall
                             }
                           >
                             <CellContents
-                              className="euiTableCellContent euiTableCellContent--alignRight"
+                              className="euiTableCellContent"
                               showSortMsg={false}
                             >
                               <span
-                                className="euiTableCellContent euiTableCellContent--alignRight"
+                                className="euiTableCellContent"
                               >
                                 <EuiInnerText>
                                   <EuiI18n
@@ -1371,11 +1431,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                   >
                     <tbody>
                       <EuiTableRow
+                        isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_alpha-test"
@@ -1427,7 +1488,34 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_title_alpha-test_0"
+                            isExpander={true}
+                            key="_computed_column_alpha-test_0"
+                            mobileOptions={
+                              Object {
+                                "header": undefined,
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            width="40px"
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--isExpander"
+                              style={
+                                Object {
+                                  "width": "40px",
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              />
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_title_alpha-test_1"
                             mobileOptions={
                               Object {
                                 "header": "Data source",
@@ -1454,6 +1542,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
@@ -1492,7 +1581,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_type_alpha-test_1"
+                            key="_data_column_type_alpha-test_2"
                             mobileOptions={
                               Object {
                                 "header": "Type",
@@ -1529,7 +1618,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_alpha-test_2"
+                            key="_data_column_description_alpha-test_3"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -1557,8 +1646,8 @@ exports[`DataSourceTable should get datasources successful should render normall
                             </td>
                           </EuiTableRowCell>
                           <EuiTableRowCell
-                            align="right"
-                            key="_data_column_relatedConnections_alpha-test_3"
+                            align="left"
+                            key="_data_column_relatedConnections_alpha-test_4"
                             mobileOptions={
                               Object {
                                 "header": "Related connections",
@@ -1583,7 +1672,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 Related connections
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
                                 <EuiText
                                   className=""
@@ -1601,11 +1690,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                         </tr>
                       </EuiTableRow>
                       <EuiTableRow
+                        isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_beta-test"
@@ -1657,7 +1747,34 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_title_beta-test_0"
+                            isExpander={true}
+                            key="_computed_column_beta-test_0"
+                            mobileOptions={
+                              Object {
+                                "header": undefined,
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            width="40px"
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--isExpander"
+                              style={
+                                Object {
+                                  "width": "40px",
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              />
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_title_beta-test_1"
                             mobileOptions={
                               Object {
                                 "header": "Data source",
@@ -1684,6 +1801,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
@@ -1722,7 +1840,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_type_beta-test_1"
+                            key="_data_column_type_beta-test_2"
                             mobileOptions={
                               Object {
                                 "header": "Type",
@@ -1759,7 +1877,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_beta-test_2"
+                            key="_data_column_description_beta-test_3"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -1787,8 +1905,8 @@ exports[`DataSourceTable should get datasources successful should render normall
                             </td>
                           </EuiTableRowCell>
                           <EuiTableRowCell
-                            align="right"
-                            key="_data_column_relatedConnections_beta-test_3"
+                            align="left"
+                            key="_data_column_relatedConnections_beta-test_4"
                             mobileOptions={
                               Object {
                                 "header": "Related connections",
@@ -1813,7 +1931,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 Related connections
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
                                 <EuiText
                                   className=""
@@ -1831,11 +1949,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                         </tr>
                       </EuiTableRow>
                       <EuiTableRow
+                        isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_test2"
@@ -1887,7 +2006,34 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_title_test2_0"
+                            isExpander={true}
+                            key="_computed_column_test2_0"
+                            mobileOptions={
+                              Object {
+                                "header": undefined,
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            width="40px"
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--isExpander"
+                              style={
+                                Object {
+                                  "width": "40px",
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              />
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_title_test2_1"
                             mobileOptions={
                               Object {
                                 "header": "Data source",
@@ -1914,6 +2060,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
@@ -1952,7 +2099,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_type_test2_1"
+                            key="_data_column_type_test2_2"
                             mobileOptions={
                               Object {
                                 "header": "Type",
@@ -1989,7 +2136,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_test2_2"
+                            key="_data_column_description_test2_3"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -2017,8 +2164,8 @@ exports[`DataSourceTable should get datasources successful should render normall
                             </td>
                           </EuiTableRowCell>
                           <EuiTableRowCell
-                            align="right"
-                            key="_data_column_relatedConnections_test2_3"
+                            align="left"
+                            key="_data_column_relatedConnections_test2_4"
                             mobileOptions={
                               Object {
                                 "header": "Related connections",
@@ -2043,7 +2190,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 Related connections
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
                                 <EuiText
                                   className=""
@@ -2061,11 +2208,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                         </tr>
                       </EuiTableRow>
                       <EuiTableRow
+                        isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_test1"
@@ -2117,7 +2265,34 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_title_test1_0"
+                            isExpander={true}
+                            key="_computed_column_test1_0"
+                            mobileOptions={
+                              Object {
+                                "header": undefined,
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            width="40px"
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--isExpander"
+                              style={
+                                Object {
+                                  "width": "40px",
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              />
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_title_test1_1"
                             mobileOptions={
                               Object {
                                 "header": "Data source",
@@ -2144,6 +2319,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
@@ -2222,7 +2398,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_type_test1_1"
+                            key="_data_column_type_test1_2"
                             mobileOptions={
                               Object {
                                 "header": "Type",
@@ -2259,7 +2435,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_test1_2"
+                            key="_data_column_description_test1_3"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -2287,8 +2463,8 @@ exports[`DataSourceTable should get datasources successful should render normall
                             </td>
                           </EuiTableRowCell>
                           <EuiTableRowCell
-                            align="right"
-                            key="_data_column_relatedConnections_test1_3"
+                            align="left"
+                            key="_data_column_relatedConnections_test1_4"
                             mobileOptions={
                               Object {
                                 "header": "Related connections",
@@ -2313,7 +2489,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 Related connections
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
                                 <EuiText
                                   className=""
@@ -4199,8 +4375,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
   >
     <EuiInMemoryTable
       allowNeutralSort={false}
+      className="data-source-table"
       columns={
         Array [
+          Object {
+            "align": "left",
+            "isExpander": true,
+            "render": [Function],
+            "width": "40px",
+          },
           Object {
             "dataType": "string",
             "field": "title",
@@ -4225,7 +4408,6 @@ exports[`DataSourceTable should handle datasources with empty description correc
             "truncateText": true,
           },
           Object {
-            "align": "right",
             "field": "relatedConnections",
             "name": "Related connections",
             "render": [Function],
@@ -4233,8 +4415,10 @@ exports[`DataSourceTable should handle datasources with empty description correc
           },
         ]
       }
+      isExpandable={true}
       isSelectable={true}
       itemId="id"
+      itemIdToExpandedRowMap={Object {}}
       items={
         Array [
           Object {
@@ -4668,8 +4852,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
           />
         </EuiSpacer>
         <EuiBasicTable
+          className="data-source-table"
           columns={
             Array [
+              Object {
+                "align": "left",
+                "isExpander": true,
+                "render": [Function],
+                "width": "40px",
+              },
               Object {
                 "dataType": "string",
                 "field": "title",
@@ -4694,7 +4885,6 @@ exports[`DataSourceTable should handle datasources with empty description correc
                 "truncateText": true,
               },
               Object {
-                "align": "right",
                 "field": "relatedConnections",
                 "name": "Related connections",
                 "render": [Function],
@@ -4702,8 +4892,10 @@ exports[`DataSourceTable should handle datasources with empty description correc
               },
             ]
           }
+          isExpandable={true}
           isSelectable={true}
           itemId="id"
+          itemIdToExpandedRowMap={Object {}}
           items={
             Array [
               Object {
@@ -4767,7 +4959,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
           tableLayout="fixed"
         >
           <div
-            className="euiBasicTable"
+            className="euiBasicTable data-source-table"
           >
             <div>
               <EuiTableHeaderMobile>
@@ -4840,14 +5032,14 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 Object {
                                   "isSortAscending": true,
                                   "isSorted": true,
-                                  "key": "_data_s_title_0",
+                                  "key": "_data_s_title_1",
                                   "name": "Data source",
                                   "onSort": [Function],
                                 },
                                 Object {
                                   "isSortAscending": undefined,
                                   "isSorted": false,
-                                  "key": "_data_s_description_2",
+                                  "key": "_data_s_description_3",
                                   "name": "Description",
                                   "onSort": [Function],
                                 },
@@ -5029,17 +5221,61 @@ exports[`DataSourceTable should handle datasources with empty description correc
                         </EuiTableHeaderCellCheckbox>
                         <EuiTableHeaderCell
                           align="left"
-                          data-test-subj="tableHeaderCell_title_0"
+                          data-test-subj="tableHeaderCell_undefined_0"
+                          key="_computed_column_h_0"
+                          width="40px"
+                        >
+                          <td
+                            className="euiTableHeaderCell"
+                            data-test-subj="tableHeaderCell_undefined_0"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": "40px",
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": undefined,
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                    />
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
+                          </td>
+                        </EuiTableHeaderCell>
+                        <EuiTableHeaderCell
+                          align="left"
+                          data-test-subj="tableHeaderCell_title_1"
                           isSortAscending={true}
                           isSorted={true}
-                          key="_data_h_title_0"
+                          key="_data_h_title_1"
                           onSort={[Function]}
                         >
                           <th
                             aria-live="polite"
                             aria-sort="ascending"
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_title_0"
+                            data-test-subj="tableHeaderCell_title_1"
                             role="columnheader"
                             scope="col"
                             style={
@@ -5100,12 +5336,12 @@ exports[`DataSourceTable should handle datasources with empty description correc
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
                           align="left"
-                          data-test-subj="tableHeaderCell_type_1"
-                          key="_data_h_type_1"
+                          data-test-subj="tableHeaderCell_type_2"
+                          key="_data_h_type_2"
                         >
                           <th
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_type_1"
+                            data-test-subj="tableHeaderCell_type_2"
                             role="columnheader"
                             scope="col"
                             style={
@@ -5146,9 +5382,9 @@ exports[`DataSourceTable should handle datasources with empty description correc
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
                           align="left"
-                          data-test-subj="tableHeaderCell_description_2"
+                          data-test-subj="tableHeaderCell_description_3"
                           isSorted={false}
-                          key="_data_h_description_2"
+                          key="_data_h_description_3"
                           mobileOptions={
                             Object {
                               "show": false,
@@ -5160,7 +5396,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                             aria-live="polite"
                             aria-sort="none"
                             className="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
-                            data-test-subj="tableHeaderCell_description_2"
+                            data-test-subj="tableHeaderCell_description_3"
                             role="columnheader"
                             scope="col"
                             style={
@@ -5208,13 +5444,13 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </th>
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
-                          align="right"
-                          data-test-subj="tableHeaderCell_relatedConnections_3"
-                          key="_data_h_relatedConnections_3"
+                          align="left"
+                          data-test-subj="tableHeaderCell_relatedConnections_4"
+                          key="_data_h_relatedConnections_4"
                         >
                           <th
                             className="euiTableHeaderCell"
-                            data-test-subj="tableHeaderCell_relatedConnections_3"
+                            data-test-subj="tableHeaderCell_relatedConnections_4"
                             role="columnheader"
                             scope="col"
                             style={
@@ -5224,11 +5460,11 @@ exports[`DataSourceTable should handle datasources with empty description correc
                             }
                           >
                             <CellContents
-                              className="euiTableCellContent euiTableCellContent--alignRight"
+                              className="euiTableCellContent"
                               showSortMsg={false}
                             >
                               <span
-                                className="euiTableCellContent euiTableCellContent--alignRight"
+                                className="euiTableCellContent"
                               >
                                 <EuiInnerText>
                                   <EuiI18n
@@ -5261,11 +5497,12 @@ exports[`DataSourceTable should handle datasources with empty description correc
                   >
                     <tbody>
                       <EuiTableRow
+                        isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_test-no-description"
@@ -5317,7 +5554,34 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_title_test-no-description_0"
+                            isExpander={true}
+                            key="_computed_column_test-no-description_0"
+                            mobileOptions={
+                              Object {
+                                "header": undefined,
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            width="40px"
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--isExpander"
+                              style={
+                                Object {
+                                  "width": "40px",
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              />
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_title_test-no-description_1"
                             mobileOptions={
                               Object {
                                 "header": "Data source",
@@ -5344,6 +5608,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
@@ -5382,7 +5647,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_type_test-no-description_1"
+                            key="_data_column_type_test-no-description_2"
                             mobileOptions={
                               Object {
                                 "header": "Type",
@@ -5419,7 +5684,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_test-no-description_2"
+                            key="_data_column_description_test-no-description_3"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -5456,8 +5721,8 @@ exports[`DataSourceTable should handle datasources with empty description correc
                             </td>
                           </EuiTableRowCell>
                           <EuiTableRowCell
-                            align="right"
-                            key="_data_column_relatedConnections_test-no-description_3"
+                            align="left"
+                            key="_data_column_relatedConnections_test-no-description_4"
                             mobileOptions={
                               Object {
                                 "header": "Related connections",
@@ -5482,7 +5747,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 Related connections
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
                                 <EuiText
                                   className=""
@@ -5500,11 +5765,12 @@ exports[`DataSourceTable should handle datasources with empty description correc
                         </tr>
                       </EuiTableRow>
                       <EuiTableRow
+                        isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_test-null"
@@ -5556,7 +5822,34 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_title_test-null_0"
+                            isExpander={true}
+                            key="_computed_column_test-null_0"
+                            mobileOptions={
+                              Object {
+                                "header": undefined,
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            width="40px"
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--isExpander"
+                              style={
+                                Object {
+                                  "width": "40px",
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              />
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_title_test-null_1"
                             mobileOptions={
                               Object {
                                 "header": "Data source",
@@ -5583,6 +5876,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
@@ -5621,7 +5915,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_type_test-null_1"
+                            key="_data_column_type_test-null_2"
                             mobileOptions={
                               Object {
                                 "header": "Type",
@@ -5658,7 +5952,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_test-null_2"
+                            key="_data_column_description_test-null_3"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -5695,8 +5989,8 @@ exports[`DataSourceTable should handle datasources with empty description correc
                             </td>
                           </EuiTableRowCell>
                           <EuiTableRowCell
-                            align="right"
-                            key="_data_column_relatedConnections_test-null_3"
+                            align="left"
+                            key="_data_column_relatedConnections_test-null_4"
                             mobileOptions={
                               Object {
                                 "header": "Related connections",
@@ -5721,7 +6015,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 Related connections
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
                                 <EuiText
                                   className=""
@@ -5739,11 +6033,12 @@ exports[`DataSourceTable should handle datasources with empty description correc
                         </tr>
                       </EuiTableRow>
                       <EuiTableRow
+                        isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_test-undefined"
@@ -5795,7 +6090,34 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_title_test-undefined_0"
+                            isExpander={true}
+                            key="_computed_column_test-undefined_0"
+                            mobileOptions={
+                              Object {
+                                "header": undefined,
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            width="40px"
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--isExpander"
+                              style={
+                                Object {
+                                  "width": "40px",
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              />
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_title_test-undefined_1"
                             mobileOptions={
                               Object {
                                 "header": "Data source",
@@ -5822,6 +6144,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  className=""
                                   flush="left"
                                   onClick={[Function]}
                                   size="xs"
@@ -5860,7 +6183,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_type_test-undefined_1"
+                            key="_data_column_type_test-undefined_2"
                             mobileOptions={
                               Object {
                                 "header": "Type",
@@ -5897,7 +6220,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_test-undefined_2"
+                            key="_data_column_description_test-undefined_3"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -5934,8 +6257,8 @@ exports[`DataSourceTable should handle datasources with empty description correc
                             </td>
                           </EuiTableRowCell>
                           <EuiTableRowCell
-                            align="right"
-                            key="_data_column_relatedConnections_test-undefined_3"
+                            align="left"
+                            key="_data_column_relatedConnections_test-undefined_4"
                             mobileOptions={
                               Object {
                                 "header": "Related connections",
@@ -5960,7 +6283,7 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                 Related connections
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
                                 <EuiText
                                   className=""

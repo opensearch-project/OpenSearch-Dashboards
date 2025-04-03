@@ -13,6 +13,7 @@ import { registerDatasourcesRoute } from './datasources_router';
 import { registerPplRoute } from './ppl';
 import { DSLFacet } from '../services/facets/dsl_facet';
 import { PPLFacet } from '../services/facets/ppl_facet';
+import { registerRemoteClusterRoutes } from './remote_cluster_router';
 
 export function defineRoutes(router: IRouter) {
   router.get(
@@ -51,4 +52,5 @@ export function setupRoutes({
   }
   registerDataConnectionsRoute(router, dataSourceEnabled);
   registerDatasourcesRoute(router, dataSourceEnabled);
+  registerRemoteClusterRoutes(router);
 }
