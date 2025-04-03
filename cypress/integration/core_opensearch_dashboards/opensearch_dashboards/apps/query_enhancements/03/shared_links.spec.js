@@ -153,6 +153,9 @@ export const runSharedLinksTests = () => {
           // Set query
           cy.setQueryEditor(queryString, { parseSpecialCharSequences: false });
 
+          // Set interval
+          setHistogramIntervalIfRelevant(config.language, testData.interval);
+
           // Set filter for DQL/Lucene
           if (config.hasDocLinks) {
             cy.submitFilterFromDropDown(testData.filter[0], 'is', testData.filter[1], true);
