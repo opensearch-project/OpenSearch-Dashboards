@@ -87,6 +87,8 @@ interface Props {
   // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4483
   hasBorder?: boolean;
   hasShadow?: boolean;
+  http: CoreStart['http'];
+  savedObjects?: CoreStart['savedObjects'];
 }
 
 interface State {
@@ -101,6 +103,7 @@ interface State {
   loading?: boolean;
   error?: EmbeddableError;
   errorEmbeddable?: ErrorEmbeddable;
+  isSpecificType?: boolean; // Added for button logic
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -129,6 +132,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       closeContextMenu: false,
       badges: [],
       notifications: [],
+      isSpecificType: true, // Added
     };
 
     this.embeddableRoot = React.createRef();
@@ -217,6 +221,54 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     this.props.embeddable.destroy();
   }
 
+  public componentDidMount() {
+    if (this.embeddableRoot.current) {
+      this.subscription.add(
+        this.props.embeddable.getOutput$().subscribe(
+          (output: EmbeddableOutput) => {
+            this.setState({
+              error: output.error,
+              loading: output.loading,
+            });
+          },
+          (error) => {
+            if (this.embeddableRoot.current) {
+              const errorEmbeddable = new ErrorEmbeddable(error, { id: this.props.embeddable.id });
+              errorEmbeddable.render(this.embeddableRoot.current);
+              this.setState({ errorEmbeddable });
+            }
+          }
+        )
+      );
+      this.props.embeddable.render(this.embeddableRoot.current);
+    }
+    this.checkIndexData(); // Added to check index type
+  }
+
+  private async checkIndexData() {
+    const input = this.props.embeddable.getInput() as any; // Type assertion for now
+    console.log('Embeddable input:', input); // Debug input
+
+    const indexName = input.indexPattern || input.index || 'unknown';
+    if (indexName !== 'unknown') {
+      try {
+        const mappingResponse = await this.props.http.get(`/${indexName}/_mapping`);
+        const mapping = mappingResponse[indexName]?.mappings || {};
+        const isSpecificType = this.isSpecificIndexType(mapping);
+        if (this.mounted) {
+          this.setState({ isSpecificType });
+        }
+      } catch (error) {
+        console.error(`Error fetching mapping for ${indexName}:`, error);
+      }
+    }
+  }
+
+  private isSpecificIndexType(mapping: any): boolean {
+    // TODO: Replace with your specific index type logic
+    return true; // Placeholder
+  }
+
   public onFocus = (focusedPanelIndex: string) => {
     this.setState({ focusedPanelIndex });
   };
@@ -266,32 +318,14 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           />
         )}
         <EmbeddableErrorLabel error={this.state.error} />
+        {this.state.isSpecificType && (
+          <button onClick={() => console.log(`Button clicked for ${this.props.embeddable.id}`)}>
+            Special Index Button
+          </button>
+        )}
         <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
       </EuiPanel>
     );
-  }
-
-  public componentDidMount() {
-    if (this.embeddableRoot.current) {
-      this.subscription.add(
-        this.props.embeddable.getOutput$().subscribe(
-          (output: EmbeddableOutput) => {
-            this.setState({
-              error: output.error,
-              loading: output.loading,
-            });
-          },
-          (error) => {
-            if (this.embeddableRoot.current) {
-              const errorEmbeddable = new ErrorEmbeddable(error, { id: this.props.embeddable.id });
-              errorEmbeddable.render(this.embeddableRoot.current);
-              this.setState({ errorEmbeddable });
-            }
-          }
-        )
-      );
-      this.props.embeddable.render(this.embeddableRoot.current);
-    }
   }
 
   closeMyContextMenuPanel = () => {
