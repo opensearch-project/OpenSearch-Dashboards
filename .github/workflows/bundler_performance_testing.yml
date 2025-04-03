@@ -1,4 +1,4 @@
-name: Performance Testing
+name: Bundler Performance Testing
 
 on:
   pull_request:
@@ -47,26 +47,16 @@ jobs:
         # This command updates the limit and bundle size variation for the OpenSearch Dashboards platform plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --update-limits
 
-      - name: Create or Update PR Comment
+      - name: Save Bundle Analysis Results
         if: ${{ hashFiles('packages/osd-optimizer/limits_delta.yml') != '' }}
         run: |
-          {
-            echo "COMMENT_BODY<<EOF"
-            echo "📊 **Bundle Size crossed 5% for below plugins**"
-            echo ""
-            cat packages/osd-optimizer/limits_delta.yml
-            echo "EOF"
-          } >> "$GITHUB_ENV"
+          echo "📊 **Bundle Size crossed 5% for below plugins**" > bundle_analysis.txt
+          echo "" >> bundle_analysis.txt
+          cat packages/osd-optimizer/limits_delta.yml >> bundle_analysis.txt
 
-      - name: Post PR Comment
+      - name: Upload Analysis Artifact
         if: ${{ hashFiles('packages/osd-optimizer/limits_delta.yml') != '' }}
-        uses: actions/github-script@v7
+        uses: actions/upload-artifact@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: process.env.COMMENT_BODY
-            })
+          name: bundle-analysis-results
+          path: bundle_analysis.txt
