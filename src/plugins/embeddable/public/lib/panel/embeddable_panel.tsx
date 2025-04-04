@@ -103,7 +103,8 @@ interface State {
   loading?: boolean;
   error?: EmbeddableError;
   errorEmbeddable?: ErrorEmbeddable;
-  isSpecificType?: boolean; // Added for button logic
+  isSpecificType?: boolean;
+  panelSavedObjectIds: string[]; // Added to collect savedObjectIds
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -132,7 +133,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       closeContextMenu: false,
       badges: [],
       notifications: [],
-      isSpecificType: true, // Added
+      isSpecificType: true,
+      panelSavedObjectIds: [], // Initialize empty array
     };
 
     this.embeddableRoot = React.createRef();
@@ -242,31 +244,32 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       );
       this.props.embeddable.render(this.embeddableRoot.current);
     }
-    this.checkIndexData(); // Added to check index type
+    this.collectPanelSavedObjectId();
   }
 
-  private async checkIndexData() {
+  private collectPanelSavedObjectId() {
     const input = this.props.embeddable.getInput() as any; // Type assertion for now
-    console.log('Embeddable input:', input); // Debug input
+    const savedObjectId = input.savedObjectId;
 
-    const indexName = input.indexPattern || input.index || 'unknown';
-    if (indexName !== 'unknown') {
-      try {
-        const mappingResponse = await this.props.http.get(`/${indexName}/_mapping`);
-        const mapping = mappingResponse[indexName]?.mappings || {};
-        const isSpecificType = this.isSpecificIndexType(mapping);
-        if (this.mounted) {
-          this.setState({ isSpecificType });
+    if (savedObjectId) {
+      // Add this panel's savedObjectId to the array
+      this.setState(
+        (prevState) => ({
+          panelSavedObjectIds: [...prevState.panelSavedObjectIds, savedObjectId],
+        }),
+        () => {
+          // Log the updated array after state is set
+          console.log('Panel Saved Object IDs:', this.state.panelSavedObjectIds);
         }
-      } catch (error) {
-        console.error(`Error fetching mapping for ${indexName}:`, error);
-      }
+      );
+    } else {
+      console.log('No savedObjectId found for this panel');
     }
   }
 
   private isSpecificIndexType(mapping: any): boolean {
     // TODO: Replace with your specific index type logic
-    return true; // Placeholder
+    return true; // Your placeholder
   }
 
   public onFocus = (focusedPanelIndex: string) => {

@@ -200,6 +200,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           data,
           core.application
         )}
+        http={core.http}
+        savedObjects={core.savedObjects}
       />
     );
 
