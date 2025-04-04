@@ -1,4 +1,4 @@
-name: Performance Testing
+name: Bundler Performance Testing
 
 on:
   pull_request:
@@ -11,15 +11,20 @@ on:
       - '**/__tests__/**' # Ignore test directories
       - '.github/workflows/**' # Ignore GitHub workflow files
       - 'docs/**' # Ignore entire docs directory
-
 permissions:
   contents: read
-  issues: write
   pull-requests: write
-  
+  statuses: write
+  issues: write
+
 jobs:
   bundle-analyzer:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,15 +52,16 @@ jobs:
         # This command updates the limit and bundle size variation for the OpenSearch Dashboards platform plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --update-limits
 
-      - name: Read and comment bundle size variations
+      - name: Save Bundle Analysis Results
+        if: ${{ hashFiles('packages/osd-optimizer/limits_delta.yml') != '' }}
         run: |
-          if [ -f packages/osd-optimizer/limits_delta.yml ]; then
-            echo "📊 **Bundle Size crossed 5% for below plugins**" > comment.txt
-            echo "" >> comment.txt
-            cat packages/osd-optimizer/limits_delta.yml >> comment.txt
-            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
-          else
-            echo "No bundle size variations detected, skipping comment."
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "📊 **Bundle Size crossed 5% for below plugins**" > bundle_analysis.txt
+          echo "" >> bundle_analysis.txt
+          cat packages/osd-optimizer/limits_delta.yml >> bundle_analysis.txt
+
+      - name: Upload Analysis Artifact
+        if: ${{ hashFiles('packages/osd-optimizer/limits_delta.yml') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis-results
+          path: bundle_analysis.txt
