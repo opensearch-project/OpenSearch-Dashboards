@@ -5,6 +5,7 @@
 
 import React, { useMemo } from 'react';
 import {
+  ACTION_BAR_BUTTONS_CONTAINER_ID,
   QueryEditorExtension,
   QueryEditorExtensionConfig,
   QueryEditorExtensionDependencies,
@@ -33,11 +34,14 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
     return Object.values(configMap).sort((a, b) => a.order - b.order);
   }, [configMap]);
 
+  const actionBarContainer = document.getElementById(ACTION_BAR_BUTTONS_CONTAINER_ID);
+
   return (
     <>
       {sortedConfigs.map((config) => {
         const extensionComponentId = `osdQueryEditorExtensionComponent-${config.id}`;
         const extensionQueryControlsId = `osdQueryEditorExtensionQueryControls-${config.id}`;
+        const extensionActionBarContainerId = `osdQueryEditorExtensionActionBarContainer-${config.id}`;
 
         // Make sure extension components are rendered in order
         let extensionComponentContainer = document.getElementById(extensionComponentId);
@@ -57,6 +61,16 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
           queryControlsContainer.appendChild(extensionQueryControlsContainer);
         }
 
+        // Make sure action bar buttons are rendered in order
+        let extensionActionBarContainer = document.getElementById(extensionActionBarContainerId);
+        if (!extensionActionBarContainer) {
+          extensionActionBarContainer = document.createElement('div');
+          // osdQueryEditorExtensionActionBarContainer styling is within Discovers results_action_bar.scss
+          extensionActionBarContainer.className = `osdQueryEditorExtensionActionBarContainer osdQueryEditorExtensionActionBarContainer__${config.id}`;
+          extensionActionBarContainer.id = extensionActionBarContainerId;
+          actionBarContainer?.appendChild(extensionActionBarContainer);
+        }
+
         return (
           <QueryEditorExtension
             key={config.id}
@@ -66,6 +80,7 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
             bannerContainer={bannerContainer}
             bottomPanelContainer={bottomPanelContainer}
             queryControlsContainer={extensionQueryControlsContainer}
+            actionBarContainer={extensionActionBarContainer}
           />
         );
       })}
