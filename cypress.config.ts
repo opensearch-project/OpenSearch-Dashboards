@@ -17,7 +17,6 @@ module.exports = defineConfig({
     runMode: 2,
     openMode: 0,
   },
-  numTestsKeptInMemory: 5,
   viewportWidth: 1920,
   viewportHeight: 1080,
   env: {

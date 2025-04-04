@@ -15,6 +15,7 @@ import {
 } from './constants';
 import { setDatePickerDatesAndSearchIfRelevant } from './shared';
 import { verifyMonacoEditorContent } from './autocomplete';
+import { openShareMenuWithRetry } from './shared_links';
 
 /**
  * The fields to select for saved search. Also takes shape of the API for saved search
@@ -540,6 +541,45 @@ export const updateSavedSearchAndSaveAndVerify = (
   cy.loadSaveSearch(saveNameToUse);
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);
+};
+
+export const updateSavedSearchAndNotSaveAndVerify = (config, datasourceName) => {
+  cy.loadSaveSearch(config.saveName);
+
+  // Change the dataset type to use
+  const [newDataset, newDatasetType] =
+    config.datasetType === DatasetTypes.INDEX_PATTERN.name
+      ? [INDEX_WITH_TIME_1, DatasetTypes.INDEXES.name]
+      : [INDEX_PATTERN_WITH_TIME, DatasetTypes.INDEX_PATTERN.name];
+  // If current language is PPL, update to OpenSearch SQL, else update to PPL
+  const newLanguage =
+    config.language === QueryLanguages.PPL.name ? QueryLanguages.SQL : QueryLanguages.PPL;
+  const newConfig = generateSavedTestConfiguration(newDataset, newDatasetType, newLanguage);
+
+  cy.setDataset(newConfig.dataset, datasourceName, newConfig.datasetType);
+  cy.setQueryLanguage(newConfig.language);
+  setDatePickerDatesAndSearchIfRelevant(newConfig.language);
+  setSearchConfigurations({
+    ...newConfig,
+    // only select field if previous config did not select it, because otherwise it is already selected
+    selectFields: !config.selectFields ? newConfig.selectFields : false,
+  });
+
+  // Verify the snapshot url contain the updates
+  openShareMenuWithRetry();
+  cy.getElementByTestId('copyShareUrlButton')
+    .invoke('attr', 'data-share-url')
+    .then((url) => {
+      cy.getElementByTestId('discoverNewButton').click();
+      cy.get('h1').contains('New search').should('be.visible');
+      cy.visit(url);
+    });
+  verifyDiscoverPageState(newConfig);
+
+  // Verify the original save is unchanged
+  cy.loadSaveSearch(config.saveName);
+  setDatePickerDatesAndSearchIfRelevant(config.language);
+  verifyDiscoverPageState(config);
 };
 
 /**
