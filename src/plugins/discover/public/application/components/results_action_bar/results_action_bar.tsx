@@ -11,6 +11,7 @@ import { HitsCounter } from '../chart/hits_counter';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
 import { IndexPattern } from '../../../../../data/common';
+import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../data/public';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
@@ -58,9 +59,14 @@ export const DiscoverResultsActionBar = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexStart">
-          {/* TODO: We will allow extensions to be added here */}
-        </EuiFlexGroup>
+        {/* Where Data Plugin's QueryEditorExtension action buttons will go */}
+        <EuiFlexGroup
+          className="dscResultsActionBar__extensions-container"
+          direction="row"
+          gutterSize="none"
+          justifyContent="flexStart"
+          id={ACTION_BAR_BUTTONS_CONTAINER_ID}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
