@@ -87,8 +87,6 @@ interface Props {
   // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4483
   hasBorder?: boolean;
   hasShadow?: boolean;
-  http: CoreStart['http'];
-  savedObjects?: CoreStart['savedObjects'];
 }
 
 interface State {
@@ -103,8 +101,6 @@ interface State {
   loading?: boolean;
   error?: EmbeddableError;
   errorEmbeddable?: ErrorEmbeddable;
-  isSpecificType?: boolean;
-  panelSavedObjectIds: string[]; // Added to collect savedObjectIds
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -133,8 +129,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       closeContextMenu: false,
       badges: [],
       notifications: [],
-      isSpecificType: true,
-      panelSavedObjectIds: [], // Initialize empty array
     };
 
     this.embeddableRoot = React.createRef();
@@ -223,55 +217,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     this.props.embeddable.destroy();
   }
 
-  public componentDidMount() {
-    if (this.embeddableRoot.current) {
-      this.subscription.add(
-        this.props.embeddable.getOutput$().subscribe(
-          (output: EmbeddableOutput) => {
-            this.setState({
-              error: output.error,
-              loading: output.loading,
-            });
-          },
-          (error) => {
-            if (this.embeddableRoot.current) {
-              const errorEmbeddable = new ErrorEmbeddable(error, { id: this.props.embeddable.id });
-              errorEmbeddable.render(this.embeddableRoot.current);
-              this.setState({ errorEmbeddable });
-            }
-          }
-        )
-      );
-      this.props.embeddable.render(this.embeddableRoot.current);
-    }
-    this.collectPanelSavedObjectId();
-  }
-
-  private collectPanelSavedObjectId() {
-    const input = this.props.embeddable.getInput() as any; // Type assertion for now
-    const savedObjectId = input.savedObjectId;
-
-    if (savedObjectId) {
-      // Add this panel's savedObjectId to the array
-      this.setState(
-        (prevState) => ({
-          panelSavedObjectIds: [...prevState.panelSavedObjectIds, savedObjectId],
-        }),
-        () => {
-          // Log the updated array after state is set
-          console.log('Panel Saved Object IDs:', this.state.panelSavedObjectIds);
-        }
-      );
-    } else {
-      console.log('No savedObjectId found for this panel');
-    }
-  }
-
-  private isSpecificIndexType(mapping: any): boolean {
-    // TODO: Replace with your specific index type logic
-    return true; // Your placeholder
-  }
-
   public onFocus = (focusedPanelIndex: string) => {
     this.setState({ focusedPanelIndex });
   };
@@ -321,14 +266,32 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           />
         )}
         <EmbeddableErrorLabel error={this.state.error} />
-        {this.state.isSpecificType && (
-          <button onClick={() => console.log(`Button clicked for ${this.props.embeddable.id}`)}>
-            Special Index Button
-          </button>
-        )}
         <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
       </EuiPanel>
     );
+  }
+
+  public componentDidMount() {
+    if (this.embeddableRoot.current) {
+      this.subscription.add(
+        this.props.embeddable.getOutput$().subscribe(
+          (output: EmbeddableOutput) => {
+            this.setState({
+              error: output.error,
+              loading: output.loading,
+            });
+          },
+          (error) => {
+            if (this.embeddableRoot.current) {
+              const errorEmbeddable = new ErrorEmbeddable(error, { id: this.props.embeddable.id });
+              errorEmbeddable.render(this.embeddableRoot.current);
+              this.setState({ errorEmbeddable });
+            }
+          }
+        )
+      );
+      this.props.embeddable.render(this.embeddableRoot.current);
+    }
   }
 
   closeMyContextMenuPanel = () => {
