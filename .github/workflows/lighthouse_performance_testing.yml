@@ -4,6 +4,13 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**/*.md' # Ignore documentation files
+      - '**/*.test.ts' # Ignore test files (TypeScript)
+      - '**/*.test.js' # Ignore test files (JavaScript)
+      - '**/__tests__/**' # Ignore test directories
+      - '.github/workflows/**' # Ignore GitHub workflow files
+      - 'docs/**' # Ignore entire docs directory
 permissions:
   contents: read
   pull-requests: write

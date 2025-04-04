@@ -11,6 +11,11 @@ on:
       - '**/__tests__/**' # Ignore test directories
       - '.github/workflows/**' # Ignore GitHub workflow files
       - 'docs/**' # Ignore entire docs directory
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+  issues: write
 
 jobs:
   bundle-analyzer:
