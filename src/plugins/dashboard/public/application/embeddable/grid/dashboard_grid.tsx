@@ -287,8 +287,30 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
 
     const panelMetadata = await Promise.all(panelDataPromises);
-    this.setState({ panelMetadata }, () => {
+    this.setState({ panelMetadata }, async () => {
       console.log('All Panel Metadata:', this.state.panelMetadata);
+
+      // POC ONLY: Extract first pie chart savedObjectId
+      const firstPie = this.state.panelMetadata.find((meta) => meta.type === 'pie');
+      if (firstPie) {
+        console.log('First pie visualization savedObjectId:', firstPie.savedObjectId);
+
+        try {
+          // POC ONLY: Fetch the full saved object for the pie visualization
+          const pieSavedObject = await this.props.savedObjectsClient.get(
+            'visualization',
+            firstPie.savedObjectId
+          );
+          console.log('First pie visualization saved object metadata:', pieSavedObject);
+        } catch (error) {
+          console.error(
+            `Error fetching metadata for pie saved object ID ${firstPie.savedObjectId}:`,
+            error
+          );
+        }
+      } else {
+        console.log('No pie visualizations found.');
+      }
     });
   }
 
