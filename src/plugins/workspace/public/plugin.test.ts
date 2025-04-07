@@ -6,7 +6,11 @@
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
 import { first } from 'rxjs/operators';
-import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
+import {
+  applicationServiceMock,
+  chromeServiceMock,
+  coreMock,
+} from 'opensearch-dashboards/public/mocks';
 import {
   ChromeBreadcrumb,
   NavGroupStatus,
@@ -14,7 +18,7 @@ import {
   AppNavLinkStatus,
   WorkspaceAvailability,
   AppStatus,
-} from '../../../core/public';
+} from 'opensearch-dashboards/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
