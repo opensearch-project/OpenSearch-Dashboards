@@ -86,7 +86,7 @@ jobs:
           yarn start --no-base-path &
           until curl -s http://localhost:5601 >/dev/null; do
             echo "Waiting for OpenSearch Dashboards..."
-            sleep 10
+            sleep 30
           done
           echo "OpenSearch Dashboards is up!"
 
