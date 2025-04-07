@@ -276,6 +276,7 @@ export class DashboardPlugin
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         ExitFullScreenButton,
         uiActions: deps.uiActions,
+        savedObjectsClient: coreStart.savedObjects.client, // HERE TO ADD SAVED OBJECTS CLIENT
       };
     };
 

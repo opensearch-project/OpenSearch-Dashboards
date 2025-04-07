@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { Logos } from 'opensearch-dashboards/public';
+import { Logos, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { PanelState, EmbeddableStart } from '../../../../../embeddable/public';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
@@ -41,6 +41,7 @@ export interface DashboardViewportProps {
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
   renderEmpty?: () => React.ReactNode;
   logos: Logos;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface State {
@@ -159,7 +160,11 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             logos={this.props.logos}
           />
         )}
-        <DashboardGrid container={container} PanelComponent={PanelComponent} />
+        <DashboardGrid
+          container={container}
+          PanelComponent={PanelComponent}
+          savedObjectsClient={this.props.savedObjectsClient}
+        />
       </div>
     );
   }

@@ -39,6 +39,7 @@ import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
+import type { SavedObjectsClientContract } from 'src/core/public';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -127,6 +128,7 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   opensearchDashboards: DashboardReactContextValue;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
   container: DashboardContainer;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface State {
@@ -137,6 +139,7 @@ interface State {
   viewMode: ViewMode;
   useMargins: boolean;
   expandedPanelId?: string;
+  panelMetadata: Array<{ panelId: string; savedObjectId: string; type: string }>;
 }
 
 interface PanelLayout extends Layout {
@@ -161,6 +164,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       viewMode: this.props.container.getInput().viewMode,
       useMargins: this.props.container.getInput().useMargins,
       expandedPanelId: this.props.container.getInput().expandedPanelId,
+      panelMetadata: [],
     };
   }
 
@@ -171,8 +175,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     try {
       layout = this.buildLayoutFromPanels();
     } catch (error: any) {
-      console.error(error); // eslint-disable-line no-console
-
+      console.error(error);
       isLayoutInvalid = true;
       this.props.opensearchDashboards.notifications.toasts.danger({
         title: this.props.intl.formatMessage({
@@ -198,8 +201,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             useMargins: input.useMargins,
             expandedPanelId: input.expandedPanelId,
           });
+          this.collectAllPanelMetadata();
         }
       });
+
+    this.collectAllPanelMetadata();
   }
 
   public componentWillUnmount() {
@@ -245,6 +251,46 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       this.setState({ focusedPanelIndex: undefined });
     }
   };
+
+  /**
+   * Collects metadata (panelId, savedObjectId, type) for all panels in the dashboard.
+   * Runs on mount and when the container input (panels) changes.
+   */
+  private async collectAllPanelMetadata() {
+    const panels = this.state.panels;
+
+    const panelDataPromises = Object.keys(panels).map(async (panelId) => {
+      const panel = panels[panelId];
+      const panelEmbeddable = await this.props.container.untilEmbeddableLoaded(panelId);
+      const embeddableInput = panelEmbeddable.getInput() as any;
+      console.log(`Embeddable input for panel ${panelId}:`, embeddableInput);
+      const savedObjectId = embeddableInput.savedObjectId || 'unknown';
+
+      if (!savedObjectId || savedObjectId === 'unknown') {
+        console.log(`No valid savedObjectId for panel ${panelId}`);
+        return { panelId, savedObjectId: 'unknown', type: 'unknown' };
+      }
+
+      try {
+        const savedObject = await this.props.savedObjectsClient.get(panel.type, savedObjectId);
+
+        console.log(`Saved object for ${savedObjectId}:`, savedObject);
+        const visState = savedObject.attributes.visState
+          ? JSON.parse(savedObject.attributes.visState)
+          : {};
+        const visType = visState.type || savedObject.attributes.type || 'unknown';
+        return { panelId, savedObjectId, type: visType };
+      } catch (error) {
+        console.error(`Error fetching saved object for ${savedObjectId}:`, error);
+        return { panelId, savedObjectId, type: 'unknown' };
+      }
+    });
+
+    const panelMetadata = await Promise.all(panelDataPromises);
+    this.setState({ panelMetadata }, () => {
+      console.log('All Panel Metadata:', this.state.panelMetadata);
+    });
+  }
 
   public renderPanels() {
     const { focusedPanelIndex, panels, expandedPanelId } = this.state;
