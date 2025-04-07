@@ -24,11 +24,13 @@ export interface QueryStatus {
     error?: {
       error?: string;
       message?: {
-        error?: {
-          reason?: string;
-          details: string;
-          type?: string;
-        };
+        error?:
+          | string
+          | {
+              reason?: string;
+              details: string;
+              type?: string;
+            };
         status?: number;
       };
       statusCode?: number;
@@ -68,21 +70,39 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
 
   const displayErrorMessage = useMemo(() => {
     const error = props.queryStatus.body?.error;
-    const reason = error?.message?.error?.reason;
+    const message = error?.message;
 
-    if (reason) {
-      return reason;
+    if (message == null) {
+      if (typeof error === 'string') {
+        return error;
+      }
+
+      if (typeof error === 'object') {
+        return JSON.stringify(error);
+      }
+
+      return `Unknown Error: ${String(error)}`;
     }
 
-    if (typeof error === 'string') {
-      return error;
+    // For async search strategy, expecting message.error to be string
+    if (typeof message.error === 'string') {
+      return message.error;
     }
 
-    if (typeof error === 'object') {
-      return JSON.stringify(error);
+    // For normal search strategy, expecting message.error to be object
+    if (message.error?.details) {
+      return message.error.details;
     }
 
-    return 'Unkown Error';
+    if (typeof message === 'string') {
+      return message;
+    }
+
+    if (typeof message === 'object') {
+      return JSON.stringify(message);
+    }
+
+    return `Unknown Error: ${String(message)}`;
   }, [props.queryStatus.body?.error]);
 
   if (props.queryStatus.status === ResultStatus.LOADING) {
