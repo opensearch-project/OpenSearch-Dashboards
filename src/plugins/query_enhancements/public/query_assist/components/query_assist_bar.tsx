@@ -137,24 +137,22 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   return (
     <EuiForm component="form" onSubmit={onSubmit} className="queryAssist queryAssist__form">
       <EuiFormRow fullWidth>
-        <>
-          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-            <EuiFlexItem>
-              <QueryAssistInput
-                inputRef={inputRef}
-                persistedLog={persistedLog}
-                isDisabled={loading || !datasetSupported}
-                selectedIndex={selectedIndex}
-                previousQuestion={previousQuestionRef.current}
-                error={agentError}
-                placeholder={inputPlaceholder}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <QueryAssistSubmitButton isDisabled={loading || !datasetSupported} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+          <EuiFlexItem>
+            <QueryAssistInput
+              inputRef={inputRef}
+              persistedLog={persistedLog}
+              isDisabled={loading || !datasetSupported}
+              selectedIndex={selectedIndex}
+              previousQuestion={previousQuestionRef.current}
+              error={agentError}
+              placeholder={inputPlaceholder}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <QueryAssistSubmitButton isDisabled={loading || !datasetSupported} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
       <QueryAssistCallOut
         language={props.dependencies.language}
