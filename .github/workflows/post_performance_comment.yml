@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows:
       - 'Lighthouse Performance Testing'
-      - 'Bundler Performance Testing' # Listen to both workflows
+      - 'Bundler Performance Testing'
     types:
       - completed
 
@@ -14,83 +14,60 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
+
     steps:
       - name: Download Lighthouse Results
         uses: actions/download-artifact@v4
         with:
           name: lighthouse-results
+          path: lighthouse-results
+        continue-on-error: true
 
       - name: Download Bundle Analysis Results
         uses: actions/download-artifact@v4
         with:
           name: bundle-analysis-results
+          path: bundle-analysis-results
+        continue-on-error: true
 
-      - name: Prepare Lighthouse Results Comment
+      - name: Prepare Combined Comment
         run: |
-          # Initialize comment body with heading
-          COMMENT="### Performance Issues Detected!!\n\n"
+          COMMENT="### 🚨 Performance Issues Detected!!\n\n"
 
-          # Validate if the Lighthouse results are available
+          # Lighthouse results
           if [ -f lighthouse-results/assertion-results.json ]; then
-            # Ensure JSON is properly formatted
             if ! jq empty lighthouse-results/assertion-results.json; then
               echo "❌ Invalid JSON format in Lighthouse assertion results."
               exit 1
             fi
 
             BASELINE=$(cat ./baselines/lighthouse_baseline.json)
-
             FAILURES=$(jq --argjson baseline "$BASELINE" -r '[.[] | select(.passed==false) | {metric: .auditId, expected: ($baseline[(.url | sub("^.*?//[^/]+"; ""))][.auditId] // "N/A"), actual: (if .actual then (.actual | floor) else "N/A" end), url: .url}]' lighthouse-results/assertion-results.json)
 
-            UNIQUE_FAILURE_URLS=$(echo "$FAILURES" | jq '[.[] | .url] | unique')
-
             if [ ! -f lighthouse-results/links.json ]; then
-              echo "⚠️ No .lighthouseci/links.json file found. Creating an empty JSON object..."
               echo "{}" > lighthouse-results/links.json
             fi
 
-            # Load the URL to report mapping from links.json
             URL_REPORT_MAP=$(jq -c '.' lighthouse-results/links.json)
+            FAILURES_WITH_REPORTS=$(jq --argjson url_report_map "$URL_REPORT_MAP" 'map(. + {reportUrl: $url_report_map[.url]})' <<< "$FAILURES")
 
-            # Append report URLs to failed assertions
-            FAILURES_WITH_REPORTS=$(jq --argjson url_report_map "$URL_REPORT_MAP" '
-            map(. + {reportUrl: $url_report_map[.url]})
-            ' <<< "$FAILURES")
-
-            # Check if there are failures before posting
             if [[ "$FAILURES_WITH_REPORTS" != "[]" ]]; then
               COMMENT+="### ⚡ Lighthouse CI Performance Issues ⚡\n\n"
-              COMMENT+="| Metric | Expected Value | Current Value | Page URL | Report |\n"
-              COMMENT+="|--------|---------------|--------------|----------|--------|\n"
-
+              COMMENT+="| Metric | Expected | Actual | URL | Report |\n"
+              COMMENT+="|--------|----------|--------|-----|--------|\n"
               while IFS= read -r line; do
                 COMMENT+="| $(echo "$line" | jq -r '.metric') | $(echo "$line" | jq -r '.expected') | $(echo "$line" | jq -r '.actual') | $(echo "$line" | jq -r '.url') | [Report]($(echo "$line" | jq -r '.reportUrl')) |\n"
               done <<< "$(echo "$FAILURES_WITH_REPORTS" | jq -c '.[]')"
+              COMMENT+="\n\n"
             fi
           fi
 
-      - name: Prepare Bundle Size Results Comment
-        run: |
-          # Check if Bundle Analysis results are present
-          if [ -f bundle-analysis-results/bundle-size.json ]; then
-            BUNDLE_SIZE=$(cat bundle-analysis-results/bundle-size.json)
-            BUNDLE_COMMENT="### 📦 Bundle Size Analysis 📦\n\n"
-            BUNDLE_COMMENT+="| Metric | Value |\n"
-            BUNDLE_COMMENT+="|--------|-------|\n"
-
-            # Extract and format the bundle size data
-            for row in $(echo "$BUNDLE_SIZE" | jq -r '.bundles[] | @base64'); do
-              _jq() {
-                echo ${row} | base64 --decode | jq -r ${1}
-              }
-              BUNDLE_COMMENT+="| $(_jq '.name') | $(_jq '.size') |\n"
-            done
-
-            COMMENT+="$BUNDLE_COMMENT"
+          # Bundle size results
+          if [ -f bundle-analysis-results/bundle_analysis.txt ]; then
+            COMMENT+="### 📦 Bundle Size Analysis 📦\n\n"
+            COMMENT+="\`\`\`\n$(cat bundle-analysis-results/bundle_analysis.txt)\n\`\`\`\n"
           fi
 
-      - name: Set Comment Body
-        run: |
           echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
           echo "$COMMENT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -100,9 +77,15 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
+            const prNumber = context.payload.workflow_run.pull_requests[0]?.number;
+            if (!prNumber) {
+              core.setFailed("❌ Could not determine PR number from workflow_run payload.");
+              return;
+            }
+
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              issue_number: prNumber,
               body: process.env.COMMENT_BODY
-            })
+            });

@@ -59,6 +59,15 @@ jobs:
           echo "" >> bundle_analysis.txt
           cat packages/osd-optimizer/limits_delta.yml >> bundle_analysis.txt
 
+      - name: Check if bundle_analysis.txt exists
+        id: check_file
+        run: |
+          if [ -f bundle_analysis.txt ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Upload Analysis Artifact
         if: ${{ hashFiles('packages/osd-optimizer/limits_delta.yml') != '' }}
         uses: actions/upload-artifact@v4

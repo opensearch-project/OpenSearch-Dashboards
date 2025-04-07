@@ -119,12 +119,20 @@ jobs:
         run: |
           mkdir -p artifacts
           cp .lighthouseci/assertion-results.json artifacts/
+          if [ -f .lighthouseci/links.json ]; then
+            cp .lighthouseci/links.json artifacts/
+          fi
 
-      - name: Upload Lighthouse Results Artifact
+      - name: Debug Artifact Contents
+        run: |
+          echo "Uploading the following files:"
+          ls -R artifacts/
+
+      - name: Upload Lighthouse Results (assertions + links)
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-results
-          path: artifacts/assertion-results.json
+          path: artifacts/
 
       - name: Cleanup Lighthouse Reports
         run: rm -rf .lighthouseci
