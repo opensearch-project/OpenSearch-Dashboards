@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { IndexPattern, getServices } from '../../../opensearch_dashboards_services';
@@ -74,6 +74,8 @@ export const DataGridTable = ({
   const newDiscoverEnabled = getNewDiscoverSetting(services.storage);
   const isQueryEnhancementEnabled = services.uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
 
+  const tableKey = useMemo(() => `${columns.join(',')}-${rows.length}`, [columns, rows.length]);
+
   const panelContent =
     isQueryEnhancementEnabled || !newDiscoverEnabled ? (
       <DefaultDiscoverTable
@@ -93,6 +95,7 @@ export const DataGridTable = ({
       />
     ) : (
       <DataGrid
+        key={tableKey}
         columns={columns}
         indexPattern={indexPattern}
         sort={sort}
