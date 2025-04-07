@@ -53,7 +53,7 @@ interface Params {
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
-const EVENT_STREAM_CONTENT = /text\/event-stream/;
+const EVENT_STREAM_CONTENT = /^(text\/event-stream)(;.*)?$/;
 
 const removedUndefined = (obj: Record<string, any> | undefined) => {
   return omitBy(obj, (v) => v === undefined);
