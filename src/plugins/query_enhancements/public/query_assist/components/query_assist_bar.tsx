@@ -114,6 +114,26 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     dependencies.query.dataset?.type || ''
   );
 
+  let inputPlaceholder = selectedIndex
+    ? i18n.translate('queryEnhancements.queryAssist.input.placeholderWithIndex', {
+        defaultMessage: 'Ask a natural language question about {selectedIndex} to generate a query',
+        values: { selectedIndex },
+      })
+    : i18n.translate('queryEnhancements.queryAssist.input.placeholderWithoutIndex', {
+        defaultMessage: 'Select an index to ask a question',
+      });
+
+  if (!datasetSupported && dependencies.query.dataset?.title) {
+    inputPlaceholder = i18n.translate(
+      'queryEnhancements.queryAssist.input.placeholderDataSetNotSupported',
+      {
+        defaultMessage:
+          'Query Assist is not supported by {datasource}. Please select another data source that is compatible to start entering questions or enter PPL below.',
+        values: { datasource: dependencies.query.dataset.title },
+      }
+    );
+  }
+
   return (
     <EuiForm component="form" onSubmit={onSubmit} className="queryAssist queryAssist__form">
       <EuiFormRow fullWidth>
@@ -127,27 +147,13 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
                 selectedIndex={selectedIndex}
                 previousQuestion={previousQuestionRef.current}
                 error={agentError}
+                placeholder={inputPlaceholder}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <QueryAssistSubmitButton isDisabled={loading || !datasetSupported} />
             </EuiFlexItem>
           </EuiFlexGroup>
-          {!datasetSupported && dependencies.query.dataset?.title ? (
-            <EuiCallOut
-              color="danger"
-              iconType="alert"
-              title={i18n.translate('queryEnhancements.query_assist_bar.unsupported.dataset', {
-                defaultMessage:
-                  'The selected datasource {datasource} is not supported for Amazon Q query assistance. Please select another data source that is compatible.',
-                values: {
-                  datasource: dependencies.query.dataset.title,
-                },
-              })}
-              size="s"
-              data-test-subj="queryAssistUnsupportedDataset"
-            />
-          ) : null}
         </>
       </EuiFormRow>
       <QueryAssistCallOut

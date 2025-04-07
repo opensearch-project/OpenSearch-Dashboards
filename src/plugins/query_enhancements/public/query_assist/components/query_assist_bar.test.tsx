@@ -29,9 +29,9 @@ jest.mock('../hooks', () => ({
 }));
 
 jest.mock('./query_assist_input', () => ({
-  QueryAssistInput: ({ inputRef, error }: ComponentProps<typeof QueryAssistInput>) => (
+  QueryAssistInput: ({ inputRef, error, placeholder }: ComponentProps<typeof QueryAssistInput>) => (
     <>
-      <input ref={inputRef} />
+      <input placeholder={placeholder} ref={inputRef} />
       <div>{JSON.stringify(error)}</div>
     </>
   ),
@@ -229,7 +229,7 @@ describe('QueryAssistBar', () => {
     expect(screen.getByTestId('query-assist-query-generated-callout')).toBeInTheDocument();
   });
 
-  it('should render callout when dataset is not supported', async () => {
+  it('should show unsupported placeholder when dataset is not supported', async () => {
     const { component } = renderQueryAssistBar({
       dependencies: {
         ...dependencies,
@@ -245,8 +245,8 @@ describe('QueryAssistBar', () => {
       },
     });
 
-    await component.findByText(
-      'The selected datasource mock is not supported for Amazon Q query assistance. Please select another data source that is compatible.'
+    await component.findByPlaceholderText(
+      'Query Assist is not supported by mock. Please select another data source that is compatible to start entering questions or enter PPL below.'
     );
   });
 });
