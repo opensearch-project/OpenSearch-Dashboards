@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { duration } from 'moment';
 import { DataSourcePluginConfigType } from '../../config';
 import { parseClientOptions } from './client_config';
 
@@ -17,9 +18,13 @@ describe('parseClientOptions', () => {
       clientPool: {
         size: 5,
       },
+      globalOpenSearchConfig: {
+        requestTimeout: duration(10, 'seconds'),
+        pingTimeout: duration(20, 'seconds'),
+      },
     } as DataSourcePluginConfigType;
 
-    expect(parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT)).toEqual(
+    expect(parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [])).toEqual(
       expect.objectContaining({
         host: TEST_DATA_SOURCE_ENDPOINT,
         ssl: {
@@ -38,8 +43,12 @@ describe('parseClientOptions', () => {
       clientPool: {
         size: 5,
       },
+      globalOpenSearchConfig: {
+        requestTimeout: duration(10, 'seconds'),
+        pingTimeout: duration(20, 'seconds'),
+      },
     } as DataSourcePluginConfigType;
-    expect(parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT)).toEqual(
+    expect(parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, [])).toEqual(
       expect.objectContaining({
         host: TEST_DATA_SOURCE_ENDPOINT,
         ssl: {
@@ -60,10 +69,14 @@ describe('parseClientOptions', () => {
       clientPool: {
         size: 5,
       },
+      globalOpenSearchConfig: {
+        requestTimeout: duration(10, 'seconds'),
+        pingTimeout: duration(20, 'seconds'),
+      },
     } as DataSourcePluginConfigType;
     mockReadFileSync.mockReset();
     mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
     mockReadFileSync.mockClear();
     expect(parsedConfig).toEqual(
@@ -89,10 +102,14 @@ describe('parseClientOptions', () => {
       clientPool: {
         size: 5,
       },
+      globalOpenSearchConfig: {
+        requestTimeout: duration(10, 'seconds'),
+        pingTimeout: duration(20, 'seconds'),
+      },
     } as DataSourcePluginConfigType;
     mockReadFileSync.mockReset();
     mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
     mockReadFileSync.mockClear();
     expect(parsedConfig).toEqual(
@@ -115,10 +132,14 @@ describe('parseClientOptions', () => {
       clientPool: {
         size: 5,
       },
+      globalOpenSearchConfig: {
+        requestTimeout: duration(10, 'seconds'),
+        pingTimeout: duration(20, 'seconds'),
+      },
     } as DataSourcePluginConfigType;
     mockReadFileSync.mockReset();
     mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
     expect(mockReadFileSync).toHaveBeenCalledTimes(0);
     mockReadFileSync.mockClear();
     expect(parsedConfig).toEqual(
@@ -128,6 +149,38 @@ describe('parseClientOptions', () => {
           rejectUnauthorized: true,
           ca: undefined,
         },
+      })
+    );
+  });
+
+  test('test honor pingTimeout and requestTimeout from the global configs', () => {
+    const config = {
+      enabled: true,
+      ssl: {
+        verificationMode: 'full',
+      },
+      clientPool: {
+        size: 5,
+      },
+      globalOpenSearchConfig: {
+        requestTimeout: duration(15, 'seconds'),
+        pingTimeout: duration(25, 'seconds'),
+      },
+    } as DataSourcePluginConfigType;
+    mockReadFileSync.mockReset();
+    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(0);
+    mockReadFileSync.mockClear();
+    expect(parsedConfig).toEqual(
+      expect.objectContaining({
+        host: TEST_DATA_SOURCE_ENDPOINT,
+        ssl: {
+          rejectUnauthorized: true,
+          ca: undefined,
+        },
+        requestTimeout: 15000,
+        pingTimeout: 25000,
       })
     );
   });
