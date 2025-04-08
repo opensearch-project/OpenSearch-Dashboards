@@ -3,31 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { workspaceSearchPages } from './search_pages_command';
-import { WorkspaceUseCase } from '../../types';
+import { searchPages } from './search_pages_command';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
-import { NavGroupItemInMap, WorkspaceObject } from 'opensearch-dashboards/public';
 
-describe('<workspaceSearchPagesCommand />', () => {
-  const registeredUseCases = new BehaviorSubject([
-    {
-      id: 'foo',
-      title: 'Foo',
-      features: [{ id: 'system-feature', title: 'System feature' }],
-      systematic: true,
-      description: '',
-    } as WorkspaceUseCase,
-  ]);
-
-  const currentWorkspace: WorkspaceObject = {
-    id: 'mock-workspace',
-    name: 'mock-workspace',
-    features: ['use-case-foo-group'],
-  };
-
-  const navGroup: Record<string, NavGroupItemInMap> = {
-    'foo-group': {
+describe('<SearchPagesCommand />', () => {
+  const navGroup = {
+    all: {
       id: 'foo-group',
       title: 'Foo Group',
       description: 'Foo Group description',
@@ -89,19 +71,16 @@ describe('<workspaceSearchPagesCommand />', () => {
         getNavGroupsMap$: () => new BehaviorSubject(navGroup),
       },
     },
-    workspaces: {
-      ...mock.workspaces,
-      currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(currentWorkspace),
-    },
+    application: {},
   };
 
   const callbackFn = jest.fn();
 
   it('search return empty result', async () => {
-    const searchResult = await workspaceSearchPages(
+    const searchResult = await searchPages(
       'bar',
-      registeredUseCases,
-      coreStartMock,
+      coreStartMock.chrome.navGroup,
+      coreStartMock.application as any,
       callbackFn
     );
 
@@ -109,32 +88,24 @@ describe('<workspaceSearchPagesCommand />', () => {
   });
 
   it('search return matched result', async () => {
-    const searchResult = await workspaceSearchPages(
+    const searchResult = await searchPages(
       'foo',
-      registeredUseCases,
-      coreStartMock,
+      coreStartMock.chrome.navGroup,
+      coreStartMock.application as any,
       callbackFn
     );
 
     expect(searchResult).toHaveLength(2);
   });
 
-  it('search return pages out of workspace', async () => {
-    let searchResult = await workspaceSearchPages(
-      'Settings',
-      registeredUseCases,
-      coreStartMock,
+  it('search return matched data admin result', async () => {
+    const searchResult = await searchPages(
+      'data',
+      coreStartMock.chrome.navGroup,
+      coreStartMock.application as any,
       callbackFn
     );
 
-    expect(searchResult).toHaveLength(2);
-
-    searchResult = await workspaceSearchPages(
-      'Administration',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
     expect(searchResult).toHaveLength(2);
   });
 });

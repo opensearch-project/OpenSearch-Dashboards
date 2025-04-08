@@ -11,6 +11,7 @@ import {
   getOrderedLinks,
   getOrderedLinksOrCategories,
   getSortedNavLinks,
+  searchNavigationLinks,
 } from './utils';
 
 const mockedNonCategoryLink = {
@@ -143,5 +144,136 @@ describe('getSortedNavLinks', () => {
       mockedNavLinkA.id,
       mockedSubNavLinkA.id,
     ]);
+  });
+});
+
+describe('searchNavigationLinks', () => {
+  const mockedNavLinkParent = {
+    id: 'parent',
+    title: 'Parent Link',
+    baseUrl: '',
+    href: '',
+    order: 1,
+  };
+
+  const mockedNavLinkChild = {
+    id: 'child',
+    parentNavLinkId: 'parent',
+    title: 'Child Link',
+    baseUrl: '',
+    href: '',
+    order: 2,
+  };
+
+  const mockedHiddenLink = {
+    id: 'hidden',
+    title: 'Hidden Link',
+    baseUrl: '',
+    href: '',
+    hidden: true,
+    order: 3,
+  };
+
+  const mockedDisabledLink = {
+    id: 'disabled',
+    title: 'Disabled Link',
+    baseUrl: '',
+    href: '',
+    disabled: true,
+    order: 4,
+  };
+
+  const mockedNavGroup = {
+    id: 'test-group',
+    title: 'Test Group',
+    description: 'Test Group',
+    navLinks: [mockedNavLinkParent, mockedNavLinkChild, mockedHiddenLink, mockedDisabledLink],
+  };
+
+  const navGroupMap = {
+    'test-group': mockedNavGroup,
+  };
+
+  const allAvailableCaseId = ['test-group'];
+
+  it('should return matching visible and enabled links', () => {
+    const query = 'child';
+    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        id: 'child',
+        title: 'Child Link',
+        navGroup: mockedNavGroup,
+      })
+    );
+  });
+
+  it('should return child links when searching by parent title', () => {
+    const query = 'parent';
+    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        id: 'child',
+        title: 'Child Link',
+        navGroup: mockedNavGroup,
+      })
+    );
+  });
+
+  it('should not return hidden links', () => {
+    const query = 'hidden';
+    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('should not return disabled links', () => {
+    const query = 'disabled';
+    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('should not return parent links', () => {
+    const query = 'Parent';
+    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        id: 'child',
+        title: 'Child Link',
+      })
+    );
+  });
+
+  it('should handle case-insensitive search', () => {
+    const query = 'CHILD';
+    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        id: 'child',
+        title: 'Child Link',
+      })
+    );
+  });
+
+  it('should handle non-existent nav group', () => {
+    const result = searchNavigationLinks(['non-existent'], navGroupMap, 'test');
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('should return empty array for empty query', () => {
+    const query = '';
+    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+
+    expect(result).toHaveLength(1);
   });
 });

@@ -146,6 +146,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -1263,6 +1264,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -2380,6 +2382,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -3497,6 +3500,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -4614,6 +4618,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -5731,6 +5736,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {

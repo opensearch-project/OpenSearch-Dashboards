@@ -71,6 +71,7 @@ import {
   GlobalSearchServiceSetupContract,
   GlobalSearchServiceStartContract,
 } from './global_search';
+import { searchPages } from './ui/global_search/search_pages_command';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -145,6 +146,8 @@ export class ChromeService {
   private useUpdatedHeader = false;
   private updatedHeaderSubscription: Subscription | undefined;
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
+  private navGroupStart?: ChromeNavGroupServiceStartContract;
+  private applicationStart?: InternalApplicationStart;
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -211,6 +214,14 @@ export class ChromeService {
   public setup({ uiSettings }: SetupDeps): ChromeSetup {
     const navGroup = this.navGroup.setup({ uiSettings });
     const globalSearch = this.globalSearch.setup();
+
+    globalSearch.registerSearchCommand({
+      id: 'pagesSearch',
+      type: 'PAGES',
+      run: async (query: string, callback: () => void) =>
+        searchPages(query, this.navGroupStart, this.applicationStart, callback),
+    });
+
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
         if (this.collapsibleNavHeaderRender) {
@@ -268,8 +279,14 @@ export class ChromeService {
       breadcrumbsEnricher$,
       workspaces,
     });
+    this.navGroupStart = navGroup;
+    this.applicationStart = application;
 
     const globalSearch = this.globalSearch.start();
+    if (application.capabilities.workspaces.enabled) {
+      // Page search will be register on workspace side
+      globalSearch.unregisterSearchCommand('pagesSearch');
+    }
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
