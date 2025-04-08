@@ -7,6 +7,7 @@ import { Credentials } from '@aws-sdk/client-sts';
 import { SignatureV4 } from '@aws-sdk/signature-v4';
 import { HttpRequest } from '@aws-sdk/protocol-http';
 import { Sha256 } from '@aws-crypto/sha256-js';
+import { AbortController } from '@aws-sdk/abort-controller';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 const HttpConnector = require('elasticsearch/src/lib/connectors/http');
@@ -36,10 +37,11 @@ class HttpAmazonESConnector extends HttpConnector {
     const reqParams = this.makeReqParams(params);
     let request;
     let cancelled = false;
+    const controller = new AbortController();
 
     const cancel = () => {
       cancelled = true;
-      request && request.abort();
+      controller.abort();
     };
 
     try {
@@ -55,7 +57,9 @@ class HttpAmazonESConnector extends HttpConnector {
         .digest('hex');
       request.headers['x-amz-content-sha256'] = hash;
 
-      const { response } = this.httpClient.handle(request);
+      const { response } = this.httpClient.handle(request, {
+        abortSignal: controller.signal,
+      });
       const body = this.streamToString(response.body);
 
       this.log.trace(params.method, reqParams, params.body, body, response.statusCode);
