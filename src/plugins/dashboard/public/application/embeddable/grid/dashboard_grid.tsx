@@ -40,6 +40,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import type { SavedObjectsClientContract } from 'src/core/public';
+import { EuiButton } from '@elastic/eui';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -345,6 +346,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
   }
 
+  private synchronizeNow = () => {
+    console.log('Synchronize Now clicked!');
+    // Add any sync logic here
+  };
+
   public renderPanels() {
     const { focusedPanelIndex, panels, expandedPanelId } = this.state;
 
@@ -399,15 +405,25 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     const { viewMode } = this.state;
     const isViewMode = viewMode === ViewMode.VIEW;
     return (
-      <ResponsiveSizedGrid
-        isViewMode={isViewMode}
-        layout={this.buildLayoutFromPanels()}
-        onLayoutChange={this.onLayoutChange}
-        maximizedPanelId={this.state.expandedPanelId!}
-        useMargins={this.state.useMargins}
-      >
-        {this.renderPanels()}
-      </ResponsiveSizedGrid>
+      <div style={{ position: 'relative', padding: '16px' }}>
+        {/* ✅ Top-left corner "Synchronize Now" button */}
+        <div style={{ marginBottom: '8px' }}>
+          <EuiButton iconType="refresh" size="s" onClick={this.synchronizeNow}>
+            Synchronize Now
+          </EuiButton>
+        </div>
+
+        {/* ✅ The grid itself */}
+        <ResponsiveSizedGrid
+          isViewMode={isViewMode}
+          layout={this.buildLayoutFromPanels()}
+          onLayoutChange={this.onLayoutChange}
+          maximizedPanelId={this.state.expandedPanelId!}
+          useMargins={this.state.useMargins}
+        >
+          {this.renderPanels()}
+        </ResponsiveSizedGrid>
+      </div>
     );
   }
 }
