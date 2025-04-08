@@ -315,6 +315,18 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
               );
               const indexTitle = indexPattern.attributes.title;
               console.log('Index pattern title (index name):', indexTitle);
+              // Extract datasource, database, and index name from index title
+              const trimmedTitle = indexTitle.replace(/^flint_/, '');
+              const parts = trimmedTitle.split('_');
+
+              const datasource = parts[0] || 'unknown';
+              const database = parts[1] || 'unknown';
+              const index = parts.slice(2).join('_') || 'unknown';
+
+              console.log('Extracted Info:');
+              console.log('Datasource:', datasource);
+              console.log('Database:', database);
+              console.log('Index:', index);
             } catch (err) {
               console.error(`Failed to fetch index pattern ${indexPatternRef.id}:`, err);
             }
