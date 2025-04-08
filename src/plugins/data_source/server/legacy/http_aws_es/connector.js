@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Credentials } from '@aws-sdk/client-sts';
 import { SignatureV4 } from '@aws-sdk/signature-v4';
 import { HttpRequest } from '@aws-sdk/protocol-http';
 import { Sha256 } from '@aws-crypto/sha256-js';
@@ -88,11 +87,11 @@ class HttpAmazonESConnector extends HttpConnector {
       this.service = awssigv4Cred.service;
       delete reqParams.headers.auth;
 
-      return new Credentials({
+      return {
         accessKeyId,
         secretAccessKey,
         sessionToken,
-      });
+      };
     }
 
     // Use default credential provider chain
