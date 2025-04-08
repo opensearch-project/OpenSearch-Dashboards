@@ -302,6 +302,25 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             firstPie.savedObjectId
           );
           console.log('First pie visualization saved object metadata:', pieSavedObject);
+
+          const indexPatternRef = pieSavedObject.references.find(
+            (ref: any) => ref.type === 'index-pattern'
+          );
+
+          if (indexPatternRef) {
+            try {
+              const indexPattern = await this.props.savedObjectsClient.get(
+                'index-pattern',
+                indexPatternRef.id
+              );
+              const indexTitle = indexPattern.attributes.title;
+              console.log('Index pattern title (index name):', indexTitle);
+            } catch (err) {
+              console.error(`Failed to fetch index pattern ${indexPatternRef.id}:`, err);
+            }
+          } else {
+            console.warn('No index-pattern reference found in the pie visualization saved object.');
+          }
         } catch (error) {
           console.error(
             `Error fetching metadata for pie saved object ID ${firstPie.savedObjectId}:`,
