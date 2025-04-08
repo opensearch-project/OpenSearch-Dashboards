@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import dompurify from 'dompurify';
 
 import { OpenSearchDashboardsDatatableRow } from 'src/plugins/expressions';
 import { FormattedColumn } from '../types';
@@ -61,5 +62,32 @@ describe('getTableVisCellValue', () => {
   test('should return null when no matching columnId is found', () => {
     const { container } = render(<TableCell rowIndex={0} columnId="nonexistent" />);
     expect(container.firstChild).toBeNull();
+  });
+  
+  test('should invoke dompurify hook', () => {
+    mockFormatter.convert.mockReturnValueOnce('<strong>Test Value 1</strong>');
+    const addHookSpy = jest.spyOn(dompurify, 'addHook').mockImplementation((currentNode, hookEvent) => { 
+    });
+	const { getByText } = render(<TableCell rowIndex={0} columnId="testId" />);
+    expect(addHookSpy).toHaveBeenCalled();
+  });
+  
+  test('should return node with value of target attribute as _blank', () => {
+    mockFormatter.convert.mockReturnValueOnce('<a target="_blank" >Test Value 1</a>');
+    const { getByText } = render(<TableCell rowIndex={0} columnId="testId" />);
+    expect(getByText('Test Value 1')).toHaveAttribute('target', '_blank');
+    expect(getByText('Test Value 1')).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+  
+  test('should return node with value of target attribute as _self', () => {
+    mockFormatter.convert.mockReturnValueOnce('<a target="_self" >Test Value 1</a>');
+    const { getByText } = render(<TableCell rowIndex={0} columnId="testId" />);
+    expect(getByText('Test Value 1')).toHaveAttribute('target', '_self');
+  });
+  
+  test('should return node with value of rel attribute as noopener noreferrer', () => {
+    mockFormatter.convert.mockReturnValueOnce('<a>Test Value 1</a>');
+    const { getByText } = render(<TableCell rowIndex={0} columnId="testId" />);
+    expect(getByText('Test Value 1')).toHaveAttribute('rel', 'noopener noreferrer');
   });
 });
