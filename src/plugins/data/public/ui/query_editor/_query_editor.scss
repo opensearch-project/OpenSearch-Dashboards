@@ -137,7 +137,7 @@
 .osdQueryEditor__header {
   display: flex;
   align-items: center;
-  padding: $euiSizeS $euiSizeXS 0;
+  padding: 0 $euiSizeXS;
 }
 
 .osdQueryEditor__topBar {
@@ -182,7 +182,7 @@
   margin-top: $euiSizeS;
 
   .globalFilterGroup__wrapper {
-    margin-top: -$euiSizeS * 2;
+    margin-top: -$euiSizeS;
   }
 }
 

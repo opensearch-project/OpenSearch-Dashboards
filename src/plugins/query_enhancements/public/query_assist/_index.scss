@@ -22,6 +22,10 @@
     margin-bottom: $euiSizeS;
   }
 
+  &.queryAssist__form {
+    margin-top: $euiSizeS;
+  }
+
   .queryAssist__popoverWrapper {
     display: flex;
     align-items: center;
