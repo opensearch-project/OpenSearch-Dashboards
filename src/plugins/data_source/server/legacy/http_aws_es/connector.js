@@ -10,7 +10,6 @@ import { AbortController } from '@aws-sdk/abort-controller';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 const HttpConnector = require('elasticsearch/src/lib/connectors/http');
-const crypto = require('crypto');
 
 class HttpAmazonESConnector extends HttpConnector {
   constructor(host, config) {
@@ -32,9 +31,8 @@ class HttpAmazonESConnector extends HttpConnector {
     this.service = config.service || 'es';
   }
 
-  request(params, cb) {
+  async request(params, cb) {
     const reqParams = this.makeReqParams(params);
-    let request;
     let cancelled = false;
     const controller = new AbortController();
 
@@ -44,22 +42,16 @@ class HttpAmazonESConnector extends HttpConnector {
     };
 
     try {
-      const creds = this.getAWSCredentials(reqParams);
+      const creds = await this.getAWSCredentials(reqParams);
       if (cancelled) return;
 
-      request = this.createRequest(params, reqParams);
-      this.signRequest(request, creds);
+      let request = this.createRequest(params, reqParams);
+      request = await this.signRequest(request, creds);
 
-      const hash = crypto
-        .createHash('sha256')
-        .update(request.body || '', 'utf8')
-        .digest('hex');
-      request.headers['x-amz-content-sha256'] = hash;
-
-      const { response } = this.httpClient.handle(request, {
+      const { response } = await this.httpClient.handle(request, {
         abortSignal: controller.signal,
       });
-      const body = this.streamToString(response.body);
+      const body = await this.streamToString(response.body);
 
       this.log.trace(params.method, reqParams, params.body, body, response.statusCode);
       cb(null, body, response.statusCode, response.headers);
@@ -118,7 +110,7 @@ class HttpAmazonESConnector extends HttpConnector {
     return request;
   }
 
-  signRequest(request, credentials) {
+  async signRequest(request, credentials) {
     const signer = new SignatureV4({
       credentials,
       region: this.awsConfig.region,
