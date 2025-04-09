@@ -291,7 +291,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(setupMock, {});
 
     expect(WorkspaceClientMock).toBeCalledTimes(1);
-    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId', expect.any(Object));
+    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
 
     const startMock = coreMock.createStart();
     startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_DETAIL_APP_ID);
@@ -328,7 +328,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(getSetupMock(), {});
 
     expect(WorkspaceClientMock).toBeCalledTimes(1);
-    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId', expect.any(Object));
+    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
 
     const startMock = coreMock.createStart();
     workspacePlugin.start(startMock, getMockDependencies());
@@ -357,7 +357,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(getSetupMock(), {});
 
     expect(WorkspaceClientMock).toBeCalledTimes(1);
-    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId', expect.any(Object));
+    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
 
     const startMock = coreMock.createStart();
     startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_DETAIL_APP_ID);
