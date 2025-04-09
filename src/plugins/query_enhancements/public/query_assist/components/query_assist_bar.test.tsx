@@ -6,9 +6,14 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ComponentProps, PropsWithChildren } from 'react';
 import { IntlProvider } from 'react-intl';
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { QueryAssistBar } from '.';
-import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
+import {
+  notificationServiceMock,
+  uiSettingsServiceMock,
+  coreMock,
+} from '../../../../../core/public/mocks';
 import { DataStorage } from '../../../../data/common';
 import { QueryEditorExtensionDependencies, QueryStringContract } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
@@ -17,6 +22,7 @@ import { setData, setStorage } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistInput } from './query_assist_input';
+import { QueryEnhancementsPluginStartDependencies } from '../../types';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
@@ -38,8 +44,12 @@ jest.mock('./query_assist_input', () => ({
 }));
 
 const dataSetupMock = dataPluginMock.createSetupContract(true);
+const abortControllerRefMock = {
+  current: new AbortController(),
+} as React.MutableRefObject<AbortController | undefined>;
+
 dataSetupMock.ui = {
-  isGeneratingppl$: new BehaviorSubject<boolean>(false),
+  abortControllerRef: abortControllerRefMock,
 };
 
 const dataMock = dataPluginMock.createStartContract(true);
@@ -65,6 +75,23 @@ const dataPropsMock = {
   data: dataSetupMock,
 };
 
+const uiActionsStartMock = uiActionsPluginMock.createStartContract();
+uiActionsStartMock.getTrigger.mockReturnValue({
+  id: '',
+  exec: jest.fn(),
+});
+
+const queryEnhancementDepsMock: QueryEnhancementsPluginStartDependencies = {
+  data: {} as any,
+  dataSource: {} as any,
+  uiActions: uiActionsStartMock,
+};
+
+const coreSetupMock = {
+  ...coreMock.createSetup(),
+  getStartServices: jest.fn().mockResolvedValue([coreMock.createStart(), queryEnhancementDepsMock]),
+} as unknown;
+
 type Props = ComponentProps<typeof QueryAssistBar>;
 
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
@@ -76,6 +103,7 @@ const renderQueryAssistBar = (overrideProps: Partial<Props> = {}) => {
     {
       dependencies,
       data: dataPropsMock.data,
+      core: coreSetupMock,
     },
     overrideProps
   );

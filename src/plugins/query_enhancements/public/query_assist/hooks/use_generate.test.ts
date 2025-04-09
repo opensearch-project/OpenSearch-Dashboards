@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { act, renderHook } from '@testing-library/react-hooks/dom';
 import { coreMock } from '../../../../../core/public/mocks';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { useGenerateQuery } from './use_generate';
+import { QueryEnhancementsPluginStartDependencies } from '../../types';
 
 const coreSetup = coreMock.createSetup();
 const mockHttp = coreSetup.http;
@@ -18,7 +19,20 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
 }));
 
 describe('useGenerateQuery', () => {
-  const isGeneratingppl$ = new BehaviorSubject<boolean>(false);
+  const uiActionsStartMock = uiActionsPluginMock.createStartContract();
+  uiActionsStartMock.getTrigger.mockReturnValue({
+    id: '',
+    exec: jest.fn(),
+  });
+  const startServiceMock: QueryEnhancementsPluginStartDependencies = {
+    data: {} as any,
+    dataSource: {} as any,
+    uiActions: uiActionsStartMock,
+  };
+  const abortControllerRefMock = {
+    current: new AbortController(),
+  } as React.MutableRefObject<AbortController | undefined>;
+
   beforeEach(() => {
     (useOpenSearchDashboards as jest.MockedFunction<typeof useOpenSearchDashboards>)
       // @ts-ignore for this test we only need http implemented
@@ -35,7 +49,7 @@ describe('useGenerateQuery', () => {
 
   it('should generate results', async () => {
     mockHttp.post.mockResolvedValueOnce({ query: 'test query' });
-    const { result } = renderHook(() => useGenerateQuery({ isGeneratingppl$ }));
+    const { result } = renderHook(() => useGenerateQuery(startServiceMock, abortControllerRefMock));
     const { generateQuery } = result.current;
 
     await act(async () => {
@@ -50,7 +64,7 @@ describe('useGenerateQuery', () => {
   });
 
   it('should handle errors', async () => {
-    const { result } = renderHook(() => useGenerateQuery({ isGeneratingppl$ }));
+    const { result } = renderHook(() => useGenerateQuery(startServiceMock, abortControllerRefMock));
     const { generateQuery } = result.current;
     const mockError = new Error('mockError');
     mockHttp.post.mockRejectedValueOnce(mockError);
@@ -68,7 +82,7 @@ describe('useGenerateQuery', () => {
   });
 
   it('should abort previous call', async () => {
-    const { result } = renderHook(() => useGenerateQuery({ isGeneratingppl$ }));
+    const { result } = renderHook(() => useGenerateQuery(startServiceMock, abortControllerRefMock));
     const { generateQuery, abortControllerRef } = result.current;
 
     await act(async () => {
@@ -81,7 +95,7 @@ describe('useGenerateQuery', () => {
   });
 
   it('should abort call with controller', async () => {
-    const { result } = renderHook(() => useGenerateQuery({ isGeneratingppl$ }));
+    const { result } = renderHook(() => useGenerateQuery(startServiceMock, abortControllerRefMock));
     const { generateQuery, abortControllerRef } = result.current;
 
     await act(async () => {

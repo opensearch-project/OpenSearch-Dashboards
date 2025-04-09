@@ -14,7 +14,7 @@ import { QueryEnhancementsPluginStartDependencies } from '../../types';
 
 export const useGenerateQuery = (
   startService: QueryEnhancementsPluginStartDependencies | undefined,
-  otherAbortControllerRef: React.MutableRefObject<AbortController | undefined>
+  abortControllerRefInDataPlugin: React.MutableRefObject<AbortController | undefined>
 ) => {
   const mounted = useRef(false);
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ export const useGenerateQuery = (
       if (startService) {
         startService?.uiActions
           .getTrigger(ABORT_DATA_QUERY_TRIGGER)
-          .exec({ abortControllerRef: otherAbortControllerRef });
+          .exec({ abortControllerRef: abortControllerRefInDataPlugin });
       }
       const response = await services.http.post<QueryAssistResponse>(API.QUERY_ASSIST.GENERATE, {
         body: JSON.stringify(params),
