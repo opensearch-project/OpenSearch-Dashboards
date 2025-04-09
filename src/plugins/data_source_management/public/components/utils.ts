@@ -72,7 +72,7 @@ export const getRemoteClusterConnections = async (dataSourceId: string, http: Ht
 
   const remoteClusterConnections: DataSourceTableItem[] = response.map(
     (remoteClusterConnection: { connectionAlias: string }) => ({
-      id: `${dataSourceId}-${remoteClusterConnection.connectionAlias}`,
+      id: `${dataSourceId}:${remoteClusterConnection.connectionAlias}`,
       title: remoteClusterConnection.connectionAlias,
       type: DataSourceEngineType.OpenSearchCrossCluster,
       connectionType: DataSourceConnectionType.OpenSearchConnection,
