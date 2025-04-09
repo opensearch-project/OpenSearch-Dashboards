@@ -351,7 +351,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   synchronizeNow = async () => {
     try {
       console.log('http:', this.props.http);
-      const response = await this.props.http.get(`api/observability/dsl/indices.getFieldMapping`, {
+      const response = await this.props.http.get(`/api/directquery/dsl/indices.getFieldMapping`, {
         query: {
           index: 'flint_flinttest1_default_vpc_mv_1106',
         },
