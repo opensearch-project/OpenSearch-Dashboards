@@ -84,4 +84,15 @@ describe('<QueryAssistInput /> spec', () => {
     });
     expect(screen.getByTestId('queryAssistErrorBadge')).toBeInTheDocument();
   });
+
+  it('should close suggestions after submission', () => {
+    const { component } = renderQueryAssistInput();
+    const inputElement = component.getByTestId('query-assist-input-field-text') as HTMLInputElement;
+    fireEvent.click(inputElement);
+    const suggestionButton = component.getByText('mock suggestion 1');
+    fireEvent.click(suggestionButton);
+    fireEvent.keyDown(inputElement, { key: 'Enter', code: 'Enter' });
+    const suggestionsComponent = component.getByTestId('suggestions-component');
+    expect(suggestionsComponent).toBeEmptyDOMElement();
+  });
 });
