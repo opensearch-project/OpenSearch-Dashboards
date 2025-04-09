@@ -18,6 +18,7 @@ import {
   fulfillRegistrationLinksToChromeNavLinks,
   getSortedNavLinks,
   getVisibleUseCases,
+  isUseCaseGroup,
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
@@ -363,15 +364,24 @@ export class ChromeNavGroupService {
             appIdNavGroupMap.set(navLinkId, navGroupSet);
           });
         };
-        if (visibleUseCases.length === 1) {
+        if (application.capabilities.workspaces.enabled && visibleUseCases.length === 1) {
           // The length will be 1 if inside a workspace
           // as workspace plugin will register a filter to only make the selected nav group visible.
           // In order to tell which nav group we are in, we should use the only visible use case if the visibleUseCases.length equals 1.
           visibleUseCases.forEach((navGroup) => mapAppIdToNavGroup(navGroup));
         } else {
-          // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
           Object.values(navGroupMap).forEach((navGroup) => {
+            // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
             if (navGroup.status === NavGroupStatus.Hidden) {
+              return;
+            }
+
+            // Use cases except "analytics" should be filtered out when workspace is disabled
+            if (
+              !application.capabilities.workspaces.enabled &&
+              isUseCaseGroup(navGroup) &&
+              navGroup.id !== ALL_USE_CASE_ID
+            ) {
               return;
             }
 
