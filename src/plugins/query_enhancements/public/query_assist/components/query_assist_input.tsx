@@ -86,7 +86,9 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
           onClick={() => setIsSuggestionsVisible(true)}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key !== 'Enter') {
+            if (e.key === 'Enter') {
+              setIsSuggestionsVisible(false);
+            } else {
               setIsSuggestionsVisible(true);
             }
           }}
