@@ -40,6 +40,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import type { SavedObjectsClientContract } from 'src/core/public';
+import { HttpStart } from 'src/core/public';
 import { EuiButton } from '@elastic/eui';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
@@ -130,6 +131,7 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
   container: DashboardContainer;
   savedObjectsClient: SavedObjectsClientContract;
+  http: HttpStart;
 }
 
 interface State {
@@ -346,9 +348,18 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
   }
 
-  private synchronizeNow = () => {
-    console.log('Synchronize Now clicked!');
-    // Add any sync logic here
+  synchronizeNow = async () => {
+    try {
+      console.log('http:', this.props.http);
+      const response = await this.props.http.get(`api/observability/dsl/indices.getFieldMapping`, {
+        query: {
+          index: 'flint_flinttest1_default_vpc_mv_1106',
+        },
+      });
+      console.log('Index Mapping:', response);
+    } catch (error) {
+      console.error('Error fetching index mapping:', error);
+    }
   };
 
   public renderPanels() {

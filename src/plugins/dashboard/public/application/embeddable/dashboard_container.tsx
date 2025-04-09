@@ -105,6 +105,7 @@ export interface DashboardContainerOptions {
   ExitFullScreenButton: React.ComponentType<any>;
   uiActions: UiActionsStart;
   savedObjectsClient: CoreStart['savedObjects']['client'];
+  http: CoreStart['http'];
 }
 
 export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<
@@ -246,6 +247,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
             container={this}
             PanelComponent={this.embeddablePanel}
             savedObjectsClient={this.options.savedObjectsClient}
+            http={this.options.http}
           />
         </OpenSearchDashboardsContextProvider>
       </I18nProvider>,

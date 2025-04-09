@@ -9,9 +9,10 @@
     "urlForwarding",
     "navigation",
     "uiActions",
-    "savedObjects"
+    "savedObjects",
+    "dataSourceManagement"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection"],
+  "optionalPlugins": ["home", "share", "usageCollection","dataSouce"],
   "server": true,
   "ui": true,
   "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "home"]

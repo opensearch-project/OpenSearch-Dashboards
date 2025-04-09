@@ -277,6 +277,7 @@ export class DashboardPlugin
         ExitFullScreenButton,
         uiActions: deps.uiActions,
         savedObjectsClient: coreStart.savedObjects.client, // HERE TO ADD SAVED OBJECTS CLIENT
+        http: coreStart.http, // HERE TO ADD HTTP
       };
     };
 
