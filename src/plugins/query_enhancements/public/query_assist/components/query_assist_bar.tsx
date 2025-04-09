@@ -21,7 +21,7 @@ import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
 import { useQueryAssist } from '../hooks';
-import { PPL_SUPPORT_DATASET_TYPES } from '../utils/constant';
+import { isPPLSupportedType } from '../utils/language_support';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
@@ -108,8 +108,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
 
   if (props.dependencies.isCollapsed) return null;
 
-  const datasetSupported =
-    selectedDataset?.type && PPL_SUPPORT_DATASET_TYPES.includes(selectedDataset.type);
+  const datasetSupported = isPPLSupportedType(selectedDataset?.type);
 
   let inputPlaceholder = selectedIndex
     ? i18n.translate('queryEnhancements.queryAssist.input.placeholderWithIndex', {
