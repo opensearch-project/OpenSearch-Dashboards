@@ -8,6 +8,9 @@ import { IRouter } from 'opensearch-dashboards/server';
 import { REMOTE_CLUSTER } from '../../framework/utils/shared';
 
 export function registerRemoteClusterRoutes(router: IRouter) {
+  /**
+   * @experimental this API is experimental and might change in future releases
+   */
   router.get(
     {
       path: `${REMOTE_CLUSTER}/list`,
@@ -23,10 +26,15 @@ export function registerRemoteClusterRoutes(router: IRouter) {
         : context.core.opensearch.client.asCurrentUser;
 
       try {
-        const result = await client.transport.request({
-          method: 'GET',
-          path: '/_remote/info',
-        });
+        const result = await client.transport.request(
+          {
+            method: 'GET',
+            path: '/_remote/info',
+          },
+          {
+            requestTimeout: 5000, // Enforce timeout to avoid hanging requests
+          }
+        );
 
         const remoteClusters = Object.entries(result.body).map(([key, value]) => ({
           connectionAlias: key,
@@ -35,10 +43,9 @@ export function registerRemoteClusterRoutes(router: IRouter) {
         return response.ok({ body: remoteClusters });
       } catch (error) {
         const errMessage = error?.meta?.body?.Message || 'Unknown Error';
+        // Transform 401 errors to 405 to indicate Method not allowed and remote cluster is not enabled
         return response.custom({
-          statusCode: errMessage.includes(`'/_remote/info' is not allowed`)
-            ? 405
-            : error.statusCode,
+          statusCode: error.statusCode === 401 ? 405 : error.statusCode,
           body: {
             message: errMessage,
           },
@@ -47,6 +54,9 @@ export function registerRemoteClusterRoutes(router: IRouter) {
     }
   );
 
+  /**
+   * @experimental this API is experimental and might change in future releases
+   */
   router.get(
     {
       path: `${REMOTE_CLUSTER}/indexes`,
@@ -63,18 +73,21 @@ export function registerRemoteClusterRoutes(router: IRouter) {
         : context.core.opensearch.client.asCurrentUser; // obtain the opensearch client corresponding to the datasourceId
 
       try {
-        const result = await client.transport.request({
-          method: 'GET',
-          path: `/_resolve/index/${request.query.connectionAlias}:*`,
-        });
+        const result = await client.transport.request(
+          {
+            method: 'GET',
+            path: `/_resolve/index/${request.query.connectionAlias}:*`,
+          },
+          {
+            requestTimeout: 5000, // Enforce timeout to avoid hanging requests
+          }
+        );
         const indexes = result.body.indices.map((index) => index.name);
         return response.ok({ body: indexes });
       } catch (error) {
         const errMessage = error?.meta?.body?.Message || 'Unknown Error';
         return response.custom({
-          statusCode: errMessage.includes(`'/_remote/info' is not allowed`)
-            ? 405
-            : error.statusCode,
+          statusCode: error.statusCode,
           body: {
             message: errMessage,
           },

@@ -87,6 +87,36 @@ const renderOption = (option: DataSourceModalOption) => {
   return label;
 };
 
+const getOpenSearchRelatedConnectionsBadges = (
+  relatedCrossClusterConnections: DataSourceConnection[] | undefined,
+  relatedDirectConnections: DataSourceConnection[] | undefined
+) => {
+  return relatedCrossClusterConnections && relatedCrossClusterConnections.length > 0 ? (
+    <EuiBadgeGroup>
+      {relatedCrossClusterConnections && relatedCrossClusterConnections.length && (
+        <EuiBadge>
+          {i18n.translate('workspace.form.selectDataSource.crossClusterOptionBadge', {
+            defaultMessage: '+ {relatedConnections} Cross cluster',
+            values: {
+              relatedConnections: relatedCrossClusterConnections.length,
+            },
+          })}
+        </EuiBadge>
+      )}
+      {relatedDirectConnections && relatedDirectConnections.length > 0 && (
+        <EuiBadge>
+          {i18n.translate('workspace.form.selectDataSource.directQueryOptionBadge', {
+            defaultMessage: '+ {relatedConnections} Direct query',
+            values: {
+              relatedConnections: relatedDirectConnections.length,
+            },
+          })}
+        </EuiBadge>
+      )}
+    </EuiBadgeGroup>
+  ) : undefined;
+};
+
 const convertConnectionToOption = ({
   connection,
   selectedConnectionIds,
@@ -98,46 +128,23 @@ const convertConnectionToOption = ({
   logos: Logos;
   mode: AssociationDataSourceModalMode;
 }) => {
+  const relatedCrossClusterConnections = connection.relatedConnections?.filter(
+    (relatedConnection) => relatedConnection.type === DataSourceEngineType.OpenSearchCrossCluster
+  );
+
   const relatedDirectConnections = connection.relatedConnections?.filter(
     (relatedConnection) =>
       relatedConnection.connectionType === DataSourceConnectionType.DirectQueryConnection
   );
 
-  const relatedCrossClusterConnections = connection.relatedConnections?.filter(
-    (relatedConnection) => relatedConnection.type === DataSourceEngineType.OpenSearchCrossCluster
-  );
-
-  const openSearchRelatedConnectionsBadges =
-    connection?.relatedConnections && connection.relatedConnections.length > 0 ? (
-      <EuiBadgeGroup>
-        {relatedCrossClusterConnections && relatedCrossClusterConnections.length && (
-          <EuiBadge>
-            {i18n.translate('workspace.form.selectDataSource.crossClusterOptionBadge', {
-              defaultMessage: '+ {relatedConnections} Cross cluster',
-              values: {
-                relatedConnections: relatedCrossClusterConnections.length,
-              },
-            })}
-          </EuiBadge>
-        )}
-        {relatedDirectConnections && relatedDirectConnections.length > 0 && (
-          <EuiBadge>
-            {i18n.translate('workspace.form.selectDataSource.directQueryOptionBadge', {
-              defaultMessage: '+ {relatedConnections} Direct query',
-              values: {
-                relatedConnections: relatedDirectConnections.length,
-              },
-            })}
-          </EuiBadge>
-        )}
-      </EuiBadgeGroup>
-    ) : undefined;
-
   return {
     label: connection.name,
     key: connection.id,
     description: connection.description,
-    append: openSearchRelatedConnectionsBadges,
+    append: getOpenSearchRelatedConnectionsBadges(
+      relatedCrossClusterConnections,
+      relatedDirectConnections
+    ),
     disabled: !!(
       connection.connectionType === DataSourceConnectionType.DirectQueryConnection ||
       connection?.parentId

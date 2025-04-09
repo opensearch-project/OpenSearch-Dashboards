@@ -195,21 +195,16 @@ export const fetchRemoteClusterConnections = async (
     return [];
   }
 
-  const remoteClusterConnections: DataSourceTableItem[] = [];
-
-  for (const ds of dataSources) {
+  const remoteClusterConnectionsPromises = dataSources.map((ds) => {
     if (
       ds.type === DataSourceEngineType.OpenSearch ||
       ds.type === DataSourceEngineType.Elasticsearch
     ) {
-      try {
-        const remoteClusterConnectionsResult = await getRemoteClusterConnections(ds.id, http);
-        remoteClusterConnections.push(...remoteClusterConnectionsResult);
-      } catch (error) {
-        // Ignore errors when fetching remote cluster connections
-      }
+      return getRemoteClusterConnections(ds.id, http).catch(() => []); // Incase of error, return empty array
     }
-  }
+    return [];
+  });
+  const remoteClusterConnections = (await Promise.all(remoteClusterConnectionsPromises)).flat();
 
   return remoteClusterConnections;
 };

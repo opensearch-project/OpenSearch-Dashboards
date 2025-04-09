@@ -289,6 +289,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         item?.relatedConnections?.length ? (
           <EuiButtonIcon
             onClick={() => toggleDetails(item)}
+            data-test-subj="expandCollapseButton"
             aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
             iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
           />
