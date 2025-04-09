@@ -22,8 +22,6 @@ import { QueryAssistBanner, QueryAssistBar, QueryAssistSummary } from '../compon
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { QueryAssistContext, QueryAssistState } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
-import { Trigger, UiActionsSetup, UiActionsStart } from '../../../../ui_actions/public';
-import { QueryEnhancementsPluginStartDependencies } from '../../types';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -92,7 +90,7 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
   );
 
 export const createQueryAssistExtension = (
-  core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
+  core: CoreSetup,
   data: DataPublicPluginSetup,
   config: ConfigSchema['queryAssist'],
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>,
@@ -134,7 +132,7 @@ export const createQueryAssistExtension = (
           data={data}
           queryState$={assistQueryState$}
         >
-          <QueryAssistBar data={data} dependencies={dependencies} core={core} />
+          <QueryAssistBar data={data} dependencies={dependencies} />
         </QueryAssistWrapper>
       );
     },

@@ -9,20 +9,15 @@ import { IntlProvider } from 'react-intl';
 import { of } from 'rxjs';
 import { QueryAssistBar } from '.';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
-import {
-  notificationServiceMock,
-  uiSettingsServiceMock,
-  coreMock,
-} from '../../../../../core/public/mocks';
+import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { DataStorage } from '../../../../data/common';
 import { QueryEditorExtensionDependencies, QueryStringContract } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { setData, setStorage } from '../../services';
+import { setData, setStorage, setUiActions } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistInput } from './query_assist_input';
-import { QueryEnhancementsPluginStartDependencies } from '../../types';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
@@ -81,16 +76,7 @@ uiActionsStartMock.getTrigger.mockReturnValue({
   exec: jest.fn(),
 });
 
-const queryEnhancementDepsMock: QueryEnhancementsPluginStartDependencies = {
-  data: {} as any,
-  dataSource: {} as any,
-  uiActions: uiActionsStartMock,
-};
-
-const coreSetupMock = {
-  ...coreMock.createSetup(),
-  getStartServices: jest.fn().mockResolvedValue([coreMock.createStart(), queryEnhancementDepsMock]),
-} as unknown;
+setUiActions(uiActionsStartMock);
 
 type Props = ComponentProps<typeof QueryAssistBar>;
 
@@ -103,7 +89,6 @@ const renderQueryAssistBar = (overrideProps: Partial<Props> = {}) => {
     {
       dependencies,
       data: dataPropsMock.data,
-      core: coreSetupMock,
     },
     overrideProps
   );

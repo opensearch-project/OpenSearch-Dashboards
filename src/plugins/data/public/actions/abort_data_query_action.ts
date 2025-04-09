@@ -20,7 +20,6 @@ export function createAbortDataQueryAction(): ActionByType<typeof ACTION_ABORT_D
     execute: async (context: AbortDataQueryContext) => {
       try {
         const { abortControllerRef } = context;
-
         if (abortControllerRef.current) {
           // Abort existing query
           abortControllerRef.current.abort();
