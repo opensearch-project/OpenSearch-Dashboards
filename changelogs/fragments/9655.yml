@@ -1,0 +1,3 @@
+feat:
+- Enable experimental data plugin's __enhance ([#9655](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9655))
+- Add resultsActionBar into data plugin's __enhance ([#9655](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9655))

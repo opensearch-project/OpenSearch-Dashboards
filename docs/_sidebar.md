@@ -12,6 +12,8 @@
     - [User_stories](multi-datasource/user_stories.md)
   - [Openapi](openapi/README.md)
   - Plugins
+    - data
+      - [Query editor enhancements](plugins/data/query-editor-enhancements.md)
     - discover
       - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
       - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
