@@ -1,2 +1,0 @@
-security:
-- Resolve CVE-2024-53392 by bumping prismjs to 1.30.0 ([#9634](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9634))
