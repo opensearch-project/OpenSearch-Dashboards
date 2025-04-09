@@ -3,8 +3,7 @@ name: Post Performance Comment
 on:
   workflow_run:
     workflows:
-      - 'Lighthouse Performance Testing'
-      - 'Bundler Performance Testing'
+      - 'Performance CI'
     types:
       - completed
 
@@ -12,19 +11,23 @@ jobs:
   post-comment:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       issues: write
       pull-requests: write
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Download Lighthouse Results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v2
         with:
           name: lighthouse-results
           path: lighthouse-results
         continue-on-error: true
 
       - name: Download Bundle Analysis Results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v2
         with:
           name: bundle-analysis-results
           path: bundle-analysis-results

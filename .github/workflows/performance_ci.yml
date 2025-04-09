@@ -1,0 +1,12 @@
+name: Performance CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  run-lighthouse:
+    uses: ./.github/workflows/lighthouse_performance_testing.yml
+
+  run-bundler:
+    uses: ./.github/workflows/bundler_performance_testing.yml

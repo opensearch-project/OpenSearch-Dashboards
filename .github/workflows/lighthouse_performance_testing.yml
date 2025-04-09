@@ -1,21 +1,7 @@
 name: Lighthouse Performance Testing
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - '**/*.md' # Ignore documentation files
-      - '**/*.test.ts' # Ignore test files (TypeScript)
-      - '**/*.test.js' # Ignore test files (JavaScript)
-      - '**/__tests__/**' # Ignore test directories
-      - '.github/workflows/**' # Ignore GitHub workflow files
-      - 'docs/**' # Ignore entire docs directory
-permissions:
-  contents: read
-  pull-requests: write
-  statuses: write
-  issues: write
+  workflow_call:
 
 env:
   NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
@@ -24,6 +10,7 @@ env:
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
