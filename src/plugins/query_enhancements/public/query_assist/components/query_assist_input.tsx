@@ -19,7 +19,7 @@ interface QueryAssistInputProps {
   selectedIndex?: string;
   previousQuestion?: string;
   error?: AgentError;
-  placeholder: string;
+  placeholder?: string;
 }
 
 export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {

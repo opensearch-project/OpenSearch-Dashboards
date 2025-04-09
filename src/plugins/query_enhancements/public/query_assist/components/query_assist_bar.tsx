@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
 import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { Dataset } from '../../../../data/common';
@@ -108,11 +108,8 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
 
   if (props.dependencies.isCollapsed) return null;
 
-  const { dependencies } = props;
-
-  const datasetSupported = PPL_SUPPORT_DATASET_TYPES.includes(
-    dependencies.query.dataset?.type || ''
-  );
+  const datasetSupported =
+    selectedDataset?.type && PPL_SUPPORT_DATASET_TYPES.includes(selectedDataset.type);
 
   let inputPlaceholder = selectedIndex
     ? i18n.translate('queryEnhancements.queryAssist.input.placeholderWithIndex', {
@@ -123,13 +120,13 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
         defaultMessage: 'Select an index to ask a question',
       });
 
-  if (!datasetSupported && dependencies.query.dataset?.title) {
+  if (!datasetSupported && selectedDataset?.title) {
     inputPlaceholder = i18n.translate(
       'queryEnhancements.queryAssist.input.placeholderDataSetNotSupported',
       {
         defaultMessage:
           'Query Assist is not supported by {datasource}. Please select another data source that is compatible to start entering questions or enter PPL below.',
-        values: { datasource: dependencies.query.dataset.title },
+        values: { datasource: selectedDataset.title },
       }
     );
   }
