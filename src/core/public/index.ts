@@ -412,3 +412,5 @@ export {
 } from './workspace';
 
 export { debounce } from './utils';
+
+export { searchNavigationLinks, GlobalSearchPageItem, navGroupElement } from './chrome';
