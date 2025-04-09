@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { useEffect, useRef, useState } from 'react';
 import { IDataPluginServices } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { API } from '../../../common';
 import { QueryAssistParameters, QueryAssistResponse } from '../../../common/query_assist';
 import { formatError } from '../utils';
+import { ABORT_DATA_QUERY_TRIGGER } from '../../../../ui_actions/public';
+import { QueryEnhancementsPluginStartDependencies } from '../../types';
 
-interface Props {
-  isGeneratingppl$: BehaviorSubject<boolean>;
-}
-
-export const useGenerateQuery = (props: Props) => {
+export const useGenerateQuery = (
+  startService: QueryEnhancementsPluginStartDependencies | undefined,
+  otherAbortControllerRef: React.MutableRefObject<AbortController | undefined>
+) => {
   const mounted = useRef(false);
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef<AbortController>();
@@ -39,7 +39,11 @@ export const useGenerateQuery = (props: Props) => {
     abortControllerRef.current = new AbortController();
     setLoading(true);
     try {
-      props.isGeneratingppl$.next(true);
+      if (startService) {
+        startService?.uiActions
+          .getTrigger(ABORT_DATA_QUERY_TRIGGER)
+          .exec({ abortControllerRef: otherAbortControllerRef });
+      }
       const response = await services.http.post<QueryAssistResponse>(API.QUERY_ASSIST.GENERATE, {
         body: JSON.stringify(params),
         signal: abortControllerRef.current?.signal,
@@ -50,7 +54,6 @@ export const useGenerateQuery = (props: Props) => {
     } finally {
       if (mounted.current) {
         setLoading(false);
-        props.isGeneratingppl$.next(false);
       }
     }
     return {};

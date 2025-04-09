@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
 import { SuggestionsComponentProps } from './typeahead/suggestions_component';
@@ -12,8 +11,9 @@ import { SuggestionsComponentProps } from './typeahead/suggestions_component';
  * The setup contract exposed by the Search plugin exposes the search strategy extension
  * point.
  */
+
 export interface IUiSetup {
-  isGeneratingppl$: BehaviorSubject<boolean>;
+  abortControllerRef: React.MutableRefObject<AbortController | undefined>;
 }
 
 /**

@@ -33,6 +33,11 @@ export {
   createFilterAction,
   ApplyGlobalFilterActionContext,
 } from './apply_filter_action';
+export {
+  AbortDataQueryContext,
+  ACTION_ABORT_DATA_QUERY,
+  createAbortDataQueryAction,
+} from './abort_data_query_action';
 export { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 export { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 export * from './select_range_action';

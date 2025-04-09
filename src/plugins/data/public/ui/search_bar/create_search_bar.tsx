@@ -28,11 +28,10 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { CoreStart } from 'src/core/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
@@ -42,12 +41,28 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
 import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { ABORT_DATA_QUERY_TRIGGER } from '../../../../ui_actions/public';
+import {
+  ACTION_ABORT_DATA_QUERY,
+  createAbortDataQueryAction,
+  AbortDataQueryContext,
+} from '../../actions';
+
+declare module '../../../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [ABORT_DATA_QUERY_TRIGGER]: AbortDataQueryContext;
+  }
+  export interface ActionContextMapping {
+    [ACTION_ABORT_DATA_QUERY]: AbortDataQueryContext;
+  }
+}
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: DataStorage;
-  isGeneratingppl$: BehaviorSubject<boolean>;
+  uiActions: UiActionsStart;
+  abortControllerRef: React.MutableRefObject<AbortController | undefined>;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -80,19 +95,19 @@ const defaultOnQuerySubmit = (
   props: StatefulSearchBarProps,
   queryService: QueryStart,
   currentQuery: Query,
-  isGeneratingppl: boolean = false,
-  abortControllerRef: React.MutableRefObject<AbortController | null>
+  uiActions: UiActionsStart,
+  abortControllerRef: React.MutableRefObject<AbortController | undefined>
 ) => {
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
-  if (isGeneratingppl) return;
-
   const { timefilter } = queryService.timefilter;
 
-  return (payload: { dateRange: TimeRange; query?: Query }) => {
+  return async (payload: { dateRange: TimeRange; query?: Query }) => {
     const isUpdate =
       !_.isEqual(timefilter.getTime(), payload.dateRange) ||
       !_.isEqual(payload.query, currentQuery);
     if (isUpdate) {
+      // register ABORT_DATA_QUERY_TRIGGER
+      uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, createAbortDataQueryAction());
       abortControllerRef.current = new AbortController();
       timefilter.setTime(payload.dateRange);
       if (payload.query) {
@@ -136,22 +151,19 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data, isGeneratingppl$ }: StatefulSearchBarDeps) {
+export function createSearchBar({
+  core,
+  storage,
+  data,
+  uiActions,
+  abortControllerRef,
+}: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
     const { useDefaultBehaviors } = props;
-    const abortControllerRef = useRef<AbortController>(null);
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
-    const isGeneratingppl = useObservable(isGeneratingppl$);
-
-    // if it is generating ppl now, we need to abort current request
-    useEffect(() => {
-      if (isGeneratingppl) {
-        abortControllerRef.current?.abort();
-      }
-    }, [isGeneratingppl]);
 
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
@@ -224,7 +236,7 @@ export function createSearchBar({ core, storage, data, isGeneratingppl$ }: State
             props,
             data.query,
             query,
-            isGeneratingppl,
+            uiActions,
             abortControllerRef
           )}
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}

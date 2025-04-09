@@ -57,6 +57,8 @@ export {
   valueClickTrigger,
   APPLY_FILTER_TRIGGER,
   applyFilterTrigger,
+  ABORT_DATA_QUERY_TRIGGER,
+  abortDataQueryTrigger,
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,

@@ -78,6 +78,7 @@ export interface DataPublicPluginSetup {
 export interface DataPublicPluginStartActions {
   createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
   createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
+  // createAbortDataQueryAction: typeof createAbortDataQueryAction;
 }
 
 /**

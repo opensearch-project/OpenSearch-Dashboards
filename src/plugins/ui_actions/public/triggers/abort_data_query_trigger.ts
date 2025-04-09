@@ -28,14 +28,16 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
-export * from './value_click_trigger';
-export * from './apply_filter_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './external_action_trigger';
-export * from './default_trigger';
-export * from './abort_data_query_trigger';
+import { i18n } from '@osd/i18n';
+import { Trigger } from '.';
+
+export const ABORT_DATA_QUERY_TRIGGER = 'ABORT_DATA_QUERY_TRIGGER';
+export const abortDataQueryTrigger: Trigger<'ABORT_DATA_QUERY_TRIGGER'> = {
+  id: ABORT_DATA_QUERY_TRIGGER,
+  title: i18n.translate('uiActions.triggers.abortDataQueryTrigger', {
+    defaultMessage: 'Abort data query',
+  }),
+  description: i18n.translate('uiActions.triggers.abortDataQueryDescription', {
+    defaultMessage: 'Abort present data query request',
+  }),
+};

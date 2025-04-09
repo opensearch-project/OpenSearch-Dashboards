@@ -5,6 +5,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
 import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import { Dataset } from '../../../../data/common';
 import {
   IDataPluginServices,
@@ -21,10 +22,12 @@ import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
 import { useQueryAssist } from '../hooks';
+import { QueryEnhancementsPluginStartDependencies } from '../../types';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
   data: DataPublicPluginSetup;
+  core: CoreSetup<QueryEnhancementsPluginStartDependencies>;
 }
 
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
@@ -36,9 +39,6 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     () => getPersistedLog(services.uiSettings, storage, 'query-assist'),
     [services.uiSettings, storage]
   );
-  const { generateQuery, loading } = useGenerateQuery({
-    isGeneratingppl$: props.data.ui.isGeneratingppl$,
-  });
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
   const [agentError, setAgentError] = useState<AgentError>();
@@ -48,6 +48,21 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
   const { updateQueryState } = useQueryAssist();
+  const [startService, setStartService] = useState<QueryEnhancementsPluginStartDependencies>();
+
+  useEffect(() => {
+    const loadStartServices = async () => {
+      const [, depsStart] = await props.core.getStartServices();
+      setStartService(depsStart);
+    };
+
+    loadStartServices();
+  }, [props.core]);
+
+  const { generateQuery, loading } = useGenerateQuery(
+    startService,
+    props.data.ui.abortControllerRef
+  );
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
