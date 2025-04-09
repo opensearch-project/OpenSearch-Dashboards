@@ -4,7 +4,6 @@
  */
 
 import { Client as LegacyClient, ConfigOptions } from 'elasticsearch';
-import { Config } from 'aws-sdk';
 import { get } from 'lodash';
 import HttpAmazonESConnector from './http_aws_es/connector';
 import {
@@ -241,9 +240,6 @@ const getAWSClient = (credential: SigV4Content, clientOptions: ConfigOptions): L
   const { region } = credential;
   const client = new LegacyClient({
     connectionClass: HttpAmazonESConnector,
-    awsConfig: new Config({
-      region,
-    }),
     ...clientOptions,
   });
   return client;
