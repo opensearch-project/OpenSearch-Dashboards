@@ -112,8 +112,18 @@ describe('QueryAssistBar', () => {
   });
 
   it('displays callout when dataset is not selected on submit', async () => {
-    queryStringMock.getQuery.mockReturnValueOnce({ query: '', language: 'kuery' });
-    queryStringMock.getUpdates$.mockReturnValueOnce(of({ query: '', language: 'kuery' }));
+    queryStringMock.getQuery.mockReturnValueOnce({
+      query: '',
+      language: 'kuery',
+      dataset: { type: 'INDEX_PATTERN', id: '', title: '' },
+    });
+    queryStringMock.getUpdates$.mockReturnValueOnce(
+      of({
+        query: '',
+        language: 'kuery',
+        dataset: { type: 'INDEX_PATTERN', id: '', title: '' },
+      })
+    );
     renderQueryAssistBar();
 
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'test query' } });
@@ -230,18 +240,20 @@ describe('QueryAssistBar', () => {
   });
 
   it('should show unsupported placeholder when dataset is not supported', async () => {
+    const mockedQuery = {
+      query: '',
+      language: 'kuery',
+      dataset: {
+        id: 'foo',
+        title: 'mock',
+        type: 'S3',
+      },
+    };
+    queryStringMock.getUpdates$.mockReturnValueOnce(of(mockedQuery));
     const { component } = renderQueryAssistBar({
       dependencies: {
         ...dependencies,
-        query: {
-          query: '',
-          language: 'kuery',
-          dataset: {
-            id: 'foo',
-            title: 'mock',
-            type: 'S3',
-          },
-        },
+        query: mockedQuery,
       },
     });
 
