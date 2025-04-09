@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiModalBody,
   EuiModalFooter,
@@ -22,7 +23,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import moment from 'moment';
-import { BaseDataset, DATA_STRUCTURE_META_TYPES, DataStructure } from '../../../common';
+import {
+  BaseDataset,
+  DATA_STRUCTURE_META_TYPES,
+  DataStructure,
+  DataStructureCustomMeta,
+} from '../../../common';
 import { DataStructureFetchOptions, QueryStringContract } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { DatasetTable } from './dataset_table';
@@ -286,7 +292,8 @@ const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
   ) : (
     <EmptyColumn />
   );
-const appendIcon = (item: DataStructure) => {
+
+const getMetaIcon = (item: DataStructure) => {
   if (item.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE) {
     return (
       <EuiToolTip content={item.meta.tooltip}>
@@ -306,6 +313,33 @@ const appendIcon = (item: DataStructure) => {
   }
 
   return null;
+};
+
+const appendIcon = (item: DataStructure) => {
+  const metaIcon = getMetaIcon(item);
+
+  const additionalIcons = (item.meta as DataStructureCustomMeta)?.additionalAppendIcons?.map(
+    (icon: { tooltip: string; type: string }) => {
+      return (
+        <EuiFlexItem grow={false} key={icon.tooltip}>
+          <EuiIconTip key={icon.tooltip} content={icon.tooltip} type={icon.type} />
+        </EuiFlexItem>
+      );
+    }
+  );
+
+  return (
+    <EuiToolTip>
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={true}>
+        {additionalIcons}
+        {metaIcon && (
+          <EuiFlexItem grow={false} key="metaIcon">
+            {metaIcon}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
 };
 
 const isChecked = (
