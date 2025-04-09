@@ -95,6 +95,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Replace `@elastic/filesaver` in favor of `file-saver`. ([#9484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9484))
  - Replace `formatNumWithCommas` with `toLocaleString` ([#9488](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9488))
  - Upgrade @aws-crypto/client-node to ^4.2.0 and aws-sdk from v2 to v3 ([#9641](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9641))
+ - Use AbortController from aws-sdk v3 to abort request ([#9663](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9663))
 
 ### 🪛 Refactoring
 
