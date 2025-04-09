@@ -34,11 +34,13 @@ jobs:
         continue-on-error: true
 
       - name: Prepare Combined Comment
+        id: prepare_comment
         run: |
           COMMENT="### 🚨 Performance Issues Detected!!\n\n"
-
+          HAS_ARTIFACT=false
           # Lighthouse results
           if [ -f lighthouse-results/assertion-results.json ]; then
+            HAS_ARTIFACT=true
             if ! jq empty lighthouse-results/assertion-results.json; then
               echo "❌ Invalid JSON format in Lighthouse assertion results."
               exit 1
@@ -67,15 +69,22 @@ jobs:
 
           # Bundle size results
           if [ -f bundle-analysis-results/bundle_analysis.txt ]; then
+            HAS_ARTIFACT=true
             COMMENT+="### 📦 Bundle Size Analysis 📦\n\n"
             COMMENT+="\`\`\`\n$(cat bundle-analysis-results/bundle_analysis.txt)\n\`\`\`\n"
           fi
 
-          echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
-          echo "$COMMENT" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          if [ "$HAS_ARTIFACT" = false ]; then
+            echo "SKIP_COMMENT=true" >> $GITHUB_OUTPUT
+          else
+            echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
+            echo "$COMMENT" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "SKIP_COMMENT=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Post PR Comment
+        if: steps.prepare_comment.outputs.SKIP_COMMENT == 'false'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
