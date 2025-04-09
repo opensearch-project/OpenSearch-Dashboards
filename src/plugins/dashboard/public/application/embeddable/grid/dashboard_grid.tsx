@@ -156,6 +156,10 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   // item.
   private gridItems = {} as { [key: string]: HTMLDivElement | null };
 
+  private extractedDatasource?: string;
+  private extractedDatabase?: string;
+  private extractedIndex?: string;
+
   constructor(props: DashboardGridProps) {
     super(props);
 
@@ -326,6 +330,10 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
               const database = parts[1] || 'unknown';
               const index = parts.slice(2).join('_') || 'unknown';
 
+              this.extractedDatasource = datasource;
+              this.extractedDatabase = database;
+              this.extractedIndex = index;
+
               console.log('Extracted Info:');
               console.log('Datasource:', datasource);
               console.log('Database:', database);
@@ -350,15 +358,37 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
   synchronizeNow = async () => {
     try {
-      console.log('http:', this.props.http);
-      const response = await this.props.http.get(`/api/directquery/dsl/indices.getFieldMapping`, {
-        query: {
-          index: 'flint_flinttest1_default_vpc_mv_1106',
-        },
+      const { extractedDatasource, extractedDatabase, extractedIndex } = this;
+
+      if (
+        !extractedDatasource ||
+        extractedDatasource === 'unknown' ||
+        !extractedDatabase ||
+        extractedDatabase === 'unknown' ||
+        !extractedIndex ||
+        extractedIndex === 'unknown'
+      ) {
+        console.error(
+          'Datasource, database, or index not properly set. Cannot run REFRESH command.'
+        );
+        return;
+      }
+
+      const query = `REFRESH MATERIALIZED VIEW \`${extractedDatasource}\`.\`${extractedDatabase}\`.\`${extractedIndex}\``;
+
+      const queryParams = {
+        query,
+        lang: 'sql',
+        datasource: extractedDatasource,
+      };
+
+      const response = await this.props.http.post('/api/observability/query/jobs', {
+        body: JSON.stringify(queryParams),
       });
-      console.log('Index Mapping:', response);
+
+      console.log('Materialized view refresh response:', response);
     } catch (error) {
-      console.error('Error fetching index mapping:', error);
+      console.error('Error executing REFRESH MATERIALIZED VIEW:', error);
     }
   };
 
