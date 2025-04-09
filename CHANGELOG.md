@@ -4,7 +4,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
-## [3.0.0-2025-04-09](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.0.0)
+## [3.0.0-beta1-2025-04-09](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.0.0)
 
 ### 💥 Breaking Changes
 
