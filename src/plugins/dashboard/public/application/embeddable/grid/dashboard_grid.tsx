@@ -417,14 +417,14 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     const isViewMode = viewMode === ViewMode.VIEW;
     return (
       <div style={{ position: 'relative', padding: '16px' }}>
-        {/* ✅ Top-left corner "Synchronize Now" button */}
+        {/* Top-left corner "Synchronize Now" button */}
         <div style={{ marginBottom: '8px' }}>
           <EuiButton iconType="refresh" size="s" onClick={this.synchronizeNow}>
             Synchronize Now
           </EuiButton>
         </div>
 
-        {/* ✅ The grid itself */}
+        {/* The grid itself */}
         <ResponsiveSizedGrid
           isViewMode={isViewMode}
           layout={this.buildLayoutFromPanels()}
