@@ -54,6 +54,7 @@ export const workspaceSearchPages = async (
     const searchResult = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
     const handleCallback = (link: Link) => {
+      callback?.();
       const isPageOutOfWorkspace = link.navGroup.type === NavGroupType.SYSTEM;
       if (isPageOutOfWorkspace && currentWorkspace) {
         // remove workspace information in the URL, special handling for data source which could visible both in/out workspace
@@ -96,7 +97,6 @@ export const workspaceSearchPages = async (
           search={query}
           application={coreStart.application}
           callback={() => {
-            callback?.();
             handleCallback(link);
           }}
           customizeBreadcrumbs={(breadcrumbs) => {
