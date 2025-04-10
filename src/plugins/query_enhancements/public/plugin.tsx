@@ -52,6 +52,8 @@ export class QueryEnhancementsPlugin
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
 
+    const abortControllerRef = data.ui.abortControllerRef;
+
     // Define controls once for each language and register language configurations outside of `getUpdates$`
     const pplControls = [pplLanguageReference('PPL')];
     const sqlControls = [sqlLanguageReference('SQL')];
@@ -61,6 +63,7 @@ export class QueryEnhancementsPlugin
       id: 'PPL',
       title: 'PPL',
       search: new PPLSearchInterceptor({
+        abortControllerRef,
         toasts: core.notifications.toasts,
         http: core.http,
         uiSettings: core.uiSettings,
