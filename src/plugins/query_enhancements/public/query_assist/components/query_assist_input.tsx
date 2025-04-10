@@ -85,7 +85,13 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
           disabled={props.isDisabled}
           onClick={() => setIsSuggestionsVisible(true)}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={() => setIsSuggestionsVisible(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setIsSuggestionsVisible(false);
+            } else {
+              setIsSuggestionsVisible(true);
+            }
+          }}
           placeholder={
             props.selectedIndex
               ? i18n.translate('queryEnhancements.queryAssist.input.placeholderWithIndex', {
