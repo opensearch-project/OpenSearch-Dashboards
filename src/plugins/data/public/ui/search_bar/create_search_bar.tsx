@@ -101,7 +101,7 @@ const defaultOnQuerySubmit = (
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
   const { timefilter } = queryService.timefilter;
 
-  return async (payload: { dateRange: TimeRange; query?: Query }) => {
+  return (payload: { dateRange: TimeRange; query?: Query }) => {
     const isUpdate =
       !_.isEqual(timefilter.getTime(), payload.dateRange) ||
       !_.isEqual(payload.query, currentQuery);
