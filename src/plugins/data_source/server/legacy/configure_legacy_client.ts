@@ -240,6 +240,9 @@ const getAWSClient = (credential: SigV4Content, clientOptions: ConfigOptions): L
   const { region } = credential;
   const client = new LegacyClient({
     connectionClass: HttpAmazonESConnector,
+    awsConfig: {
+      region,
+    },
     ...clientOptions,
   });
   return client;

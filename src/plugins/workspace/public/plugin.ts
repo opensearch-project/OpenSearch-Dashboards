@@ -54,7 +54,6 @@ import {
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
-import { recentWorkspaceManager } from './recent_workspace_manager';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { WorkspaceListCard } from './components/service_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
@@ -73,6 +72,7 @@ import { WorkspaceCollaboratorTypesService, UseCaseService } from './services';
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
 import { searchPages } from './components/global_search/search_pages_command';
+import { WorkspaceValidationService } from './services/workspace_validation_service';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -106,7 +106,7 @@ export class WorkspacePlugin
   private registeredUseCasesUpdaterSubscription?: Subscription;
   private workspaceAndUseCasesCombineSubscription?: Subscription;
   private useCase = new UseCaseService();
-  private workspaceClient?: WorkspaceClient;
+  private workspaceValidationService = new WorkspaceValidationService();
   private collaboratorTypes = new WorkspaceCollaboratorTypesService();
   private collaboratorsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
 
@@ -269,11 +269,6 @@ export class WorkspacePlugin
       contentManagement,
     }: WorkspacePluginSetupDeps
   ) {
-    const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
-    await workspaceClient.init();
-    this.workspaceClient = workspaceClient;
-    core.workspaces.setClient(workspaceClient);
-
     this.useCase.setup({
       chrome: core.chrome,
       getStartServices: core.getStartServices,
@@ -298,44 +293,11 @@ export class WorkspacePlugin
       core.http.basePath.getBasePath()
     );
 
-    if (workspaceId) {
-      const result = await workspaceClient.enterWorkspace(workspaceId);
-      if (!result.success) {
-        /**
-         * Fatal error service does not support customized actions
-         * So we have to use a self-hosted page to show the errors and redirect.
-         */
-        (async () => {
-          const [{ application, chrome }] = await core.getStartServices();
-          chrome.setIsVisible(false);
-          application.navigateToApp(WORKSPACE_FATAL_ERROR_APP_ID, {
-            replace: true,
-            state: {
-              error: result?.error,
-            },
-          });
-        })();
-      } else {
-        /**
-         * If the workspace id is valid and user is currently on workspace_fatal_error page,
-         * we should redirect user to overview page of workspace.
-         */
-        (async () => {
-          const [{ application }] = await core.getStartServices();
-          const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
-            if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
-              application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
-            }
-            currentAppIdSubscription.unsubscribe();
-          });
-          // Add workspace id to recent workspaces.
-          recentWorkspaceManager.addRecentWorkspace(workspaceId);
-        })();
-      }
-    }
+    await this.workspaceValidationService.setup(core, workspaceId);
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
       const [coreStart, { navigation }] = await core.getStartServices();
+      const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
 
       const services = {
         ...coreStart,
@@ -484,6 +446,7 @@ export class WorkspacePlugin
             coreStart,
             { contentManagement: contentManagementStart, navigation: navigationStart },
           ] = await core.getStartServices();
+          const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
           const services = {
             ...coreStart,
             workspaceClient,
@@ -520,6 +483,7 @@ export class WorkspacePlugin
             coreStart,
             { contentManagement: contentManagementStart, navigation: navigationStart },
           ] = await core.getStartServices();
+          const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
           const services = {
             ...coreStart,
             workspaceClient,
@@ -619,6 +583,8 @@ export class WorkspacePlugin
       workspaceConfigurableApps$: this.getWorkspaceConfigurableApps$(core),
     });
 
+    this.workspaceValidationService.start(core);
+
     this.registeredUseCasesUpdaterSubscription = useCaseStart
       .getRegisteredUseCases$()
       .subscribe((registeredUseCases) => {
@@ -686,9 +652,10 @@ export class WorkspacePlugin
     navigation: NavigationPublicPluginStart
   ) {
     if (contentManagement) {
+      const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
       const services: Services = {
         ...coreStart,
-        workspaceClient: this.workspaceClient!,
+        workspaceClient,
         navigationUI: navigation.ui,
         collaboratorTypes: this.collaboratorTypes,
       };
@@ -719,5 +686,6 @@ export class WorkspacePlugin
     this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
     this.useCase.stop();
     this.collaboratorTypes.stop();
+    this.workspaceValidationService.stop();
   }
 }

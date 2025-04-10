@@ -506,6 +506,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
         "observers": Array [],
         "thrownError": null,
       },
+      "workspaceError$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "workspaceList$": BehaviorSubject {
         "_isScalar": false,
         "_value": Array [
@@ -687,6 +696,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
       "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceError$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
         "closed": false,
         "hasError": false,
         "isStopped": false,
@@ -886,6 +904,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
       "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceError$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
         "closed": false,
         "hasError": false,
         "isStopped": false,

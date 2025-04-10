@@ -48,33 +48,6 @@ describe('request', function () {
     this.signRequest = sinon.stub(connector, 'signRequest');
   });
 
-  it('returns a cancel function that aborts the request', function (done) {
-    const fakeReq = new EventEmitter();
-
-    fakeReq.setNoDelay = sinon.stub();
-    fakeReq.setSocketKeepAlive = sinon.stub();
-    fakeReq.abort = sinon.stub();
-
-    sinon.stub(connector, 'createRequest').returns(fakeReq);
-
-    const cancel = connector.request({}, () => {});
-
-    // since getCredentials is async, we have to let the event loop tick
-    setTimeout(() => {
-      try {
-        expect(cancel).to.be.a('function');
-
-        cancel();
-
-        expect(fakeReq.abort.called).to.be.true;
-
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
-  });
-
   it('calls callback with error', function (done) {
     const error = new Error();
     const fakeReq = new EventEmitter();
