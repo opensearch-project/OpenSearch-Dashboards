@@ -31,6 +31,8 @@ describe('parseClientOptions', () => {
           requestCert: true,
           rejectUnauthorized: true,
         },
+        requestTimeout: 1000,
+        pingTimeout: 2000,
       })
     );
   });
@@ -57,6 +59,8 @@ describe('parseClientOptions', () => {
           rejectUnauthorized: false,
           ca: undefined,
         },
+        requestTimeout: 1000,
+        pingTimeout: 2000,
       })
     );
   });
@@ -90,6 +94,8 @@ describe('parseClientOptions', () => {
           checkServerIdentity: expect.any(Function),
           ca: ['content-of-some-path'],
         },
+        requestTimeout: 1000,
+        pingTimeout: 2000,
       })
     );
     expect(parsedConfig.ssl?.checkServerIdentity()).toBeUndefined();
@@ -123,6 +129,8 @@ describe('parseClientOptions', () => {
           rejectUnauthorized: true,
           ca: ['content-of-some-path'],
         },
+        requestTimeout: 1000,
+        pingTimeout: 2000,
       })
     );
   });
@@ -154,6 +162,8 @@ describe('parseClientOptions', () => {
           rejectUnauthorized: true,
           ca: undefined,
         },
+        requestTimeout: 1000,
+        pingTimeout: 2000,
       })
     );
   });
