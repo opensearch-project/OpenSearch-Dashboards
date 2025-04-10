@@ -89,7 +89,7 @@ describe('<QueryAssistInput /> spec', () => {
     const { component } = renderQueryAssistInput();
     const inputElement = component.getByTestId('query-assist-input-field-text') as HTMLInputElement;
     fireEvent.click(inputElement);
-    fireEvent.change(inputElement, { target: { value: 'mock' } });
+    fireEvent.keyDown(inputElement, { key: 'm', code: 'KeyM' });
     const suggestionButton = component.getByText('mock suggestion 1');
     fireEvent.click(suggestionButton);
     fireEvent.keyDown(inputElement, { key: 'Enter', code: 'Enter' });
