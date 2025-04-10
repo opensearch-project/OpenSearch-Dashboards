@@ -1,2 +1,0 @@
-fix:
-- Fixing when find saved objects within a workspace returns saved objects in all the workspaces ([#9420](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9420))

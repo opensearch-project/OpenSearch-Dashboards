@@ -12,6 +12,8 @@
     - [User_stories](multi-datasource/user_stories.md)
   - [Openapi](openapi/README.md)
   - Plugins
+    - data
+      - [Query editor enhancements](plugins/data/query-editor-enhancements.md)
     - discover
       - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
       - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
@@ -186,6 +188,7 @@
     - [Opensearch dashboards.release notes 2.8.0](../release-notes/opensearch-dashboards.release-notes-2.8.0.md)
     - [Opensearch dashboards.release notes 2.9.0](../release-notes/opensearch-dashboards.release-notes-2.9.0.md)
     - [Opensearch dashboards.release notes 3.0.0 alpha1](../release-notes/opensearch-dashboards.release-notes-3.0.0-alpha1.md)
+    - [Opensearch dashboards.release notes 3.0.0 beta1](../release-notes/opensearch-dashboards.release-notes-3.0.0-beta1.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
