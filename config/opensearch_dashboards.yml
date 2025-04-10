@@ -209,6 +209,35 @@
 #  'ff00::/8',
 # ]
 
+opensearch.hosts: ["http://k8s-testluna-opensear-30015c200d-490081827.us-west-1.elb.amazonaws.com/"]
+# opensearch.hosts: ['https://localhost:9208'] 
+server.host: '0.0.0.0'
+assistant:
+  chat:
+    enabled: true
+  next:
+    enabled: true
+  alertInsight:
+    enabled: true
+  text2viz:
+    enabled: true
+  smartAnomalyDetector:
+    enabled: true
+usageCollection.uiMetric.enabled: true
+data_source.enabled: true
+savedObjects.permission.enabled: true
+opensearch.ssl.verificationMode: none
+opensearch.username: 'admin'
+opensearch.password: 'myStrongPassword123!'
+opensearchDashboards.dashboardAdmin.users: ['admin']
+opensearch.requestHeadersWhitelist: [authorization, securitytenant]
+workspace.enabled: true
+opensearch.ignoreVersionMismatch: true
+uiSettings:
+  overrides:
+    'home:useNewHomePage': true
+queryEnhancements.queryAssist.summary.enabled: true
+
 # vis_type_timeline.graphiteDeniedIPs: []
 
 # vis_type_timeline.graphiteDeniedIPs: [
