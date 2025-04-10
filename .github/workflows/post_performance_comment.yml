@@ -33,7 +33,7 @@ jobs:
       - name: Prepare Combined Comment
         id: prepare_comment
         run: |
-          COMMENT="### 🚨 Performance Issues Detected !!\n\n"
+          COMMENT="### 🚨 Performance Issues Detected!!\n\n"
           HAS_ARTIFACT=false
           # Lighthouse results
           if [ -f lighthouse-results/assertion-results.json ]; then
