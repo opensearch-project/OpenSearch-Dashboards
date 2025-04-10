@@ -17,14 +17,14 @@ jobs:
 
     steps:
       - name: Download Lighthouse Results
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: lighthouse-results
           path: lighthouse-results
         continue-on-error: true
 
       - name: Download Bundle Analysis Results
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: bundle-analysis-results
           path: bundle-analysis-results
