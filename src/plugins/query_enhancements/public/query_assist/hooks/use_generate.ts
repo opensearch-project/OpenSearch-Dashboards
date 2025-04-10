@@ -12,7 +12,7 @@ import { formatError } from '../utils';
 import { ABORT_DATA_QUERY_TRIGGER, UiActionsStart } from '../../../../ui_actions/public';
 
 export const useGenerateQuery = (
-  startService: UiActionsStart,
+  uiActions: UiActionsStart,
   abortControllerRefInDataPlugin: React.MutableRefObject<AbortController | undefined>
 ) => {
   const mounted = useRef(false);
@@ -38,7 +38,7 @@ export const useGenerateQuery = (
     abortControllerRef.current = new AbortController();
     setLoading(true);
     try {
-      startService
+      uiActions
         .getTrigger(ABORT_DATA_QUERY_TRIGGER)
         .exec({ abortControllerRef: abortControllerRefInDataPlugin });
 
