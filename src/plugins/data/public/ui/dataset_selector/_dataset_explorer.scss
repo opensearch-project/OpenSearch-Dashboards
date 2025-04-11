@@ -9,7 +9,7 @@
   height: 100%;
   max-height: calc(100vh - 200px);
   overflow-x: auto;
-  scrollbar-gutter: stable;
+  overflow-y: hidden;
   border: $euiBorderThin;
 
   &__column {
