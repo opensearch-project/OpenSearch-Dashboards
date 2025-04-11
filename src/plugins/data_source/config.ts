@@ -5,6 +5,8 @@
 
 import { schema, TypeOf } from '@osd/config-schema';
 import { fileAppenderSchema } from './audit_config';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { SharedGlobalConfig } from '../../../src/core/server';
 
 const KEY_NAME_MIN_LENGTH: number = 1;
 const KEY_NAME_MAX_LENGTH: number = 100;
@@ -61,4 +63,8 @@ export const configSchema = schema.object({
   }),
 });
 
-export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;
+export type ConfigSchema = TypeOf<typeof configSchema>;
+
+export interface DataSourcePluginConfigType extends TypeOf<typeof configSchema> {
+  readonly globalOpenSearchConfig: SharedGlobalConfig['opensearch'];
+}
