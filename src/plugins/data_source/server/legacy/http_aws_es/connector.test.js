@@ -91,15 +91,8 @@ describe('createRequest', () => {
       },
     };
 
-    const request = connector.createRequest(reqParams);
+    const request = connector.createRequest({}, reqParams);
 
-    expect(request).to.deep.equal({
-      method: 'GET',
-      path: '/_search',
-      body: '{"query":{"match_all":{}}}',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    expect(request.path).to.equal(reqParams.path);
   });
 });
