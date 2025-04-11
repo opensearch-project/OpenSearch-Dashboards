@@ -8,7 +8,8 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 240px)) minmax(300px, 1fr);
   height: 100%;
   max-height: calc(100vh - 200px);
-  overflow-x: hidden;
+  overflow-x: auto;
+  scrollbar-gutter: stable;
   border: $euiBorderThin;
 
   &__column {
