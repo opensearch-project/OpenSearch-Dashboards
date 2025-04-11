@@ -104,7 +104,7 @@ class HttpAmazonESConnector extends HttpConnector {
     const body = params.body;
     if (body) {
       const contentLength = Buffer.isBuffer(body) ? body.length : Buffer.byteLength(body);
-      request.headers['Content-Length'] = contentLength;
+      request.headers['Content-Length'] = contentLength.toString();
       request.body = body;
     }
 

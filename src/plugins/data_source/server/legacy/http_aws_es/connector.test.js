@@ -95,4 +95,66 @@ describe('createRequest', () => {
 
     expect(request.path).to.equal(reqParams.path);
   });
+
+  it('should set Content-Length as a string for a string body', () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const bodyString = '{"name": "test"}';
+
+    // Pass the body in the first parameter (params) so that createRequest picks it up.
+    const params = {
+      method: 'POST',
+      body: bodyString,
+    };
+    const reqParams = {
+      method: 'POST',
+      path: '/test',
+      headers: {},
+    };
+
+    const request = connector.createRequest(params, reqParams);
+
+    // Calculate the expected content length and convert it to string.
+    const expectedLength = Buffer.byteLength(bodyString).toString();
+    expect(request.headers).to.have.property('Content-Length');
+    expect(request.headers['Content-Length']).to.be.a('string');
+    expect(request.headers['Content-Length']).to.equal(expectedLength);
+  });
+
+  it('should set Content-Length as a string for a Buffer body', () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const bodyBuffer = Buffer.from('This is a test');
+
+    // Again, place the body in the first parameter.
+    const params = {
+      method: 'POST',
+      body: bodyBuffer,
+    };
+    const reqParams = {
+      method: 'POST',
+      path: '/test',
+      headers: {},
+    };
+
+    const request = connector.createRequest(params, reqParams);
+
+    // Calculate the expected content length for the Buffer and convert to string.
+    const expectedLength = bodyBuffer.length.toString();
+    expect(request.headers).to.have.property('Content-Length');
+    expect(request.headers['Content-Length']).to.be.a('string');
+    expect(request.headers['Content-Length']).to.equal(expectedLength);
+  });
 });
