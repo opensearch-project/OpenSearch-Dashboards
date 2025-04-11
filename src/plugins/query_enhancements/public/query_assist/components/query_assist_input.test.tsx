@@ -38,7 +38,11 @@ const renderQueryAssistInput = (overrideProps: Partial<QueryAssistInputProps> = 
     QueryAssistInputProps,
     Partial<QueryAssistInputProps>
   >(
-    { inputRef: { current: null }, persistedLog: mockPersistedLog, isDisabled: false },
+    {
+      inputRef: { current: null },
+      persistedLog: mockPersistedLog,
+      isDisabled: false,
+    },
     overrideProps
   );
   const component = render(
