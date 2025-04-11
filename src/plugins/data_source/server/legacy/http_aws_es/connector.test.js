@@ -70,3 +70,29 @@ describe('request', function () {
     });
   });
 });
+
+describe('createRequest', () => {
+  it('should correctly extend reqParams passed in', () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const reqParams = {
+      method: 'GET',
+      path: '/_search',
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+    };
+
+    const request = connector.createRequest({}, reqParams);
+
+    expect(request.path).to.equal(reqParams.path);
+  });
+});
