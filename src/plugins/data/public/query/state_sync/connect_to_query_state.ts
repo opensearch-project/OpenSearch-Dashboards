@@ -77,11 +77,13 @@ export const connectStorageToQueryState = (
       filters: filterManager.getAppFilters(),
     };
 
-    // set up initial '_q' flag in the URL to sync query and filter changes
     if (!osdUrlStateStorage.get('_q')) {
+      // set up initial '_q' flag in the URL to sync query and filter changes
       osdUrlStateStorage.set('_q', initialStateFromURL, {
         replace: true,
       });
+      // clear existing query and apply default query
+      queryString.clearQuery();
     }
 
     if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
