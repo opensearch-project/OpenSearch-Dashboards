@@ -5,7 +5,9 @@
 
 import { DataStorage } from '../../../data/common';
 import { DataPublicPluginStart } from '../../../data/public';
+import { UiActionsStart } from '../../../ui_actions/public';
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/common';
 
 export const [getStorage, setStorage] = createGetterSetter<DataStorage>('storage');
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('data');
+export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UIActions');

@@ -8,12 +8,13 @@ import React, { ComponentProps, PropsWithChildren } from 'react';
 import { IntlProvider } from 'react-intl';
 import { of } from 'rxjs';
 import { QueryAssistBar } from '.';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { DataStorage } from '../../../../data/common';
 import { QueryEditorExtensionDependencies, QueryStringContract } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { setData, setStorage } from '../../services';
+import { setData, setStorage, setUiActions } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistInput } from './query_assist_input';
@@ -36,6 +37,15 @@ jest.mock('./query_assist_input', () => ({
     </>
   ),
 }));
+
+const dataSetupMock = dataPluginMock.createSetupContract(true);
+const abortControllerRefMock = {
+  current: new AbortController(),
+} as React.MutableRefObject<AbortController | undefined>;
+
+dataSetupMock.ui = {
+  abortControllerRef: abortControllerRefMock,
+};
 
 const dataMock = dataPluginMock.createStartContract(true);
 const queryStringMock = dataMock.query.queryString as jest.Mocked<QueryStringContract>;
@@ -61,6 +71,18 @@ const dependencies: QueryEditorExtensionDependencies = {
   },
 };
 
+const dataPropsMock = {
+  data: dataSetupMock,
+};
+
+const uiActionsStartMock = uiActionsPluginMock.createStartContract();
+uiActionsStartMock.getTrigger.mockReturnValue({
+  id: '',
+  exec: jest.fn(),
+});
+
+setUiActions(uiActionsStartMock);
+
 type Props = ComponentProps<typeof QueryAssistBar>;
 
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
@@ -68,7 +90,13 @@ const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
 );
 
 const renderQueryAssistBar = (overrideProps: Partial<Props> = {}) => {
-  const props: Props = Object.assign<Props, Partial<Props>>({ dependencies }, overrideProps);
+  const props: Props = Object.assign<Props, Partial<Props>>(
+    {
+      dependencies,
+      data: dataPropsMock.data,
+    },
+    overrideProps
+  );
   const component = render(<QueryAssistBar {...props} />, {
     wrapper: IntlWrapper,
   });
