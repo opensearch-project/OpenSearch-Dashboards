@@ -69,6 +69,7 @@ export async function openAddPanelFlyout(options: {
     {
       'data-test-subj': 'dashboardAddPanel',
       ownFocus: true,
+      outsideClickCloses: true,
     }
   );
 }
