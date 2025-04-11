@@ -15,6 +15,7 @@ import {
   AssociationDataSourceModalProps,
 } from './association_data_source_modal';
 import { AssociationDataSourceModalMode } from 'src/plugins/workspace/common/constants';
+import { DataSourceEngineType } from 'src/plugins/data_source/common/data_sources';
 
 const setupAssociationDataSourceModal = ({
   mode,
@@ -36,6 +37,13 @@ const setupAssociationDataSourceModal = ({
           parentId: 'ds1',
           connectionType: DataSourceConnectionType.DirectQueryConnection,
           type: 'Amazon S3',
+        },
+        {
+          id: 'ds1-cross-cluster-connection',
+          name: 'cross-cluster-connection',
+          parentId: 'ds1',
+          connectionType: DataSourceConnectionType.OpenSearchConnection,
+          type: DataSourceEngineType.OpenSearchCrossCluster,
         },
       ],
     },
@@ -119,6 +127,25 @@ describe('AssociationDataSourceModal', () => {
       expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: 'Data Source 2' })).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'Data Connection 1' })).not.toBeInTheDocument();
+      expect(screen.getByText('+ 1 Cross cluster')).toBeInTheDocument();
+    });
+  });
+
+  it('should display the cross cluster on clicking on a OpenSearch data sources with cross cluter badge', async () => {
+    setupAssociationDataSourceModal();
+    expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+      )
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Data Source 2' })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Data Connection 1' })).not.toBeInTheDocument();
+      expect(screen.getByText('+ 1 Cross cluster')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
+      expect(screen.getByText('cross-cluster-connection')).toBeInTheDocument();
     });
   });
 
@@ -149,7 +176,7 @@ describe('AssociationDataSourceModal', () => {
     });
     expect(screen.getByText('Associate direct query data sources')).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText('+ 1 related')).toBeInTheDocument();
+      expect(screen.getByText('+ 1 Direct query')).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'dqc1' })).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
       expect(screen.getByRole('option', { name: 'dqc1' })).toBeInTheDocument();
@@ -195,6 +222,13 @@ describe('AssociationDataSourceModal', () => {
             parentId: 'ds1',
             connectionType: DataSourceConnectionType.DirectQueryConnection,
             type: 'Amazon S3',
+          },
+          {
+            id: 'ds1-cross-cluster-connection',
+            name: 'cross-cluster-connection',
+            parentId: 'ds1',
+            connectionType: DataSourceConnectionType.OpenSearchConnection,
+            type: DataSourceEngineType.OpenSearchCrossCluster,
           },
         ],
       },

@@ -46,6 +46,29 @@ describe('indexPatternTypeConfig', () => {
       type: 'INDEX_PATTERN',
       timeFieldName: '@timestamp',
       dataSource: undefined,
+      isRemoteDataset: false,
+    });
+  });
+
+  test('toDataset converts DataStructure to Dataset for a remoteDataset', () => {
+    const mockPath: DataStructure[] = [
+      {
+        id: 'test-pattern',
+        title: 'connectionalias:Test Pattern',
+        type: 'INDEX_PATTERN',
+        meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+      },
+    ];
+
+    const result = indexPatternTypeConfig.toDataset(mockPath);
+
+    expect(result).toEqual({
+      id: 'test-pattern',
+      title: 'connectionalias:Test Pattern',
+      type: 'INDEX_PATTERN',
+      timeFieldName: '@timestamp',
+      dataSource: undefined,
+      isRemoteDataset: true,
     });
   });
 
