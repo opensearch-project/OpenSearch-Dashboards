@@ -379,3 +379,4 @@
 
 # Set the value to true to enable the new UI for savedQueries in Discover
 # data.savedQueriesNewUI.enabled: true
+opensearch.ignoreVersionMismatch: true
