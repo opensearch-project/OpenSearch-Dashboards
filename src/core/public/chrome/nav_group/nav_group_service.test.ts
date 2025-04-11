@@ -386,7 +386,7 @@ describe('ChromeNavGroupService#start()', () => {
     expect(currentNavGroup).toBeUndefined();
   });
 
-  it('should set current nav group automatically if application only belongs to 1 visible nav group', async () => {
+  it('should ignore all use cases except "analytics" when workspace is disabled', async () => {
     const uiSettings = uiSettingsServiceMock.createSetupContract();
     const navGroupEnabled$ = new Rx.BehaviorSubject(true);
     uiSettings.get$.mockImplementation(() => navGroupEnabled$);
@@ -405,7 +405,7 @@ describe('ChromeNavGroupService#start()', () => {
 
     chromeNavGroupServiceSetup.addNavLinksToGroup(
       {
-        id: 'bar-group',
+        id: ALL_USE_CASE_ID,
         title: 'barGroupTitle',
         description: 'bar description',
       },
@@ -420,25 +420,14 @@ describe('ChromeNavGroupService#start()', () => {
     });
 
     mockedApplicationService.navigateToApp(mockedNavLinkFoo.id);
-    let currentNavGroup = await chromeNavGroupServiceStart
+    const currentNavGroup = await chromeNavGroupServiceStart
       .getCurrentNavGroup$()
       .pipe(first())
       .toPromise();
 
-    expect(currentNavGroup).toBeFalsy();
-
-    // reset
-    chromeNavGroupServiceStart.setCurrentNavGroup(undefined);
-
-    mockedApplicationService.navigateToApp(mockedNavLinkBar.id);
-
-    currentNavGroup = await chromeNavGroupServiceStart
-      .getCurrentNavGroup$()
-      .pipe(first())
-      .toPromise();
-
-    expect(currentNavGroup?.id).toEqual(undefined);
-    expect(currentNavGroup?.title).toEqual(undefined);
+    // Though mockedNavLinkFoo belongs to 2 use case
+    // but when workspace is disabled, it should only show "analytics" use case
+    expect(currentNavGroup?.id).toEqual(ALL_USE_CASE_ID);
   });
 
   it('should erase current nav group if application can not be found in any of the visible nav groups', async () => {

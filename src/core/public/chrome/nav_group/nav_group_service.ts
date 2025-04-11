@@ -364,7 +364,7 @@ export class ChromeNavGroupService {
             appIdNavGroupMap.set(navLinkId, navGroupSet);
           });
         };
-        if (application.capabilities.workspaces.enabled && visibleUseCases.length === 1) {
+        if (visibleUseCases.length === 1) {
           // The length will be 1 if inside a workspace
           // as workspace plugin will register a filter to only make the selected nav group visible.
           // In order to tell which nav group we are in, we should use the only visible use case if the visibleUseCases.length equals 1.
