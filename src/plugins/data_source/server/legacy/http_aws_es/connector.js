@@ -98,6 +98,9 @@ class HttpAmazonESConnector extends HttpConnector {
       hostname: this.endpoint.hostname,
     });
 
+    // copy across params
+    Object.assign(request, reqParams);
+
     const body = params.body;
     if (body) {
       const contentLength = Buffer.isBuffer(body) ? body.length : Buffer.byteLength(body);
