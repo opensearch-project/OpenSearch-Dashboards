@@ -177,9 +177,13 @@ export class QueryStringManager {
    * Updates the query.
    * @param {Query} query
    */
-  public setQuery = (query: Partial<Query>, force: boolean = false) => {
+  public setQuery = (
+    query: Partial<Query>,
+    force: boolean = false,
+    mergeCurrentQuery: boolean = true
+  ) => {
     const curQuery = this.query$.getValue();
-    let newQuery = { ...curQuery, ...query };
+    let newQuery = mergeCurrentQuery ? { ...curQuery, ...query } : (query as Query);
     // If the current query is different from the new query, or the user explicitly set force to true,
     // then proceed with updating the query.
     if (!isEqual(curQuery, newQuery) || force) {
@@ -225,28 +229,9 @@ export class QueryStringManager {
    * Resets the query to the default one.
    */
   public clearQuery = () => {
-    const curQuery = this.query$.getValue();
-    let newQuery = this.getDefaultQuery();
-    // Check if dataset changed and if new dataset has language restrictions
-    if (newQuery.dataset && !isEqual(curQuery.dataset, newQuery.dataset)) {
-      // Get supported languages for the dataset
-      const supportedLanguages = this.datasetService
-        .getType(newQuery.dataset.type)
-        ?.supportedLanguages(newQuery.dataset);
-
-      // If we have supported languages and current language isn't supported
-      if (supportedLanguages && !supportedLanguages.includes(newQuery.language)) {
-        // Get initial query with first supported language and new dataset
-        newQuery = this.getInitialQuery({
-          language: supportedLanguages[0],
-          dataset: newQuery.dataset,
-        });
-      }
-
-      // Add to recent datasets
-      this.datasetService.addRecentDataset(newQuery.dataset);
-    }
-    this.query$.next(newQuery);
+    const force = false;
+    const mergeCurrentQuery = false;
+    this.setQuery(this.getDefaultQuery(), force, mergeCurrentQuery);
   };
 
   // Todo: update this function to use the Query object when it is udpated, Query object should include time range and dataset
