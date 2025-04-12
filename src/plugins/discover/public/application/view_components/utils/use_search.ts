@@ -34,7 +34,7 @@ import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { trackQueryMetric } from '../../../ui_metric';
 
-function safeJSONParse(text: any) {
+export function safeJSONParse(text: any) {
   try {
     return JSON.parse(text);
   } catch (error) {
