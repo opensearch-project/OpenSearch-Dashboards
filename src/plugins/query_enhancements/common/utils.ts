@@ -83,8 +83,8 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
             // eslint-disable-next-line no-console
             console.error('Failed to cancel query:', cancelError);
           }
-          throw error;
         }
+        throw error;
       })
   );
 };
