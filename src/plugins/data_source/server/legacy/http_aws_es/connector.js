@@ -91,15 +91,24 @@ class HttpAmazonESConnector extends HttpConnector {
   }
 
   createRequest(params, reqParams) {
+    const [pathname = '/', queryString = ''] = (reqParams.path || '').split('?', 2);
+
+    const queryParams = queryString ? new URLSearchParams(queryString) : undefined;
+
     const request = new HttpRequest({
       ...this.endpoint,
       method: reqParams.method,
       headers: reqParams.headers || {},
       hostname: this.endpoint.hostname,
+      path: pathname,
+      query: queryParams,
     });
 
     // copy across params
-    Object.assign(request, reqParams);
+    Object.assign(request, {
+      ...reqParams,
+      path: pathname,
+    });
 
     const body = params.body;
     if (body) {
