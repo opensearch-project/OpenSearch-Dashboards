@@ -29,9 +29,9 @@ jest.mock('../hooks', () => ({
 }));
 
 jest.mock('./query_assist_input', () => ({
-  QueryAssistInput: ({ inputRef, error }: ComponentProps<typeof QueryAssistInput>) => (
+  QueryAssistInput: ({ inputRef, error, placeholder }: ComponentProps<typeof QueryAssistInput>) => (
     <>
-      <input ref={inputRef} />
+      <input placeholder={placeholder} ref={inputRef} />
       <div>{JSON.stringify(error)}</div>
     </>
   ),
@@ -53,6 +53,11 @@ const dependencies: QueryEditorExtensionDependencies = {
   query: {
     query: '',
     language: '',
+    dataset: {
+      type: 'INDEX_PATTERN',
+      id: '',
+      title: '',
+    },
   },
 };
 
@@ -107,8 +112,18 @@ describe('QueryAssistBar', () => {
   });
 
   it('displays callout when dataset is not selected on submit', async () => {
-    queryStringMock.getQuery.mockReturnValueOnce({ query: '', language: 'kuery' });
-    queryStringMock.getUpdates$.mockReturnValueOnce(of({ query: '', language: 'kuery' }));
+    queryStringMock.getQuery.mockReturnValueOnce({
+      query: '',
+      language: 'kuery',
+      dataset: { type: 'INDEX_PATTERN', id: '', title: '' },
+    });
+    queryStringMock.getUpdates$.mockReturnValueOnce(
+      of({
+        query: '',
+        language: 'kuery',
+        dataset: { type: 'INDEX_PATTERN', id: '', title: '' },
+      })
+    );
     renderQueryAssistBar();
 
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'test query' } });
@@ -203,21 +218,47 @@ describe('QueryAssistBar', () => {
       });
     });
 
-    expect(queryStringMock.setQuery).toHaveBeenCalledWith({
-      dataset: {
-        dataSource: {
-          id: 'mock-data-source-id',
-          title: 'Default Data Source',
-          type: 'OpenSearch',
+    expect(queryStringMock.setQuery).toHaveBeenCalledWith(
+      {
+        dataset: {
+          dataSource: {
+            id: 'mock-data-source-id',
+            title: 'Default Data Source',
+            type: 'OpenSearch',
+          },
+          id: 'default-index-pattern',
+          timeFieldName: '@timestamp',
+          title: 'Default Index Pattern',
+          type: 'INDEX_PATTERN',
         },
-        id: 'default-index-pattern',
-        timeFieldName: '@timestamp',
-        title: 'Default Index Pattern',
-        type: 'INDEX_PATTERN',
+        language: 'PPL',
+        query: 'generated query',
       },
-      language: 'PPL',
-      query: 'generated query',
-    });
+      true
+    );
     expect(screen.getByTestId('query-assist-query-generated-callout')).toBeInTheDocument();
+  });
+
+  it('should show unsupported placeholder when dataset is not supported', async () => {
+    const mockedQuery = {
+      query: '',
+      language: 'kuery',
+      dataset: {
+        id: 'foo',
+        title: 'mock',
+        type: 'S3',
+      },
+    };
+    queryStringMock.getUpdates$.mockReturnValueOnce(of(mockedQuery));
+    const { component } = renderQueryAssistBar({
+      dependencies: {
+        ...dependencies,
+        query: mockedQuery,
+      },
+    });
+
+    await component.findByPlaceholderText(
+      'Query Assist is not supported by mock. Please select another data source that is compatible to start entering questions or enter PPL below.'
+    );
   });
 });

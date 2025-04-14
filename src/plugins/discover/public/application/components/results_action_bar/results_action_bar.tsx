@@ -9,16 +9,15 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HitsCounter } from '../chart/hits_counter';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import { DiscoverOptions } from '../discover_options/discover_options';
 import { DiscoverDownloadCsv } from '../download_csv';
 import { IndexPattern } from '../../../../../data/common';
+import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../data/public';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
   showResetButton?: boolean;
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
-  isEnhancementsEnabled: boolean;
   indexPattern?: IndexPattern;
 }
 
@@ -27,7 +26,6 @@ export const DiscoverResultsActionBar = ({
   showResetButton = false,
   resetQuery,
   rows,
-  isEnhancementsEnabled,
   indexPattern,
 }: DiscoverResultsActionBarProps) => {
   return (
@@ -61,14 +59,14 @@ export const DiscoverResultsActionBar = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexStart">
-          {/* TODO: We will allow extensions to be added here */}
-          {!isEnhancementsEnabled && (
-            <EuiFlexItem grow={false}>
-              <DiscoverOptions />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        {/* Where Data Plugin's QueryEditorExtension action buttons will go */}
+        <EuiFlexGroup
+          className="dscResultsActionBar__extensions-container"
+          direction="row"
+          gutterSize="none"
+          justifyContent="flexStart"
+          id={ACTION_BAR_BUTTONS_CONTAINER_ID}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

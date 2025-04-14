@@ -406,6 +406,7 @@ export {
   WorkspacesStart,
   WorkspacesSetup,
   WorkspacesService,
+  WorkspaceError,
   WorkspaceObject,
   IWorkspaceClient,
   IWorkspaceResponse,

@@ -121,3 +121,21 @@ export const buildQueryStatusConfig = (response: any) => {
     sessionId: response.data.sessionId,
   } as QueryStatusConfig;
 };
+
+/**
+ * Test if a PPL query is using search command
+ * https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.rst
+ */
+export const isPPLSearchQuery = (query: Query) => {
+  if (query.language !== 'PPL') {
+    return false;
+  }
+
+  if (typeof query.query !== 'string') {
+    return false;
+  }
+
+  const string = query.query.toLowerCase().replace(/\s/g, '');
+
+  return string.startsWith('source=') || string.startsWith('searchsource=');
+};

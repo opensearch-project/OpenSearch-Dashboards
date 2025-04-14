@@ -63,6 +63,7 @@ import {
 
 import { FilterLabel } from './ui';
 export {
+  ACTION_BAR_BUTTONS_CONTAINER_ID,
   createEditor,
   DefaultInput,
   DQLBody,

@@ -9,6 +9,7 @@ import webpackPreprocessor from '@cypress/webpack-preprocessor';
 
 module.exports = defineConfig({
   experimentalMemoryManagement: true,
+  numTestsKeptInMemory: 0,
   defaultCommandTimeout: 15000,
   requestTimeout: 60000,
   responseTimeout: 60000,
@@ -16,7 +17,6 @@ module.exports = defineConfig({
     runMode: 2,
     openMode: 0,
   },
-  numTestsKeptInMemory: 5,
   viewportWidth: 1920,
   viewportHeight: 1080,
   env: {
