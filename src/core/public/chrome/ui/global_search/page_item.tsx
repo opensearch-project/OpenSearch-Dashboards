@@ -5,7 +5,6 @@
 
 import { EuiBreadcrumb, EuiHighlight, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
 import {
-  ApplicationStart,
   ChromeNavLink,
   ChromeRegistrationNavLink,
   NavGroupItemInMap,
@@ -14,24 +13,13 @@ import React from 'react';
 
 interface Props {
   link: ChromeRegistrationNavLink & ChromeNavLink & { navGroup: NavGroupItemInMap };
-  application: ApplicationStart;
   search: string;
   callback?: () => void;
-  customizeBreadcrumbs?: (breadcrumbs: EuiBreadcrumb[]) => void;
+  renderBreadcrumbs?: (breadcrumbs: EuiBreadcrumb[]) => EuiBreadcrumb[];
 }
 
-export const GlobalSearchPageItem = ({
-  link,
-  application,
-  search,
-  callback,
-  customizeBreadcrumbs,
-}: Props) => {
-  // const availableUseCases = useObservable(registeredUseCases$);
-  const breadcrumbs: EuiBreadcrumb[] = [];
-  if (customizeBreadcrumbs) {
-    customizeBreadcrumbs(breadcrumbs);
-  }
+export const GlobalSearchPageItem = ({ link, search, callback, renderBreadcrumbs }: Props) => {
+  let breadcrumbs: EuiBreadcrumb[] = [];
 
   const appId = link.id.toLowerCase();
   const isLanding = appId.endsWith('landing');
@@ -64,6 +52,10 @@ export const GlobalSearchPageItem = ({
   const onNavItemClick = () => {
     callback?.();
   };
+
+  if (renderBreadcrumbs) {
+    breadcrumbs = renderBreadcrumbs(breadcrumbs);
+  }
 
   breadcrumbs.push({
     text,

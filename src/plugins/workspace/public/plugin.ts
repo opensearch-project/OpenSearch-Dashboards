@@ -593,6 +593,9 @@ export class WorkspacePlugin
 
     this.filterNavLinks(core);
 
+    // Unregister the page search that set by chrome service, since workspace has its own search
+    core.chrome.globalSearch.unregisterSearchCommand('pagesSearch');
+
     if (!core.chrome.navGroup.getNavGroupEnabled()) {
       this.addWorkspaceToBreadcrumbs(core);
     } else {

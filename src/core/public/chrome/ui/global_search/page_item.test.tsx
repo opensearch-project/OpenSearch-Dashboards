@@ -53,9 +53,7 @@ describe('PageItem', () => {
   });
 
   it('renders the page item correctly', () => {
-    const { getByText } = render(
-      <GlobalSearchPageItem link={link} application={application} search="abc" />
-    );
+    const { getByText } = render(<GlobalSearchPageItem link={link} search="abc" />);
 
     expect(getByText('App 1')).toBeInTheDocument();
   });
@@ -79,9 +77,7 @@ describe('PageItem', () => {
         ],
       },
     };
-    const { getByText } = render(
-      <GlobalSearchPageItem link={linkWithParentLink} application={application} search="abc" />
-    );
+    const { getByText } = render(<GlobalSearchPageItem link={linkWithParentLink} search="abc" />);
 
     expect(getByText('Settings')).toBeInTheDocument();
     expect(getByText('App 1')).toBeInTheDocument();
@@ -101,10 +97,10 @@ describe('PageItem', () => {
     const { getByText } = render(
       <GlobalSearchPageItem
         link={settingsLink}
-        application={application}
         search="abc"
-        customizeBreadcrumbs={(breadcrumbs) => {
+        renderBreadcrumbs={(breadcrumbs) => {
           breadcrumbs.push({ text: <>{settingsLink.navGroup.title}</> });
+          return breadcrumbs;
         }}
       />
     );
@@ -131,10 +127,10 @@ describe('PageItem', () => {
     const { getByText } = render(
       <GlobalSearchPageItem
         link={settingsLink}
-        application={application}
         search="abc"
-        customizeBreadcrumbs={(breadcrumbs) => {
+        renderBreadcrumbs={(breadcrumbs) => {
           breadcrumbs.push({ text: <>{settingsLink.navGroup.title}</> });
+          return breadcrumbs;
         }}
       />
     );
@@ -155,10 +151,10 @@ describe('PageItem', () => {
     const { getByText } = render(
       <GlobalSearchPageItem
         link={settingsLink}
-        application={application}
         search="abc"
-        customizeBreadcrumbs={(breadcrumbs) => {
+        renderBreadcrumbs={(breadcrumbs) => {
           breadcrumbs.push({ text: <>{currentWorkspace.name}</> });
+          return breadcrumbs;
         }}
       />
     );
@@ -180,10 +176,10 @@ describe('PageItem', () => {
     const { getByText, getByTestId } = render(
       <GlobalSearchPageItem
         link={settingsLink}
-        application={application}
         search="abc"
-        customizeBreadcrumbs={(breadcrumbs) => {
+        renderBreadcrumbs={(breadcrumbs) => {
           breadcrumbs.push({ text: <>{currentWorkspace.name}</> });
+          return breadcrumbs;
         }}
         callback={() => application.navigateToApp(settingsLink.id)}
       />
@@ -216,10 +212,10 @@ describe('PageItem', () => {
     const { getByText, getByTestId } = render(
       <GlobalSearchPageItem
         link={navLink}
-        application={application}
         search="abc"
-        customizeBreadcrumbs={(breadcrumbs) => {
+        renderBreadcrumbs={(breadcrumbs) => {
           breadcrumbs.push({ text: <>{navLink.navGroup.title}</> });
+          return breadcrumbs;
         }}
         callback={() => {
           window.location.assign('http://localhost:5601/app/data_source');
@@ -252,7 +248,6 @@ describe('PageItem', () => {
     const { getByText, getByTestId } = render(
       <GlobalSearchPageItem
         link={navLink}
-        application={application}
         search="abc"
         callback={() => application.navigateToApp('data_source')}
       />

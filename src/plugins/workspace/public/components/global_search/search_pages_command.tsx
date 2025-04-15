@@ -4,6 +4,7 @@
  */
 
 import {
+  ApplicationStart,
   ChromeNavLink,
   ChromeRegistrationNavLink,
   CoreStart,
@@ -69,15 +70,16 @@ export const workspaceSearchPages = async (
       coreStart.application.navigateToApp(link.id);
     };
 
-    const handleBreadcrumbs = (
+    const renderBreadcrumbs = (
       link: Link,
       breadcrumbs: EuiBreadcrumb[],
       availableUseCases: WorkspaceUseCase[]
     ) => {
       const isPageOutOfWorkspace = link.navGroup.type === NavGroupType.SYSTEM;
 
+      const updatedBreadcrumbs = [...breadcrumbs];
       if (currentWorkspace && !isPageOutOfWorkspace) {
-        breadcrumbs.push({
+        updatedBreadcrumbs.push({
           text: (
             <WorkspaceTitleDisplay
               workspace={currentWorkspace}
@@ -86,23 +88,44 @@ export const workspaceSearchPages = async (
           ),
         });
       } else {
-        breadcrumbs.push({ text: navGroupElement(link.navGroup) });
+        updatedBreadcrumbs.push({ text: navGroupElement(link.navGroup) });
       }
+
+      return updatedBreadcrumbs;
+    };
+
+    const WorkspaceGlobalSearchPageItem = ({
+      link,
+      search,
+      application,
+      onCallback,
+    }: {
+      link: Link;
+      search: string;
+      application: ApplicationStart;
+      onCallback: (link: Link) => void;
+    }) => {
+      const availableUseCases = useObservable(registeredUseCases$);
+
+      return (
+        <GlobalSearchPageItem
+          link={link}
+          search={search}
+          callback={() => onCallback(link)}
+          renderBreadcrumbs={(breadcrumbs) =>
+            renderBreadcrumbs(link, breadcrumbs, availableUseCases!)
+          }
+        />
+      );
     };
 
     const pages = searchResult.slice(0, 10).map((link) => {
       return (
-        <GlobalSearchPageItem
+        <WorkspaceGlobalSearchPageItem
           link={link}
           search={query}
           application={coreStart.application}
-          callback={() => {
-            handleCallback(link);
-          }}
-          customizeBreadcrumbs={(breadcrumbs) => {
-            const availableUseCases = useObservable(registeredUseCases$);
-            handleBreadcrumbs(link, breadcrumbs, availableUseCases!);
-          }}
+          onCallback={handleCallback}
         />
       );
     });
