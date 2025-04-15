@@ -283,10 +283,6 @@ export class ChromeService {
     this.applicationStart = application;
 
     const globalSearch = this.globalSearch.start();
-    if (application.capabilities.workspaces.enabled) {
-      // Page search will be register on workspace side
-      globalSearch.unregisterSearchCommand('pagesSearch');
-    }
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {

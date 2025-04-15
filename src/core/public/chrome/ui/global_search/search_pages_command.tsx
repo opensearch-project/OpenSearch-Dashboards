@@ -35,18 +35,18 @@ export const searchPages = async (
         <GlobalSearchPageItem
           link={link}
           search={query}
-          application={application as any}
           callback={() => {
             callback?.();
             application.navigateToApp(link.id);
           }}
-          customizeBreadcrumbs={
-            link.navGroup.id === DEFAULT_NAV_GROUPS.dataAdministration.id
-              ? (breadcrumbs) => {
-                  breadcrumbs.push({ text: navGroupElement(link.navGroup) });
-                }
-              : undefined
-          }
+          renderBreadcrumbs={(breadcrumbs) => {
+            if (link.navGroup.id === DEFAULT_NAV_GROUPS.dataAdministration.id) {
+              const updatedBreadcrumbs = [...breadcrumbs];
+              updatedBreadcrumbs.push({ text: navGroupElement(link.navGroup) });
+              return updatedBreadcrumbs;
+            }
+            return breadcrumbs;
+          }}
         />
       );
     });
