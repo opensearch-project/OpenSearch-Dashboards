@@ -30,11 +30,18 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { Logos, SavedObjectsClientContract, HttpStart } from 'opensearch-dashboards/public';
+import {
+  Logos,
+  SavedObjectsClientContract,
+  HttpStart,
+  NotificationsStart,
+} from 'opensearch-dashboards/public';
 import { PanelState, EmbeddableStart } from '../../../../../embeddable/public';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../../opensearch_dashboards_react/public';
+import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
+import { DirectQueryRequest, DirectQueryLoadingStatus } from '../../../../framework/types';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
@@ -43,6 +50,10 @@ export interface DashboardViewportProps {
   logos: Logos;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpStart;
+  notifications: NotificationsStart;
+  startLoading: (payload: DirectQueryRequest) => void;
+  loadStatus: DirectQueryLoadingStatus;
+  pollingResult: any;
 }
 
 interface State {
@@ -137,7 +148,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   }
 
   private renderContainerScreen() {
-    const { container, PanelComponent } = this.props;
+    const { container, PanelComponent, startLoading, loadStatus, pollingResult } = this.props;
     const {
       isEmbeddedExternally,
       isFullScreenMode,
@@ -166,6 +177,10 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           PanelComponent={PanelComponent}
           savedObjectsClient={this.props.savedObjectsClient}
           http={this.props.http}
+          notifications={this.props.notifications}
+          startLoading={startLoading}
+          loadStatus={loadStatus}
+          pollingResult={pollingResult}
         />
       </div>
     );
@@ -180,3 +195,22 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     );
   }
 }
+
+export const DashboardViewportWithQuery = (
+  props: Omit<DashboardViewportProps, 'startLoading' | 'loadStatus' | 'pollingResult'>
+) => {
+  const { http, notifications, ...restProps } = props;
+  const { startLoading, loadStatus, pollingResult } = useDirectQuery(http, notifications);
+
+  return (
+    <DashboardViewport
+      {...restProps}
+      http={http}
+      notifications={notifications}
+      startLoading={startLoading}
+      loadStatus={loadStatus}
+      pollingResult={pollingResult}
+    />
+  );
+};
+//

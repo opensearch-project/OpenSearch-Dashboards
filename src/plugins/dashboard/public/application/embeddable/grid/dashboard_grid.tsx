@@ -40,7 +40,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import type { SavedObjectsClientContract } from 'src/core/public';
-import { HttpStart } from 'src/core/public';
+import { HttpStart, NotificationsStart } from 'src/core/public';
 import { EuiButton } from '@elastic/eui';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
@@ -49,6 +49,8 @@ import { DashboardPanelState } from '../types';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
+import { DirectQueryLoadingStatus } from '../../../../framework/types';
+import { DirectQueryRequest } from '../../../../framework/types';
 
 let lastValidGridSize = 0;
 
@@ -132,6 +134,12 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   container: DashboardContainer;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpStart;
+  notifications: NotificationsStart;
+
+  // direct query loading
+  startLoading: (payload: DirectQueryRequest) => void;
+  loadStatus: DirectQueryLoadingStatus;
+  pollingResult: any;
 }
 
 interface State {
@@ -356,40 +364,32 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
   }
 
-  synchronizeNow = async () => {
-    try {
-      const { extractedDatasource, extractedDatabase, extractedIndex } = this;
+  synchronizeNow = () => {
+    const { extractedDatasource, extractedDatabase, extractedIndex } = this;
 
-      if (
-        !extractedDatasource ||
-        extractedDatasource === 'unknown' ||
-        !extractedDatabase ||
-        extractedDatabase === 'unknown' ||
-        !extractedIndex ||
-        extractedIndex === 'unknown'
-      ) {
-        console.error(
-          'Datasource, database, or index not properly set. Cannot run REFRESH command.'
-        );
-        return;
-      }
-
-      const query = `REFRESH MATERIALIZED VIEW \`${extractedDatasource}\`.\`${extractedDatabase}\`.\`${extractedIndex}\``;
-
-      const queryParams = {
-        query,
-        lang: 'sql',
-        datasource: extractedDatasource,
-      };
-
-      const response = await this.props.http.post('/api/observability/query/jobs', {
-        body: JSON.stringify(queryParams),
-      });
-
-      console.log('Materialized view refresh response:', response);
-    } catch (error) {
-      console.error('Error executing REFRESH MATERIALIZED VIEW:', error);
+    if (
+      !extractedDatasource ||
+      extractedDatasource === 'unknown' ||
+      !extractedDatabase ||
+      extractedDatabase === 'unknown' ||
+      !extractedIndex ||
+      extractedIndex === 'unknown'
+    ) {
+      console.error('Datasource, database, or index not properly set. Cannot run REFRESH command.');
+      return;
     }
+
+    // POC ONLY: Run REFRESH MATERIALIZED VIEW command
+    // TODO: Add the logic to check the index type
+    const query = `REFRESH MATERIALIZED VIEW \`${extractedDatasource}\`.\`${extractedDatabase}\`.\`${extractedIndex}\``;
+
+    const queryPayload = {
+      query,
+      lang: 'sql',
+      datasource: extractedDatasource,
+    };
+
+    this.props.startLoading(queryPayload);
   };
 
   public renderPanels() {
@@ -449,12 +449,17 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       <div style={{ position: 'relative', padding: '16px' }}>
         {/* Top-left corner "Synchronize Now" button */}
         <div style={{ marginBottom: '8px' }}>
-          <EuiButton iconType="refresh" size="s" onClick={this.synchronizeNow}>
+          <EuiButton
+            iconType="refresh"
+            size="s"
+            onClick={this.synchronizeNow}
+            isLoading={this.props.loadStatus === 'running'}
+            isDisabled={this.props.loadStatus === 'running'}
+          >
             Synchronize Now
           </EuiButton>
         </div>
 
-        {/* The grid itself */}
         <ResponsiveSizedGrid
           isViewMode={isViewMode}
           layout={this.buildLayoutFromPanels()}

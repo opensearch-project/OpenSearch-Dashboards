@@ -53,7 +53,7 @@ import { UiActionsStart } from '../../../../ui_actions/public';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
-import { DashboardViewport } from './viewport/dashboard_viewport';
+import { DashboardViewportWithQuery } from './viewport/dashboard_viewport';
 import {
   OpenSearchDashboardsContextProvider,
   OpenSearchDashboardsReactContext,
@@ -240,7 +240,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <OpenSearchDashboardsContextProvider services={this.options}>
-          <DashboardViewport
+          <DashboardViewportWithQuery
             key={this.id}
             renderEmpty={this.renderEmpty}
             logos={this.logos}
@@ -248,6 +248,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
             PanelComponent={this.embeddablePanel}
             savedObjectsClient={this.options.savedObjectsClient}
             http={this.options.http}
+            notifications={this.options.notifications}
           />
         </OpenSearchDashboardsContextProvider>
       </I18nProvider>,
