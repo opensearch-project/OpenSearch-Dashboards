@@ -329,23 +329,48 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
                 indexPatternRef.id
               );
               const indexTitle = indexPattern.attributes.title;
-              console.log('Index pattern title (index name):', indexTitle);
-              // Extract datasource, database, and index name from index title
-              const trimmedTitle = indexTitle.replace(/^flint_/, '');
-              const parts = trimmedTitle.split('_');
+              console.log('Index pattern title (raw):', indexTitle);
 
-              const datasource = parts[0] || 'unknown';
-              const database = parts[1] || 'unknown';
-              const index = parts.slice(2).join('_') || 'unknown';
+              // If indexTitle contains a wildcard, try to resolve to real indices
+              if (indexTitle.includes('*')) {
+                try {
+                  const resolved = await this.props.http.get(
+                    `/internal/index-pattern-management/resolve_index/${encodeURIComponent(
+                      indexTitle
+                    )}`
+                  );
+                  const matchedIndices = resolved?.indices || [];
+                  console.log('Resolved index pattern to concrete indices:', matchedIndices);
 
-              this.extractedDatasource = datasource;
-              this.extractedDatabase = database;
-              this.extractedIndex = index;
+                  if (matchedIndices.length > 0) {
+                    // TODO: Handle multiple matches if needed
+                    const firstMatch = matchedIndices[0].name;
+                    const trimmedTitle = firstMatch.replace(/^flint_/, '');
+                    const parts = trimmedTitle.split('_');
 
-              console.log('Extracted Info:');
-              console.log('Datasource:', datasource);
-              console.log('Database:', database);
-              console.log('Index:', index);
+                    this.extractedDatasource = parts[0] || 'unknown';
+                    this.extractedDatabase = parts[1] || 'unknown';
+                    this.extractedIndex = parts.slice(2).join('_') || 'unknown';
+
+                    console.log('Resolved from concrete index name:');
+                    console.log('Datasource:', this.extractedDatasource);
+                    console.log('Database:', this.extractedDatabase);
+                    console.log('Index:', this.extractedIndex);
+                  } else {
+                    console.warn('No concrete indices matched the wildcard pattern.');
+                  }
+                } catch (err) {
+                  console.error('Failed to resolve concrete index for pattern:', indexTitle, err);
+                }
+              } else {
+                // Original fallback logic (non-wildcard)
+                const trimmedTitle = indexTitle.replace(/^flint_/, '');
+                const parts = trimmedTitle.split('_');
+
+                this.extractedDatasource = parts[0] || 'unknown';
+                this.extractedDatabase = parts[1] || 'unknown';
+                this.extractedIndex = parts.slice(2).join('_') || 'unknown';
+              }
             } catch (err) {
               console.error(`Failed to fetch index pattern ${indexPatternRef.id}:`, err);
             }
