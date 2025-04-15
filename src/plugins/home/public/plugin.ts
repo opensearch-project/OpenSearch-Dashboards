@@ -227,6 +227,9 @@ export class HomePublicPlugin
       title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
         defaultMessage: 'Add sample data',
       }),
+      description: i18n.translate('home.tutorialDirectory.featureCatalogueDescription', {
+        defaultMessage: 'Get started with sample data, visualizations, and dashboards.',
+      }),
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.default
         : AppNavLinkStatus.hidden,
@@ -246,6 +249,15 @@ export class HomePublicPlugin
         });
       },
     });
+
+    core.getStartServices().then(([coreStart]) => {
+      if (!coreStart.application.capabilities.workspaces.enabled) {
+        core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+          { id: IMPORT_SAMPLE_DATA_APP_ID },
+        ]);
+      }
+    });
+
     urlForwarding.forwardApp('home', 'home');
 
     const featureCatalogue = { ...this.featuresCatalogueRegistry.setup() };
