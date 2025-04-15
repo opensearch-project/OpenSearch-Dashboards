@@ -29,7 +29,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { SavedObjectsClientCommon } from '../..';
+import { FieldFormatsContentType, SavedObjectsClientCommon } from '../..';
 import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
 
 import { SerializedFieldFormat } from '../../../../expressions/common';
@@ -71,7 +71,11 @@ interface SavedObjectBody {
   type?: string;
 }
 
-type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
+type FormatFieldFn = (
+  hit: Record<string, any>,
+  fieldName: string,
+  type?: FieldFormatsContentType
+) => any;
 
 const DATA_SOURCE_REFERNECE_NAME = 'dataSource';
 export class IndexPattern implements IIndexPattern {
@@ -84,7 +88,7 @@ export class IndexPattern implements IIndexPattern {
   public intervalName: string | undefined;
   public type: string | undefined;
   public formatHit: {
-    (hit: Record<string, any>, type?: string): any;
+    (hit: Record<string, any>, type?: FieldFormatsContentType): any;
     formatField: FormatFieldFn;
   };
   public formatField: FormatFieldFn;
@@ -251,7 +255,6 @@ export class IndexPattern implements IIndexPattern {
    * @param name field name
    * @param script script code
    * @param fieldType
-   * @param lang
    */
   async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
@@ -384,6 +387,7 @@ export class IndexPattern implements IIndexPattern {
     return (this.fieldsLoading = status);
   };
 
+  // DQL and Lucene already calling this formatter, we should add ppl formatter in the language config
   /**
    * Provide a field, get its formatter
    * @param field

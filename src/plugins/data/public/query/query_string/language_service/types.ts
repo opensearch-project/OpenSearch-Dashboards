@@ -5,6 +5,7 @@
 
 import { ISearchInterceptor } from '../../../search';
 import {
+  OSD_FIELD_TYPES,
   Query,
   QueryEditorExtensionConfig,
   QueryStringContract,
@@ -51,8 +52,10 @@ export interface LanguageConfig {
     bodyProps: any
   ) => EditorInstance<any, any, any>;
   fields?: {
+    sortable?: boolean;
     filterable?: boolean;
     visualizable?: boolean;
+    formatter?: (value: any, type: OSD_FIELD_TYPES) => any;
   };
   showDocLinks?: boolean;
   docLink?: {

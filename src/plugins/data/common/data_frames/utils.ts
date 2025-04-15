@@ -8,7 +8,6 @@ import datemath from '@opensearch/datemath';
 import {
   DATA_FRAME_TYPES,
   DataFrameAggConfig,
-  IDataFrame,
   IDataFrameWithAggs,
   IDataFrameResponse,
   PartialDataFrame,
@@ -16,7 +15,9 @@ import {
 } from './types';
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
-import { TimeRange } from '../types';
+import { OSD_FIELD_TYPES, TimeRange } from '../types';
+import { IDataFrame } from './types';
+import { ISearchOptions, SearchSourceFields } from '../search';
 
 /**
  * Converts the data frame response to a search response.
@@ -26,7 +27,15 @@ import { TimeRange } from '../types';
  * @param response - data frame response object
  * @returns converted search response
  */
-export const convertResult = (response: IDataFrameResponse): SearchResponse<any> => {
+export const convertResult = ({
+  response,
+  fields,
+  options,
+}: {
+  response: IDataFrameResponse;
+  fields?: SearchSourceFields;
+  options?: ISearchOptions;
+}): SearchResponse<any> => {
   const body = response.body;
   if (body.hasOwnProperty('error')) {
     return response;
@@ -52,9 +61,63 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
   if (data && data.fields && data.fields.length > 0) {
     for (let index = 0; index < data.size; index++) {
       const hit: { [key: string]: any } = {};
+
+      const processNestedFieldEntry = (field: any, value: any, formatter: any): any => {
+        if (!value) {
+          return value;
+        }
+        Object.entries(value).forEach(([nestedField, nestedValue]) => {
+          // Need to get the flattened field name for nested fields ex.products.created_on
+          const flattenedFieldName = `${field.name}.${nestedField}`;
+
+          // Go through search source fields to find the field type of the nested field
+          fields?.index?.fields.forEach((searchSourceField) => {
+            if (
+              searchSourceField.displayName === flattenedFieldName &&
+              searchSourceField.type === 'date'
+            ) {
+              value[nestedField] = formatter(nestedValue as string, OSD_FIELD_TYPES.DATE);
+            }
+          });
+        });
+        return value;
+      };
+
+      const processNestedField = (field: any, value: any, formatter: any): any => {
+        const nestedHit: { [key: string]: any } = value;
+        // if nestedHit is an array, we need to process each element
+        if (Array.isArray(nestedHit)) {
+          return nestedHit.map((nestedValue) => {
+            return processNestedFieldEntry(field, nestedValue, formatter);
+          });
+        } else {
+          return processNestedFieldEntry(field, nestedHit, formatter);
+        }
+      };
+
+      const processField = (field: any, value: any): any => {
+        if (options && options.formatter) {
+          // Handle date fields
+          if (field.type === 'date') {
+            return options.formatter(value, OSD_FIELD_TYPES.DATE);
+          }
+          // Handle nested objects with potential date fields
+          else if (field.type === 'object') {
+            return processNestedField(field, value, options.formatter);
+          } else {
+            // Default case when the field is either a date type or object type
+            return value;
+          }
+        } else {
+          // Default case when we don't have a formatter
+          return value;
+        }
+      };
+
       data.fields.forEach((field) => {
-        hit[field.name] = field.values[index];
+        hit[field.name] = processField(field, field.values[index]);
       });
+
       hits.push({
         _index: data.name,
         _source: hit,

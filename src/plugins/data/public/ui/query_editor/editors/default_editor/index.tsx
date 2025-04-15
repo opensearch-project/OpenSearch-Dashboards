@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
+import { QueryStatus, ResultStatus } from '../../../../query';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { createEditor, SingleLineInput } from '../shared';
 
@@ -20,6 +21,7 @@ export interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
   };
   headerRef?: React.RefObject<HTMLDivElement>;
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+  queryStatus?: QueryStatus;
 }
 
 export const DefaultInput: React.FC<DefaultInputProps> = ({
@@ -30,7 +32,16 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   editorDidMount,
   headerRef,
   provideCompletionItems,
+  queryStatus,
 }) => {
+  // Simple wrapper for editorDidMount
+  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    // Call the original editorDidMount function
+    editorDidMount(editor);
+
+    // Return the original editor instance
+    return editor;
+  };
   return (
     <div className="defaultEditor" data-test-subj="osdQueryEditor__multiLine">
       <div ref={headerRef} className="defaultEditor__header" data-test-subj="defaultEditorHeader" />
@@ -39,7 +50,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         languageId={languageId}
         value={value}
         onChange={onChange}
-        editorDidMount={editorDidMount}
+        editorDidMount={handleEditorDidMount}
         options={{
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
@@ -52,11 +63,20 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
           wrappingIndent: 'same',
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 1,
-          wordBasedSuggestions: false,
+          // Configure suggestion behavior
+          suggest: {
+            snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
+            filterGraceful: false, // Don't filter suggestions
+            showStatusBar: true, // Enable the built-in status bar with default text
+            showWords: false, // Disable word-based suggestions
+          },
+          acceptSuggestionOnEnter: 'off',
         }}
         suggestionProvider={{
-          provideCompletionItems,
           triggerCharacters: [' '],
+          provideCompletionItems: async (model, position, context, token) => {
+            return provideCompletionItems(model, position, context, token);
+          },
         }}
         languageConfiguration={{
           autoClosingPairs: [
@@ -69,6 +89,11 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         }}
         triggerSuggestOnFocus={true}
       />
+      <div className="defaultEditor__progress" data-test-subj="defaultEditorProgress">
+        {queryStatus?.status === ResultStatus.LOADING && (
+          <EuiProgress size="xs" color="accent" position="absolute" />
+        )}
+      </div>
       <div className="defaultEditor__footer" data-test-subj="defaultEditorFooter">
         {footerItems && (
           <EuiFlexGroup
@@ -106,4 +131,4 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
   );
 };
 
-export const createDefaultEditor = createEditor(SingleLineInput, null, DefaultInput);
+export const createDefaultEditor = createEditor(SingleLineInput, null, [], DefaultInput);

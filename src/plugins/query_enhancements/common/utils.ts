@@ -13,6 +13,7 @@ import {
   QueryStatusConfig,
   QueryStatusOptions,
 } from './types';
+import { API } from './constants';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -57,13 +58,34 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
     pollQueryResultsParams: context.body?.pollQueryResultsParams,
     timeRange: context.body?.timeRange,
   });
+
   return from(
-    http.fetch({
-      method: 'POST',
-      path,
-      body,
-      signal,
-    })
+    http
+      .fetch({
+        method: 'POST',
+        path,
+        body,
+        signal,
+      })
+      .catch(async (error) => {
+        if (error.name === 'AbortError' && context.body?.pollQueryResultsParams?.queryId) {
+          // Cancel job
+          try {
+            await http.fetch({
+              method: 'DELETE',
+              path: API.DATA_SOURCE.ASYNC_JOBS,
+              query: {
+                id: query.dataset?.dataSource?.id,
+                queryId: context.body?.pollQueryResultsParams.queryId,
+              },
+            });
+          } catch (cancelError) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to cancel query:', cancelError);
+          }
+        }
+        throw error;
+      })
   );
 };
 
@@ -98,4 +120,22 @@ export const buildQueryStatusConfig = (response: any) => {
     queryId: response.data.queryId,
     sessionId: response.data.sessionId,
   } as QueryStatusConfig;
+};
+
+/**
+ * Test if a PPL query is using search command
+ * https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.rst
+ */
+export const isPPLSearchQuery = (query: Query) => {
+  if (query.language !== 'PPL') {
+    return false;
+  }
+
+  if (typeof query.query !== 'string') {
+    return false;
+  }
+
+  const string = query.query.toLowerCase().replace(/\s/g, '');
+
+  return string.startsWith('source=') || string.startsWith('searchsource=');
 };

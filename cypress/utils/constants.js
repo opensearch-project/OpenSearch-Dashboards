@@ -11,8 +11,8 @@ export const SECONDARY_ENGINE = Cypress.env('SECONDARY_ENGINE');
 
 export const PATHS = {
   BASE: BASE_PATH,
-  ENGINE: BASE_ENGINE.url,
-  SECONDARY_ENGINE: SECONDARY_ENGINE.url,
+  ENGINE: BASE_ENGINE ? BASE_ENGINE.url : undefined,
+  SECONDARY_ENGINE: SECONDARY_ENGINE ? SECONDARY_ENGINE.url : undefined,
   STACK_MANAGEMENT: BASE_PATH + '/app/management',
   SECURITY_PLUGIN: BASE_PATH + '/app/security-dashboards-plugin#/',
   TENANTS_MANAGE: BASE_PATH + '/app/security-dashboards-plugin#/tenants',

@@ -5,13 +5,20 @@
 
 import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
+// TODO: import { paste } from 'copy-paste';
 
 module.exports = defineConfig({
-  defaultCommandTimeout: 60000,
+  experimentalMemoryManagement: true,
+  numTestsKeptInMemory: 0,
+  defaultCommandTimeout: 15000,
   requestTimeout: 60000,
   responseTimeout: 60000,
-  viewportWidth: 2000,
-  viewportHeight: 1320,
+  retries: {
+    runMode: 2,
+    openMode: 0,
+  },
+  viewportWidth: 1920,
+  viewportHeight: 1080,
   env: {
     ENGINE: {
       name: 'default',
@@ -38,7 +45,9 @@ module.exports = defineConfig({
     DATASOURCE_MANAGEMENT_ENABLED: false,
     ML_COMMONS_DASHBOARDS_ENABLED: true,
     WAIT_FOR_LOADER_BUFFER_MS: 0,
+    WAIT_MS: 2000,
     DISABLE_LOCAL_CLUSTER: false,
+    CYPRESS_RUNTIME_ENV: 'osd',
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
@@ -75,6 +84,12 @@ function setupNodeEvents(
       webpackOptions,
     })
   );
+  // TODO: Define the custom task to read clipboard
+  /* on('task', {
+    readClipboard() {
+      return paste(); // Return the clipboard content
+    },
+  });*/
 
   return config;
 }

@@ -222,8 +222,14 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
   const provideCompletionItems = async (
     model: monaco.editor.ITextModel,
-    position: monaco.Position
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
   ): Promise<monaco.languages.CompletionList> => {
+    if (token.isCancellationRequested) {
+      return { suggestions: [], incomplete: false };
+    }
+
     const dataset = queryString.getQuery().dataset;
     const indexPattern = dataset ? await getIndexPatterns().get(dataset.id) : undefined;
 
@@ -341,6 +347,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       ],
     },
     provideCompletionItems,
+    queryStatus: props.queryStatus,
   };
 
   const singleLineInputProps = {
@@ -401,6 +408,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         </EuiButtonEmpty>,
       ],
     },
+    queryStatus: props.queryStatus,
   };
 
   const languageEditorFunc = languageManager.getLanguage(query.language)!.editor;

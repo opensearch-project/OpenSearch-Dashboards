@@ -230,6 +230,11 @@ $ wsl -d docker-desktop
 $ sysctl -w vm.max_map_count=262144
 ```
 
+#### Debugging
+You can debug the OpenSearch Dashboards server by
+1. Attaching your debugger client to the debug port on port `9229`. If you're using VSCode, you can use the `attach-to-server` debug configuration provided.
+2. Running `yarn debug`. This will start the OpenSearch Dashboards development server with a debug port open on port `9229`.
+
 ### Next Steps
 
 Now that you have a development environment to play with, there are a number of different paths you may take next.
@@ -265,7 +270,7 @@ $ yarn start --run-examples
 
 #### Join the discussion
 
-See the [communication guide](COMMUNICATION.md)for information on how to join our slack workspace, forum, or developer office hours.
+See the [communication guide](COMMUNICATION.md) for information on how to join our slack workspace, forum, or developer office hours.
 
 ## Alternative development installations
 
@@ -374,7 +379,7 @@ You could pass one or multiple flags. If you don't pass any flag, `yarn build-pl
 Currently, the supported flags for this script are:
 
 - `darwin` (builds Darwin x64)
-- `linux` (builds Linux x64)
+- `linux` (builds Linux x64) **Note:** This build relies on the `dart-sass-embeddable` module, which uses `glibc`. Some Linux distributions (such as Alpine Linux) use `musl` instead of `glibc` and are not compatible with this build. If you are using a musl-based distro, consider building on a glibc-based environment (for example, using a Docker image based on Debian or CentOS) to avoid compatibility issues.
 - `linux-arm` (builds Linux ARM64).
 - `windows` (builds Windows x64)
 

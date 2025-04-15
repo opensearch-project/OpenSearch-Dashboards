@@ -36,7 +36,8 @@ import { ISearchOptions } from '../../index';
 export function callClient(
   searchRequests: SearchRequest[],
   requestsOptions: ISearchOptions[] = [],
-  fetchHandlers: FetchHandlers
+  fetchHandlers: FetchHandlers,
+  dataSourceId?: string
 ) {
   // Correlate the options with the request that they're associated with
   const requestOptionEntries: Array<[
@@ -48,6 +49,7 @@ export function callClient(
 
   const { searching, abort } = defaultSearchStrategy.search({
     searchRequests,
+    dataSourceId,
     ...fetchHandlers,
   });
 

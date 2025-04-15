@@ -4,6 +4,308 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [3.0.0-beta1-2025-04-09](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.0.0)
+
+### 💥 Breaking Changes
+
+ - Bump `monaco-editor` from 0.17.0 to 0.30.1 ([#9497](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9497))
+ - Remove the deprecated "newExperience" table option in discover ([#9531](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9531))
+ - Bump monaco-editor from 0.30.1 to 0.52.0 ([#9618](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9618))
+
+### Deprecations
+
+### 🛡 Security
+
+ - Bump vega from 5.23.0 to 5.32.0 ([#9623](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9623))
+ - Resolve CVE-2024-53392 by bumping prismjs to 1.30.0 ([#9634](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9634))
+ - Bump @babel/runtime to 7.26.10 and tar-fs to 1.2.2 for CVE-2025-27789 and CVE-2024-12905 ([#9649](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9649))
+
+### 📈 Features/Enhancements
+
+ - Lighthouse Page Performance Metrics CI workflow ([#9304](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9304))
+ - Support streaming when content type is event stream ([#9647](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9647))
+ - Enable experimental data plugin's __enhance ([#9655](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9655))
+ - Add resultsActionBar into data plugin's __enhance ([#9655](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9655))
+
+### 🐛 Bug Fixes
+
+ - Fixing when find saved objects within a workspace returns saved objects in all the workspaces ([#9420](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9420))
+ - Prevent user from visiting discover when out of a workspace ([#9465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9465))
+ - Fix potential memory leak in getDirectQueryConnections ([#9575](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9575))
+ - Permissions for github workflow in bundler performance testing ci ([#9581](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9581))
+ - Query assistant doesn't refresh generated ppl ([#9601](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9601))
+ - Trim the url for creating data source ([#9637](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9637))
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+ - Add Joey Liu (`@Maosaic`) as maintainer ([#9467](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9467))
+ - Getting started with Discover 2.0 ([#9525](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9525))
+
+### 🛠 Maintenance
+
+### 🪛 Refactoring
+
+### 🔩 Tests
+
+ - Reenable saved search cypress tests ([#9628](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9628))
+
+### 📈 Features/Enhancements
+ - Revert "[Query enhancement]feat: Append prompt for query assistant in request payload" ([#9607](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9607))
+
+## [3.0.0-alpha1-2025-03-17](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.0.0)
+
+### 💥 Breaking Changes
+
+ - Remove `CssDistFilename` ([#9446](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9446))
+ - Remove `withLongNumerals` in `HttpFetchOptions`. ([#9448](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9448))
+ - Remove `@elastic/filesaver` ([#9484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9484))
+
+### Deprecations
+
+ - Discover:newExpereince and DataGridTable ([#9511](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9511))
+
+### 🛡 Security
+
+ - Bump markdown-it from 12.3.2 to 13.0.2 ([#9412](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9412))
+ - Bump dompurify from 3.1.6 to 3.2.4 ([#9447](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9447))
+ - [CVE-2023-28155][CVE-2023-44270][CVE-2024-55565] Resolve the CVE ([#9503](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9503))
+ - Resolve CVE-2025-27152 by bumping axios to 1.8.2 ([#9507](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9507))
+ - Fix GHSA-vjh7-7g9h-fjfh by bumping elliptic to 6.6.1 ([#9546](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9546))
+
+### 📈 Features/Enhancements
+
+ - Autocomplete Value Suggestion ([#8275](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8275))
+ - Improve validation of the licensing imposed by dependencies. ([#9064](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9064))
+ - Vega visualization with ppl now supports reading time field ([#9152](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9152))
+ - Improve scrolling experience on Discover page. ([#9298](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9298))
+ - Webpack bundle analyser limit check ([#9320](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9320))
+ - Deletes S3 Jobs in Backend when Original Query is Canceled ([#9355](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9355))
+ - Add MDS to msearch ([#9361](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9361))
+ - Update formatHit.formatField() to accept `type` as an argument ([#9469](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9469))
+ - Allow to customize discover summary panel title ([#9481](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9481))
+ - Update position of summary ([#9494](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9494))
+ - Move HITs counter to be closer to table & show results count ([#9498](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9498))
+ - Add the ability to export to CSV from the discover page ([#9530](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9530))
+ - Append prompt for query assistant in request payload ([#9532](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9532))
+
+### 🐛 Bug Fixes
+
+ - Encode searchId as it tends to be decoded after adds into url. ([#8530](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8530))
+ - Preserve location state at dashboard app startup to fix adding a new visualization ([#9072](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9072))
+ - PPL Grammar Parsing related issues ([#9120](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9120))
+ - Hide the assistant entry when there isn't data2summary agent ([#9277](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9277))
+ - Clean up sync URL subscription in Discover plugin topNav ([#9316](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9316))
+ - Change from cluster to data sources for dataset selector column ([#9343](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9343))
+ - Flatten hit modify original array ([#9347](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9347))
+ - Update actions/cache from v1 to v4 to address deprecation warning ([#9366](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9366))
+ - Make PPL time column respect time zone and date format ([#9379](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9379))
+ - Add mappings for tinyint, smallint, and bigint in S3 dataset type ([#9430](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9430))
+ - Make PPL handle miliseconds in date fields ([#9436](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9436))
+ - Organizing generated summary by using markdown format ([#9464](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9464))
+ - Should not show summary if there is no response ([#9480](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9480))
+ - Text size in generated summary should be s ([#9492](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9492))
+ - Make nav icon style compatible with sidecar ([#9514](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9514))
+ - Fix data frame null or undefined object conversion error ([#9516](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9516))
+ - Discover summary regression when result is empty ([#9519](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9519))
+ - Correctly show selected cols from saved search ([#9523](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9523))
+ - Correctly load saved search from snapshot URL ([#9529](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9529))
+ - Pr permission write access ([#9534](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9534))
+ - Correctly load saved search query in query editor ([#9541](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9541))
+ - Clear discover summary if t2ppl failed ([#9552](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9552))
+ - Query-assist removed the placeholder of last ask question ([#9552](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9552))
+ - Use markdown in discover summary ([#9553](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9553))
+
+### 🚞 Infrastructure
+
+ - Add checks for out of sync lockfile and dev docc to the CI ([#9064](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9064))
+ - Validate the licensing imposed by dependencies during CI ([#9064](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9064))
+
+### 📝 Documentation
+
+ - Fix OpenAPI documentation ([#8885](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8885))
+ - Add triaging process documentation ([#9291](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9291))
+ - Add 2.19 Release Notes ([#9325](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9325))
+ - Add alternative Docker development environment documentation specific to Cypress. ([#9362](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9362))
+ - Add documentation and configuration for server debugging ([#9435](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9435))
+ - Initial version of Understanding Discover 2.0 ([#9463](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9463))
+
+### 🛠 Maintenance
+
+ - Adds a git pre commit hook to ensure that developer docs are always updated ([#6585](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6585))
+ - Bump actions used by build and test workflows ([#9064](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9064))
+ - Disable sorting on Discover table columns header for PPL and SQL ([#9263](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9263))
+ - Update query editor loading UI ([#9344](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9344))
+ - Fix view single document page content padding ([#9382](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9382))
+ - Make colour of discover histogram match theme ([#9405](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9405))
+ - Replace `@elastic/filesaver` in favor of `file-saver`. ([#9484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9484))
+ - Replace `formatNumWithCommas` with `toLocaleString` ([#9488](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9488))
+ - Upgrade @aws-crypto/client-node to ^4.2.0 and aws-sdk from v2 to v3 ([#9641](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9641))
+
+### 🪛 Refactoring
+
+ - Update data source details tabs to use small buttons ([#9057](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9057))
+
+### 🔩 Tests
+
+ - [Cypress Test] Add and Refactor TESTID-140 sidebar spec and clean up ([#9154](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9154))
+ - [Cypress][TESTID-147] Add tests for table canvas in discover ([#9285](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9285))
+ - Add tests for saved searches in dashboards ([#9288](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9288))
+ - Add histogram interaction tests ([#9290](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9290))
+ - Add cypress integration test for the inspect functionality in the Discover and Dashboards pages. ([#9292](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9292))
+ - Add all recent queries tests ([#9307](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9307))
+ - Test sort in language_specific_display ([#9314](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9314))
+ - Update cypress data to have random id, missing value fields and unique field ([#9321](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9321))
+ - [TESTID-64] Add cypress test for auto query updates when switch dataset ([#9322](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9322))
+ - Add cypress integration test for the inspect functionality in the Discover and Dashboards pages. ([#9331](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9331))
+ - Add retry mechanism for flaky share menu test ([#9352](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9352))
+ - Add Top Values and Filter Sidebar Fields by Type testing for the Discover Page. ([#9386](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9386))
+ - Remove unnecessary reload in saved_search test. ([#9396](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9396))
+ - [TESTID-234] Add tests for query editor display ([#9398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9398))
+ - Fix flakieness in cypress tests ([#9433](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9433))
+ - Use before/after to speed up test ([#9439](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9439))
+ - Clear session storage in S3 integ test and update workflow ([#9490](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9490))
+
+## [2.19.0-2025-02-04](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.19.0)
+
+### 💥 Breaking Changes
+
+### Deprecations
+
+### 🛡 Security
+
+ - [CVE-2024-21538] Bump `cross-spawn` from 6.0.5 and 7.0.3 to 7.0.5 ([#8882](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8882))
+
+### 📈 Features/Enhancements
+
+ - Making local cluster state calls during health checks to avoid stressing cluster manager node ([#8187](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8187))
+ - Add data test subject for discover cypress test ([#8682](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8682))
+ - Adds data2summary agent check in data summary panel in discover. ([#8716](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8716))
+ - Add setting to turn extending numeric precision on or off ([#8837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8837))
+ - Add framework to show banner at the top in discover results canvas ([#8851](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8851))
+ - Show indexed views in dataset selector ([#8851](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8851))
+ - [Workspace] support dismiss get started for search overview page ([#8874](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8874))
+ - Added framework to get default query string using dataset and language combination ([#8896](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8896))
+ - Optimize recent items and filter out items whose workspace is deleted ([#8900](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8900))
+ - Refactor the bulk_get handler in permission wrapper when item has permission error ([#8906](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8906))
+ - Add privacy levels to the workspace ([#8907](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8907))
+ - [workspace]support search dev tools by its category name ([#8920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8920))
+ - Support custom logic to insert time filter based on dataset type ([#8932](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8932))
+ - Add two-steps loading for associating data sources ([#8999](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8999))
+ - Disable buttons in sample data cards for read-only users ([#9042](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9042))
+ - Migrate query enhancement cypress tests to OSD repo ([#9048](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9048))
+ - Add a "Learn More" flyout providing additional information to the collaborators page. ([#9145](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9145))
+ - Support to dissociate data connection object since DSM list has supported to display ([#9164](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9164))
+ - [Workspace]Update workspace privacy setting link ([#9222](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9222))
+ - Add navControlsPrimaryHeaderRight slot to header ([#9223](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9223))
+ - Enable maximum workspaces ([#9226](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9226))
+ - Add Tests for Simple Dataset Selector ([#9255](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9255))
+ - Add Tests for Relative and Quick Select Time Range Selection ([#9265](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9265))
+
+### 🐛 Bug Fixes
+
+ - [Workspace] Unable to copy assets to a workspace without assigning related data source ([#7690](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7690))
+ - Fix the display and jump logic for recent assets ([#8136](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8136))
+ - Fix the UI of recent assets in the header ([#8156](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8156))
+ - Fix/the UI of workspace list table ([#8219](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8219))
+ - Fix the UI of delete modal in the save objects(assets) page ([#8237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8237))
+ - Address UI issues of index patterns ([#8287](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8287))
+ - Adds badge when there are more than one workspaces and updates the icon ([#8519](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8519))
+ - Fix data source info is missing in default query when click Discover from other pages ([#8583](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8583))
+ - Bump url to 0.11.4 ([#8611](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8611))
+ - Fix UI issues in workspace detail and create page ([#8737](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8737))
+ - [Workspace]Fix error message missed in workspace creator name input ([#8738](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8738))
+ - [Workspace] [Bug] Check if workspaces exists when creating saved objects. ([#8739](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8739))
+ - Update async search response type ([#8781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8781))
+ - Staled closure inside chrome_service ([#8783](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8783))
+ - [Workspace]Fix flights sample data copy in workspace assets page ([#8786](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8786))
+ - [Discover] Makes cachign dataset options optional and configurable by the dataset type ([#8799](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8799))
+ - Query Editor state sync issues in Discover ([#8803](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8803))
+ - Decouple data$ updates to prevent rows clearing on hook re-render ([#8806](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8806))
+ - Adds test id for workspace multi-deletion button ([#8833](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8833))
+ - Fix a typo while inspecting values for large numerals in OSD and the JS client ([#8837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8837))
+ - [MDS] Fix showing DQS sources list in workspaces ([#8838](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8838))
+ - Fix a typo while inspecting values for large numerals in OSD and the JS client ([#8839](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8839))
+ - [Workspace]Fix error toasts in sample data page ([#8842](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8842))
+ - Fix template queries loading and update getSampleQuery interface ([#8848](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8848))
+ - Upgrade actions/upload-artifact to v4 ([#8855](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8855))
+ - [Workspace][Bug] Fix inspect page url error. ([#8857](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8857))
+ - Keep previous query result if current query result in error ([#8863](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8863))
+ - Hide Date Picker for Unsupported Types ([#8866](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8866))
+ - Add max height and scroll to error message body ([#8867](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8867))
+ - Search on page load out of sync state when clicking submit. ([#8871](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8871))
+ - Remove filter out serverless cluster and add support to extract index name ([#8872](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8872))
+ - Retain currently selected dataset when opening saved query without dataset info ([#8883](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8883))
+ - Only support copy action for query templates ([#8899](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8899))
+ - Removed extra parameter ([#8902](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8902))
+ - Fix toggle column action in the discover page ([#8905](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8905))
+ - Ensure query editor cursor is aligned with text ([#8912](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8912))
+ - Change some of the http link in settings page to https link ([#8919](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8919))
+ - Update saved search initialization logic to use current query instead of default query ([#8930](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8930))
+ - DQL autocomplete better parsing and fixes ([#8931](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8931))
+ - Use roundUp when converting timestamp for PPL ([#8935](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8935))
+ - SQL syntax highlighting double quotes ([#8951](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8951))
+ - Support imports without extensions in cypress webpack build ([#8993](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8993))
+ - Fix workspace page hanging with none collaborators for non dashboard admin ([#9004](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9004))
+ - Prevent user from visiting dashboards / visualizations when out of a workspace ([#9024](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9024))
+ - Inactive manage link in the data source selector when opening DevTools ([#9059](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9059))
+ - Preserve location state at dashboard app startup to fix adding a new visualization ([#9072](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9072))
+ - Hide collaborators page on nav when newHomePage is disabled ([#9116](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9116))
+ - 0 rendered in discover when there are no results ([#9153](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9153))
+ - Fix Unhandled Error Response of dev tool with MDS ([#9159](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9159))
+ - Cleanup OsdUrlStateStorage subscription in TopNav ([#9167](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9167))
+ - Fix set as default error in data source and index pattern ([#9187](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9187))
+ - Update workspace not found message to generic message ([#9189](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9189))
+ - Fix cypress version error on ciGroup11 ([#9209](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9209))
+ - Solve console error on the page when the data source has an empty description ([#9236](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9236))
+ - Bug that mistakenly classify data connection ([#9237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9237))
+ - Fix Discover query editor enter shortcuts reverting date range ([#9248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9248))
+ - DQC can not be assigned to a workspace due to validation ([#9259](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9259))
+ - Update sidecar style to align with new page header ([#9269](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9269))
+ - Recent item links are not correctly constructed ([#9275](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9275))
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+ - Update dev guide to connect to external cluster ([#9080](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9080))
+
+### 🛠 Maintenance
+
+ - Revert back to using the official release of `vega-interpreter` ([#8744](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8744))
+ - Remove data enhancement options from yaml config now it is controlled by Advanced Settings ([#8828](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8828))
+ - Bump `@opensearch-project/opensearch` from 2.9.0 to 2.13.0 ([#8886](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8886))
+ - Update cypress to v12 ([#8926](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8926))
+ - Update oui to 1.18 ([#9058](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9058))
+ - Use relative paths in cypress utilities ([#9079](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9079))
+ - Create cypress command namespacing util ([#9150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9150))
+ - Update oui to 1.19 ([#9172](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9172))
+ - Updates the cross-spawn dependency in the yarn.lock ([#9302](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9302))
+
+### 🪛 Refactoring
+
+ - [Workspace] Integrate dashboard admin with dynamic config ([#8137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8137))
+ - [Workspace] Add unit tests for inspect page url ([#8834](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8834))
+ - [Workspace] Isolate objects based on workspace when calling get/bulkGet ([#8888](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8888))
+ - Remove permission validation in workspace form ([#9065](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9065))
+ - [Workspace] add missing method for workspace client interface ([#9070](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9070))
+ - Move query assistant summary toggle to AI assistant dropdown list ([#9228](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9228))
+
+### 🔩 Tests
+
+ - Remove head 10 for PPL default query to unblock cypress test failures ([#8827](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8827))
+ - Query-enhancements testing utility updates and additions ([#9074](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9074))
+ - Re-enable dataset_selector.spec.js under workspace in ciGroup10 ([#9082](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9082))
+ - Add tests for saving search and loading it ([#9112](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9112))
+ - Adding Cypress Tests for S3 Datasets ([#9113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9113))
+ - Add cypress integration test for the new Data Explorer UI's Filtering. ([#9119](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9119))
+ - Make createWorkspaceIndexPatterns to handle no default cluster and clean up ([#9129](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9129))
+ - Add tests for updating a saved search ([#9151](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9151))
+ - Add cypress integration test for the old and new UI view saved queries. ([#9166](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9166))
+ - Add tests for language-specific display ([#9215](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9215))
+ - Add cypress integration test for the old and new UI view saved queries. ([#9229](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9229))
+
 ## [2.18.0-2024-10-31](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.18.0)
 
 ### 💥 Breaking Changes

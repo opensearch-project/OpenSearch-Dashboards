@@ -13,7 +13,7 @@
     "@osd/dev-utils": "1.0.0",
     "@osd/babel-preset": "1.0.0",
     "raw-loader": "^4.0.2",
-    "typescript": "4.0.2",
+    "typescript": "4.5.5",
     "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1"
   },
   "@osd/pm": {

@@ -1,2 +1,0 @@
-feat:
-- Refactor the bulk_get handler in permission wrapper when item has permission error ([#8906](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8906))

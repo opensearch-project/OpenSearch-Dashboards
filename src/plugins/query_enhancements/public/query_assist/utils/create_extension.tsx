@@ -5,8 +5,9 @@
 
 import { i18n } from '@osd/i18n';
 import { HttpSetup } from 'opensearch-dashboards/public';
-import React, { useEffect, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import React, { useCallback, useEffect, useState } from 'react';
+import { BehaviorSubject, of } from 'rxjs';
+import { useObservable } from 'react-use';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
 import {
@@ -19,8 +20,9 @@ import { ConfigSchema } from '../../../common/config';
 import assistantMark from '../../assets/sparkle_mark.svg';
 import { QueryAssistBanner, QueryAssistBar, QueryAssistSummary } from '../components';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
-import { QueryAssistContext } from '../hooks/use_query_assist';
+import { QueryAssistContext, QueryAssistState } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
+import { isPPLSupportedType } from './language_support';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -79,7 +81,7 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
       if (
         query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH && // datasource is MDS OpenSearch
         query.dataset?.dataSource?.type !== 'DATA_SOURCE' && // datasource is MDS OpenSearch when using indexes
-        query.dataset?.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN // dataset is index pattern
+        !isPPLSupportedType(query.dataset?.type)
       )
         return [];
 
@@ -93,11 +95,15 @@ export const createQueryAssistExtension = (
   data: DataPublicPluginSetup,
   config: ConfigSchema['queryAssist'],
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>,
+  isSummaryAgentAvailable$: BehaviorSubject<boolean>,
   resultSummaryEnabled$: BehaviorSubject<boolean>,
   usageCollection?: UsageCollectionSetup
 ): QueryEditorExtensionConfig => {
   const http: HttpSetup = core.http;
-  const question$ = new BehaviorSubject('');
+  const assistQueryState$ = new BehaviorSubject<QueryAssistState>({
+    question: '',
+    generatedQuery: '',
+  });
   return {
     id: 'query-assist',
     order: 1000,
@@ -124,11 +130,40 @@ export const createQueryAssistExtension = (
           dependencies={dependencies}
           http={http}
           data={data}
-          isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
-          {...(config.summary.enabled && { resultSummaryEnabled$ })}
-          question$={question$}
+          queryState$={assistQueryState$}
         >
           <QueryAssistBar dependencies={dependencies} />
+        </QueryAssistWrapper>
+      );
+    },
+    getBanner: (dependencies) => {
+      // advertise query assist if user is not on a supported language.
+      return (
+        <QueryAssistWrapper
+          dependencies={dependencies}
+          http={http}
+          data={data}
+          queryState$={assistQueryState$}
+          invert
+        >
+          <QueryAssistBanner
+            dependencies={dependencies}
+            languages={config.supportedLanguages.map((conf) => conf.language)}
+          />
+        </QueryAssistWrapper>
+      );
+    },
+    getBottomPanel: (dependencies) => {
+      return (
+        <QueryAssistWrapper
+          dependencies={dependencies}
+          http={http}
+          data={data}
+          isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
+          isSummaryAgentAvailable$={isSummaryAgentAvailable$}
+          {...(config.summary.enabled && { resultSummaryEnabled$ })}
+          queryState$={assistQueryState$}
+        >
           {config.summary.enabled && (
             <QueryAssistSummary
               data={data}
@@ -136,19 +171,9 @@ export const createQueryAssistExtension = (
               usageCollection={usageCollection}
               dependencies={dependencies}
               core={core}
+              brandingLabel={config.summary.branding.label}
             />
           )}
-        </QueryAssistWrapper>
-      );
-    },
-    getBanner: (dependencies) => {
-      // advertise query assist if user is not on a supported language.
-      return (
-        <QueryAssistWrapper dependencies={dependencies} http={http} data={data} invert>
-          <QueryAssistBanner
-            dependencies={dependencies}
-            languages={config.supportedLanguages.map((conf) => conf.language)}
-          />
         </QueryAssistWrapper>
       );
     },
@@ -162,32 +187,38 @@ interface QueryAssistWrapperProps {
   invert?: boolean;
   isQuerySummaryCollapsed$?: BehaviorSubject<boolean>;
   resultSummaryEnabled$?: BehaviorSubject<boolean>;
-  question$?: BehaviorSubject<string>;
+  isSummaryAgentAvailable$?: BehaviorSubject<boolean>;
+  queryState$: BehaviorSubject<QueryAssistState>;
 }
 
 const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
   const [visible, setVisible] = useState(false);
-  const [question, setQuestion] = useState('');
   const [isQuerySummaryCollapsed, setIsQuerySummaryCollapsed] = useState(true);
-  const updateQuestion = (newQuestion: string) => {
-    props.question$?.next(newQuestion);
-  };
-  const question$ = props.question$;
+  const isSummaryAgentAvailable = useObservable(props.isSummaryAgentAvailable$ ?? of(false), false);
+  // The current successfully generated query
+  const [queryState, setQueryState] = useState<QueryAssistState>(props.queryState$.value);
+
+  const updateQueryState = useCallback(
+    (newState: QueryAssistState) => {
+      props.queryState$.next(newState);
+    },
+    [props.queryState$]
+  );
 
   useEffect(() => {
     const subscription = props.isQuerySummaryCollapsed$?.subscribe((isCollapsed) => {
       setIsQuerySummaryCollapsed(isCollapsed);
     });
-    const questionSubscription = props.question$?.subscribe((newQuestion) => {
-      setQuestion(newQuestion);
+
+    const queryStateSubscription = props.queryState$.subscribe((newState) => {
+      setQueryState(newState);
     });
 
     return () => {
-      questionSubscription?.unsubscribe();
+      queryStateSubscription.unsubscribe();
       subscription?.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.isQuerySummaryCollapsed$, props.queryState$]);
 
   useEffect(() => {
     let mounted = true;
@@ -212,10 +243,10 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     <>
       <QueryAssistContext.Provider
         value={{
-          question,
-          question$,
-          updateQuestion,
+          queryState,
+          updateQueryState,
           isQuerySummaryCollapsed,
+          isSummaryAgentAvailable,
         }}
       >
         {props.children}

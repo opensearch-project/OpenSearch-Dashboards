@@ -55,7 +55,7 @@ describe('#SslConfig', () => {
   describe('throws when config is invalid', () => {
     beforeEach(() => {
       const realFs = jest.requireActual('fs');
-      mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
+      mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path, 'utf8'));
       const utils = jest.requireActual('../utils');
       mockReadPkcs12Keystore.mockImplementation((path: string, password?: string) =>
         utils.readPkcs12Keystore(path, password)
