@@ -157,4 +157,80 @@ describe('createRequest', () => {
     expect(request.headers['Content-Length']).to.be.a('string');
     expect(request.headers['Content-Length']).to.equal(expectedLength);
   });
+
+  it('should correctly separate path and query parameters', () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const params = {
+      method: 'GET',
+    };
+    const reqParams = {
+      method: 'GET',
+      path: '/test?dataSourceId=sample&sort=true',
+      headers: {},
+    };
+
+    const request = connector.createRequest(params, reqParams);
+
+    // Test path separation
+    expect(request.path).to.equal('/test');
+
+    // Test query parameters
+    expect(Object.keys(request.query).length).to.equal(2);
+    expect(request.query.dataSourceId).to.equal('sample');
+    expect(request.query.sort).to.equal('true');
+  });
+
+  it('should handle path with special characters', () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const params = {
+      method: 'GET',
+    };
+    const reqParams = {
+      method: 'GET',
+      path: "/test/*/(hello')/!",
+      headers: {},
+    };
+
+    const request = connector.createRequest(params, reqParams);
+
+    expect(request.path).to.equal('/test/%2A/%28hello%27%29/%21');
+  });
+
+  it('should handle path without query parameters', () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const params = {
+      method: 'GET',
+    };
+    const reqParams = {
+      method: 'GET',
+      path: '/test',
+      headers: {},
+    };
+
+    const request = connector.createRequest(params, reqParams);
+
+    expect(request.path).to.equal('/test');
+    expect(request.query).to.be.empty;
+  });
 });
