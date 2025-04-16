@@ -7,7 +7,7 @@ import { MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
 import { determineMapping } from './determine_mapping';
 
 describe('determine_mapping', () => {
-  describe.skip('determineType()', () => {
+  describe('determineType()', () => {
     const document = {
       metadata: {
         id: 'abc-123',
@@ -171,7 +171,14 @@ describe('determine_mapping', () => {
         metadata: {
           properties: {
             created_at: {
-              type: 'date',
+              // TODO When date parsing is supported, change to 'date' type
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
             },
             id: {
               type: 'text',
@@ -212,7 +219,14 @@ describe('determine_mapping', () => {
         orders: {
           properties: {
             date: {
-              type: 'date',
+              // TODO When date parsing is supported, change to 'date' type
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
             },
             items: {
               properties: {
@@ -291,7 +305,14 @@ describe('determine_mapping', () => {
                                   type: 'integer',
                                 },
                                 last_rotation: {
-                                  type: 'date',
+                                  // TODO When date parsing is supported, change to 'date' type
+                                  type: 'text',
+                                  fields: {
+                                    keyword: {
+                                      type: 'keyword',
+                                      ignore_above: 256,
+                                    },
+                                  },
                                 },
                               },
                             },
@@ -390,7 +411,14 @@ describe('determine_mapping', () => {
                   },
                 },
                 timestamp: {
-                  type: 'date',
+                  // TODO When date parsing is supported, change to 'date' type
+                  type: 'text',
+                  fields: {
+                    keyword: {
+                      type: 'keyword',
+                      ignore_above: 256,
+                    },
+                  },
                 },
               },
             },
