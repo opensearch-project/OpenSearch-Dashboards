@@ -41,7 +41,7 @@ import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import type { SavedObjectsClientContract } from 'src/core/public';
 import { HttpStart, NotificationsStart } from 'src/core/public';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -463,6 +463,22 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
   }
 
+  // TODO find a home for this
+  EMR_STATES: Map<string, { ord: number; terminal: boolean; color: string }> = new Map(
+    Object.entries({
+      submitted: { ord: 10, terminal: false, color: 'vis0' },
+      queued: { ord: 20, terminal: false, color: 'vis0' },
+      pending: { ord: 30, terminal: false, color: 'vis0' },
+      scheduled: { ord: 40, terminal: false, color: 'vis0' },
+      running: { ord: 50, terminal: false, color: 'vis0' },
+      cancelling: { ord: 50, terminal: false, color: 'vis0' },
+      success: { ord: 100, terminal: true, color: 'success' },
+      failed: { ord: 100, terminal: true, color: 'danger' },
+      cancelled: { ord: 100, terminal: true, color: 'subdued' },
+    })
+  );
+  MAX_ORD: number = 100;
+
   public render() {
     if (this.state.isLayoutInvalid) {
       return null;
@@ -470,19 +486,30 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
     const { viewMode } = this.state;
     const isViewMode = viewMode === ViewMode.VIEW;
+    const state = this.EMR_STATES.get(this.props.loadStatus as string)!;
+
     return (
       <div style={{ position: 'relative', padding: '16px' }}>
         {/* Top-left corner "Synchronize Now" button */}
-        <div style={{ marginBottom: '8px' }}>
+        <div
+          style={{ marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}
+        >
           <EuiButton
             iconType="refresh"
             size="s"
             onClick={this.synchronizeNow}
-            isLoading={this.props.loadStatus === 'running'}
-            isDisabled={this.props.loadStatus === 'running'}
+            isLoading={!state.terminal}
+            isDisabled={!state.terminal}
           >
             Synchronize Now
           </EuiButton>
+          <EuiProgress
+            value={state.ord}
+            max={this.MAX_ORD}
+            color={state.color}
+            style={{ width: '100px' }}
+            size="l"
+          />
         </div>
 
         <ResponsiveSizedGrid
