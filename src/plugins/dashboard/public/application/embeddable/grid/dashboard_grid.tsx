@@ -51,6 +51,10 @@ import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
 import { DirectQueryRequest } from '../../../../framework/types';
+import {
+  extractIndexInfoFromDashboard,
+  generateRefreshQuery,
+} from '../../utils/direct_query_sync/direct_query_sync';
 
 let lastValidGridSize = 0;
 
@@ -104,9 +108,9 @@ function ResponsiveGrid({
       width={lastValidGridSize}
       className={classes}
       isDraggable={true}
-      isResizable={true}
       // There is a bug with d3 + firefox + elements using transforms.
       // See https://github.com/elastic/kibana/issues/16870 for more context.
+      isResizable={true}
       useCSSTransforms={false}
       margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
@@ -135,8 +139,6 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpStart;
   notifications: NotificationsStart;
-
-  // direct query loading
   startLoading: (payload: DirectQueryRequest) => void;
   loadStatus: DirectQueryLoadingStatus;
   pollingResult: any;
@@ -190,7 +192,8 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     try {
       layout = this.buildLayoutFromPanels();
     } catch (error: any) {
-      console.error(error);
+      console.error(error); // eslint-disable-line no-console
+
       isLayoutInvalid = true;
       this.props.opensearchDashboards.notifications.toasts.danger({
         title: this.props.intl.formatMessage({
@@ -272,141 +275,41 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
    * Runs on mount and when the container input (panels) changes.
    */
   private async collectAllPanelMetadata() {
-    const panels = this.state.panels;
+    const indexInfo = await extractIndexInfoFromDashboard(
+      this.state.panels,
+      this.props.savedObjectsClient,
+      this.props.http
+    );
 
-    const panelDataPromises = Object.keys(panels).map(async (panelId) => {
-      const panel = panels[panelId];
-      const panelEmbeddable = await this.props.container.untilEmbeddableLoaded(panelId);
-      const embeddableInput = panelEmbeddable.getInput() as any;
-      console.log(`Embeddable input for panel ${panelId}:`, embeddableInput);
-      const savedObjectId = embeddableInput.savedObjectId || 'unknown';
-
-      if (!savedObjectId || savedObjectId === 'unknown') {
-        console.log(`No valid savedObjectId for panel ${panelId}`);
-        return { panelId, savedObjectId: 'unknown', type: 'unknown' };
-      }
-
-      try {
-        const savedObject = await this.props.savedObjectsClient.get(panel.type, savedObjectId);
-
-        console.log(`Saved object for ${savedObjectId}:`, savedObject);
-        const visState = savedObject.attributes.visState
-          ? JSON.parse(savedObject.attributes.visState)
-          : {};
-        const visType = visState.type || savedObject.attributes.type || 'unknown';
-        return { panelId, savedObjectId, type: visType };
-      } catch (error) {
-        console.error(`Error fetching saved object for ${savedObjectId}:`, error);
-        return { panelId, savedObjectId, type: 'unknown' };
-      }
-    });
-
-    const panelMetadata = await Promise.all(panelDataPromises);
-    this.setState({ panelMetadata }, async () => {
-      console.log('All Panel Metadata:', this.state.panelMetadata);
-
-      // POC ONLY: Extract first pie chart savedObjectId
-      const firstPie = this.state.panelMetadata.find((meta) => meta.type === 'pie');
-      if (firstPie) {
-        console.log('First pie visualization savedObjectId:', firstPie.savedObjectId);
-
-        try {
-          // POC ONLY: Fetch the full saved object for the pie visualization
-          const pieSavedObject = await this.props.savedObjectsClient.get(
-            'visualization',
-            firstPie.savedObjectId
-          );
-          console.log('First pie visualization saved object metadata:', pieSavedObject);
-
-          const indexPatternRef = pieSavedObject.references.find(
-            (ref: any) => ref.type === 'index-pattern'
-          );
-
-          if (indexPatternRef) {
-            try {
-              const indexPattern = await this.props.savedObjectsClient.get(
-                'index-pattern',
-                indexPatternRef.id
-              );
-              const indexTitle = indexPattern.attributes.title;
-              console.log('Index pattern title (raw):', indexTitle);
-
-              // If indexTitle contains a wildcard, try to resolve to real indices
-              if (indexTitle.includes('*')) {
-                try {
-                  const resolved = await this.props.http.get(
-                    `/internal/index-pattern-management/resolve_index/${encodeURIComponent(
-                      indexTitle
-                    )}`
-                  );
-                  const matchedIndices = resolved?.indices || [];
-                  console.log('Resolved index pattern to concrete indices:', matchedIndices);
-
-                  if (matchedIndices.length > 0) {
-                    // TODO: Handle multiple matches if needed
-                    const firstMatch = matchedIndices[0].name;
-                    const trimmedTitle = firstMatch.replace(/^flint_/, '');
-                    const parts = trimmedTitle.split('_');
-
-                    this.extractedDatasource = parts[0] || 'unknown';
-                    this.extractedDatabase = parts[1] || 'unknown';
-                    this.extractedIndex = parts.slice(2).join('_') || 'unknown';
-
-                    console.log('Resolved from concrete index name:');
-                    console.log('Datasource:', this.extractedDatasource);
-                    console.log('Database:', this.extractedDatabase);
-                    console.log('Index:', this.extractedIndex);
-                  } else {
-                    console.warn('No concrete indices matched the wildcard pattern.');
-                  }
-                } catch (err) {
-                  console.error('Failed to resolve concrete index for pattern:', indexTitle, err);
-                }
-              } else {
-                // Original fallback logic (non-wildcard)
-                const trimmedTitle = indexTitle.replace(/^flint_/, '');
-                const parts = trimmedTitle.split('_');
-
-                this.extractedDatasource = parts[0] || 'unknown';
-                this.extractedDatabase = parts[1] || 'unknown';
-                this.extractedIndex = parts.slice(2).join('_') || 'unknown';
-              }
-            } catch (err) {
-              console.error(`Failed to fetch index pattern ${indexPatternRef.id}:`, err);
-            }
-          } else {
-            console.warn('No index-pattern reference found in the pie visualization saved object.');
-          }
-        } catch (error) {
-          console.error(
-            `Error fetching metadata for pie saved object ID ${firstPie.savedObjectId}:`,
-            error
-          );
-        }
-      } else {
-        console.log('No pie visualizations found.');
-      }
-    });
+    if (indexInfo) {
+      this.extractedDatasource = indexInfo.datasource;
+      this.extractedDatabase = indexInfo.database;
+      this.extractedIndex = indexInfo.index;
+      console.log('Resolved index info:', indexInfo);
+    } else {
+      console.warn('Could not extract index info from pie visualization.');
+    }
   }
 
   synchronizeNow = () => {
     const { extractedDatasource, extractedDatabase, extractedIndex } = this;
-
     if (
       !extractedDatasource ||
-      extractedDatasource === 'unknown' ||
       !extractedDatabase ||
-      extractedDatabase === 'unknown' ||
       !extractedIndex ||
+      extractedDatasource === 'unknown' ||
+      extractedDatabase === 'unknown' ||
       extractedIndex === 'unknown'
     ) {
       console.error('Datasource, database, or index not properly set. Cannot run REFRESH command.');
       return;
     }
 
-    // POC ONLY: Run REFRESH MATERIALIZED VIEW command
-    // TODO: Add the logic to check the index type
-    const query = `REFRESH MATERIALIZED VIEW \`${extractedDatasource}\`.\`${extractedDatabase}\`.\`${extractedIndex}\``;
+    const query = generateRefreshQuery({
+      datasource: extractedDatasource,
+      database: extractedDatabase,
+      index: extractedIndex,
+    });
 
     const queryPayload = {
       query,

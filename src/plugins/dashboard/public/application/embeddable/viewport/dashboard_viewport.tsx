@@ -213,4 +213,3 @@ export const DashboardViewportWithQuery = (
     />
   );
 };
-//
