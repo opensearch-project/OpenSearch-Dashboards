@@ -34,13 +34,12 @@ import {
   CoreStart,
   Plugin,
   Logger,
-  ILegacyClusterClient,
 } from '../../../core/server';
 
 import { dashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
+
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { setupRoutes } from './routes'; // <-- We'll define this next
 
 export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPluginStart> {
   private readonly logger: Logger;
@@ -49,7 +48,7 @@ export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPl
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
     this.logger.debug('dashboard: Setup');
 
     core.savedObjects.registerType(dashboardSavedObjectType);
@@ -63,12 +62,6 @@ export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPl
         },
       });
     });
-
-    // Setup router and route handlers
-    const router = core.http.createRouter();
-    const legacyClient: ILegacyClusterClient = core.opensearch.legacy.createClient('dashboard_dsl');
-
-    setupRoutes({ router, client: legacyClient });
 
     return {};
   }
