@@ -34,6 +34,10 @@ export const API = {
   DATA_SOURCE: {
     ASYNC_JOBS: `${BASE_API}/jobs`,
     CONNECTIONS: `${BASE_API}/connections`,
+    REMOTE_CLUSTER: {
+      LIST: `${BASE_API}/remote_cluster/list`,
+      INDEXES: `${BASE_API}/remote_cluster/indexes`,
+    },
   },
   AGENT_API: {
     CONFIG_EXISTS: `${BASE_API_ASSISTANT}/agent_config/_exists`,
