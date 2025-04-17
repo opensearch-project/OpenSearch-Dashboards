@@ -41,6 +41,8 @@ import {
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
+import './data_source_table.scss';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 
 /* Table config */
 const pagination = {
@@ -86,6 +88,9 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
   const canAssociateDataSource = !!currentWorkspace && isDashboardAdmin;
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, React.ReactNode>
+  >({});
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -124,11 +129,38 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     [notifications.toasts]
   );
 
+  const toggleDetails = (item: DataSourceTableItem) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[item.id]) {
+      delete itemIdToExpandedRowMapValues[item.id];
+    } else {
+      itemIdToExpandedRowMapValues[item.id] = (
+        <EuiInMemoryTable
+          items={item?.relatedConnections ?? []}
+          itemId="id"
+          columns={columns}
+          className="data-source-expanded-table"
+          rowProps={{
+            className: 'data-source-table-expanded-row',
+          }}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
+
   const fetchDataSources = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await getDataSources(savedObjects.client);
-      const finalData = await fetchDataSourceConnections(response, http, notifications, false);
+      const finalData = await fetchDataSourceConnections(
+        response,
+        http,
+        notifications,
+        false,
+        false,
+        true
+      );
       setDataSources(finalData);
     } catch (error) {
       setDataSources([]);
@@ -250,31 +282,47 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   /* Table columns */
   const columns: Array<EuiBasicTableColumn<DataSourceTableItem>> = [
     {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      render: (item: DataSourceTableItem) =>
+        item?.relatedConnections?.length ? (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item)}
+            data-test-subj="expandCollapseButton"
+            aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          />
+        ) : null,
+    },
+    {
       field: 'title',
       name: i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourceField', {
         defaultMessage: 'Data source',
       }),
-      render: (
-        name: string,
-        index: {
-          id: string;
-          tags?: Array<{
-            key: string;
-            name: string;
-          }>;
-        }
-      ) => (
-        <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)} flush="left">
-            {name}
-          </EuiButtonEmpty>
-          {index.id === defaultDataSourceId ? (
-            <EuiBadge iconType="starFilled" iconSide="left">
-              Default
-            </EuiBadge>
-          ) : null}
-        </>
-      ),
+      render: (name: string, item: DataSourceTableItem) => {
+        return (
+          <>
+            <EuiButtonEmpty
+              size="xs"
+              {...reactRouterNavigate(history, `${item.id}`)}
+              className={
+                item.type === DataSourceEngineType.OpenSearchCrossCluster
+                  ? 'data-source-table-expanded-row_title'
+                  : ''
+              }
+              flush="left"
+            >
+              {name}
+            </EuiButtonEmpty>
+            {item.id === defaultDataSourceId ? (
+              <EuiBadge iconType="starFilled" iconSide="left">
+                Default
+              </EuiBadge>
+            ) : null}
+          </>
+        );
+      },
       dataType: 'string' as const,
       sortable: ({ title }: { title: string }) => title,
     },
@@ -304,10 +352,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       name: i18n.translate('dataSourcesManagement.dataSourcesTable.relatedConnectionsField', {
         defaultMessage: 'Related connections',
       }),
-      align: 'right',
       truncateText: true,
       render: (relatedConnections: DataSourceTableItem[]) =>
-        relatedConnections.length > 0 ? relatedConnections.length : <EuiText>&mdash;</EuiText>,
+        relatedConnections && relatedConnections.length > 0 ? (
+          relatedConnections.length
+        ) : (
+          <EuiText>&mdash;</EuiText>
+        ),
     },
   ];
 
@@ -427,6 +478,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         <EuiInMemoryTable
           allowNeutralSort={false}
           itemId="id"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isExpandable={true}
           isSelectable={true}
           selection={selection}
           items={dataSources}
@@ -435,6 +488,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           sorting={sorting}
           search={search}
           loading={isLoading}
+          className="data-source-table"
         />
       </>
     );
