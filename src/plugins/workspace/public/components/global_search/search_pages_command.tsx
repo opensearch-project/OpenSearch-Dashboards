@@ -4,7 +4,6 @@
  */
 
 import {
-  ApplicationStart,
   ChromeNavLink,
   ChromeRegistrationNavLink,
   CoreStart,
@@ -22,7 +21,7 @@ import { WorkspaceTitleDisplay } from '../workspace_name/workspace_name';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import {
   searchNavigationLinks,
-  navGroupElement,
+  NavGroupElement,
   GlobalSearchPageItem,
 } from '../../../../../core/public';
 
@@ -77,32 +76,30 @@ export const workspaceSearchPages = async (
     ) => {
       const isPageOutOfWorkspace = link.navGroup.type === NavGroupType.SYSTEM;
 
-      const updatedBreadcrumbs = [...breadcrumbs];
       if (currentWorkspace && !isPageOutOfWorkspace) {
-        updatedBreadcrumbs.push({
-          text: (
-            <WorkspaceTitleDisplay
-              workspace={currentWorkspace}
-              availableUseCases={availableUseCases || []}
-            />
-          ),
-        });
+        return [
+          {
+            text: (
+              <WorkspaceTitleDisplay
+                workspace={currentWorkspace}
+                availableUseCases={availableUseCases || []}
+              />
+            ),
+          },
+          ...breadcrumbs,
+        ];
       } else {
-        updatedBreadcrumbs.push({ text: navGroupElement(link.navGroup) });
+        return [{ text: NavGroupElement(link.navGroup) }, ...breadcrumbs];
       }
-
-      return updatedBreadcrumbs;
     };
 
     const WorkspaceGlobalSearchPageItem = ({
       link,
       search,
-      application,
       onCallback,
     }: {
       link: Link;
       search: string;
-      application: ApplicationStart;
       onCallback: (link: Link) => void;
     }) => {
       const availableUseCases = useObservable(registeredUseCases$);
@@ -121,12 +118,7 @@ export const workspaceSearchPages = async (
 
     const pages = searchResult.slice(0, 10).map((link) => {
       return (
-        <WorkspaceGlobalSearchPageItem
-          link={link}
-          search={query}
-          application={coreStart.application}
-          onCallback={handleCallback}
-        />
+        <WorkspaceGlobalSearchPageItem link={link} search={query} onCallback={handleCallback} />
       );
     });
 
