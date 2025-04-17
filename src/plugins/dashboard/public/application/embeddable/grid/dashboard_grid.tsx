@@ -54,6 +54,7 @@ import { DirectQueryRequest } from '../../../../framework/types';
 import {
   extractIndexInfoFromDashboard,
   generateRefreshQuery,
+  fetchIndexMapping,
 } from '../../utils/direct_query_sync/direct_query_sync';
 
 let lastValidGridSize = 0;

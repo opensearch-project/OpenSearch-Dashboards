@@ -11,6 +11,10 @@ interface IndexExtractionResult {
   index: string;
 }
 
+export const DIRECT_QUERY_BASE = '/api/directquery';
+export const DSL_MAPPING = '/indices.getFieldMapping';
+export const DSL_BASE = `${DIRECT_QUERY_BASE}/dsl`;
+
 export async function resolveConcreteIndex(
   indexTitle: string,
   http: HttpStart
@@ -29,8 +33,8 @@ export async function resolveConcreteIndex(
   }
 }
 
-export function extractIndexParts(indexTitle: string): IndexExtractionResult {
-  const trimmed = indexTitle.replace(/^flint_/, '');
+export function extractIndexParts(fullIndexName: string): IndexExtractionResult {
+  const trimmed = fullIndexName.replace(/^flint_/, '');
   const parts = trimmed.split('_');
   return {
     datasource: parts[0] || 'unknown',
@@ -46,7 +50,8 @@ export function generateRefreshQuery(info: IndexExtractionResult): string {
 export async function extractIndexInfoFromDashboard(
   panels: { [key: string]: any },
   savedObjectsClient: SavedObjectsClientContract,
-  http: HttpStart
+  http: HttpStart,
+  mdsId?: string
 ): Promise<IndexExtractionResult | null> {
   for (const panelId of Object.keys(panels)) {
     try {
@@ -72,6 +77,10 @@ export async function extractIndexInfoFromDashboard(
       const concreteTitle = await resolveConcreteIndex(indexTitleRaw, http);
       if (!concreteTitle) return null;
 
+      // Fetch mapping immediately after resolving index
+      const mapping = await fetchIndexMapping(concreteTitle, http, mdsId);
+      console.log('Index Mapping Result:', mapping);
+
       return extractIndexParts(concreteTitle);
     } catch (err) {
       console.warn(`Skipping panel ${panelId} due to error:`, err);
@@ -79,4 +88,24 @@ export async function extractIndexInfoFromDashboard(
   }
 
   return null;
+}
+
+export async function fetchIndexMapping(
+  index: string,
+  http: HttpStart,
+  mdsId?: string
+): Promise<Record<string, any> | null> {
+  try {
+    const baseUrl = `${DSL_BASE}${DSL_MAPPING}`;
+    const url = mdsId ? `${baseUrl}/dataSourceMDSId=${encodeURIComponent(mdsId)}` : baseUrl;
+    console.log('url', url);
+    const response = await http.get(url, {
+      query: { index },
+    });
+
+    return response;
+  } catch (err) {
+    console.error(`Failed to fetch mapping for index "${index}"`, err);
+    return null;
+  }
 }
