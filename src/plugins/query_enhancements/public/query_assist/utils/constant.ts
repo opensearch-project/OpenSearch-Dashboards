@@ -3,5 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DEFAULT_DATA } from '../../../../data/common';
+
 export const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
-export const APPENDED_QUERY_PROMPT = `. If you're dealing logs with http response code, then error usually refers to http response code like 4xx, 5xx`;
+
+export const PPL_SUPPORT_DATASET_TYPES = [
+  DEFAULT_DATA.SET_TYPES.INDEX,
+  DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+];

@@ -1,0 +1,2 @@
+fix:
+- Fix minor UX style issues on discover summary section ([#9509](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9509))

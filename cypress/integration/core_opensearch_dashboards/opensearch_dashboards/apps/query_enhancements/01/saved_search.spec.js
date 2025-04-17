@@ -21,6 +21,7 @@ import {
   updateSavedSearchAndSaveAndVerify,
   generateSavedTestConfiguration,
   postRequestSaveSearch,
+  updateSavedSearchAndNotSaveAndVerify,
 } from '../../../../../../utils/apps/query_enhancements/saved';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
@@ -28,8 +29,7 @@ const workspaceName = getRandomizedWorkspaceName();
 
 const runSavedSearchTests = () => {
   describe('saved search', () => {
-    // TODO: Currently we cannot convert this into a "before" and "after" due to us grabbing several aliases that are required by postRequestSaveSearch()
-    beforeEach(() => {
+    before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,
         INDEX_WITH_TIME_2,
@@ -41,10 +41,9 @@ const runSavedSearchTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
     });
 
-    afterEach(() => {
+    after(() => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
         INDEX_WITH_TIME_1,
         INDEX_WITH_TIME_2,
@@ -60,6 +59,7 @@ const runSavedSearchTests = () => {
         });
 
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.osd.grabIdsFromDiscoverPageUrl();
 
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -82,22 +82,70 @@ const runSavedSearchTests = () => {
         });
 
         cy.getElementByTestId('discoverNewButton').click();
-        cy.setQueryLanguage(config.language);
         cy.loadSaveSearch(config.saveName);
         setDatePickerDatesAndSearchIfRelevant(config.language);
         verifyDiscoverPageState(config);
+
+        cy.get('@WORKSPACE_ID').then((workspaceId) => {
+          cy.osd.deleteSavedObjectsByType(workspaceId, 'search');
+        });
       });
 
-      it.skip(`should successfully update a saved search for ${config.testName}`, () => {
+      it(`should successfully update url when update a saved search for ${config.testName}`, () => {
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.osd.grabIdsFromDiscoverPageUrl();
+
+        // using a POST request to create a saved search to load
+        postRequestSaveSearch(config);
+        updateSavedSearchAndNotSaveAndVerify(config, DATASOURCE_NAME);
+
+        cy.get('@WORKSPACE_ID').then((workspaceId) => {
+          cy.osd.deleteSavedObjectsByType(workspaceId, 'search');
+        });
+      });
+
+      it(`should successfully update a saved search for ${config.testName}`, () => {
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.osd.grabIdsFromDiscoverPageUrl();
+
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
         updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
+
+        cy.get('@WORKSPACE_ID').then((workspaceId) => {
+          cy.osd.deleteSavedObjectsByType(workspaceId, 'search');
+        });
       });
 
-      it.skip(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
+      it(`should successfully save a saved search as a new saved search for ${config.testName}`, () => {
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.osd.grabIdsFromDiscoverPageUrl();
+
         // using a POST request to create a saved search to load
         postRequestSaveSearch(config);
         updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, true);
+
+        cy.get('@WORKSPACE_ID').then((workspaceId) => {
+          cy.osd.deleteSavedObjectsByType(workspaceId, 'search');
+        });
       });
     });
   });
