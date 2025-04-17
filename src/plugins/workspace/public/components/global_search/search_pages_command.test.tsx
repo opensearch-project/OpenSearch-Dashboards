@@ -97,6 +97,10 @@ describe('<workspaceSearchPagesCommand />', () => {
 
   const callbackFn = jest.fn();
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('search return empty result', async () => {
     const searchResult = await workspaceSearchPages(
       'bar',
@@ -136,5 +140,53 @@ describe('<workspaceSearchPagesCommand />', () => {
       callbackFn
     );
     expect(searchResult).toHaveLength(2);
+  });
+
+  it('search click callback with non system link should navigate correctly', async () => {
+    const searchResult = await workspaceSearchPages(
+      'foo',
+      registeredUseCases,
+      coreStartMock,
+      callbackFn
+    );
+
+    (searchResult[0] as any).props?.onCallback({
+      navGroup: {
+        type: 'non-system',
+      },
+      href: 'test-link',
+      id: 'test',
+    });
+
+    expect(coreStartMock.application.navigateToApp).toBeCalledWith('test');
+  });
+
+  it('search click callback with system link should use window assign correctly', async () => {
+    const mockAssign = jest.fn();
+
+    Object.defineProperty(window, 'location', {
+      value: { assign: mockAssign },
+      writable: true,
+    });
+
+    const testUrl = 'http://localhost:5601/test';
+
+    const searchResult = await workspaceSearchPages(
+      'Settings',
+      registeredUseCases,
+      coreStartMock,
+      callbackFn
+    );
+
+    (searchResult[0] as any).props?.onCallback({
+      navGroup: {
+        type: 'system',
+      },
+      href: testUrl,
+      id: 'test',
+    });
+
+    expect(coreStartMock.application.navigateToApp).not.toBeCalled();
+    expect(window.location.assign).toBeCalledWith(testUrl);
   });
 });
