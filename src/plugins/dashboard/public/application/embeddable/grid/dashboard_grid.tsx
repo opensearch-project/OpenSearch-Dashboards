@@ -41,7 +41,14 @@ import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import type { SavedObjectsClientContract } from 'src/core/public';
 import { HttpStart, NotificationsStart } from 'src/core/public';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiProgress,
+  EuiText,
+} from '@elastic/eui';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -56,6 +63,7 @@ import {
   generateRefreshQuery,
   fetchIndexMapping,
 } from '../../utils/direct_query_sync/direct_query_sync';
+import { loadStatus } from 'src/core/public/core_app/status/lib';
 
 let lastValidGridSize = 0;
 
@@ -154,6 +162,8 @@ interface State {
   useMargins: boolean;
   expandedPanelId?: string;
   panelMetadata: Array<{ panelId: string; savedObjectId: string; type: string }>;
+  extractedProps: { lastRefreshTime: number } | null;
+  prevStatus?: string;
 }
 
 interface PanelLayout extends Layout {
@@ -183,6 +193,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       useMargins: this.props.container.getInput().useMargins,
       expandedPanelId: this.props.container.getInput().expandedPanelId,
       panelMetadata: [],
+      extractedProps: null,
     };
   }
 
@@ -283,9 +294,10 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     );
 
     if (indexInfo) {
-      this.extractedDatasource = indexInfo.datasource;
-      this.extractedDatabase = indexInfo.database;
-      this.extractedIndex = indexInfo.index;
+      this.extractedDatasource = indexInfo.parts.datasource;
+      this.extractedDatabase = indexInfo.parts.database;
+      this.extractedIndex = indexInfo.parts.index;
+      this.setState({ extractedProps: indexInfo.mapping });
       console.log('Resolved index info:', indexInfo);
     } else {
       console.warn('Could not extract index info from pie visualization.');
@@ -368,20 +380,32 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   // TODO find a home for this
-  EMR_STATES: Map<string, { ord: number; terminal: boolean; color: string }> = new Map(
+  EMR_STATES: Map<string, { ord: number; terminal: boolean }> = new Map(
     Object.entries({
-      submitted: { ord: 10, terminal: false, color: 'vis0' },
-      queued: { ord: 20, terminal: false, color: 'vis0' },
-      pending: { ord: 30, terminal: false, color: 'vis0' },
-      scheduled: { ord: 40, terminal: false, color: 'vis0' },
-      running: { ord: 50, terminal: false, color: 'vis0' },
-      cancelling: { ord: 50, terminal: false, color: 'vis0' },
-      success: { ord: 100, terminal: true, color: 'success' },
-      failed: { ord: 100, terminal: true, color: 'danger' },
-      cancelled: { ord: 100, terminal: true, color: 'subdued' },
+      submitted: { ord: 0, terminal: false },
+      queued: { ord: 8, terminal: false },
+      pending: { ord: 16, terminal: false },
+      scheduled: { ord: 33, terminal: false },
+      running: { ord: 67, terminal: false },
+      cancelling: { ord: 50, terminal: false },
+      success: { ord: 100, terminal: true },
+      failed: { ord: 100, terminal: true },
+      cancelled: { ord: 100, terminal: true },
+      fresh: { ord: 100, terminal: true },
     })
   );
   MAX_ORD: number = 100;
+
+  private timeSince(date: number): string {
+    const seconds = Math.floor((new Date().getTime() - date) / 1000);
+
+    const interval: number = seconds / 60;
+
+    if (interval > 1) {
+      return Math.floor(interval) + ' minutes';
+    }
+    return Math.floor(seconds) + ' seconds';
+  }
 
   public render() {
     if (this.state.isLayoutInvalid) {
@@ -391,6 +415,9 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     const { viewMode } = this.state;
     const isViewMode = viewMode === ViewMode.VIEW;
     const state = this.EMR_STATES.get(this.props.loadStatus as string)!;
+    if (state.terminal && this.props.loadStatus !== 'fresh') {
+      window.location.reload();
+    }
 
     return (
       <div style={{ position: 'relative', padding: '16px' }}>
@@ -407,13 +434,27 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           >
             Synchronize Now
           </EuiButton>
-          <EuiProgress
-            value={state.ord}
-            max={this.MAX_ORD}
-            color={state.color}
-            style={{ width: '100px' }}
-            size="l"
-          />
+          {state.terminal ? (
+            <EuiText>
+              Last Refresh:{' '}
+              {this.state.extractedProps ? (
+                this.timeSince(this.state.extractedProps.lastRefreshTime) + ' ago'
+              ) : (
+                <>
+                  &nbsp;&nbsp;
+                  <EuiLoadingSpinner />
+                </>
+              )}
+            </EuiText>
+          ) : (
+            <EuiProgress
+              value={state.ord}
+              max={this.MAX_ORD}
+              color="vis0"
+              style={{ width: '100px' }}
+              size="l"
+            />
+          )}
         </div>
 
         <ResponsiveSizedGrid

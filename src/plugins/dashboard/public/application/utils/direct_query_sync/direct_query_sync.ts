@@ -52,7 +52,7 @@ export async function extractIndexInfoFromDashboard(
   savedObjectsClient: SavedObjectsClientContract,
   http: HttpStart,
   mdsId?: string
-): Promise<IndexExtractionResult | null> {
+): Promise<{ parts: IndexExtractionResult; mapping: { lastRefreshTime: number } } | null> {
   for (const panelId of Object.keys(panels)) {
     try {
       const panel = panels[panelId];
@@ -78,10 +78,12 @@ export async function extractIndexInfoFromDashboard(
       if (!concreteTitle) return null;
 
       // Fetch mapping immediately after resolving index
-      const mapping = await fetchIndexMapping(concreteTitle, http, mdsId);
+      const mapping = (await fetchIndexMapping(concreteTitle, http, mdsId))!;
       console.log('Index Mapping Result:', mapping);
 
-      return extractIndexParts(concreteTitle);
+      for (const val of Object.values(mapping)) {
+        return { mapping: val.mappings._meta.properties!, parts: extractIndexParts(concreteTitle) };
+      }
     } catch (err) {
       console.warn(`Skipping panel ${panelId} due to error:`, err);
     }
