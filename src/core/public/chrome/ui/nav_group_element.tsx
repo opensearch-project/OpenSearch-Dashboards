@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { NavGroupItemInMap } from '../nav_group';
 
-export const navGroupElement = (navGroup: NavGroupItemInMap) => (
+export const NavGroupElement = (navGroup: NavGroupItemInMap) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     {navGroup.icon && (
       <EuiFlexItem>

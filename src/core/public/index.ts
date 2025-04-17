@@ -414,4 +414,4 @@ export {
 
 export { debounce } from './utils';
 
-export { searchNavigationLinks, GlobalSearchPageItem, navGroupElement } from './chrome';
+export { searchNavigationLinks, GlobalSearchPageItem, NavGroupElement } from './chrome';

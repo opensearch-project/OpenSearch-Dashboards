@@ -9,7 +9,7 @@ import {
   ChromeRegistrationNavLink,
   NavGroupItemInMap,
 } from 'opensearch-dashboards/public';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface Props {
   link: ChromeRegistrationNavLink & ChromeNavLink & { navGroup: NavGroupItemInMap };
@@ -19,48 +19,50 @@ interface Props {
 }
 
 export const GlobalSearchPageItem = ({ link, search, callback, renderBreadcrumbs }: Props) => {
-  let breadcrumbs: EuiBreadcrumb[] = [];
+  const breadcrumbs = useMemo(() => {
+    const breadcrumbList: EuiBreadcrumb[] = [];
+    const appId = link.id.toLowerCase();
+    const isLanding = appId.endsWith('landing');
+    const text = (
+      <EuiHighlight search={search} highlightAll={true}>
+        {isLanding ? `${link.navGroup.title} ${link.title}` : link.title}
+      </EuiHighlight>
+    );
 
-  const appId = link.id.toLowerCase();
-  const isLanding = appId.endsWith('landing');
-  const text = (
-    <EuiHighlight search={search} highlightAll={true}>
-      {isLanding ? `${link.navGroup.title} ${link.title}` : link.title}
-    </EuiHighlight>
-  );
-
-  const isOverviewPage = appId.endsWith('overview');
-  if (isOverviewPage && link.category) {
-    breadcrumbs.push({ text: link.category.label });
-  }
-
-  if (link.parentNavLinkId) {
-    const parentNavLinkTitle = link.navGroup.navLinks.find(
-      (navLink) => navLink.id === link.parentNavLinkId
-    )?.title;
-    if (parentNavLinkTitle) {
-      breadcrumbs.push({
-        text: (
-          <EuiHighlight search={search} highlightAll={true}>
-            {parentNavLinkTitle}
-          </EuiHighlight>
-        ),
-      });
+    const isOverviewPage = appId.endsWith('overview');
+    if (isOverviewPage && link.category) {
+      breadcrumbList.push({ text: link.category.label });
     }
-  }
+
+    if (link.parentNavLinkId) {
+      const parentNavLinkTitle = link.navGroup.navLinks.find(
+        (navLink) => navLink.id === link.parentNavLinkId
+      )?.title;
+      if (parentNavLinkTitle) {
+        breadcrumbList.push({
+          text: (
+            <EuiHighlight search={search} highlightAll={true}>
+              {parentNavLinkTitle}
+            </EuiHighlight>
+          ),
+        });
+      }
+    }
+
+    const processedCrumbs = renderBreadcrumbs ? renderBreadcrumbs(breadcrumbList) : breadcrumbList;
+
+    return [
+      ...processedCrumbs,
+      {
+        text,
+        onClick: () => {},
+      },
+    ];
+  }, [link, search, renderBreadcrumbs]);
 
   const onNavItemClick = () => {
     callback?.();
   };
-
-  if (renderBreadcrumbs) {
-    breadcrumbs = renderBreadcrumbs(breadcrumbs);
-  }
-
-  breadcrumbs.push({
-    text,
-    onClick: () => {},
-  });
 
   return (
     <div
