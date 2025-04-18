@@ -64,11 +64,13 @@ export interface SearchData {
       error?: {
         error?: string;
         message?: {
-          error?: {
-            reason?: string;
-            details: string;
-            type?: string;
-          };
+          error?:
+            | string
+            | {
+                reason?: string;
+                details: string;
+                type?: string;
+              };
           status?: number;
         };
         statusCode?: number;

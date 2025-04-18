@@ -24,11 +24,13 @@ export interface QueryStatus {
     error?: {
       error?: string;
       message?: {
-        error?: {
-          reason?: string;
-          details: string;
-          type?: string;
-        };
+        error?:
+          | string
+          | {
+              reason?: string;
+              details: string;
+              type?: string;
+            };
         status?: number;
       };
       statusCode?: number;
@@ -68,7 +70,8 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
 
   const displayErrorMessage = useMemo(() => {
     const error = props.queryStatus.body?.error;
-    const reason = error?.message?.error?.reason;
+    const reason =
+      typeof error?.message?.error === 'object' ? error.message.error.reason : undefined;
 
     if (reason) {
       return reason;
@@ -107,7 +110,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       return JSON.stringify(message);
     }
 
-    return `Unknown Error`;
+    return `Unknown Error: ${String(message)}`;
   }, [props.queryStatus.body?.error]);
 
   if (props.queryStatus.status === ResultStatus.LOADING) {
