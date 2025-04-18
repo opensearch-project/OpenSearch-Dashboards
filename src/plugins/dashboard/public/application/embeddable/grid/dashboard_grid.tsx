@@ -41,7 +41,6 @@ import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import type { SavedObjectsClientContract } from 'src/core/public';
 import { HttpStart, NotificationsStart } from 'src/core/public';
-import { EuiButton, EuiLoadingSpinner, EuiProgress, EuiText } from '@elastic/eui';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -55,8 +54,6 @@ import {
   extractIndexInfoFromDashboard,
   generateRefreshQuery,
   EMR_STATES,
-  MAX_ORD,
-  timeSince,
 } from '../../utils/direct_query_sync/direct_query_sync';
 import { DashboardFlintSync } from './dashboard_flint_sync';
 
