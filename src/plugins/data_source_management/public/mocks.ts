@@ -229,6 +229,52 @@ export const getDataSourcesWithFieldsResponse = {
   ],
 };
 
+export const remoteClusterConnections: DataSourceTableItem[] = [
+  {
+    id: 'connectionAlias1',
+    type: 'OpenSearch(Cross-cluster search)',
+    title: 'connectionAlias1',
+    parentId: 'test1',
+    description: '',
+    connectionType: 0,
+  },
+  {
+    id: 'connectionAlias2',
+    type: 'OpenSearch(Cross-cluster search)',
+    title: 'connectionAlias2',
+    parentId: 'test1',
+    description: '',
+    connectionType: 0,
+  },
+];
+
+export const getDataSourcesWithCrossClusterConnections = [
+  {
+    id: 'test1',
+    type: 'OpenSearch',
+    title: 'test1',
+    connectionType: 'OpenSearchConnection',
+    description: 'test datasource1',
+    relatedConnections: remoteClusterConnections,
+  },
+  {
+    id: 'test2',
+    type: 'OpenSearch',
+    description: 'test datasource2',
+    title: 'test',
+    connectionType: 'OpenSearchConnection',
+    sort: 'test',
+  },
+  {
+    id: 'alpha-test',
+    type: 'OpenSearch',
+    description: 'alpha test datasource',
+    title: 'alpha-test',
+    connectionType: 'OpenSearchConnection',
+    sort: 'alpha-test',
+  },
+];
+
 export const existingDatasourceNamesList = [
   'test123',
   'testTest20',

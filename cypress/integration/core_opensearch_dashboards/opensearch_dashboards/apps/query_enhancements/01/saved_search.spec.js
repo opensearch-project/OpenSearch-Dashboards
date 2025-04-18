@@ -21,6 +21,7 @@ import {
   updateSavedSearchAndSaveAndVerify,
   generateSavedTestConfiguration,
   postRequestSaveSearch,
+  updateSavedSearchAndNotSaveAndVerify,
 } from '../../../../../../utils/apps/query_enhancements/saved';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
@@ -81,10 +82,28 @@ const runSavedSearchTests = () => {
         });
 
         cy.getElementByTestId('discoverNewButton').click();
-        cy.setQueryLanguage(config.language);
         cy.loadSaveSearch(config.saveName);
         setDatePickerDatesAndSearchIfRelevant(config.language);
         verifyDiscoverPageState(config);
+
+        cy.get('@WORKSPACE_ID').then((workspaceId) => {
+          cy.osd.deleteSavedObjectsByType(workspaceId, 'search');
+        });
+      });
+
+      it(`should successfully update url when update a saved search for ${config.testName}`, () => {
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.osd.grabIdsFromDiscoverPageUrl();
+
+        // using a POST request to create a saved search to load
+        postRequestSaveSearch(config);
+        updateSavedSearchAndNotSaveAndVerify(config, DATASOURCE_NAME);
 
         cy.get('@WORKSPACE_ID').then((workspaceId) => {
           cy.osd.deleteSavedObjectsByType(workspaceId, 'search');
