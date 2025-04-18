@@ -367,8 +367,21 @@ export const useSearch = (services: DiscoverViewServices) => {
         }
       }
 
-      // Currently error message is sent as encoded JSON string, which requires extra parsing
-      // TODO: Confirm error contract
+      // Error message can be sent as encoded JSON string, which requires extra parsing
+      /*
+        errorBody: {
+          error: string,
+          statusCode: number,
+          message: {
+            error: {
+              reason: string;
+              details: string;
+              type: string;
+            };
+            status: number;
+          }
+        }
+      */
       errorBody.message = safeJSONParse(errorBody.message);
 
       data$.next({
