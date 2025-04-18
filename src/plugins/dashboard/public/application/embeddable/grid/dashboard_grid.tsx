@@ -58,6 +58,7 @@ import {
   MAX_ORD,
   timeSince,
 } from '../../utils/direct_query_sync/direct_query_sync';
+import { DashboardFlintSync } from './dashboard_flint_sync';
 
 let lastValidGridSize = 0;
 
@@ -286,6 +287,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       this.props.savedObjectsClient,
       this.props.http
     );
+    console.log('Extracted metadata123:', indexInfo?.mapping);
 
     if (indexInfo) {
       this.extractedDatasource = indexInfo.parts.datasource;
@@ -386,46 +388,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
     return (
       <div style={{ position: 'relative', padding: '16px' }}>
-        <div
-          style={{
-            marginBottom: '8px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '10px',
-          }}
-        >
-          <EuiButton
-            iconType="refresh"
-            size="s"
-            onClick={this.synchronizeNow}
-            isLoading={!state.terminal}
-            isDisabled={!state.terminal}
-          >
-            Synchronize Now
-          </EuiButton>
-          {state.terminal ? (
-            <EuiText>
-              Last Refresh:{' '}
-              {this.state.extractedProps ? (
-                timeSince(this.state.extractedProps.lastRefreshTime) + ' ago'
-              ) : (
-                <>
-                  &nbsp;&nbsp;
-                  <EuiLoadingSpinner />
-                </>
-              )}
-            </EuiText>
-          ) : (
-            <EuiProgress
-              value={state.ord}
-              max={MAX_ORD}
-              color="vis0"
-              style={{ width: '100px' }}
-              size="l"
-            />
-          )}
-        </div>
-
+        <DashboardFlintSync
+          loadStatus={this.props.loadStatus}
+          lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
+          onSynchronize={this.synchronizeNow}
+        />
         <ResponsiveSizedGrid
           isViewMode={isViewMode}
           layout={this.buildLayoutFromPanels()}
