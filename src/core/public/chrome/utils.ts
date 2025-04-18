@@ -216,9 +216,13 @@ export const getSortedNavLinks = (
   return acc;
 };
 
+export const isUseCaseGroup = (navGroup: NavGroupItemInMap) => {
+  return navGroup.type === undefined;
+};
+
 export const getVisibleUseCases = (navGroupMap: Record<string, NavGroupItemInMap>) => {
   return Object.values(navGroupMap).filter(
-    (navGroup) => navGroup.status !== NavGroupStatus.Hidden && navGroup.type === undefined
+    (navGroup) => navGroup.status !== NavGroupStatus.Hidden && isUseCaseGroup(navGroup)
   );
 };
 
