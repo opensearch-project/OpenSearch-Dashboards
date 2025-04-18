@@ -14,6 +14,7 @@ import { ScopedHistory, WorkspaceObject } from 'opensearch-dashboards/public';
 import { scopedHistoryMock } from '../../../../../core/public/mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import {
+  getDataSourcesWithCrossClusterConnections,
   getMappedDataSources,
   getMappedDataSourcesWithEmptyDescription,
   mockManagementPlugin,
@@ -102,7 +103,7 @@ describe('DataSourceTable', () => {
       });
       component.update();
       // @ts-ignore
-      expect(component.find(tableColumnHeaderIdentifier).first().props().isSorted).toBe(true);
+      expect(component.find(tableColumnHeaderIdentifier).at(1).props().isSorted).toBe(true);
       expect(uiSettings.get).toHaveBeenCalled();
     });
 
@@ -472,6 +473,48 @@ describe('DataSourceTable', () => {
       descriptionPlaceholders.forEach((node) => {
         expect(node.children().text()).toBe('—');
       });
+    });
+  });
+
+  describe('should handle opensearch remote clusters', () => {
+    beforeEach(async () => {
+      spyOn(utils, 'getDataSources').and.returnValue(
+        Promise.resolve(getDataSourcesWithCrossClusterConnections)
+      );
+      spyOn(utils, 'fetchDataSourceConnections').and.returnValue(
+        Promise.resolve(getDataSourcesWithCrossClusterConnections)
+      );
+      await act(async () => {
+        component = await mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+    });
+
+    it('should show a arrow which expands to show connected remote clusters for datasources with remote clusters', () => {
+      expect(component.find('[data-test-subj="expandCollapseButton"]').exists()).toBe(true);
+
+      // validate that we are initially not able to see the remote clusters
+      expect(component.text()).not.toContain('connectionAlias1');
+
+      // click the expand button corresponding to the datasource containing remote clusters
+      component.find('[data-test-subj="expandCollapseButton"]').first().simulate('click');
+
+      // validate that we are now able to see the remote clusters
+      expect(component.text()).toContain('connectionAlias1');
     });
   });
 });
