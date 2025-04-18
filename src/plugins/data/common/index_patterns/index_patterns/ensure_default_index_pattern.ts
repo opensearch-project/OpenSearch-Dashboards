@@ -30,11 +30,12 @@
 
 import { includes } from 'lodash';
 import { IndexPatternsContract } from './index_patterns';
-import { UiSettingsCommon } from '../types';
+import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
 
 export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
 
 export const createEnsureDefaultIndexPattern = (
+  savedObjectsClient: SavedObjectsClientCommon,
   uiSettings: UiSettingsCommon,
   onRedirectNoIndexPattern: () => Promise<unknown> | void,
   canUpdateUiSetting?: boolean
@@ -43,14 +44,29 @@ export const createEnsureDefaultIndexPattern = (
    * Checks whether a default index pattern is set and exists and defines
    * one otherwise.
    */
-  return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
+  return async function ensureDefaultIndexPattern(
+    this: IndexPatternsContract,
+    dataSourceIds: string[] = []
+  ) {
+    const datasources = await savedObjectsClient.find({ type: 'data-source' });
+    const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
+    const existDataSources = datasources.map((item) => item.id);
+    const availablePatterns: string[] = [];
+
+    indexPatterns.forEach((item) => {
+      const refId = item.references[0]?.id;
+      const refIdBool = !!refId;
+      if (!refIdBool || existDataSources.includes(refId)) {
+        availablePatterns.push(item.id);
+      }
+    });
+
     if (canUpdateUiSetting === false) {
       return;
     }
-    const patterns = await this.getIds();
     let defaultId = await uiSettings.get('defaultIndex');
     let defined = !!defaultId;
-    const exists = includes(patterns, defaultId);
+    const exists = availablePatterns.includes(defaultId);
 
     if (defined && !exists) {
       await uiSettings.remove('defaultIndex');
@@ -62,8 +78,8 @@ export const createEnsureDefaultIndexPattern = (
     }
 
     // If there is any index pattern created, set the first as default
-    if (patterns.length >= 1) {
-      defaultId = patterns[0];
+    if (availablePatterns.length >= 1) {
+      defaultId = availablePatterns[0];
       await uiSettings.set('defaultIndex', defaultId);
     } else {
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
