@@ -95,7 +95,11 @@ describe('Query Result', () => {
         status: ResultStatus.ERROR,
         body: {
           error: {
-            error: 'error reason: error details',
+            message: {
+              reason: 'error reason',
+              details: 'error details',
+              status: 400,
+            },
           },
           statusCode: 400,
         },
