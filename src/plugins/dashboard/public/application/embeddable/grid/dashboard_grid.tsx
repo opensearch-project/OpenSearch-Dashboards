@@ -41,14 +41,7 @@ import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import type { SavedObjectsClientContract } from 'src/core/public';
 import { HttpStart, NotificationsStart } from 'src/core/public';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiProgress,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiProgress, EuiText } from '@elastic/eui';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -61,9 +54,7 @@ import { DirectQueryRequest } from '../../../../framework/types';
 import {
   extractIndexInfoFromDashboard,
   generateRefreshQuery,
-  fetchIndexMapping,
 } from '../../utils/direct_query_sync/direct_query_sync';
-import { loadStatus } from 'src/core/public/core_app/status/lib';
 
 let lastValidGridSize = 0;
 
