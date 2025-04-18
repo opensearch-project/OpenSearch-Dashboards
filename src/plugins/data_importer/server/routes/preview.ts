@@ -6,7 +6,7 @@
 import { IRouter } from 'src/core/server';
 import { schema, TypeOf } from '@osd/config-schema';
 import _ from 'lodash';
-import { FileParserService } from '../parsers/file_parser_service';
+import { FileProcessorService } from '../processors/file_processor_service';
 import { configSchema } from '../../config';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 import { decideClient, fetchDepthLimit, mergeCustomizerForPreview } from '../utils/util';
@@ -16,7 +16,7 @@ import { determineMapping } from '../utils/determine_mapping';
 export function previewRoute(
   router: IRouter,
   config: TypeOf<typeof configSchema>,
-  fileParsers: FileParserService,
+  fileProcessors: FileProcessorService,
   dataSourceEnabled: boolean
 ) {
   router.post(
@@ -56,8 +56,8 @@ export function previewRoute(
         ? request.query.fileExtension.slice(1)
         : request.query.fileExtension;
 
-      const parser = fileParsers.getFileParser(fileExtension);
-      if (!parser) {
+      const processor = fileProcessors.getFileProcessor(fileExtension);
+      if (!processor) {
         return response.badRequest({
           body: `${fileExtension} is not a registered or supported filetype`,
         });
@@ -93,7 +93,7 @@ export function previewRoute(
       try {
         documents.push(
           ...(
-            await parser.parseFile(file, request.query.previewCount, {
+            await processor.parseFile(file, request.query.previewCount, {
               delimiter: request.query.delimiter,
             })
           ).slice(0, request.query.previewCount)

@@ -4,20 +4,20 @@
  */
 
 import { Readable } from 'stream';
-import { CSVParser } from './csv_parser';
+import { CSVProcessor } from './csv_processor';
 import { CSVTestCaseFormat, INVALID_CSV_CASES, VALID_CSV_CASES } from './test_utils/csv_test_cases';
 import { opensearchServiceMock } from '../../../../core/server/mocks';
 import { IndexResponse } from '@opensearch-project/opensearch/api/types';
 
-describe('CSVParser', () => {
-  const parser = new CSVParser();
+describe('CSVProcessor', () => {
+  const processor = new CSVProcessor();
   const clientMock = opensearchServiceMock.createOpenSearchClient();
 
   describe('validateText()', () => {
     it.each<CSVTestCaseFormat>(VALID_CSV_CASES)(
       'should pass validation check for text input with delimiter $delimiter',
       async ({ delimiter, rawStringArray }) => {
-        expect(await parser.validateText(rawStringArray.join(''), { delimiter })).toBe(true);
+        expect(await processor.validateText(rawStringArray.join(''), { delimiter })).toBe(true);
       }
     );
 
@@ -25,7 +25,7 @@ describe('CSVParser', () => {
       'should fail validation check for text input',
       async ({ rawStringArray, delimiter }) => {
         try {
-          const testValidity = await parser.validateText(rawStringArray.join(''), { delimiter });
+          const testValidity = await processor.validateText(rawStringArray.join(''), { delimiter });
           expect(testValidity).toBe(false);
           // eslint-disable-next-line no-empty
         } catch (e) {}
@@ -41,7 +41,7 @@ describe('CSVParser', () => {
     it.each<CSVTestCaseFormat>(VALID_CSV_CASES)(
       'should index $expected.length documents into OpenSearch',
       async ({ rawStringArray, delimiter, expected }) => {
-        const response = await parser.ingestText(rawStringArray.join(''), {
+        const response = await processor.ingestText(rawStringArray.join(''), {
           client: clientMock,
           indexName: 'foo',
           delimiter,
@@ -63,7 +63,7 @@ describe('CSVParser', () => {
           .mockRejectedValueOnce({})
           .mockResolvedValue(mockSuccessfulResponse);
 
-        const response = await parser.ingestText(rawStringArray.join(''), {
+        const response = await processor.ingestText(rawStringArray.join(''), {
           client: clientMock,
           indexName: 'foo',
           delimiter,
@@ -90,7 +90,7 @@ describe('CSVParser', () => {
       'should index $expected.length documents into OpenSearch',
       async ({ expected, delimiter, rawStringArray }) => {
         const validCSVFileStream = Readable.from(rawStringArray);
-        const response = await parser.ingestFile(validCSVFileStream, {
+        const response = await processor.ingestFile(validCSVFileStream, {
           client: clientMock,
           indexName: 'foo',
           delimiter,
@@ -112,7 +112,7 @@ describe('CSVParser', () => {
           .mockResolvedValue(mockSuccessfulResponse);
 
         const validCSVFileStream = Readable.from(rawStringArray);
-        const response = await parser.ingestFile(validCSVFileStream, {
+        const response = await processor.ingestFile(validCSVFileStream, {
           client: clientMock,
           indexName: 'foo',
           delimiter,
@@ -134,7 +134,7 @@ describe('CSVParser', () => {
       async ({ rawStringArray, delimiter, expected }) => {
         const invalidCSVFileStream = Readable.from(rawStringArray);
         try {
-          const response = await parser.ingestFile(invalidCSVFileStream, {
+          const response = await processor.ingestFile(invalidCSVFileStream, {
             client: clientMock,
             indexName: 'foo',
             delimiter,
@@ -153,7 +153,7 @@ describe('CSVParser', () => {
       'should parse 3 documents from CSV file',
       async ({ rawStringArray, delimiter, expected }) => {
         const validCSVFileStream = Readable.from(rawStringArray);
-        const response = await parser.parseFile(validCSVFileStream, limit, { delimiter });
+        const response = await processor.parseFile(validCSVFileStream, limit, { delimiter });
 
         expect(response).toEqual(expected.slice(0, limit));
       }
@@ -164,7 +164,7 @@ describe('CSVParser', () => {
       async ({ rawStringArray, delimiter }) => {
         const invalidCSVFileStream = Readable.from(rawStringArray);
         try {
-          await parser.parseFile(invalidCSVFileStream, limit, { delimiter });
+          await processor.parseFile(invalidCSVFileStream, limit, { delimiter });
           // eslint-disable-next-line no-empty
         } catch (_) {}
       }

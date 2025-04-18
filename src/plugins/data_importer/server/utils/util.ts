@@ -5,7 +5,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { FileParserService } from '../parsers/file_parser_service';
+import { FileProcessorService } from '../processors/file_processor_service';
 import { OpenSearchClient, RequestHandlerContext } from '../../../../core/server';
 
 export const decideClient = async (
@@ -18,9 +18,9 @@ export const decideClient = async (
     : context.core.opensearch.client.asCurrentUser;
 };
 
-export const validateEnabledFileTypes = (fileTypes: string[], fileParsers: FileParserService) => {
+export const validateFileTypes = (fileTypes: string[], fileProcessors: FileProcessorService) => {
   const nonRegisteredFileTypes = fileTypes.filter(
-    (fileType) => !fileParsers.hasFileParserBeenRegistered(fileType)
+    (fileType) => !fileProcessors.hasFileProcessorBeenRegistered(fileType)
   );
   if (nonRegisteredFileTypes.length > 0) {
     throw new Error(

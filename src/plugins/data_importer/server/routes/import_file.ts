@@ -4,7 +4,7 @@
  */
 
 import { schema, TypeOf } from '@osd/config-schema';
-import { FileParserService } from '../parsers/file_parser_service';
+import { FileProcessorService } from '../processors/file_processor_service';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 import { IRouter } from '../../../../core/server';
 import { configSchema } from '../../config';
@@ -14,7 +14,7 @@ import { FileStream } from '../types';
 export function importFileRoute(
   router: IRouter,
   config: TypeOf<typeof configSchema>,
-  fileParsers: FileParserService,
+  fileProcessors: FileProcessorService,
   dataSourceEnabled: boolean
 ) {
   router.post(
@@ -54,8 +54,8 @@ export function importFileRoute(
         ? request.query.fileExtension.slice(1)
         : request.query.fileExtension;
 
-      const parser = fileParsers.getFileParser(fileExtension);
-      if (!parser) {
+      const processor = fileProcessors.getFileProcessor(fileExtension);
+      if (!processor) {
         return response.badRequest({
           body: `${fileExtension} is not a registered or supported filetype`,
         });
@@ -108,7 +108,7 @@ export function importFileRoute(
       const file = request.body.file as FileStream;
 
       try {
-        const message = await parser.ingestFile(file, {
+        const message = await processor.ingestFile(file, {
           indexName: request.query.indexName,
           client,
           delimiter: request.query.delimiter,

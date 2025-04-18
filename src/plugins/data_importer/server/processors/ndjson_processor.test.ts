@@ -5,7 +5,7 @@
 
 import { IndexResponse } from '@opensearch-project/opensearch/api/types';
 import { opensearchServiceMock } from '../../../../core/server/mocks';
-import { NDJSONParser } from './ndjson_parser';
+import { NDJSONProcessor } from './ndjson_processor';
 import {
   INVALID_NDJSON_TEST_CASES,
   NDJSONTestCaseFormat,
@@ -13,21 +13,21 @@ import {
 } from './test_utils/ndjson_test_cases';
 import { Readable } from 'stream';
 
-describe('NDJSONParser', () => {
-  const parser = new NDJSONParser();
+describe('NDJSONProcessor', () => {
+  const processor = new NDJSONProcessor();
   const clientMock = opensearchServiceMock.createOpenSearchClient();
 
   describe('validateText()', () => {
     it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
       'should return true for valid NDJSON',
       async ({ rawString }) => {
-        expect(await parser.validateText(rawString.join('\n'), {})).toBe(true);
+        expect(await processor.validateText(rawString.join('\n'), {})).toBe(true);
       }
     );
     it.each<NDJSONTestCaseFormat>(INVALID_NDJSON_TEST_CASES)(
       'should throw an error for invalid NDJSON',
       async ({ rawString }) => {
-        expect(parser.validateText(rawString.join('\n'), {})).rejects.toThrow();
+        expect(processor.validateText(rawString.join('\n'), {})).rejects.toThrow();
       }
     );
   });
@@ -40,7 +40,7 @@ describe('NDJSONParser', () => {
     it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
       'should index $expected.length documents into OpenSearch',
       async ({ rawString, expected }) => {
-        const response = await parser.ingestText(rawString.join('\n'), {
+        const response = await processor.ingestText(rawString.join('\n'), {
           client: clientMock,
           indexName: 'foo',
         });
@@ -60,7 +60,7 @@ describe('NDJSONParser', () => {
           .mockRejectedValueOnce({})
           .mockResolvedValue(mockSuccessfulResponse);
 
-        const response = await parser.ingestText(rawString.join('\n'), {
+        const response = await processor.ingestText(rawString.join('\n'), {
           client: clientMock,
           indexName: 'foo',
         });
@@ -86,7 +86,7 @@ describe('NDJSONParser', () => {
       'should index $expected.length documents into OpenSearch',
       async ({ rawString, expected }) => {
         const validNDJSONFileStream = Readable.from(rawString.join('\n'));
-        const response = await parser.ingestFile(validNDJSONFileStream, {
+        const response = await processor.ingestFile(validNDJSONFileStream, {
           client: clientMock,
           indexName: 'foo',
         });
@@ -107,7 +107,7 @@ describe('NDJSONParser', () => {
           .mockResolvedValue(mockSuccessfulResponse);
 
         const validNDJSONFileStream = Readable.from(rawString.join('\n'));
-        const response = await parser.ingestFile(validNDJSONFileStream, {
+        const response = await processor.ingestFile(validNDJSONFileStream, {
           client: clientMock,
           indexName: 'foo',
         });
@@ -128,7 +128,7 @@ describe('NDJSONParser', () => {
       async ({ rawString }) => {
         const invalidNDJSONFileStream = Readable.from(rawString.join('\n'));
         try {
-          const response = await parser.ingestFile(invalidNDJSONFileStream, {
+          const response = await processor.ingestFile(invalidNDJSONFileStream, {
             client: clientMock,
             indexName: 'foo',
           });
@@ -147,7 +147,7 @@ describe('NDJSONParser', () => {
       'should parse 4 documents from NDJSON',
       async ({ rawString, expected }) => {
         const validNDJSONFileStream = Readable.from(rawString.join('\n'));
-        const response = await parser.parseFile(validNDJSONFileStream, limit, {});
+        const response = await processor.parseFile(validNDJSONFileStream, limit, {});
 
         expect(response).toEqual(expected.slice(0, limit));
       }
@@ -157,7 +157,7 @@ describe('NDJSONParser', () => {
       'should throw an error for invalid NDJSON',
       async ({ rawString }) => {
         const invalidNDJSONFileStream = Readable.from(rawString.join('\n'));
-        expect(parser.parseFile(invalidNDJSONFileStream, limit, {})).rejects.toThrow();
+        expect(processor.parseFile(invalidNDJSONFileStream, limit, {})).rejects.toThrow();
       }
     );
   });

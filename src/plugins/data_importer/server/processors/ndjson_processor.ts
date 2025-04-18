@@ -5,10 +5,10 @@
 
 import { parse } from 'ndjson';
 import { Readable } from 'stream';
-import { IFileParser, IngestOptions, ParseOptions, ValidationOptions } from '../types';
+import { IFileProcessor, IngestOptions, ParseOptions, ValidationOptions } from '../types';
 import { isValidObject } from '../utils/util';
 
-export class NDJSONParser implements IFileParser {
+export class NDJSONProcessor implements IFileProcessor {
   public async validateText(text: string, _: ValidationOptions) {
     const stringStream = new Readable();
     stringStream._read = () => {};

@@ -8,12 +8,12 @@ import { OpenSearchClient } from '../../../core/server';
 
 export interface DataImporterPluginSetup {
   /**
-   * Register custom file type parsers to ingest into OpenSearch
-   * @param fileType The file type to register a parser for (should NOT be csv, ndjson, or json filetypes)
-   * @param fileParser
+   * Register custom file type processors to ingest into OpenSearch
+   * @param fileType The file type to register a processor for (should NOT be csv, ndjson, or json filetypes)
+   * @param fileProcessor
    * @throws errors if a filetype is already registered in this plugin or another plugin
    */
-  registerFileParser: (fileType: string, fileParser: IFileParser) => void;
+  registerFileProcessor: (fileType: string, fileProcessor: IFileProcessor) => void;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataImporterPluginStart {}
@@ -61,9 +61,9 @@ export interface ValidationOptions {
 export type ParseOptions = ValidationOptions;
 
 /**
- * Parser that handles a particular file type
+ * Processor that handles a particular file type
  */
-export interface IFileParser {
+export interface IFileProcessor {
   /**
    * Given text input, validate that it is in the expected format
    * @param text

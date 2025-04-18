@@ -4,7 +4,7 @@
  */
 
 import { schema, TypeOf } from '@osd/config-schema';
-import { FileParserService } from '../parsers/file_parser_service';
+import { FileProcessorService } from '../processors/file_processor_service';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 import { IRouter } from '../../../../core/server';
 import { configSchema } from '../../config';
@@ -13,7 +13,7 @@ import { decideClient } from '../utils/util';
 export function importTextRoute(
   router: IRouter,
   config: TypeOf<typeof configSchema>,
-  fileParsers: FileParserService,
+  fileProcessors: FileProcessorService,
   dataSourceEnabled: boolean
 ) {
   router.post(
@@ -48,8 +48,8 @@ export function importTextRoute(
       },
     },
     async (context, request, response) => {
-      const parser = fileParsers.getFileParser(request.query.fileType);
-      if (!parser || !parser.validateText || !parser.ingestText) {
+      const processor = fileProcessors.getFileProcessor(request.query.fileType);
+      if (!processor || !processor.validateText || !processor.ingestText) {
         return response.badRequest({
           body: `${request.query.fileType} is not a registered or supported filetype`,
         });
@@ -101,7 +101,7 @@ export function importTextRoute(
 
       let isValid;
       try {
-        isValid = await parser.validateText(request.body.text, {
+        isValid = await processor.validateText(request.body.text, {
           delimiter: request.query.delimiter,
         });
       } catch (e) {
@@ -117,7 +117,7 @@ export function importTextRoute(
       }
 
       try {
-        const message = await parser.ingestText(request.body.text, {
+        const message = await processor.ingestText(request.body.text, {
           indexName: request.query.indexName,
           client,
           delimiter: request.query.delimiter,

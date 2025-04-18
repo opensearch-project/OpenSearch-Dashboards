@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { decideClient, fetchDepthLimit, isValidObject, validateEnabledFileTypes } from './util';
+import { decideClient, fetchDepthLimit, isValidObject, validateFileTypes } from './util';
 import { coreMock, opensearchServiceMock } from '../../../../core/server/mocks';
-import { FileParserService } from '../parsers/file_parser_service';
-import { IFileParser } from '../types';
+import { FileProcessorService } from '../processors/file_processor_service';
+import { IFileProcessor } from '../types';
 import { ClusterGetSettingsResponse } from '@opensearch-project/opensearch/api/types';
 import { ApiResponse } from '@opensearch-project/opensearch';
 
@@ -59,10 +59,10 @@ describe('util', () => {
   });
 
   describe('validateEnabledFileTypes()', () => {
-    let fileParserService: FileParserService;
+    let fileProcessorService: FileProcessorService;
 
     beforeEach(() => {
-      fileParserService = new FileParserService();
+      fileProcessorService = new FileProcessorService();
     });
 
     it.each([
@@ -104,7 +104,7 @@ describe('util', () => {
     ])(
       'should throw an error should be $throwsError',
       ({ registeredFileTypes, configEnabledFileTypes, throwsError }) => {
-        const dummyFileParser: IFileParser = {
+        const dummyFileProcessor: IFileProcessor = {
           validateText: jest.fn(),
           ingestText: jest.fn(),
           ingestFile: jest.fn(),
@@ -112,16 +112,16 @@ describe('util', () => {
         };
 
         registeredFileTypes.forEach((fileType: string) => {
-          fileParserService.registerFileParser(fileType, { ...dummyFileParser });
+          fileProcessorService.registerFileProcessor(fileType, { ...dummyFileProcessor });
         });
 
         if (throwsError) {
           expect(() => {
-            validateEnabledFileTypes(configEnabledFileTypes, fileParserService);
+            validateFileTypes(configEnabledFileTypes, fileProcessorService);
           }).toThrowError();
         } else {
           expect(() => {
-            validateEnabledFileTypes(configEnabledFileTypes, fileParserService);
+            validateFileTypes(configEnabledFileTypes, fileProcessorService);
           }).not.toThrowError();
         }
       }

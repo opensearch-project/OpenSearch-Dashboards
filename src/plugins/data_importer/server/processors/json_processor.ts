@@ -4,10 +4,10 @@
  */
 
 import { Readable } from 'stream';
-import { IFileParser, IngestOptions, ParseOptions, ValidationOptions } from '../types';
+import { IFileProcessor, IngestOptions, ParseOptions, ValidationOptions } from '../types';
 import { isValidObject } from '../utils/util';
 
-export class JSONParser implements IFileParser {
+export class JSONProcessor implements IFileProcessor {
   public async validateText(text: string, _: ValidationOptions) {
     if (text.length < 1) {
       return false;

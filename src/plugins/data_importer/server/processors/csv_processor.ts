@@ -5,10 +5,10 @@
 
 import { parseStream, parseString } from 'fast-csv';
 import { Readable } from 'stream';
-import { IFileParser, IngestOptions, ParseOptions, ValidationOptions } from '../types';
+import { IFileProcessor, IngestOptions, ParseOptions, ValidationOptions } from '../types';
 import { isValidObject } from '../utils/util';
 
-export class CSVParser implements IFileParser {
+export class CSVProcessor implements IFileProcessor {
   public async validateText(text: string, options: ValidationOptions) {
     if (!!!options.delimiter) {
       return false;
