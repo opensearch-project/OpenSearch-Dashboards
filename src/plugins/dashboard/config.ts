@@ -32,6 +32,7 @@ import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
   allowByValueEmbeddables: schema.boolean({ defaultValue: false }),
+  directQueryConnectionSync: schema.boolean({ defaultValue: false }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

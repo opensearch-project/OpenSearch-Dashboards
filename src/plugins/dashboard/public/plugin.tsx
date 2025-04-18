@@ -138,6 +138,7 @@ export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_UR
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
+  directQueryConnectionSync: boolean;
 }
 
 interface SetupDependencies {
@@ -278,6 +279,7 @@ export class DashboardPlugin
         uiActions: deps.uiActions,
         savedObjectsClient: coreStart.savedObjects.client, // HERE TO ADD SAVED OBJECTS CLIENT
         http: coreStart.http, // HERE TO ADD HTTP
+        dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!, // HERE TO PASS THE DASHBOARD FEATURE FLAG CONFIG
       };
     };
 
@@ -440,6 +442,7 @@ export class DashboardPlugin
           savedObjectsPublic: savedObjects,
           restorePreviousUrl,
           toastNotifications: coreStart.notifications.toasts,
+          dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();

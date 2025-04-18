@@ -61,6 +61,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import { DashboardFeatureFlagConfig } from '../../plugin';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -106,6 +107,7 @@ export interface DashboardContainerOptions {
   uiActions: UiActionsStart;
   savedObjectsClient: CoreStart['savedObjects']['client'];
   http: CoreStart['http'];
+  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
 }
 
 export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<
@@ -249,6 +251,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
             savedObjectsClient={this.options.savedObjectsClient}
             http={this.options.http}
             notifications={this.options.notifications}
+            isDirectQuerySyncEnabled={
+              this.options.dashboardFeatureFlagConfig.directQueryConnectionSync
+            }
           />
         </OpenSearchDashboardsContextProvider>
       </I18nProvider>,

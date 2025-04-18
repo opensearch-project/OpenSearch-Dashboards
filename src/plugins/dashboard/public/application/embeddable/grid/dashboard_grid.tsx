@@ -143,6 +143,7 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   startLoading: (payload: DirectQueryRequest) => void;
   loadStatus: DirectQueryLoadingStatus;
   pollingResult: any;
+  isDirectQuerySyncEnabled: boolean;
 }
 
 interface State {
@@ -385,11 +386,14 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
     return (
       <div style={{ position: 'relative', padding: '16px' }}>
-        <DashboardFlintSync
-          loadStatus={this.props.loadStatus}
-          lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
-          onSynchronize={this.synchronizeNow}
-        />
+        {this.props.isDirectQuerySyncEnabled && (
+          <DashboardFlintSync
+            loadStatus={this.props.loadStatus}
+            lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
+            onSynchronize={this.synchronizeNow}
+          />
+        )}
+
         <ResponsiveSizedGrid
           isViewMode={isViewMode}
           layout={this.buildLayoutFromPanels()}

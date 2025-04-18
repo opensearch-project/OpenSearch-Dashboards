@@ -54,6 +54,7 @@ export interface DashboardViewportProps {
   startLoading: (payload: DirectQueryRequest) => void;
   loadStatus: DirectQueryLoadingStatus;
   pollingResult: any;
+  isDirectQuerySyncEnabled: boolean;
 }
 
 interface State {
@@ -181,6 +182,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           startLoading={startLoading}
           loadStatus={loadStatus}
           pollingResult={pollingResult}
+          isDirectQuerySyncEnabled={this.props.isDirectQuerySyncEnabled}
         />
       </div>
     );
