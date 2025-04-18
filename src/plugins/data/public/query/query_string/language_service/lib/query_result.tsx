@@ -24,13 +24,11 @@ export interface QueryStatus {
     error?: {
       error?: string;
       message?: {
-        error?:
-          | string
-          | {
-              reason?: string;
-              details: string;
-              type?: string;
-            };
+        error?: {
+          reason?: string;
+          details: string;
+          type?: string;
+        };
         status?: number;
       };
       statusCode?: number;
@@ -102,7 +100,21 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       return JSON.stringify(message);
     }
 
-    return `Unknown Error: ${String(message)}`;
+    const reason = error?.message?.error?.reason;
+
+    if (reason) {
+      return reason;
+    }
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (typeof error === 'object') {
+      return JSON.stringify(error);
+    }
+
+    return 'Unkown Error';
   }, [props.queryStatus.body?.error]);
 
   if (props.queryStatus.status === ResultStatus.LOADING) {

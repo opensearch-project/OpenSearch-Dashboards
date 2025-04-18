@@ -34,11 +34,16 @@ import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { trackQueryMetric } from '../../../ui_metric';
 
-export function safeJSONParse(text: any) {
+function isJSONString(text: any) {
+  if (typeof text !== 'string') {
+    return false;
+  }
+
   try {
-    return JSON.parse(text);
+    JSON.parse(text);
+    return true;
   } catch (error) {
-    return text;
+    return false;
   }
 }
 
@@ -64,13 +69,11 @@ export interface SearchData {
       error?: {
         error?: string;
         message?: {
-          error?:
-            | string
-            | {
-                reason?: string;
-                details: string;
-                type?: string;
-              };
+          error?: {
+            reason?: string;
+            details: string;
+            type?: string;
+          };
           status?: number;
         };
         statusCode?: number;
@@ -367,22 +370,11 @@ export const useSearch = (services: DiscoverViewServices) => {
         }
       }
 
-      // Error message can be sent as encoded JSON string, which requires extra parsing
-      /*
-        errorBody: {
-          error: string,
-          statusCode: number,
-          message: {
-            error: {
-              reason: string;
-              details: string;
-              type: string;
-            };
-            status: number;
-          }
-        }
-      */
-      errorBody.message = safeJSONParse(errorBody.message);
+      // Currently error message is sent as encoded JSON string, which requires extra parsing
+      // TODO: Confirm error contract
+      if (isJSONString(errorBody.message)) {
+        errorBody.message = JSON.parse(errorBody.message);
+      }
 
       data$.next({
         status: ResultStatus.ERROR,
