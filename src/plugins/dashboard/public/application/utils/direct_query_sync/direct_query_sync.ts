@@ -15,6 +15,30 @@ export const DIRECT_QUERY_BASE = '/api/directquery';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const DSL_BASE = `${DIRECT_QUERY_BASE}/dsl`;
 
+// Module for handling EMR states for Dashboards Progress Bar
+export const EMR_STATES = new Map<string, { ord: number; terminal: boolean }>(
+  Object.entries({
+    submitted: { ord: 0, terminal: false },
+    queued: { ord: 8, terminal: false },
+    pending: { ord: 16, terminal: false },
+    scheduled: { ord: 33, terminal: false },
+    running: { ord: 67, terminal: false },
+    cancelling: { ord: 50, terminal: false },
+    success: { ord: 100, terminal: true },
+    failed: { ord: 100, terminal: true },
+    cancelled: { ord: 100, terminal: true },
+    fresh: { ord: 100, terminal: true },
+  })
+);
+
+export const MAX_ORD = 100;
+
+export function timeSince(date: number): string {
+  const seconds = Math.floor((new Date().getTime() - date) / 1000);
+  const interval: number = seconds / 60;
+  return interval > 1 ? Math.floor(interval) + ' minutes' : Math.floor(seconds) + ' seconds';
+}
+
 export async function resolveConcreteIndex(
   indexTitle: string,
   http: HttpStart

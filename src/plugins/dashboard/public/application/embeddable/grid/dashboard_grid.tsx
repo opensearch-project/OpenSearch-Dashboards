@@ -54,6 +54,9 @@ import { DirectQueryRequest } from '../../../../framework/types';
 import {
   extractIndexInfoFromDashboard,
   generateRefreshQuery,
+  EMR_STATES,
+  MAX_ORD,
+  timeSince,
 } from '../../utils/direct_query_sync/direct_query_sync';
 
 let lastValidGridSize = 0;
@@ -315,13 +318,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       index: extractedIndex,
     });
 
-    const queryPayload = {
+    this.props.startLoading({
       query,
       lang: 'sql',
       datasource: extractedDatasource,
-    };
-
-    this.props.startLoading(queryPayload);
+    });
   };
 
   public renderPanels() {
@@ -370,34 +371,6 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
   }
 
-  // TODO find a home for this
-  EMR_STATES: Map<string, { ord: number; terminal: boolean }> = new Map(
-    Object.entries({
-      submitted: { ord: 0, terminal: false },
-      queued: { ord: 8, terminal: false },
-      pending: { ord: 16, terminal: false },
-      scheduled: { ord: 33, terminal: false },
-      running: { ord: 67, terminal: false },
-      cancelling: { ord: 50, terminal: false },
-      success: { ord: 100, terminal: true },
-      failed: { ord: 100, terminal: true },
-      cancelled: { ord: 100, terminal: true },
-      fresh: { ord: 100, terminal: true },
-    })
-  );
-  MAX_ORD: number = 100;
-
-  private timeSince(date: number): string {
-    const seconds = Math.floor((new Date().getTime() - date) / 1000);
-
-    const interval: number = seconds / 60;
-
-    if (interval > 1) {
-      return Math.floor(interval) + ' minutes';
-    }
-    return Math.floor(seconds) + ' seconds';
-  }
-
   public render() {
     if (this.state.isLayoutInvalid) {
       return null;
@@ -405,16 +378,21 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
     const { viewMode } = this.state;
     const isViewMode = viewMode === ViewMode.VIEW;
-    const state = this.EMR_STATES.get(this.props.loadStatus as string)!;
+    const state = EMR_STATES.get(this.props.loadStatus as string)!;
+
     if (state.terminal && this.props.loadStatus !== 'fresh') {
       window.location.reload();
     }
 
     return (
       <div style={{ position: 'relative', padding: '16px' }}>
-        {/* Top-left corner "Synchronize Now" button */}
         <div
-          style={{ marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}
+          style={{
+            marginBottom: '8px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '10px',
+          }}
         >
           <EuiButton
             iconType="refresh"
@@ -429,7 +407,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             <EuiText>
               Last Refresh:{' '}
               {this.state.extractedProps ? (
-                this.timeSince(this.state.extractedProps.lastRefreshTime) + ' ago'
+                timeSince(this.state.extractedProps.lastRefreshTime) + ' ago'
               ) : (
                 <>
                   &nbsp;&nbsp;
@@ -440,7 +418,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           ) : (
             <EuiProgress
               value={state.ord}
-              max={this.MAX_ORD}
+              max={MAX_ORD}
               color="vis0"
               style={{ width: '100px' }}
               size="l"
