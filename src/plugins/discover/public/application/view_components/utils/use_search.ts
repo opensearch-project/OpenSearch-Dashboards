@@ -34,6 +34,14 @@ import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { trackQueryMetric } from '../../../ui_metric';
 
+export function safeJSONParse(text: any) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return text;
+  }
+}
+
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
@@ -54,10 +62,19 @@ export interface SearchData {
   queryStatus?: {
     body?: {
       error?: {
-        reason?: string;
-        details: string;
+        error?: string;
+        message?: {
+          error?:
+            | string
+            | {
+                reason?: string;
+                details: string;
+                type?: string;
+              };
+          status?: number;
+        };
+        statusCode?: number;
       };
-      statusCode?: number;
     };
     elapsedMs?: number;
     startTime?: number;
@@ -318,16 +335,54 @@ export const useSearch = (services: DiscoverViewServices) => {
         data.search.showError(error as Error);
         return;
       }
+      // TODO: Create a unify error response at server side
       let errorBody;
       try {
+        // Normal search strategy failed query, return HttpFetchError
+        /*
+          @type {HttpFetchError}
+          {
+            body: {
+              error: string,
+              statusCode: number,
+              message: JSONstring,
+            },
+            ...
+          }
+        */
         errorBody = JSON.parse(error.body);
       } catch (e) {
         if (error.body) {
           errorBody = error.body;
         } else {
+          // Async search strategy failed query, return Error
+          /*
+            @type {Error}
+            {
+              message: string,
+              stack: string,
+            }
+          */
           errorBody = error;
         }
       }
+
+      // Error message can be sent as encoded JSON string, which requires extra parsing
+      /*
+        errorBody: {
+          error: string,
+          statusCode: number,
+          message: {
+            error: {
+              reason: string;
+              details: string;
+              type: string;
+            };
+            status: number;
+          }
+        }
+      */
+      errorBody.message = safeJSONParse(errorBody.message);
 
       data$.next({
         status: ResultStatus.ERROR,
