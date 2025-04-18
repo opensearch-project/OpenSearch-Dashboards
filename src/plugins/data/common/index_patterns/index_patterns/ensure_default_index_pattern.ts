@@ -44,10 +44,7 @@ export const createEnsureDefaultIndexPattern = (
    * Checks whether a default index pattern is set and exists and defines
    * one otherwise.
    */
-  return async function ensureDefaultIndexPattern(
-    this: IndexPatternsContract,
-    dataSourceIds: string[] = []
-  ) {
+  return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
     const datasources = await savedObjectsClient.find({ type: 'data-source' });
     const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
     const existDataSources = datasources.map((item) => item.id);
