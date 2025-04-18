@@ -44,6 +44,19 @@ export const createEnsureDefaultIndexPattern = (
    * one otherwise.
    */
   return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
+    const datasources = await savedObjectsClient.find({ type: 'data-source' });
+    const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
+    const existDataSources = datasources.map((item) => item.id);
+    const availablePatterns: string[] = [];
+
+    indexPatterns.forEach((item) => {
+      const refId = item.references[0]?.id;
+      const refIdBool = !!refId;
+      if (!refIdBool || existDataSources.includes(refId)) {
+        availablePatterns.push(item.id);
+      }
+    });
+
     if (canUpdateUiSetting === false) {
       return;
     }
