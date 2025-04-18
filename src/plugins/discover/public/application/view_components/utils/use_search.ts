@@ -34,16 +34,11 @@ import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { trackQueryMetric } from '../../../ui_metric';
 
-function isJSONString(text: any) {
-  if (typeof text !== 'string') {
-    return false;
-  }
-
+export function safeJSONParse(text: any) {
   try {
-    JSON.parse(text);
-    return true;
+    return JSON.parse(text);
   } catch (error) {
-    return false;
+    return text;
   }
 }
 
@@ -372,9 +367,7 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       // Currently error message is sent as encoded JSON string, which requires extra parsing
       // TODO: Confirm error contract
-      if (isJSONString(errorBody.message)) {
-        errorBody.message = JSON.parse(errorBody.message);
-      }
+      errorBody.message = safeJSONParse(errorBody.message);
 
       data$.next({
         status: ResultStatus.ERROR,

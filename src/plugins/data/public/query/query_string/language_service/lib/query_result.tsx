@@ -68,6 +68,12 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
 
   const displayErrorMessage = useMemo(() => {
     const error = props.queryStatus.body?.error;
+    const reason = error?.message?.error?.reason;
+
+    if (reason) {
+      return reason;
+    }
+
     const message = error?.message;
 
     if (message == null) {
@@ -92,6 +98,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       return message.error.details;
     }
 
+    // For normal search strategy, expecting message.error to be object
     if (typeof message === 'string') {
       return message;
     }
@@ -100,21 +107,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       return JSON.stringify(message);
     }
 
-    const reason = error?.message?.error?.reason;
-
-    if (reason) {
-      return reason;
-    }
-
-    if (typeof error === 'string') {
-      return error;
-    }
-
-    if (typeof error === 'object') {
-      return JSON.stringify(error);
-    }
-
-    return 'Unkown Error';
+    return `Unknown Error`;
   }, [props.queryStatus.body?.error]);
 
   if (props.queryStatus.status === ResultStatus.LOADING) {
