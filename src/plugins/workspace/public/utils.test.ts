@@ -419,6 +419,32 @@ describe('workspace utils: getDataSourcesList', () => {
     ]);
   });
 
+  it('should call client.find with { withoutClientBasePath: true }', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [],
+    });
+
+    await getDataSourcesList(mockedSavedObjectClient, ['workspace-1']);
+
+    expect(mockedSavedObjectClient.find).toHaveBeenCalledWith(
+      {
+        type: [DATA_SOURCE_SAVED_OBJECT_TYPE, DATA_CONNECTION_SAVED_OBJECT_TYPE],
+        fields: [
+          'id',
+          'title',
+          'auth',
+          'description',
+          'dataSourceEngineType',
+          'type',
+          'connectionId',
+        ],
+        perPage: 10000,
+        workspaces: ['workspace-1'],
+      },
+      { withoutClientBasePath: true }
+    );
+  });
+
   it('should return title for data source object and connectionId as title for data connection object', async () => {
     mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
       savedObjects: [

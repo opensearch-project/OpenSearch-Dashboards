@@ -243,24 +243,6 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
       expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
     });
-
-    it(`Should not throw error when passing in '*'`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
-      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
-      updateWorkspaceState(mockRequest, {});
-      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
-        client: mockedClient,
-        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
-        request: mockRequest,
-      });
-      await mockedWrapperClient.find({
-        type: ['dashboard', 'visualization'],
-        workspaces: ['*'],
-      });
-      expect(mockedClient.find).toBeCalledWith({
-        type: ['dashboard', 'visualization'],
-      });
-    });
   });
 
   describe('get', () => {

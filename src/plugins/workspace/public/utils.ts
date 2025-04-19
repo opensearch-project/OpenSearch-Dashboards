@@ -226,23 +226,26 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
 
 export const getDataSourcesList = (
   client: SavedObjectsStart['client'],
-  targetWorkspaces: string[]
+  targetWorkspaces?: string[]
 ) => {
   return client
-    .find({
-      type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
-      fields: [
-        'id',
-        'title',
-        'auth',
-        'description',
-        'dataSourceEngineType',
-        'type',
-        'connectionId',
-      ],
-      perPage: 10000,
-      workspaces: targetWorkspaces,
-    })
+    .find(
+      {
+        type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+        fields: [
+          'id',
+          'title',
+          'auth',
+          'description',
+          'dataSourceEngineType',
+          'type',
+          'connectionId',
+        ],
+        perPage: 10000,
+        workspaces: targetWorkspaces,
+      },
+      { withoutClientBasePath: true }
+    )
     .then((response) => {
       const objects = response?.savedObjects;
       if (objects) {
@@ -399,7 +402,7 @@ export const mergeDataSourcesWithConnections = (
 
 // If all connected data sources are serverless, will only allow to select essential use case.
 export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
-  const allDataSources = await getDataSourcesList(client, ['*']);
+  const allDataSources = await getDataSourcesList(client);
   if (allDataSources.length > 0) {
     return allDataSources.every(
       (ds) => ds?.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
