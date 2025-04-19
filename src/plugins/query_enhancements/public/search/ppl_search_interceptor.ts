@@ -84,8 +84,12 @@ export class PPLSearchInterceptor extends SearchInterceptor {
         };
       }
     }
+    // `options.abortSignal` is provided by `use_search` to cancel any in-progress requests before starting a new one (via fetchForMaxCsvStateRef)
+    // We also inject `abortControllerRef` through plugin dependencies for aborting in-progress requests for plugin itself
+    // If `abortControllerRef` exists, it takes priority; otherwise, use options.abortSignal
 
-    return this.runSearch(request, options.abortSignal, strategy);
+    const signal = this.deps.abortControllerRef?.current?.signal ?? options.abortSignal;
+    return this.runSearch(request, signal, strategy);
   }
 
   private buildQuery() {

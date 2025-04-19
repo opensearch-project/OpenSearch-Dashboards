@@ -104,6 +104,7 @@ export const createQueryAssistExtension = (
     question: '',
     generatedQuery: '',
   });
+
   return {
     id: 'query-assist',
     order: 1000,
@@ -132,7 +133,7 @@ export const createQueryAssistExtension = (
           data={data}
           queryState$={assistQueryState$}
         >
-          <QueryAssistBar dependencies={dependencies} />
+          <QueryAssistBar data={data} dependencies={dependencies} />
         </QueryAssistWrapper>
       );
     },

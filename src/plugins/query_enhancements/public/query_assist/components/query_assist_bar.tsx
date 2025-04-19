@@ -11,10 +11,11 @@ import {
   IDataPluginServices,
   PersistedLog,
   QueryEditorExtensionDependencies,
+  DataPublicPluginSetup,
 } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { QueryAssistParameters } from '../../../common/query_assist';
-import { getStorage } from '../../services';
+import { getStorage, getUiActions } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { getPersistedLog, AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
@@ -25,6 +26,7 @@ import { isPPLSupportedType } from '../utils/language_support';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
+  data: DataPublicPluginSetup;
 }
 
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
@@ -36,7 +38,6 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     () => getPersistedLog(services.uiSettings, storage, 'query-assist'),
     [services.uiSettings, storage]
   );
-  const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
   const [agentError, setAgentError] = useState<AgentError>();
@@ -46,6 +47,8 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
   const { updateQueryState } = useQueryAssist();
+  const uiActions = getUiActions();
+  const { generateQuery, loading } = useGenerateQuery(uiActions, props.data.ui.abortControllerRef);
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {

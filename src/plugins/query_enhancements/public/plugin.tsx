@@ -19,7 +19,7 @@ import { s3TypeConfig } from './datasets';
 import { createQueryAssistExtension } from './query_assist';
 import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
-import { setData, setStorage } from './services';
+import { setData, setStorage, setUiActions } from './services';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
@@ -52,6 +52,8 @@ export class QueryEnhancementsPlugin
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
 
+    const abortControllerRef = data.ui.abortControllerRef;
+
     // Define controls once for each language and register language configurations outside of `getUpdates$`
     const pplControls = [pplLanguageReference('PPL')];
     const sqlControls = [sqlLanguageReference('SQL')];
@@ -61,6 +63,7 @@ export class QueryEnhancementsPlugin
       id: 'PPL',
       title: 'PPL',
       search: new PPLSearchInterceptor({
+        abortControllerRef,
         toasts: core.notifications.toasts,
         http: core.http,
         uiSettings: core.uiSettings,
@@ -225,10 +228,11 @@ export class QueryEnhancementsPlugin
 
   public start(
     core: CoreStart,
-    { data }: QueryEnhancementsPluginStartDependencies
+    { data, uiActions }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
     setStorage(this.storage);
     setData(data);
+    setUiActions(uiActions);
     return {};
   }
 

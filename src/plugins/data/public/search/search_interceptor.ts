@@ -52,6 +52,7 @@ export interface SearchInterceptorDeps {
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
+  abortControllerRef?: React.MutableRefObject<AbortController | undefined>;
 }
 
 export class SearchInterceptor {

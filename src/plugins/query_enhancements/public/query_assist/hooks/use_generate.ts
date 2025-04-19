@@ -9,8 +9,12 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { API } from '../../../common';
 import { QueryAssistParameters, QueryAssistResponse } from '../../../common/query_assist';
 import { formatError } from '../utils';
+import { ABORT_DATA_QUERY_TRIGGER, UiActionsStart } from '../../../../ui_actions/public';
 
-export const useGenerateQuery = () => {
+export const useGenerateQuery = (
+  uiActions: UiActionsStart,
+  abortControllerRefInDataPlugin: React.MutableRefObject<AbortController | undefined>
+) => {
   const mounted = useRef(false);
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef<AbortController>();
@@ -34,6 +38,10 @@ export const useGenerateQuery = () => {
     abortControllerRef.current = new AbortController();
     setLoading(true);
     try {
+      uiActions
+        .getTrigger(ABORT_DATA_QUERY_TRIGGER)
+        .exec({ abortControllerRef: abortControllerRefInDataPlugin });
+
       const response = await services.http.post<QueryAssistResponse>(API.QUERY_ASSIST.GENERATE, {
         body: JSON.stringify(params),
         signal: abortControllerRef.current?.signal,
@@ -42,7 +50,9 @@ export const useGenerateQuery = () => {
     } catch (error) {
       if (mounted.current) return { error: formatError(error) };
     } finally {
-      if (mounted.current) setLoading(false);
+      if (mounted.current) {
+        setLoading(false);
+      }
     }
     return {};
   };
