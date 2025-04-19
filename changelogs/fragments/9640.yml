@@ -1,0 +1,2 @@
+fix:
+- Fix the performance workflow script permission issue ([#9640](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9640))
