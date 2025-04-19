@@ -40,6 +40,7 @@
       - [Dashboard](../src/plugins/dashboard/README.md)
       - [Data](../src/plugins/data/README.md)
       - [Data_explorer](../src/plugins/data_explorer/README.md)
+      - [Data_importer](../src/plugins/data_importer/README.md)
       - [Data_source](../src/plugins/data_source/README.md)
       - [Data_source_management](../src/plugins/data_source_management/README.md)
       - [Dev_tools](../src/plugins/dev_tools/README.md)

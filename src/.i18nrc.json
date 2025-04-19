@@ -10,6 +10,7 @@
     "dashboard": "plugins/dashboard",
     "data": "plugins/data",
     "dataExplorer": "plugins/data_explorer",
+    "dataImporter": "plugins/data_importer",
     "dataSourcesManagement": "plugins/data_source_management",
     "devTools": "plugins/dev_tools",
     "discover": "plugins/discover",
@@ -46,14 +47,9 @@
     "server": "legacy/server",
     "share": "plugins/share",
     "statusPage": "legacy/core_plugins/status_page",
-    "telemetry": [
-      "plugins/telemetry",
-      "plugins/telemetry_management_section"
-    ],
+    "telemetry": ["plugins/telemetry", "plugins/telemetry_management_section"],
     "tileMap": "plugins/tile_map",
-    "timeline": [
-      "plugins/vis_type_timeline"
-    ],
+    "timeline": ["plugins/vis_type_timeline"],
     "uiActions": "plugins/ui_actions",
     "usageCollection": "plugins/usage_collection",
     "visAugmenter": "plugins/vis_augmenter",

@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImportFileContent should render 1`] = `
+<div>
+  <div
+    class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+  >
+    <div
+      class="euiFilePicker__wrap"
+    >
+      <input
+        accept=".csv, .json, .ndjson"
+        aria-describedby="mocked-id-filePicker__prompt"
+        class="euiFilePicker__input"
+        id="mocked-id"
+        type="file"
+      />
+      <div
+        class="euiFilePicker__prompt"
+        id="mocked-id-filePicker__prompt"
+      >
+        <span
+          aria-hidden="true"
+          class="euiFilePicker__icon"
+          data-euiicon-type="importAction"
+        />
+        <div
+          class="euiFilePicker__promptText"
+        >
+          Select or drag and drop a .csv, .json, .ndjson file
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
