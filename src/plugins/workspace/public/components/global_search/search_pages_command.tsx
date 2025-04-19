@@ -3,16 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChromeNavLink, ChromeRegistrationNavLink, CoreStart } from 'opensearch-dashboards/public';
+import {
+  ChromeNavLink,
+  ChromeRegistrationNavLink,
+  CoreStart,
+  NavGroupItemInMap,
+} from 'opensearch-dashboards/public';
 import { first } from 'rxjs/operators';
 import React, { ReactNode } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { useObservable } from 'react-use';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
-import { GlobalSearchPageItem } from './page_item';
 import { DEFAULT_NAV_GROUPS, NavGroupType } from '../../../../../core/public';
 import { WorkspaceUseCase } from '../../types';
+import { WorkspaceTitleDisplay } from '../workspace_name/workspace_name';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
+import {
+  searchNavigationLinks,
+  NavGroupElement,
+  GlobalSearchPageItem,
+} from '../../../../../core/public';
 
-export const searchPages = async (
+type Link = { navGroup: NavGroupItemInMap } & ChromeRegistrationNavLink & ChromeNavLink;
+
+export const workspaceSearchPages = async (
   query: string,
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>,
   coreStart?: CoreStart,
@@ -36,51 +51,74 @@ export const searchPages = async (
       getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []) || ''
     );
 
-    const searchResult = allAvailableCaseId.flatMap((useCaseId) => {
-      const navGroup = navGroupMap[useCaseId];
-      if (navGroup) {
-        const links = navGroup.navLinks as Array<ChromeRegistrationNavLink & ChromeNavLink>;
-        // parent nav links are not clickable
-        const parentNavLinkIds = links.map((link) => link.parentNavLinkId).filter((link) => !!link);
-        return links
-          .filter((link) => {
-            const title = link.title;
-            let parentNavLinkTitle;
-            // parent title also taken into consideration for search its sub items
-            if (link.parentNavLinkId) {
-              parentNavLinkTitle = navGroup.navLinks.find(
-                (navLink) => navLink.id === link.parentNavLinkId
-              )?.title;
-            }
-            const titleMatch = title && title.toLowerCase().includes(query.toLowerCase());
-            const parentTitleMatch =
-              parentNavLinkTitle && parentNavLinkTitle.toLowerCase().includes(query.toLowerCase());
-            return (
-              !link.hidden &&
-              !link.disabled &&
-              (titleMatch || parentTitleMatch) &&
-              !parentNavLinkIds.includes(link.id)
-            );
-          })
-          .map((link) => ({
-            ...link,
-            navGroup,
-          }));
-      }
-      return [];
-    });
+    const searchResult = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
-    const pages = searchResult.slice(0, 10).map((link) => {
+    const handleCallback = (link: Link) => {
+      callback?.();
+      const isPageOutOfWorkspace = link.navGroup.type === NavGroupType.SYSTEM;
+      if (isPageOutOfWorkspace && currentWorkspace) {
+        // remove workspace information in the URL, special handling for data source which could visible both in/out workspace
+        const urlWithoutWorkspace = formatUrlWithWorkspaceId(
+          link.href,
+          '',
+          coreStart.http.basePath
+        );
+        window.location.assign(urlWithoutWorkspace);
+        return;
+      }
+      coreStart.application.navigateToApp(link.id);
+    };
+
+    const renderBreadcrumbs = (
+      link: Link,
+      breadcrumbs: EuiBreadcrumb[],
+      availableUseCases: WorkspaceUseCase[]
+    ) => {
+      const isPageOutOfWorkspace = link.navGroup.type === NavGroupType.SYSTEM;
+
+      if (currentWorkspace && !isPageOutOfWorkspace) {
+        return [
+          {
+            text: (
+              <WorkspaceTitleDisplay
+                workspace={currentWorkspace}
+                availableUseCases={availableUseCases || []}
+              />
+            ),
+          },
+          ...breadcrumbs,
+        ];
+      } else {
+        return [{ text: NavGroupElement(link.navGroup) }, ...breadcrumbs];
+      }
+    };
+
+    const WorkspaceGlobalSearchPageItem = ({
+      link,
+      search,
+      onCallback,
+    }: {
+      link: Link;
+      search: string;
+      onCallback: (link: Link) => void;
+    }) => {
+      const availableUseCases = useObservable(registeredUseCases$);
+
       return (
         <GlobalSearchPageItem
           link={link}
-          search={query}
-          currentWorkspace={currentWorkspace}
-          application={coreStart.application}
-          http={coreStart.http}
-          registeredUseCases$={registeredUseCases$}
-          callback={callback}
+          search={search}
+          callback={() => onCallback(link)}
+          renderBreadcrumbs={(breadcrumbs) =>
+            renderBreadcrumbs(link, breadcrumbs, availableUseCases!)
+          }
         />
+      );
+    };
+
+    const pages = searchResult.slice(0, 10).map((link) => {
+      return (
+        <WorkspaceGlobalSearchPageItem link={link} search={query} onCallback={handleCallback} />
       );
     });
 

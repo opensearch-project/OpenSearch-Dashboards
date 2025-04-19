@@ -545,6 +545,17 @@ describe('Workspace plugin', () => {
     expect(appState(mockApp)).toEqual({ status: AppStatus.inaccessible });
   });
 
+  it('#start should remove non-workspace chrome page search service', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+
+    workspacePlugin.start(coreStart, getMockDependencies());
+
+    expect(coreStart.chrome.globalSearch.unregisterSearchCommand).toBeCalledWith('pagesSearch');
+  });
+
   it('#stop should call unregisterNavGroupUpdater', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();
