@@ -1,0 +1,2 @@
+feat:
+- Add workspace scope and refactor workspace_ui_setting_wrapper ([#9594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9594))
