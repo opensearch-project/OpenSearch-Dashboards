@@ -1,0 +1,2 @@
+fix:
+- Update default index pattern logic ([#9692](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9692))
