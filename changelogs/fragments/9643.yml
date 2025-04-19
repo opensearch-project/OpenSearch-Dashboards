@@ -1,0 +1,2 @@
+fix:
+- Close flyout when clicking outside ([#9643](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9643))
