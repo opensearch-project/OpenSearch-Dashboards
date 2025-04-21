@@ -44,7 +44,23 @@ export const removeKeyword = (queryString: string | undefined) => {
 };
 
 export const throwFacetError = (response: any) => {
-  const error = new Error(response.data.body?.message ?? response.data.body ?? response.data);
+  let errorMessage = response.data.body?.message ?? response.data.body ?? response.data;
+
+  // Check if errorMessage is an object and handle Error objects
+  if (typeof errorMessage === 'object') {
+    if (errorMessage instanceof Error) {
+      // If errorMessage is an instance of Error, extract its message
+      errorMessage = errorMessage.message;
+    } else if (errorMessage.message) {
+      // If errorMessage has a message property, extract that message
+      errorMessage = JSON.stringify(errorMessage.message);
+    } else {
+      // If errorMessage is a plain object, stringify it
+      errorMessage = JSON.stringify(errorMessage);
+    }
+  }
+
+  const error = new Error(errorMessage);
   error.name = response.data.status ?? response.status ?? response.data.statusCode;
   (error as any).status = error.name;
   throw error;

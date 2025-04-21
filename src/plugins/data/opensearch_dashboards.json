@@ -16,6 +16,7 @@
     "usageCollection",
     "opensearchDashboardsUtils",
     "opensearchDashboardsReact",
-    "inspector"
+    "inspector",
+    "dataSource"
   ]
 }
