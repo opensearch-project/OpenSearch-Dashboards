@@ -1,2 +1,0 @@
-fix:
-- Trim the url for creating data source ([#9637](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9637))

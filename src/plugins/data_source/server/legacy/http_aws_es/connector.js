@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Credentials } from '@aws-sdk/client-sts';
 import { SignatureV4 } from '@aws-sdk/signature-v4';
 import { HttpRequest } from '@aws-sdk/protocol-http';
 import { Sha256 } from '@aws-crypto/sha256-js';
+import { AbortController } from '@aws-sdk/abort-controller';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
+import queryString from 'query-string';
 const HttpConnector = require('elasticsearch/src/lib/connectors/http');
-const crypto = require('crypto');
 
 class HttpAmazonESConnector extends HttpConnector {
   constructor(host, config) {
@@ -32,31 +32,27 @@ class HttpAmazonESConnector extends HttpConnector {
     this.service = config.service || 'es';
   }
 
-  request(params, cb) {
+  async request(params, cb) {
     const reqParams = this.makeReqParams(params);
-    let request;
     let cancelled = false;
+    const controller = new AbortController();
 
     const cancel = () => {
       cancelled = true;
-      request && request.abort();
+      controller.abort();
     };
 
     try {
-      const creds = this.getAWSCredentials(reqParams);
+      const creds = await this.getAWSCredentials(reqParams);
       if (cancelled) return;
 
-      request = this.createRequest(params, reqParams);
-      this.signRequest(request, creds);
+      let request = this.createRequest(params, reqParams);
+      request = await this.signRequest(request, creds);
 
-      const hash = crypto
-        .createHash('sha256')
-        .update(request.body || '', 'utf8')
-        .digest('hex');
-      request.headers['x-amz-content-sha256'] = hash;
-
-      const { response } = this.httpClient.handle(request);
-      const body = this.streamToString(response.body);
+      const { response } = await this.httpClient.handle(request, {
+        abortSignal: controller.signal,
+      });
+      const body = await this.streamToString(response.body);
 
       this.log.trace(params.method, reqParams, params.body, body, response.statusCode);
       cb(null, body, response.statusCode, response.headers);
@@ -84,11 +80,11 @@ class HttpAmazonESConnector extends HttpConnector {
       this.service = awssigv4Cred.service;
       delete reqParams.headers.auth;
 
-      return new Credentials({
+      return {
         accessKeyId,
         secretAccessKey,
         sessionToken,
-      });
+      };
     }
 
     // Use default credential provider chain
@@ -96,17 +92,30 @@ class HttpAmazonESConnector extends HttpConnector {
   }
 
   createRequest(params, reqParams) {
+    const [pathname = '/', queryStr = ''] = (reqParams.path || '').split('?', 2);
+
+    const queryParams = queryStr ? queryString.parse(queryStr) : undefined;
+
     const request = new HttpRequest({
       ...this.endpoint,
       method: reqParams.method,
       headers: reqParams.headers || {},
       hostname: this.endpoint.hostname,
+      query: queryParams,
+    });
+
+    Object.assign(request, {
+      ...reqParams,
+      path: pathname.replaceAll(
+        /[!'()*]/g,
+        (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`
+      ),
     });
 
     const body = params.body;
     if (body) {
       const contentLength = Buffer.isBuffer(body) ? body.length : Buffer.byteLength(body);
-      request.headers['Content-Length'] = contentLength;
+      request.headers['Content-Length'] = contentLength.toString();
       request.body = body;
     }
 
@@ -115,7 +124,7 @@ class HttpAmazonESConnector extends HttpConnector {
     return request;
   }
 
-  signRequest(request, credentials) {
+  async signRequest(request, credentials) {
     const signer = new SignatureV4({
       credentials,
       region: this.awsConfig.region,

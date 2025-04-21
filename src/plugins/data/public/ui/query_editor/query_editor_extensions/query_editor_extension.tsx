@@ -10,6 +10,9 @@ import { Observable } from 'rxjs';
 import { DataStructureMeta, Query } from '../../../../common';
 import { ResultStatus } from '../../../query/query_string/language_service/lib';
 
+// ID for the container that will house the action bar buttons. Should be used by Discover Plugin's ResultsActionBar component
+export const ACTION_BAR_BUTTONS_CONTAINER_ID = 'query-editor-action-bar-buttons-container';
+
 interface QueryEditorExtensionProps {
   config: QueryEditorExtensionConfig;
   dependencies: QueryEditorExtensionDependencies;
@@ -17,8 +20,10 @@ interface QueryEditorExtensionProps {
   bannerContainer: Element;
   bottomPanelContainer: Element;
   queryControlsContainer: Element;
+  actionBarContainer: Element;
 }
 
+// When updating this please update docs/plugins/data/query-editor-enhancements.md
 export interface QueryEditorExtensionDependencies {
   /**
    * Currently selected query language.
@@ -46,6 +51,7 @@ export interface QueryEditorExtensionDependencies {
   fetchStatus?: ResultStatus;
 }
 
+// When updating this please update docs/plugins/data/query-editor-enhancements.md
 export interface QueryEditorExtensionConfig {
   /**
    * The id for the query editor extension.
@@ -70,27 +76,43 @@ export interface QueryEditorExtensionConfig {
    * A function that returns the query editor extension component. The component
    * will be displayed on top of the query editor in the search bar.
    * @param dependencies - The dependencies required for the extension.
-   * @returns The component the query editor extension.
+   * @returns The query editor extension component.
    */
   getComponent?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
   /**
    * A function that returns the query editor extension banner. The banner is a
    * component that will be displayed on top of the search bar.
    * @param dependencies - The dependencies required for the extension.
-   * @returns The component the query editor extension.
+   * @returns The query editor extension component.
    */
   getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
-
-  getSearchBarButton?: (
+  /**
+   * A function that returns the action bar buttons. The action bar is a
+   * component that will be displayed on top of the results table in the discover page, to the right
+   * of the Results count. Requires the Discover plugin for it to be rendered
+   * @param dependencies - The dependencies required for the extension.
+   * @returns The query editor extension component.
+   */
+  getActionBarButtons?: (
+    dependencies: QueryEditorExtensionDependencies
+  ) => React.ReactElement | null;
+  /**
+   * A function that returns the query control buttons. The query controls is the section to the right
+   * of the query editor bar.
+   * @param dependencies - The dependencies required for the extension.
+   * @returns The query editor extension component.
+   */
+  getQueryControlButtons?: (
     dependencies: QueryEditorExtensionDependencies
   ) => React.ReactElement | null;
   /**
    * Returns the footer element that is rendered at the bottom of the query editor.
    * @param dependencies - The dependencies required for the extension.
-   * @returns The component the query editor extension.
+   * @returns The query editor extension component.
    */
   getBottomPanel?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
 }
+
 const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
   if (!props.children) return null;
 
@@ -104,25 +126,16 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
   const [isEnabled, setIsEnabled] = useState(false);
   const isMounted = useRef(false);
 
-  const banner = useMemo(() => props.config.getBanner?.(props.dependencies), [
-    props.config,
-    props.dependencies,
-  ]);
-
-  const component = useMemo(() => props.config.getComponent?.(props.dependencies), [
-    props.config,
-    props.dependencies,
-  ]);
-
-  const queryControlButtons = useMemo(() => props.config.getSearchBarButton?.(props.dependencies), [
-    props.config,
-    props.dependencies,
-  ]);
-
-  const bottomPanel = useMemo(() => props.config.getBottomPanel?.(props.dependencies), [
-    props.config,
-    props.dependencies,
-  ]);
+  const { banner, component, queryControlButtons, bottomPanel, actionBarButtons } = useMemo(
+    () => ({
+      banner: props.config.getBanner?.(props.dependencies),
+      component: props.config.getComponent?.(props.dependencies),
+      queryControlButtons: props.config.getQueryControlButtons?.(props.dependencies),
+      bottomPanel: props.config.getBottomPanel?.(props.dependencies),
+      actionBarButtons: props.config.getActionBarButtons?.(props.dependencies),
+    }),
+    [props.config, props.dependencies]
+  );
 
   useEffect(() => {
     isMounted.current = true;
@@ -153,6 +166,9 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
       </QueryEditorExtensionPortal>
       <QueryEditorExtensionPortal container={props.bottomPanelContainer}>
         {bottomPanel}
+      </QueryEditorExtensionPortal>
+      <QueryEditorExtensionPortal container={props.actionBarContainer}>
+        {actionBarButtons}
       </QueryEditorExtensionPortal>
     </>
   );

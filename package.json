@@ -105,6 +105,9 @@
   "resolutions": {
     "**/axios": "^1.8.2",
     "**/browserify-rsa": "^4.1.1",
+    "**/@babel/helpers": "^7.27.0",
+    "**/@babel/runtime": "^7.27.0",
+    "**/@babel/runtime-corejs3": "^7.27.0",
     "**/@babel/traverse": "^7.23.2",
     "**/@cypress/request": "^3.0.0",
     "**/@types/node": "~20.10.5",
@@ -166,6 +169,7 @@
   "dependencies": {
     "@aws-crypto/client-node": "^4.2.0",
     "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/abort-controller": "^3.374.0",
     "@aws-sdk/client-sts": "^3.777.0",
     "@aws-sdk/credential-provider-node": "^3.777.0",
     "@aws-sdk/node-http-handler": "^3.374.0",

@@ -27,6 +27,13 @@ const mockRecentlyAccessed$ = new BehaviorSubject([
     workspaceId: 'workspace_1',
     meta: { type: 'visualization' },
   },
+  {
+    id: 'fake-dashboard-id',
+    label: 'Fake Dashboards',
+    link: '/app/dashboards',
+    workspaceId: 'workspace_1',
+    meta: { type: 'dashboards' },
+  },
 ]);
 
 const mockWorkspaceList$ = new BehaviorSubject([
@@ -43,6 +50,18 @@ const savedObjectsFromServer: SavedObjectWithMetadata[] = [
     attributes: {},
     references: [],
     updated_at: '2024-07-20T00:00:00.000Z',
+    meta: {},
+  },
+  {
+    type: 'dashboards',
+    id: 'fake-dashboard-id',
+    error: {
+      statusCode: 404,
+      error: 'Saved object not found',
+      message: 'Not found',
+    },
+    attributes: {},
+    references: [],
     meta: {},
   },
 ];
@@ -104,9 +123,10 @@ describe('Recent items', () => {
     const mockRecentButton = screen.getByTestId('recentItemsSectionButton');
     fireEvent.click(mockRecentButton);
     expect(screen.getByText('visualizeMock')).toBeInTheDocument();
+    expect(screen.queryByText('Fake Dashboards')).not.toBeInTheDocument();
   });
 
-  it('should be able to display workspace name if the asset is attched to a workspace and render it with brackets wrapper ', async () => {
+  it('should be able to display workspace name if the asset is attached to a workspace and render it with brackets wrapper ', async () => {
     const mockProps = {
       ...defaultMockProps,
       recentlyAccessed$: mockRecentlyAccessed$,
