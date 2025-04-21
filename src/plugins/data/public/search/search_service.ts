@@ -72,6 +72,7 @@ import {
   createAbortDataQueryAction,
   AbortDataQueryContext,
 } from '../actions';
+import { getCombinedSignal, combineAbortSignals } from '../../common/utils/abort_utils';
 
 declare module '../../../ui_actions/public' {
   export interface TriggerContextMapping {
@@ -181,10 +182,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       if (options?.abortSignal) {
         const controller = new AbortController();
         this.abortControllerRef.current = controller;
-        // `options.abortSignal` is provided by `use_search` to cancel any in-progress requests before starting a new one
-        // We also provide `abortControllerRef` for aborting in-progress requests for other plugins
-        const combinedSignal = AbortSignal.any([options.abortSignal, controller.signal]);
+
+        const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedSignal([
+          options.abortSignal,
+          controller.signal,
+        ]);
+
         options.abortSignal = combinedSignal;
+        const cleanup = () => {
+          combinedSignal.removeEventListener('abort', cleanup);
+          cleanupCombinedSignal();
+        };
+        combinedSignal.addEventListener('abort', cleanup);
       }
       const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
       if (isEnhancedEnabled && !options?.strategy) {
