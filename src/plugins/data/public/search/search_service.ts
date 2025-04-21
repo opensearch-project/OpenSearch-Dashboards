@@ -29,6 +29,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
@@ -65,6 +66,21 @@ import {
 } from '../../common/data_frames';
 import { getQueryService } from '../services';
 import { UI_SETTINGS } from '../../common';
+import { ABORT_DATA_QUERY_TRIGGER } from '../../../ui_actions/public';
+import {
+  ACTION_ABORT_DATA_QUERY,
+  createAbortDataQueryAction,
+  AbortDataQueryContext,
+} from '../actions';
+
+declare module '../../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [ABORT_DATA_QUERY_TRIGGER]: AbortDataQueryContext;
+  }
+  export interface ActionContextMapping {
+    [ACTION_ABORT_DATA_QUERY]: AbortDataQueryContext;
+  }
+}
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -76,6 +92,7 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: IndexPatternsContract;
+  uiActions: UiActionsStart;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -86,6 +103,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private defaultSearchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
   private dataFrame$ = new BehaviorSubject<IDataFrame | undefined>(undefined);
+  private abortControllerRef: React.MutableRefObject<AbortController | undefined> = {
+    current: undefined,
+  };
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -146,14 +166,26 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
       df: dfService,
+      abortControllerRef: this.abortControllerRef,
     };
   }
 
   public start(
     { application, http, notifications, uiSettings }: CoreStart,
-    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns, uiActions }: SearchServiceStartDependencies
   ): ISearchStart {
+    // register ABORT_DATA_QUERY_TRIGGER
+    uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, createAbortDataQueryAction());
+
     const search = ((request, options) => {
+      if (options?.abortSignal) {
+        const controller = new AbortController();
+        this.abortControllerRef.current = controller;
+        // `options.abortSignal` is provided by `use_search` to cancel any in-progress requests before starting a new one
+        // We also provide `abortControllerRef` for aborting in-progress requests for other plugins
+        const combinedSignal = AbortSignal.any([options.abortSignal, controller.signal]);
+        options.abortSignal = combinedSignal;
+      }
       const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
       if (isEnhancedEnabled && !options?.strategy) {
         const queryStringManager = getQueryService().queryString;

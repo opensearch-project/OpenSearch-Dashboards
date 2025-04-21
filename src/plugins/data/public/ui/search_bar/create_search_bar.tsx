@@ -31,7 +31,6 @@
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
@@ -41,28 +40,11 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
 import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { ABORT_DATA_QUERY_TRIGGER } from '../../../../ui_actions/public';
-import {
-  ACTION_ABORT_DATA_QUERY,
-  createAbortDataQueryAction,
-  AbortDataQueryContext,
-} from '../../actions';
-
-declare module '../../../../ui_actions/public' {
-  export interface TriggerContextMapping {
-    [ABORT_DATA_QUERY_TRIGGER]: AbortDataQueryContext;
-  }
-  export interface ActionContextMapping {
-    [ACTION_ABORT_DATA_QUERY]: AbortDataQueryContext;
-  }
-}
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: DataStorage;
-  uiActions: UiActionsStart;
-  abortControllerRef: React.MutableRefObject<AbortController | undefined>;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -94,21 +76,17 @@ const defaultOnRefreshChange = (queryService: QueryStart) => {
 const defaultOnQuerySubmit = (
   props: StatefulSearchBarProps,
   queryService: QueryStart,
-  currentQuery: Query,
-  uiActions: UiActionsStart,
-  abortControllerRef: React.MutableRefObject<AbortController | undefined>
+  currentQuery: Query
 ) => {
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
+
   const { timefilter } = queryService.timefilter;
 
-  return async (payload: { dateRange: TimeRange; query?: Query }) => {
+  return (payload: { dateRange: TimeRange; query?: Query }) => {
     const isUpdate =
       !_.isEqual(timefilter.getTime(), payload.dateRange) ||
       !_.isEqual(payload.query, currentQuery);
     if (isUpdate) {
-      // register ABORT_DATA_QUERY_TRIGGER
-      uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, createAbortDataQueryAction());
-      abortControllerRef.current = new AbortController();
       timefilter.setTime(payload.dateRange);
       if (payload.query) {
         queryService.queryString.setQuery(payload.query);
@@ -151,13 +129,7 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({
-  core,
-  storage,
-  data,
-  uiActions,
-  abortControllerRef,
-}: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -232,13 +204,7 @@ export function createSearchBar({
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
-          onQuerySubmit={defaultOnQuerySubmit(
-            props,
-            data.query,
-            query,
-            uiActions,
-            abortControllerRef
-          )}
+          onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}

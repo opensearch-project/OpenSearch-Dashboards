@@ -43,7 +43,7 @@ const abortControllerRefMock = {
   current: new AbortController(),
 } as React.MutableRefObject<AbortController | undefined>;
 
-dataSetupMock.ui = {
+dataSetupMock.search = {
   abortControllerRef: abortControllerRefMock,
 };
 

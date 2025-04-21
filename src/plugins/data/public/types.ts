@@ -39,7 +39,7 @@ import { EditorEnhancements, QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
-import { IUiSetup, IUiStart } from './ui';
+import { IUiStart } from './ui';
 import { DataStorage } from '../common';
 
 export interface DataPublicPluginEnhancements {
@@ -65,7 +65,6 @@ export interface DataPublicPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
-  ui: IUiSetup;
   /**
    * @internal
    */

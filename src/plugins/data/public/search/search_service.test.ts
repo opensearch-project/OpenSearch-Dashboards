@@ -30,7 +30,7 @@
 
 import { coreMock } from '../../../../core/public/mocks';
 import { CoreSetup, CoreStart } from '../../../../core/public';
-
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 
 describe('Search service', () => {
@@ -62,9 +62,11 @@ describe('Search service', () => {
 
   describe('start()', () => {
     it('exposes proper contract', async () => {
+      const uiActionsStartMock = uiActionsPluginMock.createStartContract();
       const start = searchService.start(mockCoreStart, {
         fieldFormats: {},
         indexPatterns: {},
+        uiActions: uiActionsStartMock,
       } as any);
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');

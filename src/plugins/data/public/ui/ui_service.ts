@@ -4,7 +4,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -21,14 +20,10 @@ export interface UiServiceSetupDependencies {}
 export interface UiServiceStartDependencies {
   dataServices: Omit<DataPublicPluginStart, 'ui'>;
   storage: DataStorage;
-  uiActions: UiActionsStart;
 }
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
-  private abortControllerRef: React.MutableRefObject<AbortController | undefined> = {
-    current: undefined,
-  };
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     const { enhancements } = initializerContext.config.get<ConfigSchema>();
@@ -36,20 +31,15 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     this.enhancementsConfig = enhancements;
   }
 
-  public setup(core: CoreSetup): IUiSetup {
-    return { abortControllerRef: this.abortControllerRef };
+  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): IUiSetup {
+    return {};
   }
 
-  public start(
-    core: CoreStart,
-    { dataServices, storage, uiActions }: UiServiceStartDependencies
-  ): IUiStart {
+  public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
     const SearchBar = createSearchBar({
       core,
       data: dataServices,
       storage,
-      uiActions,
-      abortControllerRef: this.abortControllerRef,
     });
 
     return {

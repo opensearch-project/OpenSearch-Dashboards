@@ -158,8 +158,6 @@ export class DataPublicPlugin
       notifications: core.notifications,
     });
 
-    const uiService = this.uiService.setup(core);
-
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
@@ -198,7 +196,6 @@ export class DataPublicPlugin
         if (enhancements.editor)
           queryService.queryString.getLanguageService().__enhance(enhancements.editor);
       },
-      ui: uiService,
     };
   }
 
@@ -257,7 +254,7 @@ export class DataPublicPlugin
     });
     setQueryService(query);
 
-    const search = this.searchService.start(core, { fieldFormats, indexPatterns });
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns, uiActions });
     setSearchService(search);
 
     uiActions.addTriggerAction(
@@ -297,7 +294,6 @@ export class DataPublicPlugin
     const uiService = this.uiService.start(core, {
       dataServices,
       storage: this.storage,
-      uiActions,
     });
     setUiService(uiService);
 
