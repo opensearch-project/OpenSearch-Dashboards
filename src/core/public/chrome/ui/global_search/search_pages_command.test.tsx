@@ -71,7 +71,10 @@ describe('<SearchPagesCommand />', () => {
         getNavGroupsMap$: () => new BehaviorSubject(navGroup),
       },
     },
-    application: {},
+    application: {
+      ...mock.application,
+      navigateToApp: jest.fn(),
+    },
   };
 
   const callbackFn = jest.fn();
@@ -107,5 +110,80 @@ describe('<SearchPagesCommand />', () => {
     );
 
     expect(searchResult).toHaveLength(2);
+  });
+
+  it('search return empty result if no match', async () => {
+    const searchResult = await searchPages(
+      'hello',
+      coreStartMock.chrome.navGroup,
+      coreStartMock.application as any,
+      callbackFn
+    );
+
+    expect(searchResult).toHaveLength(0);
+  });
+
+  it('search handle search callback', async () => {
+    const searchResult = await searchPages(
+      'data',
+      coreStartMock.chrome.navGroup,
+      coreStartMock.application as any,
+      callbackFn
+    );
+
+    (searchResult[0] as any).props?.callback();
+
+    expect(callbackFn).toBeCalledTimes(1);
+    expect(coreStartMock.application.navigateToApp).toBeCalledWith('dataAdministration-link1');
+  });
+
+  it('renders default breadcrumbs for regular nav groups', async () => {
+    const searchResult = await searchPages(
+      'foo',
+      coreStartMock.chrome.navGroup,
+      coreStartMock.application as any,
+      callbackFn
+    );
+
+    const breadcrumbs = [{ text: 'Some breadcrumb' }];
+    const result = (searchResult[0] as any).props.renderBreadcrumbs(breadcrumbs);
+
+    expect(result).toEqual(breadcrumbs);
+  });
+
+  it('adds nav group breadcrumb for data administration items', async () => {
+    const searchResult = await searchPages(
+      'data',
+      coreStartMock.chrome.navGroup,
+      coreStartMock.application as any,
+      callbackFn
+    );
+
+    const breadcrumbs = [{ text: 'Some breadcrumb' }];
+    const result = (searchResult[0] as any).props.renderBreadcrumbs(breadcrumbs);
+
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual({
+      text: expect.any(Object),
+    });
+    expect(result[1]).toEqual({ text: 'Some breadcrumb' });
+  });
+
+  it('adds nav group breadcrumb for settings and setup items', async () => {
+    const searchResult = await searchPages(
+      'settings',
+      coreStartMock.chrome.navGroup,
+      coreStartMock.application as any,
+      callbackFn
+    );
+
+    const breadcrumbs = [{ text: 'Some breadcrumb' }];
+    const result = (searchResult[0] as any).props.renderBreadcrumbs(breadcrumbs);
+
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual({
+      text: expect.any(Object),
+    });
+    expect(result[1]).toEqual({ text: 'Some breadcrumb' });
   });
 });
