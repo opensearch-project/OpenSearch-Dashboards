@@ -134,6 +134,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
     const { useDefaultBehaviors } = props;
+
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 

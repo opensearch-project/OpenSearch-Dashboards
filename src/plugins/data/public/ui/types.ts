@@ -11,7 +11,6 @@ import { SuggestionsComponentProps } from './typeahead/suggestions_component';
  * The setup contract exposed by the Search plugin exposes the search strategy extension
  * point.
  */
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IUiSetup {}
 
