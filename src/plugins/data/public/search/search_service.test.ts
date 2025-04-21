@@ -32,6 +32,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { CoreSetup, CoreStart } from '../../../../core/public';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
+import { ABORT_DATA_QUERY_TRIGGER } from '../../../ui_actions/public';
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -71,6 +72,23 @@ describe('Search service', () => {
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');
       expect(start).toHaveProperty('searchSource');
+    });
+
+    it('registers abort data query action', () => {
+      const uiActionsStartMock = uiActionsPluginMock.createStartContract();
+      searchService.start(mockCoreStart, {
+        fieldFormats: {},
+        indexPatterns: {},
+        uiActions: uiActionsStartMock,
+      } as any);
+
+      expect(uiActionsStartMock.addTriggerAction).toHaveBeenCalledWith(
+        ABORT_DATA_QUERY_TRIGGER,
+        expect.objectContaining({
+          execute: expect.any(Function),
+          type: 'ACTION_ABORT_DATA_QUERY',
+        })
+      );
     });
   });
 });

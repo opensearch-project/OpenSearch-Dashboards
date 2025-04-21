@@ -8,20 +8,26 @@ import { createAbortDataQueryAction, ACTION_ABORT_DATA_QUERY } from './abort_dat
 describe('createAbortDataQueryAction', () => {
   let action: ReturnType<typeof createAbortDataQueryAction>;
   let mockAbortController: AbortController;
-  let mockContext: { abortControllerRef: { current: AbortController | undefined } };
+  const mockContext = {
+    reason: 'test abort',
+    trigger: {
+      type: 'test-trigger',
+      payload: undefined,
+    },
+  };
+  let abortControllerRefMock: React.MutableRefObject<AbortController | undefined>;
 
   beforeEach(() => {
-    action = createAbortDataQueryAction();
     mockAbortController = ({
       abort: jest.fn(),
       signal: new AbortController().signal,
     } as unknown) as AbortController;
 
-    mockContext = {
-      abortControllerRef: {
-        current: mockAbortController,
-      },
-    };
+    abortControllerRefMock = {
+      current: mockAbortController,
+    } as React.MutableRefObject<AbortController | undefined>;
+
+    action = createAbortDataQueryAction(abortControllerRefMock);
   });
 
   it('should create an action with correct type and id', () => {
@@ -31,15 +37,18 @@ describe('createAbortDataQueryAction', () => {
 
   it('should abort the query when execute is called with valid abort controller', async () => {
     await action.execute(mockContext);
-    expect(mockAbortController.abort).toHaveBeenCalled();
+    expect(abortControllerRefMock.current?.abort).toHaveBeenCalled();
   });
 
   it('should handle errors and log warning', async () => {
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
     const error = new Error('Test error');
-    mockAbortController.abort = jest.fn().mockImplementation(() => {
-      throw error;
-    });
+
+    if (abortControllerRefMock.current) {
+      abortControllerRefMock.current.abort = jest.fn().mockImplementation(() => {
+        throw error;
+      });
+    }
 
     await action.execute(mockContext);
 
@@ -48,5 +57,10 @@ describe('createAbortDataQueryAction', () => {
       error
     );
     consoleSpy.mockRestore();
+  });
+
+  it('should not throw when abort controller is undefined', async () => {
+    abortControllerRefMock.current = undefined;
+    await expect(action.execute(mockContext)).resolves.not.toThrow();
   });
 });

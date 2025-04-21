@@ -46,10 +46,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const previousQuestionRef = useRef<string>();
   const { updateQueryState } = useQueryAssist();
   const uiActions = getUiActions();
-  const { generateQuery, loading } = useGenerateQuery(
-    uiActions,
-    props.data.search.abortControllerRef
-  );
+  const { generateQuery, loading } = useGenerateQuery(uiActions);
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {

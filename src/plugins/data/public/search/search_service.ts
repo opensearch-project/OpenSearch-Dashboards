@@ -72,7 +72,7 @@ import {
   createAbortDataQueryAction,
   AbortDataQueryContext,
 } from '../actions';
-import { getCombinedSignal, combineAbortSignals } from '../../common/utils/abort_utils';
+import { getCombinedSignal } from '../../common/utils/abort_utils';
 
 declare module '../../../ui_actions/public' {
   export interface TriggerContextMapping {
@@ -167,7 +167,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
       df: dfService,
-      abortControllerRef: this.abortControllerRef,
     };
   }
 
@@ -176,8 +175,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { fieldFormats, indexPatterns, uiActions }: SearchServiceStartDependencies
   ): ISearchStart {
     // register ABORT_DATA_QUERY_TRIGGER
-    uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, createAbortDataQueryAction());
-
+    uiActions.addTriggerAction(
+      ABORT_DATA_QUERY_TRIGGER,
+      createAbortDataQueryAction(this.abortControllerRef)
+    );
     const search = ((request, options) => {
       if (options?.abortSignal) {
         const controller = new AbortController();

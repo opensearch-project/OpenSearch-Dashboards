@@ -39,14 +39,6 @@ jest.mock('./query_assist_input', () => ({
 }));
 
 const dataSetupMock = dataPluginMock.createSetupContract(true);
-const abortControllerRefMock = {
-  current: new AbortController(),
-} as React.MutableRefObject<AbortController | undefined>;
-
-dataSetupMock.search = {
-  abortControllerRef: abortControllerRefMock,
-};
-
 const dataMock = dataPluginMock.createStartContract(true);
 const queryStringMock = dataMock.query.queryString as jest.Mocked<QueryStringContract>;
 const uiSettingsMock = uiSettingsServiceMock.createStartContract();

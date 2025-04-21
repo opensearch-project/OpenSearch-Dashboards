@@ -11,10 +11,7 @@ import { QueryAssistParameters, QueryAssistResponse } from '../../../common/quer
 import { formatError } from '../utils';
 import { ABORT_DATA_QUERY_TRIGGER, UiActionsStart } from '../../../../ui_actions/public';
 
-export const useGenerateQuery = (
-  uiActions: UiActionsStart,
-  abortControllerRefInDataPlugin: React.MutableRefObject<AbortController | undefined>
-) => {
+export const useGenerateQuery = (uiActions: UiActionsStart) => {
   const mounted = useRef(false);
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef<AbortController>();
@@ -40,8 +37,7 @@ export const useGenerateQuery = (
     try {
       uiActions
         .getTrigger(ABORT_DATA_QUERY_TRIGGER)
-        .exec({ abortControllerRef: abortControllerRefInDataPlugin });
-
+        .exec({ reason: 'trigger abort action if trying to use query assistant' });
       const response = await services.http.post<QueryAssistResponse>(API.QUERY_ASSIST.GENERATE, {
         body: JSON.stringify(params),
         signal: abortControllerRef.current?.signal,
