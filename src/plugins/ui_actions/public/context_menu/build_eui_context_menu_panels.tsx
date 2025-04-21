@@ -213,6 +213,7 @@ export async function buildContextMenuForActions({
       icon: action.getIconType(context),
       'data-test-subj': `embeddablePanelAction-${action.id}`,
       onClick: onClick(action, context, closeMenu),
+      id: action?.id,
       href: action.getHref ? await action.getHref(context) : undefined,
       _order: action.order || 0,
       _title: action.getDisplayName(context),
