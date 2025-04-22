@@ -93,6 +93,7 @@ jobs:
             echo "⚠️ No Lighthouse results found. Generating an empty report..."
             mkdir -p .lighthouseci
             echo "[]" > .lighthouseci/assertion-results.json
+          fi
 
       - name: Upload Lighthouse Artifacts
         uses: actions/upload-artifact@v4
