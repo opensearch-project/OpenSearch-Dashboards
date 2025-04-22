@@ -453,7 +453,7 @@ describe('preferBrowserSetting merge', () => {
   const originalLocalStorage = window.localStorage;
 
   beforeEach(() => {
-    // @ts-ignore
+    // @ts-expect-error
     window.localStorage = {
       store: {},
       getItem(key: string) {
