@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import uuid from 'uuid';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime, filter, pairwise } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
@@ -147,10 +148,8 @@ export const useSearch = (services: DiscoverViewServices) => {
     abortController: undefined,
   });
 
-  uiActions.addTriggerAction(
-    ABORT_DATA_QUERY_TRIGGER,
-    createAbortDataQueryAction([fetchForMaxCsvStateRef, fetchStateRef])
-  );
+  const actionId = useRef(`ACTION_ABORT_DATA_QUERY_${uuid.v4()}`);
+
   const inspectorAdapters = {
     requests: new RequestAdapter(),
   };
@@ -210,13 +209,13 @@ export const useSearch = (services: DiscoverViewServices) => {
   });
 
   useEffect(() => {
+    const id = actionId.current;
     uiActions.addTriggerAction(
       ABORT_DATA_QUERY_TRIGGER,
-      createAbortDataQueryAction([fetchForMaxCsvStateRef, fetchStateRef])
+      createAbortDataQueryAction([fetchForMaxCsvStateRef, fetchStateRef], id)
     );
-
     return () => {
-      uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, ACTION_ABORT_DATA_QUERY);
+      uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, id);
     };
   }, [uiActions]);
 

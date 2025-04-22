@@ -11,6 +11,7 @@ describe('createAbortDataQueryAction', () => {
   const mockContext = {
     reason: 'test abort',
   };
+  const mockId = 'id';
   let refs: Array<React.MutableRefObject<{ abortController: AbortController | undefined }>>;
 
   beforeEach(() => {
@@ -26,12 +27,12 @@ describe('createAbortDataQueryAction', () => {
     };
 
     refs = [ref];
-    action = createAbortDataQueryAction(refs);
+    action = createAbortDataQueryAction(refs, mockId);
   });
 
   it('should create an action with correct type and id', () => {
     expect(action.type).toBe(ACTION_ABORT_DATA_QUERY);
-    expect(action.id).toBe(ACTION_ABORT_DATA_QUERY);
+    expect(action.id).toBe(mockId);
   });
 
   it('should abort the query when execute is called with valid abort controller', async () => {
