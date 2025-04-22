@@ -1,0 +1,37 @@
+{
+  "_id": "678463a5da83272d55eca5ec",
+  "index": 0,
+  "guid": "8ff4e90d-f8ed-431b-b993-f00fa2cd8ef1",
+  "isActive": false,
+  "balance": "$2,417.33",
+  "picture": "example.com",
+  "age": 24,
+  "eyeColor": "blue",
+  "name": "Susanna Todd",
+  "gender": "female",
+  "company": "MIRACLIS",
+  "email": "susannatodd@miraclis.com",
+  "phone": "+1 (941) 410-3589",
+  "address": "783 Coles Street, Stewartville, New York, 3292",
+  "about": "Dolore ipsum id do esse do aliqua irure deserunt. Dolor consectetur nulla esse tempor occaecat aliquip mollit do ut nisi elit nisi id exercitation. Ut amet elit ipsum occaecat est.\r\n",
+  "registered": "2015-08-06T09:49:38 +07:00",
+  "latitude": -88.036058,
+  "longitude": -59.883729,
+  "tags": ["velit", "Lorem", "qui", "aliquip", "in", "quis", "minim"],
+  "friends": [
+    {
+      "id": 0,
+      "name": "Jaime Figueroa"
+    },
+    {
+      "id": 1,
+      "name": "Shawna Good"
+    },
+    {
+      "id": 2,
+      "name": "Rose Saunders"
+    }
+  ],
+  "greeting": "Hello, Susanna Todd! You have 4 unread messages.",
+  "favoriteFruit": "strawberry"
+}

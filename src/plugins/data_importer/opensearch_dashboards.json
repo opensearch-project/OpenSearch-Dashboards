@@ -1,0 +1,9 @@
+{
+  "id": "dataImporter",
+  "version": "8.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": ["dataSource", "dataSourceManagement"]
+}
