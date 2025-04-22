@@ -14,11 +14,11 @@ export interface AbortDataQueryContext {
 // Create the action creator function
 export function createAbortDataQueryAction(
   refs: Array<React.MutableRefObject<{ abortController: AbortController | undefined }>>,
-  newId: string
+  actionId: string
 ): ActionByType<typeof ACTION_ABORT_DATA_QUERY> {
   return createAction<typeof ACTION_ABORT_DATA_QUERY>({
     type: ACTION_ABORT_DATA_QUERY,
-    id: newId,
+    id: actionId,
     shouldAutoExecute: async () => true,
     execute: async (context: AbortDataQueryContext) => {
       try {
