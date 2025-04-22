@@ -64,7 +64,10 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const config = {
       ...pluginConfig,
-      globalOpenSearchConfig: globalConfig.opensearch,
+      globalOpenSearchConfig: {
+        requestTimeout: globalConfig.opensearch.requestTimeout,
+        pingTimeout: globalConfig.opensearch.pingTimeout,
+      },
     } as DataSourcePluginConfigType;
 
     const cryptographyServiceSetup: CryptographyServiceSetup = this.cryptographyService.setup(
