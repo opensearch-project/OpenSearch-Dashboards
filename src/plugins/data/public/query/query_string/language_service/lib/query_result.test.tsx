@@ -7,6 +7,7 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryResult } from './query_result';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MessageChannel } from 'node:worker_threads';
 
 enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -94,8 +95,11 @@ describe('Query Result', () => {
         status: ResultStatus.ERROR,
         body: {
           error: {
-            reason: 'error reason',
-            details: 'error details',
+            message: {
+              reason: 'error reason',
+              details: 'error details',
+              status: 400,
+            },
           },
           statusCode: 400,
         },
@@ -145,7 +149,7 @@ describe('Query Result', () => {
     await fireEvent.click(screen.getByText('Error'));
 
     await waitFor(() => {
-      expect(screen.getByText('error details')).toBeInTheDocument();
+      expect(screen.getByText('error reason')).toBeInTheDocument();
     });
   });
 
@@ -180,7 +184,14 @@ describe('Query Result', () => {
       queryStatus: {
         status: ResultStatus.ERROR,
         body: {
-          error: 'error message',
+          error: {
+            error: 'error',
+            statusCode: 400,
+            message: {
+              reason: 'error message',
+              status: 400,
+            },
+          },
         },
       },
     };
@@ -190,7 +201,7 @@ describe('Query Result', () => {
     await fireEvent.click(screen.getByText('Error'));
 
     await waitFor(() => {
-      expect(screen.getByText('error message')).toBeInTheDocument();
+      expect(screen.getByText('{"reason":"error message","status":400}')).toBeInTheDocument();
     });
   });
 });

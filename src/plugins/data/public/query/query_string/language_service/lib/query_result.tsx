@@ -70,6 +70,13 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
 
   const displayErrorMessage = useMemo(() => {
     const error = props.queryStatus.body?.error;
+    const reason =
+      typeof error?.message?.error === 'object' ? error.message.error.reason : undefined;
+
+    if (reason) {
+      return reason;
+    }
+
     const message = error?.message;
 
     if (message == null) {
@@ -94,6 +101,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       return message.error.details;
     }
 
+    // For normal search strategy, expecting message.error to be object
     if (typeof message === 'string') {
       return message;
     }
