@@ -9,7 +9,11 @@ import { GlobalSearchPageItem } from './page_item';
 import { ChromeNavGroupServiceStartContract } from '../../nav_group';
 import { InternalApplicationStart } from '../../../../../core/public/application';
 import { searchNavigationLinks } from '../../utils';
-import { DEFAULT_NAV_GROUPS, NavGroupElement, NavGroupType } from '../../../../../core/public';
+import {
+  DEFAULT_NAV_GROUPS,
+  renderNavGroupElement,
+  NavGroupType,
+} from '../../../../../core/public';
 
 export const searchPages = async (
   query: string,
@@ -45,7 +49,10 @@ export const searchPages = async (
                * Search items from dataAdministration and settingsAndSetup are technically out of the
                * current navigation menu, add breadcrumbs before these search items for clarification
                */
-              const updatedBreadcrumbs = [{ text: NavGroupElement(link.navGroup) }, ...breadcrumbs];
+              const updatedBreadcrumbs = [
+                { text: renderNavGroupElement(link.navGroup) },
+                ...breadcrumbs,
+              ];
               return updatedBreadcrumbs;
             }
             return breadcrumbs;

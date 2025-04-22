@@ -17,7 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 import { NavGroupType } from '../../../../../core/public';
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceTitleDisplay } from '../workspace_name/workspace_name';
-import { NavGroupElement, GlobalSearchPageItem } from '../../../../../core/public';
+import { renderNavGroupElement, GlobalSearchPageItem } from '../../../../../core/public';
 
 export type NavLink = { navGroup: NavGroupItemInMap } & ChromeRegistrationNavLink & ChromeNavLink;
 
@@ -53,7 +53,7 @@ export const WorkspaceGlobalSearchPageItem = ({
         ...breadcrumbs,
       ];
     } else {
-      return [{ text: NavGroupElement(link.navGroup) }, ...breadcrumbs];
+      return [{ text: renderNavGroupElement(link.navGroup) }, ...breadcrumbs];
     }
   };
 

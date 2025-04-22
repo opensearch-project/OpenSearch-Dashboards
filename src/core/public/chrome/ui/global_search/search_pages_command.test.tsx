@@ -6,6 +6,7 @@
 import { searchPages } from './search_pages_command';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
+import { NavGroupType } from 'opensearch-dashboards/public';
 
 describe('<SearchPagesCommand />', () => {
   const navGroup = {
@@ -33,7 +34,7 @@ describe('<SearchPagesCommand />', () => {
       id: 'dataAdministration',
       title: 'Data Administration',
       description: 'Data Administration description',
-      type: 'system',
+      type: 'system' as NavGroupType,
       navLinks: [
         {
           id: 'dataAdministration-link1',
@@ -49,7 +50,7 @@ describe('<SearchPagesCommand />', () => {
       id: 'settingsAndSetup',
       title: 'Settings and Setup',
       description: 'Settings and Setup description',
-      type: 'system',
+      type: 'system' as NavGroupType,
       navLinks: [
         {
           id: 'settingsAndSetup-link1',

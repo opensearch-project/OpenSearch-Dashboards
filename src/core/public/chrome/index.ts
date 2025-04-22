@@ -68,4 +68,4 @@ export {
 } from './utils';
 export { SearchCommandKeyTypes, GlobalSearchCommand } from './global_search';
 export { GlobalSearchPageItem } from './ui/global_search/page_item';
-export { NavGroupElement } from './ui/nav_group_element';
+export { renderNavGroupElement } from './ui/nav_group_element';

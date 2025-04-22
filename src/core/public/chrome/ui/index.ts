@@ -41,4 +41,4 @@ export {
   RightNavigationButtonProps,
   createRecentNavLink,
 } from './header';
-export { NavGroupElement } from './nav_group_element';
+export { renderNavGroupElement } from './nav_group_element';
