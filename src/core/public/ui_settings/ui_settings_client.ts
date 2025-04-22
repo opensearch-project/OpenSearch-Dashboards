@@ -62,7 +62,22 @@ export class UiSettingsClient implements IUiSettingsClient {
       this.cache['theme:enableUserControl']?.userValue ??
       this.cache['theme:enableUserControl']?.value
     ) {
-      this.cache = defaultsDeep(this.cache, this.getBrowserStoredSettings());
+      const allKeys = new Set([
+        ...Object.keys(this.getBrowserStoredSettings()),
+        ...Object.keys(this.cache),
+      ]);
+      const merged: Record<string, PublicUiSettingsParams & UserProvidedValues> = {};
+      for (const key of allKeys) {
+        const preferBrowser = this.cache[key]?.preferBrowserSetting ?? false;
+        if (preferBrowser) {
+          // browser level setting should have a higher priority, otherwise its userValue could not be consumed.
+          // Only use this pattern for declared setting for security reasons.
+          merged[key] = defaultsDeep({}, this.getBrowserStoredSettings()[key], this.cache[key]);
+        } else {
+          merged[key] = defaultsDeep({}, this.cache[key], this.getBrowserStoredSettings()[key]);
+        }
+      }
+      this.cache = merged;
     }
 
     params.done$.subscribe({
