@@ -1,0 +1,2 @@
+fix:
+- Support left navigation search for OSD with workspace plugin disabled ([#9662](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9662))
