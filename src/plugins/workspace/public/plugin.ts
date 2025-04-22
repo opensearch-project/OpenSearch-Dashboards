@@ -71,8 +71,8 @@ import { UserDefaultWorkspace } from './components/workspace_list/default_worksp
 import { WorkspaceCollaboratorTypesService, UseCaseService } from './services';
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
-import { searchPages } from './components/global_search/search_pages_command';
 import { WorkspaceValidationService } from './services/workspace_validation_service';
+import { workspaceSearchPages } from './components/global_search/search_pages_command';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -532,10 +532,10 @@ export class WorkspacePlugin
     ]);
 
     core.chrome.globalSearch.registerSearchCommand({
-      id: 'pagesSearch',
+      id: 'workspacePagesSearch',
       type: 'PAGES',
       run: async (query: string, callback: () => void) =>
-        searchPages(query, this.registeredUseCases$, this.coreStart, callback),
+        workspaceSearchPages(query, this.registeredUseCases$, this.coreStart, callback),
     });
 
     if (workspaceId) {
@@ -592,6 +592,9 @@ export class WorkspacePlugin
       });
 
     this.filterNavLinks(core);
+
+    // Unregister the page search that set by chrome service, since workspace has its own search
+    core.chrome.globalSearch.unregisterSearchCommand('pagesSearch');
 
     if (!core.chrome.navGroup.getNavGroupEnabled()) {
       this.addWorkspaceToBreadcrumbs(core);
