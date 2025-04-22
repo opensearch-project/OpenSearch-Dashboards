@@ -9,7 +9,7 @@ import { GlobalSearchPageItem } from './page_item';
 import { ChromeNavGroupServiceStartContract } from '../../nav_group';
 import { InternalApplicationStart } from '../../../../../core/public/application';
 import { searchNavigationLinks } from '../../utils';
-import { DEFAULT_NAV_GROUPS, NavGroupElement } from '../../../../../core/public';
+import { DEFAULT_NAV_GROUPS, NavGroupElement, NavGroupType } from '../../../../../core/public';
 
 export const searchPages = async (
   query: string,
@@ -40,10 +40,7 @@ export const searchPages = async (
             application.navigateToApp(link.id);
           }}
           renderBreadcrumbs={(breadcrumbs) => {
-            if (
-              link.navGroup.id === DEFAULT_NAV_GROUPS.dataAdministration.id ||
-              link.navGroup.id === DEFAULT_NAV_GROUPS.settingsAndSetup.id
-            ) {
+            if (link.navGroup.type === NavGroupType.SYSTEM) {
               /**
                * Search items from dataAdministration and settingsAndSetup are technically out of the
                * current navigation menu, add breadcrumbs before these search items for clarification

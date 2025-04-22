@@ -33,6 +33,7 @@ describe('<SearchPagesCommand />', () => {
       id: 'dataAdministration',
       title: 'Data Administration',
       description: 'Data Administration description',
+      type: 'system',
       navLinks: [
         {
           id: 'dataAdministration-link1',
@@ -48,6 +49,7 @@ describe('<SearchPagesCommand />', () => {
       id: 'settingsAndSetup',
       title: 'Settings and Setup',
       description: 'Settings and Setup description',
+      type: 'system',
       navLinks: [
         {
           id: 'settingsAndSetup-link1',
