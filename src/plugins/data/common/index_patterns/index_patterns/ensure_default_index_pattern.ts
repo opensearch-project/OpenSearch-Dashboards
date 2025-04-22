@@ -32,10 +32,10 @@ import { IndexPatternsContract } from './index_patterns';
 import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
 export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
 export const createEnsureDefaultIndexPattern = (
-  savedObjectsClient: SavedObjectsClientCommon,
   uiSettings: UiSettingsCommon,
   onRedirectNoIndexPattern: () => Promise<unknown> | void,
-  canUpdateUiSetting?: boolean
+  canUpdateUiSetting?: boolean,
+  savedObjectsClient?: SavedObjectsClientCommon
 ) => {
   /**
    * Checks whether a default index pattern is set and exists and defines
@@ -45,45 +45,33 @@ export const createEnsureDefaultIndexPattern = (
     if (canUpdateUiSetting === false) {
       return;
     }
-
     const defaultId = await uiSettings.get('defaultIndex');
     const defined = !!defaultId;
+    const patterns: string[] = [];
 
     if (defined) {
       const indexPattern = await this.get(defaultId);
-      const dataSourceRef = indexPattern?.dataSourceRef?.id;
+      const dataSourceRef = indexPattern?.dataSourceRef;
 
       if (dataSourceRef) {
-        const result = await this.getDataSource(defaultId);
-
+        const result = await this.getDataSource(dataSourceRef.id);
         if (result.error?.statusCode === 403 || result.error?.statusCode === 404) {
           try {
-            const datasources = await savedObjectsClient.find({ type: 'data-source' });
-            const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
-            const existDataSources = datasources.map((item) => item.id);
-            const availableArray: string[] = [];
+            if (savedObjectsClient) {
+              const datasources = await savedObjectsClient.find({ type: 'data-source' });
+              const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
+              const existDataSources = datasources.map((item) => item.id);
 
-            indexPatterns.forEach((item) => {
-              const refId = item.references?.[0]?.id;
-              const refIdBool = !!refId;
-              if (!refIdBool || existDataSources.includes(refId)) {
-                availableArray.push(item.id);
-              }
-            });
-
-            if (availableArray.length >= 1) {
-              await uiSettings.set('defaultIndex', availableArray[0]);
-            } else {
-              const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
-              const shouldRedirect = !isEnhancementsEnabled;
-              if (shouldRedirect) return onRedirectNoIndexPattern();
-              else return;
+              indexPatterns.forEach((item) => {
+                const refId = item.references?.[0]?.id;
+                const refIdBool = !!refId;
+                if (!refIdBool || existDataSources.includes(refId)) {
+                  patterns.push(item.id);
+                }
+              });
             }
-          } catch (error) {
-            const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
-            const shouldRedirect = !isEnhancementsEnabled;
-            if (shouldRedirect) return onRedirectNoIndexPattern();
-            else return;
+          } catch (e) {
+            // console.error(e);
           }
         } else {
           return;
@@ -91,6 +79,16 @@ export const createEnsureDefaultIndexPattern = (
       } else {
         return;
       }
+    }
+
+    if (patterns.length >= 1) {
+      // await this.setDefault(patterns[0]);
+      await uiSettings.set('defaultIndex', patterns[0]);
+    } else {
+      const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
+      const shouldRedirect = !isEnhancementsEnabled;
+      if (shouldRedirect) return onRedirectNoIndexPattern();
+      else return;
     }
   };
 };

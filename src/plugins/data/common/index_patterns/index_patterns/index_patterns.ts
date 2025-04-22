@@ -107,10 +107,10 @@ export class IndexPatternsService {
     this.onError = onError;
     this.onUnsupportedTimePattern = onUnsupportedTimePattern;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
-      savedObjectsClient,
       uiSettings,
       onRedirectNoIndexPattern,
-      canUpdateUiSetting
+      canUpdateUiSetting,
+      savedObjectsClient
     );
   }
 
