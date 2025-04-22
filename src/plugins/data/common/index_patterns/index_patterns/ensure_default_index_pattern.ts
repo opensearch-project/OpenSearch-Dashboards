@@ -42,39 +42,55 @@ export const createEnsureDefaultIndexPattern = (
    * one otherwise.
    */
   return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
-    const datasources = await savedObjectsClient.find({ type: 'data-source' });
-    const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
-    const existDataSources = datasources.map((item) => item.id);
-    const availableArray: string[] = [];
-    indexPatterns.forEach((item) => {
-      const refId = item.references[0]?.id;
-      const refIdBool = !!refId;
-      if (!refIdBool || existDataSources.includes(refId)) {
-        availableArray.push(item.id);
-      }
-    });
     if (canUpdateUiSetting === false) {
       return;
     }
-    let defaultId = await uiSettings.get('defaultIndex');
-    let defined = !!defaultId;
-    const exists = availableArray.includes(defaultId);
-    if (defined && !exists) {
-      await uiSettings.remove('defaultIndex');
-      defaultId = defined = false;
-    }
+
+    const defaultId = await uiSettings.get('defaultIndex');
+    const defined = !!defaultId;
+
     if (defined) {
-      return;
-    }
-    // If there is any index pattern created, set the first as default
-    if (availableArray.length >= 1) {
-      defaultId = availableArray[0];
-      await uiSettings.set('defaultIndex', defaultId);
-    } else {
-      const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
-      const shouldRedirect = !isEnhancementsEnabled;
-      if (shouldRedirect) return onRedirectNoIndexPattern();
-      else return;
+      const indexPattern = await this.get(defaultId);
+      const dataSourceRef = indexPattern?.dataSourceRef?.id;
+
+      if (dataSourceRef) {
+        const result = await this.getDataSource(defaultId);
+
+        if (result.error?.statusCode === 403 || result.error?.statusCode === 404) {
+          try {
+            const datasources = await savedObjectsClient.find({ type: 'data-source' });
+            const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
+            const existDataSources = datasources.map((item) => item.id);
+            const availableArray: string[] = [];
+
+            indexPatterns.forEach((item) => {
+              const refId = item.references?.[0]?.id;
+              const refIdBool = !!refId;
+              if (!refIdBool || existDataSources.includes(refId)) {
+                availableArray.push(item.id);
+              }
+            });
+
+            if (availableArray.length >= 1) {
+              await uiSettings.set('defaultIndex', availableArray[0]);
+            } else {
+              const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
+              const shouldRedirect = !isEnhancementsEnabled;
+              if (shouldRedirect) return onRedirectNoIndexPattern();
+              else return;
+            }
+          } catch (error) {
+            const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
+            const shouldRedirect = !isEnhancementsEnabled;
+            if (shouldRedirect) return onRedirectNoIndexPattern();
+            else return;
+          }
+        } else {
+          return;
+        }
+      } else {
+        return;
+      }
     }
   };
 };
