@@ -73,7 +73,7 @@ jobs:
 
       - name: Start OpenSearch Dashboards
         run: |
-          yarn start --no-base-path &
+          yarn start --no-base-path --opensearch.ignoreVersionMismatch=true &
           until curl -s http://localhost:5601 >/dev/null; do
             echo "Waiting for OpenSearch Dashboards..."
             sleep 10
