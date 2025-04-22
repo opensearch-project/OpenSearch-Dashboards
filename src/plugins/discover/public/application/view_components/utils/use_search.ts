@@ -34,6 +34,22 @@ import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { trackQueryMetric } from '../../../ui_metric';
 
+import { ABORT_DATA_QUERY_TRIGGER } from '../../../../../ui_actions/public';
+import {
+  ACTION_ABORT_DATA_QUERY,
+  AbortDataQueryContext,
+  createAbortDataQueryAction,
+} from '../../../../public/actions/abort_data_query_action';
+
+declare module '../../../../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [ABORT_DATA_QUERY_TRIGGER]: AbortDataQueryContext;
+  }
+  export interface ActionContextMapping {
+    [ACTION_ABORT_DATA_QUERY]: AbortDataQueryContext;
+  }
+}
+
 export function safeJSONParse(text: any) {
   try {
     return JSON.parse(text);
@@ -109,6 +125,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   const skipInitialFetch = useRef(false);
   const {
     data,
+    uiActions,
     filterManager,
     getSavedSearchById,
     core,
@@ -129,6 +146,11 @@ export const useSearch = (services: DiscoverViewServices) => {
   const fetchForMaxCsvStateRef = useRef<{ abortController: AbortController | undefined }>({
     abortController: undefined,
   });
+
+  uiActions.addTriggerAction(
+    ABORT_DATA_QUERY_TRIGGER,
+    createAbortDataQueryAction([fetchForMaxCsvStateRef, fetchStateRef])
+  );
   const inspectorAdapters = {
     requests: new RequestAdapter(),
   };
@@ -186,6 +208,17 @@ export const useSearch = (services: DiscoverViewServices) => {
       });
     return () => subscription.unsubscribe();
   });
+
+  useEffect(() => {
+    uiActions.addTriggerAction(
+      ABORT_DATA_QUERY_TRIGGER,
+      createAbortDataQueryAction([fetchForMaxCsvStateRef, fetchStateRef])
+    );
+
+    return () => {
+      uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, ACTION_ABORT_DATA_QUERY);
+    };
+  }, [uiActions]);
 
   useEffect(() => {
     data$.next({ ...data$.value, queryStatus: { startTime } });
