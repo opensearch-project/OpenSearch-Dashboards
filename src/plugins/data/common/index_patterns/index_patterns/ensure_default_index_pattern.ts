@@ -28,16 +28,14 @@
  * under the License.
  */
 
-import { includes } from 'lodash';
 import { IndexPatternsContract } from './index_patterns';
-import { UiSettingsCommon } from '../types';
-
+import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
 export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
-
 export const createEnsureDefaultIndexPattern = (
   uiSettings: UiSettingsCommon,
   onRedirectNoIndexPattern: () => Promise<unknown> | void,
-  canUpdateUiSetting?: boolean
+  canUpdateUiSetting?: boolean,
+  savedObjectsClient?: SavedObjectsClientCommon
 ) => {
   /**
    * Checks whether a default index pattern is set and exists and defines
@@ -47,24 +45,40 @@ export const createEnsureDefaultIndexPattern = (
     if (canUpdateUiSetting === false) {
       return;
     }
-    const patterns = await this.getIds();
-    let defaultId = await uiSettings.get('defaultIndex');
-    let defined = !!defaultId;
-    const exists = includes(patterns, defaultId);
-
-    if (defined && !exists) {
-      await uiSettings.remove('defaultIndex');
-      defaultId = defined = false;
-    }
-
+    const defaultId = await uiSettings.get('defaultIndex');
+    const defined = !!defaultId;
+    const patterns: string[] = [];
     if (defined) {
-      return;
+      const indexPattern = await this.get(defaultId);
+      const dataSourceRef = indexPattern?.dataSourceRef;
+      if (dataSourceRef) {
+        const result = await this.getDataSource(dataSourceRef.id);
+        if (result.error?.statusCode === 403 || result.error?.statusCode === 404) {
+          try {
+            if (savedObjectsClient) {
+              const datasources = await savedObjectsClient.find({ type: 'data-source' });
+              const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
+              const existDataSources = datasources.map((item) => item.id);
+              indexPatterns.forEach((item) => {
+                const refId = item.references?.[0]?.id;
+                const refIdBool = !!refId;
+                if (!refIdBool || existDataSources.includes(refId)) {
+                  patterns.push(item.id);
+                }
+              });
+            }
+          } catch (e) {
+            //  if it fails, jump directly to the execution of Redirect
+          }
+        } else {
+          return;
+        }
+      } else {
+        return;
+      }
     }
-
-    // If there is any index pattern created, set the first as default
     if (patterns.length >= 1) {
-      defaultId = patterns[0];
-      await uiSettings.set('defaultIndex', defaultId);
+      await uiSettings.set('defaultIndex', patterns[0]);
     } else {
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       const shouldRedirect = !isEnhancementsEnabled;
