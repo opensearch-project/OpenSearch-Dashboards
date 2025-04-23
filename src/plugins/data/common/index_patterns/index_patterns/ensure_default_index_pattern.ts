@@ -71,7 +71,7 @@ export const createEnsureDefaultIndexPattern = (
               });
             }
           } catch (e) {
-            // console.error(e);
+            console.error(e);
           }
         } else {
           return;
@@ -82,7 +82,6 @@ export const createEnsureDefaultIndexPattern = (
     }
 
     if (patterns.length >= 1) {
-      // await this.setDefault(patterns[0]);
       await uiSettings.set('defaultIndex', patterns[0]);
     } else {
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
