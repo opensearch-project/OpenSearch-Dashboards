@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { includes } from 'lodash';
 import { IndexPatternsContract } from './index_patterns';
 import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
 export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
@@ -45,13 +46,17 @@ export const createEnsureDefaultIndexPattern = (
     if (canUpdateUiSetting === false) {
       return;
     }
+    const patterns = await this.getIds();
     const defaultId = await uiSettings.get('defaultIndex');
     const defined = !!defaultId;
-    const patterns: string[] = [];
-    if (defined) {
+    const exists = includes(patterns, defaultId);
+    const availablePatterns: string[] = [];
+    if (defined && !exists) {
       const indexPattern = await this.get(defaultId);
       const dataSourceRef = indexPattern?.dataSourceRef;
-      if (dataSourceRef) {
+      if (!dataSourceRef) {
+        return;
+      } else {
         const result = await this.getDataSource(dataSourceRef.id);
         if (result.error?.statusCode === 403 || result.error?.statusCode === 404) {
           try {
@@ -63,7 +68,7 @@ export const createEnsureDefaultIndexPattern = (
                 const refId = item.references?.[0]?.id;
                 const refIdBool = !!refId;
                 if (!refIdBool || existDataSources.includes(refId)) {
-                  patterns.push(item.id);
+                  availablePatterns.push(item.id);
                 }
               });
             }
@@ -73,12 +78,12 @@ export const createEnsureDefaultIndexPattern = (
         } else {
           return;
         }
-      } else {
-        return;
       }
     }
-    if (patterns.length >= 1) {
-      await uiSettings.set('defaultIndex', patterns[0]);
+
+    // If there is any index pattern created, set the first as default
+    if (availablePatterns.length >= 1) {
+      await uiSettings.set('defaultIndex', availablePatterns[0]);
     } else {
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       const shouldRedirect = !isEnhancementsEnabled;
