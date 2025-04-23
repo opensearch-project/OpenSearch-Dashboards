@@ -71,7 +71,7 @@ export const createEnsureDefaultIndexPattern = (
               });
             }
           } catch (e) {
-            console.error(e);
+            //  if it fails, jump directly to the execution of Redirect
           }
         } else {
           return;
