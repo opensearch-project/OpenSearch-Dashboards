@@ -43,8 +43,11 @@ const ConnectedDatasetSelector = ({
   const onSelect = useCallback(
     (partialQuery: Partial<Query>) => {
       const query = queryString.getInitialQuery(partialQuery);
+      const languageService = queryString.getLanguageService();
       setSelectedDataset(query.dataset);
       queryString.setQuery(query);
+      languageService.setUserQueryLanguage(query.language);
+      queryString.getInitialQueryByLanguage(query.language);
       onSubmit!(query);
     },
     [onSubmit, queryString]
