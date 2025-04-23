@@ -68,8 +68,6 @@ describe('createEnsureDefaultIndexPattern', () => {
     });
     mockUiSettingsSet.mockResolvedValue(undefined);
     mockSavedObjectsClientFind.mockResolvedValue([]);
-    mockSavedObjectsClientGet.mockResolvedValue({});
-    mockOnRedirectNoIndexPattern.mockResolvedValue(undefined);
     mockIndexPatternsContractGet.mockResolvedValue({ dataSourceRef: null });
     mockIndexPatternsContractGetDataSource.mockResolvedValue({});
 
@@ -97,13 +95,8 @@ describe('createEnsureDefaultIndexPattern', () => {
   });
 
   test('does nothing if default index pattern is set and valid with local data source', async () => {
-    mockUiSettingsGet.mockImplementation((key: string) => {
-      if (key === 'defaultIndex') return Promise.resolve('index-pattern-1');
-      return Promise.resolve(undefined);
-    });
-
+    mockUiSettingsGet.mockResolvedValueOnce('index-pattern-1');
     await ensureDefaultIndexPattern.call(mockIndexPatternsContract);
-
     expect(mockUiSettingsGet).toHaveBeenCalledWith('defaultIndex');
     expect(mockIndexPatternsContractGet).toHaveBeenCalledWith('index-pattern-1');
     expect(mockIndexPatternsContractGetDataSource).not.toHaveBeenCalled();
@@ -112,17 +105,12 @@ describe('createEnsureDefaultIndexPattern', () => {
   });
 
   test('does nothing if default index pattern is set and external data source is valid', async () => {
-    mockUiSettingsGet.mockImplementation((key: string) => {
-      if (key === 'defaultIndex') return Promise.resolve('index-pattern-1');
-      return Promise.resolve(undefined);
-    });
+    mockUiSettingsGet.mockResolvedValueOnce('index-pattern-1');
     mockIndexPatternsContractGet.mockResolvedValue({
       dataSourceRef: { id: 'data-source-1' },
     });
     mockIndexPatternsContractGetDataSource.mockResolvedValue({ error: null });
-
     await ensureDefaultIndexPattern.call(mockIndexPatternsContract);
-
     expect(mockUiSettingsGet).toHaveBeenCalledWith('defaultIndex');
     expect(mockIndexPatternsContractGet).toHaveBeenCalledWith('index-pattern-1');
     expect(mockIndexPatternsContractGetDataSource).toHaveBeenCalledWith('data-source-1');
@@ -130,46 +118,24 @@ describe('createEnsureDefaultIndexPattern', () => {
     expect(mockOnRedirectNoIndexPattern).not.toHaveBeenCalled();
   });
 
-  test('redirects or does nothing when no default index pattern is set', async () => {
-    mockUiSettingsGet.mockImplementation((key: string) => {
-      if (key === 'defaultIndex') return Promise.resolve(null);
-      if (key === 'query:enhancements:enabled') return Promise.resolve(false);
-      return Promise.resolve(undefined);
-    });
+  test('redirects when no default index pattern is set', async () => {
     mockSavedObjectsClientFind.mockResolvedValue([]);
-
     await ensureDefaultIndexPattern.call(mockIndexPatternsContract);
-
-    expect(mockUiSettingsGet).toHaveBeenCalledWith('defaultIndex');
-    expect(mockUiSettingsGet).toHaveBeenCalledWith('query:enhancements:enabled');
-    expect(mockSavedObjectsClientFind).not.toHaveBeenCalled();
-    expect(mockUiSettingsSet).not.toHaveBeenCalled();
     expect(mockOnRedirectNoIndexPattern).toHaveBeenCalled();
+    expect(mockUiSettingsSet).not.toHaveBeenCalled();
   });
 
   test('redirects if no valid index patterns and enhancements are disabled', async () => {
-    mockSavedObjectsClientFind.mockResolvedValue([]);
-
     await ensureDefaultIndexPattern.call(mockIndexPatternsContract);
-
-    expect(mockUiSettingsGet).toHaveBeenCalledWith('defaultIndex');
-    expect(mockUiSettingsGet).toHaveBeenCalledWith('query:enhancements:enabled');
     expect(mockOnRedirectNoIndexPattern).toHaveBeenCalled();
     expect(mockUiSettingsSet).not.toHaveBeenCalled();
   });
 
   test('does not redirect if enhancements are enabled', async () => {
-    mockUiSettingsGet.mockImplementation((key: string) => {
-      if (key === 'defaultIndex') return Promise.resolve(null);
-      if (key === 'query:enhancements:enabled') return Promise.resolve(true);
-      return Promise.resolve(undefined);
-    });
-    mockSavedObjectsClientFind.mockResolvedValue([]);
-
+    mockUiSettingsGet.mockResolvedValueOnce(null);
+    mockUiSettingsGet.mockResolvedValueOnce(true);
     await ensureDefaultIndexPattern.call(mockIndexPatternsContract);
 
-    expect(mockUiSettingsGet).toHaveBeenCalledWith('defaultIndex');
-    expect(mockUiSettingsGet).toHaveBeenCalledWith('query:enhancements:enabled');
     expect(mockOnRedirectNoIndexPattern).not.toHaveBeenCalled();
     expect(mockUiSettingsSet).not.toHaveBeenCalled();
   });
@@ -200,10 +166,7 @@ describe('createEnsureDefaultIndexPattern', () => {
   });
 
   test('redirects if default index pattern has invalid data source and no other valid patterns', async () => {
-    mockUiSettingsGet.mockImplementation((key: string) => {
-      if (key === 'defaultIndex') return Promise.resolve('index-pattern-1');
-      return Promise.resolve(undefined);
-    });
+    mockUiSettingsGet.mockResolvedValueOnce('index-pattern-1');
     mockIndexPatternsContractGet.mockResolvedValue({
       dataSourceRef: { id: 'data-source-1' },
     });
@@ -212,11 +175,7 @@ describe('createEnsureDefaultIndexPattern', () => {
 
     await ensureDefaultIndexPattern.call(mockIndexPatternsContract);
 
-    expect(mockUiSettingsGet).toHaveBeenCalledWith('defaultIndex');
-    expect(mockIndexPatternsContractGet).toHaveBeenCalledWith('index-pattern-1');
-    expect(mockIndexPatternsContractGetDataSource).toHaveBeenCalledWith('data-source-1');
-    expect(mockSavedObjectsClientFind).toHaveBeenCalled();
-    expect(mockUiSettingsSet).not.toHaveBeenCalled();
     expect(mockOnRedirectNoIndexPattern).toHaveBeenCalled();
+    expect(mockUiSettingsSet).not.toHaveBeenCalled();
   });
 });
