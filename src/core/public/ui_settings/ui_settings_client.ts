@@ -64,10 +64,10 @@ export class UiSettingsClient implements IUiSettingsClient {
     ) {
       const browserSettingsKeys = Object.keys(this.getBrowserStoredSettings());
       for (const key of browserSettingsKeys) {
+        // Only keep settings which is declared as preferBrowserSetting as high priority instead of all settings, otherwise all settings could be replaced value easily if they are declared in localStorage.
         const preferBrowser = this.cache[key]?.preferBrowserSetting ?? false;
         if (preferBrowser) {
           // browser level setting should have a higher priority, otherwise its userValue could not be consumed.
-          // Only use this pattern for declared setting for security reasons.
           this.cache[key] = defaultsDeep({}, this.getBrowserStoredSettings()[key], this.cache[key]);
         }
       }
