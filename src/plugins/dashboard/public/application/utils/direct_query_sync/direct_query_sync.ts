@@ -77,9 +77,12 @@ export function generateRefreshQuery(info: IndexExtractionResult): string {
 export async function extractIndexInfoFromDashboard(
   panels: { [key: string]: any },
   savedObjectsClient: SavedObjectsClientContract,
-  http: HttpStart,
-  mdsId?: string
-): Promise<{ parts: IndexExtractionResult; mapping: { lastRefreshTime: number } } | null> {
+  http: HttpStart
+): Promise<{
+  parts: IndexExtractionResult;
+  mapping: { lastRefreshTime: number };
+  mdsId?: string;
+} | null> {
   for (const panelId of Object.keys(panels)) {
     try {
       const panel = panels[panelId];
@@ -99,17 +102,25 @@ export async function extractIndexInfoFromDashboard(
       if (!indexPatternRef) continue;
 
       const indexPattern = await savedObjectsClient.get('index-pattern', indexPatternRef.id);
+      console.log('Index Pattern:', indexPattern);
       const indexTitleRaw = indexPattern.attributes.title;
 
       const concreteTitle = await resolveConcreteIndex(indexTitleRaw, http);
       if (!concreteTitle) return null;
+
+      const mdsId =
+        indexPattern.references?.find((ref: any) => ref.type === 'data-source')?.id || undefined;
 
       // Fetch mapping immediately after resolving index
       const mapping = (await fetchIndexMapping(concreteTitle, http, mdsId))!;
       console.log('Index Mapping Result:', mapping);
 
       for (const val of Object.values(mapping)) {
-        return { mapping: val.mappings._meta.properties!, parts: extractIndexParts(concreteTitle) };
+        return {
+          mapping: val.mappings._meta.properties!,
+          parts: extractIndexParts(concreteTitle),
+          mdsId,
+        };
       }
     } catch (err) {
       console.warn(`Skipping panel ${panelId} due to error:`, err);

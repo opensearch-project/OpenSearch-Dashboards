@@ -144,6 +144,7 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   loadStatus: DirectQueryLoadingStatus;
   pollingResult: any;
   isDirectQuerySyncEnabled: boolean;
+  setMdsId?: (mdsId?: string) => void;
 }
 
 interface State {
@@ -293,6 +294,9 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       this.extractedIndex = indexInfo.parts.index;
       this.setState({ extractedProps: indexInfo.mapping });
       console.log('Resolved index info:', indexInfo);
+      if (this.props.setMdsId) {
+        this.props.setMdsId(indexInfo.mdsId);
+      }
     } else {
       console.warn('Could not extract index info from pie visualization.');
     }

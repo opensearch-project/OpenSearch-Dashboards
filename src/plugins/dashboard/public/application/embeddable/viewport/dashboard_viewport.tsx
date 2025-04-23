@@ -55,6 +55,7 @@ export interface DashboardViewportProps {
   loadStatus: DirectQueryLoadingStatus;
   pollingResult: any;
   isDirectQuerySyncEnabled: boolean;
+  setMdsId?: (mdsId?: string) => void;
 }
 
 interface State {
@@ -183,6 +184,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           loadStatus={loadStatus}
           pollingResult={pollingResult}
           isDirectQuerySyncEnabled={this.props.isDirectQuerySyncEnabled}
+          setMdsId={this.props.setMdsId}
         />
       </div>
     );
@@ -201,8 +203,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 export const DashboardViewportWithQuery = (
   props: Omit<DashboardViewportProps, 'startLoading' | 'loadStatus' | 'pollingResult'>
 ) => {
+  const [mdsId, setMdsId] = React.useState<string | undefined>(undefined);
   const { http, notifications, ...restProps } = props;
-  const { startLoading, loadStatus, pollingResult } = useDirectQuery(http, notifications);
+  const { startLoading, loadStatus, pollingResult } = useDirectQuery(http, notifications, mdsId);
 
   return (
     <DashboardViewport
@@ -212,6 +215,7 @@ export const DashboardViewportWithQuery = (
       startLoading={startLoading}
       loadStatus={loadStatus}
       pollingResult={pollingResult}
+      setMdsId={setMdsId}
     />
   );
 };
