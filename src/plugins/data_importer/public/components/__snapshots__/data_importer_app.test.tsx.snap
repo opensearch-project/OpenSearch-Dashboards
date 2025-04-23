@@ -1,0 +1,289 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`App should render with MDS 1`] = `
+<BrowserRouter
+  basename="dataImporter"
+>
+  <I18nProvider>
+    <mockConstructor
+      appName="dataImporter"
+      useDefaultBehaviors={true}
+    />
+    <EuiPage>
+      <EuiPageBody
+        component="main"
+      >
+        <EuiPageHeader>
+          <EuiTitle
+            size="l"
+          >
+            <h1>
+              <FormattedMessage
+                defaultMessage="Data Importer"
+                id="dataImporter.mainTitle"
+                values={Object {}}
+              />
+            </h1>
+          </EuiTitle>
+        </EuiPageHeader>
+        <EuiPageContent>
+          <EuiFlexGroup>
+            <EuiFlexItem
+              grow={1}
+            >
+              <ImportTypeSelector
+                initialSelection="file"
+                updateSelection={[Function]}
+              />
+              <EuiTitle
+                size="xs"
+              >
+                <span>
+                  Select target data source
+                </span>
+              </EuiTitle>
+              <div>
+                <[object Object]
+                  componentConfig={
+                    Object {
+                      "fullWidth": true,
+                      "notifications": Object {
+                        "toasts": Object {
+                          "add": [MockFunction],
+                          "addDanger": [MockFunction],
+                          "addError": [MockFunction],
+                          "addInfo": [MockFunction],
+                          "addSuccess": [MockFunction],
+                          "addWarning": [MockFunction],
+                          "get$": [MockFunction],
+                          "remove": [MockFunction],
+                        },
+                      },
+                      "onManageDataSource": [Function],
+                      "onSelectedDataSources": [Function],
+                      "savedObjects": Object {
+                        "bulkCreate": [MockFunction],
+                        "bulkGet": [MockFunction],
+                        "bulkUpdate": [MockFunction],
+                        "create": [MockFunction],
+                        "delete": [MockFunction],
+                        "find": [MockFunction],
+                        "get": [MockFunction],
+                        "setCurrentWorkspace": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                    }
+                  }
+                  componentType="DataSourceSelectable"
+                  onManageDataSource={[Function]}
+                />
+                <EuiSpacer
+                  size="m"
+                />
+              </div>
+              <EuiSpacer
+                size="s"
+              />
+              <EuiTitle
+                size="xs"
+              >
+                <span>
+                  Create/Select Index Name
+                </span>
+              </EuiTitle>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={false}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                labelType="label"
+              >
+                <EuiComboBox
+                  async={false}
+                  compressed={false}
+                  fullWidth={false}
+                  isClearable={true}
+                  onChange={[Function]}
+                  onCreateOption={[Function]}
+                  options={Array []}
+                  placeholder="Enter index name"
+                  selectedOptions={Array []}
+                  singleSelection={
+                    Object {
+                      "asPlainText": true,
+                    }
+                  }
+                  sortMatchesBy="none"
+                />
+              </EuiFormRow>
+              <EuiSpacer
+                size="s"
+              />
+              <ImportFileContentBody
+                enabledFileTypes={
+                  Array [
+                    "csv",
+                    "json",
+                    "ndjson",
+                  ]
+                }
+                onFileUpdate={[Function]}
+              />
+              <EuiButton
+                fullWidth={true}
+                onClick={[Function]}
+              >
+                Preview
+              </EuiButton>
+              <EuiSpacer
+                size="s"
+              />
+              <EuiButton
+                fullWidth={true}
+                onClick={[Function]}
+              >
+                Import
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={2}
+            >
+              <div>
+                <PreviewComponent
+                  existingMapping={Object {}}
+                  loadMoreRows={[Function]}
+                  predictedMapping={Object {}}
+                  previewData={Array []}
+                  visibleRows={10}
+                />
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
+  </I18nProvider>
+</BrowserRouter>
+`;
+
+exports[`App should render without MDS 1`] = `
+<BrowserRouter
+  basename="dataImporter"
+>
+  <I18nProvider>
+    <mockConstructor
+      appName="dataImporter"
+      useDefaultBehaviors={true}
+    />
+    <EuiPage>
+      <EuiPageBody
+        component="main"
+      >
+        <EuiPageHeader>
+          <EuiTitle
+            size="l"
+          >
+            <h1>
+              <FormattedMessage
+                defaultMessage="Data Importer"
+                id="dataImporter.mainTitle"
+                values={Object {}}
+              />
+            </h1>
+          </EuiTitle>
+        </EuiPageHeader>
+        <EuiPageContent>
+          <EuiFlexGroup>
+            <EuiFlexItem
+              grow={1}
+            >
+              <ImportTypeSelector
+                initialSelection="file"
+                updateSelection={[Function]}
+              />
+              <EuiSpacer
+                size="s"
+              />
+              <EuiTitle
+                size="xs"
+              >
+                <span>
+                  Create/Select Index Name
+                </span>
+              </EuiTitle>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={false}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                labelType="label"
+              >
+                <EuiComboBox
+                  async={false}
+                  compressed={false}
+                  fullWidth={false}
+                  isClearable={true}
+                  onChange={[Function]}
+                  onCreateOption={[Function]}
+                  options={Array []}
+                  placeholder="Enter index name"
+                  selectedOptions={Array []}
+                  singleSelection={
+                    Object {
+                      "asPlainText": true,
+                    }
+                  }
+                  sortMatchesBy="none"
+                />
+              </EuiFormRow>
+              <EuiSpacer
+                size="s"
+              />
+              <ImportFileContentBody
+                enabledFileTypes={
+                  Array [
+                    "csv",
+                    "json",
+                    "ndjson",
+                  ]
+                }
+                onFileUpdate={[Function]}
+              />
+              <EuiButton
+                fullWidth={true}
+                onClick={[Function]}
+              >
+                Preview
+              </EuiButton>
+              <EuiSpacer
+                size="s"
+              />
+              <EuiButton
+                fullWidth={true}
+                onClick={[Function]}
+              >
+                Import
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={2}
+            >
+              <div>
+                <PreviewComponent
+                  existingMapping={Object {}}
+                  loadMoreRows={[Function]}
+                  predictedMapping={Object {}}
+                  previewData={Array []}
+                  visibleRows={10}
+                />
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
+  </I18nProvider>
+</BrowserRouter>
+`;
