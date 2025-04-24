@@ -43,6 +43,8 @@ export function createAction<T extends ActionType>(
 ): ActionByType<T> {
   return {
     getIconType: () => undefined,
+    getTooltip: () => '',
+    isDisabled: () => false,
     order: 0,
     id: action.type,
     isCompatible: () => Promise.resolve(true),

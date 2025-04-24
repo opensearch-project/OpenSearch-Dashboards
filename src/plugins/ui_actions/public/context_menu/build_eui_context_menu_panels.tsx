@@ -221,7 +221,6 @@ export async function buildContextMenuForActions({
       _title: action.getDisplayName(context),
     });
   });
-
   await Promise.all(promises);
 
   // For each panel, sort items by order and title
