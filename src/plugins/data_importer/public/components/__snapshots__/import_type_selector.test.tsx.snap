@@ -1,0 +1,145 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImportTypeSelector should render 1`] = `
+<div>
+  <fieldset>
+    <legend
+      class="euiFormLegend"
+    >
+      <span
+        class="euiTitle euiTitle--xsmall"
+      >
+        Import Type
+      </span>
+    </legend>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard euiCheckableCard-isChecked"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--primary euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+          >
+            <div
+              class="euiRadio euiRadio--noLabel"
+            >
+              <input
+                checked=""
+                class="euiRadio__input"
+                id="file-selection"
+                type="radio"
+                value=""
+              />
+              <div
+                class="euiRadio__circle"
+              />
+            </div>
+          </div>
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+          >
+            <label
+              class="euiCheckableCard__label"
+              for="file-selection"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiText euiText--medium"
+                  >
+                    Upload
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      aria-label="Info"
+                      data-euiicon-type="iInCircle"
+                      tabindex="0"
+                    />
+                  </span>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+          >
+            <div
+              class="euiRadio euiRadio--noLabel"
+            >
+              <input
+                class="euiRadio__input"
+                id="text-selection"
+                type="radio"
+                value=""
+              />
+              <div
+                class="euiRadio__circle"
+              />
+            </div>
+          </div>
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+          >
+            <label
+              class="euiCheckableCard__label"
+              for="text-selection"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiText euiText--medium"
+                  >
+                    Text
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      aria-label="Info"
+                      data-euiicon-type="iInCircle"
+                      tabindex="0"
+                    />
+                  </span>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m"
+    />
+  </fieldset>
+</div>
+`;
