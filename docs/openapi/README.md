@@ -11,4 +11,4 @@ To start up the swagger UI locally for development or validation purposes, you c
 ### API Docs
 
 - [Saved Objects](https://opensearch-project.github.io/OpenSearch-Dashboards/docs/openapi/saved_objects/)
-- [Index Patterns](https://opensearch-project.github.io/OpenSearch-Dashboards/docs/openapi/index_patterns/)https://github.com/ashwin-pc/OpenSearch-Dashboards/blob/26b8c38cf4b9f6cf9a809dad370d26cf37b72571/docs/openapi/README.md
+- [Index Patterns](https://opensearch-project.github.io/OpenSearch-Dashboards/docs/openapi/index_patterns/)
