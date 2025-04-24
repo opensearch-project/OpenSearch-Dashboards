@@ -47,6 +47,7 @@ export enum OPENSEARCH_FIELD_TYPES {
   TEXT = 'text',
   MATCH_ONLY_TEXT = 'match_only_text',
   KEYWORD = 'keyword',
+  WILDCARD = 'wildcard',
 
   BOOLEAN = 'boolean',
   OBJECT = 'object',
