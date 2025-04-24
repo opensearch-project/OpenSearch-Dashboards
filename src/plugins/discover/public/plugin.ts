@@ -279,7 +279,6 @@ export class DiscoverPlugin
         syncHistoryLocations();
         const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
 
-        pluginsStart.data.indexPatterns.clearCache();
         await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
         // This is for instances where the user navigates to the app from the application nav menu
