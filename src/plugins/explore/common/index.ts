@@ -4,4 +4,4 @@
  */
 
 export const PLUGIN_ID = 'explore';
-export const PLUGIN_NAME = 'Discover (explore)';
+export const PLUGIN_NAME = 'Discover (experimental)';

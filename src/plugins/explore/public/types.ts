@@ -20,9 +20,9 @@ import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizat
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 
-export interface ExplorePluginSetup {
-  getGreeting: () => string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ExplorePluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ExplorePluginStart {}
 

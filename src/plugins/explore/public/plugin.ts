@@ -4,7 +4,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { lazy } from 'react';
 import {
   AppMountParameters,
   CoreSetup,
@@ -113,16 +112,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
     // TODO: Register embeddable factory when ready
     // this.registerEmbeddable(core, plugins);
 
-    return {
-      getGreeting() {
-        return i18n.translate('explore.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart): ExplorePluginStart {
