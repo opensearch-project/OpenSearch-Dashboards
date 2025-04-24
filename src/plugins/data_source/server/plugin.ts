@@ -68,7 +68,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
         requestTimeout: globalConfig.opensearch.requestTimeout,
         pingTimeout: globalConfig.opensearch.pingTimeout,
       },
-    } as DataSourcePluginConfigType;
+    };
 
     const cryptographyServiceSetup: CryptographyServiceSetup = this.cryptographyService.setup(
       config
