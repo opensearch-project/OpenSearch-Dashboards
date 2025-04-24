@@ -46,6 +46,7 @@
       - [Dev_tools](../src/plugins/dev_tools/README.md)
       - [Discover](../src/plugins/discover/README.md)
       - [Embeddable](../src/plugins/embeddable/README.md)
+      - [Explore](../src/plugins/explore/README.md)
       - [Expressions](../src/plugins/expressions/README.md)
       - [Home](../src/plugins/home/README.md)
       - index_pattern_management
