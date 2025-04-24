@@ -31,6 +31,7 @@
 import { includes } from 'lodash';
 import { IndexPatternsContract } from './index_patterns';
 import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
+
 export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
 export const createEnsureDefaultIndexPattern = (
   uiSettings: UiSettingsCommon,
@@ -47,37 +48,40 @@ export const createEnsureDefaultIndexPattern = (
       return;
     }
     const patterns = await this.getIds();
-    const defaultId = await uiSettings.get('defaultIndex');
-    const defined = !!defaultId;
+    let defaultId = await uiSettings.get('defaultIndex');
+    let defined = !!defaultId;
     const exists = includes(patterns, defaultId);
     const availablePatterns: string[] = [];
     if (defined && !exists) {
+      await uiSettings.remove('defaultIndex');
+      defaultId = defined = false;
+    }
+    if (defined) {
       const indexPattern = await this.get(defaultId);
       const dataSourceRef = indexPattern?.dataSourceRef;
       if (!dataSourceRef) {
         return;
-      } else {
-        const result = await this.getDataSource(dataSourceRef.id);
-        if (result.error?.statusCode === 403 || result.error?.statusCode === 404) {
-          try {
-            if (savedObjectsClient) {
-              const datasources = await savedObjectsClient.find({ type: 'data-source' });
-              const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
-              const existDataSources = datasources.map((item) => item.id);
-              indexPatterns.forEach((item) => {
-                const refId = item.references?.[0]?.id;
-                const refIdBool = !!refId;
-                if (!refIdBool || existDataSources.includes(refId)) {
-                  availablePatterns.push(item.id);
-                }
-              });
-            }
-          } catch (e) {
-            //  if it fails, jump directly to the execution of Redirect
+      }
+      const result = await this.getDataSource(dataSourceRef.id);
+      if (result.error?.statusCode === 403 || result.error?.statusCode === 404) {
+        try {
+          if (savedObjectsClient) {
+            const datasources = await savedObjectsClient.find({ type: 'data-source' });
+            const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
+            const existDataSources = datasources.map((item) => item.id);
+            indexPatterns.forEach((item) => {
+              const refId = item.references?.[0]?.id;
+              const refIdBool = !!refId;
+              if (!refIdBool || existDataSources.includes(refId)) {
+                availablePatterns.push(item.id);
+              }
+            });
           }
-        } else {
-          return;
+        } catch (e) {
+          //  if it fails, jump directly to the execution of Redirect
         }
+      } else {
+        return;
       }
     }
 
