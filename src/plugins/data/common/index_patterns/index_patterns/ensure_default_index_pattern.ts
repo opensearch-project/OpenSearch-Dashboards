@@ -33,6 +33,7 @@ import { IndexPatternsContract } from './index_patterns';
 import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
 
 export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
+
 export const createEnsureDefaultIndexPattern = (
   uiSettings: UiSettingsCommon,
   onRedirectNoIndexPattern: () => Promise<unknown> | void,
@@ -87,7 +88,8 @@ export const createEnsureDefaultIndexPattern = (
 
     // If there is any index pattern created, set the first as default
     if (availablePatterns.length >= 1) {
-      await uiSettings.set('defaultIndex', availablePatterns[0]);
+      defaultId = availablePatterns[0];
+      await uiSettings.set('defaultIndex', defaultId);
     } else {
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       const shouldRedirect = !isEnhancementsEnabled;
