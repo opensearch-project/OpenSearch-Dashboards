@@ -29,7 +29,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { PublicUiSettingsParams, UserProvidedValues } from 'src/core/server/types';
+import { PublicUiSettingsParams, UserProvidedValues, UiSettingScope } from 'src/core/server/types';
 
 /** @public */
 export interface UiSettingsState {
@@ -80,7 +80,7 @@ export interface IUiSettingsClient {
    * server fails then a updateErrors$ will be notified and the setting will be
    * reverted to its value before `set()` was called.
    */
-  set: (key: string, value: any) => Promise<boolean>;
+  set: (key: string, value: any, scope?: UiSettingScope) => Promise<boolean>;
 
   /**
    * Overrides the default value for a setting in this specific browser tab. If the page

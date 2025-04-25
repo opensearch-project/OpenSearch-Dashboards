@@ -32,7 +32,7 @@
 import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
-
+import { UiSettingScope } from '../../server/ui_settings/types';
 import { setup as httpSetup } from '../../test_helpers/http_test_setup';
 import { UiSettingsApi } from './ui_settings_api';
 
@@ -181,6 +181,26 @@ describe('#batchSet', () => {
 
     // ensure only two requests were sent
     expect(fetchMock.calls()).toHaveLength(2);
+  });
+});
+
+describe('#getWithScope', () => {
+  it('sends a GET request with scope in query string', async () => {
+    const mockResponse = { settings: { theme: 'dark' } };
+    fetchMock.mock('*', {
+      status: 200,
+      body: mockResponse,
+    });
+
+    const { uiSettingsApi } = setup();
+
+    const result = await uiSettingsApi.getWithScope(UiSettingScope.USER);
+
+    const [url, options] = fetchMock.lastCall();
+
+    expect(url).toContain('/api/opensearch-dashboards/settings');
+    expect(options.method).toBe('GET');
+    expect(result).toEqual(mockResponse);
   });
 });
 

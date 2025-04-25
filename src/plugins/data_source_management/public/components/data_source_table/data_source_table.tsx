@@ -43,6 +43,7 @@ import { LoadingMask } from '../loading_mask';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 import './data_source_table.scss';
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+import { UiSettingScope } from '../../../../../core/public';
 
 /* Table config */
 const pagination = {
@@ -567,7 +568,11 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
             })}
             iconType="flag"
             onClick={async () => {
-              await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, item.id);
+              await uiSettings.set(
+                DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+                item.id,
+                UiSettingScope.WORKSPACE
+              );
             }}
           />
         );

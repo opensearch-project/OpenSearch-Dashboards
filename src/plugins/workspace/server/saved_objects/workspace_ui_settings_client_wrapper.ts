@@ -15,14 +15,11 @@ import {
   WorkspaceAttribute,
   OpenSearchDashboardsRequest,
   SavedObjectsClientContract,
-  CURRENT_USER_PLACEHOLDER,
+  SavedObjectsErrorHelpers,
+  CURRENT_WORKSPACE_PLACEHOLDER,
 } from '../../../../core/server';
 import { WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { Logger } from '../../../../core/server';
-import {
-  DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
-  DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID,
-} from '../../../data_source_management/common';
 
 /**
  * This saved object client wrapper offers methods to get and update UI settings considering
@@ -61,12 +58,12 @@ export class WorkspaceUiSettingsClientWrapper {
        * the global ui settings and workspace ui settings have higher priority if the same setting
        * was defined in both places
        */
-      if (type === 'config' && requestWorkspaceId) {
-        const configObject = await wrapperOptions.client.get<Record<string, any>>(
-          'config',
-          id,
-          options
-        );
+      if (type === 'config' && id.startsWith(CURRENT_WORKSPACE_PLACEHOLDER)) {
+        // if not in a workspace and try to get workspace level settings
+        // it should return NotFoundError
+        if (!requestWorkspaceId) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+        }
 
         let workspaceObject: SavedObject<WorkspaceAttribute> | null = null;
 
@@ -78,22 +75,9 @@ export class WorkspaceUiSettingsClientWrapper {
           this.logger.error(`Unable to get workspaceObject with id: ${requestWorkspaceId}`);
         }
 
-        const workspaceLevelDefaultDS =
-          workspaceObject?.attributes?.uiSettings?.[DEFAULT_DATA_SOURCE_UI_SETTINGS_ID];
-
-        const workspaceLevelDefaultIndex =
-          workspaceObject?.attributes?.uiSettings?.[DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID];
-
-        configObject.attributes = {
-          ...configObject.attributes,
-          ...(workspaceObject ? workspaceObject.attributes.uiSettings : {}),
-          // Workspace level default data source value should not extend global UIsettings value.
-          [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: workspaceLevelDefaultDS,
-          // Workspace level default index pattern value should not extend global UIsettings value.
-          [DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID]: workspaceLevelDefaultIndex,
-        };
-
-        return configObject as SavedObject<T>;
+        return {
+          attributes: workspaceObject?.attributes?.uiSettings || {},
+        } as SavedObject<T>;
       }
 
       return wrapperOptions.client.get(type, id, options);
@@ -110,15 +94,15 @@ export class WorkspaceUiSettingsClientWrapper {
       /**
        * When updating ui settings within a workspace, it will update the workspace ui settings,
        * the global ui settings will remain unchanged.
-       * Skip updating workspace level setting if the request is updating user level setting specifically.
+       * Skip updating workspace level setting if the request is updating user level setting specifically or global workspace level setting.
        */
-      if (type === 'config' && requestWorkspaceId && !id.startsWith(CURRENT_USER_PLACEHOLDER)) {
-        const configObject = await wrapperOptions.client.get<Record<string, any>>(
-          'config',
-          id,
-          options
-        );
+      if (type === 'config' && id.startsWith(CURRENT_WORKSPACE_PLACEHOLDER)) {
         const savedObjectsClient = this.getWorkspaceTypeEnabledClient(wrapperOptions.request);
+        if (!requestWorkspaceId) {
+          throw new Error(
+            ' It is forbidden to update workspace level uiSettings when out of a workspace'
+          );
+        }
 
         const workspaceObject = await savedObjectsClient.get<WorkspaceAttribute>(
           WORKSPACE_TYPE,
@@ -135,11 +119,7 @@ export class WorkspaceUiSettingsClientWrapper {
           options
         );
 
-        if (workspaceUpdateResult.attributes.uiSettings) {
-          configObject.attributes = workspaceUpdateResult.attributes.uiSettings;
-        }
-
-        return configObject as SavedObjectsUpdateResponse<T>;
+        return workspaceUpdateResult.attributes.uiSettings as SavedObjectsUpdateResponse<T>;
       }
       return wrapperOptions.client.update(type, id, attributes, options);
     };

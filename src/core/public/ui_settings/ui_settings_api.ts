@@ -32,6 +32,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { HttpSetup } from '../http';
 import { UiSettingsState } from './types';
+import { UiSettingScope } from '../../server/ui_settings/types';
 
 export interface UiSettingsApiResponse {
   settings: UiSettingsState;
@@ -39,7 +40,9 @@ export interface UiSettingsApiResponse {
 
 interface Changes {
   values: {
-    [key: string]: any;
+    [scope: UiSettingScope | string]: {
+      [key: string]: any;
+    };
   };
 
   callback(error?: Error, response?: UiSettingsApiResponse): void;
@@ -65,16 +68,17 @@ export class UiSettingsApi {
    * already in progress it will wait until the previous request is complete
    * before sending the next request
    */
-  public batchSet(key: string, value: any) {
+  public batchSet(key: string, value: any, scope?: UiSettingScope) {
     return new Promise<UiSettingsApiResponse | undefined>((resolve, reject) => {
       const prev = this.pendingChanges || NOOP_CHANGES;
-
+      const prevValues = { ...prev.values };
+      const scopedKey = scope ?? 'undefined';
+      if (!prevValues[scopedKey]) {
+        prevValues[scopedKey] = {};
+      }
+      prevValues[scopedKey][key] = value;
       this.pendingChanges = {
-        values: {
-          ...prev.values,
-          [key]: value,
-        },
-
+        values: prevValues,
         callback(error, resp) {
           prev.callback(error, resp);
 
@@ -88,6 +92,13 @@ export class UiSettingsApi {
 
       this.flushPendingChanges();
     });
+  }
+
+  public async getWithScope(scope: UiSettingScope) {
+    // Retrieves UI settings for a specific scope.
+    // This is an immediate (non-batched) request since scope-based settings are typically fetched individually.
+    const path = `/api/opensearch-dashboards/settings?scope=${encodeURIComponent(scope)}`;
+    return this.sendRequest('GET', path, undefined, { scope: 'user' });
   }
 
   /**
@@ -130,16 +141,30 @@ export class UiSettingsApi {
 
     const changes = this.pendingChanges;
     this.pendingChanges = undefined;
-
+    const results: UiSettingsApiResponse = { settings: {} };
     try {
       this.sendInProgress = true;
+      const scopeEntries = Object.entries(changes.values);
+      const requestPromises = scopeEntries.map(([scope, settings]) => {
+        return this.sendRequest('POST', '/api/opensearch-dashboards/settings', {
+          changes: settings,
+          scope,
+        });
+      });
 
-      changes.callback(
-        undefined,
-        await this.sendRequest('POST', '/api/opensearch-dashboards/settings', {
-          changes: changes.values,
-        })
-      );
+      const settledResults = await Promise.allSettled(requestPromises);
+
+      for (const result of settledResults) {
+        if (result.status === 'fulfilled') {
+          // merge settings
+          Object.assign(results.settings, result.value.settings);
+        } else {
+          changes.callback(result.reason);
+          return;
+        }
+      }
+
+      changes.callback(undefined, results);
     } catch (error) {
       changes.callback(error);
     } finally {
@@ -151,16 +176,21 @@ export class UiSettingsApi {
   /**
    * Calls window.fetch() with the proper headers and error handling logic.
    */
-  private async sendRequest(method: string, path: string, body: any): Promise<any> {
+  private async sendRequest(
+    method: string,
+    path: string,
+    body?: any,
+    query?: Record<string, string>
+  ): Promise<any> {
     try {
       this.loadingCount$.next(this.loadingCount$.getValue() + 1);
-
       return await this.http.fetch(path, {
         method,
         body: JSON.stringify(body),
         headers: {
           accept: 'application/json',
         },
+        query: query || undefined,
       });
     } catch (err) {
       if (err.response) {
