@@ -635,7 +635,7 @@ describe('RenderingService', () => {
   describe('isUrlValid()', () => {
     it('checks valid SVG URL', async () => {
       const result = await service.isUrlValid(
-        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg',
+        'https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg',
         'config'
       );
       expect(result).toEqual(true);
@@ -643,7 +643,7 @@ describe('RenderingService', () => {
 
     it('checks valid PNG URL', async () => {
       const result = await service.isUrlValid(
-        'https://opensearch.org/assets/brand/PNG/Mark/opensearch_mark_default.png',
+        'https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.png',
         'config'
       );
       expect(result).toEqual(true);
