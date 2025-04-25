@@ -1,0 +1,51 @@
+{
+  "name": "@osd/storybook",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "./target/index.js",
+  "opensearchDashboards": {
+    "devOnly": true
+  },
+  "dependencies": {
+    "@osd/dev-utils": "1.0.0",
+    "@storybook/addon-actions": "~6.3.12",
+    "@storybook/addon-essentials": "~6.3.12",
+    "@storybook/addon-knobs": "~6.3.1",
+    "@storybook/addon-postcss": "~2.0.0",
+    "@storybook/addons": "~6.3.12",
+    "@storybook/api": "~6.3.12",
+    "@storybook/components": "~6.3.12",
+    "@storybook/core": "~6.3.12",
+    "@storybook/core-events": "~6.3.12",
+    "@storybook/react": "~6.3.12",
+    "@storybook/theming": "~6.3.12",
+    "@types/loader-utils": "^1.1.3",
+    "@types/webpack": "^4.41.31",
+    "@types/webpack-env": "^1.16.3",
+    "@types/webpack-merge": "^4.1.5",
+    "@osd/utils": "1.0.0",
+    "autoprefixer": "^10.4.1",
+    "babel-loader": "^8.2.3",
+    "copy-webpack-plugin": "^6.0.2",
+    "jest-specific-snapshot": "2.0.0",
+    "jest-styled-components": "^7.0.8",
+    "mkdirp": "0.5.1",
+    "mini-css-extract-plugin": "^1.6.0",
+    "normalize-path": "^3.0.0",
+    "postcss": "^8.4.31",
+    "postcss-loader": "^4.2.0",
+    "postcss-flexbugs-fixes": "^4.2.1",
+    "react-docgen-typescript-loader": "^3.1.1",
+    "react-is": "^16.8.0",
+    "rxjs": "^6.5.5",
+    "serve-static": "1.14.1",
+    "styled-components": "^5.3.9",
+    "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "osd:bootstrap": "yarn build",
+    "watch": "yarn build --watch"
+  }
+}
