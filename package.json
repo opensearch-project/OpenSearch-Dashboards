@@ -96,6 +96,9 @@
   },
   "resolutions": {
     "**/@babel/traverse": "^7.25.0",
+    "**/@babel/helpers": "^7.27.0",
+    "**/@babel/runtime": "^7.27.0",
+    "**/@babel/runtime-corejs3": "^7.27.0",
     "**/@types/node": "~18.7.0",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
@@ -118,6 +121,7 @@
     "**/loader-utils": "^2.0.4",
     "**/node-jose": "^2.2.0",
     "**/nth-check": "^2.0.1",
+    "**/prismjs": "^1.30.0",
     "**/qs": "^6.11.0",
     "**/semver": "^7.5.3",
     "**/set-value": "^4.1.0",
