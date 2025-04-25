@@ -56,6 +56,7 @@ import {
   EMR_STATES,
 } from '../../utils/direct_query_sync/direct_query_sync';
 import { DashboardFlintSync } from './dashboard_flint_sync';
+import { isDirectQuerySyncEnabledByUrl } from '../../utils/direct_query_sync/direct_query_sync_url_flag';
 
 let lastValidGridSize = 0;
 
@@ -390,14 +391,22 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
     return (
       <div style={{ position: 'relative', padding: '16px' }}>
-        {this.props.isDirectQuerySyncEnabled && (
-          <DashboardFlintSync
-            loadStatus={this.props.loadStatus}
-            lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
-            refreshInterval={this.state.extractedProps?.refreshInterval}
-            onSynchronize={this.synchronizeNow}
-          />
-        )}
+        {(() => {
+          const urlOverride = isDirectQuerySyncEnabledByUrl();
+          const shouldRender =
+            urlOverride !== undefined
+              ? urlOverride
+              : this.props.isDirectQuerySyncEnabled;
+        
+          return shouldRender ? (
+            <DashboardFlintSync
+              loadStatus={this.props.loadStatus}
+              lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
+              refreshInterval={this.state.extractedProps?.refreshInterval}
+              onSynchronize={this.synchronizeNow}
+            />
+          ) : null;
+        })()}
 
         <ResponsiveSizedGrid
           isViewMode={isViewMode}
