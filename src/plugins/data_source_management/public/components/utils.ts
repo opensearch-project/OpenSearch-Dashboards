@@ -24,7 +24,7 @@ import {
   defaultAuthType,
   noAuthCredentialAuthMethod,
 } from '../types';
-import { UiSettingScope } from '../../../../core/types';
+import { UiSettingScope } from '../../../../core/public';
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
 import { DataSourceGroupLabelOption } from './data_source_menu/types';

@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { c } from 'tar';
-import { UiSettingScope } from '../../../../../core/types';
+import { UiSettingScope } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
   DataSourceManagementContext,
