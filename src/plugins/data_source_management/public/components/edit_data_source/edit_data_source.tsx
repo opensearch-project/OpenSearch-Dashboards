@@ -10,6 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { c } from 'tar';
+import { UiSettingScope } from '../../../../../core/types';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
   DataSourceManagementContext,
@@ -53,6 +54,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     notifications: { toasts },
     application,
     navigation,
+    workspaces,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const dataSourceID: string = props.match.params.id.split(':')[0];
   const crossClusterConnectionAlias = props.match.params.id.includes(':')
@@ -64,6 +66,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const useNewUX = uiSettings.get('home:useNewHomePage');
+  const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
 
   /* Fetch data source by id*/
   useEffectOnce(() => {
@@ -100,7 +103,11 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   };
 
   const handleSetDefault = async () => {
-    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID);
+    // default data source has 2 scopes
+    // if in a workspace, then update workspace level setting
+    // or update global level setting
+    const scope = currentWorkspaceId ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
+    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID, scope);
   };
 
   const isDefaultDataSource = getDefaultDataSourceId(uiSettings) === dataSourceID;
@@ -146,7 +153,12 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const setDefaultDataSource = async () => {
     try {
       if (getDefaultDataSourceId(uiSettings) === dataSourceID) {
-        await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+        await setFirstDataSourceAsDefault(
+          savedObjects.client,
+          uiSettings,
+          true,
+          !!currentWorkspaceId
+        );
       }
     } catch (e) {
       setIsLoading(false);

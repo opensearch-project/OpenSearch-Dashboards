@@ -24,6 +24,7 @@ import {
   defaultAuthType,
   noAuthCredentialAuthMethod,
 } from '../types';
+import { UiSettingScope } from '../../../../core/types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
 import { DataSourceGroupLabelOption } from './data_source_menu/types';
@@ -272,17 +273,24 @@ export async function getDataSourcesWithFields(
 
 export async function handleSetDefaultDatasource(
   savedObjectsClient: SavedObjectsClientContract,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  isWorkspaceLevelUpdate: boolean
 ) {
   if (!getDefaultDataSourceId(uiSettings)) {
-    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
+    return await setFirstDataSourceAsDefault(
+      savedObjectsClient,
+      uiSettings,
+      false,
+      isWorkspaceLevelUpdate
+    );
   }
 }
 
 export async function setFirstDataSourceAsDefault(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient,
-  exists: boolean
+  exists: boolean,
+  isWorkspaceLevelUpdate: boolean
 ) {
   if (exists) {
     uiSettings.remove(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID);
@@ -290,7 +298,11 @@ export async function setFirstDataSourceAsDefault(
   const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
   if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
     const datasourceId = listOfDataSources[0].id;
-    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, datasourceId);
+    return await uiSettings.set(
+      DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+      datasourceId,
+      isWorkspaceLevelUpdate ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
+    );
   }
 }
 

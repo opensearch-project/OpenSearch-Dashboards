@@ -114,7 +114,12 @@ export const ManageDirectQueryDataConnectionsTable = ({
     try {
       for (const dataSource of selectedDataSources) {
         if (defaultDataSourceId === dataSource.id) {
-          await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+          await setFirstDataSourceAsDefault(
+            savedObjects.client,
+            uiSettings,
+            true,
+            !!currentWorkspace
+          );
           break;
         }
       }
@@ -264,7 +269,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
           await fetchDataSources();
           setSelectedDataSources([]);
           if (payload.some((p) => p.id === defaultDataSourceId)) {
-            setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+            setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, !!currentWorkspace);
           }
         }
       }

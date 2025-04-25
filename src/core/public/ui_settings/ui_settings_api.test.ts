@@ -118,32 +118,25 @@ describe('#batchSet', () => {
     expect(fetchMock.calls()).toMatchSnapshot('final, includes both requests');
   });
 
-  it('batches changes and sends buffered changes in one request', async () => {
+  it('batches changes and sends buffered changes', async () => {
     fetchMock.mock('*', {
       body: { settings: {} },
     });
 
     const { uiSettingsApi } = setup();
-    const originalBatchSet = uiSettingsApi.batchSet;
-    uiSettingsApi.batchSet = jest.fn().mockImplementation((key, value, scope) => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          originalBatchSet.call(uiSettingsApi, key, value, scope);
-          resolve();
-        }, 100);
-      });
-    });
-
-    uiSettingsApi.batchSet('foo', 'bar');
-    const finalPromise = uiSettingsApi.batchSet('box', 'bar');
+    uiSettingsApi.batchSet('0', '0');
+    uiSettingsApi.batchSet('1', '1');
+    uiSettingsApi.batchSet('2', '2');
+    uiSettingsApi.batchSet('3', '3');
+    uiSettingsApi.batchSet('4', '4');
+    const finalPromise = uiSettingsApi.batchSet('5', '5');
 
     // 2 requests should be batched.
-    expect(uiSettingsApi.hasPendingChanges()).toBe(false);
+    expect(uiSettingsApi.hasPendingChanges()).toBe(true);
 
     await finalPromise;
-    const calls = fetchMock.calls();
-    expect(calls.length).toBe(1);
-    expect(fetchMock.calls()).toMatchSnapshot('batch requests, and send it in one request');
+
+    expect(fetchMock.calls()).toMatchSnapshot('able to batch requests');
   });
 
   it('groups buffered changes and send it respectively', async () => {

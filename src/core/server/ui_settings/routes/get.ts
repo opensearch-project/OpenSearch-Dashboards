@@ -35,7 +35,7 @@ import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { UiSettingScope } from '../types';
 
 const validate = {
-  body: schema.object(
+  query: schema.object(
     {
       scope: schema.maybe(
         schema.oneOf([
@@ -44,8 +44,8 @@ const validate = {
           schema.literal(UiSettingScope.WORKSPACE),
         ])
       ),
-    }
-    // { unknowns: 'allow' }
+    },
+    { unknowns: 'allow' }
   ),
 };
 
@@ -55,7 +55,7 @@ export function registerGetRoute(router: IRouter) {
     async (context, request, response) => {
       try {
         const uiSettingsClient = context.core.uiSettings.client;
-        const { scope } = request.body;
+        const { scope } = request.query;
         return response.ok({
           body: {
             settings: await uiSettingsClient.getUserProvided(scope),

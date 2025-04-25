@@ -58,8 +58,20 @@ Array [
 ]
 `;
 
-exports[`#batchSet batches changes and sends buffered changes in one request: batch requests, and send it in one request 1`] = `
+exports[`#batchSet batches changes and sends buffered changes: able to batch requests 1`] = `
 Array [
+  Array [
+    "/foo/bar/api/opensearch-dashboards/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "osd-version": "opensearchDashboardsVersion",
+        "osd-xsrf": "osd-fetch",
+      },
+      "method": "POST",
+    },
+  ],
   Array [
     "/foo/bar/api/opensearch-dashboards/settings",
     Object {

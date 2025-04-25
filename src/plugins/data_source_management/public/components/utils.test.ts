@@ -403,23 +403,23 @@ describe('DataSourceManagement: Utils.ts', () => {
     });
     test('should set defaultDataSource if more than one data source exists', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, true);
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should set defaultDataSource if only one data source exists', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getSingleDataSourceResponse);
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, true);
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should not set defaultDataSource if no data source exists', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, true);
       expect(uiSettings.remove).toHaveBeenCalled();
       expect(uiSettings.set).not.toHaveBeenCalled();
     });
     test('should not set defaultDataSource if no data source exists and no default datasouce', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, false);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, false, true);
       expect(uiSettings.remove).not.toHaveBeenCalled();
       expect(uiSettings.set).not.toHaveBeenCalled();
     });
