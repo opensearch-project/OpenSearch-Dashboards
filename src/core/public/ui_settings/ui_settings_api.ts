@@ -97,8 +97,8 @@ export class UiSettingsApi {
   public async getWithScope(scope: UiSettingScope) {
     // Retrieves UI settings for a specific scope.
     // This is an immediate (non-batched) request since scope-based settings are typically fetched individually.
-    const path = `/api/opensearch-dashboards/settings?scope=${encodeURIComponent(scope)}`;
-    return this.sendRequest('GET', path, undefined, { scope: 'user' });
+    const path = '/api/opensearch-dashboards/settings';
+    return this.sendRequest('GET', path, undefined, { scope });
   }
 
   /**
@@ -146,9 +146,18 @@ export class UiSettingsApi {
       this.sendInProgress = true;
       const scopeEntries = Object.entries(changes.values);
       const requestPromises = scopeEntries.map(([scope, settings]) => {
+        if (scope !== 'undefined' && scope !== undefined) {
+          return this.sendRequest(
+            'POST',
+            '/api/opensearch-dashboards/settings',
+            {
+              changes: settings,
+            },
+            { scope }
+          );
+        }
         return this.sendRequest('POST', '/api/opensearch-dashboards/settings', {
           changes: settings,
-          scope,
         });
       });
 

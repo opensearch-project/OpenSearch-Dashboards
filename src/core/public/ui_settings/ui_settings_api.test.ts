@@ -68,14 +68,37 @@ afterEach(() => {
 });
 
 describe('#batchSet', () => {
-  it('sends a single change immediately', async () => {
+  it('sends a single without scope change immediately', async () => {
     fetchMock.mock('*', {
       body: { settings: {} },
     });
 
     const { uiSettingsApi } = setup();
     await uiSettingsApi.batchSet('foo', 'bar');
-    expect(fetchMock.calls()).toMatchSnapshot('single change');
+    const calls = fetchMock.calls();
+    expect(calls.length).toBe(1);
+    const [url, options] = calls[0];
+    expect(url).toContain('/api/opensearch-dashboards/settings');
+
+    expect(options.method).toBe('POST');
+
+    expect(fetchMock.calls()).toMatchSnapshot('single without scope');
+  });
+
+  it('sends a single change to a specific scope immediately', async () => {
+    fetchMock.mock('*', {
+      body: { settings: {} },
+    });
+
+    const { uiSettingsApi } = setup();
+    await uiSettingsApi.batchSet('foo', 'bar', UiSettingScope.WORKSPACE);
+
+    const [url, options] = fetchMock.lastCall();
+
+    expect(url).toContain('/api/opensearch-dashboards/settings?scope=workspace');
+
+    expect(options.method).toBe('POST');
+    expect(fetchMock.calls()).toMatchSnapshot('single with scope');
   });
 
   it('buffers changes while first request is in progress, sends buffered changes after first request completes', async () => {
@@ -90,7 +113,56 @@ describe('#batchSet', () => {
 
     expect(uiSettingsApi.hasPendingChanges()).toBe(true);
     await finalPromise;
+    const calls = fetchMock.calls();
+    expect(calls.length).toBe(2);
     expect(fetchMock.calls()).toMatchSnapshot('final, includes both requests');
+  });
+
+  it('batches changes and sends buffered changes in one request', async () => {
+    fetchMock.mock('*', {
+      body: { settings: {} },
+    });
+
+    const { uiSettingsApi } = setup();
+    const originalBatchSet = uiSettingsApi.batchSet;
+    uiSettingsApi.batchSet = jest.fn().mockImplementation((key, value, scope) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          originalBatchSet.call(uiSettingsApi, key, value, scope);
+          resolve();
+        }, 100);
+      });
+    });
+
+    uiSettingsApi.batchSet('foo', 'bar');
+    const finalPromise = uiSettingsApi.batchSet('box', 'bar');
+
+    // 2 requests should be batched.
+    expect(uiSettingsApi.hasPendingChanges()).toBe(false);
+
+    await finalPromise;
+    const calls = fetchMock.calls();
+    expect(calls.length).toBe(1);
+    expect(fetchMock.calls()).toMatchSnapshot('batch requests, and send it in one request');
+  });
+
+  it('groups buffered changes and send it respectively', async () => {
+    fetchMock.mock('*', {
+      body: { settings: {} },
+    });
+
+    const { uiSettingsApi } = setup();
+
+    uiSettingsApi.batchSet('workspace', 'bar', UiSettingScope.WORKSPACE);
+    uiSettingsApi.batchSet('foo', 'bar');
+    uiSettingsApi.batchSet('bar', 'foo');
+    const finalPromise = uiSettingsApi.batchSet('user', 'bar', UiSettingScope.USER);
+    expect(uiSettingsApi.hasPendingChanges()).toBe(true);
+
+    await finalPromise;
+    const calls = fetchMock.calls();
+    expect(calls.length).toBe(3);
+    expect(fetchMock.calls()).toMatchSnapshot('batch requests, and send them respectively');
   });
 
   it('Overwrites previously buffered values with new values for the same key', async () => {
@@ -198,7 +270,7 @@ describe('#getWithScope', () => {
 
     const [url, options] = fetchMock.lastCall();
 
-    expect(url).toContain('/api/opensearch-dashboards/settings');
+    expect(url).toContain('/api/opensearch-dashboards/settings?scope=user');
     expect(options.method).toBe('GET');
     expect(result).toEqual(mockResponse);
   });

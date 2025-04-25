@@ -257,7 +257,11 @@ describe('DataSourceTable', () => {
         .find('[data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"]')
         .first()
         .simulate('click');
-      expect(uiSettings.set).toBeCalledWith(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, 'alpha-test');
+      expect(uiSettings.set).toBeCalledWith(
+        DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+        'alpha-test',
+        'workspace'
+      );
 
       // reset to original value
       mockedContext.workspaces.currentWorkspace$ = currentWorkspace$;

@@ -58,6 +58,23 @@ Array [
 ]
 `;
 
+exports[`#batchSet batches changes and sends buffered changes in one request: batch requests, and send it in one request 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/opensearch-dashboards/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "osd-version": "opensearchDashboardsVersion",
+        "osd-xsrf": "osd-fetch",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
 exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
 Array [
   Array [
@@ -74,6 +91,47 @@ Array [
   ],
   Array [
     "/foo/bar/api/opensearch-dashboards/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "osd-version": "opensearchDashboardsVersion",
+        "osd-xsrf": "osd-fetch",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet groups buffered changes and send it respectively: batch requests, and send them respectively 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/opensearch-dashboards/settings?scope=workspace",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "osd-version": "opensearchDashboardsVersion",
+        "osd-xsrf": "osd-fetch",
+      },
+      "method": "POST",
+    },
+  ],
+  Array [
+    "/foo/bar/api/opensearch-dashboards/settings",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "osd-version": "opensearchDashboardsVersion",
+        "osd-xsrf": "osd-fetch",
+      },
+      "method": "POST",
+    },
+  ],
+  Array [
+    "/foo/bar/api/opensearch-dashboards/settings?scope=user",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -110,7 +168,24 @@ exports[`#batchSet rejects on 404 response 1`] = `"Request failed with status co
 
 exports[`#batchSet rejects on 500 1`] = `"Request failed with status code: 500"`;
 
-exports[`#batchSet sends a single change immediately: single change 1`] = `
+exports[`#batchSet sends a single change to a specific scope immediately: single with scope 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/opensearch-dashboards/settings?scope=workspace",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "osd-version": "opensearchDashboardsVersion",
+        "osd-xsrf": "osd-fetch",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet sends a single without scope change immediately: single without scope 1`] = `
 Array [
   Array [
     "/foo/bar/api/opensearch-dashboards/settings",
