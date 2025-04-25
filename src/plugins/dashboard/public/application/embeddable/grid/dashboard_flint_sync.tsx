@@ -29,48 +29,56 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiLoadingSpinner, EuiProgress, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiProgress,
+  EuiText,
+} from '@elastic/eui';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
-import { EMR_STATES, MAX_ORD, timeSince } from '../../utils/direct_query_sync/direct_query_sync';
+import {
+  EMR_STATES,
+  MAX_ORD,
+  intervalAsMinutes,
+} from '../../utils/direct_query_sync/direct_query_sync';
 
 interface DashboardFlintSyncProps {
   loadStatus: DirectQueryLoadingStatus;
   lastRefreshTime?: number;
+  refreshInterval?: number;
   onSynchronize: () => void;
 }
 
 export const DashboardFlintSync: React.FC<DashboardFlintSyncProps> = ({
   loadStatus,
   lastRefreshTime,
+  refreshInterval,
   onSynchronize,
 }) => {
   const state = EMR_STATES.get(loadStatus)!;
 
-  return (
-    <div style={{ marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
-      <EuiButton
-        iconType="refresh"
-        size="s"
-        onClick={onSynchronize}
-        isLoading={!state.terminal}
-        isDisabled={!state.terminal}
-      >
-        Synchronize Now
-      </EuiButton>
-      {state.terminal ? (
-        <EuiText>
-          Last Refresh:{' '}
-          {typeof lastRefreshTime === 'number' ? timeSince(lastRefreshTime) + ' ago' : '--'}
-        </EuiText>
+  return state.terminal ? (
+    <EuiText size="s">
+      Data scheduled to sync every{' '}
+      {refreshInterval ? intervalAsMinutes(1000 * refreshInterval) : '--'}. Last sync:{' '}
+      {lastRefreshTime ? (
+        <>
+          {new Date(lastRefreshTime).toLocaleString()} (
+          {intervalAsMinutes(new Date().getTime() - lastRefreshTime)} ago)
+        </>
       ) : (
-        <EuiProgress
-          value={state.ord}
-          max={MAX_ORD}
-          color="vis0"
-          style={{ width: '100px' }}
-          size="l"
-        />
+        '--'
       )}
-    </div>
+      . &nbsp;&nbsp;
+      <EuiLink onClick={onSynchronize}>Sync data</EuiLink>
+    </EuiText>
+  ) : (
+    <EuiCallOut size="s">
+      <EuiLoadingSpinner size="s" />
+      &nbsp;&nbsp;&nbsp;Data sync is in progress (<b>{state.ord}%</b> complete). The dashboard will
+      reload on completion.
+    </EuiCallOut>
   );
 };

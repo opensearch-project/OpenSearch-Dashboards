@@ -21,10 +21,10 @@ export const DSL_BASE = `${DIRECT_QUERY_BASE}/dsl`;
 export const EMR_STATES = new Map<string, { ord: number; terminal: boolean }>(
   Object.entries({
     submitted: { ord: 0, terminal: false },
-    queued: { ord: 8, terminal: false },
-    pending: { ord: 16, terminal: false },
-    scheduled: { ord: 33, terminal: false },
-    running: { ord: 67, terminal: false },
+    queued: { ord: 10, terminal: false },
+    pending: { ord: 20, terminal: false },
+    scheduled: { ord: 30, terminal: false },
+    running: { ord: 70, terminal: false },
     cancelling: { ord: 90, terminal: false },
     success: { ord: 100, terminal: true },
     failed: { ord: 100, terminal: true },
@@ -36,10 +36,9 @@ export const EMR_STATES = new Map<string, { ord: number; terminal: boolean }>(
 
 export const MAX_ORD = 100;
 
-export function timeSince(date: number): string {
-  const seconds = Math.floor((new Date().getTime() - date) / 1000);
-  const interval: number = seconds / 60;
-  return interval > 1 ? Math.floor(interval) + ' minutes' : Math.floor(seconds) + ' seconds';
+export function intervalAsMinutes(interval: number): string {
+  const minutes = Math.floor(interval / 60000);
+  return minutes === 1 ? '1 minute' : minutes + ' minutes';
 }
 
 export async function resolveConcreteIndex(

@@ -156,7 +156,7 @@ interface State {
   useMargins: boolean;
   expandedPanelId?: string;
   panelMetadata: Array<{ panelId: string; savedObjectId: string; type: string }>;
-  extractedProps: { lastRefreshTime: number } | null;
+  extractedProps: { lastRefreshTime?: number; refreshInterval?: number } | null;
   prevStatus?: string;
 }
 
@@ -394,6 +394,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           <DashboardFlintSync
             loadStatus={this.props.loadStatus}
             lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
+            refreshInterval={this.state.extractedProps?.refreshInterval}
             onSynchronize={this.synchronizeNow}
           />
         )}
