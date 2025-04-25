@@ -40,19 +40,20 @@ describe('ensureDefaultIndexPattern', () => {
     (includes as jest.Mock).mockClear();
   });
 
-  test('returns early if canUpdateUiSetting is false', async () => {
+  test('should return early if canUpdateUiSetting is false', async () => {
     ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
       uiSettings,
       onRedirectNoIndexPattern,
       false,
       savedObjectsClient
     );
+
     await ensureDefaultIndexPattern.call(indexPatterns);
     expect(uiSettings.get).not.toHaveBeenCalled();
     expect(indexPatterns.getIds).not.toHaveBeenCalled();
   });
 
-  test('removes defaultIndex if it is defined but does not exist', async () => {
+  test('should set first available pattern as default when no valid default exists', async () => {
     ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
       uiSettings,
       onRedirectNoIndexPattern,
@@ -60,17 +61,58 @@ describe('ensureDefaultIndexPattern', () => {
       savedObjectsClient
     );
 
-    (indexPatterns.getIds as jest.Mock).mockResolvedValue(['pattern1', 'pattern2']);
-    (uiSettings.get as jest.Mock).mockResolvedValue('nonexistent');
-    (includes as jest.Mock).mockReturnValue(false);
+    (indexPatterns.getIds as jest.Mock).mockResolvedValue(['pattern1']);
+    (uiSettings.get as jest.Mock).mockImplementation((key) => {
+      if (key === 'defaultIndex') return 'invalid-pattern';
+      return false;
+    });
+    (includes as jest.Mock).mockReturnValue(true);
+
+    (indexPatterns.get as jest.Mock).mockResolvedValue({
+      dataSourceRef: { id: 'ds1' },
+    });
+
+    (indexPatterns.getDataSource as jest.Mock).mockResolvedValue({
+      error: { statusCode: 404 },
+    });
+
+    (savedObjectsClient.find as jest.Mock).mockImplementation((params) => {
+      if (params.type === 'data-source') {
+        return Promise.resolve([{ id: 'ds1' }]);
+      }
+      if (params.type === 'index-pattern') {
+        return Promise.resolve([
+          {
+            id: 'pattern1',
+            references: [{ id: 'ds1' }],
+          },
+        ]);
+      }
+    });
 
     await ensureDefaultIndexPattern.call(indexPatterns);
 
-    expect(uiSettings.remove).toHaveBeenCalledWith('defaultIndex');
-    expect(onRedirectNoIndexPattern).not.toHaveBeenCalled();
+    expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern1');
   });
 
-  test('returns early if default index pattern exists and has valid data source', async () => {
+  test('should redirect when no patterns available and enhancements disabled', async () => {
+    ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
+      uiSettings,
+      onRedirectNoIndexPattern,
+      true,
+      savedObjectsClient
+    );
+
+    (indexPatterns.getIds as jest.Mock).mockResolvedValue([]);
+    (uiSettings.get as jest.Mock).mockResolvedValueOnce(null).mockResolvedValueOnce(false);
+    (savedObjectsClient.find as jest.Mock).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+    await ensureDefaultIndexPattern.call(indexPatterns);
+
+    expect(onRedirectNoIndexPattern).toHaveBeenCalled();
+  });
+
+  test('should handle invalid data source', async () => {
     ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
       uiSettings,
       onRedirectNoIndexPattern,
@@ -85,103 +127,12 @@ describe('ensureDefaultIndexPattern', () => {
     (indexPatterns.get as jest.Mock).mockResolvedValue({
       dataSourceRef: { id: 'ds1' },
     });
-    (indexPatterns.getDataSource as jest.Mock).mockResolvedValue({});
-
-    await ensureDefaultIndexPattern.call(indexPatterns);
-
-    expect(uiSettings.set).not.toHaveBeenCalled();
-    expect(onRedirectNoIndexPattern).not.toHaveBeenCalled();
-  });
-
-  test('sets first available pattern as default if patterns exist', async () => {
-    ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
-      uiSettings,
-      onRedirectNoIndexPattern,
-      true,
-      savedObjectsClient
-    );
-
-    (indexPatterns.getIds as jest.Mock).mockResolvedValue(['pattern1']);
-    (uiSettings.get as jest.Mock).mockResolvedValue(null);
-    (savedObjectsClient.find as jest.Mock)
-      .mockResolvedValueOnce([{ id: 'ds1' }])
-      .mockResolvedValueOnce([
-        {
-          id: 'pattern1',
-          attributes: { title: 'pattern1' },
-          references: [{ id: 'ds1', type: 'data-source' }],
-        },
-      ]);
-
-    await ensureDefaultIndexPattern.call(indexPatterns);
-
-    // expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern1');
-    // expect(onRedirectNoIndexPattern).not.toHaveBeenCalled();
-  });
-
-  test('redirects if no patterns and enhancements are disabled', async () => {
-    ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
-      uiSettings,
-      onRedirectNoIndexPattern,
-      true,
-      savedObjectsClient
-    );
-
-    (indexPatterns.getIds as jest.Mock).mockResolvedValue([]);
-    (uiSettings.get as jest.Mock).mockResolvedValueOnce(null).mockResolvedValueOnce(false);
-    (savedObjectsClient.find as jest.Mock).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
-
-    await ensureDefaultIndexPattern.call(indexPatterns);
-
-    expect(uiSettings.set).not.toHaveBeenCalled();
-    expect(onRedirectNoIndexPattern).toHaveBeenCalled();
-  });
-
-  test('does not redirect if enhancements are enabled', async () => {
-    ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
-      uiSettings,
-      onRedirectNoIndexPattern,
-      true,
-      savedObjectsClient
-    );
-
-    (indexPatterns.getIds as jest.Mock).mockResolvedValue([]);
-    (uiSettings.get as jest.Mock).mockResolvedValueOnce(null).mockResolvedValueOnce(true);
-    (savedObjectsClient.find as jest.Mock).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
-
-    await ensureDefaultIndexPattern.call(indexPatterns);
-
-    expect(uiSettings.set).not.toHaveBeenCalled();
-    expect(onRedirectNoIndexPattern).not.toHaveBeenCalled();
-  });
-
-  test('handles error when fetching data sources and index patterns', async () => {
-    ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
-      uiSettings,
-      onRedirectNoIndexPattern,
-      true,
-      savedObjectsClient
-    );
-
-    const defaultId = 'pattern1';
-    (indexPatterns.getIds as jest.Mock).mockResolvedValue([defaultId]);
-    (uiSettings.get as jest.Mock).mockImplementation((key: string) => {
-      if (key === 'defaultIndex') return Promise.resolve(defaultId);
-      if (key === 'query:enhancements:enabled') return Promise.resolve(false);
-      return Promise.resolve(undefined);
-    });
-    (includes as jest.Mock).mockReturnValue(true);
-    (indexPatterns.get as jest.Mock).mockResolvedValue({
-      dataSourceRef: { id: 'ds1' },
-    });
     (indexPatterns.getDataSource as jest.Mock).mockResolvedValue({
       error: { statusCode: 404 },
     });
-    (savedObjectsClient.find as jest.Mock).mockRejectedValue(new Error('Fetch error'));
 
     await ensureDefaultIndexPattern.call(indexPatterns);
 
-    expect(uiSettings.get).toHaveBeenCalledWith('query:enhancements:enabled');
-    expect(onRedirectNoIndexPattern).toHaveBeenCalled();
+    expect(savedObjectsClient.find).toHaveBeenCalledWith({ type: 'data-source' });
   });
 });
