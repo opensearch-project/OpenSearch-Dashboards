@@ -206,20 +206,35 @@ export async function buildContextMenuForActions({
 
     // Add a context menu item for this action so it shows up on a context menu panel.
     // We add this within the parent group or default to the mainMenu panel.
-    panels[parentGroupId || 'mainMenu'].items!.push({
-      name: action.MenuItem
-        ? React.createElement(uiToReactComponent(action.MenuItem), { context })
-        : action.getDisplayName(context),
-      icon: action.getIconType(context),
-      'data-test-subj': `embeddablePanelAction-${action.id}`,
-      onClick: onClick(action, context, closeMenu),
-      toolTipContent: action?.getTooltip(context),
-      disabled: action?.isDisabled(context),
-      id: action?.id,
-      href: action.getHref ? await action.getHref(context) : undefined,
-      _order: action.order || 0,
-      _title: action.getDisplayName(context),
-    });
+    if (typeof action?.getTooltip === 'function' && typeof action?.isDisabled === 'function') {
+      panels[parentGroupId || 'mainMenu'].items!.push({
+        name: action.MenuItem
+          ? React.createElement(uiToReactComponent(action.MenuItem), { context })
+          : action.getDisplayName(context),
+        icon: action.getIconType(context),
+        'data-test-subj': `embeddablePanelAction-${action.id}`,
+        onClick: onClick(action, context, closeMenu),
+        toolTipContent: action?.getTooltip(context),
+        disabled: action?.isDisabled(context),
+        id: action?.id,
+        href: action.getHref ? await action.getHref(context) : undefined,
+        _order: action.order || 0,
+        _title: action.getDisplayName(context),
+      });
+    } else {
+      panels[parentGroupId || 'mainMenu'].items!.push({
+        name: action.MenuItem
+          ? React.createElement(uiToReactComponent(action.MenuItem), { context })
+          : action.getDisplayName(context),
+        icon: action.getIconType(context),
+        'data-test-subj': `embeddablePanelAction-${action.id}`,
+        onClick: onClick(action, context, closeMenu),
+        id: action?.id,
+        href: action.getHref ? await action.getHref(context) : undefined,
+        _order: action.order || 0,
+        _title: action.getDisplayName(context),
+      });
+    }
   });
   await Promise.all(promises);
 
