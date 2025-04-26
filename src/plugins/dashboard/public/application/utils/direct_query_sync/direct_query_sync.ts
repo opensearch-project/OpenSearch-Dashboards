@@ -43,13 +43,16 @@ export function intervalAsMinutes(interval: number): string {
 
 export async function resolveConcreteIndex(
   indexTitle: string,
-  http: HttpStart
+  http: HttpStart,
+  mdsId?: string
 ): Promise<string | null> {
   if (!indexTitle.includes('*')) return indexTitle;
 
   try {
+    const query: any = mdsId ? { data_source: mdsId } : {};
     const resolved = await http.get(
-      `/internal/index-pattern-management/resolve_index/${encodeURIComponent(indexTitle)}`
+      `/internal/index-pattern-management/resolve_index/${encodeURIComponent(indexTitle)}`,
+      { query }
     );
     const matchedIndices = resolved?.indices || [];
     return matchedIndices.length > 0 ? matchedIndices[0].name : null;
@@ -93,6 +96,7 @@ export async function extractIndexInfoFromDashboard(
       const savedObject = await savedObjectsClient.get(type, savedObjectId);
       const visState = JSON.parse(savedObject.attributes.visState || '{}');
 
+      // Check if the visualization is a pie chart TODO: add more types
       if (visState.type !== 'pie') continue;
 
       const indexPatternRef = savedObject.references.find(
@@ -102,13 +106,14 @@ export async function extractIndexInfoFromDashboard(
 
       const indexPattern = await savedObjectsClient.get('index-pattern', indexPatternRef.id);
       console.log('Index Pattern:', indexPattern);
-      const indexTitleRaw = indexPattern.attributes.title;
-
-      const concreteTitle = await resolveConcreteIndex(indexTitleRaw, http);
-      if (!concreteTitle) return null;
 
       const mdsId =
         indexPattern.references?.find((ref: any) => ref.type === 'data-source')?.id || undefined;
+
+      const indexTitleRaw = indexPattern.attributes.title;
+
+      const concreteTitle = await resolveConcreteIndex(indexTitleRaw, http, mdsId);
+      if (!concreteTitle) return null;
 
       // Fetch mapping immediately after resolving index
       const mapping = (await fetchIndexMapping(concreteTitle, http, mdsId))!;
