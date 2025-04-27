@@ -274,15 +274,10 @@ export async function getDataSourcesWithFields(
 export async function handleSetDefaultDatasource(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient,
-  isWorkspaceLevelUpdate: boolean
+  scope: UiSettingScope
 ) {
   if (!getDefaultDataSourceId(uiSettings)) {
-    return await setFirstDataSourceAsDefault(
-      savedObjectsClient,
-      uiSettings,
-      false,
-      isWorkspaceLevelUpdate
-    );
+    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false, scope);
   }
 }
 
@@ -290,19 +285,15 @@ export async function setFirstDataSourceAsDefault(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient,
   exists: boolean,
-  isWorkspaceLevelUpdate: boolean
+  scope: UiSettingScope
 ) {
   if (exists) {
-    uiSettings.remove(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID);
+    uiSettings.remove(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, scope);
   }
   const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
   if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
     const datasourceId = listOfDataSources[0].id;
-    return await uiSettings.set(
-      DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
-      datasourceId,
-      isWorkspaceLevelUpdate ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
-    );
+    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, datasourceId, scope);
   }
 }
 
@@ -347,9 +338,11 @@ export function getFilteredDataSources(
     .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 }
 
-export function getDefaultDataSourceId(uiSettings?: IUiSettingsClient) {
+export function getDefaultDataSourceId(uiSettings?: IUiSettingsClient, scope?: UiSettingScope) {
   if (!uiSettings) return null;
-  return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
+  if (scope)
+    return uiSettings.getUserProvided<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, scope);
+  return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID);
 }
 
 export function getDefaultDataSourceId$(uiSettings?: IUiSettingsClient) {

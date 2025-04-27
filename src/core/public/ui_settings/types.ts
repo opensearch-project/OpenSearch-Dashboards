@@ -55,6 +55,11 @@ export interface IUiSettingsClient {
   get: <T = any>(key: string, defaultOverride?: T) => T;
 
   /**
+   * Gets the value for a specific uiSetting and scope and sent to the server
+   */
+  getUserProvided: <T = any>(key: string, scope: UiSettingScope) => Promise<T>;
+
+  /**
    * Gets an observable of the current value for a config key, and all updates to that config
    * key in the future. Providing a `defaultOverride` argument behaves the same as it does in #get()
    */
@@ -93,7 +98,7 @@ export interface IUiSettingsClient {
    * method behaves the same as calling `set(key, null)`, including the synchronization, custom
    * setting, and error behavior of that method.
    */
-  remove: (key: string) => Promise<boolean>;
+  remove: (key: string, scope?: UiSettingScope) => Promise<boolean>;
 
   /**
    * Returns true if the key is a "known" uiSetting, meaning it is either registered

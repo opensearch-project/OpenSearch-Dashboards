@@ -96,6 +96,9 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
 
     const result = await wrappedClient.get(`config`, `${CURRENT_WORKSPACE_PLACEHOLDER}_3.0.0`);
     expect(result).toEqual({
+      id: '3.0.0',
+      references: [],
+      type: 'config',
       attributes: {
         defaultDashboard: 'default-dashboard-workspace',
         [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: 'default-ds-workspace',
@@ -176,9 +179,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
     }
 
     expect(error).toBeInstanceOf(Error);
-    expect(error.message).toEqual(
-      ' It is forbidden to update workspace level uiSettings when out of a workspace'
-    );
+    expect(error.message).toEqual('Bad Request');
   });
 
   it('should update global ui settings', async () => {

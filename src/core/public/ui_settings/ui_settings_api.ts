@@ -38,6 +38,8 @@ export interface UiSettingsApiResponse {
   settings: UiSettingsState;
 }
 
+const NO_SCOPE = 'undefined';
+
 interface Changes {
   values: {
     [scope: UiSettingScope | string]: {
@@ -72,7 +74,7 @@ export class UiSettingsApi {
     return new Promise<UiSettingsApiResponse | undefined>((resolve, reject) => {
       const prev = this.pendingChanges || NOOP_CHANGES;
       const prevValues = { ...prev.values };
-      const scopedKey = scope ?? 'undefined';
+      const scopedKey = scope ?? NO_SCOPE;
       if (!prevValues[scopedKey]) {
         prevValues[scopedKey] = {};
       }
@@ -146,19 +148,14 @@ export class UiSettingsApi {
       this.sendInProgress = true;
       const scopeEntries = Object.entries(changes.values);
       const requestPromises = scopeEntries.map(([scope, settings]) => {
-        if (scope !== 'undefined' && scope !== undefined) {
-          return this.sendRequest(
-            'POST',
-            '/api/opensearch-dashboards/settings',
-            {
-              changes: settings,
-            },
-            { scope }
-          );
-        }
-        return this.sendRequest('POST', '/api/opensearch-dashboards/settings', {
-          changes: settings,
-        });
+        const options = scope !== NO_SCOPE && scope !== undefined ? { scope } : undefined;
+
+        return this.sendRequest(
+          'POST',
+          '/api/opensearch-dashboards/settings',
+          { changes: settings },
+          options
+        );
       });
 
       const settledResults = await Promise.allSettled(requestPromises);

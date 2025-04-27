@@ -67,6 +67,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const useNewUX = uiSettings.get('home:useNewHomePage');
   const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+  const scope = currentWorkspaceId ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
 
   /* Fetch data source by id*/
   useEffectOnce(() => {
@@ -106,11 +107,10 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     // default data source has 2 scopes
     // if in a workspace, then update workspace level setting
     // or update global level setting
-    const scope = currentWorkspaceId ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
     return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID, scope);
   };
 
-  const isDefaultDataSource = getDefaultDataSourceId(uiSettings) === dataSourceID;
+  const isDefaultDataSource = getDefaultDataSourceId(uiSettings, scope) === dataSourceID;
 
   /* Handle submit - create data source*/
   const handleSubmit = async (attributes: DataSourceAttributes) => {
@@ -152,13 +152,8 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
   const setDefaultDataSource = async () => {
     try {
-      if (getDefaultDataSourceId(uiSettings) === dataSourceID) {
-        await setFirstDataSourceAsDefault(
-          savedObjects.client,
-          uiSettings,
-          true,
-          !!currentWorkspaceId
-        );
+      if (getDefaultDataSourceId(uiSettings, scope) === dataSourceID) {
+        await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, scope);
       }
     } catch (e) {
       setIsLoading(false);

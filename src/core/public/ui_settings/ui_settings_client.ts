@@ -137,12 +137,20 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     );
   }
 
+  async getUserProvided<T = any>(key: string, scope: UiSettingScope) {
+    return await this.api.getWithScope(scope).then((response: any) => {
+      const value = response[key];
+      const type = this.cache[key].type;
+      return this.resolveValue(value, type);
+    });
+  }
+
   async set(key: string, value: any, scope?: UiSettingScope) {
     return await this.update(key, value, scope);
   }
 
-  async remove(key: string) {
-    return await this.update(key, null);
+  async remove(key: string, scope?: UiSettingScope) {
+    return await this.update(key, null, scope);
   }
 
   isDeclared(key: string) {

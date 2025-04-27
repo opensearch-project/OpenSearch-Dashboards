@@ -26,6 +26,7 @@ import {
   getDefaultDataSourceId$,
 } from './utils';
 import { coreMock, notificationServiceMock } from '../../../../core/public/mocks';
+import { UiSettingScope } from '../../../../core/public';
 import {
   getDataSourceByIdWithCredential,
   getDataSourceByIdWithoutCredential,
@@ -403,23 +404,43 @@ describe('DataSourceManagement: Utils.ts', () => {
     });
     test('should set defaultDataSource if more than one data source exists', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, true);
+      await setFirstDataSourceAsDefault(
+        savedObjects.client,
+        uiSettings,
+        true,
+        UiSettingScope.GLOBAL
+      );
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should set defaultDataSource if only one data source exists', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getSingleDataSourceResponse);
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, true);
+      await setFirstDataSourceAsDefault(
+        savedObjects.client,
+        uiSettings,
+        true,
+        UiSettingScope.GLOBAL
+      );
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should not set defaultDataSource if no data source exists', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, true);
+      await setFirstDataSourceAsDefault(
+        savedObjects.client,
+        uiSettings,
+        true,
+        UiSettingScope.GLOBAL
+      );
       expect(uiSettings.remove).toHaveBeenCalled();
       expect(uiSettings.set).not.toHaveBeenCalled();
     });
     test('should not set defaultDataSource if no data source exists and no default datasouce', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, false, true);
+      await setFirstDataSourceAsDefault(
+        savedObjects.client,
+        uiSettings,
+        false,
+        UiSettingScope.GLOBAL
+      );
       expect(uiSettings.remove).not.toHaveBeenCalled();
       expect(uiSettings.set).not.toHaveBeenCalled();
     });

@@ -65,6 +65,14 @@ export class WorkspaceUiSettingsClientWrapper {
           throw SavedObjectsErrorHelpers.createGenericNotFoundError();
         }
 
+        const normalizeDocId = id.replace(`${CURRENT_WORKSPACE_PLACEHOLDER}_`, '');
+
+        const configObject = await wrapperOptions.client.get<Record<string, any>>(
+          'config',
+          normalizeDocId,
+          options
+        );
+
         let workspaceObject: SavedObject<WorkspaceAttribute> | null = null;
 
         try {
@@ -75,9 +83,9 @@ export class WorkspaceUiSettingsClientWrapper {
           this.logger.error(`Unable to get workspaceObject with id: ${requestWorkspaceId}`);
         }
 
-        return {
-          attributes: workspaceObject?.attributes?.uiSettings || {},
-        } as SavedObject<T>;
+        configObject.attributes = workspaceObject?.attributes?.uiSettings || {};
+
+        return configObject as SavedObject<T>;
       }
 
       return wrapperOptions.client.get(type, id, options);
@@ -98,11 +106,18 @@ export class WorkspaceUiSettingsClientWrapper {
        */
       if (type === 'config' && id.startsWith(CURRENT_WORKSPACE_PLACEHOLDER)) {
         const savedObjectsClient = this.getWorkspaceTypeEnabledClient(wrapperOptions.request);
+        // if not in a workspace and try to update workspace level settings
+        // it should return 400 BadRequestError
         if (!requestWorkspaceId) {
-          throw new Error(
-            ' It is forbidden to update workspace level uiSettings when out of a workspace'
-          );
+          throw SavedObjectsErrorHelpers.createBadRequestError();
         }
+
+        const normalizeDocId = id.replace(`${CURRENT_WORKSPACE_PLACEHOLDER}_`, '');
+        const configObject = await wrapperOptions.client.get<Record<string, any>>(
+          'config',
+          normalizeDocId,
+          options
+        );
 
         const workspaceObject = await savedObjectsClient.get<WorkspaceAttribute>(
           WORKSPACE_TYPE,
@@ -119,7 +134,9 @@ export class WorkspaceUiSettingsClientWrapper {
           options
         );
 
-        return workspaceUpdateResult.attributes.uiSettings as SavedObjectsUpdateResponse<T>;
+        configObject.attributes = workspaceUpdateResult.attributes.uiSettings || {};
+
+        return configObject as SavedObjectsUpdateResponse<T>;
       }
       return wrapperOptions.client.update(type, id, attributes, options);
     };

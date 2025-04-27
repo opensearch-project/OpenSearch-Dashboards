@@ -24,6 +24,7 @@ import {
   handleSetDefaultDatasource,
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
+import { UiSettingScope } from '../../../../../core/public';
 
 type CreateDataSourceWizardProps = RouteComponentProps;
 
@@ -88,7 +89,11 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
       attributes.installedPlugins = metadata.installedPlugins;
       await createSingleDataSource(savedObjects.client, attributes);
       // Set the first create data source as default data source.
-      await handleSetDefaultDatasource(savedObjects.client, uiSettings, !!currentWorkspaceId);
+      await handleSetDefaultDatasource(
+        savedObjects.client,
+        uiSettings,
+        currentWorkspaceId ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
+      );
       props.history.push('');
     } catch (e) {
       setIsLoading(false);

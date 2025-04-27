@@ -194,7 +194,12 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           await fetchDataSources();
           setSelectedDataSources([]);
           if (payload.some((p) => p.id === defaultDataSourceId)) {
-            setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, !!currentWorkspace);
+            setFirstDataSourceAsDefault(
+              savedObjects.client,
+              uiSettings,
+              true,
+              UiSettingScope.WORKSPACE
+            );
           }
         }
       }
@@ -446,7 +451,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
             savedObjects.client,
             uiSettings,
             true,
-            !!currentWorkspace
+            currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
           );
           break;
         }

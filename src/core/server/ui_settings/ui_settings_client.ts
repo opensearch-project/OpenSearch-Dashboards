@@ -311,7 +311,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   /**
    * group change into different scopes
    * @param changes ui setting changes
-   * @returns [global, user]
+   * @returns [global, user, workspace]
    */
   private groupChanges(changes: Record<string, any>) {
     const userChanges = {} as Record<string, any>;
@@ -319,7 +319,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     const workspaceChanges = {} as Record<string, any>;
 
     Object.entries(changes).forEach(([key, val]) => {
-      if (this.uiSettingsKeysWithMoreThanOneScope.includes(key)) {
+      if (Array.isArray(this.defaults[key]?.scope) && (this.defaults[key].scope?.length ?? 0) > 1) {
         // if this setting has more than one scope, we should not update this setting without specifying scope
         throw new Error(`Unable to update "${key}", because it has multiple scopes`);
       } else if (this.userLevelSettingsKeys.includes(key)) {
