@@ -105,13 +105,13 @@ export class WorkspaceUiSettingsClientWrapper {
        * Skip updating workspace level setting if the request is updating user level setting specifically or global workspace level setting.
        */
       if (type === 'config' && id.startsWith(CURRENT_WORKSPACE_PLACEHOLDER)) {
-        const savedObjectsClient = this.getWorkspaceTypeEnabledClient(wrapperOptions.request);
         // if not in a workspace and try to update workspace level settings
         // it should return 400 BadRequestError
         if (!requestWorkspaceId) {
           throw SavedObjectsErrorHelpers.createBadRequestError();
         }
 
+        const savedObjectsClient = this.getWorkspaceTypeEnabledClient(wrapperOptions.request);
         const normalizeDocId = id.replace(`${CURRENT_WORKSPACE_PLACEHOLDER}_`, '');
         const configObject = await wrapperOptions.client.get<Record<string, any>>(
           'config',

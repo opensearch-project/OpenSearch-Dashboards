@@ -39,6 +39,7 @@ const createSetupContractMock = () => {
     getDefault: jest.fn(),
     get: jest.fn(),
     get$: jest.fn(),
+    getUserProvided: jest.fn(),
     set: jest.fn(),
     remove: jest.fn(),
     isDeclared: jest.fn(),
