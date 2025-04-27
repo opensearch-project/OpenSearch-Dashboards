@@ -413,3 +413,5 @@ export {
 } from './workspace';
 
 export { debounce } from './utils';
+
+export { searchNavigationLinks, GlobalSearchPageItem, renderNavGroupElement } from './chrome';

@@ -7,8 +7,6 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { GlobalSearchPageItem } from './page_item';
 import { coreMock } from '../../../../../core/public/mocks';
-import { BehaviorSubject } from 'rxjs';
-import { WorkspaceUseCase } from '../../types';
 import {
   ChromeNavLink,
   ChromeRegistrationNavLink,
@@ -38,17 +36,7 @@ describe('PageItem', () => {
   } as ChromeRegistrationNavLink & ChromeNavLink & { navGroup: NavGroupItemInMap };
 
   const coreStartMock = coreMock.createStart();
-  const { application, http } = coreStartMock;
-
-  const registeredUseCases = new BehaviorSubject([
-    {
-      id: 'foo',
-      title: 'Foo',
-      features: [{ id: 'system-feature', title: 'System feature' }],
-      systematic: true,
-      description: '',
-    } as WorkspaceUseCase,
-  ]);
+  const { application } = coreStartMock;
 
   const assignMock = jest.fn();
 
@@ -65,19 +53,33 @@ describe('PageItem', () => {
   });
 
   it('renders the page item correctly', () => {
-    const { getByText } = render(
-      <GlobalSearchPageItem
-        currentWorkspace={currentWorkspace}
-        link={link}
-        http={http}
-        application={application}
-        registeredUseCases$={registeredUseCases}
-        search="abc"
-      />
-    );
+    const { getByText } = render(<GlobalSearchPageItem link={link} search="abc" />);
 
-    // workspace name and link title
-    expect(getByText('Workspace 1')).toBeInTheDocument();
+    expect(getByText('App 1')).toBeInTheDocument();
+  });
+
+  it('renders the page item with parent link correctly', () => {
+    const linkWithParentLink = {
+      ...link,
+      parentNavLinkId: 'settings',
+      navGroup: {
+        id: 'admin',
+        description: '',
+        title: 'Data administration',
+        type: NavGroupType.SYSTEM,
+        navLinks: [
+          {
+            id: 'settings',
+            description: '',
+            title: 'Settings',
+            type: NavGroupType.SYSTEM,
+          },
+        ],
+      },
+    };
+    const { getByText } = render(<GlobalSearchPageItem link={linkWithParentLink} search="abc" />);
+
+    expect(getByText('Settings')).toBeInTheDocument();
     expect(getByText('App 1')).toBeInTheDocument();
   });
 
@@ -94,12 +96,12 @@ describe('PageItem', () => {
     };
     const { getByText } = render(
       <GlobalSearchPageItem
-        currentWorkspace={currentWorkspace}
         link={settingsLink}
-        http={http}
-        application={application}
-        registeredUseCases$={registeredUseCases}
         search="abc"
+        renderBreadcrumbs={(breadcrumbs) => {
+          breadcrumbs.push({ text: <>{settingsLink.navGroup.title}</> });
+          return breadcrumbs;
+        }}
       />
     );
 
@@ -124,12 +126,12 @@ describe('PageItem', () => {
 
     const { getByText } = render(
       <GlobalSearchPageItem
-        currentWorkspace={currentWorkspace}
         link={settingsLink}
-        http={http}
-        application={application}
-        registeredUseCases$={registeredUseCases}
         search="abc"
+        renderBreadcrumbs={(breadcrumbs) => {
+          breadcrumbs.push({ text: <>{settingsLink.navGroup.title}</> });
+          return breadcrumbs;
+        }}
       />
     );
 
@@ -148,12 +150,12 @@ describe('PageItem', () => {
 
     const { getByText } = render(
       <GlobalSearchPageItem
-        currentWorkspace={currentWorkspace}
         link={settingsLink}
-        http={http}
-        application={application}
-        registeredUseCases$={registeredUseCases}
         search="abc"
+        renderBreadcrumbs={(breadcrumbs) => {
+          breadcrumbs.push({ text: <>{currentWorkspace.name}</> });
+          return breadcrumbs;
+        }}
       />
     );
 
@@ -171,17 +173,15 @@ describe('PageItem', () => {
       title: 'Overview',
     };
 
-    const callbackFn = jest.fn();
-
     const { getByText, getByTestId } = render(
       <GlobalSearchPageItem
-        currentWorkspace={currentWorkspace}
         link={settingsLink}
-        http={http}
-        application={application}
-        registeredUseCases$={registeredUseCases}
         search="abc"
-        callback={callbackFn}
+        renderBreadcrumbs={(breadcrumbs) => {
+          breadcrumbs.push({ text: <>{currentWorkspace.name}</> });
+          return breadcrumbs;
+        }}
+        callback={() => application.navigateToApp(settingsLink.id)}
       />
     );
 
@@ -192,7 +192,6 @@ describe('PageItem', () => {
 
     fireEvent.click(getByTestId('global-search-item-sa_overview'));
     expect(application.navigateToApp).toBeCalledWith('sa_overview');
-    expect(callbackFn).toBeCalled();
   });
 
   it('click on the item will navigate to correctly page for data source out of workspace', () => {
@@ -210,17 +209,17 @@ describe('PageItem', () => {
       title: 'Data source',
     };
 
-    const callbackFn = jest.fn();
-
     const { getByText, getByTestId } = render(
       <GlobalSearchPageItem
-        currentWorkspace={currentWorkspace}
         link={navLink}
-        http={http}
-        application={application}
-        registeredUseCases$={registeredUseCases}
         search="abc"
-        callback={callbackFn}
+        renderBreadcrumbs={(breadcrumbs) => {
+          breadcrumbs.push({ text: <>{navLink.navGroup.title}</> });
+          return breadcrumbs;
+        }}
+        callback={() => {
+          window.location.assign('http://localhost:5601/app/data_source');
+        }}
       />
     );
 
@@ -246,17 +245,11 @@ describe('PageItem', () => {
       title: 'Data source',
     };
 
-    const callbackFn = jest.fn();
-
     const { getByText, getByTestId } = render(
       <GlobalSearchPageItem
-        currentWorkspace={currentWorkspace}
         link={navLink}
-        http={http}
-        application={application}
-        registeredUseCases$={registeredUseCases}
         search="abc"
-        callback={callbackFn}
+        callback={() => application.navigateToApp('data_source')}
       />
     );
 

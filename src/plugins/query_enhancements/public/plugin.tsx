@@ -19,7 +19,7 @@ import { s3TypeConfig } from './datasets';
 import { createQueryAssistExtension } from './query_assist';
 import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
-import { setData, setStorage } from './services';
+import { setData, setStorage, setUiActions } from './services';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
@@ -225,10 +225,11 @@ export class QueryEnhancementsPlugin
 
   public start(
     core: CoreStart,
-    { data }: QueryEnhancementsPluginStartDependencies
+    { data, uiActions }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
     setStorage(this.storage);
     setData(data);
+    setUiActions(uiActions);
     return {};
   }
 

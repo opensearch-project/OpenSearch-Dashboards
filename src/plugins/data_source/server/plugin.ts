@@ -17,8 +17,9 @@ import {
   Plugin,
   PluginInitializerContext,
   RequestHandler,
+  SharedGlobalConfig,
 } from '../../../../src/core/server';
-import { DataSourcePluginConfigType } from '../config';
+import { ConfigSchema, DataSourcePluginConfigType } from '../config';
 import { LoggingAuditor } from './audit/logging_auditor';
 import { CryptographyService, CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
@@ -38,7 +39,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   private readonly logger: Logger;
   private readonly cryptographyService: CryptographyService;
   private readonly dataSourceService: DataSourceService;
-  private readonly config$: Observable<DataSourcePluginConfigType>;
+  private readonly config$: Observable<ConfigSchema>;
+  private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistry();
   private customApiSchemaRegistry = new CustomApiSchemaRegistry();
@@ -47,7 +49,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     this.logger = this.initializerContext.logger.get();
     this.cryptographyService = new CryptographyService(this.logger.get('cryptography-service'));
     this.dataSourceService = new DataSourceService(this.logger.get('data-source-service'));
-    this.config$ = this.initializerContext.config.create<DataSourcePluginConfigType>();
+    this.config$ = this.initializerContext.config.create<ConfigSchema>();
+    this.globalConfig$ = this.initializerContext.config.legacy.globalConfig$;
   }
 
   public async setup(core: CoreSetup<DataSourcePluginStart>) {
@@ -57,7 +60,15 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     core.savedObjects.registerType(dataSource);
     core.savedObjects.registerType(dataConnection);
 
-    const config: DataSourcePluginConfigType = await this.config$.pipe(first()).toPromise();
+    const pluginConfig: ConfigSchema = await this.config$.pipe(first()).toPromise();
+    const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
+    const config = {
+      ...pluginConfig,
+      globalOpenSearchConfig: {
+        requestTimeout: globalConfig.opensearch.requestTimeout,
+        pingTimeout: globalConfig.opensearch.pingTimeout,
+      },
+    };
 
     const cryptographyServiceSetup: CryptographyServiceSetup = this.cryptographyService.setup(
       config
