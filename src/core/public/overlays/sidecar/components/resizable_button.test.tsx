@@ -5,10 +5,12 @@
 
 import React from 'react';
 
-import { ResizableButton, MIN_SIDECAR_SIZE } from './resizable_button';
+import { ResizableButton } from './resizable_button';
 import { mount, shallow } from 'enzyme';
 import { SIDECAR_DOCKED_MODE } from '../sidecar_service';
 import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/dom';
+import { MIN_SIDECAR_SIZE } from '../helper';
 
 const originalAddEventListener = window.addEventListener;
 
@@ -229,8 +231,10 @@ test('it should handle window resize events correctly for different docked modes
     window.dispatchEvent(new Event('resize'));
   });
 
-  expect(onResize).toHaveBeenCalledWith(600);
-
+  await waitFor(() => {
+    // wait for debounce
+    expect(onResize).toHaveBeenCalledWith(600);
+  });
   onResize.mockClear();
 
   const rightProps = {
@@ -246,7 +250,10 @@ test('it should handle window resize events correctly for different docked modes
     window.dispatchEvent(new Event('resize'));
   });
 
-  expect(onResize).toHaveBeenCalledWith(800);
+  await waitFor(() => {
+    // wait for debounce
+    expect(onResize).toHaveBeenCalledWith(800);
+  });
 
   component.unmount();
 });

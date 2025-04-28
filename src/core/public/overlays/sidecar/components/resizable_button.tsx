@@ -6,8 +6,9 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import './resizable_button.scss';
-import { getPosition } from '../helper';
+import { getPosition, calculateNewPaddingSize, MIN_SIDECAR_SIZE } from '../helper';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../sidecar_service';
+import { debounce } from '../../../../../core/public/utils';
 
 interface Props {
   onResize: (size: number) => void;
@@ -15,7 +16,7 @@ interface Props {
   dockedMode: ISidecarConfig['dockedMode'] | undefined;
 }
 
-export const MIN_SIDECAR_SIZE = 350;
+const RESIZE_DEBOUNCE_DELAY = 50;
 
 export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => {
   const isHorizontal = dockedMode !== SIDECAR_DOCKED_MODE.TAKEOVER;
@@ -29,29 +30,28 @@ export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => 
   const initialFlyoutSize = useRef(flyoutSize);
   const setFocus = (e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.focus();
 
+  const currentFlyoutSize = useRef(flyoutSize);
+  currentFlyoutSize.current = flyoutSize;
+
   useEffect(() => {
-    const handleWindowResize = () => {
-      if (flyoutSize > MIN_SIDECAR_SIZE) {
+    const debouncedResize = debounce(() => {
+      const currentSize = currentFlyoutSize.current;
+
+      if (currentSize > MIN_SIDECAR_SIZE) {
         // Make sure flyout never below min size even if the window goes below the size
-        if (dockedMode === SIDECAR_DOCKED_MODE.TAKEOVER && flyoutSize > window.innerHeight) {
-          // Automatically reduce the height in full screen mode when resize the window
-          onResize(window.innerHeight);
-        } else if (
-          (dockedMode === SIDECAR_DOCKED_MODE.LEFT || dockedMode === SIDECAR_DOCKED_MODE.RIGHT) &&
-          flyoutSize > window.innerWidth
-        ) {
-          // Automatically reduce the width in left or right docked mode when resize the window
-          onResize(window.innerWidth);
+        const newPaddingSize = calculateNewPaddingSize(dockedMode, currentSize);
+        if (currentSize > newPaddingSize) {
+          onResize(newPaddingSize);
         }
       }
-    };
+    }, RESIZE_DEBOUNCE_DELAY);
 
-    window.addEventListener('resize', handleWindowResize);
+    window.addEventListener('resize', debouncedResize);
 
     return () => {
-      window.removeEventListener('resize', handleWindowResize);
+      window.removeEventListener('resize', debouncedResize);
     };
-  }, [flyoutSize, dockedMode, onResize]);
+  }, [dockedMode, onResize]);
 
   const onMouseDown = useCallback(
     (event: React.MouseEvent | React.TouchEvent) => {
