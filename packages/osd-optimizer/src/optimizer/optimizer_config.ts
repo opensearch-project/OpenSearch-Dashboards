@@ -38,6 +38,7 @@ import {
   ThemeTag,
   ThemeTags,
   parseThemeTags,
+  BundleRef,
 } from '../common';
 
 import {
@@ -131,6 +132,8 @@ interface Options {
    *  - "k7light"
    */
   themes?: ThemeTag | '*' | ThemeTag[];
+
+  bundleRefs?: BundleRef[];
 }
 
 export interface ParsedOptions {
@@ -147,6 +150,7 @@ export interface ParsedOptions {
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
+  bundleRefs: BundleRef[];
 }
 
 export class OptimizerConfig {
@@ -159,6 +163,7 @@ export class OptimizerConfig {
     const cache = options.cache !== false && !process.env.OSD_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
+    const bundleRefs = options.bundleRefs ?? [];
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -223,6 +228,7 @@ export class OptimizerConfig {
       inspectWorkers,
       includeCoreBundle,
       themeTags,
+      bundleRefs,
     };
   }
 
@@ -259,7 +265,8 @@ export class OptimizerConfig {
       options.dist,
       options.profileWebpack,
       options.themeTags,
-      readLimits()
+      readLimits(),
+      options.bundleRefs
     );
   }
 
@@ -274,7 +281,8 @@ export class OptimizerConfig {
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
     public readonly themeTags: ThemeTags,
-    public readonly limits: Limits
+    public readonly limits: Limits,
+    public readonly bundleRefs: BundleRef[]
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
