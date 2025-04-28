@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import './resizable_button.scss';
 import { getPosition } from '../helper';
@@ -29,6 +29,30 @@ export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => 
   const initialFlyoutSize = useRef(flyoutSize);
   const setFocus = (e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.focus();
 
+  useEffect(() => {
+    const handleWindowResize = () => {
+      if (flyoutSize > MIN_SIDECAR_SIZE) {
+        // Make sure flyout never below min size even if the window goes below the size
+        if (dockedMode === SIDECAR_DOCKED_MODE.TAKEOVER && flyoutSize > window.innerHeight) {
+          // Automatically reduce the height in full screen mode when resize the window
+          onResize(window.innerHeight);
+        } else if (
+          (dockedMode === SIDECAR_DOCKED_MODE.LEFT || dockedMode === SIDECAR_DOCKED_MODE.RIGHT) &&
+          flyoutSize > window.innerWidth
+        ) {
+          // Automatically reduce the width in left or right docked mode when resize the window
+          onResize(window.innerWidth);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleWindowResize);
+
+    return () => {
+      window.removeEventListener('resize', handleWindowResize);
+    };
+  }, [flyoutSize, dockedMode, onResize]);
+
   const onMouseDown = useCallback(
     (event: React.MouseEvent | React.TouchEvent) => {
       const onMouseUp = () => {
@@ -39,6 +63,17 @@ export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => 
         window.removeEventListener('touchend', onMouseUp);
       };
       const onMouseMove = (e: MouseEvent | TouchEvent) => {
+        if (
+          e instanceof MouseEvent &&
+          (e.clientX < 0 ||
+            e.clientX > window.innerWidth ||
+            e.clientY < 0 ||
+            e.clientY > window.innerHeight)
+        ) {
+          // Stop resize calculation if the user mouse move out of window
+          return;
+        }
+
         let offset;
         if (dockedMode === SIDECAR_DOCKED_MODE.LEFT) {
           offset = getPosition(e, isHorizontal) - initialMouseXorY.current;
