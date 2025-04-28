@@ -556,6 +556,90 @@ describe('Workspace plugin', () => {
     expect(coreStart.chrome.globalSearch.unregisterSearchCommand).toBeCalledWith('pagesSearch');
   });
 
+  it('#start should update collaboratorsAppUpdater correctly if permission enabled', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+
+    const appUpdaterSpy = jest.spyOn((workspacePlugin as any).collaboratorsAppUpdater$, 'next');
+
+    const startMock = {
+      ...coreStart,
+      chrome: {
+        ...coreStart.chrome,
+        navGroup: {
+          ...coreStart.chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(true),
+        },
+      },
+      application: {
+        ...coreStart.application,
+        capabilities: {
+          ...coreStart.application.capabilities,
+          workspaces: {
+            ...coreStart.application.capabilities.workspaces,
+            permissionEnabled: true,
+          },
+        },
+      },
+    };
+
+    workspacePlugin.start(startMock, getMockDependencies());
+
+    expect(appUpdaterSpy).toHaveBeenCalled();
+    const updaterFn = appUpdaterSpy.mock.calls[0][0];
+    const result = (updaterFn as any)();
+
+    expect(result).toStrictEqual({
+      status: AppStatus.accessible,
+      chromeless: false,
+      navLinkStatus: AppNavLinkStatus.visible,
+    });
+  });
+
+  it('#start should update collaboratorsAppUpdater correctly if permission disabled', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+
+    const appUpdaterSpy = jest.spyOn((workspacePlugin as any).collaboratorsAppUpdater$, 'next');
+
+    const startMock = {
+      ...coreStart,
+      chrome: {
+        ...coreStart.chrome,
+        navGroup: {
+          ...coreStart.chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(false),
+        },
+      },
+      application: {
+        ...coreStart.application,
+        capabilities: {
+          ...coreStart.application.capabilities,
+          workspaces: {
+            ...coreStart.application.capabilities.workspaces,
+            permissionEnabled: false,
+          },
+        },
+      },
+    };
+
+    workspacePlugin.start(startMock, getMockDependencies());
+
+    expect(appUpdaterSpy).toHaveBeenCalled();
+    const updaterFn = appUpdaterSpy.mock.calls[0][0];
+    const result = (updaterFn as any)();
+
+    expect(result).toStrictEqual({
+      status: AppStatus.inaccessible,
+      chromeless: true,
+      navLinkStatus: AppNavLinkStatus.hidden,
+    });
+  });
+
   it('#stop should call unregisterNavGroupUpdater', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();

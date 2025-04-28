@@ -570,6 +570,7 @@ export class WorkspacePlugin
     this.collaboratorsAppUpdater$.next(() => {
       return {
         status: isPermissionEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+        chromeless: !isPermissionEnabled,
         navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
           ? AppNavLinkStatus.visible
           : AppNavLinkStatus.hidden,
