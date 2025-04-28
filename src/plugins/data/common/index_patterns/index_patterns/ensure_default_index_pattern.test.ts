@@ -6,11 +6,6 @@
 import { createEnsureDefaultIndexPattern } from './ensure_default_index_pattern';
 import { IndexPatternsContract } from './index_patterns';
 import { UiSettingsCommon, SavedObjectsClientCommon } from '../types';
-import { includes } from 'lodash';
-
-jest.mock('lodash', () => ({
-  includes: jest.fn(),
-}));
 
 describe('ensureDefaultIndexPattern', () => {
   let uiSettings: UiSettingsCommon;
@@ -36,8 +31,6 @@ describe('ensureDefaultIndexPattern', () => {
       get: jest.fn(),
       getDataSource: jest.fn(),
     } as unknown) as IndexPatternsContract;
-
-    (includes as jest.Mock).mockClear();
   });
 
   test('should return early if canUpdateUiSetting is false', async () => {
@@ -66,16 +59,12 @@ describe('ensureDefaultIndexPattern', () => {
       if (key === 'defaultIndex') return 'invalid-pattern';
       return false;
     });
-    (includes as jest.Mock).mockReturnValue(true);
-
     (indexPatterns.get as jest.Mock).mockResolvedValue({
       dataSourceRef: { id: 'ds1' },
     });
-
     (indexPatterns.getDataSource as jest.Mock).mockResolvedValue({
       error: { statusCode: 404 },
     });
-
     (savedObjectsClient.find as jest.Mock).mockImplementation((params) => {
       if (params.type === 'data-source') {
         return Promise.resolve([{ id: 'ds1' }]);
@@ -91,7 +80,7 @@ describe('ensureDefaultIndexPattern', () => {
     });
 
     await ensureDefaultIndexPattern.call(indexPatterns);
-
+    expect(indexPatterns.getIds).toHaveBeenCalled();
     expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern1');
   });
 
@@ -108,7 +97,6 @@ describe('ensureDefaultIndexPattern', () => {
     (savedObjectsClient.find as jest.Mock).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
     await ensureDefaultIndexPattern.call(indexPatterns);
-
     expect(onRedirectNoIndexPattern).toHaveBeenCalled();
   });
 
@@ -123,7 +111,6 @@ describe('ensureDefaultIndexPattern', () => {
     const defaultId = 'pattern1';
     (indexPatterns.getIds as jest.Mock).mockResolvedValue([defaultId]);
     (uiSettings.get as jest.Mock).mockResolvedValue(defaultId);
-    (includes as jest.Mock).mockReturnValue(true);
     (indexPatterns.get as jest.Mock).mockResolvedValue({
       dataSourceRef: { id: 'ds1' },
     });
@@ -132,7 +119,6 @@ describe('ensureDefaultIndexPattern', () => {
     });
 
     await ensureDefaultIndexPattern.call(indexPatterns);
-
     expect(savedObjectsClient.find).toHaveBeenCalledWith({ type: 'data-source' });
   });
 
@@ -147,7 +133,6 @@ describe('ensureDefaultIndexPattern', () => {
     const defaultId = 'pattern1';
     (indexPatterns.getIds as jest.Mock).mockResolvedValue([defaultId]);
     (uiSettings.get as jest.Mock).mockResolvedValue(defaultId);
-    (includes as jest.Mock).mockReturnValue(true);
     (indexPatterns.get as jest.Mock).mockResolvedValue({});
 
     await ensureDefaultIndexPattern.call(indexPatterns);
@@ -165,12 +150,10 @@ describe('ensureDefaultIndexPattern', () => {
     const defaultId = 'pattern1';
     (indexPatterns.getIds as jest.Mock).mockResolvedValue([defaultId]);
     (uiSettings.get as jest.Mock).mockResolvedValue(defaultId);
-    (includes as jest.Mock).mockReturnValue(true);
     (indexPatterns.get as jest.Mock).mockResolvedValue({
       dataSourceRef: { id: 'ds1' },
     });
     (indexPatterns.getDataSource as jest.Mock).mockResolvedValue({
-      // No error
       data: {},
     });
 
@@ -189,14 +172,12 @@ describe('ensureDefaultIndexPattern', () => {
     const defaultId = 'pattern1';
     (indexPatterns.getIds as jest.Mock).mockResolvedValue([defaultId]);
     (uiSettings.get as jest.Mock).mockResolvedValue(defaultId);
-    (includes as jest.Mock).mockReturnValue(true);
     (indexPatterns.get as jest.Mock).mockResolvedValue({
       dataSourceRef: { id: 'ds1' },
     });
     (indexPatterns.getDataSource as jest.Mock).mockResolvedValue({
       error: { statusCode: 403 },
     });
-
     (savedObjectsClient.find as jest.Mock).mockImplementation((params) => {
       if (params.type === 'data-source') {
         return Promise.resolve([{ id: 'ds1' }]);
@@ -222,21 +203,17 @@ describe('ensureDefaultIndexPattern', () => {
       true,
       savedObjectsClient
     );
-
-    const defaultId = 'pattern1';
-    (indexPatterns.getIds as jest.Mock).mockResolvedValue([defaultId]);
-    (uiSettings.get as jest.Mock).mockResolvedValue(defaultId);
-    (includes as jest.Mock).mockReturnValue(true);
+  
+    (indexPatterns.getIds as jest.Mock).mockResolvedValue([]);
+    (uiSettings.get as jest.Mock).mockResolvedValue(null);
     (indexPatterns.get as jest.Mock).mockResolvedValue({
       dataSourceRef: { id: 'ds1' },
     });
     (indexPatterns.getDataSource as jest.Mock).mockResolvedValue({
       error: { statusCode: 403 },
     });
-
     (savedObjectsClient.find as jest.Mock).mockRejectedValue(new Error('Failed to find'));
-    (uiSettings.get as jest.Mock).mockResolvedValueOnce(defaultId).mockResolvedValueOnce(false);
-
+  
     await ensureDefaultIndexPattern.call(indexPatterns);
     expect(onRedirectNoIndexPattern).toHaveBeenCalled();
   });
@@ -252,14 +229,12 @@ describe('ensureDefaultIndexPattern', () => {
     const defaultId = 'pattern1';
     (indexPatterns.getIds as jest.Mock).mockResolvedValue([defaultId]);
     (uiSettings.get as jest.Mock).mockResolvedValue(defaultId);
-    (includes as jest.Mock).mockReturnValue(true);
     (indexPatterns.get as jest.Mock).mockResolvedValue({
       dataSourceRef: { id: 'ds1' },
     });
     (indexPatterns.getDataSource as jest.Mock).mockResolvedValue({
       error: { statusCode: 403 },
     });
-
     (savedObjectsClient.find as jest.Mock).mockImplementation((params) => {
       if (params.type === 'data-source') {
         return Promise.resolve([{ id: 'ds2' }]);
