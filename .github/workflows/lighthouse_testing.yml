@@ -98,13 +98,32 @@ jobs:
       - name: List contents of .lighthouseci
         run: ls -R .lighthouseci || echo "Directory not found"
 
-      - name: Upload Lighthouse Artifacts
+      - name: Verify Lighthouse Results
+        id: verify_lighthouse
+        run: |
+          if [ ! -s ".lighthouseci/assertion-results.json" ]; then
+            echo "❌ Lighthouse assertion-results.json is empty. Skipping further steps."
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Valid Lighthouse results found."
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Save Lighthouse Results as Artifact
+        if: steps.verify_lighthouse.outputs.should_continue == 'true'
+        run: |
+          mkdir -p artifacts
+          cp .lighthouseci/assertion-results.json artifacts/
+
+      - name: Upload Lighthouse Results Artifact
+        if: steps.verify_lighthouse.outputs.should_continue == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-results
-          path: .lighthouseci
+          path: artifacts/assertion-results.json
 
       - name: Fail CI if Lighthouse assertion results indicate failures
+        if: steps.verify_lighthouse.outputs.should_continue == 'true'
         run: |
           if jq -e '[.[] | select(.passed==false)] | length > 0' .lighthouseci/assertion-results.json > /dev/null; then
             echo "❌ Lighthouse CI detected performance issues. Failing the job."
