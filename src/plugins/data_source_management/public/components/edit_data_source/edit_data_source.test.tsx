@@ -154,7 +154,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
     test('should delete datasource successfully', async () => {
       spyOn(utils, 'deleteDataSourceById').and.returnValue({});
       spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
-      spyOn(uiSettings, 'get').and.callFake((key) => {
+      spyOn(uiSettings, 'getUserProvided').and.callFake((key) => {
         if (key === 'home:useNewHomePage') {
           return false;
         }

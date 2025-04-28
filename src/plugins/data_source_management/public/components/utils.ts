@@ -276,7 +276,7 @@ export async function handleSetDefaultDatasource(
   uiSettings: IUiSettingsClient,
   scope: UiSettingScope
 ) {
-  if (!getDefaultDataSourceId(uiSettings)) {
+  if (!getDefaultDataSourceId(uiSettings, scope)) {
     return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false, scope);
   }
 }
@@ -340,6 +340,8 @@ export function getFilteredDataSources(
 
 export function getDefaultDataSourceId(uiSettings?: IUiSettingsClient, scope?: UiSettingScope) {
   if (!uiSettings) return null;
+  // if specify the scope, then we will call getUserProvided to request from server
+  // otherwise, we will call get to get defaultDataSource stored in cache
   if (scope)
     return uiSettings.getUserProvided<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, scope);
   return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID);
