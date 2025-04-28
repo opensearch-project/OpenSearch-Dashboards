@@ -64,28 +64,6 @@ export class BundleRefsPlugin {
    * Called by webpack when the plugin is passed in the webpack config
    */
   public apply(compiler: webpack.Compiler) {
-    /* compiler.hooks.normalModuleFactory.tap('BundleRefsPlugin/test', (normalModuleFactory) => {
-      normalModuleFactory.hooks.beforeResolve.tapAsync(
-        'BundleRefsPlugin/test',
-        (resolveData, callback) => {
-          if (!resolveData || !resolveData.request.startsWith('@/core/public')) {
-            return callback();
-          }
-          // const pluginPath = resolveData.request.replace('@/', '');
-          const virtualModulePath = `/@/virtual-modules/core/public.js`;
-
-          // TODO: replace plugin path with bundle export id
-          const virtualModuleContent = `
-            const ns = __osdBundles__.get('entry/core/public');
-            module.exports = ns;
-          `;
-          resolveData.request = virtualModulePath;
-          this.virtualModules[virtualModulePath] = virtualModuleContent;
-
-          return callback(null, resolveData);
-        }
-      );
-    });*/
     // called whenever the compiler starts to compile, passed the params
     // that will be used to create the compilation
     compiler.hooks.compile.tap('BundleRefsPlugin', (compilationParams: any) => {
@@ -224,9 +202,6 @@ export class BundleRefsPlugin {
    * undefined is returned. Otherwise it returns the referenced bundleRef.
    */
   private async maybeReplaceImport(context: string, request: string) {
-    // if (request.startsWith('@/core')) {
-    //   console.log(request);
-    // }
     // ignore imports that have loaders defined or are not relative seeming
     if (request.includes('!') || !request.startsWith('.')) {
       return;

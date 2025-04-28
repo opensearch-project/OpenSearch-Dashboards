@@ -59,6 +59,8 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
   );
 
   const refs: BundleRef[] = [];
+
+  // The core modules
   ['public', 'public/utils'].forEach((name) => {
     refs.push({
       bundleId: 'core',
@@ -81,8 +83,6 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
       });
     }
   }
-
-  log.info('Using bundle refs: ', JSON.stringify(refs, undefined, 2));
 
   // build bundles into target
   const config = OptimizerConfig.create({
