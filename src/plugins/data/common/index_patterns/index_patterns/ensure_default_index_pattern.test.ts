@@ -203,7 +203,7 @@ describe('ensureDefaultIndexPattern', () => {
       true,
       savedObjectsClient
     );
-  
+
     (indexPatterns.getIds as jest.Mock).mockResolvedValue([]);
     (uiSettings.get as jest.Mock).mockResolvedValue(null);
     (indexPatterns.get as jest.Mock).mockResolvedValue({
@@ -213,7 +213,7 @@ describe('ensureDefaultIndexPattern', () => {
       error: { statusCode: 403 },
     });
     (savedObjectsClient.find as jest.Mock).mockRejectedValue(new Error('Failed to find'));
-  
+
     await ensureDefaultIndexPattern.call(indexPatterns);
     expect(onRedirectNoIndexPattern).toHaveBeenCalled();
   });
