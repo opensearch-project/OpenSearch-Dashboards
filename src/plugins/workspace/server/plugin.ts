@@ -13,7 +13,18 @@ import {
   Logger,
   CoreStart,
   SharedGlobalConfig,
-} from '../../../core/server';
+} from 'opensearch-dashboards/server';
+import {
+  cleanWorkspaceId,
+  cleanUpACLAuditor,
+  cleanUpClientCallAuditor,
+  getACLAuditor,
+  getWorkspaceIdFromUrl,
+  getWorkspaceState,
+  initializeACLAuditor,
+  initializeClientCallAuditor,
+  updateWorkspaceState,
+} from 'opensearch-dashboards/server/utils';
 import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
@@ -33,17 +44,6 @@ import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
-import {
-  cleanWorkspaceId,
-  cleanUpACLAuditor,
-  cleanUpClientCallAuditor,
-  getACLAuditor,
-  getWorkspaceIdFromUrl,
-  getWorkspaceState,
-  initializeACLAuditor,
-  initializeClientCallAuditor,
-  updateWorkspaceState,
-} from '../../../core/server/utils';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
 import {
   SavedObjectsPermissionControl,

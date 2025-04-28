@@ -4,15 +4,19 @@
  */
 
 import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
-import { coreMock, httpServerMock, uiSettingsServiceMock } from '../../../core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  uiSettingsServiceMock,
+} from 'opensearch-dashboards/server/mocks';
 import { WorkspacePlugin, WorkspacePluginDependencies } from './plugin';
 import {
   getACLAuditor,
   getClientCallAuditor,
   getWorkspaceState,
   updateWorkspaceState,
-} from '../../../core/server/utils';
-import * as serverUtils from '../../../core/server/utils/auth_info';
+} from 'opensearch-dashboards/server/utils';
+import * as serverUtils from 'opensearch-dashboards/server/utils/auth_info';
 import { SavedObjectsPermissionControl } from './permission_control/client';
 import { DataSourcePluginSetup } from '../../data_source/server';
 import { DataSourceError } from '../../data_source/common/data_sources';
