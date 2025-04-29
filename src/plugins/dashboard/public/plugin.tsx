@@ -277,9 +277,9 @@ export class DashboardPlugin
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         ExitFullScreenButton,
         uiActions: deps.uiActions,
-        savedObjectsClient: coreStart.savedObjects.client, // HERE TO ADD SAVED OBJECTS CLIENT
-        http: coreStart.http, // HERE TO ADD HTTP
-        dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!, // HERE TO PASS THE DASHBOARD FEATURE FLAG CONFIG
+        savedObjectsClient: coreStart.savedObjects.client,
+        http: coreStart.http,
+        dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       };
     };
 
