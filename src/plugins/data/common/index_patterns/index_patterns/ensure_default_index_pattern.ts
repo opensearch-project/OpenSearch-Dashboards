@@ -52,10 +52,12 @@ export const createEnsureDefaultIndexPattern = (
     let defaultId = await uiSettings.get('defaultIndex');
     let defined = !!defaultId;
     const exists = includes(patterns, defaultId);
+
     if (defined && !exists) {
       await uiSettings.remove('defaultIndex');
       defaultId = defined = false;
     }
+
     if (defined) {
       const indexPattern = await this.get(defaultId);
       const dataSourceRef = indexPattern?.dataSourceRef;
@@ -71,7 +73,8 @@ export const createEnsureDefaultIndexPattern = (
             const existDataSources = datasources.map((item) => item.id);
             patterns = [];
             indexPatterns.forEach((item) => {
-              const refId = item.references?.[0]?.id;
+              const sourceRef = item.references?.find((ref) => ref.type === 'data-source');
+              const refId = sourceRef?.id;
               const refIdBool = !!refId;
               if (!refIdBool || existDataSources.includes(refId)) {
                 patterns.push(item.id);
@@ -79,7 +82,7 @@ export const createEnsureDefaultIndexPattern = (
             });
           }
         } catch (e) {
-          //  if it fails, jump directly to the execution of Redirect
+          return;
         }
       } else {
         return;
