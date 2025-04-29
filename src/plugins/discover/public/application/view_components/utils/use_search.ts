@@ -589,6 +589,9 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       filterManager.setAppFilters(actualFilters);
       data.query.queryString.setQuery(query);
+      // Update local storage after loading saved search
+      data.query.queryString.getLanguageService().setUserQueryLanguage(query.language);
+      data.query.queryString.getInitialQueryByLanguage(query.language);
       setSavedSearch(savedSearchInstance);
 
       if (savedSearchInstance?.id) {

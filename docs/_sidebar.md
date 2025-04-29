@@ -129,6 +129,7 @@
     - [Osd pm](../packages/osd-pm/README.md)
     - [Osd spec to console](../packages/osd-spec-to-console/README.md)
     - [Osd std](../packages/osd-std/README.md)
+    - [Osd storybook](../packages/osd-storybook/README.md)
     - [Osd stylelint config](../packages/osd-stylelint-config/README.md)
     - [Osd stylelint plugin stylelint](../packages/osd-stylelint-plugin-stylelint/README.md)
     - [Osd telemetry tools](../packages/osd-telemetry-tools/README.md)
