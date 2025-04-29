@@ -29,29 +29,18 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiProgress,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
-import {
-  EMR_STATES,
-  MAX_ORD,
-  intervalAsMinutes,
-} from '../../utils/direct_query_sync/direct_query_sync';
+import { EMR_STATES, intervalAsMinutes } from '../../utils/direct_query_sync/direct_query_sync';
 
-interface DashboardFlintSyncProps {
+interface DashboardDirectQuerySyncProps {
   loadStatus: DirectQueryLoadingStatus;
   lastRefreshTime?: number;
   refreshInterval?: number;
   onSynchronize: () => void;
 }
 
-export const DashboardFlintSync: React.FC<DashboardFlintSyncProps> = ({
+export const DashboardDirectQuerySync: React.FC<DashboardDirectQuerySyncProps> = ({
   loadStatus,
   lastRefreshTime,
   refreshInterval,

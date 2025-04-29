@@ -55,7 +55,7 @@ import {
   generateRefreshQuery,
   EMR_STATES,
 } from '../../utils/direct_query_sync/direct_query_sync';
-import { DashboardFlintSync } from './dashboard_flint_sync';
+import { DashboardDirectQuerySync } from './dashboard_direct_query_sync';
 import { isDirectQuerySyncEnabledByUrl } from '../../utils/direct_query_sync/direct_query_sync_url_flag';
 
 let lastValidGridSize = 0;
@@ -407,7 +407,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           const shouldRenderSyncUI = featureFlagEnabled && metadataAvailable;
 
           return shouldRenderSyncUI ? (
-            <DashboardFlintSync
+            <DashboardDirectQuerySync
               loadStatus={this.props.loadStatus}
               lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
               refreshInterval={this.state.extractedProps?.refreshInterval}
