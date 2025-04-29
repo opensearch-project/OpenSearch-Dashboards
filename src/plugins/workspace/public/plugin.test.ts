@@ -593,7 +593,6 @@ describe('Workspace plugin', () => {
 
     expect(result).toStrictEqual({
       status: AppStatus.accessible,
-      chromeless: false,
       navLinkStatus: AppNavLinkStatus.visible,
     });
   });
@@ -635,7 +634,6 @@ describe('Workspace plugin', () => {
 
     expect(result).toStrictEqual({
       status: AppStatus.inaccessible,
-      chromeless: true,
       navLinkStatus: AppNavLinkStatus.hidden,
     });
   });
