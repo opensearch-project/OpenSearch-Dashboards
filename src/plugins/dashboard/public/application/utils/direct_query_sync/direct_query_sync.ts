@@ -178,6 +178,11 @@ export async function fetchIndexMapping(
 }
 
 export function sourceCheck(indexPatternIds: string[], mdsIds: Array<string | undefined>): boolean {
+  // If no visualizations reference an index pattern, treat as acceptable (no sync, but no conflict).
+  if (indexPatternIds.length === 0 && mdsIds.length === 0) {
+    return true;
+  }
+
   const uniqueIndexPatternIds = Array.from(new Set(indexPatternIds));
   const uniqueMdsIds = Array.from(new Set(mdsIds));
 
