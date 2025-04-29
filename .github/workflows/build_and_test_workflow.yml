@@ -592,7 +592,7 @@ jobs:
 
       - name: Set OpenSearch URL
         run: |
-          echo "OPENSEARCH_URL=https://artifacts.opensearch.org/snapshots/core/opensearch/${{ env.VERSION }}-SNAPSHOT/opensearch-min-${{ env.VERSION }}-SNAPSHOT-linux-x64-latest.tar.gz" >> $GITHUB_ENV
+          echo "OPENSEARCH_URL=https://artifacts.opensearch.org/snapshots/core/opensearch/2.19.0-SNAPSHOT/opensearch-min-2.19.0-SNAPSHOT-linux-x64-latest.tar.gz" >> $GITHUB_ENV
 
       - name: Verify if OpenSearch is available for version
         id: verify-opensearch-exists

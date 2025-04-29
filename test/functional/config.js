@@ -60,6 +60,7 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('osdTestServer.serverArgs'),
         // '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
+        '--opensearch.ignoreVersionMismatch=true',
       ],
     },
 
