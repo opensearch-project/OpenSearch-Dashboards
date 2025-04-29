@@ -85,50 +85,73 @@ export async function extractIndexInfoFromDashboard(
   mapping: { lastRefreshTime: number };
   mdsId?: string;
 } | null> {
+  const indexPatternIds: string[] = [];
+  const mdsIds: Array<string | undefined> = [];
+
   for (const panelId of Object.keys(panels)) {
     try {
       const panel = panels[panelId];
       const savedObjectId = panel.explicitInput?.savedObjectId;
+      if (!savedObjectId) continue;
+
       const type = panel.type;
-
-      if (!savedObjectId || type !== 'visualization') continue;
-
       const savedObject = await savedObjectsClient.get(type, savedObjectId);
-      const visState = JSON.parse(savedObject.attributes.visState || '{}');
 
-      // Check if the visualization is a pie chart TODO: add more types
-      if (visState.type !== 'pie') continue;
+      const references = savedObject.references || [];
 
-      const indexPatternRef = savedObject.references.find(
-        (ref: any) => ref.type === 'index-pattern'
-      );
-      if (!indexPatternRef) continue;
+      if (references.length === 0) {
+        continue; // No references, skip (acceptable)
+      }
+
+      // Check if there is any non-index-pattern reference
+      if (references.some((ref: any) => ref.type !== 'index-pattern')) {
+        console.warn(
+          `Visualization ${panelId} references a non-index-pattern object. Disabling sync.`
+        );
+        return null;
+      }
+
+      const indexPatternRef = references.find((ref: any) => ref.type === 'index-pattern');
+      if (!indexPatternRef) {
+        console.warn(
+          `Visualization ${panelId} does not reference an index-pattern. Disabling sync.`
+        );
+        return null;
+      }
 
       const indexPattern = await savedObjectsClient.get('index-pattern', indexPatternRef.id);
-      console.log('Index Pattern:', indexPattern);
-
       const mdsId =
         indexPattern.references?.find((ref: any) => ref.type === 'data-source')?.id || undefined;
 
-      const indexTitleRaw = indexPattern.attributes.title;
-
-      const concreteTitle = await resolveConcreteIndex(indexTitleRaw, http, mdsId);
-      if (!concreteTitle) return null;
-
-      // Fetch mapping immediately after resolving index
-      const mapping = (await fetchIndexMapping(concreteTitle, http, mdsId))!;
-      console.log('Index Mapping Result:', mapping);
-
-      for (const val of Object.values(mapping)) {
-        return {
-          mapping: val.mappings._meta.properties!,
-          parts: extractIndexParts(concreteTitle),
-          mdsId,
-        };
-      }
+      indexPatternIds.push(indexPatternRef.id);
+      mdsIds.push(mdsId);
     } catch (err) {
       console.warn(`Skipping panel ${panelId} due to error:`, err);
     }
+  }
+
+  if (!sourceCheck(indexPatternIds, mdsIds)) {
+    return null;
+  }
+
+  const selectedIndexPatternId = indexPatternIds[0];
+  const selectedMdsId = mdsIds[0];
+
+  const indexPattern = await savedObjectsClient.get('index-pattern', selectedIndexPatternId);
+  const indexTitleRaw = indexPattern.attributes.title;
+  const concreteTitle = await resolveConcreteIndex(indexTitleRaw, http, selectedMdsId);
+
+  if (!concreteTitle) return null;
+
+  const mapping = await fetchIndexMapping(concreteTitle, http, selectedMdsId);
+  if (!mapping) return null;
+
+  for (const val of Object.values(mapping)) {
+    return {
+      mapping: val.mappings._meta.properties!,
+      parts: extractIndexParts(concreteTitle),
+      mdsId: selectedMdsId,
+    };
   }
 
   return null;
@@ -152,4 +175,19 @@ export async function fetchIndexMapping(
     console.error(`Failed to fetch mapping for index "${index}"`, err);
     return null;
   }
+}
+
+export function sourceCheck(indexPatternIds: string[], mdsIds: Array<string | undefined>): boolean {
+  const uniqueIndexPatternIds = Array.from(new Set(indexPatternIds));
+  const uniqueMdsIds = Array.from(new Set(mdsIds));
+
+  const isConsistent = uniqueIndexPatternIds.length === 1 && uniqueMdsIds.length === 1;
+
+  if (!isConsistent) {
+    console.warn(
+      'Dashboard uses multiple data sources or multiple index patterns. Sync feature disabled.'
+    );
+  }
+
+  return isConsistent;
 }

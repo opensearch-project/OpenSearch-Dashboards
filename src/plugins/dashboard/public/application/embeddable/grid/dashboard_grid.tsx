@@ -287,7 +287,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       this.props.savedObjectsClient,
       this.props.http
     );
-    console.log('Extracted metadata123:', indexInfo?.mapping);
+    console.log('Extracted metadata:', indexInfo?.mapping);
 
     if (indexInfo) {
       this.extractedDatasource = indexInfo.parts.datasource;
@@ -299,7 +299,13 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         this.props.setMdsId(indexInfo.mdsId);
       }
     } else {
-      console.warn('Could not extract index info from pie visualization.');
+      console.warn(
+        'Dashboard does not qualify for synchronization: inconsistent or unsupported visualization sources.'
+      );
+      this.setState({ extractedProps: null });
+      if (this.props.setMdsId) {
+        this.props.setMdsId(undefined);
+      }
     }
   }
 
@@ -393,12 +399,14 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       <div style={{ position: 'relative', padding: '16px' }}>
         {(() => {
           const urlOverride = isDirectQuerySyncEnabledByUrl();
-          const shouldRender =
-            urlOverride !== undefined
-              ? urlOverride
-              : this.props.isDirectQuerySyncEnabled;
-        
-          return shouldRender ? (
+          const featureFlagEnabled =
+            urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
+
+          const metadataAvailable = this.state.extractedProps !== null;
+
+          const shouldRenderSyncUI = featureFlagEnabled && metadataAvailable;
+
+          return shouldRenderSyncUI ? (
             <DashboardFlintSync
               loadStatus={this.props.loadStatus}
               lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
