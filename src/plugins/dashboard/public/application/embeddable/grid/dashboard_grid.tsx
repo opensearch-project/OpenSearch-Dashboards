@@ -391,7 +391,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     const isViewMode = viewMode === ViewMode.VIEW;
     const state = EMR_STATES.get(this.props.loadStatus as string)!;
 
-    if (state.terminal && this.props.loadStatus !== 'fresh') {
+    if (state?.terminal && this.props.loadStatus !== 'fresh') {
       window.location.reload();
     }
 

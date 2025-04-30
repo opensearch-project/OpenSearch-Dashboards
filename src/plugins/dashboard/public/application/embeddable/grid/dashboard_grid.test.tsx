@@ -42,6 +42,7 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../../../../embeddable/public/lib/test_samples';
 import { embeddablePluginMock } from '../../../../../embeddable/public/mocks';
+import { createDashboardServicesMock } from '../../utils/mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;
@@ -90,11 +91,23 @@ function prepare(props?: Partial<DashboardGridProps>) {
     } as any,
   };
   dashboardContainer = new DashboardContainer(initialInput, options);
+
+  const services = createDashboardServicesMock();
+
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
     PanelComponent: () => <div />,
-    opensearchDashboards: null as any,
+    opensearchDashboards: {
+      services,
+    },
     intl: null as any,
+    savedObjectsClient: services.savedObjectsClient,
+    http: services.http,
+    notifications: services.notifications,
+    startLoading: jest.fn(),
+    loadStatus: 'fresh',
+    pollingResult: {},
+    isDirectQuerySyncEnabled: false,
   };
 
   return {
