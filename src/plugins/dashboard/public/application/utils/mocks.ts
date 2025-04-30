@@ -42,7 +42,7 @@ export const createDashboardServicesMock = () => {
       find: jest.fn(),
       get: jest.fn().mockResolvedValue({
         attributes: { title: 'flint_ds1_db1_index1' },
-        references: [],
+        references: [{ type: 'data-source', id: 'test-mds' }],
       }),
     },
     savedObjectsPublic: {
