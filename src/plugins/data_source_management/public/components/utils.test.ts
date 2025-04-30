@@ -725,16 +725,16 @@ describe('DataSourceManagement: Utils.ts', () => {
   });
 
   describe('getDefaultDataSourceId$', () => {
-    it('should return null if uiSettings is not passed', async () => {
+    it('should return null if uiSettings is not passed', () => {
       mockUiSettingsCalls(uiSettings, 'get', 'id-1');
-      const result = await getDefaultDataSourceId$();
+      const result = getDefaultDataSourceId$();
       expect(result).toEqual(null);
     });
 
-    it('should return observable value normally', async () => {
+    it('should return observable value normally', () => {
       const id$ = of('id-1');
       mockUiSettingsCalls(uiSettings, 'get$', id$);
-      const result$ = await getDefaultDataSourceId$(uiSettings);
+      const result$ = getDefaultDataSourceId$(uiSettings);
       expect(result$).toBeInstanceOf(Observable);
       expect(result$).toEqual(id$);
     });

@@ -133,6 +133,21 @@ describe('ui settings', () => {
       );
     });
 
+    it('shall throw error when trying to update multi-scope settings without passing a scope', async () => {
+      const value = chance.word();
+      const defaults = {
+        user: { value, scope: 'user' },
+        workspace: { value, scope: ['workspace', 'user'] },
+      };
+      const { uiSettings } = setup({ defaults });
+
+      try {
+        await uiSettings.setMany({ one: 'value', user: 'val', workspace: 'value' });
+      } catch (error) {
+        expect(error.message).toBe('Unable to update "workspace", because it has multiple scopes');
+      }
+    });
+
     it('automatically creates the savedConfig if it is missing', async () => {
       const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
       savedObjectsClient.update
@@ -397,7 +412,7 @@ describe('ui settings', () => {
       );
     });
 
-    it('returns user configuration if specifically request user scope', async () => {
+    it('returns user configuration if specify request user scope', async () => {
       const opensearchDocSource = {};
       const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
 
@@ -429,7 +444,7 @@ describe('ui settings', () => {
       });
     });
 
-    it('returns workspace scope configuration if specifically request workspace scope ', async () => {
+    it('returns workspace scope configuration if specify request workspace scope ', async () => {
       const opensearchDocSource = {};
       const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
 
@@ -463,7 +478,7 @@ describe('ui settings', () => {
       });
     });
 
-    it('merges workspace, user, global configuration if not specifically any scope', async () => {
+    it('merges workspace, user, global configuration if no specific scope is defined', async () => {
       const opensearchDocSource = {};
       const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
 

@@ -4,8 +4,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { EuiPopover, EuiContextMenuPanel, EuiPanel, EuiSelectable } from '@elastic/eui';
 import {
   SavedObjectsClientContract,

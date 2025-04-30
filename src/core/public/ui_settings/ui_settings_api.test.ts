@@ -131,7 +131,6 @@ describe('#batchSet', () => {
     uiSettingsApi.batchSet('4', '4');
     const finalPromise = uiSettingsApi.batchSet('5', '5');
 
-    // 2 requests should be batched.
     expect(uiSettingsApi.hasPendingChanges()).toBe(true);
 
     await finalPromise;

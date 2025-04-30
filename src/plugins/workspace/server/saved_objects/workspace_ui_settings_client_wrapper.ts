@@ -55,8 +55,7 @@ export class WorkspaceUiSettingsClientWrapper {
 
       /**
        * When getting ui settings within a workspace, it will combine the workspace ui settings with
-       * the global ui settings and workspace ui settings have higher priority if the same setting
-       * was defined in both places
+       * the global ui settings and workspace ui settings will override global settings attribute
        */
       if (type === 'config' && id.startsWith(CURRENT_WORKSPACE_PLACEHOLDER)) {
         // if not in a workspace and try to get workspace level settings

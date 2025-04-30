@@ -88,7 +88,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
     });
   });
 
-  it('should just return workspace settings if trying to get workspace level settings in a workspace', async () => {
+  it('should return workspace settings and override global config attribute if trying to get workspace level settings in a workspace', async () => {
     // Currently in a workspace
     jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ requestWorkspaceId: 'workspace-id' });
 

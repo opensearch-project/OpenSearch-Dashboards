@@ -194,7 +194,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           await fetchDataSources();
           setSelectedDataSources([]);
           if (payload.some((p) => p.id === defaultDataSourceId)) {
-            setFirstDataSourceAsDefault(
+            await setFirstDataSourceAsDefault(
               savedObjects.client,
               uiSettings,
               true,

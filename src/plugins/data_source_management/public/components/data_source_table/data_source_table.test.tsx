@@ -21,6 +21,7 @@ import {
 } from '../../mocks';
 import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
+import { UiSettingScope } from '../../../../../core/public';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
 const tableIdentifier = 'EuiInMemoryTable';
@@ -260,7 +261,7 @@ describe('DataSourceTable', () => {
       expect(uiSettings.set).toBeCalledWith(
         DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
         'alpha-test',
-        'workspace'
+        UiSettingScope.WORKSPACE
       );
 
       // reset to original value

@@ -74,6 +74,7 @@ export class UiSettingsApi {
     return new Promise<UiSettingsApiResponse | undefined>((resolve, reject) => {
       const prev = this.pendingChanges || NOOP_CHANGES;
       const newValues = { ...prev.values };
+      // if there isn;t a scope passed in, we will use NO_SCOPE as a identifier temporarily
       const scopedKey = scope ?? NO_SCOPE;
       if (!newValues[scopedKey]) {
         newValues[scopedKey] = {};
