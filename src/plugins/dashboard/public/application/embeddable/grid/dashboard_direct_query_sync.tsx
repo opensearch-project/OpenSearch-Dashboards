@@ -33,7 +33,7 @@ import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
 import { EMR_STATES, intervalAsMinutes } from '../../utils/direct_query_sync/direct_query_sync';
 
-interface DashboardDirectQuerySyncProps {
+export interface DashboardDirectQuerySyncProps {
   loadStatus: DirectQueryLoadingStatus;
   lastRefreshTime?: number;
   refreshInterval?: number;
