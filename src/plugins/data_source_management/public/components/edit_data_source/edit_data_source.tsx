@@ -4,7 +4,7 @@
  */
 
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useEffectOnce } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -65,6 +65,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>(null);
   const useNewUX = uiSettings.get('home:useNewHomePage');
   const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
   const scope = currentWorkspaceId ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
@@ -75,6 +76,16 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
       await fetchDataSourceDetailsByID();
     })();
   });
+
+  const loadDefaultDataSourceId = useCallback(async () => {
+    const id = await getDefaultDataSourceId(uiSettings, scope);
+    setDefaultDataSourceId(id);
+  }, [uiSettings, scope]);
+
+  /* fetch current default data source id*/
+  useEffect(() => {
+    loadDefaultDataSourceId();
+  }, [loadDefaultDataSourceId]);
 
   const fetchDataSourceDetailsByID = async () => {
     setIsLoading(true);
@@ -107,10 +118,12 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     // default data source has 2 scopes
     // if in a workspace, then update workspace level setting
     // or update global level setting
-    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID, scope);
+    const result = await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID, scope);
+    if (result) {
+      await loadDefaultDataSourceId();
+    }
+    return result;
   };
-
-  const isDefaultDataSource = getDefaultDataSourceId(uiSettings, scope) === dataSourceID;
 
   /* Handle submit - create data source*/
   const handleSubmit = async (attributes: DataSourceAttributes) => {
@@ -137,7 +150,8 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
       // If deleted datasource is the default datasource, then set the first existing
       // datasource as default datasource.
-      setDefaultDataSource();
+      await setDefaultDataSource();
+      await loadDefaultDataSourceId();
       props.history.push('');
     } catch (e) {
       setIsLoading(false);
@@ -152,7 +166,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
   const setDefaultDataSource = async () => {
     try {
-      if (getDefaultDataSourceId(uiSettings, scope) === dataSourceID) {
+      if (defaultDataSourceId === dataSourceID) {
         await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, scope);
       }
     } catch (e) {
@@ -176,6 +190,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
   /* Render the edit wizard */
   const renderContent = () => {
+    const isDefaultDataSource = defaultDataSourceId === dataSourceID;
     if (!isLoading && (!dataSource || !dataSource.id)) {
       return <h1 data-test-subj="dataSourceNotFound">Data Source not found!</h1>;
     }

@@ -4,6 +4,8 @@
  */
 
 import React from 'react';
+import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { EuiPopover, EuiContextMenuPanel, EuiPanel, EuiSelectable } from '@elastic/eui';
 import {
   SavedObjectsClientContract,
@@ -71,8 +73,8 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     const selectedOption = this.props.selectedOption;
     const option = selectedOption[0];
     const optionId = option.id;
-
-    const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
+    // for data source view, get default data source from cache
+    const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
     if (optionId === '' && !this.props.hideLocalCluster) {
       this.setState({
         selectedOption: [LocalCluster],

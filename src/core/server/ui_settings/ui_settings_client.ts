@@ -107,7 +107,6 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly userLevelSettingsKeys: string[] = [];
   private readonly workspaceLevelSettingsKeys: string[] = [];
   private readonly globalLevelSettingsKeys: string[] = [];
-  private readonly uiSettingsKeysWithMoreThanOneScope: string[] = [];
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
@@ -284,9 +283,6 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   private groupSettingsKeys(defaults: NonNullable<UiSettingsServiceOptions['defaults']>) {
     Object.entries(defaults).forEach(([key, value]) => {
-      if (Array.isArray(value.scope) && (value.scope?.length ?? 0) > 1) {
-        this.uiSettingsKeysWithMoreThanOneScope.push(key);
-      }
       if (
         value.scope === UiSettingScope.USER ||
         (Array.isArray(value.scope) && value.scope.includes(UiSettingScope.USER))

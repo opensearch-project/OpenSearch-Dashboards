@@ -73,14 +73,14 @@ export class UiSettingsApi {
   public batchSet(key: string, value: any, scope?: UiSettingScope) {
     return new Promise<UiSettingsApiResponse | undefined>((resolve, reject) => {
       const prev = this.pendingChanges || NOOP_CHANGES;
-      const prevValues = { ...prev.values };
+      const newValues = { ...prev.values };
       const scopedKey = scope ?? NO_SCOPE;
-      if (!prevValues[scopedKey]) {
-        prevValues[scopedKey] = {};
+      if (!newValues[scopedKey]) {
+        newValues[scopedKey] = {};
       }
-      prevValues[scopedKey][key] = value;
+      newValues[scopedKey][key] = value;
       this.pendingChanges = {
-        values: prevValues,
+        values: newValues,
         callback(error, resp) {
           prev.callback(error, resp);
 

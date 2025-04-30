@@ -37,7 +37,7 @@ import {
   PublicUiSettingsParams,
   UiSettingsType,
   UiSettingScope,
-} from 'src/core/server/types';
+} from '../../server/ui_settings/types';
 import { IUiSettingsClient, UiSettingsState } from './types';
 
 import { UiSettingsApi } from './ui_settings_api';
@@ -137,19 +137,37 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     );
   }
 
-  async getUserProvided<T = any>(key: string, scope: UiSettingScope) {
+  private validateScope(key: string, scope: UiSettingScope) {
+    const definition = this.cache[key];
+    const validScopes = Array.isArray(definition.scope)
+      ? definition.scope
+      : [definition.scope || UiSettingScope.GLOBAL];
+
+    if (scope && !validScopes.includes(scope)) {
+      throw new Error(`Unable to process "${key}" with invalid scope: "${scope}"`);
+    }
+  }
+
+  async getUserProvidedWithScope<T = any>(key: string, scope: UiSettingScope) {
+    this.validateScope(key, scope);
     return await this.api.getWithScope(scope).then((response: any) => {
-      const value = response[key];
+      const value = response.settings[key].userValue;
       const type = this.cache[key].type;
       return this.resolveValue(value, type);
     });
   }
 
   async set(key: string, value: any, scope?: UiSettingScope) {
+    if (scope) {
+      this.validateScope(key, scope);
+    }
     return await this.update(key, value, scope);
   }
 
   async remove(key: string, scope?: UiSettingScope) {
+    if (scope) {
+      this.validateScope(key, scope);
+    }
     return await this.update(key, null, scope);
   }
 

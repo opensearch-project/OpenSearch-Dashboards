@@ -380,25 +380,26 @@ describe('DataSourceManagement: Utils.ts', () => {
       jest.clearAllMocks(); // Reset all mock calls before each test
     });
     test('should set default datasource when it does not have default datasource ', async () => {
-      mockUiSettingsCalls(uiSettings, 'get', null);
+      mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', null);
+
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
-      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings, UiSettingScope.GLOBAL);
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should set default datasource when returned default datasource id is empty string', async () => {
-      mockUiSettingsCalls(uiSettings, 'get', '');
+      mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', '');
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
-      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings, UiSettingScope.GLOBAL);
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should not set default datasource when it has default datasouce', async () => {
-      mockUiSettingsCalls(uiSettings, 'get', 'test');
+      mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'test');
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
-      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings, UiSettingScope.GLOBAL);
       expect(uiSettings.set).not.toHaveBeenCalled();
     });
   });
-  describe('set first aataSource as default', () => {
+  describe('set first dataSource as default', () => {
     beforeEach(() => {
       jest.clearAllMocks(); // Reset all mock calls before each test
     });
@@ -704,30 +705,36 @@ describe('DataSourceManagement: Utils.ts', () => {
     });
   });
   describe('getDefaultDataSourceId', () => {
-    it('should return null if uiSettings is not passed', () => {
+    it('should return null if uiSettings is not passed', async () => {
       mockUiSettingsCalls(uiSettings, 'get', 'id-1');
-      const result = getDefaultDataSourceId();
+      const result = await getDefaultDataSourceId();
       expect(result).toEqual(null);
     });
 
-    it('should return string value normally', () => {
+    it('should return string value normally', async () => {
       mockUiSettingsCalls(uiSettings, 'get', 'id-1');
-      const result = getDefaultDataSourceId(uiSettings);
+      const result = await getDefaultDataSourceId(uiSettings);
       expect(result).toEqual('id-1');
+    });
+
+    it('should call getUserProvidedWithScope if a scope is passed', async () => {
+      mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'id-global');
+      const result = await getDefaultDataSourceId(uiSettings, UiSettingScope.GLOBAL);
+      expect(result).toEqual('id-global');
     });
   });
 
   describe('getDefaultDataSourceId$', () => {
-    it('should return null if uiSettings is not passed', () => {
+    it('should return null if uiSettings is not passed', async () => {
       mockUiSettingsCalls(uiSettings, 'get', 'id-1');
-      const result = getDefaultDataSourceId$();
+      const result = await getDefaultDataSourceId$();
       expect(result).toEqual(null);
     });
 
-    it('should return observable value normally', () => {
+    it('should return observable value normally', async () => {
       const id$ = of('id-1');
       mockUiSettingsCalls(uiSettings, 'get$', id$);
-      const result$ = getDefaultDataSourceId$(uiSettings);
+      const result$ = await getDefaultDataSourceId$(uiSettings);
       expect(result$).toBeInstanceOf(Observable);
       expect(result$).toEqual(id$);
     });

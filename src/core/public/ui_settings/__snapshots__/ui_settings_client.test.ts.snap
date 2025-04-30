@@ -57,6 +57,8 @@ Array [
 ]
 `;
 
+exports[`#getUserProvidedWithScope throws an error if the setting does not align the scope passed in 1`] = `"Unable to process \\"defaultDatasource\\" with invalid scope: \\"global\\""`;
+
 exports[`#overrideLocalDefault key has no user value calls subscriber with new and previous value: single subscriber call 1`] = `
 Array [
   Array [
@@ -82,6 +84,10 @@ Object {
   "dateFormat": Object {
     "value": "bar",
   },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
 }
 `;
 
@@ -93,6 +99,10 @@ Object {
   },
   "dateFormat": Object {
     "value": "Browser",
+  },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
   },
 }
 `;
@@ -111,6 +121,10 @@ Object {
     "userValue": "foo",
     "value": "bar",
   },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
 }
 `;
 
@@ -123,6 +137,10 @@ Object {
   "dateFormat": Object {
     "userValue": "foo",
     "value": "Browser",
+  },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
   },
 }
 `;
@@ -140,6 +158,10 @@ Object {
   "dateFormat": Object {
     "value": "bar",
   },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
 }
 `;
 
@@ -153,9 +175,17 @@ Object {
     "userValue": "foo",
     "value": "bar",
   },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
 }
 `;
 
+exports[`#remove should validate scope first 1`] = `"Unable to process \\"defaultDatasource\\" with invalid scope: \\"user\\""`;
+
 exports[`#remove throws an error if key is overridden 1`] = `"Unable to update \\"bar\\" because its value is overridden by the OpenSearch Dashboards server"`;
+
+exports[`#set should validate scope first 1`] = `"Unable to process \\"defaultDatasource\\" with invalid scope: \\"user\\""`;
 
 exports[`#set throws an error if key is overridden 1`] = `"Unable to update \\"foo\\" because its value is overridden by the OpenSearch Dashboards server"`;

@@ -57,7 +57,7 @@ export interface IUiSettingsClient {
   /**
    * Gets the value for a specific uiSetting and scope and sent to the server
    */
-  getUserProvided: <T = any>(key: string, scope: UiSettingScope) => Promise<T>;
+  getUserProvidedWithScope: <T = any>(key: string, scope: UiSettingScope) => Promise<T>;
 
   /**
    * Gets an observable of the current value for a config key, and all updates to that config
