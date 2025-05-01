@@ -5,18 +5,17 @@ on:
     branches:
       - main
     paths-ignore:
-      - '**/*.md' # Ignore documentation files
-      - '**/*.test.ts' # Ignore test files (TypeScript)
-      - '**/*.test.js' # Ignore test files (JavaScript)
-      - '**/__tests__/**' # Ignore test directories
-      - '.github/workflows/**' # Ignore GitHub workflow files
-      - 'docs/**' # Ignore entire docs directory
+      - '**/*.md'
+      - '**/*.test.ts'
+      - '**/*.test.js'
+      - '**/__tests__/**'
+      - '.github/workflows/**'
+      - 'docs/**'
 
 permissions:
   contents: read
-  issues: write
   pull-requests: write
-  
+
 jobs:
   bundle-analyzer:
     runs-on: ubuntu-latest
@@ -36,26 +35,34 @@ jobs:
           npm i -g yarn@1.22.10
 
       - name: Run bootstrap
-        # Install dependencies and bootstrap the OpenSearch Dashboards project
         run: yarn osd bootstrap
 
       - name: Build plugins
-        # Build OpenSearch Dashboards platform plugins without examples using 12 workers
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
       - name: Update Limit and bundle size variation
-        # This command updates the limit and bundle size variation for the OpenSearch Dashboards platform plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --update-limits
 
-      - name: Read and comment bundle size variations
+      - name: Check and upload bundle size variations
+        id: check_bundle_size
         run: |
           if [ -f packages/osd-optimizer/limits_delta.yml ]; then
-            echo "📊 **Bundle Size crossed 5% for below plugins**" > comment.txt
-            echo "" >> comment.txt
-            cat packages/osd-optimizer/limits_delta.yml >> comment.txt
-            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
+            echo "Bundle size changes detected."
+            echo "bundle_size_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "No bundle size variations detected, skipping comment."
+            echo "No bundle size variations detected."
+            echo "bundle_size_changed=false" >> $GITHUB_OUTPUT
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload limits_delta.yml as artifact
+        if: steps.check_bundle_size.outputs.bundle_size_changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-size-delta
+          path: packages/osd-optimizer/limits_delta.yml
+
+      - name: Fail the CI if bundle size exceeded
+        if: steps.check_bundle_size.outputs.bundle_size_changed == 'true'
+        run: |
+          echo "❌ Bundle size exceeded threshold. Failing the job."
+          exit 1
