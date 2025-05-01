@@ -1,2 +1,0 @@
-fix:
-- Correctly show error message in DQL and PPL query editor ([#9586](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9586))
