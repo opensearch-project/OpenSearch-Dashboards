@@ -287,21 +287,16 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       this.props.savedObjectsClient,
       this.props.http
     );
-    console.log('Extracted metadata:', indexInfo?.mapping);
 
     if (indexInfo) {
       this.extractedDatasource = indexInfo.parts.datasource;
       this.extractedDatabase = indexInfo.parts.database;
       this.extractedIndex = indexInfo.parts.index;
       this.setState({ extractedProps: indexInfo.mapping });
-      console.log('Resolved index info:', indexInfo);
       if (this.props.setMdsId) {
         this.props.setMdsId(indexInfo.mdsId);
       }
     } else {
-      console.warn(
-        'Dashboard does not qualify for synchronization: inconsistent or unsupported visualization sources.'
-      );
       this.setState({ extractedProps: null });
       if (this.props.setMdsId) {
         this.props.setMdsId(undefined);
@@ -319,7 +314,6 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       extractedDatabase === 'unknown' ||
       extractedIndex === 'unknown'
     ) {
-      console.error('Datasource, database, or index not properly set. Cannot run REFRESH command.');
       return;
     }
 

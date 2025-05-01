@@ -57,7 +57,6 @@ export async function resolveConcreteIndex(
     const matchedIndices = resolved?.indices || [];
     return matchedIndices.length > 0 ? matchedIndices[0].name : null;
   } catch (err) {
-    console.error(`Failed to resolve index pattern "${indexTitle}"`, err);
     return null;
   }
 }
@@ -100,22 +99,16 @@ export async function extractIndexInfoFromDashboard(
       const references = savedObject.references || [];
 
       if (references.length === 0) {
-        continue; // No references, skip (acceptable)
+        continue;
       }
 
       // Check if there is any non-index-pattern reference
       if (references.some((ref: any) => ref.type !== 'index-pattern')) {
-        console.warn(
-          `Visualization ${panelId} references a non-index-pattern object. Disabling sync.`
-        );
         return null;
       }
 
       const indexPatternRef = references.find((ref: any) => ref.type === 'index-pattern');
       if (!indexPatternRef) {
-        console.warn(
-          `Visualization ${panelId} does not reference an index-pattern. Disabling sync.`
-        );
         return null;
       }
 
@@ -126,7 +119,7 @@ export async function extractIndexInfoFromDashboard(
       indexPatternIds.push(indexPatternRef.id);
       mdsIds.push(mdsId);
     } catch (err) {
-      console.warn(`Skipping panel ${panelId} due to error:`, err);
+      // Ignoring error: saved object might be missing or invalid
     }
   }
 
@@ -165,14 +158,12 @@ export async function fetchIndexMapping(
   try {
     const baseUrl = `${DSL_BASE}${DSL_MAPPING}`;
     const url = mdsId ? `${baseUrl}/dataSourceMDSId=${encodeURIComponent(mdsId)}` : baseUrl;
-    console.log('url', url);
     const response = await http.get(url, {
       query: { index },
     });
 
     return response;
   } catch (err) {
-    console.error(`Failed to fetch mapping for index "${index}"`, err);
     return null;
   }
 }
@@ -187,12 +178,6 @@ export function sourceCheck(indexPatternIds: string[], mdsIds: Array<string | un
   const uniqueMdsIds = Array.from(new Set(mdsIds));
 
   const isConsistent = uniqueIndexPatternIds.length === 1 && uniqueMdsIds.length === 1;
-
-  if (!isConsistent) {
-    console.warn(
-      'Dashboard uses multiple data sources or multiple index patterns. Sync feature disabled.'
-    );
-  }
 
   return isConsistent;
 }

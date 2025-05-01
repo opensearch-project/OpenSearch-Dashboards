@@ -9,7 +9,6 @@ export function isDirectQuerySyncEnabledByUrl(): boolean | undefined {
   const urlParams = new URLSearchParams(queryString);
 
   const param = urlParams.get('dashboard.directQueryConnectionSync');
-  console.log('Direct Query Sync URL param:', param);
 
   if (param === 'true') return true;
   if (param === 'false') return false;
