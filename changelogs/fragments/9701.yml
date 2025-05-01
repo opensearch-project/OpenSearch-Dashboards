@@ -1,2 +1,0 @@
-fix:
-- Cancel existing query when new natural language prompt is being generated-new ([#9701](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9701))
