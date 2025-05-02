@@ -55,7 +55,7 @@ export const IGNORE_FILE_GLOBS = [
   'Dockerfile*',
   'vars/*',
   '.ci/pipeline-library/**/*',
-  'build/tsbuildinfo/opensearch-dashboards',
+  'build/tstypecheckbuildinfo/opensearch-dashboards',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',

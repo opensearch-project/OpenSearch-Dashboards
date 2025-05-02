@@ -16,7 +16,7 @@ trash
 /built_assets
 target
 build/*
-!build/tsbuildinfo/
+!build/tstypecheckbuildinfo/
 /bwc_tmp
 .jruby
 .idea

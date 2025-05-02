@@ -1,13 +1,18 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./build/tsbuildinfo/opensearch-dashboards"
+    "incremental": true,
+    "tsBuildInfoFile": "./build/tstypecheckbuildinfo/opensearch-dashboards"
   },
   "include": [
     "opensearch_dashboards.d.ts",
     "src/**/*",
-    "typings/**/*",
-    "test_utils/**/*"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "typings/**/*.ts",
+    "typings/**/*.tsx",
+    "test_utils/**/*.ts",
+    "test_utils/**/*.tsx"
   ],
   "exclude": [
     "src/**/__fixtures__/**/*",
