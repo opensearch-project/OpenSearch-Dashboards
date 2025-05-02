@@ -146,6 +146,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -1037,6 +1038,15 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -1263,6 +1273,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -2154,6 +2165,15 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -2380,6 +2400,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -3271,6 +3292,15 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -3497,6 +3527,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -4388,6 +4419,15 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -4614,6 +4654,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -5505,6 +5546,15 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -5731,6 +5781,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -6622,6 +6673,15 @@ exports[`Dashboard top nav render with all components 1`] = `
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,

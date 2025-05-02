@@ -22,6 +22,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiSuperSelectOption,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -64,6 +68,7 @@ export interface EditDataSourceProps {
   onSetDefaultDataSource: () => Promise<boolean>;
   displayToastMessage: (info: DataSourceManagementToastMessageItem) => void;
   canManageDataSource: boolean;
+  crossClusterConnectionAlias?: string;
 }
 export interface EditDataSourceState {
   formErrorsByField: CreateEditDataSourceValidation;
@@ -685,78 +690,148 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
+        {this.props.crossClusterConnectionAlias
+          ? this.renderCrossClusterConnectionAlias()
+          : this.renderConnectionObjectDetails()}
+      </EuiPanel>
+    );
+  };
 
-        <EuiDescribedFormGroup
-          title={
-            <EuiText size="s">
-              <h3>
-                {
-                  <FormattedMessage
-                    id="dataSourcesManagement.editDataSource.objectDetailsText"
-                    defaultMessage="Object Details"
-                  />
-                }
-              </h3>
-            </EuiText>
-          }
-          description={
-            <p>
+  renderConnectionObjectDetails = () => {
+    return (
+      <EuiDescribedFormGroup
+        title={
+          <EuiText size="s">
+            <h3>
               {
                 <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.objectDetailsDescription"
-                  defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                  id="dataSourcesManagement.editDataSource.objectDetailsText"
+                  defaultMessage="Object Details"
                 />
               }
-            </p>
-          }
+            </h3>
+          </EuiText>
+        }
+        description={
+          <p>
+            {
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.objectDetailsDescription"
+                defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+              />
+            }
+          </p>
+        }
+      >
+        {/* Title */}
+        <EuiCompressedFormRow
+          label={i18n.translate('dataSourcesManagement.editDataSource.title', {
+            defaultMessage: 'Title',
+          })}
+          isInvalid={!!this.state.formErrorsByField.title.length}
+          error={this.state.formErrorsByField.title}
+          data-test-subj="editDataSourceTitleFormRow"
         >
-          {/* Title */}
-          <EuiCompressedFormRow
-            label={i18n.translate('dataSourcesManagement.editDataSource.title', {
+          <EuiCompressedFieldText
+            name="dataSourceTitle"
+            value={this.state.title || ''}
+            placeholder={i18n.translate('dataSourcesManagement.editDataSource.titlePlaceHolder', {
               defaultMessage: 'Title',
             })}
             isInvalid={!!this.state.formErrorsByField.title.length}
-            error={this.state.formErrorsByField.title}
-            data-test-subj="editDataSourceTitleFormRow"
-          >
-            <EuiCompressedFieldText
-              name="dataSourceTitle"
-              value={this.state.title || ''}
-              placeholder={i18n.translate('dataSourcesManagement.editDataSource.titlePlaceHolder', {
-                defaultMessage: 'Title',
-              })}
-              isInvalid={!!this.state.formErrorsByField.title.length}
-              onChange={this.onChangeTitle}
-              onBlur={this.validateTitle}
-              disabled={!this.props.canManageDataSource}
+            onChange={this.onChangeTitle}
+            onBlur={this.validateTitle}
+            disabled={!this.props.canManageDataSource}
+          />
+        </EuiCompressedFormRow>
+        {/* Description */}
+        <EuiCompressedFormRow
+          label={
+            <FormattedMessage
+              id="dataSourcesManagement.editDataSource.descriptionOptional"
+              defaultMessage="Description {optionalLabel}"
+              values={{ optionalLabel: <DataSourceOptionalLabelSuffix /> }}
             />
-          </EuiCompressedFormRow>
-          {/* Description */}
-          <EuiCompressedFormRow
-            label={
-              <FormattedMessage
-                id="dataSourcesManagement.editDataSource.descriptionOptional"
-                defaultMessage="Description {optionalLabel}"
-                values={{ optionalLabel: <DataSourceOptionalLabelSuffix /> }}
-              />
-            }
-            data-test-subj="editDataSourceDescriptionFormRow"
-          >
-            <EuiCompressedFieldText
-              name="dataSourceDescription"
-              value={this.state.description || ''}
-              placeholder={i18n.translate(
-                'dataSourcesManagement.editDataSource.descriptionPlaceholder',
-                {
-                  defaultMessage: 'Description of the data source',
-                }
-              )}
-              onChange={this.onChangeDescription}
-              disabled={!this.props.canManageDataSource}
-            />
-          </EuiCompressedFormRow>
-        </EuiDescribedFormGroup>
-      </EuiPanel>
+          }
+          data-test-subj="editDataSourceDescriptionFormRow"
+        >
+          <EuiCompressedFieldText
+            name="dataSourceDescription"
+            value={this.state.description || ''}
+            placeholder={i18n.translate(
+              'dataSourcesManagement.editDataSource.descriptionPlaceholder',
+              {
+                defaultMessage: 'Description of the data source',
+              }
+            )}
+            onChange={this.onChangeDescription}
+            disabled={!this.props.canManageDataSource}
+          />
+        </EuiCompressedFormRow>
+      </EuiDescribedFormGroup>
+    );
+  };
+
+  renderCrossClusterConnectionAlias = () => {
+    return (
+      <div>
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem>
+            <EuiDescriptionList>
+              <EuiDescriptionListTitle>
+                {i18n.translate('dataSourcesManagement.editDataSource.crossclustersearch.type', {
+                  defaultMessage: 'Type',
+                })}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {i18n.translate(
+                  'dataSourcesManagement.editDataSource.crossclustersearch.type.value',
+                  {
+                    defaultMessage: 'OpenSearch (Cross cluster search)',
+                  }
+                )}{' '}
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionList>
+              <EuiDescriptionListTitle>
+                {i18n.translate(
+                  'dataSourcesManagement.editDataSource.crossclustersearch.connectionalias',
+                  {
+                    defaultMessage: 'Connection alias',
+                  }
+                )}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {i18n.translate(
+                  'dataSourcesManagement.editDataSource.crossclustersearch.connectionalias.value',
+                  {
+                    defaultMessage: '{alias}',
+                    values: { alias: this.props.crossClusterConnectionAlias },
+                  }
+                )}
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionList>
+              <EuiDescriptionListTitle>
+                {i18n.translate(
+                  'dataSourcesManagement.editDataSource.crossclustersearch.sourcecluster',
+                  {
+                    defaultMessage: 'Source cluster',
+                  }
+                )}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>{this.state.title}</EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+      </div>
     );
   };
 
@@ -1171,14 +1246,16 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
           <EuiSpacer size="m" />
 
-          {this.renderEndpointSection()}
+          {!this.props.crossClusterConnectionAlias && this.renderEndpointSection()}
 
           <EuiSpacer size="m" />
 
-          {this.renderAuthenticationSection()}
+          {!this.props.crossClusterConnectionAlias && this.renderAuthenticationSection()}
         </EuiForm>
 
-        {this.state.showUpdateOptions ? this.renderBottomBar() : null}
+        {this.state.showUpdateOptions && !this.props.crossClusterConnectionAlias
+          ? this.renderBottomBar()
+          : null}
 
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />

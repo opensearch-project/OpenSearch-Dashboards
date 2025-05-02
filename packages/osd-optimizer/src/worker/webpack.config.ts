@@ -222,6 +222,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
             // Don't attempt to look into release artifacts of the plugins
             /[\/\\]plugins[\/\\][^\/\\]+[\/\\]build[\/\\]/,
+
+            // exclude stories
+            /\.stories\.(js|jsx|ts|tsx)$/,
           ],
           use: {
             loader: 'babel-loader',

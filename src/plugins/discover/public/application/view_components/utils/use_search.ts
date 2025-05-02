@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import uuid from 'uuid';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime, filter, pairwise } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
@@ -34,6 +35,30 @@ import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { trackQueryMetric } from '../../../ui_metric';
 
+import { ABORT_DATA_QUERY_TRIGGER } from '../../../../../ui_actions/public';
+import {
+  ACTION_ABORT_DATA_QUERY,
+  AbortDataQueryContext,
+  createAbortDataQueryAction,
+} from '../../../../public/actions/abort_data_query_action';
+
+declare module '../../../../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [ABORT_DATA_QUERY_TRIGGER]: AbortDataQueryContext;
+  }
+  export interface ActionContextMapping {
+    [ACTION_ABORT_DATA_QUERY]: AbortDataQueryContext;
+  }
+}
+
+export function safeJSONParse(text: any) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return text;
+  }
+}
+
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
@@ -54,10 +79,19 @@ export interface SearchData {
   queryStatus?: {
     body?: {
       error?: {
-        reason?: string;
-        details: string;
+        error?: string;
+        message?: {
+          error?:
+            | string
+            | {
+                reason?: string;
+                details: string;
+                type?: string;
+              };
+          status?: number;
+        };
+        statusCode?: number;
       };
-      statusCode?: number;
     };
     elapsedMs?: number;
     startTime?: number;
@@ -92,6 +126,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   const skipInitialFetch = useRef(false);
   const {
     data,
+    uiActions,
     filterManager,
     getSavedSearchById,
     core,
@@ -112,6 +147,9 @@ export const useSearch = (services: DiscoverViewServices) => {
   const fetchForMaxCsvStateRef = useRef<{ abortController: AbortController | undefined }>({
     abortController: undefined,
   });
+
+  const actionId = useRef(`ACTION_ABORT_DATA_QUERY_${uuid.v4()}`);
+
   const inspectorAdapters = {
     requests: new RequestAdapter(),
   };
@@ -169,6 +207,17 @@ export const useSearch = (services: DiscoverViewServices) => {
       });
     return () => subscription.unsubscribe();
   });
+
+  useEffect(() => {
+    const id = actionId.current;
+    uiActions.addTriggerAction(
+      ABORT_DATA_QUERY_TRIGGER,
+      createAbortDataQueryAction([fetchForMaxCsvStateRef, fetchStateRef], id)
+    );
+    return () => {
+      uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, id);
+    };
+  }, [uiActions]);
 
   useEffect(() => {
     data$.next({ ...data$.value, queryStatus: { startTime } });
@@ -318,16 +367,54 @@ export const useSearch = (services: DiscoverViewServices) => {
         data.search.showError(error as Error);
         return;
       }
+      // TODO: Create a unify error response at server side
       let errorBody;
       try {
+        // Normal search strategy failed query, return HttpFetchError
+        /*
+          @type {HttpFetchError}
+          {
+            body: {
+              error: string,
+              statusCode: number,
+              message: JSONstring,
+            },
+            ...
+          }
+        */
         errorBody = JSON.parse(error.body);
       } catch (e) {
         if (error.body) {
           errorBody = error.body;
         } else {
+          // Async search strategy failed query, return Error
+          /*
+            @type {Error}
+            {
+              message: string,
+              stack: string,
+            }
+          */
           errorBody = error;
         }
       }
+
+      // Error message can be sent as encoded JSON string, which requires extra parsing
+      /*
+        errorBody: {
+          error: string,
+          statusCode: number,
+          message: {
+            error: {
+              reason: string;
+              details: string;
+              type: string;
+            };
+            status: number;
+          }
+        }
+      */
+      errorBody.message = safeJSONParse(errorBody.message);
 
       data$.next({
         status: ResultStatus.ERROR,
@@ -502,6 +589,9 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       filterManager.setAppFilters(actualFilters);
       data.query.queryString.setQuery(query);
+      // Update local storage after loading saved search
+      data.query.queryString.getLanguageService().setUserQueryLanguage(query.language);
+      data.query.queryString.getInitialQueryByLanguage(query.language);
       setSavedSearch(savedSearchInstance);
 
       if (savedSearchInstance?.id) {

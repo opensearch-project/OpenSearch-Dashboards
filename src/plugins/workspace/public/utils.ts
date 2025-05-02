@@ -33,7 +33,10 @@ import {
 import { getUseCaseFeatureConfig } from '../common/utils';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
-import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
+import {
+  DataSourceEngineType,
+  SigV4ServiceName,
+} from '../../../plugins/data_source/common/data_sources';
 import {
   DirectQueryDatasourceDetails,
   DATACONNECTIONS_BASE,
@@ -223,23 +226,26 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
 
 export const getDataSourcesList = (
   client: SavedObjectsStart['client'],
-  targetWorkspaces: string[]
+  targetWorkspaces?: string[]
 ) => {
   return client
-    .find({
-      type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
-      fields: [
-        'id',
-        'title',
-        'auth',
-        'description',
-        'dataSourceEngineType',
-        'type',
-        'connectionId',
-      ],
-      perPage: 10000,
-      workspaces: targetWorkspaces,
-    })
+    .find(
+      {
+        type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+        fields: [
+          'id',
+          'title',
+          'auth',
+          'description',
+          'dataSourceEngineType',
+          'type',
+          'connectionId',
+        ],
+        perPage: 10000,
+        workspaces: targetWorkspaces,
+      },
+      { withoutClientBasePath: true }
+    )
     .then((response) => {
       const objects = response?.savedObjects;
       if (objects) {
@@ -287,6 +293,21 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
     })
   );
   return directQueryConnections;
+};
+
+export const mapDataSourceConnectionToOpensearchDataSource = (
+  dataSourceConnections: DataSourceConnection[]
+) => {
+  return dataSourceConnections.map((ds) => {
+    return {
+      id: ds.id,
+      type: ds.type,
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      name: ds.name,
+      description: ds.description,
+      relatedConnections: [],
+    };
+  });
 };
 
 export const convertDataSourcesToOpenSearchAndDataConnections = (
@@ -340,7 +361,8 @@ export const fulfillRelatedConnections = (
 export const mergeDataSourcesWithConnections = (
   dataSources: DataSource[] | DataConnection[],
   directQueryConnections: DataSourceConnection[],
-  mode: AssociationDataSourceModalMode
+  mode: AssociationDataSourceModalMode,
+  remoteClusterConnections?: DataSourceConnection[]
 ): DataSourceConnection[] => {
   const {
     openSearchConnections,
@@ -350,6 +372,22 @@ export const mergeDataSourcesWithConnections = (
   // if the mode is set to OpenSearchConnections, then only display OpenSearch connections
   if (mode === AssociationDataSourceModalMode.OpenSearchConnections) {
     result = openSearchConnections.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Adding the remote clusters connections to result
+    if (remoteClusterConnections) {
+      result = result.map((ds) => {
+        const relatedRemoteConnections = remoteClusterConnections.filter(
+          (remoteConnection) => remoteConnection.parentId === ds.id
+        );
+
+        return {
+          ...ds,
+          relatedConnections: ds.relatedConnections
+            ? ds.relatedConnections.concat(relatedRemoteConnections)
+            : relatedRemoteConnections,
+        };
+      });
+    }
   } else {
     // if the mode is set to DirectQueryConnections, then will display Direct Query connections and data connections
     result = [
@@ -364,7 +402,7 @@ export const mergeDataSourcesWithConnections = (
 
 // If all connected data sources are serverless, will only allow to select essential use case.
 export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
-  const allDataSources = await getDataSourcesList(client, ['*']);
+  const allDataSources = await getDataSourcesList(client);
   if (allDataSources.length > 0) {
     return allDataSources.every(
       (ds) => ds?.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
@@ -531,6 +569,28 @@ export const fetchDataSourceConnectionsByDataSourceIds = async (
   return directQueryConnectionsResult.flat();
 };
 
+export const getRemoteClusterConnections = async (dataSourceId: string, http: HttpSetup) => {
+  const response = await http.get(`/api/enhancements/remote_cluster/list`, {
+    query: {
+      dataSourceId,
+    },
+  });
+
+  const remoteClusterConnections: DataSourceConnection[] = response.map(
+    (remoteClusterConnection: { connectionAlias: string }) => ({
+      id: `${dataSourceId}-${remoteClusterConnection.connectionAlias}`,
+      title: remoteClusterConnection.connectionAlias,
+      name: remoteClusterConnection.connectionAlias,
+      type: DataSourceEngineType.OpenSearchCrossCluster,
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      description: 'OpenSearch (Cross cluster connection)',
+      parentId: dataSourceId,
+    })
+  );
+
+  return remoteClusterConnections;
+};
+
 export const fetchDataSourceConnections = async (
   dataSources: DataSource[],
   http: HttpSetup | undefined,
@@ -538,15 +598,28 @@ export const fetchDataSourceConnections = async (
   mode: AssociationDataSourceModalMode
 ) => {
   try {
-    let directQueryConnections: DataSourceConnection[] = [];
-    if (mode === AssociationDataSourceModalMode.DirectQueryConnections) {
-      directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
-        // Only data source saved object type needs to fetch data source connections, data connection type object not.
-        dataSources.filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE).map((ds) => ds.id),
-        http
-      );
-    }
-    return mergeDataSourcesWithConnections(dataSources, directQueryConnections, mode);
+    const directQueryConnections =
+      mode === AssociationDataSourceModalMode.DirectQueryConnections
+        ? await fetchDataSourceConnectionsByDataSourceIds(
+            // Only data source saved object type needs to fetch data source connections, data connection type object not.
+            dataSources
+              .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+              .map((ds) => ds.id),
+            http
+          )
+        : [];
+
+    const remoteClusterConnections =
+      mode === AssociationDataSourceModalMode.OpenSearchConnections
+        ? await fetchRemoteClusterConnections(dataSources, http)
+        : [];
+
+    return mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      mode,
+      remoteClusterConnections
+    );
   } catch (error) {
     notifications?.toasts.addDanger(
       i18n.translate('workspace.detail.dataSources.error.message', {
@@ -555,6 +628,28 @@ export const fetchDataSourceConnections = async (
     );
     return [];
   }
+};
+
+export const fetchRemoteClusterConnections = async (
+  dataSources: DataSource[],
+  http: HttpSetup | undefined
+): Promise<DataSourceConnection[]> => {
+  if (!http) {
+    return [];
+  }
+
+  const remoteClusterConnectionsPromises = dataSources.map((ds) => {
+    if (
+      ds.dataSourceEngineType === DataSourceEngineType.OpenSearch ||
+      ds.dataSourceEngineType === DataSourceEngineType.Elasticsearch
+    ) {
+      return getRemoteClusterConnections(ds.id, http).catch(() => []); // Incase of error, return empty array
+    }
+    return [];
+  });
+  const remoteClusterConnections = (await Promise.all(remoteClusterConnectionsPromises)).flat();
+
+  return remoteClusterConnections;
 };
 
 export const getUseCase = (workspace: WorkspaceObject, availableUseCases: WorkspaceUseCase[]) => {

@@ -4,6 +4,19 @@
  */
 
 declare namespace Cypress {
+  type SavedObjectsType =
+    | 'config'
+    | 'url'
+    | 'data-connection'
+    | 'index-pattern'
+    | 'query'
+    | 'homepage'
+    | 'dashboard'
+    | 'visualization'
+    | 'visualization-visbuilder'
+    | 'augment-vis'
+    | 'search';
+
   interface Chainable<Subject> {
     /**
      * Get an element by its test id
@@ -153,6 +166,31 @@ declare namespace Cypress {
        * Grabs the dataSourceId in non-OSD environments and saves it in the alias @DATASOURCE_ID
        */
       grabDataSourceId(workspaceName: string, dataSourceName: string): Chainable<any>;
+
+      /**
+       * Grabs Workspace ID, dataSourceId, and indexPattern id from the URL of discover page
+       * Sets it in the alias @DATASOURCE_ID, @WORKSPACE_ID, @DATASOURCE_ID
+       */
+      grabIdsFromDiscoverPageUrl(): Chainable<any>;
+
+      /**
+       * Makes an API call to delete specified saved object
+       */
+      deleteSavedObject(
+        type: SavedObjectsType,
+        id: string,
+        options?: Record<string, any>
+      ): Chainable<any>;
+
+      /**
+       * Deletes all saved objects by type and an optional search param for a given workspace.
+       * If search param is not provided, it will delete all saved objects by that type.
+       */
+      deleteSavedObjectsByType(
+        workspaceId: string,
+        type: SavedObjectsType,
+        search?: string
+      ): Chainable<any>;
 
       /**
        * Deletes all workspaces that are older than a specified amount. This is to prevent ws buildup

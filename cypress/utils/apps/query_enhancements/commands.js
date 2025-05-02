@@ -101,6 +101,7 @@ Cypress.Commands.add('setQueryEditor', (value, options = {}) => {
       .should('be.visible')
       .wait(200)
       .type(escape ? `${value}{esc}` : value, {
+        delay: 40,
         force: true,
         ...typeOptions, // Pass through all other options to type command
       });

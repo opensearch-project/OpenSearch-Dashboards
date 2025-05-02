@@ -33,6 +33,7 @@ export { IndexPatternSelectProps } from './index_pattern_select';
 export { FilterLabel } from './filter_bar';
 export { QueryStringInput, QueryStringInputProps } from './query_string_input';
 export {
+  ACTION_BAR_BUTTONS_CONTAINER_ID,
   QueryEditorTopRow,
   QueryEditor,
   QueryEditorProps,
