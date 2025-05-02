@@ -79,6 +79,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       if (error instanceof ProhibitedQueryError) {
         setCallOutType('invalid_query');
       } else if (error instanceof AgentError) {
+        setCallOutType('invalid_query');
         setAgentError(error);
       } else {
         services.notifications.toasts.addError(error, { title: 'Failed to generate results' });
