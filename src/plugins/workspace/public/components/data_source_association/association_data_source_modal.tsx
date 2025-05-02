@@ -89,32 +89,37 @@ const renderOption = (option: DataSourceModalOption) => {
 
 const getOpenSearchRelatedConnectionsBadges = (
   relatedCrossClusterConnections: DataSourceConnection[] | undefined,
-  relatedDirectConnections: DataSourceConnection[] | undefined
+  relatedDirectConnections: DataSourceConnection[] | undefined,
+  mode: AssociationDataSourceModalMode
 ) => {
-  return relatedCrossClusterConnections && relatedCrossClusterConnections.length > 0 ? (
+  return (
     <EuiBadgeGroup>
-      {relatedCrossClusterConnections && relatedCrossClusterConnections.length && (
-        <EuiBadge>
-          {i18n.translate('workspace.form.selectDataSource.crossClusterOptionBadge', {
-            defaultMessage: '+ {relatedConnections} Cross cluster',
-            values: {
-              relatedConnections: relatedCrossClusterConnections.length,
-            },
-          })}
-        </EuiBadge>
-      )}
-      {relatedDirectConnections && relatedDirectConnections.length > 0 && (
-        <EuiBadge>
-          {i18n.translate('workspace.form.selectDataSource.directQueryOptionBadge', {
-            defaultMessage: '+ {relatedConnections} Direct query',
-            values: {
-              relatedConnections: relatedDirectConnections.length,
-            },
-          })}
-        </EuiBadge>
-      )}
+      {mode !== AssociationDataSourceModalMode.DirectQueryConnections &&
+        relatedCrossClusterConnections &&
+        relatedCrossClusterConnections.length > 0 && (
+          <EuiBadge>
+            {i18n.translate('workspace.form.selectDataSource.crossClusterOptionBadge', {
+              defaultMessage: '+ {relatedConnections} Cross cluster',
+              values: {
+                relatedConnections: relatedCrossClusterConnections.length,
+              },
+            })}
+          </EuiBadge>
+        )}
+      {mode === AssociationDataSourceModalMode.DirectQueryConnections &&
+        relatedDirectConnections &&
+        relatedDirectConnections.length > 0 && (
+          <EuiBadge>
+            {i18n.translate('workspace.form.selectDataSource.directQueryOptionBadge', {
+              defaultMessage: '+ {relatedConnections} Direct query',
+              values: {
+                relatedConnections: relatedDirectConnections.length,
+              },
+            })}
+          </EuiBadge>
+        )}
     </EuiBadgeGroup>
-  ) : undefined;
+  );
 };
 
 const convertConnectionToOption = ({
@@ -143,7 +148,8 @@ const convertConnectionToOption = ({
     description: connection.description,
     append: getOpenSearchRelatedConnectionsBadges(
       relatedCrossClusterConnections,
-      relatedDirectConnections
+      relatedDirectConnections,
+      mode
     ),
     disabled: !!(
       connection.connectionType === DataSourceConnectionType.DirectQueryConnection ||
@@ -197,13 +203,28 @@ const convertConnectionsToOptions = ({
         return [];
       }
 
-      if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-        return [connection];
+      if (showDirectQueryConnections) {
+        // For direct Query connections filtering out the opensearch connections
+        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
+          return [];
+        }
+        // Show the relatedConnections
+        return [
+          connection,
+          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
+        ];
+      } else {
+        // Display OpenSearch connections
+        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
+          return [connection];
+        }
+
+        // Show the relatedConnections
+        return [
+          connection,
+          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
+        ];
       }
-      return [
-        connection,
-        ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
-      ];
     })
     .map((connection) =>
       convertConnectionToOption({ connection, selectedConnectionIds, logos, mode })
