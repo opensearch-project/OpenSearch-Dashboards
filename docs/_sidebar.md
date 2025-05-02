@@ -46,6 +46,7 @@
       - [Dev_tools](../src/plugins/dev_tools/README.md)
       - [Discover](../src/plugins/discover/README.md)
       - [Embeddable](../src/plugins/embeddable/README.md)
+      - [Explore](../src/plugins/explore/README.md)
       - [Expressions](../src/plugins/expressions/README.md)
       - [Home](../src/plugins/home/README.md)
       - index_pattern_management
@@ -191,6 +192,7 @@
     - [Opensearch dashboards.release notes 2.9.0](../release-notes/opensearch-dashboards.release-notes-2.9.0.md)
     - [Opensearch dashboards.release notes 3.0.0 alpha1](../release-notes/opensearch-dashboards.release-notes-3.0.0-alpha1.md)
     - [Opensearch dashboards.release notes 3.0.0 beta1](../release-notes/opensearch-dashboards.release-notes-3.0.0-beta1.md)
+    - [Opensearch dashboards.release notes 3.0.0](../release-notes/opensearch-dashboards.release-notes-3.0.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)

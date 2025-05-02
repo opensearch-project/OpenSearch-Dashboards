@@ -1,2 +1,0 @@
-security:
-- [CVE-2025-27789] Bump @babel/runtime,@babel/helpers and @babel/runtime-corejs3 ([#9681](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9681))
