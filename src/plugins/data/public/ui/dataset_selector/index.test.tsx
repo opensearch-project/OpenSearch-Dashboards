@@ -21,6 +21,7 @@ jest.mock('./dataset_selector', () => ({
 describe('ConnectedDatasetSelector', () => {
   const mockSubscribe = jest.fn();
   const mockUnsubscribe = jest.fn();
+  const mockSetUserQueryLanguage = jest.fn();
   const mockQueryString = {
     getQuery: jest.fn().mockReturnValue({}),
     getDefaultQuery: jest.fn().mockReturnValue({}),
@@ -32,6 +33,10 @@ describe('ConnectedDatasetSelector', () => {
     getUpdates$: jest.fn().mockReturnValue({
       subscribe: mockSubscribe.mockReturnValue({ unsubscribe: mockUnsubscribe }),
     }),
+    getLanguageService: jest.fn().mockReturnValue({
+      setUserQueryLanguage: mockSetUserQueryLanguage,
+    }),
+    getInitialQueryByLanguage: jest.fn(),
   };
   const mockOnSubmit = jest.fn();
   const mockServices = {
@@ -75,6 +80,9 @@ describe('ConnectedDatasetSelector', () => {
 
     expect(mockQueryString.getInitialQuery).toHaveBeenCalledTimes(1);
     expect(mockQueryString.setQuery).toHaveBeenCalledTimes(1);
+    expect(mockQueryString.getLanguageService).toHaveBeenCalledTimes(1);
+    expect(mockQueryString.getInitialQueryByLanguage).toHaveBeenCalledTimes(1);
+    expect(mockSetUserQueryLanguage).toHaveBeenCalledTimes(1);
     expect(mockOnSubmit).toHaveBeenCalledTimes(1);
   });
 });
