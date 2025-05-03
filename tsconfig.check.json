@@ -1,12 +1,10 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./build/tstypecheckbuildinfo/opensearch-dashboards"
+    "tsBuildInfoFile": "./build/tsbuildinfo/osd-type-check"
   },
   "include": [
     "opensearch_dashboards.d.ts",
-    "src/**/*",
     "src/**/*.ts",
     "src/**/*.tsx",
     "typings/**/*.ts",

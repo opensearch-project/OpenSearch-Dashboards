@@ -15,8 +15,7 @@ trash
 /optimize
 /built_assets
 target
-build/*
-!build/tstypecheckbuildinfo/
+/build
 /bwc_tmp
 .jruby
 .idea
