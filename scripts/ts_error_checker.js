@@ -113,13 +113,14 @@ function getCurrentErrors() {
 
 // Check if an error is new or already in the baseline
 function isNewError(error, baselineErrors) {
-  // An error is considered the same if it has the same file, code, and message
-  // We don't compare line/column as those might change with code edits
+  // An error is considered the same if it has the same file, code, line, and column
+  // If you touch it, you should fix it!
   return !baselineErrors.some(
     (baselineError) =>
       baselineError.file === error.file &&
       baselineError.code === error.code &&
-      baselineError.message === error.message
+      baselineError.line === error.line &&
+      baselineError.column === error.column
   );
 }
 
