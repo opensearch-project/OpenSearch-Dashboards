@@ -10,12 +10,22 @@ const path = require('path');
 
 const BASELINE_FILE = path.join(process.cwd(), 'ts_error_baseline.json');
 const TSC_BIN = path.join(process.cwd(), 'node_modules/.bin/tsc');
+const TSCONFIG_PATH = path.join(process.cwd(), 'tsconfig.json');
 
 console.log('Running TypeScript compiler to capture current errors...');
 
-// Helper to run TypeScript compiler and get structured output
+// Helper to run TypeCheck with tsconfig.json
 function runTypeCheck() {
-  const args = ['--incremental', '--noEmit', '--pretty', 'false'];
+  // Check if tsconfig.json exists
+  if (!fs.existsSync(TSCONFIG_PATH)) {
+    console.error(`Error: Could not find tsconfig.json at ${TSCONFIG_PATH}`);
+    process.exit(1);
+  }
+
+  console.log(`Using TypeScript config: ${TSCONFIG_PATH}`);
+
+  // Use project flag to specify tsconfig.json
+  const args = ['--project', TSCONFIG_PATH, '--noEmit', '--pretty', 'false'];
 
   // Changed stdio to 'pipe' to capture output instead of 'inherit'
   const result = spawnSync(TSC_BIN, args, {
@@ -68,6 +78,7 @@ async function main() {
       {
         errors: currentStatus.errors,
         updatedAt: new Date().toISOString(),
+        tsconfig: TSCONFIG_PATH, // Add reference to which tsconfig was used
       },
       null,
       2

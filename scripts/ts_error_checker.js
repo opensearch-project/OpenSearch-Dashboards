@@ -4,194 +4,195 @@
  */
 
 /* eslint no-restricted-syntax: 0 */
-const { execSync, spawnSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Configuration
+// ANSI color codes for console output
+const colors = {
+  reset: '\x1b[0m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m',
+  white: '\x1b[37m',
+  bold: '\x1b[1m',
+};
+
 const BASELINE_FILE = path.join(process.cwd(), 'ts_error_baseline.json');
 const TSC_BIN = path.join(process.cwd(), 'node_modules/.bin/tsc');
+const TSCONFIG_PATH = path.join(process.cwd(), 'tsconfig.json');
 
-// Helper to run TypeScript compiler and get structured output
-function runTypeCheck(specificFiles = null) {
-  console.log('Running TypeScript type checker...');
+console.log(
+  `${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`
+);
+console.log(`${colors.bold}TypeScript Error Checker${colors.reset}`);
+console.log(
+  `${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`
+);
+console.log(
+  `\n${colors.cyan}▶ ${colors.reset}Running TypeScript compiler to check for new errors...\n`
+);
 
-  const args = ['--incremental', '--noEmit', '--pretty', 'false'];
-
-  // If specific files are provided, add them to the command
-  if (specificFiles && specificFiles.length > 0) {
-    console.log(`Checking ${specificFiles.length} modified files...`);
-    args.push(...specificFiles);
-  } else {
-    console.log('Checking all TypeScript files...');
-  }
-
+// Load baseline errors
+function loadBaseline() {
   try {
-    const result = spawnSync(TSC_BIN, args, {
-      encoding: 'utf8',
-      shell: true,
-      stdio: 'pipe',
-    });
-
-    // Parse the result
-    const checkedFiles = result.stdout
-      .split('\n')
-      .filter((line) => line.trim().length > 0 && line.endsWith('.ts'));
-
-    // Success - no errors
-    return {
-      success: true,
-      checkedFiles,
-      errors: [],
-    };
-  } catch (error) {
-    // Parse the error output to get structured error info
-    const errors = [];
-    if (error.stderr) {
-      error.stderr.split('\n').forEach((line) => {
-        const match = line.match(/(.+)\((\d+),(\d+)\):\s+error\s+(TS\d+):\s+(.+)/);
-        if (match) {
-          errors.push({
-            file: match[1],
-            line: parseInt(match[2]),
-            column: parseInt(match[3]),
-            code: match[4],
-            message: match[5],
-          });
-        }
-      });
+    if (fs.existsSync(BASELINE_FILE)) {
+      const content = fs.readFileSync(BASELINE_FILE, 'utf8');
+      const baseline = JSON.parse(content);
+      console.log(`${colors.blue}ℹ ${colors.reset}Loaded baseline from ${BASELINE_FILE}`);
+      console.log(
+        `${colors.blue}ℹ ${colors.reset}Baseline contains ${colors.bold}${baseline.errors.length}${colors.reset} known errors`
+      );
+      return baseline.errors;
+    } else {
+      console.warn(`${colors.yellow}⚠ ${colors.reset}Baseline file not found at ${BASELINE_FILE}.`);
+      console.warn(`${colors.yellow}⚠ ${colors.reset}All errors will be treated as new.`);
+      return [];
     }
-
-    const checkedFiles = error.stdout
-      .split('\n')
-      .filter((line) => line.trim().length > 0 && line.endsWith('.ts'));
-
-    return {
-      success: false,
-      checkedFiles,
-      errors,
-    };
+  } catch (error) {
+    console.error(`${colors.red}✖ ${colors.reset}Error loading baseline: ${error.message}`);
+    process.exit(1);
   }
 }
 
-// Get git status to find modified files
-function getModifiedFiles() {
-  try {
-    const result = execSync('git ls-files --modified --others --exclude-standard', {
-      encoding: 'utf8',
+// Helper to run TypeScript compiler and get structured output
+function getCurrentErrors() {
+  // Check if tsconfig.json exists
+  if (!fs.existsSync(TSCONFIG_PATH)) {
+    console.error(`Error: Could not find tsconfig.json at ${TSCONFIG_PATH}`);
+    process.exit(1);
+  }
+
+  console.log(`Using TypeScript config: ${TSCONFIG_PATH}`);
+
+  const args = ['--project', TSCONFIG_PATH, '--noEmit', '--pretty', 'false'];
+
+  console.log(`${colors.cyan}▶ ${colors.reset}Executing: ${TSC_BIN} ${args.join(' ')}\n`);
+
+  const result = spawnSync(TSC_BIN, args, {
+    encoding: 'utf8',
+    shell: true,
+    stdio: 'pipe',
+  });
+
+  // Process doesn't throw an exception when there are type errors
+  // Instead we need to check the exit code
+  if (result.status === 0) {
+    // Success - no errors
+    console.log(
+      `${colors.green}✓ ${colors.reset}${colors.bold}No TypeScript errors found!${colors.reset}`
+    );
+    return [];
+  } else {
+    // Parse the error output to get structured error info
+    const errors = [];
+    const output = result.stderr || result.stdout || '';
+
+    output.split('\n').forEach((line) => {
+      const match = line.match(/(.+)\((\d+),(\d+)\):\s+error\s+(TS\d+):\s+(.+)/);
+      if (match) {
+        errors.push({
+          file: match[1],
+          line: parseInt(match[2]),
+          column: parseInt(match[3]),
+          code: match[4],
+          message: match[5],
+        });
+      }
     });
 
-    const modifiedFiles = result
-      .split('\n')
-      .filter((file) => file.trim().length > 0)
-      .filter((file) => file.endsWith('.ts') || file.endsWith('.tsx'));
-
-    console.log(`Found ${modifiedFiles.length} modified TypeScript files.`);
-    return modifiedFiles;
-  } catch (error) {
-    console.warn('⚠️ Could not get git status. Falling back to checking all files.');
-    return null;
+    console.log(
+      `${colors.blue}ℹ ${colors.reset}Found ${colors.bold}${errors.length}${colors.reset} TypeScript errors in current codebase`
+    );
+    return errors;
   }
+}
+
+// Check if an error is new or already in the baseline
+function isNewError(error, baselineErrors) {
+  // An error is considered the same if it has the same file, code, and message
+  // We don't compare line/column as those might change with code edits
+  return !baselineErrors.some(
+    (baselineError) =>
+      baselineError.file === error.file &&
+      baselineError.code === error.code &&
+      baselineError.message === error.message
+  );
+}
+
+// Format an error for nice display
+function formatError(error, index) {
+  return [
+    `  ${colors.bold}${index + 1}.${colors.reset} ${colors.red}${error.file}:${error.line}:${
+      error.column
+    }${colors.reset}`,
+    `     ${colors.yellow}Error ${error.code}:${colors.reset} ${error.message}`,
+  ].join('\n');
 }
 
 // Main function
 async function main() {
-  // Load baseline if it exists
-  let baseline = {};
-  if (fs.existsSync(BASELINE_FILE)) {
-    try {
-      baseline = JSON.parse(fs.readFileSync(BASELINE_FILE, 'utf8'));
-    } catch (e) {
-      console.warn('⚠️ Could not parse baseline file. Creating a new one.');
-      baseline = { errors: [] };
-    }
-  } else {
-    console.log('⚠️ No baseline found. Creating a new one.');
-    baseline = { errors: [] };
-  }
+  console.log('\n');
 
-  // First run - create baseline if needed
-  if (!baseline.errors || !Array.isArray(baseline.errors)) {
-    console.log('📝 Creating initial baseline...');
-    // For initial baseline, check all files
-    const currentStatus = runTypeCheck();
-    fs.writeFileSync(
-      BASELINE_FILE,
-      JSON.stringify(
-        {
-          errors: currentStatus.errors,
-          updatedAt: new Date().toISOString(),
-        },
-        null,
-        2
-      )
+  // Get baseline errors
+  const baselineErrors = loadBaseline();
+  console.log('');
+
+  // Get current errors
+  const currentErrors = getCurrentErrors();
+  console.log('');
+
+  // Find new errors (not in baseline)
+  const newErrors = currentErrors.filter((error) => isNewError(error, baselineErrors));
+
+  if (newErrors.length === 0) {
+    console.log(
+      `${colors.green}✓ ${colors.reset}${colors.bold}SUCCESS:${colors.reset} No new TypeScript errors detected!`
     );
-    console.log(`✅ Baseline created with ${currentStatus.errors.length} errors`);
-    process.exit(0);
-  }
 
-  // Get modified files for incremental checking
-  const modifiedFiles = getModifiedFiles();
-
-  // Get the current status - only check modified files if available
-  const currentStatus = runTypeCheck(modifiedFiles);
-
-  // Compare with baseline to find new errors
-  const baselineErrors = new Map();
-  baseline.errors.forEach((error) => {
-    const key = `${error.file}:${error.code}`;
-    baselineErrors.set(key, error);
-  });
-
-  const newErrors = currentStatus.errors.filter((error) => {
-    const key = `${error.file}:${error.code}`;
-    return !baselineErrors.has(key);
-  });
-
-  if (newErrors.length > 0) {
-    console.error('❌ New TypeScript errors detected:');
-    newErrors.forEach((error) => {
-      console.error(
-        `- ${error.file}(${error.line},${error.column}): error ${error.code}: ${error.message}`
+    if (currentErrors.length > 0) {
+      console.log(
+        `${colors.blue}ℹ ${colors.reset}${currentErrors.length} existing errors found (already in baseline)`
       );
-    });
-    console.error('\nFix these new errors or update the baseline with:');
-    console.error('  npm run update-ts-baseline');
-    process.exit(1);
+    }
+
+    console.log(
+      `${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`
+    );
+    process.exit(0); // Success
   } else {
-    // Check if we've fixed any errors
-    const fixedErrors = [];
+    console.error(
+      `${colors.red}✖ ${colors.reset}${colors.bold}FAILURE:${colors.reset} Found ${newErrors.length} new TypeScript errors:\n`
+    );
 
-    // Only consider files that we actually checked as fixed
-    const checkedFileSet = new Set(currentStatus.checkedFiles);
-
-    baselineErrors.forEach((error, key) => {
-      // Only consider errors fixed if the file was actually checked
-      const fileWasChecked =
-        modifiedFiles === null ||
-        checkedFileSet.has(error.file) ||
-        modifiedFiles.some((f) => error.file.endsWith(f));
-
-      if (fileWasChecked && !currentStatus.errors.some((e) => `${e.file}:${e.code}` === key)) {
-        fixedErrors.push(error);
-      }
+    // Print new errors in a nice format
+    newErrors.forEach((error, index) => {
+      console.error(formatError(error, index));
+      if (index < newErrors.length - 1) console.error('');
     });
 
-    if (fixedErrors.length > 0) {
-      console.log(`✅ Good job! You've fixed ${fixedErrors.length} TypeScript errors!`);
-    }
+    console.error('\n');
+    console.error(
+      `${colors.red}✖ ${colors.reset}${colors.bold}Build failed due to new TypeScript errors.${colors.reset}`
+    );
+    console.error(
+      `${colors.yellow}ℹ ${colors.reset}To update the baseline, run the baseline update script.`
+    );
+    console.error(
+      `${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`
+    );
 
-    const remainingErrors = currentStatus.errors.length;
-    console.log(`✅ No new TypeScript errors introduced!`);
-    if (modifiedFiles !== null) {
-      console.log(`Checked ${modifiedFiles.length} modified files.`);
-    }
-    console.log(`(${remainingErrors} existing errors in baseline)`);
-    process.exit(0);
+    process.exit(1); // Failure
   }
 }
 
 main().catch((error) => {
-  console.error('❌ Error running TypeScript check:', error);
+  console.error(
+    `${colors.red}✖ ${colors.reset}${colors.bold}ERROR:${colors.reset} Failed to check TypeScript errors`
+  );
+  console.error(`  ${error.message}`);
   process.exit(1);
 });
