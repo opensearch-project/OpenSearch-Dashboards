@@ -6595,6 +6595,13 @@
       "message": "Type 'P' does not satisfy the constraint 'SerializableState'."
     },
     {
+      "file": "src/plugins/explore/public/plugin.ts",
+      "line": 6,
+      "column": 1,
+      "code": "TS6133",
+      "message": "'i18n' is declared but its value is never read."
+    },
+    {
       "file": "src/plugins/expressions/common/expression_types/expression_type.test.ts",
       "line": 58,
       "column": 7,
@@ -10606,6 +10613,6 @@
       "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
     }
   ],
-  "updatedAt": "2025-05-02T23:08:39.264Z",
+  "updatedAt": "2025-05-03T00:27:30.418Z",
   "tsconfig": "/home/ubuntu/OpenSearch-Dashboards/tsconfig.check.json"
 }
