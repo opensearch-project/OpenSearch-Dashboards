@@ -10,7 +10,7 @@ const path = require('path');
 
 const BASELINE_FILE = path.join(process.cwd(), 'ts_error_baseline.json');
 const TSC_BIN = path.join(process.cwd(), 'node_modules/.bin/tsc');
-const TSCONFIG_PATH = path.join(process.cwd(), 'tsconfig.json');
+const TSCONFIG_PATH = path.join(process.cwd(), 'tsconfig.check.json');
 
 console.log('Running TypeScript compiler to capture current errors...');
 
