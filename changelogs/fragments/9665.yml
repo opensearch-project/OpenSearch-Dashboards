@@ -1,3 +1,0 @@
-fix:
-- Menu stay in settings and setup when opening a visualization from assets relationship ([#9665](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9665))
-- Add sample data under Custom category ([#9665](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9665))
