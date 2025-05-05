@@ -389,38 +389,37 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       window.location.reload();
     }
 
-    return (
-      <div style={{ position: 'relative', padding: '16px' }}>
-        {(() => {
-          const urlOverride = isDirectQuerySyncEnabledByUrl();
-          const featureFlagEnabled =
-            urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
+    return (() => {
+      const urlOverride = isDirectQuerySyncEnabledByUrl();
+      const featureFlagEnabled =
+        urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
 
-          const metadataAvailable = this.state.extractedProps !== null;
+      const metadataAvailable = this.state.extractedProps !== null;
+      const shouldRenderSyncUI = featureFlagEnabled && metadataAvailable;
 
-          const shouldRenderSyncUI = featureFlagEnabled && metadataAvailable;
-
-          return shouldRenderSyncUI ? (
+      return (
+        <>
+          {shouldRenderSyncUI && (
             <DashboardDirectQuerySync
               loadStatus={this.props.loadStatus}
               lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
               refreshInterval={this.state.extractedProps?.refreshInterval}
               onSynchronize={this.synchronizeNow}
             />
-          ) : null;
-        })()}
+          )}
 
-        <ResponsiveSizedGrid
-          isViewMode={isViewMode}
-          layout={this.buildLayoutFromPanels()}
-          onLayoutChange={this.onLayoutChange}
-          maximizedPanelId={this.state.expandedPanelId!}
-          useMargins={this.state.useMargins}
-        >
-          {this.renderPanels()}
-        </ResponsiveSizedGrid>
-      </div>
-    );
+          <ResponsiveSizedGrid
+            isViewMode={isViewMode}
+            layout={this.buildLayoutFromPanels()}
+            onLayoutChange={this.onLayoutChange}
+            maximizedPanelId={this.state.expandedPanelId!}
+            useMargins={this.state.useMargins}
+          >
+            {this.renderPanels()}
+          </ResponsiveSizedGrid>
+        </>
+      );
+    })();
   }
 }
 
