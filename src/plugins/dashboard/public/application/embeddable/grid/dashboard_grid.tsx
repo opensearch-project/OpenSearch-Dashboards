@@ -226,11 +226,24 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             useMargins: input.useMargins,
             expandedPanelId: input.expandedPanelId,
           });
-          this.collectAllPanelMetadata();
+
+          const urlOverride = isDirectQuerySyncEnabledByUrl();
+          const featureFlagEnabled =
+            urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
+
+          if (featureFlagEnabled) {
+            this.collectAllPanelMetadata();
+          }
         }
       });
 
-    this.collectAllPanelMetadata();
+    const urlOverride = isDirectQuerySyncEnabledByUrl();
+    const featureFlagEnabled =
+      urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
+
+    if (featureFlagEnabled) {
+      this.collectAllPanelMetadata();
+    }
   }
 
   public componentWillUnmount() {
@@ -282,6 +295,12 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
    * Runs on mount and when the container input (panels) changes.
    */
   private async collectAllPanelMetadata() {
+    const urlOverride = isDirectQuerySyncEnabledByUrl();
+    const featureFlagEnabled =
+      urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
+
+    if (!featureFlagEnabled) return;
+
     const indexInfo = await extractIndexInfoFromDashboard(
       this.state.panels,
       this.props.savedObjectsClient,
@@ -305,6 +324,12 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   synchronizeNow = () => {
+    const urlOverride = isDirectQuerySyncEnabledByUrl();
+    const featureFlagEnabled =
+      urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
+
+    if (!featureFlagEnabled) return;
+
     const { extractedDatasource, extractedDatabase, extractedIndex } = this;
     if (
       !extractedDatasource ||
