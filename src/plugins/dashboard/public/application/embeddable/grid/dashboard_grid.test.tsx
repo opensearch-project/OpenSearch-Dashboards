@@ -75,6 +75,7 @@ let dashboardContainer: DashboardContainer | undefined;
 
 function prepare(props?: Partial<DashboardGridProps>) {
   const { setup, doStart } = embeddablePluginMock.createInstance();
+
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
     new ContactCardEmbeddableFactory((() => null) as any, {} as any)
@@ -87,15 +88,41 @@ function prepare(props?: Partial<DashboardGridProps>) {
       '1': {
         gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
         type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '1' },
+        explicitInput: { id: '1', savedObjectId: 'vis-1' }, // <-- added
       },
       '2': {
         gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
         type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '2' },
+        explicitInput: { id: '2', savedObjectId: 'vis-2' }, // <-- added
       },
     },
   });
+
+  const services = createDashboardServicesMock();
+
+  // Mock savedObjectsClient.get to handle both visualization and index-pattern types
+  jest.spyOn(services.savedObjectsClient, 'get').mockImplementation((type: string, id: string) => {
+    if (!type || !id) throw new Error('requires type and id');
+
+    if (type === 'visualization' || type === CONTACT_CARD_EMBEDDABLE) {
+      return Promise.resolve({
+        id,
+        attributes: {},
+        references: [{ type: 'index-pattern', id: 'index-pattern-1' }],
+      });
+    }
+
+    if (type === 'index-pattern') {
+      return Promise.resolve({
+        id,
+        attributes: {},
+        references: [{ type: 'data-source', id: 'ds-id' }],
+      });
+    }
+
+    throw new Error(`Unknown saved object type: ${type}`);
+  });
+
   const options: DashboardContainerOptions = {
     application: {} as any,
     embeddable: {
@@ -116,9 +143,8 @@ function prepare(props?: Partial<DashboardGridProps>) {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
   };
-  dashboardContainer = new DashboardContainer(initialInput, options);
 
-  const services = createDashboardServicesMock();
+  dashboardContainer = new DashboardContainer(initialInput, options);
 
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
