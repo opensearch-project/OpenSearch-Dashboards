@@ -570,9 +570,10 @@ export class WorkspacePlugin
     this.collaboratorsAppUpdater$.next(() => {
       return {
         status: isPermissionEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-        navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus:
+          core.chrome.navGroup.getNavGroupEnabled() && isPermissionEnabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.hidden,
       };
     });
 
