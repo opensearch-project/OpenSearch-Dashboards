@@ -88,12 +88,12 @@ function prepare(props?: Partial<DashboardGridProps>) {
       '1': {
         gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
         type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '1', savedObjectId: 'vis-1' }, // <-- added
+        explicitInput: { id: '1', savedObjectId: 'vis-1' },
       },
       '2': {
         gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
         type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '2', savedObjectId: 'vis-2' }, // <-- added
+        explicitInput: { id: '2', savedObjectId: 'vis-2' },
       },
     },
   });
