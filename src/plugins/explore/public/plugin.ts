@@ -3,25 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   DEFAULT_NAV_GROUPS,
   Plugin,
+  PluginInitializerContext,
   WorkspaceAvailability,
 } from '../../../core/public';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { ConfigSchema } from '../common/types/config';
 import {
   ExplorePluginSetup,
   ExplorePluginStart,
   ExploreSetupPlugins,
   ExploreStartPlugins,
 } from './types';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
+  private config: ConfigSchema;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<ConfigSchema>();
+  }
+
   public setup(core: CoreSetup, plugins: ExploreSetupPlugins): ExplorePluginSetup {
+    if (!this.config.enabled) return {};
+
     // Register an application into the side navigation menu
     core.application.register({
       id: PLUGIN_ID,
@@ -30,6 +40,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
       defaultPath: '#/',
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -48,43 +59,11 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
       },
     ]);
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 300,
-      },
-    ]);
-
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 200,
       },
     ]);
 
