@@ -22,7 +22,8 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupType,
   ALL_USE_CASE_ID,
-} from '../../../core/public';
+} from 'opensearch-dashboards/public';
+import { getWorkspaceIdFromUrl } from 'opensearch-dashboards/public/utils';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
   WORKSPACE_DETAIL_APP_ID,
@@ -32,7 +33,6 @@ import {
   WORKSPACE_NAVIGATION_APP_ID,
   WORKSPACE_COLLABORATORS_APP_ID,
 } from '../common/constants';
-import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase, WorkspacePluginSetup } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
@@ -570,9 +570,10 @@ export class WorkspacePlugin
     this.collaboratorsAppUpdater$.next(() => {
       return {
         status: isPermissionEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-        navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus:
+          core.chrome.navGroup.getNavGroupEnabled() && isPermissionEnabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.hidden,
       };
     });
 
