@@ -123,6 +123,10 @@ export async function extractIndexInfoFromDashboard(
     }
   }
 
+  if (indexPatternIds.length === 0) {
+    return null;
+  }
+
   if (!sourceCheck(indexPatternIds, mdsIds)) {
     return null;
   }
