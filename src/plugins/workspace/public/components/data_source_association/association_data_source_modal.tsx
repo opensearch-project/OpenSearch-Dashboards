@@ -203,28 +203,14 @@ const convertConnectionsToOptions = ({
         return [];
       }
 
-      if (showDirectQueryConnections) {
-        // For direct Query connections filtering out the opensearch connections
-        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-          return [];
-        }
-        // Show the relatedConnections
-        return [
-          connection,
-          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
-        ];
-      } else {
-        // Display OpenSearch connections
-        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-          return [connection];
-        }
-
-        // Show the relatedConnections
-        return [
-          connection,
-          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
-        ];
+      if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
+        return showDirectQueryConnections ? [] : [connection];
       }
+
+      return [
+        connection,
+        ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
+      ];
     })
     .map((connection) =>
       convertConnectionToOption({ connection, selectedConnectionIds, logos, mode })
