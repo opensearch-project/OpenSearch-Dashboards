@@ -243,10 +243,18 @@ describe('extractIndexInfoFromDashboard', () => {
     expect(result).toBe(null);
   });
 
-  it('handles saved object errors gracefully', async () => {
-    mockSavedObjectsClient.get.mockRejectedValueOnce(new Error('Saved object not found'));
+  it('handles 404 saved object errors gracefully', async () => {
+    mockSavedObjectsClient.get.mockRejectedValueOnce({ response: { status: 404 } });
     const panels = { panel1: { explicitInput: { savedObjectId: 'so-1' }, type: 'visualization' } };
     const result = await extractIndexInfoFromDashboard(panels, mockSavedObjectsClient, mockHttp);
     expect(result).toBe(null);
+  });
+
+  it('throws non-404 saved object errors', async () => {
+    mockSavedObjectsClient.get.mockRejectedValueOnce({ response: { status: 500 } });
+    const panels = { panel1: { explicitInput: { savedObjectId: 'so-1' }, type: 'visualization' } };
+    await expect(
+      extractIndexInfoFromDashboard(panels, mockSavedObjectsClient, mockHttp)
+    ).rejects.toMatchObject({ response: { status: 500 } });
   });
 });

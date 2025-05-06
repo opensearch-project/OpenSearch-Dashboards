@@ -118,8 +118,10 @@ export async function extractIndexInfoFromDashboard(
 
       indexPatternIds.push(indexPatternRef.id);
       mdsIds.push(mdsId);
-    } catch (err) {
-      // Ignoring error: saved object might be missing or invalid
+    } catch (err: any) {
+      if (err?.response?.status !== 404) {
+        throw err;
+      }
     }
   }
 
@@ -181,7 +183,7 @@ export function sourceCheck(indexPatternIds: string[], mdsIds: Array<string | un
   const uniqueIndexPatternIds = Array.from(new Set(indexPatternIds));
   const uniqueMdsIds = Array.from(new Set(mdsIds));
 
-  const isConsistent = uniqueIndexPatternIds.length === 1 && uniqueMdsIds.length === 1;
+  const isConsistent = uniqueIndexPatternIds.length === 1 && uniqueMdsIds.length <= 1;
 
   return isConsistent;
 }
