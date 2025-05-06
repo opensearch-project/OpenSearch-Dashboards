@@ -11,8 +11,6 @@
 
 ### Deprecations
 
- - Discover:newExpereince and DataGridTable ([#9511](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9511))
-
 ### 🛡 Security
 
  - Bump markdown-it from 12.3.2 to 13.0.2 ([#9412](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9412))
@@ -45,9 +43,6 @@
  - Enable experimental data plugin's __enhance ([#9655](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9655))
  - Add resultsActionBar into data plugin's __enhance ([#9655](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9655))
  - Display query assistant when dataset is not supported ([#9232](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9232))
- - Add a new Data Importer Plugin to OSD Core ([#9602](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9602))
- - Ui action supports `isDisabled` and `getTooltip` ([#9696](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9696))
- - Adding back storybook ([#9697](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9697))
 
 ### 🐛 Bug Fixes
 
@@ -83,15 +78,10 @@
  - Query assistant doesn't refresh generated ppl ([#9601](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9601))
  - Trim the url for creating data source ([#9637](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9637))
  - [workspace] filter out recent items which have errors ([#9346](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9346))
- - Remove * when calling find in data source association modal and in workspace list page ([#9409](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9409))
  - Add error handling page for workspace stale state to prevent getting stuck in loading ([#9478](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9478))
  - Fix minor UX style issues on discover summary section ([#9509](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9509))
  - Correctly show error message in DQL and PPL query editor ([#9586](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9586))
  - Skip appending time range to ppl when not querying with source ([#9603](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9603))
- - Should clear previous query if input invalid questions ([#9605](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9605))
- - Fix a issue that can cause incorrect query to fire when switch plugin ([#9625](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9625))
- - Data source opensearch client honors the timeout settings in yaml file ([#9651](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9651))
- - Support left navigation search for OSD with workspace plugin disabled ([#9662](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9662))
  - Menu stay in settings and setup when opening a visualization from assets relationship ([#9665](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9665))
  - Add sample data under Custom category ([#9665](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9665))
  - Close suggestions after query submission ([#9666](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9666))
@@ -99,10 +89,6 @@
  - Copy essential property to generated request ([#9674](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9674))
  - Fix issue with adding sample data to data source ([#9676](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9676))
  - Fix connect queryparams resulting in signer error ([#9678](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9678))
- - Fix Branding test urls ([#9694](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9694))
- - Fix user appearance not working ([#9700](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9700))
- - Cancel existing query when new natural language prompt is being generated-new ([#9701](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9701))
- - Fix SigV4 signing mismatch issue with ?v query parameter ([#9730](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9730))
 
 ### 🚞 Infrastructure
 
@@ -131,7 +117,6 @@
  - Replace `@elastic/filesaver` in favor of `file-saver`. ([#9484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9484))
  - Replace `formatNumWithCommas` with `toLocaleString` ([#9488](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9488))
 
-
 ### 🪛 Refactoring
 
  - Update data source details tabs to use small buttons ([#9057](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9057))
@@ -155,4 +140,4 @@
  - Fix flakieness in cypress tests ([#9433](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9433))
  - Use before/after to speed up test ([#9439](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9439))
  - Clear session storage in S3 integ test and update workflow ([#9490](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9490))
-- Reenable saved search cypress tests ([#9628](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9628))
+ - Reenable saved search cypress tests ([#9628](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9628))
