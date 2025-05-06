@@ -342,3 +342,50 @@ test('synchronizeNow triggers REFRESH query generation and startLoading', async 
     datasource: 'ds',
   });
 });
+
+test('synchronizeNow does nothing when feature flag is disabled', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: false });
+
+  const startLoadingSpy = jest.fn();
+  props.startLoading = startLoadingSpy;
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  // Simulate calling synchronizeNow directly
+  (component.find('DashboardGridUi').instance() as any).synchronizeNow();
+
+  expect(startLoadingSpy).not.toHaveBeenCalled();
+});
+
+test('synchronizeNow does nothing when metadata contains unknown values', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
+
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: 'db', index: 'unknown' },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  const startLoadingSpy = jest.fn();
+  props.startLoading = startLoadingSpy;
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  (component.find('DashboardGridUi').instance() as any).synchronizeNow();
+
+  expect(startLoadingSpy).not.toHaveBeenCalled();
+});
