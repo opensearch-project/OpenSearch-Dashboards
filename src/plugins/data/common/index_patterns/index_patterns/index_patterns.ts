@@ -109,7 +109,8 @@ export class IndexPatternsService {
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
       uiSettings,
       onRedirectNoIndexPattern,
-      canUpdateUiSetting
+      canUpdateUiSetting,
+      savedObjectsClient
     );
   }
 
