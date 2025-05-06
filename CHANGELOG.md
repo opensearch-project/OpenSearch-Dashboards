@@ -4,6 +4,45 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [3.0.0-2025-05-05](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.0.0)
+
+### 💥 Breaking Changes
+
+### Deprecations
+
+### 🛡 Security
+
+ - [CVE-2025-27789] Bump @babel/runtime,@babel/helpers and @babel/runtime-corejs3 ([#9681](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9681))
+
+### 📈 Features/Enhancements
+
+ - Display query assistant when dataset is not supported ([#9232](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9232))
+
+### 🐛 Bug Fixes
+
+ - [workspace] filter out recent items which have errors ([#9346](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9346))
+ - Add error handling page for workspace stale state to prevent getting stuck in loading ([#9478](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9478))
+ - Fix minor UX style issues on discover summary section ([#9509](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9509))
+ - Correctly show error message in DQL and PPL query editor ([#9586](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9586))
+ - Skip appending time range to ppl when not querying with source ([#9603](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9603))
+ - Menu stay in settings and setup when opening a visualization from assets relationship ([#9665](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9665))
+ - Add sample data under Custom category ([#9665](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9665))
+ - Close suggestions after query submission ([#9666](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9666))
+ - [Discover]Fix dataset selector flashing ([#9668](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9668))
+ - Copy essential property to generated request ([#9674](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9674))
+ - Fix issue with adding sample data to data source ([#9676](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9676))
+ - Fix connect queryparams resulting in signer error ([#9678](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9678))
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+### 🛠 Maintenance
+
+### 🪛 Refactoring
+
+### 🔩 Tests
+
 ## [3.0.0-beta1-2025-04-09](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.0.0)
 
 ### 💥 Breaking Changes
@@ -89,6 +128,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Move HITs counter to be closer to table & show results count ([#9498](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9498))
  - Add the ability to export to CSV from the discover page ([#9530](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9530))
  - Append prompt for query assistant in request payload ([#9532](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9532))
+ - Add tooltip and disabled to panel item ([#9696](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9696))
 
 ### 🐛 Bug Fixes
 
