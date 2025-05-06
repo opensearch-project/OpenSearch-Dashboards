@@ -11,3 +11,4 @@ export function plugin() {
 
 export { WorkspacePluginSetup, WorkspaceCollaborator } from './types';
 export { WorkspaceCollaboratorType } from './services';
+export { isNavGroupInFeatureConfigs } from './utils';

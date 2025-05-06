@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { take } from 'rxjs/operators';
 import {
   AppMountParameters,
   CoreSetup,
@@ -13,6 +14,7 @@ import {
   PluginInitializerContext,
   WorkspaceAvailability,
 } from '../../../core/public';
+import { isNavGroupInFeatureConfigs } from '../../workspace/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/types/config';
 import {
@@ -42,11 +44,20 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       async mount(params: AppMountParameters) {
-        // Load application bundle
-        const { renderApp } = await import('./application');
-        // Get start services as specified in opensearch_dashboards.json
         const [coreStart, depsStart] = await core.getStartServices();
-        // Render the application
+        const features = await core.workspaces.currentWorkspace$
+          .pipe(take(1))
+          .toPromise()
+          .then((workspace) => workspace?.features);
+        if (
+          !features ||
+          (!isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) &&
+            !isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS['security-analytics'].id, features))
+        ) {
+          coreStart.application.navigateToApp('discover', { replace: true });
+        }
+
+        const { renderApp } = await import('./application');
         return renderApp(coreStart, depsStart as ExploreStartPlugins, params);
       },
     });
