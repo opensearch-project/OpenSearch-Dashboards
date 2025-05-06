@@ -53,6 +53,7 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
   log.info('running @osd/optimizer');
   log.indent(2);
 
+  // Find all OpenSearch Dashboards platform plugins located in 'src/plugins'
   const corePlugins = findOpenSearchDashboardsPlatformPlugins(
     [Path.resolve(REPO_ROOT, 'src/plugins')],
     []
@@ -71,6 +72,10 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
     });
   });
 
+  // Define bundleRefs, which tell the optimizer (and ultimately webpack)
+  // not to bundle these modules directly, but instead to treat them as external
+  // and reference their exports at runtime. This avoids redundant bundling
+  // and enables module sharing across plugins and core components.
   for (const p of corePlugins) {
     const publicDirNames = ['public', ...p.extraPublicDirs];
     for (const name of publicDirNames) {
