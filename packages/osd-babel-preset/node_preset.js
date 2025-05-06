@@ -28,6 +28,8 @@
  * under the License.
  */
 
+const path = require('path');
+
 module.exports = (_, options = {}) => {
   return {
     presets: [
@@ -59,6 +61,19 @@ module.exports = (_, options = {}) => {
         },
       ],
       require('./common_preset'),
+    ],
+    plugins: [
+      [
+        require.resolve('babel-plugin-module-resolver'),
+        {
+          root: [path.resolve(__dirname, '../..')],
+          cwd: path.resolve(__dirname, '../..'),
+          alias: {
+            'opensearch-dashboards/server': './src/core/server',
+            'opensearch-dashboards/public': './src/core/public',
+          },
+        },
+      ],
     ],
   };
 };
