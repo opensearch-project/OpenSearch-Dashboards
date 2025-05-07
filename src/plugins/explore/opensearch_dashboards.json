@@ -17,7 +17,7 @@
     "visualizations",
     "usageCollection"
   ],
-  "requiredBundles": ["workspace"],
+  "requiredBundles": ["workspace", "opensearchDashboardsReact", "opensearchDashboardsUtils"],
   "optionalPlugins": ["home", "share"],
   "configPath": ["explore"]
 }

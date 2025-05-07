@@ -6,12 +6,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '../../../core/public';
-import { ExploreStartPlugins } from './types';
+import { ExploreStartDependencies } from './types';
 import { ExploreApp } from './components/app';
 
 export const renderApp = (
   { notifications, http }: CoreStart,
-  { navigation }: ExploreStartPlugins,
+  { navigation }: ExploreStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
