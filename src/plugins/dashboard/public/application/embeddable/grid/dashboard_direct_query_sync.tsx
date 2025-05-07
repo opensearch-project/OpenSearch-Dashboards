@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { DirectQueryLoadingStatus } from '../../../../../data_source_management/public';
 import { EMR_STATES, intervalAsMinutes } from '../../utils/direct_query_sync/direct_query_sync';
 import './_dashboard_direct_query_sync.scss';
@@ -28,24 +29,35 @@ export const DashboardDirectQuerySync: React.FC<DashboardDirectQuerySyncProps> =
     <div className="dshDashboardGrid__syncBar" data-test-subj="dashboardDirectQuerySyncBar">
       {state.terminal ? (
         <EuiText size="s">
-          Data scheduled to sync every{' '}
-          {refreshInterval ? intervalAsMinutes(1000 * refreshInterval) : '--'}. Last sync:{' '}
-          {lastRefreshTime ? (
-            <>
-              {new Date(lastRefreshTime).toLocaleString()} (
-              {intervalAsMinutes(new Date().getTime() - lastRefreshTime)} ago)
-            </>
-          ) : (
-            '--'
-          )}
-          . &nbsp;&nbsp;
-          <EuiLink onClick={onSynchronize}>Sync data</EuiLink>
+          {i18n.translate('dashboard.directQuerySync.dataScheduledToSync', {
+            defaultMessage: 'Data scheduled to sync every {interval}. Last sync: {lastSyncTime}.',
+            values: {
+              interval: refreshInterval ? intervalAsMinutes(1000 * refreshInterval) : '--',
+              lastSyncTime: lastRefreshTime
+                ? `${new Date(lastRefreshTime).toLocaleString()} (${intervalAsMinutes(
+                    new Date().getTime() - lastRefreshTime
+                  )} ago)`
+                : '--',
+            },
+          })}
+
+          <EuiLink onClick={onSynchronize}>
+            {i18n.translate('dashboard.directQuerySync.syncDataLink', {
+              defaultMessage: 'Sync data',
+            })}
+          </EuiLink>
         </EuiText>
       ) : (
         <EuiCallOut size="s">
           <EuiLoadingSpinner size="s" />
-          &nbsp;&nbsp;&nbsp;Data sync is in progress (<b>{state.ord}%</b> complete). The dashboard
-          will reload on completion.
+
+          {i18n.translate('dashboard.directQuerySync.dataSyncInProgress', {
+            defaultMessage:
+              'Data sync is in progress ({progress}% complete). The dashboard will reload on completion.',
+            values: {
+              progress: state.ord,
+            },
+          })}
         </EuiCallOut>
       )}
     </div>
