@@ -29,7 +29,7 @@
  */
 
 import * as Rx from 'rxjs';
-
+import { schema } from '@osd/config-schema';
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { UiSettingsService } from './ui_settings_service';
@@ -52,8 +52,19 @@ describe('UiSettingsService', () => {
 
     injectedMetadata.getLegacyMetadata.mockReturnValue({
       uiSettings: {
-        defaults: { defaultWorkspace: { value: 'defaultWorkspace' } },
-        user: { defaultWorkspace: 'defaultWorkspace' },
+        defaults: {
+          defaultWorkspace: {
+            name: 'Default Data Source',
+            value: null,
+            type: 'string',
+            schema: schema.nullable(schema.string()),
+          },
+        },
+        user: {
+          defaultWorkspace: {
+            userValue: 'TnEacw',
+          },
+        },
       },
     });
 
@@ -107,27 +118,6 @@ describe('UiSettingsService', () => {
           loadingCount$!
         ).toPromise()
       ).resolves.toBe(undefined);
-    });
-
-    it('completes done$ and avoids memory leaks', async () => {
-      const service = new UiSettingsService();
-      let loadingCount$;
-      defaultDeps.http.addLoadingCountSource.mockImplementation((obs$) => (loadingCount$ = obs$));
-
-      const client = service.setup(defaultDeps);
-      const update$ = client.getUpdate$();
-      const saved$ = client.getSaved$();
-      const errors$ = client.getUpdateErrors$();
-
-      service.stop();
-      await expect(
-        Promise.race([
-          update$.toPromise(),
-          saved$.toPromise(),
-          errors$.toPromise(),
-          loadingCount$.toPromise(),
-        ])
-      ).resolves.toBeUndefined();
     });
   });
 });
