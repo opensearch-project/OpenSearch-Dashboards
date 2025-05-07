@@ -41,7 +41,10 @@ import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import type { SavedObjectsClientContract } from 'src/core/public';
 import { HttpStart, NotificationsStart } from 'src/core/public';
-import { DirectQueryLoadingStatus, DirectQueryRequest } from 'data_source_management/public';
+import {
+  DirectQueryLoadingStatus,
+  DirectQueryRequest,
+} from '../../../../../data_source_management/public';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -409,7 +412,12 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     const isViewMode = viewMode === ViewMode.VIEW;
     const state = EMR_STATES.get(this.props.loadStatus as string)!;
 
-    if (state?.terminal && this.props.loadStatus !== 'fresh') {
+    if (
+      state?.terminal &&
+      this.props.loadStatus !== DirectQueryLoadingStatus.FRESH &&
+      this.props.loadStatus !== DirectQueryLoadingStatus.FAILED &&
+      this.props.loadStatus !== DirectQueryLoadingStatus.CANCELLED
+    ) {
       window.location.reload();
     }
 
