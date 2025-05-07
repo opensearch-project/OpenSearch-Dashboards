@@ -12,7 +12,7 @@
     "savedObjects",
     "dataSourceManagement"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection","dataSouce"],
+  "optionalPlugins": ["home", "share", "usageCollection"],
   "server": true,
   "ui": true,
   "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "home"]
