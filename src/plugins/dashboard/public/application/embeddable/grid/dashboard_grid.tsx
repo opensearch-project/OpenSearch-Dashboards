@@ -200,6 +200,17 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     return urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
   }
 
+  /**
+   * Determines the query language to use for direct query sync.
+   * Returns the provided queryLang if specified; otherwise, defaults to 'sql' if the feature is enabled.
+   */
+  private getQueryLanguage(): string {
+    if (this.props.queryLang) {
+      return this.props.queryLang;
+    }
+    return this.isDirectQuerySyncEnabled() ? 'sql' : '';
+  }
+
   public componentDidMount() {
     this.mounted = true;
     let isLayoutInvalid = false;
@@ -291,6 +302,22 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   };
 
   /**
+   * Validates if the extracted datasource, database, and index are present and valid.
+   * Returns true if all values are non-empty and not 'unknown', false otherwise.
+   */
+  private areDataSourceParamsValid(): boolean {
+    const { extractedDatasource, extractedDatabase, extractedIndex } = this;
+    return (
+      !!extractedDatasource &&
+      !!extractedDatabase &&
+      !!extractedIndex &&
+      extractedDatasource !== 'unknown' &&
+      extractedDatabase !== 'unknown' &&
+      extractedIndex !== 'unknown'
+    );
+  }
+
+  /**
    * Collects metadata (panelId, savedObjectId, type) for all panels in the dashboard.
    * Runs on mount and when the container input (panels) changes.
    */
@@ -325,30 +352,22 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
    * and triggers the sync process if direct query sync is enabled.
    */
   private synchronizeNow = () => {
-    if (!this.isDirectQuerySyncEnabled()) return;
-
-    const { extractedDatasource, extractedDatabase, extractedIndex } = this;
-    if (
-      !extractedDatasource ||
-      !extractedDatabase ||
-      !extractedIndex ||
-      extractedDatasource === 'unknown' ||
-      extractedDatabase === 'unknown' ||
-      extractedIndex === 'unknown'
-    ) {
+    if (!this.isDirectQuerySyncEnabled() || !this.areDataSourceParamsValid()) {
       return;
     }
 
+    const { extractedDatasource, extractedDatabase, extractedIndex } = this;
+
     const query = generateRefreshQuery({
-      datasource: extractedDatasource,
-      database: extractedDatabase,
-      index: extractedIndex,
+      datasource: extractedDatasource!,
+      database: extractedDatabase!,
+      index: extractedIndex!,
     });
 
     this.props.startLoading({
       query,
-      lang: this.props.queryLang || 'sql',
-      datasource: extractedDatasource,
+      lang: this.getQueryLanguage(),
+      datasource: extractedDatasource!,
     });
   };
 
