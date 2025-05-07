@@ -49,7 +49,7 @@ export async function resolveConcreteIndex(
   if (!indexTitle.includes('*')) return indexTitle;
 
   try {
-    const query: any = mdsId ? { data_source: mdsId } : {};
+    const query = mdsId ? { data_source: mdsId } : {};
     const resolved = await http.get(
       `/internal/index-pattern-management/resolve_index/${encodeURIComponent(indexTitle)}`,
       { query }
