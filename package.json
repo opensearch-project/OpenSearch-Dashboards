@@ -273,6 +273,7 @@
     "performance-now": "^2.1.0",
     "proxy-from-env": "1.0.0",
     "query-string": "^6.13.2",
+    "raf-debounce": "^0.1.1",
     "react": "^16.14.0",
     "react-dom": "^16.12.0",
     "react-input-range": "^1.3.0",

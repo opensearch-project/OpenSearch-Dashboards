@@ -20857,7 +20857,7 @@ pend@~1.2.0:
   resolved "https://registry.yarnpkg.com/pend/-/pend-1.2.0.tgz#7a57eb550a6783f9115331fcf4663d5c8e007a50"
   integrity sha1-elfrVQpng/kRUzH89GY9XI4AelA=
 
-performance-now@^2.1.0:
+performance-now@^2.1.0, performance-now@~0.1.3:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
@@ -21572,10 +21572,24 @@ quick-lru@^5.1.1:
   resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-5.1.1.tgz#366493e6b3e42a3a6885e2e99d18f80fb7a8c932"
   integrity sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==
 
+raf-debounce@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/raf-debounce/-/raf-debounce-0.1.1.tgz#86ebfa8094986b4f1de9da37f81ac95f02521444"
+  integrity sha512-LaiVoyrANzwFEQkOYjCAxK+YhcQPZwsN8478C83e94hteR3VUmNm/KyahunobBa6pJ2p1CHOPKDU7KD/HD4pqQ==
+  dependencies:
+    raf "2.0.4"
+
 raf-schd@^4.0.2:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/raf-schd/-/raf-schd-4.0.3.tgz#5d6c34ef46f8b2a0e880a8fcdb743efc5bfdbc1a"
   integrity sha512-tQkJl2GRWh83ui2DiPTJz9wEiMN20syf+5oKfB03yYP7ioZcJwsIK8FjrtLwH1m7C7e+Tt2yYBlrOpdT+dyeIQ==
+
+raf@2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/raf/-/raf-2.0.4.tgz#4993e453ea5275bf6ef07a163bdfe9a23233b623"
+  integrity sha512-/1MFu3i+bZeLZDRNKe+BC1d4elEHqM+ksh64WcW/5KCvxntnV6A4h6vLH3ebFKk/l8JxmHnGjOBhDq+5Jm0WnA==
+  dependencies:
+    performance-now "~0.1.3"
 
 raf@^3.4.1:
   version "3.4.1"
