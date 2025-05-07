@@ -1,0 +1,61 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.deSidebar_panel {
+  .dscSideBar_searchContainer {
+    border-bottom: $euiBorderThin;
+
+    .toggleFieldFilterButton {
+      border: none;
+      background-color: $euiFormInputGroupLabelBackground;
+    }
+
+    .dscSideBar_searchInput {
+      box-shadow: none;
+      border: $euiBorderThin;
+      background-color: $euiFormBackgroundColor;
+    }
+  }
+
+  .dscSideBar_fieldListContainer {
+    padding-top: $euiSizeS;
+  }
+
+  .deSidebar_dataSource {
+    padding-bottom: 0;
+  }
+
+  .datasetSelector__button {
+    border-radius: $euiFormControlCompressedBorderRadius;
+    border-color: $euiFormBorderColor;
+    background-color: $euiFormBackgroundColor;
+
+    & > .euiButtonContent {
+      justify-content: space-between;
+
+      .euiIcon {
+        fill: $euiTextSubduedColor;
+      }
+    }
+  }
+}
+
+.dscSideBar_fieldGroup {
+  width: 100%;
+
+  .euiButtonEmpty__content {
+    font-size: $euiFontSizeXS;
+    font-weight: $euiFontWeightSemiBold;
+    justify-content: flex-start;
+    padding-left: $euiSizeM + 2px;
+  }
+}
+
+.dscSidebar__item:hover,
+.dscSidebar__item:focus {
+  background-color: $euiColorLightestShade;
+  padding-left: $euiSizeXS;
+  margin-left: -$euiSizeXS;
+}

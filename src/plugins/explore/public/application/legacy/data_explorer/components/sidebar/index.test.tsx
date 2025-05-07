@@ -11,7 +11,7 @@ import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import configureMockStore from 'redux-mock-store';
 import { Sidebar } from './index'; // Adjust the import path as necessary
-import { MockS3DataSource } from '../../../../../../../discover/public/__mock__/index.test.mock';
+import { MockS3DataSource } from '../../../discover/__mock__/index.test.mock';
 import { s3DataSourceMetadata } from '../../../../../../../data/public/data_sources/constants';
 
 const mockStore = configureMockStore();

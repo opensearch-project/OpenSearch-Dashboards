@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<EuiFlyout
+  data-test-subj="loadSearchForm"
+  onClose={[Function]}
+  ownFocus={true}
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiText
+      size="s"
+    >
+      <h2>
+        <FormattedMessage
+          defaultMessage="OpenSearch"
+          id="discover.topNav.openSearchPanel.openSearchTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiText>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <SavedObjectFinderUi
+      noItemsMessage={
+        <FormattedMessage
+          defaultMessage="No matching searches found."
+          id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
+          values={Object {}}
+        />
+      }
+      onChoose={[Function]}
+      savedObjectMetaData={
+        Array [
+          Object {
+            "getIconForSavedObject": [Function],
+            "includeFields": Array [
+              "kibanaSavedObjectMeta",
+            ],
+            "name": "Saved search",
+            "type": "search",
+          },
+        ]
+      }
+      savedObjects={Object {}}
+      uiSettings={Object {}}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiSmallButtonEmpty
+          href="/app/management/opensearch-dashboards/objects?_a=(tab:search)"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Manage searches"
+            id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+            values={Object {}}
+          />
+        </EuiSmallButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
