@@ -49,7 +49,10 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
           iconSide="left"
           onClick={openPopover}
         >
-          <FormattedMessage id="discover.downloadCsvButtonText" defaultMessage="Download as CSV" />
+          <FormattedMessage
+            id="explore.discover.downloadCsvButtonText"
+            defaultMessage="Download as CSV"
+          />
         </EuiSmallButtonEmpty>
       }
       isOpen={isPopoverOpen}

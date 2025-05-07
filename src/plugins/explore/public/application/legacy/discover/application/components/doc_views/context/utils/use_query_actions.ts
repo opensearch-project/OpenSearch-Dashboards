@@ -72,7 +72,7 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
         anchorStatus: { value: LOADING_STATUS.FAILED, reason: FAILURE_REASONS.UNKNOWN },
       }));
       toastNotifications.addDanger({
-        title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
+        title: i18n.translate('explore.discover.context.unableToLoadAnchorDocumentDescription', {
           defaultMessage: 'Unable to fetch anchor document',
         }),
         text: 'fail',
@@ -131,9 +131,12 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
           }));
         }
         toastNotifications.addDanger({
-          title: i18n.translate('discover.context.unableToLoadSurroundingDocumentDescription', {
-            defaultMessage: 'Unable to fetch surrounding documents',
-          }),
+          title: i18n.translate(
+            'explore.discover.context.unableToLoadSurroundingDocumentDescription',
+            {
+              defaultMessage: 'Unable to fetch surrounding documents',
+            }
+          ),
           text: 'fail',
         });
       }
@@ -163,7 +166,7 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
         );
       } catch (error) {
         toastNotifications.addDanger({
-          title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
+          title: i18n.translate('explore.discover.context.unableToLoadDocumentDescription', {
             defaultMessage: 'Unable to fetch all documents',
           }),
           text: 'fail',

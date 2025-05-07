@@ -38,7 +38,7 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
             <EuiFlexItem>
               <EuiTitle size="m">
                 <h2>
-                  {i18n.translate('discover.noIndexPatterns.selectDataTitle', {
+                  {i18n.translate('explore.discover.noIndexPatterns.selectDataTitle', {
                     defaultMessage: 'Select data',
                   })}
                 </h2>
@@ -46,7 +46,7 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText textAlign="center" color="subdued" size="xs">
-                {i18n.translate('discover.noIndexPatterns.selectDataDescription', {
+                {i18n.translate('explore.discover.noIndexPatterns.selectDataDescription', {
                   defaultMessage:
                     'Select an available data source and choose a query language to use for running queries. You can use the data dropdown or use the enhanced data selector to select data.',
                 })}
@@ -55,7 +55,7 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h4>
-                  {i18n.translate('discover.noIndexPatterns.learnMoreAboutQueryLanguages', {
+                  {i18n.translate('explore.discover.noIndexPatterns.learnMoreAboutQueryLanguages', {
                     defaultMessage: 'Learn more about query languages',
                   })}
                 </h4>

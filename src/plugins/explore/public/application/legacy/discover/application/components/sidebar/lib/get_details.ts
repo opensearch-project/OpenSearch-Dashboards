@@ -47,7 +47,7 @@ export function getDetails(
   if (!indexPattern) {
     return {
       ...defaultDetails,
-      error: i18n.translate('discover.fieldChooser.noIndexPatternSelectedErrorMessage', {
+      error: i18n.translate('explore.discover.fieldChooser.noIndexPatternSelectedErrorMessage', {
         defaultMessage: 'Index pattern not specified.',
       }),
     };

@@ -36,7 +36,7 @@ const { docLinks } = getServices();
 
 export function addHelpMenuToAppChrome(chrome: ChromeStart) {
   chrome.setHelpExtension({
-    appName: i18n.translate('discover.helpMenu.appName', {
+    appName: i18n.translate('explore.discover.helpMenu.appName', {
       defaultMessage: 'Discover',
     }),
     links: [

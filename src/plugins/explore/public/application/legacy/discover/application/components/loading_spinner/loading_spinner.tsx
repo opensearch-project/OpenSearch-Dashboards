@@ -47,7 +47,7 @@ export function LoadingSpinner() {
         title={
           <EuiTitle size="s" data-test-subj="loadingSpinnerText">
             <h2>
-              <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />
+              <FormattedMessage id="explore.discover.searchingTitle" defaultMessage="Searching" />
             </h2>
           </EuiTitle>
         }

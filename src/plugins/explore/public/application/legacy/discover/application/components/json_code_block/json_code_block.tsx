@@ -35,7 +35,7 @@ import { stringify } from '@osd/std';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 export function JsonCodeBlock({ hit }: DocViewRenderProps) {
-  const label = i18n.translate('discover.docViews.json.codeEditorAriaLabel', {
+  const label = i18n.translate('explore.discover.docViews.json.codeEditorAriaLabel', {
     defaultMessage: 'Read only JSON view of an opensearch document',
   });
   return (

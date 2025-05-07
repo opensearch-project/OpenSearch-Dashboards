@@ -75,17 +75,20 @@ export function resolveIndexPattern(
   }
 
   if (stateVal && !stateValFound) {
-    const warningTitle = i18n.translate('discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
-      defaultMessage: '{id} is not a configured index pattern ID',
-      values: {
-        id: `"${stateVal}"`,
-      },
-    });
+    const warningTitle = i18n.translate(
+      'explore.discover.valueIsNotConfiguredIndexPatternIDWarningTitle',
+      {
+        defaultMessage: '{id} is not a configured index pattern ID',
+        values: {
+          id: `"${stateVal}"`,
+        },
+      }
+    );
 
     if (ownIndexPattern) {
       toastNotifications.addWarning({
         title: warningTitle,
-        text: i18n.translate('discover.showingSavedIndexPatternWarningDescription', {
+        text: i18n.translate('explore.discover.showingSavedIndexPatternWarningDescription', {
           defaultMessage:
             'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
           values: {
@@ -99,7 +102,7 @@ export function resolveIndexPattern(
 
     toastNotifications.addWarning({
       title: warningTitle,
-      text: i18n.translate('discover.showingDefaultIndexPatternWarningDescription', {
+      text: i18n.translate('explore.discover.showingDefaultIndexPatternWarningDescription', {
         defaultMessage:
           'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
         values: {

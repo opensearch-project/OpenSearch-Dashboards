@@ -75,7 +75,7 @@ export const DiscoverChart = ({
     </div>
   );
 
-  const toggleLabel = i18n.translate('discover.histogram.collapse', {
+  const toggleLabel = i18n.translate('explore.discover.histogram.collapse', {
     defaultMessage: 'Toggle histogram',
   });
 
@@ -128,7 +128,7 @@ export const DiscoverChart = ({
       {chartData && showHistogram && (
         <EuiFlexItem grow={false}>
           <section
-            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+            aria-label={i18n.translate('explore.discover.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
             className="dscTimechart"

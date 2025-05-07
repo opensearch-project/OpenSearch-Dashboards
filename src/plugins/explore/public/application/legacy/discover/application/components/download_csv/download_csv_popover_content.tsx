@@ -44,7 +44,7 @@ export const DiscoverDownloadCsvPopoverContent = ({
         id: DownloadCsvFormId.Visible,
         label: (
           <FormattedMessage
-            id="discover.downloadCsvOptionVisible"
+            id="explore.discover.downloadCsvOptionVisible"
             defaultMessage="Visible ({rowCount})"
             values={{ rowCount: rowsCountString }}
           />
@@ -58,7 +58,7 @@ export const DiscoverDownloadCsvPopoverContent = ({
         id: DownloadCsvFormId.Max,
         label: (
           <FormattedMessage
-            id="discover.downloadCsvOptionMax"
+            id="explore.discover.downloadCsvOptionMax"
             defaultMessage="Max available ({max})"
             values={{ max: maxCountString }}
           />
@@ -75,7 +75,10 @@ export const DiscoverDownloadCsvPopoverContent = ({
       <div className="dscDownloadCsvPopoverContent__titleWrapper">
         <EuiText data-test-subj="dscDownloadCsvTitle" size="m">
           <strong>
-            <FormattedMessage id="discover.downloadCsvTitle" defaultMessage="Download as CSV" />
+            <FormattedMessage
+              id="explore.discover.downloadCsvTitle"
+              defaultMessage="Download as CSV"
+            />
           </strong>
         </EuiText>
       </div>
@@ -92,7 +95,7 @@ export const DiscoverDownloadCsvPopoverContent = ({
           onClick={() => downloadForOption(selectedOption)}
           fullWidth={true}
         >
-          <FormattedMessage id="discover.downloadCsvSubmit" defaultMessage="Download CSV" />
+          <FormattedMessage id="explore.discover.downloadCsvSubmit" defaultMessage="Download CSV" />
         </EuiSmallButton>
       </div>
     </div>

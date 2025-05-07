@@ -49,7 +49,7 @@ export function SurroundingDocsApp() {
     chrome.setBreadcrumbs([
       ...getRootBreadcrumbs(),
       {
-        text: i18n.translate('discover.context.breadcrumb', {
+        text: i18n.translate('explore.discover.context.breadcrumb', {
           defaultMessage: `Context of #{docId}`,
           values: {
             docId: id,

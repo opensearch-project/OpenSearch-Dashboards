@@ -68,7 +68,7 @@ export function Doc(props: DocProps) {
               iconType="alert"
               title={
                 <FormattedMessage
-                  id="discover.doc.failedToLocateIndexPattern"
+                  id="explore.discover.doc.failedToLocateIndexPattern"
                   defaultMessage="No index pattern matches ID {indexPatternId}"
                   values={{ indexPatternId: props.indexPatternId }}
                 />
@@ -82,13 +82,13 @@ export function Doc(props: DocProps) {
               iconType="alert"
               title={
                 <FormattedMessage
-                  id="discover.doc.failedToLocateDocumentDescription"
+                  id="explore.discover.doc.failedToLocateDocumentDescription"
                   defaultMessage="Cannot find document"
                 />
               }
             >
               <FormattedMessage
-                id="discover.doc.couldNotFindDocumentsDescription"
+                id="explore.discover.doc.couldNotFindDocumentsDescription"
                 defaultMessage="No documents match that ID."
               />
             </EuiCallOut>
@@ -101,13 +101,13 @@ export function Doc(props: DocProps) {
               iconType="alert"
               title={
                 <FormattedMessage
-                  id="discover.doc.failedToExecuteQueryDescription"
+                  id="explore.discover.doc.failedToExecuteQueryDescription"
                   defaultMessage="Cannot run search"
                 />
               }
             >
               <FormattedMessage
-                id="discover.doc.somethingWentWrongDescription"
+                id="explore.discover.doc.somethingWentWrongDescription"
                 defaultMessage="{indexName} is missing."
                 values={{ indexName: props.index }}
               />{' '}
@@ -116,7 +116,7 @@ export function Doc(props: DocProps) {
                 target="_blank"
               >
                 <FormattedMessage
-                  id="discover.doc.somethingWentWrongDescriptionAddon"
+                  id="explore.explore.discover.doc.somethingWentWrongDescriptionAddon"
                   defaultMessage="Please ensure the index exists."
                 />
               </EuiLink>
@@ -126,7 +126,10 @@ export function Doc(props: DocProps) {
           {reqState === OpenSearchRequestState.Loading && (
             <EuiCallOut data-test-subj={`doc-msg-loading`}>
               <EuiLoadingSpinner size="m" />{' '}
-              <FormattedMessage id="discover.doc.loadingDescription" defaultMessage="Loading…" />
+              <FormattedMessage
+                id="explore.discover.doc.loadingDescription"
+                defaultMessage="Loading…"
+              />
             </EuiCallOut>
           )}
 

@@ -328,10 +328,10 @@ export class SearchEmbeddable
 
     // Log request to inspector
     this.inspectorAdaptors.requests.reset();
-    const title = i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
+    const title = i18n.translate('explore.discover.embeddable.inspectorRequestDataTitle', {
       defaultMessage: 'Data',
     });
-    const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
+    const description = i18n.translate('explore.discover.embeddable.inspectorRequestDescription', {
       defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });

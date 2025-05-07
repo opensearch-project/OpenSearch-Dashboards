@@ -130,7 +130,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   useEffect(() => {
     setScreenTitle(
       savedSearch?.title ||
-        i18n.translate('discover.savedSearch.newTitle', {
+        i18n.translate('explore.discover.savedSearch.newTitle', {
           defaultMessage: 'New search',
         })
     );

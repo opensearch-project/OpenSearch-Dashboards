@@ -50,7 +50,7 @@ export async function fetchAnchor(
 
   if (!doc) {
     throw new Error(
-      i18n.translate('discover.context.failedToLoadAnchorDocumentErrorDescription', {
+      i18n.translate('explore.discover.context.failedToLoadAnchorDocumentErrorDescription', {
         defaultMessage: 'Failed to load anchor document.',
       })
     );

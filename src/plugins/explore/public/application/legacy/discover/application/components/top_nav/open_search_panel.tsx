@@ -68,7 +68,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
         <EuiText size="s">
           <h2>
             <FormattedMessage
-              id="discover.topNav.openSearchPanel.openSearchTitle"
+              id="explore.discover.topNav.openSearchPanel.openSearchTitle"
               defaultMessage="OpenSearch"
             />
           </h2>
@@ -78,7 +78,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
         <SavedObjectFinderUi
           noItemsMessage={
             <FormattedMessage
-              id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
+              id="explore.discover.topNav.openSearchPanel.noSearchesFoundDescription"
               defaultMessage="No matching searches found."
             />
           }
@@ -86,7 +86,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
             {
               type: SAVED_OBJECT_TYPE,
               getIconForSavedObject: () => 'search',
-              name: i18n.translate('discover.savedSearch.savedObjectName', {
+              name: i18n.translate('explore.discover.savedSearch.savedObjectName', {
                 defaultMessage: 'Saved search',
               }),
               includeFields: ['kibanaSavedObjectMeta'],
@@ -117,7 +117,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
               )}
             >
               <FormattedMessage
-                id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+                id="explore.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
                 defaultMessage="Manage searches"
               />
             </EuiSmallButtonEmpty>

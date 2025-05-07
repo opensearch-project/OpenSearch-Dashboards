@@ -36,7 +36,7 @@ export function getRootBreadcrumbs(): EuiBreadcrumb[] {
   const { core } = getServices();
   return [
     {
-      text: i18n.translate('discover.rootBreadcrumb', {
+      text: i18n.translate('explore.discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
       onClick: () => core.application.navigateToApp('data-explorer', { path: 'discover' }),

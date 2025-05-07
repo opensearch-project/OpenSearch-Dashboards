@@ -92,7 +92,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
       handleIndexPattern();
     } catch (error) {
       if (isMounted) {
-        const warningMessage = i18n.translate('discover.indexPatternFetchErrorWarning', {
+        const warningMessage = i18n.translate('explore.discover.indexPatternFetchErrorWarning', {
           defaultMessage: 'Error fetching index pattern: {error}',
           values: { error: (error as Error).message },
         });

@@ -275,10 +275,10 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       // Initialize inspect adapter for search source
       inspectorAdapters.requests.reset();
-      const title = i18n.translate('discover.inspectorRequestDataTitle', {
+      const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
         defaultMessage: 'data',
       });
-      const description = i18n.translate('discover.inspectorRequestDescription', {
+      const description = i18n.translate('explore.discover.inspectorRequestDescription', {
         defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
       });
       const inspectorRequest = inspectorAdapters.requests.start(title, { description });

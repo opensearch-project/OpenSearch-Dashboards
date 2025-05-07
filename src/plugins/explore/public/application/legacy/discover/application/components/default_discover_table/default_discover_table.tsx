@@ -290,14 +290,17 @@ const DefaultDiscoverTableUI = ({
         {!showPagination && rows.length === sampleSize && (
           <EuiCallOut className="dscTable__footer" data-test-subj="discoverDocTableFooter">
             <FormattedMessage
-              id="discover.howToSeeOtherMatchingDocumentsDescription"
+              id="explore.discover.howToSeeOtherMatchingDocumentsDescription"
               defaultMessage="These are the first {sampleSize} documents matching
               your search, refine your search to see others."
               values={{ sampleSize }}
             />
 
             <EuiSmallButtonEmpty onClick={scrollToTop}>
-              <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
+              <FormattedMessage
+                id="explore.discover.backToTopLinkText"
+                defaultMessage="Back to top."
+              />
             </EuiSmallButtonEmpty>
           </EuiCallOut>
         )}

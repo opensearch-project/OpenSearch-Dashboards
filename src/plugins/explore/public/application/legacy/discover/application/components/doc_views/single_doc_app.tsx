@@ -51,7 +51,7 @@ export function SingleDocApp() {
     chrome.setBreadcrumbs([
       ...getRootBreadcrumbs(),
       {
-        text: i18n.translate('discover.single.breadcrumb', {
+        text: i18n.translate('explore.discover.single.breadcrumb', {
           defaultMessage: '{index}#{docId}',
           values: {
             index,

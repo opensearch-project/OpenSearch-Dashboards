@@ -190,7 +190,7 @@ export class DiscoverPlugin
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
-      title: i18n.translate('discover.docViews.table.tableTitle', {
+      title: i18n.translate('explore.discover.docViews.table.tableTitle', {
         defaultMessage: 'Table',
       }),
       order: 10,
@@ -198,7 +198,7 @@ export class DiscoverPlugin
     });
 
     this.docViewsRegistry.addDocView({
-      title: i18n.translate('discover.docViews.json.jsonTitle', {
+      title: i18n.translate('explore.discover.docViews.json.jsonTitle', {
         defaultMessage: 'JSON',
       }),
       order: 20,
@@ -209,7 +209,7 @@ export class DiscoverPlugin
     setDocViewsLinksRegistry(this.docViewsLinksRegistry);
 
     this.docViewsLinksRegistry.addDocViewLink({
-      label: i18n.translate('discover.docTable.tableRow.viewSurroundingDocumentsLinkText', {
+      label: i18n.translate('explore.discover.docTable.tableRow.viewSurroundingDocumentsLinkText', {
         defaultMessage: 'View surrounding documents',
       }),
       generateCb: (renderProps: any) => {
@@ -248,7 +248,7 @@ export class DiscoverPlugin
     });
 
     this.docViewsLinksRegistry.addDocViewLink({
-      label: i18n.translate('discover.docTable.tableRow.viewSingleDocumentLinkText', {
+      label: i18n.translate('explore.discover.docTable.tableRow.viewSingleDocumentLinkText', {
         defaultMessage: 'View single document',
       }),
       generateCb: (renderProps) => {

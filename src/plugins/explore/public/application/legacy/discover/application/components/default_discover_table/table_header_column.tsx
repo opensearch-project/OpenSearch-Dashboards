@@ -76,21 +76,21 @@ export function TableHeaderColumn({
 
   const getSortButtonAriaLabel = () => {
     const sortAscendingMessage = i18n.translate(
-      'discover.docTable.tableHeader.sortByColumnAscendingAriaLabel',
+      'explore.discover.docTable.tableHeader.sortByColumnAscendingAriaLabel',
       {
         defaultMessage: 'Sort {columnName} ascending',
         values: { columnName: name },
       }
     );
     const sortDescendingMessage = i18n.translate(
-      'discover.docTable.tableHeader.sortByColumnDescendingAriaLabel',
+      'explore.discover.docTable.tableHeader.sortByColumnDescendingAriaLabel',
       {
         defaultMessage: 'Sort {columnName} descending',
         values: { columnName: name },
       }
     );
     const stopSortingMessage = i18n.translate(
-      'discover.docTable.tableHeader.sortByColumnUnsortedAriaLabel',
+      'explore.discover.docTable.tableHeader.sortByColumnUnsortedAriaLabel',
       {
         defaultMessage: 'Stop sorting on {columnName}',
         values: { columnName: name },
@@ -123,14 +123,17 @@ export function TableHeaderColumn({
     // Remove Button
     {
       active: isRemoveable && typeof onRemoveColumn === 'function',
-      ariaLabel: i18n.translate('discover.docTable.tableHeader.removeColumnButtonAriaLabel', {
-        defaultMessage: 'Remove {columnName} column',
-        values: { columnName: name },
-      }),
+      ariaLabel: i18n.translate(
+        'explore.discover.docTable.tableHeader.removeColumnButtonAriaLabel',
+        {
+          defaultMessage: 'Remove {columnName} column',
+          values: { columnName: name },
+        }
+      ),
       className: 'fa fa-remove osdDocTableHeader__move',
       onClick: () => onRemoveColumn && onRemoveColumn(name),
       testSubject: `docTableRemoveHeader-${name}`,
-      tooltip: i18n.translate('discover.docTable.tableHeader.removeColumnButtonTooltip', {
+      tooltip: i18n.translate('explore.discover.docTable.tableHeader.removeColumnButtonTooltip', {
         defaultMessage: 'Remove Column',
       }),
       iconType: 'cross',
@@ -138,14 +141,17 @@ export function TableHeaderColumn({
     // Move Left Button
     {
       active: colLeftIdx >= 0 && typeof onMoveColumn === 'function',
-      ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
-        defaultMessage: 'Move {columnName} column to the left',
-        values: { columnName: name },
-      }),
+      ariaLabel: i18n.translate(
+        'explore.discover.docTable.tableHeader.moveColumnLeftButtonAriaLabel',
+        {
+          defaultMessage: 'Move {columnName} column to the left',
+          values: { columnName: name },
+        }
+      ),
       className: 'fa fa-angle-double-left osdDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colLeftIdx),
       testSubject: `docTableMoveLeftHeader-${name}`,
-      tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
+      tooltip: i18n.translate('explore.discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
         defaultMessage: 'Move column to the left',
       }),
       iconType: 'sortLeft',
@@ -153,16 +159,22 @@ export function TableHeaderColumn({
     // Move Right Button
     {
       active: colRightIdx >= 0 && typeof onMoveColumn === 'function',
-      ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
-        defaultMessage: 'Move {columnName} column to the right',
-        values: { columnName: name },
-      }),
+      ariaLabel: i18n.translate(
+        'explore.discover.docTable.tableHeader.moveColumnRightButtonAriaLabel',
+        {
+          defaultMessage: 'Move {columnName} column to the right',
+          values: { columnName: name },
+        }
+      ),
       className: 'fa fa-angle-double-right osdDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colRightIdx),
       testSubject: `docTableMoveRightHeader-${name}`,
-      tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonTooltip', {
-        defaultMessage: 'Move column to the right',
-      }),
+      tooltip: i18n.translate(
+        'explore.discover.docTable.tableHeader.moveColumnRightButtonTooltip',
+        {
+          defaultMessage: 'Move column to the right',
+        }
+      ),
       iconType: 'sortRight',
     },
   ];
@@ -172,7 +184,7 @@ export function TableHeaderColumn({
       data-test-subj="docTableHeaderField"
       className="docTableHeaderField"
       role="columnheader"
-      aria-label={i18n.translate('discover.defaultTable.docTableHeaderLabel', {
+      aria-label={i18n.translate('explore.discover.defaultTable.docTableHeaderLabel', {
         defaultMessage: 'Discover table column: {name}',
         values: { name },
       })}
