@@ -194,6 +194,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     };
   }
 
+  private isDirectQuerySyncEnabled(): boolean {
+    const urlOverride = isDirectQuerySyncEnabledByUrl();
+    return urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
+  }
+
   public componentDidMount() {
     this.mounted = true;
     let isLayoutInvalid = false;
@@ -229,21 +234,13 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             expandedPanelId: input.expandedPanelId,
           });
 
-          const urlOverride = isDirectQuerySyncEnabledByUrl();
-          const directQuerySyncEnabled =
-            urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
-
-          if (directQuerySyncEnabled) {
+          if (this.isDirectQuerySyncEnabled()) {
             this.collectAllPanelMetadata();
           }
         }
       });
 
-    const urlOverride = isDirectQuerySyncEnabledByUrl();
-    const directQuerySyncEnabled =
-      urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
-
-    if (directQuerySyncEnabled) {
+    if (this.isDirectQuerySyncEnabled()) {
       this.collectAllPanelMetadata();
     }
   }
@@ -297,11 +294,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
    * Runs on mount and when the container input (panels) changes.
    */
   private async collectAllPanelMetadata() {
-    const urlOverride = isDirectQuerySyncEnabledByUrl();
-    const directQuerySyncEnabled =
-      urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
-
-    if (!directQuerySyncEnabled) return;
+    if (!this.isDirectQuerySyncEnabled()) return;
 
     const indexInfo = await extractIndexInfoFromDashboard(
       this.state.panels,
@@ -326,11 +319,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   synchronizeNow = () => {
-    const urlOverride = isDirectQuerySyncEnabledByUrl();
-    const directQuerySyncEnabled =
-      urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
-
-    if (!directQuerySyncEnabled) return;
+    if (!this.isDirectQuerySyncEnabled()) return;
 
     const { extractedDatasource, extractedDatabase, extractedIndex } = this;
     if (
@@ -422,10 +411,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     }
 
     return (() => {
-      const urlOverride = isDirectQuerySyncEnabledByUrl();
-      const directQuerySyncEnabled =
-        urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
-
+      const directQuerySyncEnabled = this.isDirectQuerySyncEnabled();
       const metadataAvailable = this.state.extractedProps !== null;
       const shouldRenderSyncUI = directQuerySyncEnabled && metadataAvailable;
 
