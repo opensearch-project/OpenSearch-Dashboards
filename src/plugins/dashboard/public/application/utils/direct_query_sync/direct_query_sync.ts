@@ -4,6 +4,7 @@
  */
 
 import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
+import { i18n } from '@osd/i18n';
 
 interface IndexExtractionResult {
   datasource: string;
@@ -38,7 +39,14 @@ export const MAX_ORD = 100;
 
 export function intervalAsMinutes(interval: number): string {
   const minutes = Math.floor(interval / 60000);
-  return minutes === 1 ? '1 minute' : minutes + ' minutes';
+  return minutes === 1
+    ? i18n.translate('dashboard.directQuerySync.intervalAsMinutes.oneMinute', {
+        defaultMessage: '1 minute',
+      })
+    : i18n.translate('dashboard.directQuerySync.intervalAsMinutes.multipleMinutes', {
+        defaultMessage: '{minutes} minutes',
+        values: { minutes },
+      });
 }
 
 export async function resolveConcreteIndex(
