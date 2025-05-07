@@ -147,6 +147,7 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   loadStatus: DirectQueryLoadingStatus;
   pollingResult: any;
   isDirectQuerySyncEnabled: boolean;
+  queryLang?: string;
   setMdsId?: (mdsId?: string) => void;
 }
 
@@ -346,7 +347,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
     this.props.startLoading({
       query,
-      lang: 'sql',
+      lang: this.props.queryLang || 'sql',
       datasource: extractedDatasource,
     });
   };
