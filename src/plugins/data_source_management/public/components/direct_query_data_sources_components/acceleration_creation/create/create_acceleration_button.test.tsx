@@ -185,7 +185,7 @@ describe('CreateAccelerationButton', () => {
   test('handles other statuses correctly', async () => {
     const statuses = [
       DirectQueryLoadingStatus.FAILED,
-      DirectQueryLoadingStatus.CANCELED,
+      DirectQueryLoadingStatus.CANCELLED,
       DirectQueryLoadingStatus.RUNNING,
     ];
 
