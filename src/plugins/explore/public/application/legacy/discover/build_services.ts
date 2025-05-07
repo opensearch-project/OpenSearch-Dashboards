@@ -52,7 +52,6 @@ import { UiActionsStart } from '../../../../../ui_actions/public';
 import { VisualizationsStart } from '../../../../../visualizations/public';
 import { SavedObjectOpenSearchDashboardsServices } from '../../../../../saved_objects/public';
 
-import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './opensearch_dashboards_services';
 import { OpenSearchDashboardsLegacyStart } from '../../../../../opensearch_dashboards_legacy/public';
@@ -60,6 +59,7 @@ import { UrlForwardingStart } from '../../../../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../../../../navigation/public';
 import { DataExplorerServices } from '../data_explorer';
 import { Storage } from '../../../../../opensearch_dashboards_utils/public';
+import { DiscoverStartPlugins } from './types';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
