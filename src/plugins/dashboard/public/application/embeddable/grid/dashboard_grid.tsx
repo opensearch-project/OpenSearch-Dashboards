@@ -318,7 +318,12 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     }
   }
 
-  synchronizeNow = () => {
+  /**
+   * Initiates a direct query sync to refresh the dashboard data.
+   * Uses the extracted datasource, database, and index to construct a refresh query,
+   * and triggers the sync process if direct query sync is enabled.
+   */
+  private synchronizeNow = () => {
     if (!this.isDirectQuerySyncEnabled()) return;
 
     const { extractedDatasource, extractedDatabase, extractedIndex } = this;
