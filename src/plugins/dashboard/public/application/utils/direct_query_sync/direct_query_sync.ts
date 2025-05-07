@@ -89,6 +89,12 @@ export function generateRefreshQuery(info: IndexExtractionResult): string {
   return `REFRESH MATERIALIZED VIEW \`${info.datasource}\`.\`${info.database}\`.\`${info.index}\``;
 }
 
+/**
+ * Extracts index-related information from a dashboard's panels for direct query sync.
+ * Analyzes saved objects in the panels to identify a consistent index pattern use case of Integration Vended Dashboards, resolves it to a concrete index,
+ * fetches its mapping, and extracts datasource, database, and index details along with metadata like last refresh time.
+ * Returns null if the panels reference inconsistent index patterns, lack references, or if the index cannot be resolved.
+ */
 export async function extractIndexInfoFromDashboard(
   panels: { [key: string]: any },
   savedObjectsClient: SavedObjectsClientContract,
