@@ -19,21 +19,19 @@ export const DSL_BASE = `${DIRECT_QUERY_BASE}/dsl`;
 // Module for handling EMR states for Dashboards Progress Bar. All of these except "fresh" are
 // directly from the EMR job run states. "ord" is used to approximate progress (eyeballed relative
 // stage times), and "terminal" indicates whether a job is in progress at all.
-export const EMR_STATES = new Map<string, { ord: number; terminal: boolean }>(
-  Object.entries({
-    submitted: { ord: 0, terminal: false },
-    queued: { ord: 10, terminal: false },
-    pending: { ord: 20, terminal: false },
-    scheduled: { ord: 30, terminal: false },
-    running: { ord: 70, terminal: false },
-    cancelling: { ord: 90, terminal: false },
-    success: { ord: 100, terminal: true },
-    failed: { ord: 100, terminal: true },
-    cancelled: { ord: 100, terminal: true },
-    // The "null state" for a fresh page load, which components conditionally use on load.
-    fresh: { ord: 100, terminal: true },
-  })
-);
+export const EMR_STATES = new Map<string, { ord: number; terminal: boolean }>([
+  ['submitted', { ord: 0, terminal: false }],
+  ['queued', { ord: 10, terminal: false }],
+  ['pending', { ord: 20, terminal: false }],
+  ['scheduled', { ord: 30, terminal: false }],
+  ['running', { ord: 70, terminal: false }],
+  ['cancelling', { ord: 90, terminal: false }],
+  ['success', { ord: 100, terminal: true }],
+  ['failed', { ord: 100, terminal: true }],
+  ['cancelled', { ord: 100, terminal: true }],
+  // The "null state" for a fresh page load, which components conditionally use on load.
+  ['fresh', { ord: 100, terminal: true }],
+]);
 
 export const MAX_ORD = 100;
 
