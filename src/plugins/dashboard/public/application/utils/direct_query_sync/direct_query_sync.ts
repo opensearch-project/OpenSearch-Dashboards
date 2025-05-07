@@ -142,7 +142,7 @@ export async function extractIndexInfoFromDashboard(
 
       const indexPattern = await savedObjectsClient.get('index-pattern', indexPatternRef.id);
       const mdsId =
-        indexPattern.references?.find((ref: any) => ref.type === 'data-source')?.id || undefined;
+        indexPattern.references?.find((ref) => ref.type === 'data-source')?.id || undefined;
 
       indexPatternIds.push(indexPatternRef.id);
       mdsIds.push(mdsId);
