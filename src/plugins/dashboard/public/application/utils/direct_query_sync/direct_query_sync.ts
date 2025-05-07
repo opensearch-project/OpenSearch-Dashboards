@@ -7,9 +7,9 @@ import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
 import { i18n } from '@osd/i18n';
 
 interface IndexExtractionResult {
-  datasource: string;
-  database: string;
-  index: string;
+  datasource: string | null;
+  database: string | null;
+  index: string | null;
 }
 
 export const DIRECT_QUERY_BASE = '/api/directquery';
@@ -67,31 +67,31 @@ export async function resolveConcreteIndex(
   }
 }
 
-export function extractIndexParts(
-  fullIndexName: string,
-  mappingName?: string
-): IndexExtractionResult {
-  // Prefer parsing the mapping name if provided
+export function extractIndexParts(mappingName?: string): IndexExtractionResult {
+  // Use mapping name if provided; otherwise, return null values
   if (mappingName) {
     const parts = mappingName.split('.');
     return {
-      datasource: parts[0] || 'unknown',
-      database: parts[1] || 'unknown',
-      index: parts.slice(2).join('.') || 'unknown',
+      datasource: parts[0] || null,
+      database: parts[1] || null,
+      index: parts.slice(2).join('.') || null,
     };
   }
 
-  // Fallback to original regex-based parsing
-  const trimmed = fullIndexName.replace(/^flint_/, '');
-  const parts = trimmed.split('_');
   return {
-    datasource: parts[0] || 'unknown',
-    database: parts[1] || 'unknown',
-    index: parts.slice(2).join('_') || 'unknown',
+    datasource: null,
+    database: null,
+    index: null,
   };
 }
 
 export function generateRefreshQuery(info: IndexExtractionResult): string {
+  // Ensure all required fields are non-null before constructing the query
+  if (!info.datasource || !info.database || !info.index) {
+    throw new Error(
+      'Cannot generate refresh query: missing required datasource, database, or index'
+    );
+  }
   return `REFRESH MATERIALIZED VIEW \`${info.datasource}\`.\`${info.database}\`.\`${info.index}\``;
 }
 
@@ -176,7 +176,7 @@ export async function extractIndexInfoFromDashboard(
     const mappingName = val.mappings?._meta?.name;
     return {
       mapping: val.mappings._meta.properties!,
-      parts: extractIndexParts(concreteTitle, mappingName),
+      parts: extractIndexParts(mappingName),
       mdsId: selectedMdsId,
     };
   }

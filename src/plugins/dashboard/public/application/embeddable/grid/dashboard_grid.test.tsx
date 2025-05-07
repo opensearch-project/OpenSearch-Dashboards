@@ -364,11 +364,11 @@ test('synchronizeNow does nothing when feature flag is disabled', async () => {
   expect(startLoadingSpy).not.toHaveBeenCalled();
 });
 
-test('synchronizeNow does nothing when metadata contains unknown values', async () => {
+test('synchronizeNow does nothing when metadata contains invalid values', async () => {
   const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
 
   (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
-    parts: { datasource: 'ds', database: 'db', index: 'unknown' },
+    parts: { datasource: 'ds', database: 'db', index: null },
     mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
     mdsId: '',
   });
@@ -390,11 +390,12 @@ test('synchronizeNow does nothing when metadata contains unknown values', async 
   expect(startLoadingSpy).not.toHaveBeenCalled();
 });
 
+// New tests for recent changes
 test('synchronizeNow exits early when feature flag is disabled and datasource is invalid', async () => {
   const { props, options } = prepare({ isDirectQuerySyncEnabled: false });
 
   (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
-    parts: { datasource: 'ds', database: 'db', index: 'unknown' },
+    parts: { datasource: 'ds', database: 'db', index: null },
     mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
     mdsId: '',
   });
@@ -420,7 +421,7 @@ test('synchronizeNow exits early when feature flag is enabled but datasource is 
   const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
 
   (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
-    parts: { datasource: 'ds', database: '', index: 'idx' },
+    parts: { datasource: 'ds', database: null, index: 'idx' },
     mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
     mdsId: '',
   });
@@ -468,7 +469,7 @@ test('areDataSourceParamsValid returns false for invalid datasource params', asy
   const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
 
   (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
-    parts: { datasource: 'ds', database: 'unknown', index: 'idx' },
+    parts: { datasource: 'ds', database: null, index: 'idx' },
     mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
     mdsId: '',
   });

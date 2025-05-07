@@ -175,9 +175,9 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   // item.
   private gridItems = {} as { [key: string]: HTMLDivElement | null };
 
-  private extractedDatasource?: string;
-  private extractedDatabase?: string;
-  private extractedIndex?: string;
+  private extractedDatasource?: string | null;
+  private extractedDatabase?: string | null;
+  private extractedIndex?: string | null;
 
   constructor(props: DashboardGridProps) {
     super(props);
@@ -303,18 +303,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
   /**
    * Validates if the extracted datasource, database, and index are present and valid.
-   * Returns true if all values are non-empty and not 'unknown', false otherwise.
+   * Returns true if all values are non-null, false otherwise.
    */
   private areDataSourceParamsValid(): boolean {
     const { extractedDatasource, extractedDatabase, extractedIndex } = this;
-    return (
-      !!extractedDatasource &&
-      !!extractedDatabase &&
-      !!extractedIndex &&
-      extractedDatasource !== 'unknown' &&
-      extractedDatabase !== 'unknown' &&
-      extractedIndex !== 'unknown'
-    );
+    return !!extractedDatasource && !!extractedDatabase && !!extractedIndex;
   }
 
   /**
@@ -352,9 +345,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
    * and triggers the sync process if direct query sync is enabled.
    */
   private synchronizeNow = () => {
-    if (!this.isDirectQuerySyncEnabled() || !this.areDataSourceParamsValid()) {
-      return;
-    }
+    if (!this.isDirectQuerySyncEnabled() || !this.areDataSourceParamsValid()) return;
 
     const { extractedDatasource, extractedDatabase, extractedIndex } = this;
 

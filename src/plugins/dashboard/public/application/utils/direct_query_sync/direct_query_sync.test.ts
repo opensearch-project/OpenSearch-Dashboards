@@ -104,8 +104,8 @@ describe('resolveConcreteIndex', () => {
 });
 
 describe('extractIndexParts', () => {
-  it('correctly extracts parts from a full index name', () => {
-    const result = extractIndexParts('flint_datasource1_database1_my_index');
+  it('correctly extracts parts from a mapping name', () => {
+    const result = extractIndexParts('datasource1.database1.my_index');
     expect(result).toEqual({
       datasource: 'datasource1',
       database: 'database1',
@@ -113,21 +113,30 @@ describe('extractIndexParts', () => {
     });
   });
 
-  it('handles missing parts with unknown values', () => {
-    const result = extractIndexParts('flint_datasource1');
+  it('handles missing parts with null values', () => {
+    const result = extractIndexParts('datasource1');
     expect(result).toEqual({
       datasource: 'datasource1',
-      database: 'unknown',
-      index: 'unknown',
+      database: null,
+      index: null,
     });
   });
 
-  it('handles empty index name', () => {
+  it('handles empty mapping name with null values', () => {
     const result = extractIndexParts('');
     expect(result).toEqual({
-      datasource: 'unknown',
-      database: 'unknown',
-      index: 'unknown',
+      datasource: null,
+      database: null,
+      index: null,
+    });
+  });
+
+  it('returns null values when mappingName is undefined', () => {
+    const result = extractIndexParts(undefined);
+    expect(result).toEqual({
+      datasource: null,
+      database: null,
+      index: null,
     });
   });
 });
@@ -141,6 +150,39 @@ describe('generateRefreshQuery', () => {
     };
     const result = generateRefreshQuery(info);
     expect(result).toBe('REFRESH MATERIALIZED VIEW `datasource1`.`database1`.`my_index`');
+  });
+
+  it('throws an error if datasource is null', () => {
+    const info = {
+      datasource: null,
+      database: 'database1',
+      index: 'my_index',
+    };
+    expect(() => generateRefreshQuery(info)).toThrow(
+      'Cannot generate refresh query: missing required datasource, database, or index'
+    );
+  });
+
+  it('throws an error if database is null', () => {
+    const info = {
+      datasource: 'datasource1',
+      database: null,
+      index: 'my_index',
+    };
+    expect(() => generateRefreshQuery(info)).toThrow(
+      'Cannot generate refresh query: missing required datasource, database, or index'
+    );
+  });
+
+  it('throws an error if index is null', () => {
+    const info = {
+      datasource: 'datasource1',
+      database: 'database1',
+      index: null,
+    };
+    expect(() => generateRefreshQuery(info)).toThrow(
+      'Cannot generate refresh query: missing required datasource, database, or index'
+    );
   });
 });
 
