@@ -123,7 +123,15 @@ describe('QueryStringManager', () => {
   });
 
   test('clearQuery resets to default query', () => {
-    const newQuery = { query: 'test query', language: 'sql' };
+    const newQuery: Query = {
+      query: 'test query',
+      language: 'SQL',
+      dataset: {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: DEFAULT_DATA.SET_TYPES.INDEX,
+      },
+    };
     service.setQuery(newQuery);
     expect(service.getQuery()).toEqual(newQuery);
 
@@ -131,6 +139,7 @@ describe('QueryStringManager', () => {
     const defaultQuery = service.getQuery();
     expect(defaultQuery).not.toEqual(newQuery);
     expect(defaultQuery.query).toBe('');
+    expect(defaultQuery.dataset).toBe(undefined);
   });
 
   test('formatQuery handles different input types', () => {
