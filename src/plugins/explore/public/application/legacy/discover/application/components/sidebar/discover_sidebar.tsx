@@ -38,7 +38,7 @@ import {
   EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { I18nProvider } from '@osd/i18n/target/types/react';
+import { I18nProvider } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../../../../data/public';
 import { FIELDS_LIMIT_SETTING } from '../../../../../../../common/legacy/discover';

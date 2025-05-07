@@ -30,7 +30,7 @@
 
 import './no_results.scss';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { I18nProvider } from '@osd/i18n/target/types/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 import {
   EuiEmptyPrompt,

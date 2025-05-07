@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage, I18nProvider } from '@osd/i18n/target/types/react';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 
 import { EuiSmallButton, EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 

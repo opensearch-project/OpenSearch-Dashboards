@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@osd/i18n/target/types/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SearchProps } from './search_embeddable';
 import {

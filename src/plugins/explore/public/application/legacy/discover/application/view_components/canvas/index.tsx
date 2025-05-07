@@ -7,7 +7,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { HeaderVariant } from 'opensearch-dashboards/public';
 import { TopNav } from './top_nav';
-import { ViewProps } from '../../../../../../../../data_explorer/public';
+import { ViewProps } from '../../../../data_explorer';
 import { DiscoverTable } from './discover_table';
 import { DiscoverChartContainer } from './discover_chart_container';
 import { useDiscoverContext } from '../context';

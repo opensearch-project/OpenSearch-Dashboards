@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@osd/i18n/target/types/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';

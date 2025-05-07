@@ -7,7 +7,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { matchPath } from 'react-router-dom';
 import { Filter, Query } from '../../../../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
-import { RootState, DefaultViewState } from '../../../../../../../../data_explorer/public';
+import { RootState, DefaultViewState } from '../../../../data_explorer';
 import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../saved_searches/types';

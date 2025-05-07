@@ -9,7 +9,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { Subject } from 'rxjs';
-import { createDataExplorerServicesMock } from '../../../../../../../../data_explorer/public/utils/mocks';
+import { createDataExplorerServicesMock } from '../../../../data_explorer/utils/mocks';
 import { DiscoverViewServices } from '../../../build_services';
 import { discoverPluginMock } from '../../../mocks';
 import { ResultStatus, safeJSONParse, useSearch } from './use_search';

@@ -5,7 +5,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPagination, EuiTextColor } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@osd/i18n/target/types/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import './_pagination.scss';
 
 interface Props {

@@ -38,7 +38,7 @@ import {
   EuiSelect,
   EuiIconTip,
 } from '@elastic/eui';
-import { I18nProvider } from '@osd/i18n/target/types/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 

@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@osd/i18n/target/types/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiCallOut } from '@elastic/eui';
 import { SurrDocType } from '../../api/context';
 

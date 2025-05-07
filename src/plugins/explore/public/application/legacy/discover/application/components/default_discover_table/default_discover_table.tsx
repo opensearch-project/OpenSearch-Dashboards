@@ -7,7 +7,7 @@ import './_doc_table.scss';
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { EuiSmallButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/target/types/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TableRow } from './table_row';

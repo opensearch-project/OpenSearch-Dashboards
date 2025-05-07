@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { EuiPopover, EuiSmallButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/target/types/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_content';
 import { useDiscoverDownloadCsv } from './use_download_csv';
 import { DownloadCsvFormId } from './constants';

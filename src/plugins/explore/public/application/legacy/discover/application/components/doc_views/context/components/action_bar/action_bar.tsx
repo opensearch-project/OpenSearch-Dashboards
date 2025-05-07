@@ -30,7 +30,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
-import { FormattedMessage, I18nProvider } from '@osd/i18n/target/types/react';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import {
   EuiSmallButtonEmpty,
   EuiCompressedFieldNumber,

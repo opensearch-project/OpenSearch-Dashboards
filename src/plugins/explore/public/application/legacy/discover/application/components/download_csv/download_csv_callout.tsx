@@ -6,7 +6,7 @@
 import './download_csv_callout.scss';
 import React from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/target/types/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { MAX_DOWNLOAD_CSV_COUNT } from './constants';
 
 export const DiscoverDownloadCsvCallout = () => {

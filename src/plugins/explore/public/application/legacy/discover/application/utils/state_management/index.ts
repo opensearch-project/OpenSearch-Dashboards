@@ -9,7 +9,7 @@ import {
   setIndexPattern as updateIndexPattern,
   useTypedDispatch,
   useTypedSelector,
-} from '../../../../../../../../data_explorer/public';
+} from '../../../../data_explorer';
 import { DiscoverState } from './discover_slice';
 
 export * from './discover_slice';

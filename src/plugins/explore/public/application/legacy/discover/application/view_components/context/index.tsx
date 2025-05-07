@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { DataExplorerServices, ViewProps } from '../../../../../../../../data_explorer/public';
+import { DataExplorerServices, ViewProps } from '../../../../data_explorer';
 import {
   OpenSearchDashboardsContextProvider,
   useOpenSearchDashboards,

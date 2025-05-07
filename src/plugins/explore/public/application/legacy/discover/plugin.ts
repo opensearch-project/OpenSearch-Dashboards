@@ -71,7 +71,7 @@ import {
 } from './url_generator';
 import { SearchEmbeddableFactory } from './embeddable';
 import { PLUGIN_ID } from '../../../../common/legacy/discover';
-import { DataExplorerPluginSetup } from '../../../../../data_explorer/public';
+import { DataExplorerPluginSetup } from '../data_explorer';
 import { registerFeature } from './register_feature';
 import {
   DiscoverState,

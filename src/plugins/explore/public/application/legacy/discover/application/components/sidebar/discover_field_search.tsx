@@ -47,7 +47,7 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FormattedMessage } from '@osd/i18n/target/types/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 
 export const NUM_FILTERS = 3;
