@@ -41,6 +41,7 @@ import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import type { SavedObjectsClientContract } from 'src/core/public';
 import { HttpStart, NotificationsStart } from 'src/core/public';
+import { DirectQueryLoadingStatus, DirectQueryRequest } from 'data_source_management/public';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -48,8 +49,6 @@ import { DashboardPanelState } from '../types';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
-import { DirectQueryLoadingStatus } from '../../../../framework/types';
-import { DirectQueryRequest } from '../../../../framework/types';
 import {
   extractIndexInfoFromDashboard,
   generateRefreshQuery,

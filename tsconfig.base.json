@@ -11,6 +11,8 @@
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
       "test_utils/*": ["src/test_utils/public/*"],
       "fixtures/*": ["src/fixtures/*"],
+      "data_source_management/public": ["src/plugins/data_source_management/public"],
+      "data_source_management/public/*": ["src/plugins/data_source_management/public/*"],
       "@opensearch-project/opensearch": ["node_modules/@opensearch-project/opensearch/api/new"],
       "@opensearch-project/opensearch/lib/*": ["node_modules/@opensearch-project/opensearch/lib/*"],
     },

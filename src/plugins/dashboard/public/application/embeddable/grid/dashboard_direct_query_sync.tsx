@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { DirectQueryLoadingStatus } from '../../../../framework/types';
+import { DirectQueryLoadingStatus } from '../../../../../data_source_management/public';
 import { EMR_STATES, intervalAsMinutes } from '../../utils/direct_query_sync/direct_query_sync';
 import './_dashboard_direct_query_sync.scss';
 

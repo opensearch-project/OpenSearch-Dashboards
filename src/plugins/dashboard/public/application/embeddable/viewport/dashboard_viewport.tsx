@@ -40,9 +40,11 @@ import { PanelState, EmbeddableStart } from '../../../../../embeddable/public';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../../opensearch_dashboards_react/public';
-import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
-import { DirectQueryRequest, DirectQueryLoadingStatus } from '../../../../framework/types';
-
+import {
+  useDirectQuery,
+  DirectQueryRequest,
+  DirectQueryLoadingStatus,
+} from '../../../../../data_source_management/public';
 export interface DashboardViewportProps {
   container: DashboardContainer;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
