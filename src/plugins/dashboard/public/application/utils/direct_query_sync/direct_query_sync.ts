@@ -61,7 +61,21 @@ export async function resolveConcreteIndex(
   }
 }
 
-export function extractIndexParts(fullIndexName: string): IndexExtractionResult {
+export function extractIndexParts(
+  fullIndexName: string,
+  mappingName?: string
+): IndexExtractionResult {
+  // Prefer parsing the mapping name if provided
+  if (mappingName) {
+    const parts = mappingName.split('.');
+    return {
+      datasource: parts[0] || 'unknown',
+      database: parts[1] || 'unknown',
+      index: parts.slice(2).join('.') || 'unknown',
+    };
+  }
+
+  // Fallback to original regex-based parsing
   const trimmed = fullIndexName.replace(/^flint_/, '');
   const parts = trimmed.split('_');
   return {
@@ -119,6 +133,7 @@ export async function extractIndexInfoFromDashboard(
       indexPatternIds.push(indexPatternRef.id);
       mdsIds.push(mdsId);
     } catch (err: any) {
+      // Ignore only 404 errors (missing saved object)
       if (err?.response?.status !== 404) {
         throw err;
       }
@@ -146,9 +161,10 @@ export async function extractIndexInfoFromDashboard(
   if (!mapping) return null;
 
   for (const val of Object.values(mapping)) {
+    const mappingName = val.mappings?._meta?.name;
     return {
       mapping: val.mappings._meta.properties!,
-      parts: extractIndexParts(concreteTitle),
+      parts: extractIndexParts(concreteTitle, mappingName),
       mdsId: selectedMdsId,
     };
   }
