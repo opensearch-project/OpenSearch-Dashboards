@@ -202,6 +202,12 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   }
 }
 
+/**
+ * A wrapper component for DashboardViewport that integrates direct query sync functionality.
+ * Manages the state for direct query sync (startLoading, loadStatus, pollingResult) using the useDirectQuery hook,
+ * and provides mdsId state management for datasource synchronization.
+ * This separation keeps DashboardViewport as a pure presentational component while handling stateful logic here.
+ */
 export const DashboardViewportWithQuery = (
   props: Omit<DashboardViewportProps, 'startLoading' | 'loadStatus' | 'pollingResult'>
 ) => {
