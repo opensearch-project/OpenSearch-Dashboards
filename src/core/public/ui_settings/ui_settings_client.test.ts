@@ -63,6 +63,14 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
       batchSet,
       getWithScope,
     } as any,
+    apiForWorkspace: {
+      batchSet,
+      getWithScope,
+    } as any,
+    apiForUser: {
+      batchSet,
+      getWithScope,
+    } as any,
     done$,
   });
 

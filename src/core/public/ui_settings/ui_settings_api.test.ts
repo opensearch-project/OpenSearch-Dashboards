@@ -41,7 +41,8 @@ function setup() {
     injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
   });
 
-  const uiSettingsApi = new UiSettingsApi(http);
+  // Pass UiSettingScope.GLOBAL to let the API operate in the global scope.
+  const uiSettingsApi = new UiSettingsApi(http, UiSettingScope.GLOBAL);
 
   return {
     http,
@@ -91,11 +92,11 @@ describe('#batchSet', () => {
     });
 
     const { uiSettingsApi } = setup();
-    await uiSettingsApi.batchSet('foo', 'bar', UiSettingScope.WORKSPACE);
+    await uiSettingsApi.batchSet('foo', 'bar');
 
     const [url, options] = fetchMock.lastCall();
 
-    expect(url).toContain('/api/opensearch-dashboards/settings?scope=workspace');
+    expect(url).toContain('/api/opensearch-dashboards/settings?scope=global');
 
     expect(options.method).toBe('POST');
     expect(fetchMock.calls()).toMatchSnapshot('single with scope');
@@ -136,25 +137,6 @@ describe('#batchSet', () => {
     await finalPromise;
 
     expect(fetchMock.calls()).toMatchSnapshot('able to batch requests');
-  });
-
-  it('groups buffered changes and send it respectively', async () => {
-    fetchMock.mock('*', {
-      body: { settings: {} },
-    });
-
-    const { uiSettingsApi } = setup();
-
-    uiSettingsApi.batchSet('workspace', 'bar', UiSettingScope.WORKSPACE);
-    uiSettingsApi.batchSet('foo', 'bar');
-    uiSettingsApi.batchSet('bar', 'foo');
-    const finalPromise = uiSettingsApi.batchSet('user', 'bar', UiSettingScope.USER);
-    expect(uiSettingsApi.hasPendingChanges()).toBe(true);
-
-    await finalPromise;
-    const calls = fetchMock.calls();
-    expect(calls.length).toBe(3);
-    expect(fetchMock.calls()).toMatchSnapshot('batch requests, and send them respectively');
   });
 
   it('Overwrites previously buffered values with new values for the same key', async () => {
@@ -258,11 +240,30 @@ describe('#getWithScope', () => {
 
     const { uiSettingsApi } = setup();
 
-    const result = await uiSettingsApi.getWithScope(UiSettingScope.USER);
+    const result = await uiSettingsApi.getWithScope();
 
     const [url, options] = fetchMock.lastCall();
 
-    expect(url).toContain('/api/opensearch-dashboards/settings?scope=user');
+    expect(url).toContain('/api/opensearch-dashboards/settings?scope=global');
+    expect(options.method).toBe('GET');
+    expect(result).toEqual(mockResponse);
+  });
+});
+
+describe('#getAll', () => {
+  it('sends a GET request without scope in query string', async () => {
+    const mockResponse = { settings: { theme: 'dark' } };
+    fetchMock.mock('*', {
+      status: 200,
+      body: mockResponse,
+    });
+
+    const { uiSettingsApi } = setup();
+
+    const result = await uiSettingsApi.getAll();
+
+    const [url, options] = fetchMock.lastCall();
+    expect(url).toContain('/api/opensearch-dashboards/settings');
     expect(options.method).toBe('GET');
     expect(result).toEqual(mockResponse);
   });

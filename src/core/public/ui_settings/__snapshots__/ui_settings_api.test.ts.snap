@@ -3,7 +3,7 @@
 exports[`#batchSet Buffers are always clear of previously buffered changes: two requests, second only sends bar, not foo 1`] = `
 Array [
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -15,7 +15,7 @@ Array [
     },
   ],
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -32,7 +32,7 @@ Array [
 exports[`#batchSet Overwrites previously buffered values with new values for the same key: two requests, foo=d in final 1`] = `
 Array [
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -44,7 +44,7 @@ Array [
     },
   ],
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -61,7 +61,7 @@ Array [
 exports[`#batchSet batches changes and sends buffered changes: able to batch requests 1`] = `
 Array [
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -73,7 +73,7 @@ Array [
     },
   ],
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -90,7 +90,7 @@ Array [
 exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
 Array [
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -102,48 +102,7 @@ Array [
     },
   ],
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
-    Object {
-      "headers": Object {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "osd-version": "opensearchDashboardsVersion",
-        "osd-xsrf": "osd-fetch",
-      },
-      "method": "POST",
-    },
-  ],
-]
-`;
-
-exports[`#batchSet groups buffered changes and send it respectively: batch requests, and send them respectively 1`] = `
-Array [
-  Array [
-    "/foo/bar/api/opensearch-dashboards/settings?scope=workspace",
-    Object {
-      "headers": Object {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "osd-version": "opensearchDashboardsVersion",
-        "osd-xsrf": "osd-fetch",
-      },
-      "method": "POST",
-    },
-  ],
-  Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
-    Object {
-      "headers": Object {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "osd-version": "opensearchDashboardsVersion",
-        "osd-xsrf": "osd-fetch",
-      },
-      "method": "POST",
-    },
-  ],
-  Array [
-    "/foo/bar/api/opensearch-dashboards/settings?scope=user",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -183,7 +142,7 @@ exports[`#batchSet rejects on 500 1`] = `"Request failed with status code: 500"`
 exports[`#batchSet sends a single change to a specific scope immediately: single with scope 1`] = `
 Array [
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings?scope=workspace",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -200,7 +159,7 @@ Array [
 exports[`#batchSet sends a single without scope change immediately: single without scope 1`] = `
 Array [
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings",
+    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
     Object {
       "headers": Object {
         "accept": "application/json",

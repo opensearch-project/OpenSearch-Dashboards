@@ -33,35 +33,101 @@ import * as Rx from 'rxjs';
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { UiSettingsService } from './ui_settings_service';
+import { UiSettingsApi } from './ui_settings_api';
+import { of } from 'rxjs';
 
-const httpSetup = httpServiceMock.createSetupContract();
+jest.mock('./ui_settings_api');
 
-const defaultDeps = {
-  http: httpSetup,
-  injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-};
+describe('UiSettingsService', () => {
+  const httpSetup = httpServiceMock.createSetupContract();
+  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
 
-describe('#stop', () => {
-  it('runs fine if service never set up', () => {
-    const service = new UiSettingsService();
-    expect(() => service.stop()).not.toThrowError();
+  const defaultDeps = {
+    http: httpSetup,
+    injectedMetadata,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    injectedMetadata.getLegacyMetadata.mockReturnValue({
+      uiSettings: {
+        defaults: { defaultWorkspace: { value: 'defaultWorkspace' } },
+        user: { defaultWorkspace: 'defaultWorkspace' },
+      },
+    });
+
+    (UiSettingsApi as jest.Mock).mockImplementation(() => ({
+      getLoadingCount$: jest.fn().mockReturnValue(of(0)),
+      stop: jest.fn(),
+    }));
   });
 
-  it('stops the uiSettingsClient and uiSettingsApi', async () => {
-    const service = new UiSettingsService();
-    let loadingCount$: Rx.Observable<unknown>;
-    defaultDeps.http.addLoadingCountSource.mockImplementation((obs$) => (loadingCount$ = obs$));
-    const client = service.setup(defaultDeps);
+  describe('#setup', () => {
+    it('creates all UiSettingsApi instances and registers loadingCount$', () => {
+      const service = new UiSettingsService();
+      const addLoadingCountSourceSpy = jest.spyOn(defaultDeps.http, 'addLoadingCountSource');
 
-    service.stop();
+      const client = service.setup(defaultDeps);
 
-    await expect(
-      Rx.combineLatest(
-        client.getUpdate$(),
-        client.getSaved$(),
-        client.getUpdateErrors$(),
-        loadingCount$!
-      ).toPromise()
-    ).resolves.toBe(undefined);
+      expect(UiSettingsApi).toHaveBeenCalledTimes(3); // GLOBAL, WORKSPACE, USER
+      expect(addLoadingCountSourceSpy).toHaveBeenCalledTimes(1);
+      expect(client).toBeDefined();
+    });
+  });
+
+  describe('#start', () => {
+    it('returns the initialized uiSettingsClient', () => {
+      const service = new UiSettingsService();
+      const client = service.setup(defaultDeps);
+      const startedClient = service.start();
+      expect(startedClient).toBe(client);
+    });
+  });
+
+  describe('#stop', () => {
+    it('runs fine if service never set up', () => {
+      const service = new UiSettingsService();
+      expect(() => service.stop()).not.toThrowError();
+    });
+
+    it('stops the uiSettingsClient and uiSettingsApi', async () => {
+      const service = new UiSettingsService();
+      let loadingCount$: Rx.Observable<unknown>;
+      defaultDeps.http.addLoadingCountSource.mockImplementation((obs$) => (loadingCount$ = obs$));
+      const client = service.setup(defaultDeps);
+
+      service.stop();
+
+      await expect(
+        Rx.combineLatest(
+          client.getUpdate$(),
+          client.getSaved$(),
+          client.getUpdateErrors$(),
+          loadingCount$!
+        ).toPromise()
+      ).resolves.toBe(undefined);
+    });
+
+    it('completes done$ and avoids memory leaks', async () => {
+      const service = new UiSettingsService();
+      let loadingCount$;
+      defaultDeps.http.addLoadingCountSource.mockImplementation((obs$) => (loadingCount$ = obs$));
+
+      const client = service.setup(defaultDeps);
+      const update$ = client.getUpdate$();
+      const saved$ = client.getSaved$();
+      const errors$ = client.getUpdateErrors$();
+
+      service.stop();
+      await expect(
+        Promise.race([
+          update$.toPromise(),
+          saved$.toPromise(),
+          errors$.toPromise(),
+          loadingCount$.toPromise(),
+        ])
+      ).resolves.toBeUndefined();
+    });
   });
 });

@@ -47,6 +47,8 @@ interface UiSettingsClientParams {
   defaults: Record<string, PublicUiSettingsParams>;
   initialSettings?: UiSettingsState;
   done$: Observable<unknown>;
+  apiForWorkspace: UiSettingsApi;
+  apiForUser: UiSettingsApi;
 }
 
 export class UiSettingsClient implements IUiSettingsClient {
@@ -55,11 +57,15 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly updateErrors$ = new Subject<Error>();
 
   private readonly api: UiSettingsApi;
+  private readonly apiForWorkspace: UiSettingsApi;
+  private readonly apiForUser: UiSettingsApi;
   private readonly defaults: Record<string, PublicUiSettingsParams>;
   private cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
 
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
+    this.apiForWorkspace = params.apiForWorkspace;
+    this.apiForUser = params.apiForUser;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
 
@@ -150,11 +156,13 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
   async getUserProvidedWithScope<T = any>(key: string, scope: UiSettingScope) {
     this.validateScope(key, scope);
-    return await this.api.getWithScope(scope).then((response: any) => {
-      const value = response.settings[key].userValue;
-      const type = this.cache[key].type;
-      return this.resolveValue(value, type);
-    });
+    return await this.selectedApi(scope)
+      .getWithScope()
+      .then((response: any) => {
+        const value = response.settings[key].userValue;
+        const type = this.cache[key].type;
+        return this.resolveValue(value, type);
+      });
   }
 
   async set(key: string, value: any, scope?: UiSettingScope) {
@@ -264,6 +272,14 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     }
   }
 
+  private selectedApi(scope?: UiSettingScope) {
+    return scope === UiSettingScope.WORKSPACE
+      ? this.apiForWorkspace
+      : scope === UiSettingScope.USER
+      ? this.apiForUser
+      : this.api;
+  }
+
   private async update(key: string, newVal: any, scope?: UiSettingScope): Promise<boolean> {
     this.assertUpdateAllowed(key);
 
@@ -287,11 +303,18 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       ) {
         const { settings } = this.cache[key]?.preferBrowserSetting
           ? this.setBrowserStoredSettings(key, newVal)
-          : (await this.api.batchSet(key, newVal, scope)) || {};
+          : (await this.selectedApi(scope).batchSet(key, newVal)) || {};
         this.cache = defaultsDeep({}, defaults, this.getBrowserStoredSettings(), settings);
       } else {
-        const { settings } = (await this.api.batchSet(key, newVal, scope)) || {};
-        this.cache = defaultsDeep({}, defaults, settings);
+        const { settings } = (await this.selectedApi(scope).batchSet(key, newVal)) || {};
+
+        // If the updated setting includes multiple scopes, refresh the cache by fetching all scoped settings and merging.
+        if (Array.isArray(this.cache[key]?.scope) && (this.cache[key].scope?.length ?? 0) > 1) {
+          const freshSettings = await this.selectedApi().getAll();
+          this.cache = defaultsDeep({}, defaults, freshSettings.settings);
+        } else {
+          this.cache = defaultsDeep({}, defaults, settings);
+        }
       }
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;

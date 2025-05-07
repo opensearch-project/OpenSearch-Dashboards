@@ -38,13 +38,9 @@ export interface UiSettingsApiResponse {
   settings: UiSettingsState;
 }
 
-const NO_SCOPE = 'undefined';
-
 interface Changes {
   values: {
-    [scope: UiSettingScope | string]: {
-      [key: string]: any;
-    };
+    [key: string]: any;
   };
 
   callback(error?: Error, response?: UiSettingsApiResponse): void;
@@ -60,28 +56,23 @@ const NOOP_CHANGES = {
 export class UiSettingsApi {
   private pendingChanges?: Changes;
   private sendInProgress = false;
-
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(private readonly http: HttpSetup) {}
+  constructor(private readonly http: HttpSetup, private readonly scope: UiSettingScope) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is
    * already in progress it will wait until the previous request is complete
    * before sending the next request
    */
-  public batchSet(key: string, value: any, scope?: UiSettingScope) {
+  public batchSet(key: string, value: any) {
     return new Promise<UiSettingsApiResponse | undefined>((resolve, reject) => {
       const prev = this.pendingChanges || NOOP_CHANGES;
-      const newValues = { ...prev.values };
-      // if there isn;t a scope passed in, we will use NO_SCOPE as a identifier temporarily
-      const scopedKey = scope ?? NO_SCOPE;
-      if (!newValues[scopedKey]) {
-        newValues[scopedKey] = {};
-      }
-      newValues[scopedKey][key] = value;
       this.pendingChanges = {
-        values: newValues,
+        values: {
+          ...prev.values,
+          [key]: value,
+        },
         callback(error, resp) {
           prev.callback(error, resp);
 
@@ -97,11 +88,16 @@ export class UiSettingsApi {
     });
   }
 
-  public async getWithScope(scope: UiSettingScope) {
+  public async getAll() {
+    return this.sendRequest('GET', '/api/opensearch-dashboards/settings', undefined);
+  }
+
+  public async getWithScope() {
     // Retrieves UI settings for a specific scope.
-    // This is an immediate (non-batched) request since scope-based settings are typically fetched individually.
-    const path = '/api/opensearch-dashboards/settings';
-    return this.sendRequest('GET', path, undefined, { scope });
+    // If the scope is undefined, fetch settings for all three predefined scopes and merge them.
+    return this.sendRequest('GET', '/api/opensearch-dashboards/settings', undefined, {
+      scope: this.scope,
+    });
   }
 
   /**
@@ -144,34 +140,19 @@ export class UiSettingsApi {
 
     const changes = this.pendingChanges;
     this.pendingChanges = undefined;
-    const results: UiSettingsApiResponse = { settings: {} };
     try {
       this.sendInProgress = true;
-      const scopeEntries = Object.entries(changes.values);
-      const requestPromises = scopeEntries.map(([scope, settings]) => {
-        const options = scope !== NO_SCOPE && scope !== undefined ? { scope } : undefined;
-
-        return this.sendRequest(
+      changes.callback(
+        undefined,
+        await this.sendRequest(
           'POST',
           '/api/opensearch-dashboards/settings',
-          { changes: settings },
-          options
-        );
-      });
-
-      const settledResults = await Promise.allSettled(requestPromises);
-
-      for (const result of settledResults) {
-        if (result.status === 'fulfilled') {
-          // merge settings
-          Object.assign(results.settings, result.value.settings);
-        } else {
-          changes.callback(result.reason);
-          return;
-        }
-      }
-
-      changes.callback(undefined, results);
+          {
+            changes: changes.values,
+          },
+          { scope: this.scope }
+        )
+      );
     } catch (error) {
       changes.callback(error);
     } finally {
