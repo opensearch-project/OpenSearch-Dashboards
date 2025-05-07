@@ -230,20 +230,20 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           });
 
           const urlOverride = isDirectQuerySyncEnabledByUrl();
-          const featureFlagEnabled =
+          const directQuerySyncEnabled =
             urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
 
-          if (featureFlagEnabled) {
+          if (directQuerySyncEnabled) {
             this.collectAllPanelMetadata();
           }
         }
       });
 
     const urlOverride = isDirectQuerySyncEnabledByUrl();
-    const featureFlagEnabled =
+    const directQuerySyncEnabled =
       urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
 
-    if (featureFlagEnabled) {
+    if (directQuerySyncEnabled) {
       this.collectAllPanelMetadata();
     }
   }
@@ -298,10 +298,10 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
    */
   private async collectAllPanelMetadata() {
     const urlOverride = isDirectQuerySyncEnabledByUrl();
-    const featureFlagEnabled =
+    const directQuerySyncEnabled =
       urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
 
-    if (!featureFlagEnabled) return;
+    if (!directQuerySyncEnabled) return;
 
     const indexInfo = await extractIndexInfoFromDashboard(
       this.state.panels,
@@ -327,10 +327,10 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
   synchronizeNow = () => {
     const urlOverride = isDirectQuerySyncEnabledByUrl();
-    const featureFlagEnabled =
+    const directQuerySyncEnabled =
       urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
 
-    if (!featureFlagEnabled) return;
+    if (!directQuerySyncEnabled) return;
 
     const { extractedDatasource, extractedDatabase, extractedIndex } = this;
     if (
@@ -423,11 +423,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
     return (() => {
       const urlOverride = isDirectQuerySyncEnabledByUrl();
-      const featureFlagEnabled =
+      const directQuerySyncEnabled =
         urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
 
       const metadataAvailable = this.state.extractedProps !== null;
-      const shouldRenderSyncUI = featureFlagEnabled && metadataAvailable;
+      const shouldRenderSyncUI = directQuerySyncEnabled && metadataAvailable;
 
       return (
         <>
