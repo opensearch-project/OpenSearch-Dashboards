@@ -44,7 +44,7 @@ export default function () {
     opensearchTestCluster: {
       license: 'oss',
       from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['search.concurrent_segment_search.mode=none'],
     },
 
     osdTestServer: {

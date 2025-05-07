@@ -448,3 +448,104 @@ describe('#overrideLocalDefault', () => {
     });
   });
 });
+
+describe('preferBrowserSetting merge', () => {
+  const originalLocalStorage = window.localStorage;
+
+  beforeEach(() => {
+    // @ts-expect-error
+    window.localStorage = {
+      store: {},
+      getItem(key: string) {
+        return this.store[key] || null;
+      },
+      setItem(key: string, value: string) {
+        this.store[key] = value;
+      },
+      removeItem(key: string) {
+        delete this.store[key];
+      },
+      clear() {
+        this.store = {};
+      },
+    };
+  });
+
+  afterEach(() => {
+    window.localStorage = originalLocalStorage;
+  });
+
+  it('should use browser value if preferBrowserSetting=true', () => {
+    window.localStorage.setItem(
+      'uiSettings',
+      JSON.stringify({
+        'theme:darkMode': { userValue: true },
+      })
+    );
+    const { client } = setup({
+      defaults: {
+        'theme:darkMode': { value: false, preferBrowserSetting: true },
+        'theme:enableUserControl': { value: true },
+      },
+      initialSettings: {
+        'theme:darkMode': { userValue: false, preferBrowserSetting: true },
+        'theme:enableUserControl': { userValue: true },
+      },
+    });
+    expect(client.get('theme:darkMode')).toBe(true);
+  });
+
+  it('should use cache value if preferBrowserSetting=false', () => {
+    window.localStorage.setItem(
+      'uiSettings',
+      JSON.stringify({
+        'theme:darkMode': { userValue: true },
+      })
+    );
+    const { client } = setup({
+      defaults: {
+        'theme:darkMode': { value: false, preferBrowserSetting: false },
+        'theme:enableUserControl': { value: true },
+      },
+      initialSettings: {
+        'theme:darkMode': { userValue: false, preferBrowserSetting: false },
+        'theme:enableUserControl': { userValue: true },
+      },
+    });
+    expect(client.get('theme:darkMode')).toBe(false);
+  });
+
+  it('should fallback to cache if browser has no value', () => {
+    window.localStorage.setItem('uiSettings', JSON.stringify({}));
+    const { client } = setup({
+      defaults: {
+        'theme:darkMode': { value: false, preferBrowserSetting: true },
+        'theme:enableUserControl': { value: true },
+      },
+      initialSettings: {
+        'theme:darkMode': { userValue: true, preferBrowserSetting: true },
+        'theme:enableUserControl': { userValue: true },
+      },
+    });
+    expect(client.get('theme:darkMode')).toBe(true);
+  });
+
+  it('should fallback to browser if cache has no value, preferBrowserSetting=true', () => {
+    window.localStorage.setItem(
+      'uiSettings',
+      JSON.stringify({
+        'theme:darkMode': { userValue: true },
+      })
+    );
+    const { client } = setup({
+      defaults: {
+        'theme:darkMode': { value: false, preferBrowserSetting: true },
+        'theme:enableUserControl': { value: true },
+      },
+      initialSettings: {
+        'theme:enableUserControl': { userValue: true },
+      },
+    });
+    expect(client.get('theme:darkMode')).toBe(true);
+  });
+});

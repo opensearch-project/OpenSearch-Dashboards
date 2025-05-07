@@ -1,2 +1,0 @@
-fix:
-- [workspace] filter out recent items which have errors ([#9346](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9346))

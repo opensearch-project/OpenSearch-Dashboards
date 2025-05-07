@@ -233,4 +233,58 @@ describe('createRequest', () => {
     expect(request.path).to.equal('/test');
     expect(request.query).to.be.empty;
   });
+
+  it('should treat query parameter without value as empty string', () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const params = { method: 'GET' };
+    const reqParams = { method: 'GET', path: '/test?v', headers: {} };
+
+    const request = connector.createRequest(params, reqParams);
+
+    expect(request.path).to.equal('/test');
+    expect(request.query).to.have.property('v', '');
+  });
+
+  it('should treat query parameter with explicit empty value as empty string', () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const params = { method: 'GET' };
+    const reqParams = { method: 'GET', path: '/test?v=', headers: {} };
+
+    const request = connector.createRequest(params, reqParams);
+
+    expect(request.path).to.equal('/test');
+    expect(request.query).to.have.property('v', '');
+  });
+
+  it('should correctly parse standard key-value query parameters', () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const params = { method: 'GET' };
+    const reqParams = { method: 'GET', path: '/test?foo=bar&baz=qux', headers: {} };
+
+    const request = connector.createRequest(params, reqParams);
+
+    expect(request.path).to.equal('/test');
+    expect(request.query).to.deep.equal({ foo: 'bar', baz: 'qux' });
+  });
 });
