@@ -68,10 +68,6 @@ export const [getDocViewsLinksRegistry, setDocViewsLinksRegistry] = createGetter
   DocViewsLinksRegistry
 >('DocViewsLinksRegistry');
 
-export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
-  'UsageCollector'
-);
-
 /**
  * Makes sure discover and context are using one instance of history.
  */
