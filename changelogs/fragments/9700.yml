@@ -1,0 +1,2 @@
+fix:
+- Fix user appearance not working ([#9700](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9700))

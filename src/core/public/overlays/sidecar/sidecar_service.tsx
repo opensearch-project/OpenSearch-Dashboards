@@ -12,6 +12,7 @@ import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
 import { Sidecar } from './components/sidecar';
+import { calculateNewPaddingSize } from './helper';
 /**
  * A SidecarRef is a reference to an opened sidecar panel. It offers methods to
  * close the sidecar panel again. If you open a sidecar panel you should make
@@ -133,7 +134,13 @@ export class SidecarService {
         // init
         (!sidecarConfig$.value && config.dockedMode && config.paddingSize)
       ) {
-        sidecarConfig$.next({ ...sidecarConfig$.value, ...config } as ISidecarConfig);
+        sidecarConfig$.next({
+          ...sidecarConfig$.value,
+          ...config,
+          ...(config.paddingSize
+            ? { paddingSize: calculateNewPaddingSize(config.dockedMode, config.paddingSize) }
+            : {}),
+        } as ISidecarConfig);
       }
     };
 

@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+
 permissions:
   contents: read
   pull-requests: write
@@ -19,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -60,9 +61,6 @@ jobs:
       - name: Install Lighthouse CI
         run: yarn add --dev @lhci/cli
 
-      - name: Run bootstrap
-        run: yarn osd bootstrap
-
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
@@ -72,25 +70,21 @@ jobs:
             echo "Waiting for OpenSearch..."
             sleep 10
           done
-          echo "OpenSearch is up!"
 
       - name: Start OpenSearch Dashboards
         run: |
-          yarn start --no-base-path &
+          yarn start --no-base-path --opensearch.ignoreVersionMismatch=true &
           until curl -s http://localhost:5601 >/dev/null; do
             echo "Waiting for OpenSearch Dashboards..."
             sleep 10
           done
-          echo "OpenSearch Dashboards is up!"
 
       - name: Mock data
         run: |
           curl 'http://localhost:5601/api/sample_data/ecommerce' -X 'POST' -H 'osd-version: ${{ env.VERSION }}' -H 'osd-xsrf: osd-fetch'
 
       - name: Run Lighthouse CI
-        run: |
-          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          yarn lhci autorun --verbose
+        run: yarn lhci autorun --verbose
         continue-on-error: true
 
       - name: Ensure Lighthouse Reports Exist
@@ -101,68 +95,42 @@ jobs:
             echo "[]" > .lighthouseci/assertion-results.json
           fi
 
+      - name: List contents of .lighthouseci
+        run: ls -R .lighthouseci || echo "Directory not found"
+
       - name: Verify Lighthouse Results
+        id: verify_lighthouse
         run: |
-          if [ ! -d ".lighthouseci" ] || [ -z "$(ls -A .lighthouseci)" ]; then
-            echo "❌ Lighthouse CI did not generate reports."
-            exit 1
+          if [ ! -s ".lighthouseci/assertion-results.json" ]; then
+            echo "❌ Lighthouse assertion-results.json is empty. Skipping further steps."
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Valid Lighthouse results found."
+            echo "should_continue=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Post Lighthouse Results into comment
+      - name: Save Lighthouse Results as Artifact
+        if: steps.verify_lighthouse.outputs.should_continue == 'true'
         run: |
-          # Validate if empty
-          if [ ! -s .lighthouseci/assertion-results.json ]; then
-            echo "❌ No assertion results found. Skipping PR comment."
-            exit 0   #Prevents failure
-          fi
+          mkdir -p artifacts
+          cp .lighthouseci/assertion-results.json artifacts/
 
-          # Ensure JSON is properly formatted
-          if ! jq empty .lighthouseci/assertion-results.json; then
-            echo "❌ Invalid JSON format in Lighthouse assertion results."
-            cat .lighthouseci/assertion-results.json  # Print for debugging
+      - name: Upload Lighthouse Results Artifact
+        if: steps.verify_lighthouse.outputs.should_continue == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-results
+          path: artifacts/assertion-results.json
+
+      - name: Fail CI if Lighthouse assertion results indicate failures
+        if: steps.verify_lighthouse.outputs.should_continue == 'true'
+        run: |
+          if jq -e '[.[] | select(.passed==false)] | length > 0' .lighthouseci/assertion-results.json > /dev/null; then
+            echo "❌ Lighthouse CI detected performance issues. Failing the job."
             exit 1
+          else
+            echo "✅ All Lighthouse metrics passed."
           fi
 
-            BASELINE=$(cat ./baselines/lighthouse_baseline.json)
-
-            FAILURES=$(jq --argjson baseline "$BASELINE" -r '[.[] | select(.passed==false) | {metric: .auditId, expected: ($baseline[(.url | sub("^.*?//[^/]+"; ""))][.auditId] // "N/A"), actual: (if .actual then (.actual | floor) else "N/A" end), url: .url}]' .lighthouseci/assertion-results.json)
-
-            UNIQUE_FAILURE_URLS=$(echo "$FAILURES" | jq '[.[] | .url] | unique')
-
-            if [ ! -f ".lighthouseci/links.json" ]; then
-              echo "⚠️ No .lighthouseci/links.json file found. Creating an empty JSON object..."
-              echo "{}" > .lighthouseci/links.json
-            fi
-
-            # Load the URL to report mapping from links.json
-              URL_REPORT_MAP=$(jq -c '.' .lighthouseci/links.json)
-
-            # Append report URLs to failed assertions
-            FAILURES_WITH_REPORTS=$(jq --argjson url_report_map "$URL_REPORT_MAP" '
-            map(. + {reportUrl: $url_report_map[.url]})
-            ' <<< "$FAILURES")
-
-            # Check if there are failures before posting a comment
-            if [[ "$FAILURES_WITH_REPORTS" == "[]" ]]; then
-            echo "✅ **All Lighthouse metrics passed!** 🎉"
-            exit 0
-            fi
-
-            COMMENT="### ⚡ Lighthouse CI Performance Issues ⚡
-
-            | Metric | Expected Value | Current Value | Page URL | Report |
-            |--------|---------------|--------------|----------|--------|"
-
-            while IFS= read -r line; do
-                COMMENT+="\n| $(echo "$line" | jq -r '.metric') | $(echo "$line" | jq -r '.expected') | $(echo "$line" | jq -r '.actual') | $(echo "$line" | jq -r '.url') | [Report]($(echo "$line" | jq -r '.reportUrl')) |"
-            done <<< "$(echo "$FAILURES_WITH_REPORTS" | jq -c '.[]')"
-
-            echo -e "$COMMENT" > comment.txt
-
-            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat comment.txt)"
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN  }}
-
-      - name: Cleanup Lighthouse Reports
-        run: rm -f comment.txt && rm -rf .lighthouseci
+      - name: Cleanup
+        run: rm -rf .lighthouseci

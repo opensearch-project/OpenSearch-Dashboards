@@ -28,11 +28,11 @@ export const HeaderUserThemeMenu = () => {
   const {
     services: { uiSettings },
   } = useOpenSearchDashboards<CoreStart>();
-  const themeOptions = Object.keys(themeVersionLabelMap).map((v) => ({
+  const themeVersionOptions = Object.keys(themeVersionLabelMap).map((v) => ({
     value: v,
     text: themeVersionLabelMap[v],
   }));
-  const screenModeOptions = [
+  const colorModeOptions = [
     {
       value: 'light',
       text: 'Light mode',
@@ -46,63 +46,66 @@ export const HeaderUserThemeMenu = () => {
       text: 'Use browser settings',
     },
   ];
-  const defaultTheme = uiSettings.getDefault('theme:version');
-  const defaultScreenMode = uiSettings.getDefault('theme:darkMode');
-  const prefersAutomatic =
+  const defaultThemeVersion = uiSettings.getDefault('theme:version');
+  const defaultIsDarkMode = uiSettings.getDefault('theme:darkMode');
+  const isUsingBrowserColorScheme =
     (window.localStorage.getItem('useBrowserColorScheme') && window.matchMedia) || false;
-  const [darkMode, setDarkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const [isDarkMode, setIsDarkMode] = useUiSetting$<boolean>('theme:darkMode');
   const [themeVersion, setThemeVersion] = useUiSetting$<string>('theme:version');
-  const [isPopoverOpen, setPopover] = useState(false);
-  // TODO: improve naming?
-  const [theme, setTheme] = useState(
-    themeOptions.find((t) => t.value === themeVersionValueMap[themeVersion])?.value ||
-      themeVersionValueMap[defaultTheme]
-  );
-  const [screenMode, setScreenMode] = useState(
-    prefersAutomatic
-      ? screenModeOptions[2].value
-      : darkMode
-      ? screenModeOptions[1].value
-      : screenModeOptions[0].value
-  );
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const [selectedThemeVersion, setSelectedThemeVersion] = useState(
+    themeVersionOptions.find((t) => t.value === themeVersionValueMap[themeVersion])?.value ||
+      themeVersionValueMap[defaultThemeVersion]
+  );
+  const [selectedColorMode, setSelectedColorMode] = useState(
+    isUsingBrowserColorScheme
+      ? colorModeOptions[2].value
+      : isDarkMode
+      ? colorModeOptions[1].value
+      : colorModeOptions[0].value
+  );
   const useLegacyAppearance = !uiSettings.get('home:useNewHomePage');
 
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
+  const togglePopover = () => {
+    setIsPopoverOpen(!isPopoverOpen);
   };
 
-  const onThemeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setTheme(e.target.value);
+  const handleThemeVersionChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedThemeVersion(e.target.value);
   };
 
-  const onScreenModeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setScreenMode(e.target.value);
+  const handleColorModeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedColorMode(e.target.value);
   };
 
-  const onAppearanceSubmit = async (e: SyntheticEvent) => {
-    const actions = [setThemeVersion(themeOptions.find((t) => theme === t.value)?.value ?? '')];
+  const applyAppearanceSettings = async (e: SyntheticEvent) => {
+    const pendingActions = [
+      setThemeVersion(
+        themeVersionOptions.find((t) => selectedThemeVersion === t.value)?.value ?? ''
+      ),
+    ];
 
-    if (screenMode === 'automatic') {
-      const browserMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (selectedColorMode === 'automatic') {
+      const systemPrefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
       window.localStorage.setItem('useBrowserColorScheme', 'true');
 
-      if (browserMode !== darkMode) {
-        actions.push(setDarkMode(browserMode));
+      if (systemPrefersDarkMode !== isDarkMode) {
+        pendingActions.push(setIsDarkMode(systemPrefersDarkMode));
       }
-    } else if ((screenMode === 'dark') !== darkMode) {
-      actions.push(setDarkMode(screenMode === 'dark'));
+    } else if ((selectedColorMode === 'dark') !== isDarkMode) {
+      pendingActions.push(setIsDarkMode(selectedColorMode === 'dark'));
       window.localStorage.removeItem('useBrowserColorScheme');
     } else {
       window.localStorage.removeItem('useBrowserColorScheme');
     }
     // TODO: only set changed
-    await await Promise.all([actions]);
+    await Promise.all(pendingActions);
     window.location.reload();
   };
 
   const closePopover = () => {
-    setPopover(false);
+    setIsPopoverOpen(false);
   };
 
   const innerButton = useLegacyAppearance ? (
@@ -112,7 +115,7 @@ export const HeaderUserThemeMenu = () => {
       aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
         defaultMessage: 'Appearance menu',
       })}
-      onClick={onButtonClick}
+      onClick={togglePopover}
     >
       <EuiIcon type="color" size="m" />
     </EuiHeaderSectionItemButton>
@@ -126,7 +129,7 @@ export const HeaderUserThemeMenu = () => {
       aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
         defaultMessage: 'Appearance menu',
       })}
-      onClick={onButtonClick}
+      onClick={togglePopover}
     />
   );
 
@@ -146,22 +149,26 @@ export const HeaderUserThemeMenu = () => {
   // TODO: fix focus behavior
   const appearanceContent = (
     <div style={{ maxWidth: 300 }}>
-      <EuiCompressedFormRow label="Theme version" helpText={`Default: ${defaultTheme}`}>
-        <EuiCompressedSelect options={themeOptions} value={theme} onChange={onThemeChange} />
+      <EuiCompressedFormRow label="Theme version" helpText={`Default: ${defaultThemeVersion}`}>
+        <EuiCompressedSelect
+          options={themeVersionOptions}
+          value={selectedThemeVersion}
+          onChange={handleThemeVersionChange}
+        />
       </EuiCompressedFormRow>
       <EuiCompressedFormRow
         label="Screen mode"
         helpText={`Default: ${
-          screenModeOptions.find((t) => {
-            const defaultValue = defaultScreenMode ? 'dark' : 'light';
+          colorModeOptions.find((t) => {
+            const defaultValue = defaultIsDarkMode ? 'dark' : 'light';
             return defaultValue === t.value;
           })?.text
         }`}
       >
         <EuiCompressedSelect
-          options={screenModeOptions}
-          value={screenMode}
-          onChange={onScreenModeChange}
+          options={colorModeOptions}
+          value={selectedColorMode}
+          onChange={handleColorModeChange}
         />
       </EuiCompressedFormRow>
       <EuiFlexGroup>
@@ -178,7 +185,7 @@ export const HeaderUserThemeMenu = () => {
         <EuiFlexItem grow={false}>
           <EuiCompressedFormRow hasEmptyLabelSpace>
             {/* TODO: disable submit until changes */}
-            <EuiSmallButton onClick={onAppearanceSubmit} type="submit">
+            <EuiSmallButton onClick={applyAppearanceSettings} type="submit">
               Apply
             </EuiSmallButton>
           </EuiCompressedFormRow>

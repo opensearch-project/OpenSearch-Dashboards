@@ -30,14 +30,15 @@
 
 import { includes } from 'lodash';
 import { IndexPatternsContract } from './index_patterns';
-import { UiSettingsCommon } from '../types';
+import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
 
 export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
 
 export const createEnsureDefaultIndexPattern = (
   uiSettings: UiSettingsCommon,
   onRedirectNoIndexPattern: () => Promise<unknown> | void,
-  canUpdateUiSetting?: boolean
+  canUpdateUiSetting?: boolean,
+  savedObjectsClient?: SavedObjectsClientCommon
 ) => {
   /**
    * Checks whether a default index pattern is set and exists and defines
@@ -47,7 +48,7 @@ export const createEnsureDefaultIndexPattern = (
     if (canUpdateUiSetting === false) {
       return;
     }
-    const patterns = await this.getIds();
+    let patterns = await this.getIds();
     let defaultId = await uiSettings.get('defaultIndex');
     let defined = !!defaultId;
     const exists = includes(patterns, defaultId);
@@ -58,7 +59,34 @@ export const createEnsureDefaultIndexPattern = (
     }
 
     if (defined) {
-      return;
+      const indexPattern = await this.get(defaultId);
+      const dataSourceRef = indexPattern?.dataSourceRef;
+      if (!dataSourceRef) {
+        return;
+      }
+      const result = await this.getDataSource(dataSourceRef.id);
+      if (result.error?.statusCode === 403 || result.error?.statusCode === 404) {
+        try {
+          if (savedObjectsClient) {
+            const datasources = await savedObjectsClient.find({ type: 'data-source' });
+            const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
+            const existDataSources = datasources.map((item) => item.id);
+            patterns = [];
+            indexPatterns.forEach((item) => {
+              const sourceRef = item.references?.find((ref) => ref.type === 'data-source');
+              const refId = sourceRef?.id;
+              const refIdBool = !!refId;
+              if (!refIdBool || existDataSources.includes(refId)) {
+                patterns.push(item.id);
+              }
+            });
+          }
+        } catch (e) {
+          return;
+        }
+      } else {
+        return;
+      }
     }
 
     // If there is any index pattern created, set the first as default

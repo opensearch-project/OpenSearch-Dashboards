@@ -129,8 +129,8 @@ jobs:
       OPENSEARCH_SNAPSHOT_CMD: ${{ matrix.config == 'query_enhanced' &&
         '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
         matrix.config == 'dashboard' &&
-        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' ||
-        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' }}
+        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' ||
+        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' }}
       # prevents extra Cypress installation progress messages
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
