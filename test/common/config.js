@@ -58,7 +58,6 @@ export default function () {
         `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
         `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
         `--home.disableWelcomeScreen=false`,
-        `--home.disableNewThemeModal=true`,
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
         //`--security.showInsecureClusterWarning=false`,
