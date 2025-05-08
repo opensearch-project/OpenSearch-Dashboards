@@ -43,7 +43,7 @@ export const DiscoverChart = ({
     from: dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
     to: dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
   };
-  const { interval } = useSelector((state) => state.discover);
+  const { interval } = useSelector((state) => state.explore);
   const dispatch = useDispatch();
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));

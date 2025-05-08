@@ -7,7 +7,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { matchPath } from 'react-router-dom';
 import { Filter, Query } from '../../../../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
-import { RootState, DefaultViewState } from '../../../../data_explorer';
+import { DefaultViewState } from '../../../../data_explorer';
 import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../saved_searches/types';
@@ -59,10 +59,6 @@ export interface DiscoverState {
   };
 }
 
-export interface DiscoverRootState extends RootState {
-  discover: DiscoverState;
-}
-
 const initialState: DiscoverState = {
   columns: ['_source'],
   sort: [],
@@ -110,7 +106,7 @@ export const getPreloadedState = async ({
 };
 
 export const discoverSlice = createSlice({
-  name: 'discover',
+  name: 'explore',
   initialState,
   reducers: {
     setState(state, action: PayloadAction<DiscoverState>) {

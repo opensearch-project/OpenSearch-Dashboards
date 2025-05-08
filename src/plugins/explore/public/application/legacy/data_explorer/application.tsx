@@ -6,7 +6,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider as ReduxProvider } from 'react-redux';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from './types';
@@ -26,7 +26,10 @@ export const renderApp = (
         <ReduxProvider store={store}>
           <services.i18n.Context>
             <Switch>
-              <Route path={[`/:appId`, '/']} exact={false}>
+              <Route exact path="/">
+                <Redirect to="/logs" />
+              </Route>
+              <Route path={[`/:appId`]} exact={false}>
                 <DataExplorerApp params={params} />
               </Route>
             </Switch>

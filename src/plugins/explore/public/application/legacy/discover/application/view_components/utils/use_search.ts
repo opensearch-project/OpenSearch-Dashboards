@@ -120,7 +120,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval, savedQuery } = useSelector(
-    (state) => state.discover
+    (state) => state.explore
   );
   const indexPattern = useIndexPattern(services);
   const skipInitialFetch = useRef(false);

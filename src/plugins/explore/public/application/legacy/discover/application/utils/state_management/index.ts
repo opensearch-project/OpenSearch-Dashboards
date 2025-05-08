@@ -15,7 +15,7 @@ import { DiscoverState } from './discover_slice';
 export * from './discover_slice';
 
 export interface DiscoverRootState extends RootState {
-  discover: DiscoverState;
+  explore: DiscoverState;
 }
 
 export const useSelector: TypedUseSelectorHook<DiscoverRootState> = useTypedSelector;

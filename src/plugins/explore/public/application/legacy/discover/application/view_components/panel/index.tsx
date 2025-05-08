@@ -41,7 +41,7 @@ export default function DiscoverPanel(props: ViewProps) {
   const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
 
   const { columns } = useSelector((state) => {
-    const stateColumns = state.discover.columns;
+    const stateColumns = state.explore.columns;
     // check if state columns is not undefined, otherwise use buildColumns
     return {
       columns: stateColumns !== undefined ? stateColumns : buildColumns([]),

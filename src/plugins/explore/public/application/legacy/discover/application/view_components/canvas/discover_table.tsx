@@ -46,7 +46,7 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
 
   const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
   const { columns } = useSelector((state) => {
-    const stateColumns = state.discover.columns;
+    const stateColumns = state.explore.columns;
     // check if state columns is not undefined, otherwise use buildColumns
     return {
       columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
@@ -61,7 +61,7 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
     );
   }, [columns, indexPattern, uiSettings]);
   const { sort } = useSelector((state) => {
-    const stateSort = state.discover.sort;
+    const stateSort = state.explore.sort;
     // check if state sort is not undefined, otherwise assign an empty array
     return {
       sort: stateSort !== undefined ? stateSort : [],
