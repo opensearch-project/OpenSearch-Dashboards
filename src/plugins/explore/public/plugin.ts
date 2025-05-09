@@ -15,7 +15,7 @@ import {
   WorkspaceAvailability,
 } from '../../../core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { ConfigSchema } from '../common/types/config';
+import { ConfigSchema } from '../common/config';
 import {
   ExplorePluginSetup,
   ExplorePluginStart,
@@ -32,8 +32,6 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
   }
 
   public setup(core: CoreSetup, plugins: ExploreSetupPlugins): ExplorePluginSetup {
-    if (!this.config.enabled) return {};
-
     // Register an application into the side navigation menu
     core.application.register({
       id: PLUGIN_ID,
@@ -49,6 +47,9 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
           .pipe(take(1))
           .toPromise()
           .then((workspace) => workspace?.features);
+        // We want to limit explore UI to only show up under observability and
+        // security analytics workspaces. If user lands in the explore plugin
+        // URL in a different workspace, we will redirect them to classic discover.
         if (
           !features ||
           (!isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) &&

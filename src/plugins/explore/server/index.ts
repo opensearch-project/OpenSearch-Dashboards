@@ -4,7 +4,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
-import { ConfigSchema, configSchema } from '../common/types/config';
+import { ConfigSchema, configSchema } from '../common/config';
 import { ExplorePlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {

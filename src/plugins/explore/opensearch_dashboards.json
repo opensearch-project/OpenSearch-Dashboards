@@ -17,7 +17,6 @@
     "visualizations",
     "usageCollection"
   ],
-  "requiredBundles": ["workspace"],
   "optionalPlugins": ["home", "share"],
   "configPath": ["explore"]
 }
