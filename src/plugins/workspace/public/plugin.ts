@@ -52,7 +52,6 @@ import {
   getFirstUseCaseOfFeatureConfigs,
   getUseCaseUrl,
   isAppAccessibleInWorkspace,
-  isNavGroupInFeatureConfigs,
 } from './utils';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { WorkspaceListCard } from './components/service_card';
@@ -73,6 +72,7 @@ import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
 import { WorkspaceValidationService } from './services/workspace_validation_service';
 import { workspaceSearchPages } from './components/global_search/search_pages_command';
+import { isNavGroupInFeatureConfigs } from '../../../core/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,

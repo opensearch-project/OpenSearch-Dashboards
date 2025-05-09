@@ -9,7 +9,6 @@ import {
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
   isFeatureIdInsideUseCase,
-  isNavGroupInFeatureConfigs,
   getDataSourcesList,
   convertNavGroupToWorkspaceUseCase,
   isEqualWorkspaceUseCase,
@@ -20,9 +19,9 @@ import {
   getUseCaseUrl,
   fetchRemoteClusterConnections,
 } from './utils';
-import { WorkspaceAvailability } from '../../../core/public';
+import { WORKSPACE_USE_CASE_PREFIX, WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { USE_CASE_PREFIX, AssociationDataSourceModalMode } from '../common/constants';
+import { AssociationDataSourceModalMode } from '../common/constants';
 import {
   SigV4ServiceName,
   DataSourceEngineType,
@@ -363,22 +362,6 @@ describe('workspace utils: isFeatureIdInsideUseCase', () => {
   });
 });
 
-describe('workspace utils: isNavGroupInFeatureConfigs', () => {
-  it('should return false if nav group not in feature configs', () => {
-    expect(
-      isNavGroupInFeatureConfigs('dataAdministration', [
-        'use-case-observability',
-        'use-case-search',
-      ])
-    ).toBe(false);
-  });
-  it('should return true if nav group in feature configs', () => {
-    expect(
-      isNavGroupInFeatureConfigs('observability', ['use-case-observability', 'use-case-search'])
-    ).toBe(true);
-  });
-});
-
 describe('workspace utils: getDataSourcesList', () => {
   const mockedSavedObjectClient = startMock.savedObjects.client;
 
@@ -704,7 +687,7 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
   const workspace = {
     id: 'workspace-1',
     name: 'test workspace 1',
-    features: [`${USE_CASE_PREFIX}search`],
+    features: [`${WORKSPACE_USE_CASE_PREFIX}search`],
   };
 
   it('should not enrich breadcrumbs when out a workspace', async () => {

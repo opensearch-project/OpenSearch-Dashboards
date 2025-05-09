@@ -28,9 +28,8 @@ import {
   ScopedHistory,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { isNavGroupInFeatureConfigs } from '../../workspace/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { ConfigSchema } from '../common/types/config';
+import { ConfigSchema } from '../common/config';
 import {
   ExplorePluginSetup,
   ExplorePluginStart,
@@ -61,6 +60,7 @@ import {
 } from './application/legacy/discover/application/utils/state_management';
 import { buildServices } from './application/legacy/discover/build_services';
 import { createSavedSearchesLoader } from './application/legacy/discover';
+import { isNavGroupInFeatureConfigs } from '../../../core/public';
 
 export class ExplorePlugin
   implements
@@ -92,7 +92,6 @@ export class ExplorePlugin
     core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
     setupDeps: ExploreSetupDependencies
   ): ExplorePluginSetup {
-    if (!this.config.enabled) return {};
     const viewService = this.viewService;
 
     setUsageCollector(setupDeps.usageCollection);
@@ -220,6 +219,9 @@ export class ExplorePlugin
           .pipe(take(1))
           .toPromise()
           .then((workspace) => workspace?.features);
+        // We want to limit explore UI to only show up under observability and
+        // security analytics workspaces. If user lands in the explore plugin
+        // URL in a different workspace, we will redirect them to classic discover.
         if (
           !features ||
           (!isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) &&
