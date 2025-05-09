@@ -54,9 +54,10 @@ export class UiSettingsService {
   public setup({ http, injectedMetadata }: UiSettingsServiceDeps): IUiSettingsClient {
     /**
      * Currently, we have three scopes: workspace, global, and user.
-     * For each scope, we instantiate a dedicated API to handle operations specific to that scope.
+     * For workspace and user, we instantiate a dedicated API to handle operations specific to that scope.
+     * If the scope is not explicitly specified, the logic falls back to the previous behavior — leaving it to the server to determine the destination scope.
      */
-    this.uiSettingsApi = new UiSettingsApi(http, UiSettingScope.GLOBAL);
+    this.uiSettingsApi = new UiSettingsApi(http);
     this.uiSettingsApiForWorkspace = new UiSettingsApi(http, UiSettingScope.WORKSPACE);
     this.uiSettingsApiForUser = new UiSettingsApi(http, UiSettingScope.USER);
 

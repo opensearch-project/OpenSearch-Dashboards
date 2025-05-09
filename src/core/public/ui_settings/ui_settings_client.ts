@@ -280,6 +280,35 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       : this.api;
   }
 
+  private async mergeSettingsIntoCache(
+    key: string,
+    defaults: Record<string, any>,
+    enableUserControl: boolean,
+    settings: Record<string, any> = {},
+    scope: UiSettingScope | undefined
+  ) {
+    const hasMultipleScopes =
+      Array.isArray(this.cache[key]?.scope) && (this.cache[key].scope?.length ?? 0) > 1;
+
+    if (hasMultipleScopes) {
+      // If the updated setting includes multiple scopes, refresh the cache by fetching all scoped settings and merging.
+      const freshSettings = await this.selectedApi(scope).getAll();
+      this.cache = defaultsDeep(
+        {},
+        defaults,
+        ...(enableUserControl ? [this.getBrowserStoredSettings()] : []),
+        freshSettings.settings
+      );
+    } else {
+      this.cache = defaultsDeep(
+        {},
+        defaults,
+        ...(enableUserControl ? [this.getBrowserStoredSettings()] : []),
+        settings
+      );
+    }
+  }
+
   private async update(key: string, newVal: any, scope?: UiSettingScope): Promise<boolean> {
     this.assertUpdateAllowed(key);
 
@@ -304,17 +333,11 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
         const { settings } = this.cache[key]?.preferBrowserSetting
           ? this.setBrowserStoredSettings(key, newVal)
           : (await this.selectedApi(scope).batchSet(key, newVal)) || {};
-        this.cache = defaultsDeep({}, defaults, this.getBrowserStoredSettings(), settings);
+
+        this.mergeSettingsIntoCache(key, defaults, true, settings, scope);
       } else {
         const { settings } = (await this.selectedApi(scope).batchSet(key, newVal)) || {};
-
-        // If the updated setting includes multiple scopes, refresh the cache by fetching all scoped settings and merging.
-        if (Array.isArray(this.cache[key]?.scope) && (this.cache[key].scope?.length ?? 0) > 1) {
-          const freshSettings = await this.selectedApi(scope).getAll();
-          this.cache = defaultsDeep({}, defaults, freshSettings.settings);
-        } else {
-          this.cache = defaultsDeep({}, defaults, settings);
-        }
+        this.mergeSettingsIntoCache(key, defaults, false, settings, scope);
       }
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;

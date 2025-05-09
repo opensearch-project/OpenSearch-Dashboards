@@ -78,9 +78,16 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   });
 
   const loadDefaultDataSourceId = useCallback(async () => {
-    const id = await getDefaultDataSourceId(uiSettings, scope);
-    setDefaultDataSourceId(id);
-  }, [uiSettings, scope]);
+    try {
+      setIsLoading(true);
+      const id = await getDefaultDataSourceId(uiSettings, scope);
+      setDefaultDataSourceId(id);
+    } catch (error) {
+      toasts.addWarning(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [uiSettings, scope, toasts]);
 
   /* fetch current default data source id*/
   useEffect(() => {

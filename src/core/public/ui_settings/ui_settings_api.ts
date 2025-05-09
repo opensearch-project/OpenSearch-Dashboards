@@ -58,7 +58,7 @@ export class UiSettingsApi {
   private sendInProgress = false;
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(private readonly http: HttpSetup, private readonly scope: UiSettingScope) {}
+  constructor(private readonly http: HttpSetup, private readonly scope?: UiSettingScope) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is
@@ -93,11 +93,14 @@ export class UiSettingsApi {
   }
 
   public async getWithScope() {
+    const options = this.scope
+      ? {
+          scope: this.scope,
+        }
+      : undefined;
     // Retrieves UI settings for a specific scope.
     // If the scope is undefined, fetch settings for all three predefined scopes and merge them.
-    return this.sendRequest('GET', '/api/opensearch-dashboards/settings', undefined, {
-      scope: this.scope,
-    });
+    return this.sendRequest('GET', '/api/opensearch-dashboards/settings', undefined, options);
   }
 
   /**
@@ -142,6 +145,11 @@ export class UiSettingsApi {
     this.pendingChanges = undefined;
     try {
       this.sendInProgress = true;
+      const options = this.scope
+        ? {
+            scope: this.scope,
+          }
+        : undefined;
       changes.callback(
         undefined,
         await this.sendRequest(
@@ -150,7 +158,7 @@ export class UiSettingsApi {
           {
             changes: changes.values,
           },
-          { scope: this.scope }
+          options
         )
       );
     } catch (error) {
