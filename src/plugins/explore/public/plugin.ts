@@ -28,7 +28,7 @@ import {
   ScopedHistory,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { LOGS_VIEW_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/config';
 import {
   ExplorePluginSetup,
@@ -211,7 +211,7 @@ export class ExplorePlugin
       order: 1000,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
-      defaultPath: 'logs#/',
+      defaultPath: `${LOGS_VIEW_ID}#/`,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
@@ -313,7 +313,7 @@ export class ExplorePlugin
 
     const viewServiceSetup = this.viewService.setup();
     viewServiceSetup.registerView<DiscoverState>({
-      id: 'logs',
+      id: LOGS_VIEW_ID,
       title: 'Logs',
       defaultPath: '#/',
       appExtentions: {

@@ -6,6 +6,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { HeaderVariant } from 'opensearch-dashboards/public';
+import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../data_explorer';
 import { DiscoverTable } from './discover_table';
@@ -105,7 +106,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       hits={fetchState.hits}
       showResetButton={!!savedSearch?.id}
       resetQuery={() => {
-        core.application.navigateToApp('explore', { path: `logs#/view/${savedSearch?.id}` });
+        core.application.navigateToApp('explore', {
+          path: `${LOGS_VIEW_ID}#/view/${savedSearch?.id}`,
+        });
       }}
       rows={rows}
       indexPattern={indexPattern}

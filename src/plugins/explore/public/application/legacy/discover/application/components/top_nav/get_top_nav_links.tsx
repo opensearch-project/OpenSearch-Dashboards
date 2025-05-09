@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { Adapters } from '../../../../../../../../inspector/public';
@@ -57,7 +58,7 @@ const getLegacyTopNavLinks = (
     }),
     run() {
       core.application.navigateToApp('explore', {
-        path: 'logs#/',
+        path: `${LOGS_VIEW_ID}#/`,
       });
     },
     testId: 'discoverNewButton',
@@ -317,7 +318,7 @@ export const getTopNavLinks = (
     }),
     run() {
       core.application.navigateToApp('explore', {
-        path: 'logs#/',
+        path: `${LOGS_VIEW_ID}#/`,
       });
     },
     testId: 'discoverNewButton',

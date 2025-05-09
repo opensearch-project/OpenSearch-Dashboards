@@ -42,6 +42,7 @@ import {
   EuiFlyoutBody,
   EuiText,
 } from '@elastic/eui';
+import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { SavedObjectFinderUi } from '../../../../../../../../saved_objects/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
@@ -96,7 +97,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
             // Reset query app filters before loading saved search
             filterManager.setAppFilters([]);
             data.query.queryString.clearQuery();
-            application.navigateToApp('explore', { path: `logs#/view/${id}` });
+            application.navigateToApp('explore', { path: `${LOGS_VIEW_ID}#/view/${id}` });
             onClose();
           }}
           uiSettings={uiSettings}

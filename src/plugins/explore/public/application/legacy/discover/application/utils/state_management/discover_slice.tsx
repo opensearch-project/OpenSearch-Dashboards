@@ -5,6 +5,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { matchPath } from 'react-router-dom';
+import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { Filter, Query } from '../../../../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { DefaultViewState } from '../../../../data_explorer';
@@ -92,7 +93,7 @@ export const getPreloadedState = async ({
         metadata: {
           ...(indexPatternId &&
             !config.get(QUERY_ENHANCEMENT_ENABLED_SETTING) && { indexPattern: indexPatternId }),
-          view: PLUGIN_ID,
+          view: LOGS_VIEW_ID,
         },
       };
 
