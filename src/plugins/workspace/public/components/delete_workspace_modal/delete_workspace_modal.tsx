@@ -39,13 +39,18 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
 
   const deleteWorkspaces = async () => {
     setDeleting(true);
-    let result;
+    let result: { success: number; fail: number; failedIds: string[] };
+    let failedWorksapces;
     if (selectedWorkspaces && selectedWorkspaces.length > 0) {
       const ids = selectedWorkspaces
         .filter((selectedWorkspace) => selectedWorkspace.id)
         .map((selectedWorkspace) => selectedWorkspace.id);
       try {
         result = await workspaceClient.batchDelete(ids);
+        failedWorksapces = selectedWorkspaces
+          .filter((selectedWorkspace) => result?.failedIds.includes(selectedWorkspace.id))
+          .map((selectedWorkspace) => selectedWorkspace.name)
+          .join(', ');
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.delete.failed', {
@@ -74,10 +79,10 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
               failCount: result.fail,
             },
           }),
-          text: i18n.translate('workspace.delete.failed.mixed.text.ids', {
-            defaultMessage: 'Failed workspace id: {failedIds}',
+          text: i18n.translate('workspace.delete.failed.mixed.text.name', {
+            defaultMessage: 'Failed workspace id: {failedWorksapces}',
             values: {
-              failedIds: result?.failedIds.join(', '),
+              failedWorksapces,
             },
           }),
         });
