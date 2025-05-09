@@ -30,7 +30,7 @@
 
 import { Subject } from 'rxjs';
 import { materialize, take, toArray } from 'rxjs/operators';
-
+import { UiSettingScope } from '../../server/ui_settings/types';
 import { UiSettingsClient } from './ui_settings_client';
 
 let done$: Subject<unknown>;
@@ -40,6 +40,8 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
     defaults = {
       dateFormat: { value: 'Browser' },
       aLongNumeral: { value: `${BigInt(Number.MAX_SAFE_INTEGER) + 11n}`, type: 'number' },
+      defaultDatasource: { value: 'Browser-ds', scope: UiSettingScope.WORKSPACE },
+      defaultIndex: { value: 'Browser-ds', scope: [UiSettingScope.WORKSPACE, UiSettingScope.USER] },
     },
     initialSettings = {},
   } = options;
@@ -47,17 +49,45 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   const batchSet = jest.fn(() => ({
     settings: {},
   }));
+
+  const getAll = jest.fn(() => ({
+    settings: {},
+  }));
+
+  const getWithScope = jest.fn(() =>
+    Promise.resolve({
+      settings: {},
+    })
+  );
+
   done$ = new Subject();
   const client = new UiSettingsClient({
     defaults,
     initialSettings,
     api: {
       batchSet,
+      getWithScope,
+      getAll,
+    } as any,
+    apiForWorkspace: {
+      batchSet,
+      getWithScope,
+      getAll,
+    } as any,
+    apiForUser: {
+      batchSet,
+      getWithScope,
+      getAll,
+    } as any,
+    apiForGlobal: {
+      batchSet,
+      getWithScope,
+      getAll,
     } as any,
     done$,
   });
 
-  return { client, batchSet };
+  return { client, batchSet, getWithScope, getAll };
 }
 
 afterEach(() => {
@@ -227,6 +257,43 @@ describe('#set', () => {
     });
     await expect(client.set('foo', true)).rejects.toThrowErrorMatchingSnapshot();
   });
+  it('should validate scope first', () => {
+    const { client } = setup();
+    expect(() =>
+      client.set('defaultDatasource', 'ds', UiSettingScope.USER)
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+  it('get all settings if trying to update multi-scope settings', async () => {
+    const { client, getAll } = setup();
+    await client.set('defaultIndex', 'index', UiSettingScope.USER);
+    expect(getAll).toHaveBeenCalled();
+  });
+});
+
+describe('#getUserProvidedWithScope', () => {
+  it('throws an error if the setting does not align the scope passed in', async () => {
+    const { client } = setup();
+
+    await expect(
+      client.getUserProvidedWithScope('defaultDatasource', UiSettingScope.GLOBAL)
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('get a value if the setting does align the scope passed in', async () => {
+    const { client, getWithScope } = setup();
+
+    getWithScope.mockImplementation(() =>
+      Promise.resolve({
+        settings: {
+          defaultDatasource: { userValue: 'ds' },
+        },
+      })
+    );
+
+    await expect(
+      client.getUserProvidedWithScope('defaultDatasource', UiSettingScope.WORKSPACE)
+    ).resolves.toBe('ds');
+  });
 });
 
 describe('#remove', () => {
@@ -255,6 +322,12 @@ describe('#remove', () => {
       },
     });
     await expect(client.remove('bar')).rejects.toThrowErrorMatchingSnapshot();
+  });
+  it('should validate scope first', () => {
+    const { client } = setup();
+    expect(() =>
+      client.remove('defaultDatasource', UiSettingScope.USER)
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });
 

@@ -361,6 +361,7 @@ export {
   StringValidationRegexString,
   CURRENT_USER_PLACEHOLDER,
   UiSettingScope,
+  CURRENT_WORKSPACE_PLACEHOLDER,
 } from './ui_settings';
 
 export {

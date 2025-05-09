@@ -27,7 +27,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { TopNavControlComponentData } from 'src/plugins/navigation/public';
-
+import { UiSettingScope } from '../../../../../../core/public';
 import {
   DataSourceConnectionType,
   DataSourceManagementContext,
@@ -114,7 +114,12 @@ export const ManageDirectQueryDataConnectionsTable = ({
     try {
       for (const dataSource of selectedDataSources) {
         if (defaultDataSourceId === dataSource.id) {
-          await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+          await setFirstDataSourceAsDefault(
+            savedObjects.client,
+            uiSettings,
+            true,
+            currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
+          );
           break;
         }
       }
@@ -264,7 +269,12 @@ export const ManageDirectQueryDataConnectionsTable = ({
           await fetchDataSources();
           setSelectedDataSources([]);
           if (payload.some((p) => p.id === defaultDataSourceId)) {
-            setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+            setFirstDataSourceAsDefault(
+              savedObjects.client,
+              uiSettings,
+              true,
+              currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
+            );
           }
         }
       }

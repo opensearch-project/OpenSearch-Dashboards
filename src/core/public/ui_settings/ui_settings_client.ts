@@ -32,7 +32,12 @@ import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { UserProvidedValues, PublicUiSettingsParams, UiSettingsType } from 'src/core/server/types';
+import {
+  UserProvidedValues,
+  PublicUiSettingsParams,
+  UiSettingsType,
+  UiSettingScope,
+} from '../../server/ui_settings/types';
 import { IUiSettingsClient, UiSettingsState } from './types';
 
 import { UiSettingsApi } from './ui_settings_api';
@@ -42,6 +47,9 @@ interface UiSettingsClientParams {
   defaults: Record<string, PublicUiSettingsParams>;
   initialSettings?: UiSettingsState;
   done$: Observable<unknown>;
+  apiForWorkspace: UiSettingsApi;
+  apiForUser: UiSettingsApi;
+  apiForGlobal: UiSettingsApi;
 }
 
 export class UiSettingsClient implements IUiSettingsClient {
@@ -50,11 +58,17 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly updateErrors$ = new Subject<Error>();
 
   private readonly api: UiSettingsApi;
+  private readonly apiForWorkspace: UiSettingsApi;
+  private readonly apiForUser: UiSettingsApi;
+  private readonly apiForGlobal: UiSettingsApi;
   private readonly defaults: Record<string, PublicUiSettingsParams>;
   private cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
 
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
+    this.apiForWorkspace = params.apiForWorkspace;
+    this.apiForUser = params.apiForUser;
+    this.apiForGlobal = params.apiForGlobal;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
 
@@ -132,12 +146,40 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     );
   }
 
-  async set(key: string, value: any) {
-    return await this.update(key, value);
+  private validateScope(key: string, scope: UiSettingScope) {
+    const definition = this.cache[key];
+    const validScopes = Array.isArray(definition.scope)
+      ? definition.scope
+      : [definition.scope || UiSettingScope.GLOBAL];
+
+    if (scope && !validScopes.includes(scope)) {
+      throw new Error(`Unable to process "${key}" with invalid scope: "${scope}"`);
+    }
   }
 
-  async remove(key: string) {
-    return await this.update(key, null);
+  async getUserProvidedWithScope<T = any>(key: string, scope: UiSettingScope) {
+    this.validateScope(key, scope);
+    return await this.selectedApi(scope)
+      .getWithScope()
+      .then((response: any) => {
+        const value = response.settings[key].userValue;
+        const type = this.cache[key].type;
+        return this.resolveValue(value, type);
+      });
+  }
+
+  async set(key: string, value: any, scope?: UiSettingScope) {
+    if (scope) {
+      this.validateScope(key, scope);
+    }
+    return await this.update(key, value, scope);
+  }
+
+  async remove(key: string, scope?: UiSettingScope) {
+    if (scope) {
+      this.validateScope(key, scope);
+    }
+    return await this.update(key, null, scope);
   }
 
   isDeclared(key: string) {
@@ -233,7 +275,46 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     }
   }
 
-  private async update(key: string, newVal: any): Promise<boolean> {
+  private selectedApi(scope?: UiSettingScope) {
+    return scope === UiSettingScope.WORKSPACE
+      ? this.apiForWorkspace
+      : scope === UiSettingScope.USER
+      ? this.apiForUser
+      : scope === UiSettingScope.GLOBAL
+      ? this.apiForGlobal
+      : this.api;
+  }
+
+  private async mergeSettingsIntoCache(
+    key: string,
+    defaults: Record<string, any>,
+    enableUserControl: boolean,
+    settings: Record<string, any> = {},
+    scope: UiSettingScope | undefined
+  ) {
+    const hasMultipleScopes =
+      Array.isArray(this.cache[key]?.scope) && (this.cache[key].scope?.length ?? 0) > 1;
+
+    if (hasMultipleScopes) {
+      // If the updated setting includes multiple scopes, refresh the cache by fetching all scoped settings and merging.
+      const freshSettings = await this.selectedApi(scope).getAll();
+      this.cache = defaultsDeep(
+        {},
+        defaults,
+        ...(enableUserControl ? [this.getBrowserStoredSettings()] : []),
+        freshSettings.settings
+      );
+    } else {
+      this.cache = defaultsDeep(
+        {},
+        defaults,
+        ...(enableUserControl ? [this.getBrowserStoredSettings()] : []),
+        settings
+      );
+    }
+  }
+
+  private async update(key: string, newVal: any, scope?: UiSettingScope): Promise<boolean> {
     this.assertUpdateAllowed(key);
 
     const declared = this.isDeclared(key);
@@ -256,11 +337,12 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       ) {
         const { settings } = this.cache[key]?.preferBrowserSetting
           ? this.setBrowserStoredSettings(key, newVal)
-          : (await this.api.batchSet(key, newVal)) || {};
-        this.cache = defaultsDeep({}, defaults, this.getBrowserStoredSettings(), settings);
+          : (await this.selectedApi(scope).batchSet(key, newVal)) || {};
+
+        this.mergeSettingsIntoCache(key, defaults, true, settings, scope);
       } else {
-        const { settings } = (await this.api.batchSet(key, newVal)) || {};
-        this.cache = defaultsDeep({}, defaults, settings);
+        const { settings } = (await this.selectedApi(scope).batchSet(key, newVal)) || {};
+        this.mergeSettingsIntoCache(key, defaults, false, settings, scope);
       }
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
