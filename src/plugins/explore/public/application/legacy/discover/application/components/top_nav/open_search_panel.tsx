@@ -96,7 +96,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
             // Reset query app filters before loading saved search
             filterManager.setAppFilters([]);
             data.query.queryString.clearQuery();
-            application.navigateToApp('discover', { path: `#/view/${id}` });
+            application.navigateToApp('explore', { path: `logs#/view/${id}` });
             onClose();
           }}
           uiSettings={uiSettings}

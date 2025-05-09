@@ -56,8 +56,8 @@ const getLegacyTopNavLinks = (
       defaultMessage: 'New Search',
     }),
     run() {
-      core.application.navigateToApp('discover', {
-        path: '#/',
+      core.application.navigateToApp('explore', {
+        path: 'logs#/',
       });
     },
     testId: 'discoverNewButton',
@@ -95,7 +95,7 @@ const getLegacyTopNavLinks = (
           onTitleDuplicate,
         };
 
-        const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
+        const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
 
         savedSearch.columns = state.columns;
         savedSearch.sort = state.sort;
@@ -203,18 +203,18 @@ const getLegacyTopNavLinks = (
 
   const shareSearch: TopNavMenuData = {
     id: 'share',
-    label: i18n.translate('explore.explore.discover.localMenu.shareTitle', {
+    label: i18n.translate('explore.discover.localMenu.shareTitle', {
       defaultMessage: 'Share',
     }),
     description: i18n.translate('explore.discover.localMenu.shareSearchDescription', {
       defaultMessage: 'Share Search',
     }),
     testId: 'shareTopNavButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverShareButtonLabel', {
+    ariaLabel: i18n.translate('explore.discover.topNav.discoverShareButtonLabel', {
       defaultMessage: `Share search`,
     }),
     run: async (anchorElement) => {
-      const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
+      const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
       const sharingData = await getSharingData({
         searchSource: savedSearch.searchSource,
         state,
@@ -239,14 +239,14 @@ const getLegacyTopNavLinks = (
 
   const inspectSearch: TopNavMenuData = {
     id: 'inspect',
-    label: i18n.translate('explore.explore.discover.localMenu.inspectTitle', {
+    label: i18n.translate('explore.discover.localMenu.inspectTitle', {
       defaultMessage: 'Inspect',
     }),
     description: i18n.translate('explore.discover.localMenu.openInspectorForSearchDescription', {
       defaultMessage: 'Open Inspector for search',
     }),
     testId: 'openInspectorButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverInspectorButtonLabel', {
+    ariaLabel: i18n.translate('explore.discover.topNav.discoverInspectorButtonLabel', {
       defaultMessage: `Open Inspector for search`,
     }),
     run() {
@@ -312,16 +312,16 @@ export const getTopNavLinks = (
 
   // New
   const newSearch: TopNavMenuIconData = {
-    tooltip: i18n.translate('explore.explore.discover.localMenu.localMenu.newSearchTitle', {
+    tooltip: i18n.translate('explore.discover.localMenu.localMenu.newSearchTitle', {
       defaultMessage: 'New',
     }),
     run() {
-      core.application.navigateToApp('discover', {
-        path: '#/',
+      core.application.navigateToApp('explore', {
+        path: 'logs#/',
       });
     },
     testId: 'discoverNewButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverNewButtonLabel', {
+    ariaLabel: i18n.translate('explore.discover.topNav.discoverNewButtonLabel', {
       defaultMessage: `New Search`,
     }),
     iconType: 'plusInCircle',
@@ -331,11 +331,11 @@ export const getTopNavLinks = (
 
   // Open
   const openSearch: TopNavMenuIconData = {
-    tooltip: i18n.translate('explore.explore.discover.localMenu.openTitle', {
+    tooltip: i18n.translate('explore.discover.localMenu.openTitle', {
       defaultMessage: 'Open',
     }),
     testId: 'discoverOpenButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverOpenButtonLabel', {
+    ariaLabel: i18n.translate('explore.discover.topNav.discoverOpenButtonLabel', {
       defaultMessage: `Open Saved Search`,
     }),
     run: () => {
@@ -358,7 +358,7 @@ export const getTopNavLinks = (
   // Save
   if (capabilities.discover?.save) {
     const saveSearch: TopNavMenuIconData = {
-      tooltip: i18n.translate('explore.explore.discover.localMenu.saveTitle', {
+      tooltip: i18n.translate('explore.discover.localMenu.saveTitle', {
         defaultMessage: 'Save',
       }),
       testId: 'discoverSaveButton',
@@ -381,7 +381,7 @@ export const getTopNavLinks = (
             onTitleDuplicate,
           };
 
-          const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
+          const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
 
           savedSearch.columns = state.columns;
           savedSearch.sort = state.sort;
@@ -470,7 +470,7 @@ export const getTopNavLinks = (
         defaultMessage: `Share search`,
       }),
       run: async (anchorElement) => {
-        const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
+        const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
         const sharingData = await getSharingData({
           searchSource: savedSearch.searchSource,
           state,

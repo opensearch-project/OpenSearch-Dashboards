@@ -211,7 +211,7 @@ export class ExplorePlugin
       order: 1000,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
-      defaultPath: '#/',
+      defaultPath: 'logs#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();

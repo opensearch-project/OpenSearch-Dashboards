@@ -73,7 +73,7 @@ export const useDiscoverDownloadCsv = ({
   const [isLoading, setIsLoading] = useState(false);
   const displayedColumnNames = useSelector((state) => {
     const displayedColumns = getLegacyDisplayedColumns(
-      state.explore.columns,
+      state.logs.columns,
       indexPattern,
       uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
       uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE)

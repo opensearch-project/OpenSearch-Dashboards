@@ -39,7 +39,7 @@ export function getRootBreadcrumbs(): EuiBreadcrumb[] {
       text: i18n.translate('explore.discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
-      onClick: () => core.application.navigateToApp('data-explorer', { path: 'discover' }),
+      onClick: () => core.application.navigateToApp('explore', { path: 'logs#/' }),
     },
   ];
 }

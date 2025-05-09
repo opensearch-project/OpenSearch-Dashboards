@@ -106,7 +106,7 @@ export const getPreloadedState = async ({
 };
 
 export const discoverSlice = createSlice({
-  name: 'explore',
+  name: 'logs',
   initialState,
   reducers: {
     setState(state, action: PayloadAction<DiscoverState>) {

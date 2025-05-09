@@ -44,7 +44,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
   const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
-  const state = useSelector((s) => s.explore);
+  const state = useSelector((s) => s.logs);
   const dispatch = useDispatch();
 
   const {

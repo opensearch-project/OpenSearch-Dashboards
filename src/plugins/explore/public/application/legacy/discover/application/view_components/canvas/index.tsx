@@ -105,7 +105,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       hits={fetchState.hits}
       showResetButton={!!savedSearch?.id}
       resetQuery={() => {
-        core.application.navigateToApp('discover', { path: `#/view/${savedSearch?.id}` });
+        core.application.navigateToApp('explore', { path: `logs#/view/${savedSearch?.id}` });
       }}
       rows={rows}
       indexPattern={indexPattern}
