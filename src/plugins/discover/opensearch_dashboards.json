@@ -14,7 +14,8 @@
     "navigation",
     "uiActions",
     "visualizations",
-    "usageCollection"
+    "usageCollection",
+    "expressions"
   ],
   "optionalPlugins": ["home", "share", "explore"],
   "requiredBundles": [
