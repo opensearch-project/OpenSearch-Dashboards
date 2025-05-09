@@ -6,12 +6,14 @@
 import { ISearchStrategy, PluginSetup } from 'src/plugins/data/server';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { IDataFrameResponse, IOpenSearchDashboardsSearchRequest } from '../../data/common';
+import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 
 export interface QueryEnhancementsPluginSetup {
   defineSearchStrategyRoute: (
     id: string,
     searchStrategy: ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse>
   ) => void;
+  registerResourceManager: (dataConnectionType: string, manager: BaseConnectionManager) => void;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginStart {}

@@ -29,6 +29,8 @@ import {
   QueryEnhancementsPluginStart,
 } from './types';
 import { OpenSearchEnhancements } from './utils';
+import { resourceManagerService } from './connections/resource_manager_service';
+import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -99,6 +101,8 @@ export class QueryEnhancementsPlugin
     this.logger.info('queryEnhancements: Setup complete');
     return {
       defineSearchStrategyRoute: defineSearchStrategyRouteProvider(this.logger, router),
+      registerResourceManager: (dataConnectionType: string, manager: BaseConnectionManager) =>
+        resourceManagerService.register(dataConnectionType, manager),
     };
   }
 
