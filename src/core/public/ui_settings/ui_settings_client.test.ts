@@ -79,6 +79,11 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
       getWithScope,
       getAll,
     } as any,
+    apiForGlobal: {
+      batchSet,
+      getWithScope,
+      getAll,
+    } as any,
     done$,
   });
 

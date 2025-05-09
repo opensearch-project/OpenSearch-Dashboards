@@ -49,6 +49,7 @@ interface UiSettingsClientParams {
   done$: Observable<unknown>;
   apiForWorkspace: UiSettingsApi;
   apiForUser: UiSettingsApi;
+  apiForGlobal: UiSettingsApi;
 }
 
 export class UiSettingsClient implements IUiSettingsClient {
@@ -59,6 +60,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly api: UiSettingsApi;
   private readonly apiForWorkspace: UiSettingsApi;
   private readonly apiForUser: UiSettingsApi;
+  private readonly apiForGlobal: UiSettingsApi;
   private readonly defaults: Record<string, PublicUiSettingsParams>;
   private cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
 
@@ -66,6 +68,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.api = params.api;
     this.apiForWorkspace = params.apiForWorkspace;
     this.apiForUser = params.apiForUser;
+    this.apiForGlobal = params.apiForGlobal;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
 
@@ -277,6 +280,8 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       ? this.apiForWorkspace
       : scope === UiSettingScope.USER
       ? this.apiForUser
+      : scope === UiSettingScope.GLOBAL
+      ? this.apiForGlobal
       : this.api;
   }
 

@@ -48,25 +48,31 @@ export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsApiForWorkspace?: UiSettingsApi;
   private uiSettingsApiForUser?: UiSettingsApi;
+  private uiSettingsApiForGlobal?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
   private done$ = new Subject();
 
   public setup({ http, injectedMetadata }: UiSettingsServiceDeps): IUiSettingsClient {
     /**
      * Currently, we have three scopes: workspace, global, and user.
-     * For workspace and user, we instantiate a dedicated API to handle operations specific to that scope.
-     * If the scope is not explicitly specified, the logic falls back to the previous behavior — leaving it to the server to determine the destination scope.
+     * For workspace and user and global, we instantiate a dedicated API to handle operations specific to that scope.
+     * if the scope is not clarified, it will remains the previous logic, leave the handling to server to decide the destinanted scope
      */
     this.uiSettingsApi = new UiSettingsApi(http);
     this.uiSettingsApiForWorkspace = new UiSettingsApi(http, UiSettingScope.WORKSPACE);
     this.uiSettingsApiForUser = new UiSettingsApi(http, UiSettingScope.USER);
+    this.uiSettingsApiForGlobal = new UiSettingsApi(http, UiSettingScope.GLOBAL);
 
     const combinedLoadingCount$ = combineLatest([
       this.uiSettingsApi.getLoadingCount$(),
       this.uiSettingsApiForWorkspace.getLoadingCount$(),
       this.uiSettingsApiForUser.getLoadingCount$(),
+      this.uiSettingsApiForGlobal.getLoadingCount$(),
     ]).pipe(
-      map(([globalCount, workspaceCount, userCount]) => globalCount + workspaceCount + userCount)
+      map(
+        ([count, workspaceCount, userCount, globalCount]) =>
+          count + workspaceCount + userCount + globalCount
+      )
     );
     http.addLoadingCountSource(combinedLoadingCount$);
 
@@ -80,6 +86,7 @@ export class UiSettingsService {
       done$: this.done$,
       apiForWorkspace: this.uiSettingsApiForWorkspace,
       apiForUser: this.uiSettingsApiForUser,
+      apiForGlobal: this.uiSettingsApiForGlobal,
     });
 
     return this.uiSettingsClient;
@@ -100,6 +107,9 @@ export class UiSettingsService {
     }
     if (this.uiSettingsApiForUser) {
       this.uiSettingsApiForUser.stop();
+    }
+    if (this.uiSettingsApiForGlobal) {
+      this.uiSettingsApiForGlobal.stop();
     }
   }
 }

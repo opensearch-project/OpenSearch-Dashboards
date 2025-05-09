@@ -81,7 +81,7 @@ describe('UiSettingsService', () => {
 
       const client = service.setup(defaultDeps);
 
-      expect(UiSettingsApi).toHaveBeenCalledTimes(3); // GLOBAL, WORKSPACE, USER
+      expect(UiSettingsApi).toHaveBeenCalledTimes(4); // GLOBAL, WORKSPACE, USER, and no specific scope
       expect(addLoadingCountSourceSpy).toHaveBeenCalledTimes(1);
       expect(client).toBeDefined();
     });
