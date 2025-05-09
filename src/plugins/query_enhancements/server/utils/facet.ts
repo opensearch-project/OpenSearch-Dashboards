@@ -45,6 +45,7 @@ export class Facet {
         body: {
           query: query.query,
           ...(meta?.name && { datasource: meta.name }),
+          ...(request.body?.fetch_size && { fetch_size: request.body.fetch_size }),
           ...(meta?.sessionId && {
             sessionId: meta.sessionId,
           }),
