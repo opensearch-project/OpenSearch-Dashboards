@@ -41,11 +41,16 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
       dateFormat: { value: 'Browser' },
       aLongNumeral: { value: `${BigInt(Number.MAX_SAFE_INTEGER) + 11n}`, type: 'number' },
       defaultDatasource: { value: 'Browser-ds', scope: UiSettingScope.WORKSPACE },
+      defaultIndex: { value: 'Browser-ds', scope: [UiSettingScope.WORKSPACE, UiSettingScope.USER] },
     },
     initialSettings = {},
   } = options;
 
   const batchSet = jest.fn(() => ({
+    settings: {},
+  }));
+
+  const getAll = jest.fn(() => ({
     settings: {},
   }));
 
@@ -62,19 +67,22 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
     api: {
       batchSet,
       getWithScope,
+      getAll,
     } as any,
     apiForWorkspace: {
       batchSet,
       getWithScope,
+      getAll,
     } as any,
     apiForUser: {
       batchSet,
       getWithScope,
+      getAll,
     } as any,
     done$,
   });
 
-  return { client, batchSet, getWithScope };
+  return { client, batchSet, getWithScope, getAll };
 }
 
 afterEach(() => {
@@ -249,6 +257,11 @@ describe('#set', () => {
     expect(() =>
       client.set('defaultDatasource', 'ds', UiSettingScope.USER)
     ).rejects.toThrowErrorMatchingSnapshot();
+  });
+  it('get all settings if trying to update multi-scope settings', async () => {
+    const { client, getAll } = setup();
+    await client.set('defaultIndex', 'index', UiSettingScope.USER);
+    expect(getAll).toHaveBeenCalled();
   });
 });
 

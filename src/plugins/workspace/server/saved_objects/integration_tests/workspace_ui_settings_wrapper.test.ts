@@ -7,6 +7,7 @@ import { IUiSettingsClient, WorkspaceAttribute } from 'src/core/server';
 
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 import { httpServerMock } from '../../../../../core/server/mocks';
+import { UiSettingScope } from '../../../../../core/server/types';
 
 describe('workspace ui settings saved object client wrapper', () => {
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
@@ -56,7 +57,7 @@ describe('workspace ui settings saved object client wrapper', () => {
   }, 30000);
 
   beforeEach(async () => {
-    await globalUiSettingsClient.set('defaultIndex', 'global-index');
+    await globalUiSettingsClient.set('defaultDatasource', 'global-ds', UiSettingScope.GLOBAL);
   });
 
   it('should get and update workspace ui settings when currently in a workspace', async () => {
@@ -65,29 +66,46 @@ describe('workspace ui settings saved object client wrapper', () => {
         opensearchDashboardsRequestState: { requestWorkspaceId: testWorkspace.id },
       })
     );
+
     const workspaceScopedUiSettingsClient = osd.coreStart.uiSettings.asScopedToClient(
       workspaceScopedSavedObjectsClient
     );
 
-    expect(await globalUiSettingsClient.get('defaultIndex')).toBe('global-index');
+    expect(await globalUiSettingsClient.get('defaultDatasource', UiSettingScope.GLOBAL)).toBe(
+      'global-ds'
+    );
 
     // workspace defaultIndex is not set, it will not use the global value
-    expect(await workspaceScopedUiSettingsClient.get('defaultIndex')).toBeUndefined();
+    expect(
+      await workspaceScopedUiSettingsClient.get('defaultDatasource', UiSettingScope.WORKSPACE)
+    ).toBeUndefined();
 
     // update ui settings in a workspace
-    await workspaceScopedUiSettingsClient.set('defaultIndex', 'workspace-index');
+    await workspaceScopedUiSettingsClient.set(
+      'defaultDatasource',
+      'workspace-ds',
+      UiSettingScope.WORKSPACE
+    );
 
     // global ui settings remain unchanged
-    expect(await globalUiSettingsClient.get('defaultIndex')).toBe('global-index');
+    expect(await globalUiSettingsClient.get('defaultDatasource', UiSettingScope.GLOBAL)).toBe(
+      'global-ds'
+    );
 
     // workspace ui settings updated to the new value
-    expect(await workspaceScopedUiSettingsClient.get('defaultIndex')).toBe('workspace-index');
+    expect(
+      await workspaceScopedUiSettingsClient.get('defaultDatasource', UiSettingScope.WORKSPACE)
+    ).toBe('workspace-ds');
   });
 
   it('should get and update global ui settings when currently not in a workspace', async () => {
-    expect(await globalUiSettingsClient.get('defaultIndex')).toBe('global-index');
+    expect(await globalUiSettingsClient.get('defaultDatasource', UiSettingScope.GLOBAL)).toBe(
+      'global-ds'
+    );
 
-    await globalUiSettingsClient.set('defaultIndex', 'global-index-new');
-    expect(await globalUiSettingsClient.get('defaultIndex')).toBe('global-index-new');
+    await globalUiSettingsClient.set('defaultDatasource', 'global-ds-new', UiSettingScope.GLOBAL);
+    expect(await globalUiSettingsClient.get('defaultDatasource', UiSettingScope.GLOBAL)).toBe(
+      'global-ds-new'
+    );
   });
 });

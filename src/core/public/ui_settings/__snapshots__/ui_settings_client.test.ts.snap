@@ -88,6 +88,13 @@ Object {
     "scope": "workspace",
     "value": "Browser-ds",
   },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
+    "value": "Browser-ds",
+  },
 }
 `;
 
@@ -102,6 +109,13 @@ Object {
   },
   "defaultDatasource": Object {
     "scope": "workspace",
+    "value": "Browser-ds",
+  },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
     "value": "Browser-ds",
   },
 }
@@ -125,6 +139,13 @@ Object {
     "scope": "workspace",
     "value": "Browser-ds",
   },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
+    "value": "Browser-ds",
+  },
 }
 `;
 
@@ -140,6 +161,13 @@ Object {
   },
   "defaultDatasource": Object {
     "scope": "workspace",
+    "value": "Browser-ds",
+  },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
     "value": "Browser-ds",
   },
 }
@@ -162,6 +190,13 @@ Object {
     "scope": "workspace",
     "value": "Browser-ds",
   },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
+    "value": "Browser-ds",
+  },
 }
 `;
 
@@ -177,6 +212,13 @@ Object {
   },
   "defaultDatasource": Object {
     "scope": "workspace",
+    "value": "Browser-ds",
+  },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
     "value": "Browser-ds",
   },
 }

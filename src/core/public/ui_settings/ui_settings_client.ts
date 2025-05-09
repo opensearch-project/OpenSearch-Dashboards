@@ -310,7 +310,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
         // If the updated setting includes multiple scopes, refresh the cache by fetching all scoped settings and merging.
         if (Array.isArray(this.cache[key]?.scope) && (this.cache[key].scope?.length ?? 0) > 1) {
-          const freshSettings = await this.selectedApi().getAll();
+          const freshSettings = await this.selectedApi(scope).getAll();
           this.cache = defaultsDeep({}, defaults, freshSettings.settings);
         } else {
           this.cache = defaultsDeep({}, defaults, settings);
