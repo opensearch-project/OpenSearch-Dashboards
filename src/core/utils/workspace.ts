@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WORKSPACE_PATH_PREFIX } from './constants';
+import { WORKSPACE_PATH_PREFIX, WORKSPACE_USE_CASE_PREFIX } from './constants';
 import { IBasePath } from '../public';
 
 export const getWorkspaceIdFromUrl = (url: string, basePath: string): string => {
@@ -40,3 +40,9 @@ export const formatUrlWithWorkspaceId = (url: string, workspaceId: string, baseP
 
   return newUrl.toString();
 };
+
+export const getUseCaseFeatureConfig = (useCaseId: string) =>
+  `${WORKSPACE_USE_CASE_PREFIX}${useCaseId}`;
+
+export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
+  featureConfigs.includes(getUseCaseFeatureConfig(navGroupId));

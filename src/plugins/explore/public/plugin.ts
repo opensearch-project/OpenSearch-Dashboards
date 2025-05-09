@@ -14,7 +14,6 @@ import {
   PluginInitializerContext,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { isNavGroupInFeatureConfigs } from '../../workspace/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/types/config';
 import {
@@ -23,6 +22,7 @@ import {
   ExploreSetupPlugins,
   ExploreStartPlugins,
 } from './types';
+import { isNavGroupInFeatureConfigs } from '../../../core/public';
 
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
   private config: ConfigSchema;
