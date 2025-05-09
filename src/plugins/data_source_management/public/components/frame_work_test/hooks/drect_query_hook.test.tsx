@@ -68,9 +68,9 @@ describe('useDirectQuery', () => {
     }));
   });
 
-  it('should initialize with scheduled status', () => {
+  it('should initialize with fresh status', () => {
     const { result } = renderHook(() => useDirectQuery(httpMock, notificationsMock));
-    expect(result.current.loadStatus).toBe(DirectQueryLoadingStatus.SCHEDULED);
+    expect(result.current.loadStatus).toBe(DirectQueryLoadingStatus.FRESH);
   });
 
   it('should handle successful query execution and start polling', async () => {

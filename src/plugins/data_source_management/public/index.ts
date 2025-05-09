@@ -27,3 +27,12 @@ export {
 export { DataSourceSelectionService } from './service/data_source_selection_service';
 export { getDefaultDataSourceId, getDefaultDataSourceId$ } from './components/utils';
 export { DATACONNECTIONS_BASE, DatasourceTypeToDisplayName } from './constants';
+
+// Export framework utilities
+export { usePolling, UsePolling, PollingConfigurations } from '../framework/utils/use_polling';
+export { SQLService } from '../framework/requests/sql';
+export { useDirectQuery } from '../framework/hooks/direct_query_hook';
+export { DirectQueryRequest, DirectQueryLoadingStatus } from '../framework/types';
+export { getAsyncSessionId, setAsyncSessionId } from '../framework/utils/query_session_utils';
+export { formatError } from '../framework/utils/shared';
+export { ASYNC_POLLING_INTERVAL } from '../framework/constants';

@@ -61,16 +61,25 @@ export const CreateAccelerationButton = ({
 
   useEffect(() => {
     const status = directqueryLoadStatus.toLowerCase();
-    if (status === DirectQueryLoadingStatus.SUCCESS) {
+    if (status === DirectQueryLoadingStatus.SUCCESS.toLowerCase()) {
       setIsLoading(false);
       notifications.toasts.addSuccess('Create acceleration query submitted successfully!');
       if (refreshHandler) refreshHandler();
       resetFlyout();
     } else if (
-      status === DirectQueryLoadingStatus.FAILED ||
-      status === DirectQueryLoadingStatus.CANCELED
+      status === DirectQueryLoadingStatus.FAILED.toLowerCase() ||
+      status === DirectQueryLoadingStatus.CANCELLED.toLowerCase() ||
+      status === DirectQueryLoadingStatus.INITIAL.toLowerCase() ||
+      status === DirectQueryLoadingStatus.FRESH.toLowerCase()
     ) {
       setIsLoading(false);
+    } else if (
+      status === DirectQueryLoadingStatus.SUBMITTED.toLowerCase() ||
+      status === DirectQueryLoadingStatus.WAITING.toLowerCase() ||
+      status === DirectQueryLoadingStatus.RUNNING.toLowerCase() ||
+      status === DirectQueryLoadingStatus.SCHEDULED.toLowerCase()
+    ) {
+      setIsLoading(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [directqueryLoadStatus]);

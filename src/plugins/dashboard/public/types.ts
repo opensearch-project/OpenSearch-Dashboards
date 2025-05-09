@@ -55,6 +55,7 @@ import { History } from 'history';
 import { EmbeddableStart, ViewMode } from '../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SavedDashboardPanel730ToLatest } from '../common';
+import type { DashboardFeatureFlagConfig } from './plugin';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -279,4 +280,5 @@ export interface DashboardServices extends CoreStart {
   restorePreviousUrl: () => void;
   addBasePath?: (url: string) => string;
   toastNotifications: ToastsStart;
+  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
 }
