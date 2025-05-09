@@ -78,6 +78,7 @@ declare module '../../share/public' {
   }
 }
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { ExpressionsPublicPlugin, ExpressionsStart } from '../../expressions/public';
 
 /**
  * @public
@@ -132,6 +133,7 @@ export interface DiscoverSetupPlugins {
   data: DataPublicPluginSetup;
   dataExplorer: DataExplorerPluginSetup;
   usageCollection: UsageCollectionSetup;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
 }
 
 /**
@@ -148,6 +150,7 @@ export interface DiscoverStartPlugins {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
+  expressions: ExpressionsStart;
 }
 
 /**
