@@ -31,47 +31,60 @@ export interface DeleteWorkspaceModalProps {
 export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   const typeTextToConfirm = props.typeTextToConfirm ?? 'delete';
   const [value, setValue] = useState('');
+  const [deleting, setDeleting] = useState(false);
   const { onClose, selectedWorkspaces, onDeleteSuccess } = props;
   const {
     services: { notifications, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
   const deleteWorkspaces = async () => {
+    setDeleting(true);
+    let result;
     if (selectedWorkspaces && selectedWorkspaces.length > 0) {
-      selectedWorkspaces.forEach(async (selectedWorkspace) => {
-        if (selectedWorkspace?.id) {
-          let result;
-          try {
-            result = await workspaceClient.delete(selectedWorkspace?.id);
-          } catch (error) {
-            notifications?.toasts.addDanger({
-              title: i18n.translate('workspace.delete.failed', {
-                defaultMessage: 'Failed to delete workspace',
-              }),
-              text: error instanceof Error ? error.message : JSON.stringify(error),
-            });
-            return onClose();
-          }
-          if (result?.success) {
-            notifications?.toasts.addSuccess({
-              title: i18n.translate('workspace.delete.success', {
-                defaultMessage: 'Delete workspace successfully',
-              }),
-            });
-            onClose();
-            if (onDeleteSuccess) {
-              onDeleteSuccess();
-            }
-          } else {
-            notifications?.toasts.addDanger({
-              title: i18n.translate('workspace.delete.failed', {
-                defaultMessage: 'Failed to delete workspace',
-              }),
-              text: result?.error,
-            });
-          }
+      const ids = selectedWorkspaces
+        .filter((selectedWorkspace) => selectedWorkspace.id)
+        .map((selectedWorkspace) => selectedWorkspace.id);
+      try {
+        result = await workspaceClient.batchDelete(ids);
+      } catch (error) {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('workspace.delete.failed', {
+            defaultMessage: 'Failed to delete workspace',
+          }),
+          text: error instanceof Error ? error.message : JSON.stringify(error),
+        });
+        return onClose();
+      }
+
+      if (result?.fail === 0) {
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('workspace.delete.success', {
+            defaultMessage: 'Delete workspace successfully',
+          }),
+        });
+        if (onDeleteSuccess) {
+          onDeleteSuccess();
         }
-      });
+      } else {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('workspace.delete.failed.mixed.title', {
+            defaultMessage: '{successCount} succeeded, {failCount} failed',
+            values: {
+              successCount: result.success,
+              failCount: result.fail,
+            },
+          }),
+          text: i18n.translate('workspace.delete.failed.mixed.text.ids', {
+            defaultMessage: 'Failed workspace id: {failedIds}',
+            values: {
+              failedIds: result?.failedIds.join(', '),
+            },
+          }),
+        });
+      }
+
+      setDeleting(false);
+      onClose();
     }
   };
 
@@ -122,6 +135,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           fill
           color="danger"
           disabled={value !== typeTextToConfirm}
+          isLoading={deleting}
         >
           Delete
         </EuiSmallButton>
