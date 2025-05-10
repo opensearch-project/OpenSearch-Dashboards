@@ -1,0 +1,36 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.query-panel-layout {
+  margin: 4px;
+  border: 1px solid grey;
+  padding: 8px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.editor-area {
+  flex: 1;
+  min-height: 72px;
+  padding: 8px;
+  border: 1px dashed grey;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.footer-panel {
+  margin-top: 8px;
+  padding: 8px;
+  border-top: 1px solid grey;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  background-color: white;
+  align-items: center;
+  height: 32px;
+}
