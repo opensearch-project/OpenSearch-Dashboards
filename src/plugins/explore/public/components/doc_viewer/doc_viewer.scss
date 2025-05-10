@@ -1,0 +1,72 @@
+.osdDocViewerTable {
+  margin-top: $euiSizeS;
+}
+
+.osdDocViewer {
+  pre,
+  .osdDocViewer__value {
+    display: inline-block;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    color: $euiColorFullShade;
+    vertical-align: top;
+    padding-top: 2px;
+  }
+
+  .osdDocViewer__field {
+    padding-top: 8px;
+  }
+
+  .dscFieldName {
+    color: $euiColorDarkShade;
+  }
+
+  td,
+  pre {
+    font-family: $euiCodeFontFamily;
+  }
+
+  tr:first-child td {
+    border-top-color: transparent;
+  }
+
+  tr:hover {
+    .osdDocViewer__actionButton {
+      opacity: 1;
+    }
+  }
+}
+
+.osdDocViewer__buttons,
+.osdDocViewer__field {
+  white-space: nowrap;
+}
+
+.osdDocViewer__buttons {
+  width: 60px;
+
+  // Show all icons if one is focused,
+  // IE doesn't support, but the fallback is just the focused button becomes visible
+  &:focus-within {
+    .osdDocViewer__actionButton {
+      opacity: 1;
+    }
+  }
+}
+
+.osdDocViewer__field {
+  width: 160px;
+}
+
+.osdDocViewer__actionButton {
+  opacity: 0;
+
+  &:focus {
+    opacity: 1;
+  }
+}
+
+.osdDocViewer__warning {
+  margin-right: $euiSizeS;
+}
