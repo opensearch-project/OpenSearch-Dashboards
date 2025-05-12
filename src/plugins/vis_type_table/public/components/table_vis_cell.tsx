@@ -23,6 +23,17 @@ export const getTableVisCellValue = (
   const rawContent = row[columnId];
   const colIndex = columns.findIndex((col) => col.id === columnId);
   const htmlContent = columns[colIndex].formatter.convert(rawContent, 'html');
+  dompurify.addHook('uponSanitizeAttribute', (node, event) => {
+    if (event.attrName === 'target') {
+      event.forceKeepAttr = true;
+    }
+  });
+
+  dompurify.addHook('afterSanitizeElements', (node) => {
+    if (node instanceof Element && node.tagName?.toUpperCase() === 'A') {
+      node.setAttribute('rel', 'noopener noreferrer');
+    }
+  });
   const formattedContent = (
     /*
      * Justification for dangerouslySetInnerHTML:
