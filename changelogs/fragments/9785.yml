@@ -1,0 +1,2 @@
+fix:
+- Change workspace deletion from parallel to serial ([#9785](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9785))
