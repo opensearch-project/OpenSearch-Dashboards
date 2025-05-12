@@ -3,34 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import { useSyncExternalStore } from 'use-sync-external-store/shim';
 import { useStore } from '../context';
-import { BaseSelectors } from '../../../../opensearch_dashboards_utils/common/state_management';
-
-export function useSelector<T>(pluginKey: string): T {
-  const store = useStore(); // Access the central store
+/**
+ * Utility function to obtain the selector correspondin to the plugin Key
+ * @param pluginKey - The unique key for the plugin.
+ * @param selectorFn - The selector instance for the plugin.
+ */
+export function useSelector<TState, TResult>(
+  pluginKey: string,
+  selectorFn: (state: TState) => TResult
+): TResult | undefined {
+  const store = useStore();
   if (!store) {
     throw new Error('useSelector must be used inside PluginStoreContext.Provider');
   }
 
-  const [selector, setSelector] = useState<BaseSelectors<any> | null>(null);
+  const selector = store.getSelector(pluginKey);
 
-  useEffect(() => {
-    const currentSelector = store.getSelector(pluginKey); // Retrieve selector from the store based on pluginKey
-    setSelector(currentSelector);
+  // Memoize selector function to prevent unnecessary re-renders
+  const select = useMemo(() => (state: TState) => selectorFn(state), [selectorFn]);
 
-    // Subscribe to changes in the selector and update the state accordingly
-    const unsubscribe = store.subscribeToKeysChange(() => {
-      const updatedSelector = store.getSelector(pluginKey);
-      setSelector(updatedSelector);
-    });
-
-    return () => unsubscribe(); // Cleanup on component unmount
-  }, [store, pluginKey]);
-
-  if (!selector) {
-    throw new Error(`Selector for pluginKey ${pluginKey} not found.`);
-  }
-
-  return selector.getState();
+  return useSyncExternalStore(
+    // Subscribe function
+    (onStoreChange) => selector?.subscribe(onStoreChange) ?? (() => {}),
+    // GetSnapshot function
+    () => (selector ? select(selector.getState()) : undefined),
+    // Optional getServerSnapshot for SSR - use same as client snapshot
+    () => (selector ? select(selector.getState()) : undefined)
+  );
 }

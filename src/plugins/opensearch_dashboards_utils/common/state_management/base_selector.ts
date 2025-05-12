@@ -2,29 +2,40 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import debounce from 'raf-debounce';
-
 type ChangeHandler = () => void;
 
 export abstract class BaseSelectors<T> {
   private changeHandlers: Set<ChangeHandler> = new Set();
+  private rafHandle: number | undefined;
 
-  /**
-   * Debounce change emissions by animation frame for performance improvements.
-   */
-  protected emitChange = debounce(() => {
-    this.changeHandlers.forEach((handler) => handler());
-  });
+  protected emitChange = () => {
+    // Cancel any pending RAF to debounce multiple rapid changes
+    if (this.rafHandle !== undefined) {
+      cancelAnimationFrame(this.rafHandle);
+    }
 
-  public subscribe(changeHandler: ChangeHandler, abortController: AbortController) {
-    this.changeHandlers.add(changeHandler);
-
-    abortController.signal.addEventListener('abort', () => {
-      this.changeHandlers.delete(changeHandler);
+    // Schedule state update on next animation frame
+    this.rafHandle = requestAnimationFrame(() => {
+      this.changeHandlers.forEach((handler) => handler());
+      this.rafHandle = undefined;
     });
+  };
+
+  public subscribe(onStoreChange: ChangeHandler): () => void {
+    this.changeHandlers.add(onStoreChange);
+    return () => {
+      this.changeHandlers.delete(onStoreChange);
+    };
   }
 
-  public destroy() {
+  public getSnapshot(): T {
+    return this.getState();
+  }
+
+  public destroy(): void {
+    if (this.rafHandle !== undefined) {
+      cancelAnimationFrame(this.rafHandle);
+    }
     this.changeHandlers.clear();
   }
 

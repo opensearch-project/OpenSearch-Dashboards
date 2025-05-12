@@ -12,7 +12,7 @@ export class Store {
   private readonly actions: Record<string, BaseActions<any>> = {};
   private readonly pluginKeys$ = new BehaviorSubject<string[]>([]);
 
-  public registerServiceState(
+  public registerService(
     pluginKey: string,
     selector: BaseSelectors<any>,
     action: BaseActions<any>
