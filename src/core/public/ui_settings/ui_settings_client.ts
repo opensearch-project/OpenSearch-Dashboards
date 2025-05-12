@@ -43,13 +43,10 @@ import { IUiSettingsClient, UiSettingsState } from './types';
 import { UiSettingsApi } from './ui_settings_api';
 
 interface UiSettingsClientParams {
-  api: UiSettingsApi;
   defaults: Record<string, PublicUiSettingsParams>;
   initialSettings?: UiSettingsState;
   done$: Observable<unknown>;
-  apiForWorkspace: UiSettingsApi;
-  apiForUser: UiSettingsApi;
-  apiForGlobal: UiSettingsApi;
+  uiSettingApis: Record<string, UiSettingsApi>;
 }
 
 export class UiSettingsClient implements IUiSettingsClient {
@@ -57,18 +54,12 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly saved$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
   private readonly updateErrors$ = new Subject<Error>();
 
-  private readonly api: UiSettingsApi;
-  private readonly apiForWorkspace: UiSettingsApi;
-  private readonly apiForUser: UiSettingsApi;
-  private readonly apiForGlobal: UiSettingsApi;
+  private readonly uiSettingApis: Record<string, UiSettingsApi>;
   private readonly defaults: Record<string, PublicUiSettingsParams>;
   private cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
 
   constructor(params: UiSettingsClientParams) {
-    this.api = params.api;
-    this.apiForWorkspace = params.apiForWorkspace;
-    this.apiForUser = params.apiForUser;
-    this.apiForGlobal = params.apiForGlobal;
+    this.uiSettingApis = params.uiSettingApis;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
 
@@ -277,12 +268,12 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
   private selectedApi(scope?: UiSettingScope) {
     return scope === UiSettingScope.WORKSPACE
-      ? this.apiForWorkspace
+      ? this.uiSettingApis[UiSettingScope.WORKSPACE]
       : scope === UiSettingScope.USER
-      ? this.apiForUser
+      ? this.uiSettingApis[UiSettingScope.USER]
       : scope === UiSettingScope.GLOBAL
-      ? this.apiForGlobal
-      : this.api;
+      ? this.uiSettingApis[UiSettingScope.GLOBAL]
+      : this.uiSettingApis.default;
   }
 
   private async mergeSettingsIntoCache(

@@ -45,10 +45,7 @@ export interface UiSettingsServiceDeps {
 
 /** @internal */
 export class UiSettingsService {
-  private uiSettingsApi?: UiSettingsApi;
-  private uiSettingsApiForWorkspace?: UiSettingsApi;
-  private uiSettingsApiForUser?: UiSettingsApi;
-  private uiSettingsApiForGlobal?: UiSettingsApi;
+  private uiSettingApis?: Record<string, UiSettingsApi>;
   private uiSettingsClient?: UiSettingsClient;
   private done$ = new Subject();
 
@@ -58,35 +55,27 @@ export class UiSettingsService {
      * For workspace and user and global, we instantiate a dedicated API to handle operations specific to that scope.
      * if the scope is not clarified, it will remains the previous logic, leave the handling to server to decide the destinanted scope
      */
-    this.uiSettingsApi = new UiSettingsApi(http);
-    this.uiSettingsApiForWorkspace = new UiSettingsApi(http, UiSettingScope.WORKSPACE);
-    this.uiSettingsApiForUser = new UiSettingsApi(http, UiSettingScope.USER);
-    this.uiSettingsApiForGlobal = new UiSettingsApi(http, UiSettingScope.GLOBAL);
+    this.uiSettingApis = {
+      default: new UiSettingsApi(http),
+      [UiSettingScope.WORKSPACE]: new UiSettingsApi(http, UiSettingScope.WORKSPACE),
+      [UiSettingScope.USER]: new UiSettingsApi(http, UiSettingScope.USER),
+      [UiSettingScope.GLOBAL]: new UiSettingsApi(http, UiSettingScope.GLOBAL),
+    };
 
-    const combinedLoadingCount$ = combineLatest([
-      this.uiSettingsApi.getLoadingCount$(),
-      this.uiSettingsApiForWorkspace.getLoadingCount$(),
-      this.uiSettingsApiForUser.getLoadingCount$(),
-      this.uiSettingsApiForGlobal.getLoadingCount$(),
-    ]).pipe(
-      map(
-        ([count, workspaceCount, userCount, globalCount]) =>
-          count + workspaceCount + userCount + globalCount
-      )
-    );
+    const combinedLoadingCount$ = combineLatest(
+      Object.values(this.uiSettingApis).map((api) => api.getLoadingCount$())
+    ).pipe(map((counts) => counts.reduce((sum, count) => sum + count, 0)));
+
     http.addLoadingCountSource(combinedLoadingCount$);
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
     const legacyMetadata = injectedMetadata.getLegacyMetadata();
 
     this.uiSettingsClient = new UiSettingsClient({
-      api: this.uiSettingsApi,
+      uiSettingApis: this.uiSettingApis,
       defaults: legacyMetadata.uiSettings.defaults,
       initialSettings: legacyMetadata.uiSettings.user,
       done$: this.done$,
-      apiForWorkspace: this.uiSettingsApiForWorkspace,
-      apiForUser: this.uiSettingsApiForUser,
-      apiForGlobal: this.uiSettingsApiForGlobal,
     });
 
     return this.uiSettingsClient;
@@ -99,17 +88,10 @@ export class UiSettingsService {
   public stop() {
     this.done$.complete();
 
-    if (this.uiSettingsApi) {
-      this.uiSettingsApi.stop();
-    }
-    if (this.uiSettingsApiForWorkspace) {
-      this.uiSettingsApiForWorkspace.stop();
-    }
-    if (this.uiSettingsApiForUser) {
-      this.uiSettingsApiForUser.stop();
-    }
-    if (this.uiSettingsApiForGlobal) {
-      this.uiSettingsApiForGlobal.stop();
+    if (this.uiSettingApis) {
+      for (const api of Object.values(this.uiSettingApis)) {
+        api.stop();
+      }
     }
   }
 }

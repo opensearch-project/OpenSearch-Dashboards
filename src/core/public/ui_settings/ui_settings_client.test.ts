@@ -32,6 +32,7 @@ import { Subject } from 'rxjs';
 import { materialize, take, toArray } from 'rxjs/operators';
 import { UiSettingScope } from '../../server/ui_settings/types';
 import { UiSettingsClient } from './ui_settings_client';
+import { UiSettingsApi } from './ui_settings_api';
 
 let done$: Subject<unknown>;
 
@@ -61,29 +62,23 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   );
 
   done$ = new Subject();
+  const mockApi: UiSettingsApi = {
+    batchSet,
+    getWithScope,
+    getAll,
+  } as any;
+
+  // Unified scoped API map
+  const uiSettingApis: Record<UiSettingScope | 'default', UiSettingsApi> = {
+    default: mockApi,
+    [UiSettingScope.WORKSPACE]: mockApi,
+    [UiSettingScope.USER]: mockApi,
+    [UiSettingScope.GLOBAL]: mockApi,
+  };
   const client = new UiSettingsClient({
     defaults,
     initialSettings,
-    api: {
-      batchSet,
-      getWithScope,
-      getAll,
-    } as any,
-    apiForWorkspace: {
-      batchSet,
-      getWithScope,
-      getAll,
-    } as any,
-    apiForUser: {
-      batchSet,
-      getWithScope,
-      getAll,
-    } as any,
-    apiForGlobal: {
-      batchSet,
-      getWithScope,
-      getAll,
-    } as any,
+    uiSettingApis,
     done$,
   });
 
