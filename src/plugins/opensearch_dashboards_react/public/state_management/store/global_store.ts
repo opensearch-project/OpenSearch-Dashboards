@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Store } from '../../../../opensearch_dashboards_utils/public';
+import { Store } from './action_selector_store';
 
 /**
  * Provides the global store that we can use to register the selector and action

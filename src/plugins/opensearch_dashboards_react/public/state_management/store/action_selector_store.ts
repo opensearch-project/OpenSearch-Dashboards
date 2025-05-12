@@ -4,8 +4,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { BaseActions } from './base_action';
-import { BaseSelectors } from './base_selector';
+import { BaseActions } from '../../../../opensearch_dashboards_utils/public';
+import { BaseSelectors } from '../../../../opensearch_dashboards_utils/public';
 
 /**
  * Store is a central registry for plugin state management.
@@ -29,7 +29,7 @@ export class Store {
   /**
    * Creates a new Store instance.
    */
-  public Store() {}
+  constructor() {}
 
   /**
    * Registers selectors and actions for a plugin.

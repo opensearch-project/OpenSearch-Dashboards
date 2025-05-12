@@ -4,8 +4,7 @@
  */
 
 import React, { ReactNode, createContext, useContext } from 'react';
-import { Store } from '../../../../opensearch_dashboards_utils/public';
-import { globalStore } from '../store';
+import { Store, globalStore } from '../store';
 
 // Create a React context for the Store instance
 const StoreContext = createContext<Store | null>(null);

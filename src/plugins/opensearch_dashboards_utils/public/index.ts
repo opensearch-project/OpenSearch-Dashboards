@@ -50,6 +50,7 @@ export * from '../common/errors';
 export * from './render_complete';
 export * from './resize_checker';
 export * from '../common/state_containers';
+export * from '../common/state_management';
 export * from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
 export {
@@ -88,7 +89,6 @@ export { Configurable, CollectConfigProps } from './ui';
 export { removeQueryParam, redirectWhenMissing } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
 export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
-export * from '../common/state_management';
 
 /** dummy plugin, we just want opensearchDashboardsUtils to have its own bundle */
 export function plugin() {
