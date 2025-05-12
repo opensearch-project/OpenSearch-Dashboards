@@ -38,7 +38,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
 
   const deleteWorkspaces = async () => {
     if (selectedWorkspaces && selectedWorkspaces.length > 0) {
-      selectedWorkspaces.forEach(async (selectedWorkspace) => {
+      for (const selectedWorkspace of selectedWorkspaces) {
         if (selectedWorkspace?.id) {
           let result;
           try {
@@ -71,7 +71,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
             });
           }
         }
-      });
+      }
     }
   };
 
