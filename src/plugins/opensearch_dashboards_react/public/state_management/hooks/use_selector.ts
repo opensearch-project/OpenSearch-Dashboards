@@ -6,10 +6,18 @@
 import { useMemo } from 'react';
 import { useSyncExternalStore } from 'use-sync-external-store/shim';
 import { useStore } from '../context';
+
 /**
- * Utility function to obtain the selector correspondin to the plugin Key
- * @param pluginKey - The unique key for the plugin.
- * @param selectorFn - The selector instance for the plugin.
+ * React hook to select and subscribe to a portion of a plugin's state.
+ *
+ * @param pluginKey - The unique key for the plugin whose state you want to select from.
+ * @param selectorFn - Function to select a part of the plugin's state.
+ * @returns The selected state value, or undefined if not available.
+ *
+ * @example
+ * const value = useSelector('myPlugin', state => state.someValue);
+ *
+ * @throws Error if used outside of PluginStoreContext.Provider
  */
 export function useSelector<TState, TResult>(
   pluginKey: string,

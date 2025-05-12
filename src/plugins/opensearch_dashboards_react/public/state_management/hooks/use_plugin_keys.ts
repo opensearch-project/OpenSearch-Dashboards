@@ -6,6 +6,17 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../context';
 
+/**
+ * React hook to get all registered plugin keys from the central state store.
+ *
+ * @returns An array of all currently registered plugin keys.
+ *
+ * @example
+ * const pluginKeys = usePluginKeys();
+ * return <ul>{pluginKeys.map(key => <li key={key}>{key}</li>)}</ul>;
+ *
+ * @throws Error if used outside of PluginStoreContext.Provider
+ */
 export function usePluginKeys(): string[] {
   const store = useStore();
   if (!store) {
