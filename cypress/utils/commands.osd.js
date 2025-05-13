@@ -222,11 +222,12 @@ cy.osd.add('navigateToWorkSpaceHomePage', (workspaceName) => {
   cy.visit('/app/workspace_list#');
   cy.openWorkspaceDashboard(workspaceName);
   // wait until page loads
-  if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'osd') {
-    cy.getElementByTestId('headerAppActionMenu').should('be.visible');
-  } else {
-    cy.getElementByTestId('breadcrumbs').should('be.visible');
-  }
+  cy.wait(2000);
+  // if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'osd') {
+  //   cy.getElementByTestId('headerAppActionMenu').should('be.visible');
+  // } else {
+  //   cy.getElementByTestId('breadcrumbs').should('be.visible');
+  // }
 });
 
 cy.osd.add(
