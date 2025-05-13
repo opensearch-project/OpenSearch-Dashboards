@@ -6,7 +6,7 @@
 import './discover_visualization.scss';
 
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useDiscoverContext } from '../context';
@@ -34,6 +34,10 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
     filters: filterManager.getFilters(),
     timeRange: timefilter.timefilter.getTime(),
   });
+  const [enableViz, setEnableViz] = useState(
+    queryString.getLanguageService().getLanguage(queryString.getQuery()!.language)!
+      .showVisualization
+  );
 
   useEffect(() => {
     async function loadExpression() {
@@ -48,36 +52,34 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
     loadExpression();
   }, [toExpression, searchContext, rows, indexPattern, services]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
       setSearchContext({
         query: state.query,
         timeRange: state.time,
         filters: state.filters,
       });
+
+      setEnableViz(
+        queryString.getLanguageService().getLanguage(state.query!.language)!.showVisualization ??
+          false
+      );
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [services.data.query.state$]);
+  }, [queryString, services.data.query.state$]);
 
-  return (
+  return enableViz && expression ? (
     <EuiPanel className="discoverVisualization" data-test-subj="visualizationLoader">
-      {expression ? (
-        <ReactExpressionRenderer
-          key={JSON.stringify(searchContext) + expression}
-          expression={expression}
-          searchContext={searchContext}
-        />
-      ) : (
-        <EuiFlexItem
-          className="discoverVisualization__empty"
-          data-test-subj="emptyDiscoverVisualization"
-        >
-          <>No data to display</>
-        </EuiFlexItem>
-      )}
+      <ReactExpressionRenderer
+        key={JSON.stringify(searchContext) + expression}
+        expression={expression}
+        searchContext={searchContext}
+      />
     </EuiPanel>
+  ) : (
+    <></>
   );
 };
