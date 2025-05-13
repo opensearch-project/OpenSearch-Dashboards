@@ -6,14 +6,10 @@
 import React from 'react';
 import { QueryPanelLayout } from './layout';
 import { EditorStack } from './components/editor_stack';
-
+import { QueryEditorFooter } from './components/footer/index';
 const QueryPanel = () => {
   return (
-    <QueryPanelLayout
-      footer={
-        <div> {/* Add other controls like TimeRangeSelector, RecentQueriesToggle etc */}</div>
-      }
-    >
+    <QueryPanelLayout footer={<QueryEditorFooter />}>
       <EditorStack />
     </QueryPanelLayout>
   );

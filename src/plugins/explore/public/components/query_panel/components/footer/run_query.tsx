@@ -13,8 +13,14 @@ interface RunQueryButtonProps {
 
 export const RunQueryButton: React.FC<RunQueryButtonProps> = ({ onClick, isDisabled = false }) => {
   return (
-    <EuiButton fill onClick={onClick} isDisabled={isDisabled} data-test-subj="runQueryButton">
-      Run Query
+    <EuiButton
+      fill
+      onClick={onClick}
+      isDisabled={isDisabled}
+      data-test-subj="runQueryButton"
+      size="s"
+    >
+      Run
     </EuiButton>
   );
 };

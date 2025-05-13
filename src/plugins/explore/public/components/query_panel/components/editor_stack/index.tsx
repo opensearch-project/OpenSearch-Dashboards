@@ -4,39 +4,15 @@
  */
 
 import React from 'react';
-import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
+import { PromptEditor } from './prompt_editor';
+import { QueryEditor } from './query_editor';
 
 const EditorStack = () => {
   return (
-    <CodeEditor
-      height={40}
-      languageId={'query'}
-      value={''}
-      onChange={() => {}}
-      options={{
-        fixedOverflowWidgets: true,
-        fontSize: 14,
-        folding: false,
-        lineNumbers: 'off',
-        scrollBeyondLastLine: false,
-        minimap: {
-          enabled: false,
-        },
-        suggest: {
-          showWords: false,
-        },
-        wordWrap: 'on',
-        wrappingIndent: 'indent',
-      }}
-      languageConfiguration={{
-        autoClosingPairs: [
-          {
-            open: '(',
-            close: ')',
-          },
-        ],
-      }}
-    />
+    <>
+      <PromptEditor />
+      <QueryEditor />
+    </>
   );
 };
 
