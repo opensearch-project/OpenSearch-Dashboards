@@ -155,6 +155,8 @@ export const convertResult = ({
     });
   }
 
+  console.log('searchResponse', searchResponse);
+
   return searchResponse;
 };
 
