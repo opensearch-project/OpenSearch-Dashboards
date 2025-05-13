@@ -26,6 +26,7 @@ export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onT
       checked={isChecked}
       onChange={(e) => handleToggle(e)}
       data-test-subj="showFieldsToggle"
+      compressed
     />
   );
 };
