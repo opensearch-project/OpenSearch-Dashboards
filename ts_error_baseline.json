@@ -10397,7 +10397,7 @@
     },
     {
       "file": "src/plugins/workspace/public/plugin.ts",
-      "line": 647,
+      "line": 648,
       "column": 30,
       "code": "TS2322",
       "message": "Type 'HOME_CONTENT_AREAS' is not assignable to type 'string | string[]'."

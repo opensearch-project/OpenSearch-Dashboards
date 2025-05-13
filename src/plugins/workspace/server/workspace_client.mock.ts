@@ -14,5 +14,7 @@ export const workspaceClientMock = {
     update: jest.fn(),
     delete: jest.fn(),
     destroy: jest.fn(),
+    associate: jest.fn(),
+    dissociate: jest.fn(),
   }),
 };
