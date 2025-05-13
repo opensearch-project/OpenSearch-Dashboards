@@ -67,22 +67,52 @@ export async function resolveConcreteIndex(
   }
 }
 
-export function extractIndexParts(mappingName?: string): IndexExtractionResult {
-  // Use mapping name if provided; otherwise, return null values
-  if (mappingName) {
-    const parts = mappingName.split('.');
-    return {
-      datasource: parts[0] || null,
-      database: parts[1] || null,
-      index: parts.slice(2).join('.') || null,
-    };
-  }
-
-  return {
+export function extractIndexParts(
+  mappingName?: string,
+  concreteTitle?: string
+): IndexExtractionResult {
+  const nullResult: IndexExtractionResult = {
     datasource: null,
     database: null,
     index: null,
   };
+
+  // Use mappingName if provided and valid
+  if (mappingName) {
+    const parts = mappingName.split('.');
+    if (parts.length >= 2) {
+      const result: IndexExtractionResult = {
+        datasource: parts[0] || null,
+        database: parts[1] || null,
+        index: parts.slice(2).join('.') || null,
+      };
+      // Return nullResult if any part is null
+      if (!result.datasource || !result.database || !result.index) {
+        return nullResult;
+      }
+      return result;
+    }
+  }
+
+  // Fallback to concreteTitle with regex parsing - specific to CW created Flint indices
+  if (concreteTitle) {
+    const regex = /flint_([\w\-]+)_default_(.+)/;
+    const match = concreteTitle.match(regex);
+    if (match) {
+      const result: IndexExtractionResult = {
+        datasource: match[1] || null,
+        database: 'default', // Hardcoded for CW Flint indices
+        index: match[2] || null,
+      };
+      // Return nullResult if any part is null
+      if (!result.datasource || !result.database || !result.index) {
+        return nullResult;
+      }
+      return result;
+    }
+  }
+
+  return nullResult;
 }
 
 export function generateRefreshQuery(info: IndexExtractionResult): string {
@@ -176,7 +206,7 @@ export async function extractIndexInfoFromDashboard(
     const mappingName = val.mappings?._meta?.name;
     return {
       mapping: val.mappings._meta.properties!,
-      parts: extractIndexParts(mappingName),
+      parts: extractIndexParts(mappingName, concreteTitle),
       mdsId: selectedMdsId,
     };
   }

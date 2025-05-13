@@ -113,10 +113,10 @@ describe('extractIndexParts', () => {
     });
   });
 
-  it('handles missing parts with null values', () => {
+  it('treat missing parts with null values and verify if it returns null', () => {
     const result = extractIndexParts('datasource1');
     expect(result).toEqual({
-      datasource: 'datasource1',
+      datasource: null,
       database: null,
       index: null,
     });
