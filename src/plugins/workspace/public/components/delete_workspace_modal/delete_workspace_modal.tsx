@@ -15,10 +15,18 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCommentList,
+  EuiCommentProps,
+  EuiBadge,
 } from '@elastic/eui';
-import { WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { CoreStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import {
+  toMountPoint,
+  useOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
 
 export interface DeleteWorkspaceModalProps {
@@ -26,21 +34,53 @@ export interface DeleteWorkspaceModalProps {
   selectedWorkspaces?: WorkspaceAttribute[];
   onDeleteSuccess?: () => void;
   typeTextToConfirm?: string;
+  openModal: (
+    node: React.ReactNode,
+    options?: Parameters<CoreStart['overlays']['openModal']>['1']
+  ) => ReturnType<CoreStart['overlays']['openModal']>;
 }
 
 export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   const typeTextToConfirm = props.typeTextToConfirm ?? 'delete';
   const [value, setValue] = useState('');
   const [deleting, setDeleting] = useState(false);
-  const { onClose, selectedWorkspaces, onDeleteSuccess } = props;
+  const { onClose, selectedWorkspaces, onDeleteSuccess, openModal } = props;
   const {
     services: { notifications, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+  let updateMessages: EuiCommentProps[] = [
+    {
+      username: 'Delete Process',
+      event: 'started to delete workspaces',
+      type: 'update',
+      timelineIcon: 'trash',
+    },
+  ];
+
+  const showDeleteDetails = (updateMessages: EuiCommentProps[]) => {
+    const modal = openModal(
+      <EuiModal style={{ width: 800, minHeight: 400 }} onClose={() => modal.close()}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>Delete workspace details</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiCommentList comments={updateMessages} />
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiSmallButton fill color="primary" onClick={() => modal.close()}>
+                Close
+              </EuiSmallButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalBody>
+      </EuiModal>
+    );
+  };
 
   const deleteWorkspaces = async () => {
     setDeleting(true);
     let result: { success: number; fail: number; failedIds: string[] };
-    let failedWorksapces;
+    let failedWorksapces: WorkspaceAttribute[];
     if (selectedWorkspaces && selectedWorkspaces.length > 0) {
       const ids = selectedWorkspaces
         .filter((selectedWorkspace) => selectedWorkspace.id)
@@ -60,32 +100,111 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
         return onClose();
       }
 
+      const newMessages: EuiCommentProps[] = [];
+
+      for (const selectedWorkspace of selectedWorkspaces) {
+        const isFailed = failedWorksapces.some(
+          (failedWorkspace) => failedWorkspace.id === selectedWorkspace.id
+        );
+
+        newMessages.push({
+          username: 'Delete process',
+          event: (
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText>started to delete workspace</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={isFailed ? 'danger' : 'success'}>
+                  {isFailed ? 'fail' : 'success'}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          type: isFailed ? 'regular' : 'update',
+          children: (
+            <EuiText size="s">
+              <p>{selectedWorkspace.name} </p>
+            </EuiText>
+          ),
+          timelineIcon: isFailed ? 'cross' : 'check',
+        });
+      }
+
+      updateMessages = [...updateMessages, ...newMessages];
+
       if (result?.fail === 0) {
         notifications?.toasts.addSuccess({
           title: i18n.translate('workspace.delete.success', {
-            defaultMessage: 'Delete workspace successfully',
+            defaultMessage: '{successCount} workspaces deleted successfully',
+            values: {
+              successCount: result.success,
+            },
           }),
+          text: toMountPoint(
+            <>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSmallButton color="success" onClick={() => showDeleteDetails(updateMessages)}>
+                    View Delete Details
+                  </EuiSmallButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ),
         });
         if (onDeleteSuccess) {
           onDeleteSuccess();
         }
-      } else {
+      } else if (result?.success === 0) {
         notifications?.toasts.addDanger({
-          title: i18n.translate('workspace.delete.failed.mixed.title', {
-            defaultMessage: '{successCount} succeeded, {failCount} failed',
+          title: i18n.translate('workspace.delete.failed', {
+            defaultMessage: '{failCount} workspaces failed to delete ',
+            values: {
+              failCount: result.fail,
+            },
+          }),
+          text: toMountPoint(
+            <>
+              <div>
+                Failed workspace name:{' '}
+                {failedWorksapces.map((selectedWorkspace) => selectedWorkspace.name).join(', ')}{' '}
+              </div>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSmallButton color="danger" onClick={() => showDeleteDetails(updateMessages)}>
+                    View Delete Details
+                  </EuiSmallButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ),
+        });
+      } else {
+        notifications?.toasts.addWarning({
+          title: i18n.translate('workspace.delete.warning', {
+            defaultMessage:
+              '{successCount} workspaces deleted successfully, {failCount} failed to delete',
             values: {
               successCount: result.success,
               failCount: result.fail,
             },
           }),
-          text: i18n.translate('workspace.delete.failed.mixed.text.name', {
-            defaultMessage: 'Failed workspace name: {failedName}',
-            values: {
-              failedName: failedWorksapces
-                .map((selectedWorkspace) => selectedWorkspace.name)
-                .join(', '),
-            },
-          }),
+          text: toMountPoint(
+            <>
+              <div>
+                Failed workspace name:{' '}
+                {failedWorksapces.map((selectedWorkspace) => selectedWorkspace.name).join(', ')}{' '}
+              </div>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSmallButton color="warning" onClick={() => showDeleteDetails(updateMessages)}>
+                    View Delete Details
+                  </EuiSmallButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ),
         });
       }
 

@@ -98,6 +98,7 @@ export const WorkspaceListInner = ({
       savedObjects,
       notifications,
     },
+    overlays,
   } = useOpenSearchDashboards<{
     navigationUI: NavigationPublicPluginStart['ui'];
   }>();
@@ -639,6 +640,7 @@ export const WorkspaceListInner = ({
           <DeleteWorkspaceModal
             selectedWorkspaces={deletedWorkspaces}
             onClose={() => setDeletedWorkspaces([])}
+            openModal={overlays.openModal}
           />
         )}
       </EuiPage>
