@@ -149,7 +149,7 @@ export enum DirectQueryLoadingStatus {
   FAILED = 'failed',
   RUNNING = 'running',
   SCHEDULED = 'scheduled',
-  CANCELED = 'canceled',
+  CANCELLED = 'CANCELLED',
   WAITING = 'waiting',
   INITIAL = 'initial',
 }

@@ -81,7 +81,7 @@ export const SelectorLoadObjects = ({
       setIsLoading({ ...isLoading, tableStatus: false });
     } else if (
       status === DirectQueryLoadingStatus.FAILED ||
-      status === DirectQueryLoadingStatus.CANCELED
+      status === DirectQueryLoadingStatus.CANCELLED
     ) {
       setIsLoading({ ...isLoading, tableStatus: false });
     }
@@ -93,7 +93,7 @@ export const SelectorLoadObjects = ({
     if (
       status === DirectQueryLoadingStatus.SUCCESS ||
       status === DirectQueryLoadingStatus.FAILED ||
-      status === DirectQueryLoadingStatus.CANCELED
+      status === DirectQueryLoadingStatus.CANCELLED
     ) {
       setIsLoading({ ...isLoading, accelerationsStatus: false });
     }

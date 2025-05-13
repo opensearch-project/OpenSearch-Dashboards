@@ -59,7 +59,7 @@ export const SelectorLoadDatabases = ({
       setIsLoading(false);
     } else if (
       status === DirectQueryLoadingStatus.FAILED ||
-      status === DirectQueryLoadingStatus.CANCELED
+      status === DirectQueryLoadingStatus.CANCELLED
     ) {
       setIsLoading(false);
     }
