@@ -11,11 +11,9 @@ import {
   DEFAULT_APP_CATEGORIES,
   DEFAULT_NAV_GROUPS,
   Plugin,
-  PluginInitializerContext,
   WorkspaceAvailability,
 } from '../../../core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { ConfigSchema } from '../common/config';
 import {
   ExplorePluginSetup,
   ExplorePluginStart,
