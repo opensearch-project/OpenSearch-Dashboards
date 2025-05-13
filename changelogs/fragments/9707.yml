@@ -1,0 +1,2 @@
+feat:
+- Support new OpenSearch type match_only_text ([#9707](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9707))
