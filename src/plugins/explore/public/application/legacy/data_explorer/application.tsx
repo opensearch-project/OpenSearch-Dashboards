@@ -12,6 +12,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_d
 import { DataExplorerServices } from './types';
 import { DataExplorerApp } from './components/app';
 import { Store } from './utils/state_management';
+import { LOGS_VIEW_ID } from '../../../../common';
 
 export const renderApp = (
   core: CoreStart,
@@ -27,7 +28,10 @@ export const renderApp = (
           <services.i18n.Context>
             <div>WIP: this is rendered by the new explore plugin</div>
             <Switch>
-              <Route path={[`/:appId`, '/']} exact={false}>
+              <Route exact path="/">
+                <Redirect to={`${LOGS_VIEW_ID}#/`} />
+              </Route>
+              <Route path={[`/:appId`]} exact={false}>
                 <DataExplorerApp params={params} />
               </Route>
             </Switch>

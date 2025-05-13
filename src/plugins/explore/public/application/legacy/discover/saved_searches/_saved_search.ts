@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { LOGS_VIEW_ID } from '../../../../../common';
 import {
   createSavedObjectClass,
   SavedObject,
@@ -80,7 +81,7 @@ export function createSavedSearchClass(services: SavedObjectOpenSearchDashboards
       });
       this.showInRecentlyAccessed = true;
       this.id = id;
-      this.getFullPath = () => `/app/explore/logs#/view/${String(this.id)}`;
+      this.getFullPath = () => `/app/explore/${LOGS_VIEW_ID}#/view/${String(this.id)}`;
     }
   }
 
