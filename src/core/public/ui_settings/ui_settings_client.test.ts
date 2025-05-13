@@ -69,7 +69,7 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   } as any;
 
   // Unified scoped API map
-  const uiSettingApis: Record<UiSettingScope | 'default', UiSettingsApi> = {
+  const uiSettingApis: Record<string, UiSettingsApi> = {
     default: mockApi,
     [UiSettingScope.WORKSPACE]: mockApi,
     [UiSettingScope.USER]: mockApi,
