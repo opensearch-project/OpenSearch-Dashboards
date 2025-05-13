@@ -25,12 +25,6 @@ import {
 import { isNavGroupInFeatureConfigs } from '../../../core/public';
 
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
-  private config: ConfigSchema;
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<ConfigSchema>();
-  }
-
   public setup(core: CoreSetup, plugins: ExploreSetupPlugins): ExplorePluginSetup {
     // Register an application into the side navigation menu
     core.application.register({

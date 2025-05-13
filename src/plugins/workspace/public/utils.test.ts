@@ -31,7 +31,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
-import { DataSourceConnectionType } from '../common/types';
+import { DataSource, DataSourceConnectionType } from '../common/types';
 
 const startMock = coreMock.createStart();
 const STATIC_USE_CASES = createMockedRegisteredUseCases();
@@ -1155,7 +1155,7 @@ describe('workspace utils: fetchRemoteClusterConnections', () => {
     const coreStart = coreMock.createStart();
     const httpMock = coreStart.http;
 
-    const dataSources = [
+    const dataSources = ([
       {
         id: 'id1',
         title: 'title1',
@@ -1163,7 +1163,7 @@ describe('workspace utils: fetchRemoteClusterConnections', () => {
         description: '',
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       },
-    ];
+    ] as unknown) as DataSource[]; // force InvalidEngineType to be a valid type
 
     const result = await fetchRemoteClusterConnections(dataSources, httpMock);
 

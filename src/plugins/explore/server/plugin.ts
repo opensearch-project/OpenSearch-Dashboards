@@ -21,10 +21,12 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
   }
 
   public setup(core: CoreSetup) {
+    this.logger.debug('explore: Setup');
     return {};
   }
 
   public start(core: CoreStart) {
+    this.logger.debug('explore: Started');
     return {};
   }
 
