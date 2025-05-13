@@ -57,14 +57,14 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
     },
   ];
 
-  const showDeleteDetails = (updateMessages: EuiCommentProps[]) => {
+  const showDeleteDetails = (messages: EuiCommentProps[]) => {
     const modal = openModal(
       <EuiModal style={{ width: 800, minHeight: 400 }} onClose={() => modal.close()}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>Delete workspace details</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <EuiCommentList comments={updateMessages} />
+          <EuiCommentList comments={messages} />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiSmallButton fill color="primary" onClick={() => modal.close()}>
@@ -158,7 +158,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
         }
       } else if (result?.success === 0) {
         notifications?.toasts.addDanger({
-          title: i18n.translate('workspace.delete.failed', {
+          title: i18n.translate('workspace.delete.allFailed', {
             defaultMessage: '{failCount} workspaces failed to delete ',
             values: {
               failCount: result.fail,
