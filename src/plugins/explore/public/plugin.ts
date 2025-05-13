@@ -47,13 +47,12 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
           .pipe(take(1))
           .toPromise()
           .then((workspace) => workspace?.features);
-        // We want to limit explore UI to only show up under observability and
-        // security analytics workspaces. If user lands in the explore plugin
-        // URL in a different workspace, we will redirect them to classic discover.
+        // We want to limit explore UI to only show up under the observability
+        // workspace. If user lands in the explore plugin URL in a different
+        // workspace, we will redirect them to classic discover.
         if (
           !features ||
-          (!isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) &&
-            !isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS['security-analytics'].id, features))
+          !isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)
         ) {
           coreStart.application.navigateToApp('discover', { replace: true });
         }
@@ -64,14 +63,6 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
     });
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
         id: PLUGIN_ID,
         category: undefined,
