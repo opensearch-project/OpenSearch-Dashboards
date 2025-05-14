@@ -46,7 +46,10 @@ interface UiSettingsClientParams {
   defaults: Record<string, PublicUiSettingsParams>;
   initialSettings?: UiSettingsState;
   done$: Observable<unknown>;
-  uiSettingApis: Record<string, UiSettingsApi>;
+  uiSettingApis: {
+    default: UiSettingsApi;
+    [scope: string]: UiSettingsApi;
+  };
 }
 
 export class UiSettingsClient implements IUiSettingsClient {
@@ -54,7 +57,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly saved$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
   private readonly updateErrors$ = new Subject<Error>();
 
-  private readonly uiSettingApis: Record<string, UiSettingsApi>;
+  private readonly uiSettingApis: UiSettingsClientParams['uiSettingApis'];
   private readonly defaults: Record<string, PublicUiSettingsParams>;
   private cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
 

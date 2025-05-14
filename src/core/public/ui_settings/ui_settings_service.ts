@@ -45,7 +45,10 @@ export interface UiSettingsServiceDeps {
 
 /** @internal */
 export class UiSettingsService {
-  private uiSettingApis?: Record<string, UiSettingsApi>;
+  private uiSettingApis?: {
+    default: UiSettingsApi;
+    [scope: string]: UiSettingsApi;
+  };
   private uiSettingsClient?: UiSettingsClient;
   private done$ = new Subject();
 
