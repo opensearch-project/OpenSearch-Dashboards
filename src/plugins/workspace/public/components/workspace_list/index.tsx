@@ -345,32 +345,33 @@ export const WorkspaceListInner = ({
       setSelection([]);
     };
 
-    return (
-      isDashboardAdmin && (
-        <>
-          <EuiButton
-            color="danger"
-            iconType="trash"
-            onClick={onClick}
-            size="s"
-            data-test-subj="multi-deletion-button"
-          >
-            {i18n.translate('workspace.list.page.delete.button.info', {
-              defaultMessage:
-                '{selectedCount, plural, one {Delete # workspace} other {Delete # workspaces}}',
-              values: {
-                selectedCount: selection.length,
-              },
-            })}
-          </EuiButton>
-          {deletedWorkspaces && deletedWorkspaces.length > 0 && (
-            <DeleteWorkspaceModal
-              selectedWorkspaces={deletedWorkspaces}
-              onClose={() => setDeletedWorkspaces([])}
-            />
-          )}
-        </>
-      )
+    return isDashboardAdmin ? (
+      <>
+        <EuiButton
+          color="danger"
+          iconType="trash"
+          onClick={onClick}
+          size="s"
+          data-test-subj="multi-deletion-button"
+        >
+          {i18n.translate('workspace.list.page.delete.button.info', {
+            defaultMessage:
+              '{selectedCount, plural, one {Delete # workspace} other {Delete # workspaces}}',
+            values: {
+              selectedCount: selection.length,
+            },
+          })}
+        </EuiButton>
+        {deletedWorkspaces && deletedWorkspaces.length > 0 && (
+          <DeleteWorkspaceModal
+            selectedWorkspaces={deletedWorkspaces}
+            onClose={() => setDeletedWorkspaces([])}
+            openModal={overlays.openModal}
+          />
+        )}
+      </>
+    ) : (
+      <></>
     );
   };
 
@@ -384,7 +385,6 @@ export const WorkspaceListInner = ({
       incremental: true,
     },
     query,
-    compressed: true,
     onChange: (args) => setQuery((args.query as unknown) as EuiSearchBarProps['query']),
     filters: [
       {
