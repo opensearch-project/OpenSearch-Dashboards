@@ -6,6 +6,9 @@
 import React, { ReactNode, createContext, useContext } from 'react';
 import { Store, globalStore } from '../store';
 
+/**
+ * @experimental
+ */
 // Create a React context for the Store instance
 const StoreContext = createContext<Store | null>(null);
 
@@ -14,6 +17,9 @@ interface PluginStoreProviderProps {
   store?: Store; // Optional store
 }
 
+/**
+ * @experimental
+ */
 /**
  * React context provider for the plugin state Store.
  *

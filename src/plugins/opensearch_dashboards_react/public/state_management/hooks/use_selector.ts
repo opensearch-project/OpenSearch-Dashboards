@@ -6,7 +6,9 @@
 import { useMemo } from 'react';
 import { useSyncExternalStore } from 'use-sync-external-store/shim';
 import { useStore } from '../context';
-
+/**
+ * @experimental
+ */
 /**
  * React hook to select and subscribe to a portion of a plugin's state.
  *

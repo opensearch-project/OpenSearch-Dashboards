@@ -8,6 +8,9 @@ import { BaseActions } from '../../../../opensearch_dashboards_utils/public';
 import { BaseSelectors } from '../../../../opensearch_dashboards_utils/public';
 
 /**
+ * @experimental
+ */
+/**
  * Store is a central registry for plugin state management.
  * It allows registration and retrieval of selectors and actions for each plugin,
  * and provides a way to subscribe to changes in the set of registered plugins.

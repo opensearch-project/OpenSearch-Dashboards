@@ -5,7 +5,9 @@
 
 import { useEffect, useState } from 'react';
 import { useStore } from '../context';
-
+/**
+ * @experimental
+ */
 /**
  * React hook to get all registered plugin keys from the central state store.
  *
