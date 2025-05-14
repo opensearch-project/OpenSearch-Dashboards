@@ -85,19 +85,33 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
           }
           savedObjectMetaData={[
             {
-              type: SAVED_OBJECT_TYPE,
+              type: 'search',
               getIconForSavedObject: () => 'search',
               name: i18n.translate('explore.discover.savedSearch.savedObjectName', {
                 defaultMessage: 'Saved search',
               }),
               includeFields: ['kibanaSavedObjectMeta'],
             },
+            {
+              type: SAVED_OBJECT_TYPE,
+              getIconForSavedObject: () => 'integrationSearch',
+              name: i18n.translate('explore.discover.savedExplore.savedObjectName', {
+                defaultMessage: 'Saved explore',
+              }),
+              includeFields: ['kibanaSavedObjectMeta'],
+            },
           ]}
-          onChoose={(id) => {
+          onChoose={(id, type) => {
             // Reset query app filters before loading saved search
             filterManager.setAppFilters([]);
             data.query.queryString.clearQuery();
-            application.navigateToApp('explore', { path: `${LOGS_VIEW_ID}#/view/${id}` });
+            if (type === 'search') {
+              application.navigateToApp('discover', { path: `#/view/${id}` });
+            } else {
+              application.navigateToApp('explore', { path: `${LOGS_VIEW_ID}#/view/${id}` });
+              // TODO FIXME this is a workaround to load saved explore state without URL change
+              window.location.reload();
+            }
             onClose();
           }}
           uiSettings={uiSettings}
