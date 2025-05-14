@@ -365,6 +365,7 @@ export const WorkspaceListInner = ({
           <DeleteWorkspaceModal
             selectedWorkspaces={deletedWorkspaces}
             onClose={() => setDeletedWorkspaces([])}
+            openModal={overlays.openModal}
           />
         )}
       </>
