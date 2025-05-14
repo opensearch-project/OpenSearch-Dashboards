@@ -89,12 +89,7 @@ export class UiSettingsApi {
   }
 
   public async getAll() {
-    const options = this.scope
-      ? {
-          scope: this.scope,
-        }
-      : undefined;
-    return this.sendRequest('GET', '/api/opensearch-dashboards/settings', undefined, options);
+    return this.sendRequest('GET', '/api/opensearch-dashboards/settings', undefined);
   }
 
   /**
@@ -139,21 +134,11 @@ export class UiSettingsApi {
     this.pendingChanges = undefined;
     try {
       this.sendInProgress = true;
-      const options = this.scope
-        ? {
-            scope: this.scope,
-          }
-        : undefined;
       changes.callback(
         undefined,
-        await this.sendRequest(
-          'POST',
-          '/api/opensearch-dashboards/settings',
-          {
-            changes: changes.values,
-          },
-          options
-        )
+        await this.sendRequest('POST', '/api/opensearch-dashboards/settings', {
+          changes: changes.values,
+        })
       );
     } catch (error) {
       changes.callback(error);
@@ -166,12 +151,12 @@ export class UiSettingsApi {
   /**
    * Calls window.fetch() with the proper headers and error handling logic.
    */
-  private async sendRequest(
-    method: string,
-    path: string,
-    body?: any,
-    query?: Record<string, string>
-  ): Promise<any> {
+  private async sendRequest(method: string, path: string, body?: any): Promise<any> {
+    const query = this.scope
+      ? {
+          scope: this.scope,
+        }
+      : undefined;
     try {
       this.loadingCount$.next(this.loadingCount$.getValue() + 1);
       return await this.http.fetch(path, {
@@ -180,7 +165,7 @@ export class UiSettingsApi {
         headers: {
           accept: 'application/json',
         },
-        query: query || undefined,
+        query,
       });
     } catch (err) {
       if (err.response) {
