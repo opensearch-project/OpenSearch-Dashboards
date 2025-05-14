@@ -273,14 +273,6 @@ export class ExplorePlugin
       },
     ]);
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 300,
-      },
-    ]);
-
     // TODO: Register embeddable factory when ready
     // this.registerEmbeddable(core, plugins);
 
