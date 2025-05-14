@@ -154,7 +154,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   async getUserProvidedWithScope<T = any>(key: string, scope: UiSettingScope) {
     this.validateScope(key, scope);
     return await this.selectedApi(scope)
-      .getWithScope()
+      .getAll()
       .then((response: any) => {
         const value = response.settings[key].userValue;
         const type = this.cache[key].type;
@@ -270,13 +270,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   }
 
   private selectedApi(scope?: UiSettingScope) {
-    return scope === UiSettingScope.WORKSPACE
-      ? this.uiSettingApis[UiSettingScope.WORKSPACE]
-      : scope === UiSettingScope.USER
-      ? this.uiSettingApis[UiSettingScope.USER]
-      : scope === UiSettingScope.GLOBAL
-      ? this.uiSettingApis[UiSettingScope.GLOBAL]
-      : this.uiSettingApis.default;
+    return this.uiSettingApis[scope || 'default'] || this.uiSettingApis.default;
   }
 
   private async mergeSettingsIntoCache(

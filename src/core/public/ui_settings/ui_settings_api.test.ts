@@ -230,26 +230,6 @@ describe('#batchSet', () => {
   });
 });
 
-describe('#getWithScope', () => {
-  it('sends a GET request with scope in query string', async () => {
-    const mockResponse = { settings: { theme: 'dark' } };
-    fetchMock.mock('*', {
-      status: 200,
-      body: mockResponse,
-    });
-
-    const { uiSettingsApi } = setup();
-
-    const result = await uiSettingsApi.getWithScope();
-
-    const [url, options] = fetchMock.lastCall();
-
-    expect(url).toContain('/api/opensearch-dashboards/settings?scope=global');
-    expect(options.method).toBe('GET');
-    expect(result).toEqual(mockResponse);
-  });
-});
-
 describe('#getAll', () => {
   it('sends a GET request without scope in query string', async () => {
     const mockResponse = { settings: { theme: 'dark' } };

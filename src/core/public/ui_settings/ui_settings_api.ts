@@ -89,17 +89,11 @@ export class UiSettingsApi {
   }
 
   public async getAll() {
-    return this.sendRequest('GET', '/api/opensearch-dashboards/settings', undefined);
-  }
-
-  public async getWithScope() {
     const options = this.scope
       ? {
           scope: this.scope,
         }
       : undefined;
-    // Retrieves UI settings for a specific scope.
-    // If the scope is undefined, fetch settings for all three predefined scopes and merge them.
     return this.sendRequest('GET', '/api/opensearch-dashboards/settings', undefined, options);
   }
 
