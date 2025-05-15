@@ -6,7 +6,7 @@ import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import { DataStorage, OSD_FIELD_TYPES } from '../../data/common';
+import { DataStorage, OSD_FIELD_TYPES, UI_SETTINGS } from '../../data/common';
 import {
   createEditor,
   DefaultInput,
@@ -67,7 +67,10 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      getQueryString: (currentQuery: Query) =>
+        `source = ${currentQuery.dataset?.title} | head ${core.uiSettings.get(
+          UI_SETTINGS.DISCOVER_SAMPLE_SIZE
+        )}`,
       fields: {
         sortable: false,
         filterable: false,
@@ -145,8 +148,7 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) =>
-        `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
+      getQueryString: (currentQuery: Query) => `SELECT * FROM ${currentQuery.dataset?.title}`,
       fields: { sortable: false, filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
