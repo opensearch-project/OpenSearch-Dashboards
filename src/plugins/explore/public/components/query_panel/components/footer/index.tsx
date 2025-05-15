@@ -19,12 +19,6 @@ export const QueryEditorFooter: React.FC = () => {
         {/* Left Section */}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            {/* <EuiFlexItem grow={false}>
-              <SwitchLanguage />
-            </EuiFlexItem> */}
-            {/* <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="s" />
-            </EuiFlexItem> */}
             <EuiFlexItem grow={false}>
               <ShowFieldToggle
                 isEnabled={true}

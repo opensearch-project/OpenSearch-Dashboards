@@ -16,10 +16,11 @@ export const SaveQueryButton: React.FC = () => {
       button={
         <EuiButtonEmpty
           onClick={onButtonClick}
-          style={{ fontWeight: 'bold', color: '#0073e6' }} // Highlighted text style
+          iconType="folderOpen" // Add the folderOpen icon
+          style={{ color: '#0073e6' }} // Highlighted text style
           data-test-subj="saveQueryButton"
         >
-          SaveD Queries
+          Saved Queries
         </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}

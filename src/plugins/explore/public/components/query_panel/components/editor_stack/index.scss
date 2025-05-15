@@ -2,6 +2,85 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-.main {
-  display: flex;
-}
+// .editor-stack { 
+//     .promptEditor {
+//         border: 1px solid  #D6D9DD;
+//         border-radius: 4px;
+        
+//         &__footer {
+//             padding-left: $euiSizeXS;
+//             background-color: $euiColorLightestShade;
+//         }
+        
+//         &__progress {
+//             position: relative;
+//         }
+        
+//         .monaco-editor {
+//             border-radius: $euiSizeXS $euiSizeXS 0 0;
+            
+        
+//             .margin {
+//             border-radius: $euiSizeXS 0 0 0;
+//             background-color: $euiFormBackgroundColor;
+//             padding: 0 $euiSizeXS;
+//             }
+        
+//             .monaco-scrollable-element {
+//             border-radius: 0 $euiSizeXS 0 0;
+//             }
+
+//                 .overflow-guard {
+//                 .monaco-scrollable-element.editor-scrollable.vs.mac {
+//                     left: 0px !important; // Forcefully override inline styles
+//                 }
+//                 }
+
+//         }
+        
+//         .monaco-editor,
+//         .monaco-editor-background,
+//         .monaco-editor .inputarea.ime-input,
+//         .monaco-editor .decorationsOverviewRuler {
+//             background-color: $euiColorEmptyShade;
+//         }
+
+//         }
+
+//     .queryEditor {
+//         border: $euiBorderThin;
+//         border-radius: $euiSizeXS;
+//         padding: 8px;
+        
+//         &__footer {
+//             padding-left: $euiSizeXS;
+//             background-color: $euiColorLightestShade;
+//         }
+        
+//         &__progress {
+//             position: relative;
+//         }
+        
+//         .monaco-editor {
+//             border-radius: $euiSizeXS $euiSizeXS 0 0;
+            
+        
+//             .margin {
+//                 border-radius: $euiSizeXS 0 0 0;
+//                 background-color: $euiFormBackgroundColor;
+//                 padding: 0 $euiSizeXS;
+//                 }
+            
+//             .monaco-scrollable-element {
+//                 border-radius: 0 $euiSizeXS 0 0;
+//                 }
+//         }
+        
+//         .monaco-editor,
+//         .monaco-editor-background,
+//         .monaco-editor .inputarea.ime-input,
+//         .monaco-editor .decorationsOverviewRuler {
+//             background-color: $euiColorEmptyShade;
+//         }
+//         }
+// }
