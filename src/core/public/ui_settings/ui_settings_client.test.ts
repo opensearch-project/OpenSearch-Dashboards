@@ -51,11 +51,7 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
     settings: {},
   }));
 
-  const getAll = jest.fn(() => ({
-    settings: {},
-  }));
-
-  const getWithScope = jest.fn(() =>
+  const getAll = jest.fn(() =>
     Promise.resolve({
       settings: {},
     })
@@ -64,12 +60,14 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   done$ = new Subject();
   const mockApi: UiSettingsApi = {
     batchSet,
-    getWithScope,
     getAll,
   } as any;
 
   // Unified scoped API map
-  const uiSettingApis: Record<string, UiSettingsApi> = {
+  const uiSettingApis: {
+    default: UiSettingsApi;
+    [scope: string]: UiSettingsApi;
+  } = {
     default: mockApi,
     [UiSettingScope.WORKSPACE]: mockApi,
     [UiSettingScope.USER]: mockApi,
@@ -82,7 +80,7 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
     done$,
   });
 
-  return { client, batchSet, getWithScope, getAll };
+  return { client, batchSet, getAll };
 }
 
 afterEach(() => {
@@ -275,9 +273,9 @@ describe('#getUserProvidedWithScope', () => {
   });
 
   it('get a value if the setting does align the scope passed in', async () => {
-    const { client, getWithScope } = setup();
+    const { client, getAll } = setup();
 
-    getWithScope.mockImplementation(() =>
+    getAll.mockImplementation(() =>
       Promise.resolve({
         settings: {
           defaultDatasource: { userValue: 'ds' },
