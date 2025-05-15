@@ -9934,81 +9934,11 @@
       "message": "Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?"
     },
     {
-      "file": "src/plugins/workspace/public/components/add_collaborators_modal/index.ts",
-      "line": 9,
-      "column": 3,
-      "code": "TS2305",
-      "message": "Module '\"./duplicate_collaborator_error\"' has no exported member 'CollaboratorDuplicateSource'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/data_source_association/data_source_association.test.tsx",
-      "line": 40,
-      "column": 56,
-      "code": "TS2345",
-      "message": "Argument of type '(fn: MountPoint<HTMLElement>) => { close: Mock<any, any>; onClose: Mock<any, any>; }' is not assignable to parameter of type '(mount: MountPoint<HTMLElement>, options?: OverlayModalOpenOptions | undefined) => OverlayRef'."
-    },
-    {
       "file": "src/plugins/workspace/public/components/data_source_association/data_source_association.test.tsx",
       "line": 41,
       "column": 7,
       "code": "TS2554",
       "message": "Expected 1 arguments, but got 0."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/data_source_association/data_source_association.test.tsx",
-      "line": 73,
-      "column": 84,
-      "code": "TS2345",
-      "message": "Argument of type '{ associate: jest.Mock<any, any>; copy: jest.Mock<any, any>; dissociate: jest.Mock<any, any>; ui: jest.Mock<any, any>; }' is not assignable to parameter of type 'IWorkspaceClient'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/data_source_association/data_source_association.test.tsx",
-      "line": 110,
-      "column": 84,
-      "code": "TS2345",
-      "message": "Argument of type '{ associate: jest.Mock<any, any>; copy: jest.Mock<any, any>; dissociate: jest.Mock<any, any>; ui: jest.Mock<any, any>; }' is not assignable to parameter of type 'IWorkspaceClient'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/data_source_association/data_source_association.test.tsx",
-      "line": 145,
-      "column": 84,
-      "code": "TS2345",
-      "message": "Argument of type '{ associate: jest.Mock<any, any>; copy: jest.Mock<any, any>; dissociate: jest.Mock<any, any>; ui: jest.Mock<any, any>; }' is not assignable to parameter of type 'IWorkspaceClient'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/data_source_association/data_source_association.test.tsx",
-      "line": 184,
-      "column": 84,
-      "code": "TS2345",
-      "message": "Argument of type '{ associate: jest.Mock<any, any>; copy: jest.Mock<any, any>; dissociate: jest.Mock<any, any>; ui: jest.Mock<any, any>; }' is not assignable to parameter of type 'IWorkspaceClient'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/global_search/search_pages_command.test.tsx",
-      "line": 46,
-      "column": 11,
-      "code": "TS2322",
-      "message": "Type '{ id: string; title: string; hidden: true; }' is not assignable to type 'ChromeRegistrationNavLink'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/use_case_overview/setup_overview.test.tsx",
-      "line": 21,
-      "column": 9,
-      "code": "TS2741",
-      "message": "Property 'getPage' is missing in type '{ registerContentProvider: jest.Mock<any, any>; renderPage: jest.Mock<any, any>; updatePageSection: jest.Mock<any, any>; }' but required in type 'ContentManagementPluginStart'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/use_case_overview/setup_overview.tsx",
-      "line": 75,
-      "column": 28,
-      "code": "TS2322",
-      "message": "Type 'ESSENTIAL_OVERVIEW_CONTENT_AREAS' is not assignable to type 'string | string[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/use_case_overview/setup_overview.tsx",
-      "line": 130,
-      "column": 28,
-      "code": "TS2322",
-      "message": "Type 'ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS' is not assignable to type 'string | string[]'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_creator/workspace_creator.test.tsx",
@@ -10032,83 +9962,6 @@
       "message": "Type '{ isSubmitting: false; application: { capabilities: { dashboards: { isDashboardAdmin: boolean; }; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<...>; workspaces: Readonly<...>; }; ... 11 more ...; setAppBottomControls: ...' is missing the following properties from type 'WorkspaceCreatorFormProps': goToCollaborators, onGoToCollaboratorsChange, onAppLeave"
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_form_summary_panel.test.tsx",
-      "line": 68,
-      "column": 8,
-      "code": "TS2741",
-      "message": "Property 'privacyType' is missing in type '{ formData: { features: never[]; useCase: string; name: string; description: string; color: string; selectedDataSourceConnections: { id: string; name: string; type: string; connectionType: DataSourceConnectionType; }[]; }; ... 4 more ...; dataSourceEnabled: true; }' but required in type 'WorkspaceFormSummaryPanelProps'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_form_summary_panel.test.tsx",
-      "line": 92,
-      "column": 8,
-      "code": "TS2741",
-      "message": "Property 'privacyType' is missing in type '{ formData: { name: string; selectedDataSourceConnections: never[]; features: never[]; useCase: undefined; }; availableUseCases: ({ id: string; title: string; description: string; features: never[]; icon: string; } | { ...; })[]; formId: string; application: Mocked<...>; isSubmitting: false; dataSourceEnabled: true; }' but required in type 'WorkspaceFormSummaryPanelProps'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_form_summary_panel.test.tsx",
-      "line": 132,
-      "column": 8,
-      "code": "TS2741",
-      "message": "Property 'privacyType' is missing in type '{ formData: { features: never[]; useCase: string; name: string; description: string; color: string; selectedDataSourceConnections: { id: string; name: string; type: string; connectionType: DataSourceConnectionType; }[]; }; ... 4 more ...; dataSourceEnabled: true; }' but required in type 'WorkspaceFormSummaryPanelProps'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_form_summary_panel.test.tsx",
-      "line": 156,
-      "column": 8,
-      "code": "TS2741",
-      "message": "Property 'privacyType' is missing in type '{ formData: { features: never[]; useCase: string; name: string; description: string; color: string; selectedDataSourceConnections: { id: string; name: string; type: string; connectionType: DataSourceConnectionType; }[]; }; ... 4 more ...; dataSourceEnabled: false; }' but required in type 'WorkspaceFormSummaryPanelProps'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_detail/workspace_bottom_bar.test.tsx",
-      "line": 93,
-      "column": 50,
-      "code": "TS2741",
-      "message": "Property 'name' is missing in type '{}' but required in type 'Pick<WorkspaceFormDataState, \"name\" | \"description\">'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_detail/workspace_detail.test.tsx",
-      "line": 227,
-      "column": 34,
-      "code": "TS7031",
-      "message": "Binding element 'controls' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_detail/workspace_detail.test.tsx",
-      "line": 246,
-      "column": 34,
-      "code": "TS7031",
-      "message": "Binding element 'controls' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_detail/workspace_detail.test.tsx",
-      "line": 254,
-      "column": 39,
-      "code": "TS7031",
-      "message": "Binding element 'controls' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_detail/workspace_detail.test.tsx",
-      "line": 261,
-      "column": 34,
-      "code": "TS7031",
-      "message": "Binding element 'controls' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_detail/workspace_detail.test.tsx",
-      "line": 277,
-      "column": 79,
-      "code": "TS2339",
-      "message": "Property 'value' does not exist on type 'HTMLElement'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_detail_app.tsx",
-      "line": 86,
-      "column": 42,
-      "code": "TS2554",
-      "message": "Expected 3-4 arguments, but got 2."
-    },
-    {
       "file": "src/plugins/workspace/public/components/workspace_form/select_data_source_panel.test.tsx",
       "line": 74,
       "column": 59,
@@ -10121,13 +9974,6 @@
       "column": 5,
       "code": "TS2739",
       "message": "Type '{ application: Mocked<ApplicationStart>; defaultValues: WorkspaceFormSubmitData; onSubmit: Mock<any, any>; operationType: WorkspaceOperationType.Create; permissionEnabled: boolean; }' is missing the following properties from type 'WorkspaceFormProps': savedObjects, availableUseCases, onAppLeave"
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 47,
-      "column": 9,
-      "code": "TS2322",
-      "message": "Type '{ id: string; name: string; }' is not assignable to type 'WorkspaceFormSubmitData'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
@@ -10152,140 +9998,84 @@
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 90,
-      "column": 9,
-      "code": "TS2322",
-      "message": "Type '{ id: string; name: string; features: string[]; }' is not assignable to type 'WorkspaceFormSubmitData'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 98,
+      "line": 97,
       "column": 52,
       "code": "TS2345",
       "message": "Argument of type '{ preventDefault: jest.Mock<any, any>; }' is not assignable to parameter of type 'FormEvent<Element>'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 110,
-      "column": 9,
-      "code": "TS2322",
-      "message": "Type '{ id: string; name: string; features: string[]; }' is not assignable to type 'WorkspaceFormSubmitData'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 126,
-      "column": 9,
-      "code": "TS2322",
-      "message": "Type '{ id: string; name: string; features: string[]; }' is not assignable to type 'WorkspaceFormSubmitData'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 148,
-      "column": 9,
-      "code": "TS2322",
-      "message": "Type '{ id: string; name: string; features: string[]; }' is not assignable to type 'WorkspaceFormSubmitData'."
-    },
-    {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 20,
-      "column": 26,
-      "code": "TS7031",
-      "message": "Binding element 'permissionType' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 27,
-      "column": 26,
-      "code": "TS7031",
-      "message": "Binding element 'permissionType' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 38,
+      "line": 40,
       "column": 54,
       "code": "TS2322",
       "message": "Type '\"unknown\"' is not assignable to type 'WorkspaceCollaboratorPermissionType'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 91,
+      "line": 93,
       "column": 20,
       "code": "TS2322",
-      "message": "Type '{ displayedCollaboratorTypes: ({ id: string; name: string; buttonLabel: string; onAdd: () => Promise<void>; getDisplayedType: ({ permissionType }: { permissionType: any; }) => \"User\" | undefined; } | { ...; })[]; permissionSettings: ({ ...; } | ... 1 more ... | { ...; })[]; handleSubmitPermissionSettings: Mock<...>; }' is not assignable to type 'Props'."
+      "message": "Type '{ displayedCollaboratorTypes: ({ id: string; name: string; buttonLabel: string; onAdd: () => Promise<void>; getDisplayedType: ({ permissionType }: { permissionType: string; }) => \"User\" | undefined; } | { ...; })[]; permissionSettings: ({ ...; } | ... 1 more ... | { ...; })[]; handleSubmitPermissionSettings: Mock<.....' is not assignable to type 'Props'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 95,
-      "column": 11,
-      "code": "TS7034",
-      "message": "Variable 'permissionSettings' implicitly has type 'any[]' in some locations where its type cannot be determined."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 98,
-      "column": 70,
-      "code": "TS7005",
-      "message": "Variable 'permissionSettings' implicitly has an 'any[]' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 104,
+      "line": 106,
       "column": 35,
       "code": "TS2322",
-      "message": "Type '{ displayedCollaboratorTypes: ({ id: string; name: string; buttonLabel: string; onAdd: () => Promise<void>; getDisplayedType: ({ permissionType }: { permissionType: any; }) => \"User\" | undefined; } | { ...; })[]; permissionSettings: ({ ...; } | ... 1 more ... | { ...; })[]; handleSubmitPermissionSettings: Mock<...>; }' is not assignable to type 'Props'."
+      "message": "Type '{ displayedCollaboratorTypes: ({ id: string; name: string; buttonLabel: string; onAdd: () => Promise<void>; getDisplayedType: ({ permissionType }: { permissionType: string; }) => \"User\" | undefined; } | { ...; })[]; permissionSettings: ({ ...; } | ... 1 more ... | { ...; })[]; handleSubmitPermissionSettings: Mock<.....' is not assignable to type 'Props'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 121,
+      "line": 123,
       "column": 52,
       "code": "TS2322",
       "message": "Type '{ id: number; modes: string[]; type: string; userId: string; }[]' is not assignable to type 'PermissionSetting[]'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 154,
+      "line": 156,
       "column": 13,
       "code": "TS2322",
       "message": "Type '() => Promise<void>' is not assignable to type '(permissionSettings: WorkspacePermissionSetting[]) => Promise<IWorkspaceResponse<boolean>>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 155,
+      "line": 157,
       "column": 13,
       "code": "TS2322",
       "message": "Type '{ id: number; modes: string[]; type: string; userId: string; }[]' is not assignable to type 'PermissionSetting[]'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 207,
+      "line": 209,
       "column": 52,
       "code": "TS2322",
       "message": "Type '({ id: number; modes: string[]; type: string; userId: string; group?: undefined; } | { id: number; modes: string[]; type: string; group: string; userId?: undefined; })[]' is not assignable to type 'PermissionSetting[]'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 234,
+      "line": 236,
       "column": 52,
       "code": "TS2322",
       "message": "Type '({ id: number; modes: string[]; type: string; userId: string; group?: undefined; } | { id: number; modes: string[]; type: string; group: string; userId?: undefined; })[]' is not assignable to type 'PermissionSetting[]'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 266,
+      "line": 268,
       "column": 11,
       "code": "TS2322",
       "message": "Type '({ id: number; modes: string[]; type: string; userId: string; group?: undefined; } | { id: number; modes: string[]; type: string; group: string; userId?: undefined; })[]' is not assignable to type 'PermissionSetting[]'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 329,
+      "line": 331,
       "column": 13,
       "code": "TS2322",
       "message": "Type '() => Promise<void>' is not assignable to type '(permissionSettings: WorkspacePermissionSetting[]) => Promise<IWorkspaceResponse<boolean>>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 330,
+      "line": 332,
       "column": 13,
       "code": "TS2322",
       "message": "Type '{ id: number; modes: string[]; type: string; userId: string; }[]' is not assignable to type 'PermissionSetting[]'."
@@ -10365,7 +10155,7 @@
       "line": 47,
       "column": 50,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"user\" | \"copy\" | \"cut\" | \"pause\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_selector/workspace_selector.test.tsx",
@@ -10379,7 +10169,7 @@
       "line": 51,
       "column": 54,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"user\" | \"copy\" | \"cut\" | \"pause\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_use_case_overview_app.test.tsx",
@@ -10387,20 +10177,6 @@
       "column": 43,
       "code": "TS6133",
       "message": "'screen' is declared but its value is never read."
-    },
-    {
-      "file": "src/plugins/workspace/public/plugin.test.ts",
-      "line": 7,
-      "column": 1,
-      "code": "TS6133",
-      "message": "'waitFor' is declared but its value is never read."
-    },
-    {
-      "file": "src/plugins/workspace/public/plugin.ts",
-      "line": 647,
-      "column": 30,
-      "code": "TS2322",
-      "message": "Type 'HOME_CONTENT_AREAS' is not assignable to type 'string | string[]'."
     },
     {
       "file": "src/plugins/workspace/public/register_default_collaborator_types.test.tsx",
@@ -10439,66 +10215,17 @@
     },
     {
       "file": "src/plugins/workspace/public/utils.ts",
-      "line": 317,
-      "column": 14,
-      "code": "TS7006",
-      "message": "Parameter 'ds' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/utils.ts",
       "line": 329,
       "column": 6,
       "code": "TS2349",
       "message": "This expression is not callable."
     },
     {
-      "file": "src/plugins/workspace/public/utils.ts",
-      "line": 329,
-      "column": 14,
-      "code": "TS7006",
-      "message": "Parameter 'ds' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/utils.ts",
-      "line": 330,
-      "column": 11,
-      "code": "TS7006",
-      "message": "Parameter 'ds' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/workspace/public/workspace_client.test.ts",
-      "line": 88,
-      "column": 27,
-      "code": "TS2554",
-      "message": "Expected 2 arguments, but got 1."
-    },
-    {
-      "file": "src/plugins/workspace/public/workspace_client.test.ts",
-      "line": 167,
-      "column": 27,
-      "code": "TS2554",
-      "message": "Expected 3 arguments, but got 2."
-    },
-    {
-      "file": "src/plugins/workspace/public/workspace_client.test.ts",
-      "line": 209,
-      "column": 27,
-      "code": "TS2554",
-      "message": "Expected 3 arguments, but got 2."
-    },
-    {
-      "file": "src/plugins/workspace/public/workspace_client.ts",
-      "line": 7,
-      "column": 1,
-      "code": "TS6133",
-      "message": "'BehaviorSubject' is declared but its value is never read."
-    },
-    {
       "file": "src/plugins/workspace/server/integration_tests/duplicate.test.ts",
       "line": 119,
-      "column": 5,
-      "code": "TS2554",
-      "message": "Expected 5 arguments, but got 4."
+      "column": 50,
+      "code": "TS2345",
+      "message": "Argument of type '{ init: jest.Mock<any, any>; enterWorkspace: jest.Mock<any, any>; getCurrentWorkspaceId: jest.Mock<any, any>; getCurrentWorkspace: jest.Mock<any, any>; ... 8 more ...; setSavedObjects: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
     },
     {
       "file": "src/plugins/workspace/server/permission_control/client.mock.ts",
@@ -10509,110 +10236,12 @@
     },
     {
       "file": "src/plugins/workspace/server/routes/index.test.ts",
-      "line": 30,
-      "column": 5,
-      "code": "TS2739",
-      "message": "Type '{ setup: Mock<any, any>; setSavedObjects: Mock<any, any>; setUiSettings: Mock<any, any>; create: Mock<any, any>; list: Mock<any, any>; get: Mock<any, any>; update: Mock<...>; delete: Mock<...>; destroy: Mock<...>; }' is missing the following properties from type 'IWorkspaceClientImpl': associate, dissociate"
-    },
-    {
-      "file": "src/plugins/workspace/server/routes/index.test.ts",
       "line": 32,
       "column": 20,
       "code": "TS2345",
       "message": "Argument of type '{ router: IRouter; client: IWorkspaceClientImpl; logger: Logger; maxImportExportSize: number; isPermissionControlEnabled: false; }' is not assignable to parameter of type '{ client: IWorkspaceClientImpl; logger: Logger; router: IRouter; maxImportExportSize: number; permissionControlClient?: SavedObjectsPermissionControlContract | undefined; isPermissionControlEnabled: boolean; isDataSourceEnabled: boolean; }'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/integration_tests/workspace_ui_settings_wrapper.test.ts",
-      "line": 65,
-      "column": 45,
-      "code": "TS2322",
-      "message": "Type '{ requestWorkspaceId: string; }' is not assignable to type 'OpenSearchDashboardsRequestState'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 16,
-      "column": 58,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 80,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 212,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 229,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 312,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 369,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 471,
-      "column": 52,
-      "code": "TS2322",
-      "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 550,
-      "column": 52,
-      "code": "TS2322",
-      "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 629,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 637,
-      "column": 52,
-      "code": "TS2322",
-      "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 659,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 668,
-      "column": 52,
-      "code": "TS2322",
-      "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
     }
   ],
-  "updatedAt": "2025-05-03T00:27:30.418Z",
+  "updatedAt": "2025-05-15T02:15:13.570Z",
   "tsconfig": "/home/ubuntu/OpenSearch-Dashboards/tsconfig.check.json"
 }

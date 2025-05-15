@@ -44,8 +44,8 @@ describe('useWorkspaceForm', () => {
   it('should return invalid workspace name error and not call onSubmit when invalid name', async () => {
     const { renderResult, onSubmitMock } = setup({
       defaultValues: {
-        id: 'foo',
         name: '~',
+        features: [],
       },
     });
     expect(renderResult.result.current.formErrors).toEqual({});
@@ -87,7 +87,6 @@ describe('useWorkspaceForm', () => {
   it('should call onSubmit with workspace name and features', async () => {
     const { renderResult, onSubmitMock } = setup({
       defaultValues: {
-        id: 'foo',
         name: 'test-workspace-name',
         features: ['use-case-observability'],
       },
@@ -107,7 +106,6 @@ describe('useWorkspaceForm', () => {
   it('should update selected use case', () => {
     const { renderResult } = setup({
       defaultValues: {
-        id: 'foo',
         name: 'test-workspace-name',
         features: ['use-case-observability'],
       },
@@ -123,7 +121,6 @@ describe('useWorkspaceForm', () => {
   it('should reset workspace form', () => {
     const { renderResult } = setup({
       defaultValues: {
-        id: 'test',
         name: 'current-workspace-name',
         features: ['use-case-observability'],
       },
@@ -145,7 +142,6 @@ describe('useWorkspaceForm', () => {
     const onSubmitMock = jest.fn().mockResolvedValue({ success: true });
     const { renderResult } = setup({
       defaultValues: {
-        id: 'test',
         name: 'current-workspace-name',
         features: ['use-case-observability'],
       },

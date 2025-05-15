@@ -22,6 +22,7 @@ describe('Setup use case overview', () => {
     registerContentProvider: registerContentProviderMock,
     renderPage: jest.fn(),
     updatePageSection: jest.fn(),
+    getPage: jest.fn(),
   };
 
   const registerPageMock = jest.fn();

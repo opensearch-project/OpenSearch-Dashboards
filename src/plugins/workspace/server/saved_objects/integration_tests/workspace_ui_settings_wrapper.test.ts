@@ -62,7 +62,10 @@ describe('workspace ui settings saved object client wrapper', () => {
   it('should get and update workspace ui settings when currently in a workspace', async () => {
     const workspaceScopedSavedObjectsClient = osd.coreStart.savedObjects.getScopedClient(
       httpServerMock.createOpenSearchDashboardsRequest({
-        opensearchDashboardsRequestState: { requestWorkspaceId: testWorkspace.id },
+        opensearchDashboardsRequestState: {
+          requestId: testWorkspace.id,
+          requestUuid: testWorkspace.id,
+        },
       })
     );
     const workspaceScopedUiSettingsClient = osd.coreStart.uiSettings.asScopedToClient(

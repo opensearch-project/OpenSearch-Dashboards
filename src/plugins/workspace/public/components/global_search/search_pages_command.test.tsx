@@ -43,7 +43,6 @@ describe('<workspaceSearchPagesCommand />', () => {
         {
           id: 'foo-group-link3',
           title: 'Foo Group Link 3',
-          hidden: true,
         },
       ],
     },

@@ -39,7 +39,7 @@ describe('<DataSourceAssociation />', () => {
     });
     servicesMock.overlays.openModal.mockImplementation((fn) => {
       fn();
-      return { close: jest.fn(), onClose: jest.fn() };
+      return { close: jest.fn(), onClose: Promise.resolve() };
     });
   });
 
@@ -75,6 +75,13 @@ describe('<DataSourceAssociation />', () => {
       copy: jest.fn(),
       dissociate: jest.fn(),
       ui: jest.fn(),
+      getCurrentWorkspaceId: jest.fn(),
+      getCurrentWorkspace: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+      list: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
     });
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
 
@@ -112,6 +119,13 @@ describe('<DataSourceAssociation />', () => {
       copy: jest.fn(),
       dissociate: jest.fn(),
       ui: jest.fn(),
+      getCurrentWorkspaceId: jest.fn(),
+      getCurrentWorkspace: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+      list: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
     });
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
 
@@ -147,6 +161,13 @@ describe('<DataSourceAssociation />', () => {
       copy: jest.fn(),
       dissociate: jest.fn(),
       ui: jest.fn(),
+      getCurrentWorkspaceId: jest.fn(),
+      getCurrentWorkspace: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+      list: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
     });
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
 
@@ -186,6 +207,13 @@ describe('<DataSourceAssociation />', () => {
       copy: jest.fn(),
       dissociate: jest.fn(),
       ui: jest.fn(),
+      getCurrentWorkspaceId: jest.fn(),
+      getCurrentWorkspace: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+      list: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
     });
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
 

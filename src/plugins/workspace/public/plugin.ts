@@ -645,7 +645,7 @@ export class WorkspacePlugin
           width: 16,
           render: () => React.createElement(WorkspaceListCard, { core }),
         }),
-        getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,
+        getTargetArea: () => (HOME_CONTENT_AREAS.SERVICE_CARDS as unknown) as string,
       });
     }
   }

@@ -72,7 +72,7 @@ export const registerEssentialOverviewContent = (
   getStartedCards.forEach((card) => {
     contentManagement.registerContentProvider({
       id: card.id,
-      getTargetArea: () => ESSENTIAL_OVERVIEW_CONTENT_AREAS.GET_STARTED,
+      getTargetArea: () => (ESSENTIAL_OVERVIEW_CONTENT_AREAS.GET_STARTED as unknown) as string,
       getContent: () => ({
         id: card.id,
         kind: 'card',
@@ -127,7 +127,7 @@ export const registerAnalyticsAllOverviewContent = (
   useCaseCards.forEach((card, index) => {
     contentManagement.registerContentProvider({
       id: card.id,
-      getTargetArea: () => ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.GET_STARTED,
+      getTargetArea: () => (ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.GET_STARTED as unknown) as string,
       getContent: () => ({
         id: card.id,
         kind: 'card',

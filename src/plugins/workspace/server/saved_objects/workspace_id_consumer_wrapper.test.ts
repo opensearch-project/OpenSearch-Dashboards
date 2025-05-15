@@ -415,14 +415,26 @@ describe('WorkspaceIdConsumerWrapper', () => {
         type: 'dashboard',
         id: 'dashboard_id',
         attributes: { description: 'description' },
-        references: ['reference_id'],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         workspaces: ['foo'],
       },
       {
         type: 'dashboard',
         id: 'dashboard_error_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         error: {
           statusCode: 404,
           error: 'Not Found',
@@ -433,32 +445,62 @@ describe('WorkspaceIdConsumerWrapper', () => {
         type: 'visualization',
         id: 'visualization_id',
         attributes: { description: 'description' },
-        references: ['reference_id'],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         workspaces: ['bar'],
       },
       {
         type: 'config',
         id: 'config_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
       },
       {
         type: 'workspace',
         id: 'workspace_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
       },
       {
         type: 'data-source',
         id: 'global_data_source_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
       },
       {
         type: 'data-source',
         id: 'data_source_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         workspaces: ['foo'],
       },
     ];

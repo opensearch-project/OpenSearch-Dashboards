@@ -116,7 +116,7 @@ describe(`duplicate saved objects among workspaces`, () => {
 
     const router = httpSetup.createRouter('');
 
-    registerDuplicateRoute(router, logger.get(), clientMock, 10000);
+    registerDuplicateRoute(router, logger.get(), clientMock, 10000, true);
 
     await server.start({ dynamicConfigService: mockDynamicConfigService });
   });

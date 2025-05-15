@@ -17,14 +17,16 @@ const displayedCollaboratorTypes = [
     name: 'User',
     buttonLabel: 'Add Users',
     onAdd: async () => {},
-    getDisplayedType: ({ permissionType }) => (permissionType === 'user' ? 'User' : undefined),
+    getDisplayedType: ({ permissionType }: { permissionType: string }) =>
+      permissionType === 'user' ? 'User' : undefined,
   },
   {
     id: 'group',
     name: 'Group',
     buttonLabel: 'Add Groups',
     onAdd: async () => {},
-    getDisplayedType: ({ permissionType }) => (permissionType === 'group' ? 'Group' : undefined),
+    getDisplayedType: ({ permissionType }: { permissionType: string }) =>
+      permissionType === 'group' ? 'Group' : undefined,
   },
 ];
 
@@ -92,7 +94,7 @@ describe('WorkspaceCollaboratorTable', () => {
   });
 
   it('should render empty state when no permission settings', () => {
-    const permissionSettings = [];
+    const permissionSettings: any[] = [];
 
     const { getByText } = render(
       <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />

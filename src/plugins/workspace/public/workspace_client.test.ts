@@ -85,9 +85,7 @@ describe('#WorkspaceClient', () => {
         workspaces: [],
       },
     });
-    await workspaceClient.create({
-      name: 'foo',
-    });
+    await workspaceClient.create({ name: 'foo' }, {});
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces', {
       method: 'POST',
       body: JSON.stringify({
@@ -164,9 +162,7 @@ describe('#WorkspaceClient', () => {
         ],
       },
     });
-    await workspaceClient.update('foo', {
-      name: 'foo',
-    });
+    await workspaceClient.update('foo', { name: 'foo' }, {});
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/foo', {
       method: 'PUT',
       body: JSON.stringify({
@@ -206,9 +202,7 @@ describe('#WorkspaceClient', () => {
         success: true,
       };
     });
-    await workspaceClient.update('foo', {
-      name: 'foo',
-    });
+    await workspaceClient.update('foo', { name: 'foo' }, {});
     expect(workspaceMock.workspaceList$.getValue()).toEqual([]);
   });
 
