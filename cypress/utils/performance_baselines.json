@@ -1,0 +1,44 @@
+{
+  "_comments": {
+    "info": "This JSON file follows the structure: baselines[page][componentTestId][eventName]",
+    "example": "For example: baselines['discover']['docTable']['onPageLoad_SQL'].render_time",
+    "note": "Modify values inside 'render_time' to update performance thresholds"
+  },
+  "discover": {
+    "docTable": {
+      "onPageLoad_SQL": {
+        "render_time": 3300
+      },
+      "onPageLoad_PPL": {
+        "render_time": 3000
+      },
+      "onPageLoad_Lucene": {
+        "render_time": 1300
+      },
+      "onPageLoad_DQL": {
+        "render_time": 1500
+      }
+    },
+    "sidebarPanel": {
+      "onPageLoad_SQL": {
+        "render_time": 600
+      },
+      "onPageLoad_PPL": {
+        "render_time": 3300
+      },
+      "onPageLoad_Lucene": {
+        "render_time": 1000
+      },
+      "onPageLoad_DQL": {
+        "render_time": 1000
+      }
+    }
+  },
+  "home": {
+    "workspace-initial-card-createWorkspace-button": {
+      "onPageLoad": {
+        "render_time": 300
+      }
+    }
+  }
+}
