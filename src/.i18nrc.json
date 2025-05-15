@@ -14,6 +14,7 @@
     "dataSourcesManagement": "plugins/data_source_management",
     "devTools": "plugins/dev_tools",
     "discover": "plugins/discover",
+    "explore": "plugins/explore",
     "embeddableApi": "plugins/embeddable",
     "expressions": "plugins/expressions",
     "home": "plugins/home",
