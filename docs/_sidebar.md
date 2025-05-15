@@ -102,6 +102,7 @@
     - [Multiple_data_source_examples](../examples/multiple_data_source_examples/README.md)
     - [Routing_example](../examples/routing_example/README.md)
     - [Search_examples](../examples/search_examples/README.md)
+    - [State_management_example](../examples/state_management_example/README.md)
     - [Ui_action_examples](../examples/ui_action_examples/README.md)
     - [Ui_actions_explorer](../examples/ui_actions_explorer/README.md)
     - [Url_generators_examples](../examples/url_generators_examples/README.md)

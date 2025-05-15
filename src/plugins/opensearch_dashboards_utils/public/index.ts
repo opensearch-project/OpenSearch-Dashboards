@@ -50,6 +50,7 @@ export * from '../common/errors';
 export * from './render_complete';
 export * from './resize_checker';
 export * from '../common/state_containers';
+export * from '../common/state_management';
 export * from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
 export {
