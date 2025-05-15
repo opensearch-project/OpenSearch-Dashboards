@@ -5,13 +5,20 @@
 
 import React from 'react';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
+import { getEditorConfig, LanguageType } from './shared';
 
-const PromptEditor = () => {
+interface PromptEditorProps {
+  languageType: LanguageType;
+}
+
+const PromptEditor: React.FC<PromptEditorProps> = ({ languageType }) => {
+  const editorConfig = getEditorConfig(languageType);
+
   return (
     <div className="promptEditor" data-test-subj="osdQueryEditor__multiLine">
       <CodeEditor
         height={32}
-        languageId={'query'}
+        languageId={editorConfig.languageId}
         value={''}
         onChange={() => {}}
         options={{
@@ -24,12 +31,9 @@ const PromptEditor = () => {
           minimap: {
             enabled: false,
           },
-          suggest: {
-            showWords: false,
-          },
           wordWrap: 'on',
           wrappingIndent: 'indent',
-          ariaLabel: 'Type your JavaScript code here',
+          ...editorConfig, // Spread the dynamic configuration
         }}
       />
     </div>
