@@ -5,20 +5,78 @@
 
 .query-panel-layout {
   margin: 4px;
-  border: 1px solid grey;
   padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #D7D9DD;
   background-color: white;
+
   display: flex;
   flex-direction: column;
   height: 100%;
+  gap: 8px;
   box-sizing: border-box;
+  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.05), 0px 1px 5px 0px rgba(0, 0, 0, 0.05);
 }
 
 .editor-area {
   flex: 1;
-  min-height: 72px;
-  padding: 8px;
-  border: 1px dashed grey;
+  padding: 0px;
   background-color: white;
-  box-sizing: border-box;
+
+  .promptEditor {
+    border: 1px solid #D6D9DD;
+
+    border-radius: 1px;
+      .monaco-editor {
+        .margin {
+          // border-radius: $euiSizeXS 0 0 0;
+          background-color: $euiFormBackgroundColor;
+          padding: 0 $euiSizeXS;
+        }
+    
+        .monaco-scrollable-element {
+          border-radius: 0 $euiSizeXS 0 0;
+        }
+            // .overflow-guard {
+            //   .monaco-scrollable-element.editor-scrollable.vs.mac {
+            //     left: 0px !important; // Forcefully override inline styles
+            //   }
+            // }
+      }
+    
+      .monaco-editor,
+      .monaco-editor-background,
+      .monaco-editor .inputarea.ime-input,
+      .monaco-editor .decorationsOverviewRuler {
+        background-color: $euiColorEmptyShade;
+      }
+  
+  }
+
+
+  .queryEditor {
+    border: $euiBorderThin;
+    padding: 8px 0px 0px 8px;;
+  
+    .monaco-editor {
+      border-radius: $euiSizeXS $euiSizeXS 0 0;
+  
+      .margin {
+        border-radius: $euiSizeXS 0 0 0;
+        background-color: $euiFormBackgroundColor;
+        padding: 0 $euiSizeXS;
+      }
+  
+      .monaco-scrollable-element {
+        border-radius: 0 $euiSizeXS 0 0;
+      }
+    }
+  
+    .monaco-editor,
+    .monaco-editor-background,
+    .monaco-editor .inputarea.ime-input,
+    .monaco-editor .decorationsOverviewRuler {
+      background-color: $euiColorEmptyShade;
+    }
+  }
 }

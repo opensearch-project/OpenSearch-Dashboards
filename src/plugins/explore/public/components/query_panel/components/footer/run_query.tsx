@@ -20,7 +20,7 @@ export const RunQueryButton: React.FC<RunQueryButtonProps> = ({ onClick, isDisab
       data-test-subj="runQueryButton"
       size="s"
     >
-      Run
+      Run query
     </EuiButton>
   );
 };

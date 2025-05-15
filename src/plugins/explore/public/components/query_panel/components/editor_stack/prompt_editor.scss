@@ -1,6 +1,8 @@
-.promptEditor {
-    border: $euiBorderThin;
-    border-radius: $euiSizeXS;
+.editor-area {
+  
+  .promptEditor {
+    border: 1px solid  #D6D9DD;
+    border-radius: 4px;
   
     &__footer {
       padding-left: $euiSizeXS;
@@ -24,6 +26,13 @@
       .monaco-scrollable-element {
         border-radius: 0 $euiSizeXS 0 0;
       }
+
+          .overflow-guard {
+            .monaco-scrollable-element.editor-scrollable.vs.mac {
+              left: 0px !important; // Forcefully override inline styles
+            }
+          }
+
     }
   
     .monaco-editor,
@@ -32,4 +41,6 @@
     .monaco-editor .decorationsOverviewRuler {
       background-color: $euiColorEmptyShade;
     }
+
   }
+}

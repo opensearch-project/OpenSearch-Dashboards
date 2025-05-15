@@ -10,13 +10,14 @@ const PromptEditor = () => {
   return (
     <div className="promptEditor" data-test-subj="osdQueryEditor__multiLine">
       <CodeEditor
-        height={40}
+        height={32}
         languageId={'query'}
         value={''}
         onChange={() => {}}
         options={{
           fixedOverflowWidgets: true,
           fontSize: 14,
+          lineHeight: 32,
           folding: false,
           lineNumbers: 'off',
           scrollBeyondLastLine: false,

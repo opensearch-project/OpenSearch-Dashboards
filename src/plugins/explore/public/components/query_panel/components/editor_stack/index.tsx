@@ -9,10 +9,10 @@ import { QueryEditor } from './query_editor';
 
 const EditorStack = () => {
   return (
-    <>
+    <div className="editor-stack">
       <PromptEditor />
       <QueryEditor />
-    </>
+    </div>
   );
 };
 
