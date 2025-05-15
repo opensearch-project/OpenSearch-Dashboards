@@ -10,25 +10,53 @@ import {
   IExpressionLoaderParams,
 } from '../../../../../../expressions/public';
 import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
-import { IndexPattern } from '../../../../../../data/public';
+import { IFieldType, IndexPattern } from '../../../../../../data/public';
 import { DiscoverViewServices } from '../../../../build_services';
-import { OsdFieldType } from '../../../../../../data/common/osd_field_types/osd_field_type';
-import { getFieldType } from '../../../../../../data/common/data_frames/utils';
+import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 
 export type DiscoverVisFieldType = 'numerical' | 'categorical' | 'date';
+
+interface DiscoverVisColumn {
+  id: number;
+  name: string;
+  schema: DiscoverVisFieldType;
+  column: string;
+}
 
 export const toExpression = async (
   services: DiscoverViewServices,
   searchContext: IExpressionLoaderParams['searchContext'],
   rows: OpenSearchSearchHit[],
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  fieldSchema: Array<Partial<IFieldType>>
 ) => {
   if (
     !indexPattern ||
     !searchContext ||
-    !JSON.stringify(searchContext.query).toLowerCase().includes('stats') // query is not aggregated
+    !JSON.stringify(searchContext.query).toLowerCase().includes('stats') // Empty visualization if query is not aggregated
   ) {
     return '';
+  }
+
+  const columns: DiscoverVisColumn[] = fieldSchema.map((field, index) => {
+    // Create a clean version of the field name
+    return {
+      id: index,
+      schema: getFieldTypeFromSchema(field.type),
+      name: field.name || '',
+      column: `field-${index}`,
+    };
+  });
+
+  const numericalColumns = columns.filter((column) => column.schema === 'numerical');
+  const categoricalColumns = columns.filter((column) => column.schema === 'categorical');
+
+  if (rows.length < 1) {
+    return ''; // no visualization
+  }
+
+  if (rows.length === 1) {
+    return ''; // metric/markdown visualization
   }
 
   const opensearchDashboards = buildExpressionFunction<ExpressionFunctionOpenSearchDashboards>(
@@ -41,7 +69,19 @@ export const toExpression = async (
     query: JSON.stringify(searchContext.query || []),
   });
 
-  const vegaSpec = createVegaSpec(rows, indexPattern);
+  let vegaSpec;
+  if (numericalColumns.length >= 1 && categoricalColumns.length === 1) {
+    // Satisfy the condition of line chart
+    vegaSpec = createVegaLineSpec(
+      rows,
+      indexPattern,
+      columns,
+      numericalColumns,
+      categoricalColumns
+    );
+  } else {
+    vegaSpec = '{}'; // Table visualization
+  }
 
   const vega = buildExpressionFunction<any>('vega', {
     spec: JSON.stringify(vegaSpec),
@@ -51,7 +91,7 @@ export const toExpression = async (
 };
 
 // TODO: map OSD_FIELD_TYPES to DiscoverVisFieldType
-const getFieldTypeFromSchema = (schema: string): DiscoverVisFieldType => {
+const getFieldTypeFromSchema = (schema?: string): DiscoverVisFieldType => {
   switch (schema) {
     case 'string':
       return 'categorical';
@@ -73,146 +113,87 @@ const getFieldTypeFromSchema = (schema: string): DiscoverVisFieldType => {
   return 'categorical';
 };
 
-const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern) => {
-  const categoricalAxes = () => {};
-  const isTimeBased = () => {};
-  const numericalAxes = () => {};
-
-  const columns = Object.keys(rows[0]._source).map((column, index) => {
-    const schema = indexPattern.fields.getByName(column);
-    if (!schema) {
-      console.log(`Column ${column} not found in index pattern`);
-      return {
-        name: column,
-        id: index,
-        type: 'string',
-      };
-    } else {
-      return {
-        name: schema.name,
-        id: index,
-        schema: getFieldTypeFromSchema(schema.type),
-      };
-    }
-    console.log('schema', schema);
-    // const isDate = indexPattern.fields.getByName(column)?.type === 'date';
-    // const isNumeric = indexPattern.fields.getByName(column)?.type === ('number' || 'double');
-    // const isString = indexPattern.fields.getByName(column)?.type === 'string';
-    // const isBoolean = indexPattern.fields.getByName(column)?.type === 'boolean';
-    return {
-      name: column,
-      id: index,
-    };
-  });
-
+const createVegaLineSpec = (
+  rows: OpenSearchSearchHit[],
+  indexPattern: IndexPattern,
+  columns: DiscoverVisColumn[],
+  numericalFields: any,
+  categoricalFields: any
+) => {
+  // Transform data to a format Vega can use
   const data = rows.map((row: OpenSearchSearchHit) => {
-    const transformedRow: Record<string, any> = {};
+    const transformedRow: Record<number, any> = {};
     for (const column of columns) {
-      transformedRow[column.name] = row._source[column.name];
+      // Make sure we're consistent with field vs name
+      const fieldName = column.name;
+      transformedRow[column.column] = row._source[fieldName];
     }
     return transformedRow;
   });
 
-  console.log('columns', columns);
-  console.log('rows', rows);
-  console.log('indexPattern', indexPattern);
+  console.log('transformed data for vega:', data);
 
-  const xAxisParam = {
-    field: 'timestamp_ms',
-    type: 'temporal',
-    axis: { format: '%b %-d, %Y', title: columns[0].name },
-    scale: {
-      padding: 10,
-      nice: true, // Round the domain to nice values
-    },
-  };
-
-  const layer = [];
-
-  const colorPalette = [
-    '#4C78A8', // blue
-    '#E45756', // red
-    '#72B7B2', // teal
-    '#F58518', // orange
-    '#54A24B', // green
-    '#B279A2', // purple
-    '#D6A5C9', // pink
-    '#9D755D', // brown
-    '#BAB0AC', // gray
-  ];
-
-  const legendLabelMap: Record<string, string> = {};
-  for (let i = 1; i < columns.length; i++) {
-    legendLabelMap[columns[i].name] = columns[i].field;
+  // Make sure we have data, categorical and numerical fields
+  if (data.length === 0 || !categoricalFields[0] || numericalFields.length < 1) {
+    console.error('Not enough data or fields for visualization');
+    return null;
   }
 
-  for (let i = 1; i < columns.length; i++) {
-    const colorIndex = (i - 1) % colorPalette.length;
-    const color = colorPalette[colorIndex];
+  const categoryField = categoricalFields[0].column;
+  const numericFields = numericalFields.map((f) => f.column);
 
-    const yAxisParam = {
-      field: columns[i].name,
-      type: 'quantitative',
-      scale: { zero: false },
-      axis: { titleColor: color, title: columns[i].name },
-    };
+  console.log('category field:', categoryField);
+  console.log('numeric field:', numericFields);
 
-    const tooltipParam = [
-      {
-        field: 'timestamp_ms',
-        type: 'temporal',
-        title: columns[0].name,
-        format: '%b %-d, %Y @ %H:%M:%S.%L',
+  // Colors for different lines
+  const colors = ['#4C78A8', '#E45756', '#72B7B2', '#F58518', '#54A24B', '#B279A2'];
+
+  // Create a layer for each numeric field
+  const layers = numericFields.map((numericField, index) => {
+    const colorIndex = index % colors.length;
+
+    return {
+      mark: {
+        type: 'line',
+        point: true,
+        tooltip: true,
+        stroke: colors[colorIndex],
       },
-      { field: columns[i].name, type: 'quantitative', title: columns[i].name },
-    ];
-
-    const markParam = {
-      type: 'line',
-      point: true,
-      strokeWidth: 2,
-      interpolate: 'monotone',
-    };
-
-    const encodingParam = {
-      x: xAxisParam,
-      y: yAxisParam,
-      tooltip: tooltipParam,
-      color: {
-        datum: columns[i].name,
-        type: 'nominal',
-        scale: {
-          domain: columns.slice(1).map((col) => col.name),
-          range: colorPalette.slice(0, columns.length - 1),
+      encoding: {
+        x: {
+          field: categoryField,
+          type: 'nominal',
+          axis: {
+            // Only first layer needs axis config
+            title: categoryField,
+            labelAngle: -45,
+          },
         },
-        legend: {
-          title: '',
-          labelExpr:
-            Object.entries(legendLabelMap)
-              .map(([key, value]) => `datum.value == '${key}' ? '${key} : ${value}'`)
-              .join(' : ') + ' : datum.label',
-          orient: 'bottom',
-          labelLimit: 999,
-          columns: Math.min(3, columns.length - 1), // Limit to 3 columns or fewer legends
-          padding: 10,
+        y: {
+          field: numericField,
+          type: 'quantitative',
+          title: numericField,
+          axis: { title: categoryField }, // Only first layer needs Y-axis
         },
+        color: {
+          datum: numericField, // Use field name for color legend
+          legend: {
+            title: null,
+          },
+        },
+        tooltip: [
+          { field: categoryField, title: categoryField },
+          { field: numericField, title: numericField },
+        ],
       },
     };
-
-    const layerParam = {
-      mark: markParam,
-      encoding: encodingParam,
-    };
-
-    layer.push(layerParam);
-  }
+  });
 
   const spec = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: data },
-    transform: [{ calculate: `datum['${columns[0].field}']`, as: 'timestamp_ms' }],
-    layer,
+    layer: layers,
     config: {
       axis: {
         labelFont: 'sans-serif',
@@ -225,7 +206,6 @@ const createVegaSpec = (rows: OpenSearchSearchHit[], indexPattern: IndexPattern)
     },
   };
 
-  console.log('vega spec REAL', spec);
-
+  console.log('vega spec REVISED:', spec);
   return spec;
 };

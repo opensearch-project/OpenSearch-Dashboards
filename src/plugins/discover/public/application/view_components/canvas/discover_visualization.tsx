@@ -15,7 +15,13 @@ import { SearchData } from '../utils';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
 import { useVisualizationType } from '../utils/use_visualization_types';
 
-export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }: SearchData) => {
+export const DiscoverVisualization = ({
+  hits,
+  bucketInterval,
+  chartData,
+  rows,
+  fieldSchema,
+}: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
     data: {
@@ -44,7 +50,7 @@ export const DiscoverVisualization = ({ hits, bucketInterval, chartData, rows }:
       if (!rows || !indexPattern) {
         return;
       }
-      const exp = await toExpression(services, searchContext, rows, indexPattern);
+      const exp = await toExpression(services, searchContext, rows, indexPattern, fieldSchema);
       console.log('expression for vis in discover', exp);
       setExpression(exp);
     }
