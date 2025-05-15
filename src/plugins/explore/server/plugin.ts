@@ -12,7 +12,6 @@ import {
 } from '../../../core/server';
 
 import { ExplorePluginSetup, ExplorePluginStart } from './types';
-import { defineRoutes } from './routes';
 
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
   private readonly logger: Logger;
@@ -23,10 +22,6 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
 
   public setup(core: CoreSetup) {
     this.logger.debug('explore: Setup');
-    const router = core.http.createRouter();
-
-    defineRoutes(router);
-
     return {};
   }
 

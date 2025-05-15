@@ -3,22 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
+import { take } from 'rxjs/operators';
 import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   DEFAULT_NAV_GROUPS,
   Plugin,
   WorkspaceAvailability,
 } from '../../../core/public';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import {
   ExplorePluginSetup,
   ExplorePluginStart,
   ExploreSetupPlugins,
   ExploreStartPlugins,
 } from './types';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { isNavGroupInFeatureConfigs } from '../../../core/public';
 
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
   public setup(core: CoreSetup, plugins: ExploreSetupPlugins): ExplorePluginSetup {
@@ -30,12 +32,24 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
       defaultPath: '#/',
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       async mount(params: AppMountParameters) {
-        // Load application bundle
-        const { renderApp } = await import('./application');
-        // Get start services as specified in opensearch_dashboards.json
         const [coreStart, depsStart] = await core.getStartServices();
-        // Render the application
+        const features = await core.workspaces.currentWorkspace$
+          .pipe(take(1))
+          .toPromise()
+          .then((workspace) => workspace?.features);
+        // We want to limit explore UI to only show up under the observability
+        // workspace. If user lands in the explore plugin URL in a different
+        // workspace, we will redirect them to classic discover.
+        if (
+          !features ||
+          !isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)
+        ) {
+          coreStart.application.navigateToApp('discover', { replace: true });
+        }
+
+        const { renderApp } = await import('./application');
         return renderApp(coreStart, depsStart as ExploreStartPlugins, params);
       },
     });
@@ -45,46 +59,6 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 200,
       },
     ]);
 
