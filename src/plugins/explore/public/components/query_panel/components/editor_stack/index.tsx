@@ -3,18 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { PromptEditor } from './prompt_editor';
 import { QueryEditor } from './query_editor';
 import { LanguageType } from './shared';
+interface EditorStackProps {
+  onPromptChange: (value: string) => void;
+  onQueryChange: (value: string) => void;
+  languageType: LanguageType;
+}
 
-const EditorStack = () => {
-  const [languageType, setLanguageType] = useState<LanguageType>('ppl'); // Default to PPL
-
+const EditorStack: React.FC<EditorStackProps> = ({
+  onPromptChange,
+  onQueryChange,
+  languageType,
+}) => {
   return (
     <div className="editor-stack">
-      <PromptEditor languageType={languageType} />
-      <QueryEditor />
+      <PromptEditor onChange={onPromptChange} languageType={languageType} />
+      <QueryEditor onChange={onQueryChange} languageType="ppl" />
     </div>
   );
 };

@@ -3,18 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-class QueryTypeDetector {
-  constructor(knownFields = []) {
-    this.knownFields = new Set(knownFields.map((f) => f.toLowerCase()));
+import { KnownFields } from './constants';
+import { LanguageType } from '../../components/editor_stack/shared';
 
-    // PPL Patterns
+export interface DetectionResult {
+  type: LanguageType;
+  confidence: number;
+  reason: string;
+  warnings: string[];
+}
+
+interface ScoreResult {
+  score: number;
+  reason: string;
+  warnings: string[];
+}
+
+export class QueryTypeDetector {
+  private knownFields: Set<string>;
+  private pplStartPatterns: RegExp[];
+  private pplPipePatterns: RegExp[];
+  private kvPatterns: RegExp[];
+  private nlStarters: RegExp[];
+
+  constructor() {
+    this.knownFields = new Set(KnownFields.map((f) => f.toLowerCase()));
+
     this.pplStartPatterns = [/^\s*source\s*=/i, /^\s*from\s+\w+/i, /^\s*search\s+index\s*=/i];
     this.pplPipePatterns = [/\|\s*(where|filter|fields|sort|limit|stats|rename|eval)\b/i];
-
-    // KV Patterns
     this.kvPatterns = [/(\w+)\s*=\s*("[^"]+"|'[^']+'|\S+)/g, /\b(and|or)\b/i];
-
-    // Natural Language Patterns
     this.nlStarters = [
       /^\s*(show|list|get|find|search|display|give|retrieve|fetch|tell)\b/i,
       /^\s*(what|how|when|where|why|which|who)\b/i,
@@ -22,27 +39,28 @@ class QueryTypeDetector {
     ];
   }
 
-  detect(query) {
+  detect(query: string): DetectionResult {
     const trimmedQuery = query.trim();
-    if (!trimmedQuery)
+    if (!trimmedQuery) {
       return {
-        type: 'unknown',
+        type: 'ppl',
         confidence: 0,
         reason: 'Empty query',
         warnings: ['No input provided'],
       };
+    }
 
-    const scores = {
+    const scores: Record<'ppl' | 'kv' | 'nl', ScoreResult> = {
       ppl: this._checkPpl(trimmedQuery),
       kv: this._checkKeyValue(trimmedQuery),
       nl: this._checkNaturalLanguage(trimmedQuery),
     };
 
-    const types = Object.keys(scores);
-    const sorted = types.sort((a, b) => scores[b].score - scores[a].score);
+    const sorted = (Object.keys(scores) as Array<keyof typeof scores>).sort(
+      (a, b) => scores[b].score - scores[a].score
+    );
     const best = sorted[0];
-
-    const fallback = scores[best].score < 0.4 ? 'natural_language' : best;
+    const fallback = scores[best].score < 0.4 ? 'nl' : best;
 
     return {
       type: fallback,
@@ -52,10 +70,10 @@ class QueryTypeDetector {
     };
   }
 
-  _checkPpl(query) {
+  private _checkPpl(query: string): ScoreResult {
     let score = 0;
-    const reasons = [];
-    const warnings = [];
+    const reasons: string[] = [];
+    const warnings: string[] = [];
 
     if (this.pplStartPatterns.some((p) => p.test(query))) {
       score += 0.5;
@@ -79,10 +97,10 @@ class QueryTypeDetector {
     return { score, reason: reasons.join('; '), warnings };
   }
 
-  _checkKeyValue(query) {
+  private _checkKeyValue(query: string): ScoreResult {
     let score = 0;
-    const reasons = [];
-    const warnings = [];
+    const reasons: string[] = [];
+    const warnings: string[] = [];
 
     const kvMatches = [...query.matchAll(this.kvPatterns[0])];
     const booleanOps = this.kvPatterns[1].test(query);
@@ -91,10 +109,11 @@ class QueryTypeDetector {
       score += 0.3 + (kvMatches.length - 1) * 0.1;
       reasons.push(`Found ${kvMatches.length} key=value pairs`);
 
-      // Check against known fields
-      const knownMatches = kvMatches.filter(([full, key]) =>
-        this.knownFields.has(key.toLowerCase())
-      );
+      const knownMatches = kvMatches.filter((match) => {
+        const key = match[1];
+        return this.knownFields.has(key.toLowerCase());
+      });
+
       if (knownMatches.length > 0) {
         score += 0.1;
         reasons.push('Matched known field(s): ' + knownMatches.map((m) => m[1]).join(', '));
@@ -114,10 +133,10 @@ class QueryTypeDetector {
     return { score, reason: reasons.join('; '), warnings };
   }
 
-  _checkNaturalLanguage(query) {
+  private _checkNaturalLanguage(query: string): ScoreResult {
     let score = 0;
-    const reasons = [];
-    const warnings = [];
+    const reasons: string[] = [];
+    const warnings: string[] = [];
 
     if (this.nlStarters.some((p) => p.test(query))) {
       score += 0.4;

@@ -9,9 +9,12 @@ import { getEditorConfig, LanguageType } from './shared';
 
 interface PromptEditorProps {
   languageType: LanguageType;
+  // value: string;
+  onChange: (value: string) => void;
+  // editorDidMount: (editor: any) => void;
 }
 
-const PromptEditor: React.FC<PromptEditorProps> = ({ languageType }) => {
+const PromptEditor: React.FC<PromptEditorProps> = ({ languageType, onChange }) => {
   const editorConfig = getEditorConfig(languageType);
 
   return (
@@ -20,7 +23,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({ languageType }) => {
         height={32}
         languageId={editorConfig.languageId}
         value={''}
-        onChange={() => {}}
+        onChange={onChange}
         options={{
           fixedOverflowWidgets: true,
           fontSize: 14,
