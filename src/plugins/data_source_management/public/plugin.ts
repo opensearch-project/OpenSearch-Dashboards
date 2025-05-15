@@ -107,16 +107,18 @@ export class DataSourceManagementPlugin
       DataSourceManagementPluginStart,
       DataSourceManagementSetupDependencies
     > {
-  private started = false;
-  private authMethodsRegistry = new AuthenticationMethodRegistry();
-  private dataSourceSelection = new DataSourceSelectionService();
+  private started: boolean = false;
+  private authMethodsRegistry: IAuthenticationMethodRegistry = new AuthenticationMethodRegistry();
+  private dataSourceSelection: DataSourceSelectionService = new DataSourceSelectionService();
   private featureFlagStatus: boolean = false;
   private bannerId: string | null = null; // To store the banner ID for unmounting
+  private currentAppId: string | undefined = undefined; // To store the current appId
+  private currentDashboardId: string | undefined = undefined; // To store the current dashboardId
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
     { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
-  ) {
+  ): DataSourceManagementPluginSetup {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
     const uiSettings = core.uiSettings;
     setUiSettings(uiSettings);
@@ -138,7 +140,7 @@ export class DataSourceManagementPlugin
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
       order: 1,
-      mount: async (params) => {
+      mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
 
         return mountManagementSection(
@@ -188,7 +190,7 @@ export class DataSourceManagementPlugin
 
     // when the feature flag is disabled, we don't need to register any of the mds components
     if (!this.featureFlagStatus) {
-      return undefined;
+      return undefined as any;
     }
 
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
@@ -220,14 +222,15 @@ export class DataSourceManagementPlugin
       dataSourceSelection: this.dataSourceSelection,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource!),
-        getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
+        getDataSourceMenu: <T>(): React.ComponentType<DataSourceMenuProps<T>> =>
+          createDataSourceMenu<T>(),
       },
       getDefaultDataSourceId,
       getDefaultDataSourceId$,
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): DataSourceManagementPluginStart {
     this.started = true;
     setApplication(core.application);
     core.http.intercept({
@@ -243,7 +246,7 @@ export class DataSourceManagementPlugin
       const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           React.createElement(AccelerationDetailsFlyout, {
-            featureFlagStatus: this.featureFlagStatus, // Use the stored featureFlagStatus
+            featureFlagStatus: this.featureFlagStatus,
             acceleration,
             dataSourceName,
             resetFlyout: () => accelerationDetailsFlyout.close(),
@@ -307,20 +310,62 @@ export class DataSourceManagementPlugin
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
     // Mount the DashboardDirectQuerySync component as a banner
-    core.application.currentAppId$.subscribe((appId) => {
-      // Show the banner only in the Dashboard application
+    core.application.currentAppId$.subscribe((appId: string | undefined) => {
+      // Store the current appId
+      this.currentAppId = appId;
+
+      // Show the banner only in the Dashboard application on the view route
       if (appId === 'dashboards') {
-        if (!this.bannerId) {
-          // Mount the banner if it hasn't been mounted yet
-          this.bannerId = core.overlays.banners.add(
-            toMountPoint(React.createElement(DashboardDirectQuerySync))
-          );
+        const hash = window.location.hash;
+        // Check if the current route is a dashboard view (e.g., /app/dashboards#/view/[dashboard-id])
+        const isDashboardViewMatch = hash.match(/#\/view\/([^\/?]+)(\?.*)?$/); // Matches /app/dashboards#/view/[dashboard-id]
+        if (isDashboardViewMatch && isDashboardViewMatch[1]) {
+          // Extract the dashboard ID (e.g., "logs-waf-dashboard")
+          this.currentDashboardId = isDashboardViewMatch[1];
+          console.log('Current Dashboard ID:', this.currentDashboardId); // Log the dashboard ID for verification
+
+          if (!this.bannerId) {
+            // Mount the banner if it hasn't been mounted yet
+            this.bannerId = core.overlays.banners.add(
+              toMountPoint(React.createElement(DashboardDirectQuerySync))
+            );
+          }
+        } else if (!isDashboardViewMatch && this.bannerId) {
+          // Remove the banner if we're not on a dashboard view page
+          core.overlays.banners.remove(this.bannerId);
+          this.bannerId = null;
+          this.currentDashboardId = undefined; // Clear the dashboard ID
         }
       } else {
         // Remove the banner when not in the Dashboard application
         if (this.bannerId) {
           core.overlays.banners.remove(this.bannerId);
           this.bannerId = null;
+          this.currentDashboardId = undefined; // Clear the dashboard ID
+        }
+      }
+    });
+
+    // Listen for hash changes to handle in-app navigation
+    window.addEventListener('hashchange', () => {
+      const appId = this.currentAppId;
+      const hash = window.location.hash;
+      const isDashboardViewMatch = hash.match(/#\/view\/([^\/?]+)(\?.*)?$/);
+      if (appId === 'dashboards') {
+        if (isDashboardViewMatch && isDashboardViewMatch[1]) {
+          // Extract the dashboard ID (e.g., "logs-waf-dashboard")
+          this.currentDashboardId = isDashboardViewMatch[1];
+          console.log('Current Dashboard ID (hashchange):', this.currentDashboardId); // Log the dashboard ID for verification
+
+          if (!this.bannerId) {
+            this.bannerId = core.overlays.banners.add(
+              toMountPoint(React.createElement(DashboardDirectQuerySync))
+            );
+          }
+        } else if (!isDashboardViewMatch && this.bannerId) {
+          core.overlays.banners.remove(this.bannerId);
+          this.bannerId = null;
+          this.currentDashboardId = undefined; // Clear the dashboard ID
         }
       }
     });
@@ -335,6 +380,7 @@ export class DataSourceManagementPlugin
     if (this.bannerId) {
       // Note: We don't have access to core.overlays here, so we rely on the subscription cleanup
       this.bannerId = null;
+      this.currentDashboardId = undefined; // Clear the dashboard ID
     }
   }
 }

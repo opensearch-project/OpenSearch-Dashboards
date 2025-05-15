@@ -4,15 +4,14 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
 export const DashboardDirectQuerySync: React.FC = () => {
   return (
-    <EuiPanel paddingSize="s">
-      <EuiTitle size="xxs">
-        <h3>Direct Query Data Source Synchronization</h3>
-      </EuiTitle>
-      <EuiText size="s">Placeholder for Direct Query Sync Component</EuiText>
-    </EuiPanel>
+    <EuiText size="m">
+      Data scheduled to sync every x mins. Last sync: 3 minutes ago. Synchronize Now
+    </EuiText>
   );
 };
+
+// https://ed-logs-application-df543b56-fnk44ziwj1bj9ut9rxs9.us-west-2.opensearch.amazonaws.com/w/z5pMl4/app/dashboards?locale=en&themeTag=v9light#/view/fbda9d1f-baf5-487e-8a13-beb9c185710e?embed=true&_g=(time:(from:'2025-05-14T20:58:43.558Z',to:now))
