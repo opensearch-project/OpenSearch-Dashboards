@@ -12,10 +12,11 @@ import { render } from '@testing-library/react';
 import { DataSourceComponentType } from './types';
 import * as utils from '../utils';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
+import { mockManagementPlugin } from '../../mocks';
 
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-
+  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
@@ -26,6 +27,9 @@ describe('DataSourceMenu', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    mockedContext.workspaces.currentWorkspaceId$.getValue = jest
+      .fn()
+      .mockReturnValue('mock-workspace-id');
   });
 
   it('should render data source selectable only with local cluster not hidden', () => {

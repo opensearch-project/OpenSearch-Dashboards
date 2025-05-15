@@ -485,7 +485,7 @@ export const mockErrorResponseForSavedObjectsCalls = (
 
 export const mockUiSettingsCalls = (
   uiSettings: IUiSettingsClient,
-  uiSettingsMethodName: 'get' | 'set' | 'get$',
+  uiSettingsMethodName: 'get' | 'set' | 'get$' | 'getUserProvidedWithScope',
   response: any
 ) => {
   (uiSettings[uiSettingsMethodName] as jest.Mock).mockReturnValue(response);
