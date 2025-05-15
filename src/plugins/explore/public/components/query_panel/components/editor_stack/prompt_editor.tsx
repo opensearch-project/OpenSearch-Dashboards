@@ -29,6 +29,7 @@ const PromptEditor = () => {
           },
           wordWrap: 'on',
           wrappingIndent: 'indent',
+          ariaLabel: 'Type your JavaScript code here',
         }}
       />
     </div>
