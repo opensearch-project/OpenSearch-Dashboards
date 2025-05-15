@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type LanguageType = 'natural-language' | 'key-value' | 'ppl';
+export type LanguageType = 'nl' | 'kv' | 'ppl';
 
 export const getEditorConfig = (languageType: LanguageType) => {
   switch (languageType) {
-    case 'natural-language':
+    case 'nl':
       return {
         languageId: 'natural-language',
         ariaLabel: 'Type your natural language query here',
@@ -15,7 +15,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
           showWords: true,
         },
       };
-    case 'key-value':
+    case 'kv':
       return {
         languageId: 'ppl',
         ariaLabel: 'Type your key-value query here',
