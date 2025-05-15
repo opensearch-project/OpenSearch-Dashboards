@@ -15,6 +15,8 @@ import {
   MountPoint,
   Plugin,
 } from '../../../core/public';
+import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import { DashboardDirectQuerySync } from './components/direct_query_data_sources_components/direct_query_sync/direct_query_sync';
 
 import { PLUGIN_NAME } from '../common';
 import { createDataSourceSelector } from './components/data_source_selector/create_data_source_selector';
@@ -42,7 +44,6 @@ import {
 import { DataSourceSelectionService } from './service/data_source_selection_service';
 import { catalogRequestIntercept } from '../framework/catalog_cache/cache_intercept';
 import { createGetterSetter } from '../../../../src/plugins/opensearch_dashboards_utils/public';
-import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   RenderAccelerationDetailsFlyoutParams,
   RenderAccelerationFlyoutParams,
@@ -110,6 +111,8 @@ export class DataSourceManagementPlugin
   private authMethodsRegistry = new AuthenticationMethodRegistry();
   private dataSourceSelection = new DataSourceSelectionService();
   private featureFlagStatus: boolean = false;
+  private bannerId: string | null = null; // To store the banner ID for unmounting
+
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
     { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
@@ -303,10 +306,35 @@ export class DataSourceManagementPlugin
     };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
+    // Mount the DashboardDirectQuerySync component as a banner
+    core.application.currentAppId$.subscribe((appId) => {
+      // Show the banner only in the Dashboard application
+      if (appId === 'dashboards') {
+        if (!this.bannerId) {
+          // Mount the banner if it hasn't been mounted yet
+          this.bannerId = core.overlays.banners.add(
+            toMountPoint(React.createElement(DashboardDirectQuerySync))
+          );
+        }
+      } else {
+        // Remove the banner when not in the Dashboard application
+        if (this.bannerId) {
+          core.overlays.banners.remove(this.bannerId);
+          this.bannerId = null;
+        }
+      }
+    });
+
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
     };
   }
 
-  public stop() {}
+  public stop() {
+    // Clean up the banner on plugin stop
+    if (this.bannerId) {
+      // Note: We don't have access to core.overlays here, so we rely on the subscription cleanup
+      this.bannerId = null;
+    }
+  }
 }
