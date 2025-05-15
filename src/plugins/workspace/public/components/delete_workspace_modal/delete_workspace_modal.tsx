@@ -17,9 +17,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCommentList,
-  EuiCommentProps,
-  EuiBadge,
 } from '@elastic/eui';
 import { CoreStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
@@ -28,6 +25,7 @@ import {
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
+import { DeleteDetailsModal } from './delete_details_modal';
 
 export interface DeleteWorkspaceModalProps {
   onClose: () => void;
@@ -48,34 +46,6 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   const {
     services: { notifications, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
-  let updateMessages: EuiCommentProps[] = [
-    {
-      username: 'Delete Process',
-      event: 'started to delete workspaces',
-      type: 'update',
-      timelineIcon: 'trash',
-    },
-  ];
-
-  const showDeleteDetails = (messages: EuiCommentProps[]) => {
-    const modal = openModal(
-      <EuiModal style={{ width: 800, minHeight: 400 }} onClose={() => modal.close()}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>Delete workspace details</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiCommentList comments={messages} />
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiSmallButton fill color="primary" onClick={() => modal.close()}>
-                Close
-              </EuiSmallButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalBody>
-      </EuiModal>
-    );
-  };
 
   const deleteWorkspaces = async () => {
     setDeleting(true);
@@ -100,39 +70,6 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
         return onClose();
       }
 
-      const newMessages: EuiCommentProps[] = [];
-
-      for (const selectedWorkspace of selectedWorkspaces) {
-        const isFailed = failedWorksapces.some(
-          (failedWorkspace) => failedWorkspace.id === selectedWorkspace.id
-        );
-
-        newMessages.push({
-          username: 'Delete process',
-          event: (
-            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText>started to delete workspace</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={isFailed ? 'danger' : 'success'}>
-                  {isFailed ? 'fail' : 'success'}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          type: isFailed ? 'regular' : 'update',
-          children: (
-            <EuiText size="s">
-              <p>{selectedWorkspace.name} </p>
-            </EuiText>
-          ),
-          timelineIcon: isFailed ? 'cross' : 'check',
-        });
-      }
-
-      updateMessages = [...updateMessages, ...newMessages];
-
       if (result?.fail === 0) {
         notifications?.toasts.addSuccess({
           title: i18n.translate('workspace.delete.success', {
@@ -145,7 +82,12 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
             <>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiSmallButton color="success" onClick={() => showDeleteDetails(updateMessages)}>
+                  <EuiSmallButton
+                    color="success"
+                    onClick={() =>
+                      DeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
+                    }
+                  >
                     View Delete Details
                   </EuiSmallButton>
                 </EuiFlexItem>
@@ -172,7 +114,12 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
               </div>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiSmallButton color="danger" onClick={() => showDeleteDetails(updateMessages)}>
+                  <EuiSmallButton
+                    color="danger"
+                    onClick={() =>
+                      DeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
+                    }
+                  >
                     View Delete Details
                   </EuiSmallButton>
                 </EuiFlexItem>
@@ -198,7 +145,12 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
               </div>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiSmallButton color="warning" onClick={() => showDeleteDetails(updateMessages)}>
+                  <EuiSmallButton
+                    color="warning"
+                    onClick={() =>
+                      DeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
+                    }
+                  >
                     View Delete Details
                   </EuiSmallButton>
                 </EuiFlexItem>
