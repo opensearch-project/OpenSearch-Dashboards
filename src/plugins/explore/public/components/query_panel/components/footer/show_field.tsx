@@ -22,7 +22,7 @@ export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onT
 
   return (
     <EuiSwitch
-      label="Show Fields"
+      label="Hide Fields"
       checked={isChecked}
       onChange={(e) => handleToggle(e)}
       data-test-subj="showFieldsToggle"
