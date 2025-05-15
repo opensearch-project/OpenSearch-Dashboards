@@ -74,7 +74,9 @@ function getProps(
       getEmbeddableFactory: start.getEmbeddableFactory,
     } as any,
     chrome: {} as any,
-    notifications: {} as any,
+    notifications: {
+      toasts: { addDanger: jest.fn(), addSuccess: jest.fn(), addWarning: jest.fn() },
+    } as any,
     overlays: {} as any,
     inspector: {
       isAvailable: jest.fn(),
@@ -106,6 +108,19 @@ function getProps(
     container: dashboardContainer,
     logos: options.chrome.logos,
     PanelComponent: () => <div />,
+    savedObjectsClient: {
+      get: jest.fn().mockResolvedValue({
+        attributes: { title: 'test-pattern' },
+        references: [],
+      }),
+      find: jest.fn(),
+    } as any,
+    http: { get: jest.fn() } as any,
+    notifications: options.notifications,
+    startLoading: jest.fn(),
+    loadStatus: 'fresh',
+    pollingResult: {},
+    isDirectQuerySyncEnabled: false,
   };
 
   return {

@@ -53,7 +53,7 @@ import { UiActionsStart } from '../../../../ui_actions/public';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
-import { DashboardViewport } from './viewport/dashboard_viewport';
+import { DashboardViewportWithQuery } from './viewport/dashboard_viewport';
 import {
   OpenSearchDashboardsContextProvider,
   OpenSearchDashboardsReactContext,
@@ -61,6 +61,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import { DashboardFeatureFlagConfig } from '../../plugin';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -104,6 +105,9 @@ export interface DashboardContainerOptions {
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
   uiActions: UiActionsStart;
+  savedObjectsClient: CoreStart['savedObjects']['client'];
+  http: CoreStart['http'];
+  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
 }
 
 export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<
@@ -238,12 +242,18 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <OpenSearchDashboardsContextProvider services={this.options}>
-          <DashboardViewport
+          <DashboardViewportWithQuery
             key={this.id}
             renderEmpty={this.renderEmpty}
             logos={this.logos}
             container={this}
             PanelComponent={this.embeddablePanel}
+            savedObjectsClient={this.options.savedObjectsClient}
+            http={this.options.http}
+            notifications={this.options.notifications}
+            isDirectQuerySyncEnabled={
+              this.options.dashboardFeatureFlagConfig.directQueryConnectionSync
+            }
           />
         </OpenSearchDashboardsContextProvider>
       </I18nProvider>,

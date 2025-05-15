@@ -201,7 +201,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       setIsFirstTimeLoading(false);
     } else if (
       status === DirectQueryLoadingStatus.FAILED ||
-      status === DirectQueryLoadingStatus.CANCELED
+      status === DirectQueryLoadingStatus.CANCELLED
     ) {
       setDatabasesLoadFailed(true);
       setIsFirstTimeLoading(false);
@@ -298,7 +298,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         setCachedTables(databaseCache.tables);
       } else if (
         tablesStatus === DirectQueryLoadingStatus.FAILED ||
-        tablesStatus === DirectQueryLoadingStatus.CANCELED
+        tablesStatus === DirectQueryLoadingStatus.CANCELLED
       ) {
         setAssociatedObjectsLoadFailed(true);
         setIsRefreshing(false);
@@ -308,7 +308,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         setCachedAccelerations(accelerationsCache.accelerations);
       } else if (
         accelerationsStatus === DirectQueryLoadingStatus.FAILED ||
-        accelerationsStatus === DirectQueryLoadingStatus.CANCELED
+        accelerationsStatus === DirectQueryLoadingStatus.CANCELLED
       ) {
         setAssociatedObjectsLoadFailed(true);
         setIsRefreshing(false);

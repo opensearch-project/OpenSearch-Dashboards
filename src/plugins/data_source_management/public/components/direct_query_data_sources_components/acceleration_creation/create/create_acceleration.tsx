@@ -208,7 +208,7 @@ export const CreateAcceleration = ({
       setTableFieldsLoading(false);
     } else if (
       status === DirectQueryLoadingStatus.FAILED ||
-      status === DirectQueryLoadingStatus.CANCELED
+      status === DirectQueryLoadingStatus.CANCELLED
     ) {
       setTableFieldsLoading(false);
     }

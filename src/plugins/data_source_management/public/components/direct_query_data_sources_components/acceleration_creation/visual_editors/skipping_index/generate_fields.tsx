@@ -77,7 +77,7 @@ export const GenerateFields = ({
       setIsSkippingtableLoading(false);
     } else if (
       status === DirectQueryLoadingStatus.FAILED ||
-      status === DirectQueryLoadingStatus.CANCELED
+      status === DirectQueryLoadingStatus.CANCELLED
     ) {
       setIsSkippingtableLoading(false);
     }

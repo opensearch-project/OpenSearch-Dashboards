@@ -39,6 +39,12 @@ import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
+import type { SavedObjectsClientContract } from 'src/core/public';
+import { HttpStart, NotificationsStart } from 'src/core/public';
+import {
+  DirectQueryLoadingStatus,
+  DirectQueryRequest,
+} from '../../../../../data_source_management/public';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -46,6 +52,13 @@ import { DashboardPanelState } from '../types';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
+import {
+  extractIndexInfoFromDashboard,
+  generateRefreshQuery,
+  EMR_STATES,
+} from '../../utils/direct_query_sync/direct_query_sync';
+import { DashboardDirectQuerySync } from './dashboard_direct_query_sync';
+import { isDirectQuerySyncEnabledByUrl } from '../../utils/direct_query_sync/direct_query_sync_url_flag';
 
 let lastValidGridSize = 0;
 
@@ -99,9 +112,9 @@ function ResponsiveGrid({
       width={lastValidGridSize}
       className={classes}
       isDraggable={true}
-      isResizable={true}
       // There is a bug with d3 + firefox + elements using transforms.
       // See https://github.com/elastic/kibana/issues/16870 for more context.
+      isResizable={true}
       useCSSTransforms={false}
       margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
@@ -127,6 +140,15 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   opensearchDashboards: DashboardReactContextValue;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
   container: DashboardContainer;
+  savedObjectsClient: SavedObjectsClientContract;
+  http: HttpStart;
+  notifications: NotificationsStart;
+  startLoading: (payload: DirectQueryRequest) => void;
+  loadStatus: DirectQueryLoadingStatus;
+  pollingResult: any;
+  isDirectQuerySyncEnabled: boolean;
+  queryLang?: string;
+  setMdsId?: (mdsId?: string) => void;
 }
 
 interface State {
@@ -137,6 +159,9 @@ interface State {
   viewMode: ViewMode;
   useMargins: boolean;
   expandedPanelId?: string;
+  panelMetadata: Array<{ panelId: string; savedObjectId: string; type: string }>;
+  extractedProps: { lastRefreshTime?: number; refreshInterval?: number } | null;
+  prevStatus?: string;
 }
 
 interface PanelLayout extends Layout {
@@ -150,6 +175,10 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   // item.
   private gridItems = {} as { [key: string]: HTMLDivElement | null };
 
+  private extractedDatasource?: string | null;
+  private extractedDatabase?: string | null;
+  private extractedIndex?: string | null;
+
   constructor(props: DashboardGridProps) {
     super(props);
 
@@ -161,7 +190,25 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       viewMode: this.props.container.getInput().viewMode,
       useMargins: this.props.container.getInput().useMargins,
       expandedPanelId: this.props.container.getInput().expandedPanelId,
+      panelMetadata: [],
+      extractedProps: null,
     };
+  }
+
+  private isDirectQuerySyncEnabled(): boolean {
+    const urlOverride = isDirectQuerySyncEnabledByUrl();
+    return urlOverride !== undefined ? urlOverride : this.props.isDirectQuerySyncEnabled;
+  }
+
+  /**
+   * Determines the query language to use for direct query sync.
+   * Returns the provided queryLang if specified; otherwise, defaults to 'sql' if the feature is enabled.
+   */
+  private getQueryLanguage(): string {
+    if (this.props.queryLang) {
+      return this.props.queryLang;
+    }
+    return this.isDirectQuerySyncEnabled() ? 'sql' : '';
   }
 
   public componentDidMount() {
@@ -198,8 +245,16 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             useMargins: input.useMargins,
             expandedPanelId: input.expandedPanelId,
           });
+
+          if (this.isDirectQuerySyncEnabled()) {
+            this.collectAllPanelMetadata();
+          }
         }
       });
+
+    if (this.isDirectQuerySyncEnabled()) {
+      this.collectAllPanelMetadata();
+    }
   }
 
   public componentWillUnmount() {
@@ -244,6 +299,67 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     if (this.state.focusedPanelIndex === blurredPanelIndex) {
       this.setState({ focusedPanelIndex: undefined });
     }
+  };
+
+  /**
+   * Validates if the extracted datasource, database, and index are present and valid.
+   * Returns true if all values are non-null, false otherwise.
+   */
+  private areDataSourceParamsValid(): boolean {
+    const { extractedDatasource, extractedDatabase, extractedIndex } = this;
+    return !!extractedDatasource && !!extractedDatabase && !!extractedIndex;
+  }
+
+  /**
+   * Collects metadata (panelId, savedObjectId, type) for all panels in the dashboard.
+   * Runs on mount and when the container input (panels) changes.
+   */
+  private async collectAllPanelMetadata() {
+    if (!this.isDirectQuerySyncEnabled()) return;
+
+    const indexInfo = await extractIndexInfoFromDashboard(
+      this.state.panels,
+      this.props.savedObjectsClient,
+      this.props.http
+    );
+
+    if (indexInfo) {
+      this.extractedDatasource = indexInfo.parts.datasource;
+      this.extractedDatabase = indexInfo.parts.database;
+      this.extractedIndex = indexInfo.parts.index;
+      this.setState({ extractedProps: indexInfo.mapping });
+      if (this.props.setMdsId) {
+        this.props.setMdsId(indexInfo.mdsId);
+      }
+    } else {
+      this.setState({ extractedProps: null });
+      if (this.props.setMdsId) {
+        this.props.setMdsId(undefined);
+      }
+    }
+  }
+
+  /**
+   * Initiates a direct query sync to refresh the dashboard data.
+   * Uses the extracted datasource, database, and index to construct a refresh query,
+   * and triggers the sync process if direct query sync is enabled.
+   */
+  private synchronizeNow = () => {
+    if (!this.isDirectQuerySyncEnabled() || !this.areDataSourceParamsValid()) return;
+
+    const { extractedDatasource, extractedDatabase, extractedIndex } = this;
+
+    const query = generateRefreshQuery({
+      datasource: extractedDatasource!,
+      database: extractedDatabase!,
+      index: extractedIndex!,
+    });
+
+    this.props.startLoading({
+      query,
+      lang: this.getQueryLanguage(),
+      datasource: extractedDatasource!,
+    });
   };
 
   public renderPanels() {
@@ -299,17 +415,45 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
     const { viewMode } = this.state;
     const isViewMode = viewMode === ViewMode.VIEW;
-    return (
-      <ResponsiveSizedGrid
-        isViewMode={isViewMode}
-        layout={this.buildLayoutFromPanels()}
-        onLayoutChange={this.onLayoutChange}
-        maximizedPanelId={this.state.expandedPanelId!}
-        useMargins={this.state.useMargins}
-      >
-        {this.renderPanels()}
-      </ResponsiveSizedGrid>
-    );
+    const emrState = EMR_STATES.get(this.props.loadStatus as string);
+
+    if (
+      emrState?.terminal &&
+      this.props.loadStatus !== DirectQueryLoadingStatus.FRESH &&
+      this.props.loadStatus !== DirectQueryLoadingStatus.FAILED &&
+      this.props.loadStatus !== DirectQueryLoadingStatus.CANCELLED
+    ) {
+      window.location.reload();
+    }
+
+    return (() => {
+      const directQuerySyncEnabled = this.isDirectQuerySyncEnabled();
+      const metadataAvailable = this.state.extractedProps !== null;
+      const shouldRenderSyncUI = directQuerySyncEnabled && metadataAvailable;
+
+      return (
+        <>
+          {shouldRenderSyncUI && (
+            <DashboardDirectQuerySync
+              loadStatus={this.props.loadStatus}
+              lastRefreshTime={this.state.extractedProps?.lastRefreshTime}
+              refreshInterval={this.state.extractedProps?.refreshInterval}
+              onSynchronize={this.synchronizeNow}
+            />
+          )}
+
+          <ResponsiveSizedGrid
+            isViewMode={isViewMode}
+            layout={this.buildLayoutFromPanels()}
+            onLayoutChange={this.onLayoutChange}
+            maximizedPanelId={this.state.expandedPanelId!}
+            useMargins={this.state.useMargins}
+          >
+            {this.renderPanels()}
+          </ResponsiveSizedGrid>
+        </>
+      );
+    })();
   }
 }
 

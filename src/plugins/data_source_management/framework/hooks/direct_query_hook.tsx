@@ -19,7 +19,7 @@ export const useDirectQuery = (
 ) => {
   const sqlService = new SQLService(http);
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
-    DirectQueryLoadingStatus.SCHEDULED
+    DirectQueryLoadingStatus.FRESH
   );
 
   const {

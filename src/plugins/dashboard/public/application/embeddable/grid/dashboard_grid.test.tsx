@@ -42,12 +42,40 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../../../../embeddable/public/lib/test_samples';
 import { embeddablePluginMock } from '../../../../../embeddable/public/mocks';
+import { createDashboardServicesMock } from '../../utils/mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
+import { DashboardDirectQuerySyncProps } from './dashboard_direct_query_sync';
+import {
+  extractIndexInfoFromDashboard,
+  generateRefreshQuery,
+} from '../../utils/direct_query_sync/direct_query_sync';
+
+jest.mock('../../utils/direct_query_sync/direct_query_sync', () => {
+  const actual = jest.requireActual('../../utils/direct_query_sync/direct_query_sync');
+  return {
+    ...actual,
+    extractIndexInfoFromDashboard: jest.fn(),
+    generateRefreshQuery: jest.fn(),
+    EMR_STATES: new Map([
+      ['submitted', { ord: 0, terminal: false }],
+      ['queued', { ord: 10, terminal: false }],
+      ['pending', { ord: 20, terminal: false }],
+      ['scheduled', { ord: 30, terminal: false }],
+      ['running', { ord: 70, terminal: false }],
+      ['cancelling', { ord: 90, terminal: false }],
+      ['success', { ord: 100, terminal: true }],
+      ['failed', { ord: 100, terminal: true }],
+      ['cancelled', { ord: 100, terminal: true }],
+      ['fresh', { ord: 100, terminal: true }],
+    ]),
+  };
+});
 
 let dashboardContainer: DashboardContainer | undefined;
 
 function prepare(props?: Partial<DashboardGridProps>) {
   const { setup, doStart } = embeddablePluginMock.createInstance();
+
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
     new ContactCardEmbeddableFactory((() => null) as any, {} as any)
@@ -60,15 +88,41 @@ function prepare(props?: Partial<DashboardGridProps>) {
       '1': {
         gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
         type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '1' },
+        explicitInput: { id: '1', savedObjectId: 'vis-1' },
       },
       '2': {
         gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
         type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '2' },
+        explicitInput: { id: '2', savedObjectId: 'vis-2' },
       },
     },
   });
+
+  const services = createDashboardServicesMock();
+
+  // Mock savedObjectsClient.get to handle both visualization and index-pattern types
+  jest.spyOn(services.savedObjectsClient, 'get').mockImplementation((type: string, id: string) => {
+    if (!type || !id) throw new Error('requires type and id');
+
+    if (type === 'visualization' || type === CONTACT_CARD_EMBEDDABLE) {
+      return Promise.resolve({
+        id,
+        attributes: {},
+        references: [{ type: 'index-pattern', id: 'index-pattern-1' }],
+      });
+    }
+
+    if (type === 'index-pattern') {
+      return Promise.resolve({
+        id,
+        attributes: {},
+        references: [{ type: 'data-source', id: 'ds-id' }],
+      });
+    }
+
+    throw new Error(`Unknown saved object type: ${type}`);
+  });
+
   const options: DashboardContainerOptions = {
     application: {} as any,
     embeddable: {
@@ -89,12 +143,23 @@ function prepare(props?: Partial<DashboardGridProps>) {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
   };
+
   dashboardContainer = new DashboardContainer(initialInput, options);
+
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
     PanelComponent: () => <div />,
-    opensearchDashboards: null as any,
+    opensearchDashboards: {
+      services,
+    },
     intl: null as any,
+    savedObjectsClient: services.savedObjectsClient,
+    http: services.http,
+    notifications: services.notifications,
+    startLoading: jest.fn(),
+    loadStatus: 'fresh',
+    pollingResult: {},
+    isDirectQuerySyncEnabled: false,
   };
 
   return {
@@ -198,4 +263,348 @@ test('DashboardGrid unmount unsubscribes', (done) => {
     });
 
   props.container.updateInput({ expandedPanelId: '1' });
+});
+
+test('renders sync UI when feature flag is enabled and metadata is present', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
+
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: 'db', index: 'idx' },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  // Wait for async metadata collection
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  expect(component.find('DashboardDirectQuerySync').exists()).toBe(true);
+});
+
+test('does not render sync UI when feature flag is off', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: false });
+
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: 'db', index: 'idx' },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  expect(component.find('DashboardDirectQuerySync').exists()).toBe(false);
+});
+
+test('synchronizeNow triggers REFRESH query generation and startLoading', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
+
+  const mockRefreshQuery = 'REFRESH MATERIALIZED VIEW ds.db.idx';
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: 'db', index: 'idx' },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  (generateRefreshQuery as jest.Mock).mockReturnValue(mockRefreshQuery);
+
+  const startLoadingSpy = jest.fn();
+  props.startLoading = startLoadingSpy;
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  (component
+    .find('DashboardDirectQuerySync')
+    .props() as DashboardDirectQuerySyncProps).onSynchronize();
+
+  expect(startLoadingSpy).toHaveBeenCalledWith({
+    query: mockRefreshQuery,
+    lang: 'sql',
+    datasource: 'ds',
+  });
+});
+
+test('synchronizeNow does nothing when feature flag is disabled', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: false });
+
+  const startLoadingSpy = jest.fn();
+  props.startLoading = startLoadingSpy;
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  // Simulate calling synchronizeNow directly
+  (component.find('DashboardGridUi').instance() as any).synchronizeNow();
+
+  expect(startLoadingSpy).not.toHaveBeenCalled();
+});
+
+test('synchronizeNow does nothing when metadata contains invalid values', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
+
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: 'db', index: null },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  const startLoadingSpy = jest.fn();
+  props.startLoading = startLoadingSpy;
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  (component.find('DashboardGridUi').instance() as any).synchronizeNow();
+
+  expect(startLoadingSpy).not.toHaveBeenCalled();
+});
+
+// New tests for recent changes
+test('synchronizeNow exits early when feature flag is disabled and datasource is invalid', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: false });
+
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: 'db', index: null },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  const startLoadingSpy = jest.fn();
+  props.startLoading = startLoadingSpy;
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  (component.find('DashboardGridUi').instance() as any).synchronizeNow();
+
+  expect(startLoadingSpy).not.toHaveBeenCalled();
+});
+
+test('synchronizeNow exits early when feature flag is enabled but datasource is invalid', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
+
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: null, index: 'idx' },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  const startLoadingSpy = jest.fn();
+  props.startLoading = startLoadingSpy;
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  (component.find('DashboardGridUi').instance() as any).synchronizeNow();
+
+  expect(startLoadingSpy).not.toHaveBeenCalled();
+});
+
+test('areDataSourceParamsValid returns true for valid datasource params', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
+
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: 'db', index: 'idx' },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  const instance = component.find('DashboardGridUi').instance() as any;
+  expect(instance.areDataSourceParamsValid()).toBe(true);
+});
+
+test('areDataSourceParamsValid returns false for invalid datasource params', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
+
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: null, index: 'idx' },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  const instance = component.find('DashboardGridUi').instance() as any;
+  expect(instance.areDataSourceParamsValid()).toBe(false);
+});
+
+test('getQueryLanguage returns sql when feature is enabled and queryLang is not provided', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  const instance = component.find('DashboardGridUi').instance() as any;
+  expect(instance.getQueryLanguage()).toBe('sql');
+});
+
+test('getQueryLanguage returns empty string when feature is disabled and queryLang is not provided', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: false });
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  const instance = component.find('DashboardGridUi').instance() as any;
+  expect(instance.getQueryLanguage()).toBe('');
+});
+
+test('getQueryLanguage returns provided queryLang when specified, regardless of feature flag', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: false, queryLang: 'ppl' });
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  const instance = component.find('DashboardGridUi').instance() as any;
+  expect(instance.getQueryLanguage()).toBe('ppl');
+
+  // Test with feature flag enabled
+  component.setProps({ isDirectQuerySyncEnabled: true });
+  expect(instance.getQueryLanguage()).toBe('ppl');
+});
+
+test('synchronizeNow uses sql when feature is enabled and queryLang is not provided', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true });
+
+  const mockRefreshQuery = 'REFRESH MATERIALIZED VIEW ds.db.idx';
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: 'db', index: 'idx' },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  (generateRefreshQuery as jest.Mock).mockReturnValue(mockRefreshQuery);
+
+  const startLoadingSpy = jest.fn();
+  props.startLoading = startLoadingSpy;
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  (component
+    .find('DashboardDirectQuerySync')
+    .props() as DashboardDirectQuerySyncProps).onSynchronize();
+
+  expect(startLoadingSpy).toHaveBeenCalledWith({
+    query: mockRefreshQuery,
+    lang: 'sql',
+    datasource: 'ds',
+  });
+});
+
+test('synchronizeNow uses provided queryLang when specified', async () => {
+  const { props, options } = prepare({ isDirectQuerySyncEnabled: true, queryLang: 'ppl' });
+
+  const mockRefreshQuery = 'REFRESH MATERIALIZED VIEW ds.db.idx';
+  (extractIndexInfoFromDashboard as jest.Mock).mockResolvedValue({
+    parts: { datasource: 'ds', database: 'db', index: 'idx' },
+    mapping: { lastRefreshTime: 123456, refreshInterval: 30000 },
+    mdsId: '',
+  });
+
+  (generateRefreshQuery as jest.Mock).mockReturnValue(mockRefreshQuery);
+
+  const startLoadingSpy = jest.fn();
+  props.startLoading = startLoadingSpy;
+
+  const component = mountWithIntl(
+    <OpenSearchDashboardsContextProvider services={options}>
+      <DashboardGrid {...props} />
+    </OpenSearchDashboardsContextProvider>
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  component.update();
+
+  (component
+    .find('DashboardDirectQuerySync')
+    .props() as DashboardDirectQuerySyncProps).onSynchronize();
+
+  expect(startLoadingSpy).toHaveBeenCalledWith({
+    query: mockRefreshQuery,
+    lang: 'ppl',
+    datasource: 'ds',
+  });
 });
