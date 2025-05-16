@@ -15,63 +15,133 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { CoreStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import {
+  toMountPoint,
+  useOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
+import { DeleteDetailsModal } from './delete_details_modal';
 
 export interface DeleteWorkspaceModalProps {
   onClose: () => void;
   selectedWorkspaces?: WorkspaceAttribute[];
   onDeleteSuccess?: () => void;
   typeTextToConfirm?: string;
+  openModal: (
+    node: React.ReactNode,
+    options?: Parameters<CoreStart['overlays']['openModal']>['1']
+  ) => ReturnType<CoreStart['overlays']['openModal']>;
 }
 
 export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   const typeTextToConfirm = props.typeTextToConfirm ?? 'delete';
   const [value, setValue] = useState('');
-  const { onClose, selectedWorkspaces, onDeleteSuccess } = props;
+  const [deleting, setDeleting] = useState(false);
+  const { onClose, selectedWorkspaces, onDeleteSuccess, openModal } = props;
   const {
     services: { notifications, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
   const deleteWorkspaces = async () => {
+    setDeleting(true);
+    let result: { success: number; fail: number; failedIds: string[] };
+    let failedWorksapces: WorkspaceAttribute[];
     if (selectedWorkspaces && selectedWorkspaces.length > 0) {
-      selectedWorkspaces.forEach(async (selectedWorkspace) => {
-        if (selectedWorkspace?.id) {
-          let result;
-          try {
-            result = await workspaceClient.delete(selectedWorkspace?.id);
-          } catch (error) {
-            notifications?.toasts.addDanger({
-              title: i18n.translate('workspace.delete.failed', {
-                defaultMessage: 'Failed to delete workspace',
-              }),
-              text: error instanceof Error ? error.message : JSON.stringify(error),
-            });
-            return onClose();
-          }
-          if (result?.success) {
-            notifications?.toasts.addSuccess({
-              title: i18n.translate('workspace.delete.success', {
-                defaultMessage: 'Delete workspace successfully',
-              }),
-            });
-            onClose();
-            if (onDeleteSuccess) {
-              onDeleteSuccess();
-            }
-          } else {
-            notifications?.toasts.addDanger({
-              title: i18n.translate('workspace.delete.failed', {
-                defaultMessage: 'Failed to delete workspace',
-              }),
-              text: result?.error,
-            });
-          }
+      const ids = selectedWorkspaces
+        .filter((selectedWorkspace) => selectedWorkspace.id)
+        .map((selectedWorkspace) => selectedWorkspace.id);
+      try {
+        result = await workspaceClient.batchDelete(ids);
+        failedWorksapces = selectedWorkspaces.filter((selectedWorkspace) =>
+          result?.failedIds.includes(selectedWorkspace.id)
+        );
+      } catch (error) {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('workspace.delete.failed', {
+            defaultMessage: 'Failed to delete workspace',
+          }),
+          text: error instanceof Error ? error.message : JSON.stringify(error),
+        });
+        return onClose();
+      }
+
+      if (result?.fail === 0) {
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('workspace.delete.success', {
+            defaultMessage: '{successCount} workspaces deleted successfully',
+            values: {
+              successCount: result.success,
+            },
+          }),
+          text: toMountPoint(
+            <>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSmallButton
+                    color="success"
+                    onClick={() =>
+                      DeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
+                    }
+                  >
+                    View Delete Details
+                  </EuiSmallButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ),
+        });
+        if (onDeleteSuccess) {
+          onDeleteSuccess();
         }
-      });
+      } else {
+        const isAllFailed = result?.success === 0;
+
+        notifications?.toasts[isAllFailed ? 'addDanger' : 'addWarning']({
+          title: isAllFailed
+            ? i18n.translate('workspace.delete.allFailed', {
+                defaultMessage: '{failCount} workspaces failed to delete',
+                values: {
+                  failCount: result.fail,
+                },
+              })
+            : i18n.translate('workspace.delete.warning', {
+                defaultMessage:
+                  '{successCount} workspaces deleted successfully, {failCount} failed to delete',
+                values: {
+                  failCount: result.fail,
+                  successCount: result.success,
+                },
+              }),
+          text: toMountPoint(
+            <>
+              <div>
+                Failed workspace name:{' '}
+                {failedWorksapces.map((selectedWorkspace) => selectedWorkspace.name).join(', ')}{' '}
+              </div>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSmallButton
+                    color={isAllFailed ? 'danger' : 'warning'}
+                    onClick={() =>
+                      DeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
+                    }
+                  >
+                    View Delete Details
+                  </EuiSmallButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ),
+        });
+      }
+
+      setDeleting(false);
+      onClose();
     }
   };
 
@@ -122,6 +192,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           fill
           color="danger"
           disabled={value !== typeTextToConfirm}
+          isLoading={deleting}
         >
           Delete
         </EuiSmallButton>

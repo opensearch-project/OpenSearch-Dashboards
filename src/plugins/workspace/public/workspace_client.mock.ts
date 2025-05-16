@@ -15,6 +15,7 @@ export const workspaceClientMock = {
   update: jest.fn(),
   copy: jest.fn(),
   stop: jest.fn(),
+  batchDelete: jest.fn(),
 };
 
 export const WorkspaceClientMock = jest.fn(function () {
