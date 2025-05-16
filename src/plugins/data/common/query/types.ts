@@ -36,5 +36,5 @@ export * from './timefilter/types';
 export type Query = {
   query: string | { [key: string]: any };
   language: string;
-  dataset?: Dataset;
+  dataset?: object;
 };
