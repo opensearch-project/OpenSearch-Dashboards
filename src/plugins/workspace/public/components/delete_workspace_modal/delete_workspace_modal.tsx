@@ -98,45 +98,25 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
         if (onDeleteSuccess) {
           onDeleteSuccess();
         }
-      } else if (result?.success === 0) {
-        notifications?.toasts.addDanger({
-          title: i18n.translate('workspace.delete.allFailed', {
-            defaultMessage: '{failCount} workspaces failed to delete ',
-            values: {
-              failCount: result.fail,
-            },
-          }),
-          text: toMountPoint(
-            <>
-              <div>
-                Failed workspace name:{' '}
-                {failedWorksapces.map((selectedWorkspace) => selectedWorkspace.name).join(', ')}{' '}
-              </div>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiSmallButton
-                    color="danger"
-                    onClick={() =>
-                      DeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
-                    }
-                  >
-                    View Delete Details
-                  </EuiSmallButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ),
-        });
       } else {
-        notifications?.toasts.addWarning({
-          title: i18n.translate('workspace.delete.warning', {
-            defaultMessage:
-              '{successCount} workspaces deleted successfully, {failCount} failed to delete',
-            values: {
-              successCount: result.success,
-              failCount: result.fail,
-            },
-          }),
+        const isAllFailed = result?.success === 0;
+
+        notifications?.toasts[isAllFailed ? 'addDanger' : 'addWarning']({
+          title: isAllFailed
+            ? i18n.translate('workspace.delete.allFailed', {
+                defaultMessage: '{failCount} workspaces failed to delete',
+                values: {
+                  failCount: result.fail,
+                },
+              })
+            : i18n.translate('workspace.delete.warning', {
+                defaultMessage:
+                  '{successCount} workspaces deleted successfully, {failCount} failed to delete',
+                values: {
+                  failCount: result.fail,
+                  successCount: result.success,
+                },
+              }),
           text: toMountPoint(
             <>
               <div>
@@ -146,7 +126,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiSmallButton
-                    color="warning"
+                    color={isAllFailed ? 'danger' : 'warning'}
                     onClick={() =>
                       DeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
                     }
