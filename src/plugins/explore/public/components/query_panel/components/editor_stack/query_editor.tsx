@@ -3,35 +3,70 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
-import { getEditorConfig, LanguageType } from './shared';
+import { LanguageType } from './shared';
 
 interface PromptEditorProps {
   languageType: LanguageType;
-  // value: string;
+  queryString: string;
   onChange: (value: string) => void;
+  handleQueryRun: (queryString?: string) => void;
   // editorDidMount: (editor: any) => void;
 }
 
-export const QueryEditor: React.FC<PromptEditorProps> = ({ languageType, onChange }) => {
+export const QueryEditor: React.FC<PromptEditorProps> = ({
+  queryString,
+  languageType,
+  onChange,
+  handleQueryRun,
+}) => {
   // const editorConfig = getEditorConfig(languageType);
 
-  // Simple wrapper for editorDidMount
-  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    // Call the original editorDidMount function
-    // editorDidMount(editor);
+  const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
+  const handleEditorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    const focusDisposable = editor.onDidFocusEditorText(() => {
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+    });
 
-    // Return the original editor instance
-    return editor;
-  };
+    const blurDisposable = editor.onDidBlurEditorText(() => {
+      blurTimeoutRef.current = setTimeout(() => {}, 500);
+    });
+
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      handleQueryRun(editor.getValue());
+    });
+
+    return () => {
+      focusDisposable.dispose();
+      blurDisposable.dispose();
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Simple wrapper for editorDidMount
+  // const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+  //   // Call the original editorDidMount function
+  //   // editorDidMount(editor);
+
+  //   // Return the original editor instance
+
+  //   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+  //     onSubmit(editor.getValue());
+  //   });
+  //   return editor;
+  //};
   return (
     <div className="queryEditor" data-test-subj="osdQueryEditor__multiLine">
       <CodeEditor
         height={100}
         languageId={languageType}
-        value={'source="test"'}
+        value={queryString}
         onChange={onChange}
         editorDidMount={handleEditorDidMount}
         options={{
@@ -55,6 +90,12 @@ export const QueryEditor: React.FC<PromptEditorProps> = ({ languageType, onChang
           },
           acceptSuggestionOnEnter: 'off',
         }}
+        // suggestionProvider={{
+        //   triggerCharacters: [' '],
+        //   provideCompletionItems: async (model, position, context, token) => {
+        //     return provideCompletionItems(model, position, context, token);
+        //   },
+        // }}
         languageConfiguration={{
           autoClosingPairs: [
             { open: '(', close: ')' },

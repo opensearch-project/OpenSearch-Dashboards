@@ -12,17 +12,38 @@ interface EditorStackProps {
   onQueryChange: (value: string) => void;
   languageType: LanguageType;
   isDualEditor: Boolean;
+  handleQueryRun: (queryString?: string) => void;
+  handlePromptRun: (queryString?: string) => void;
+  queryString: string;
+  prompt: string;
 }
 
 const EditorStack: React.FC<EditorStackProps> = ({
+  isDualEditor,
   onPromptChange,
   onQueryChange,
   languageType,
+  handleQueryRun,
+  handlePromptRun,
+  queryString,
+  prompt,
 }) => {
   return (
     <div className="editor-stack">
-      <PromptEditor onChange={onPromptChange} languageType={languageType} />
-      <QueryEditor onChange={onQueryChange} languageType="ppl" />
+      <PromptEditor
+        onChange={onPromptChange}
+        languageType={languageType}
+        handlePromptRun={handlePromptRun}
+        prompt={prompt}
+      />
+      {isDualEditor && (
+        <QueryEditor
+          onChange={onQueryChange}
+          languageType="ppl"
+          handleQueryRun={handleQueryRun}
+          queryString={queryString}
+        />
+      )}
     </div>
   );
 };

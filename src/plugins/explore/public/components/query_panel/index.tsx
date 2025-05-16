@@ -11,28 +11,23 @@ import { QueryEditorFooter } from './components/footer/index';
 import { LanguageType } from './components/editor_stack/shared';
 import { debounce } from 'lodash';
 import { QueryTypeDetector } from './utils/typeDetection';
-
-interface Query {
-  query: string; // The query string value
-  prompt: string;
-  language: string; // The language of the query (e.g., 'ppl', 'natural-language', etc.)
-  dataset: string;
-}
+import { Query } from './types';
+import './index.scss';
 
 const QueryPanel = () => {
   const [lineCount, setLineCount] = useState<number | undefined>(undefined);
-  const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
+  // const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
   const inputQueryRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const [languageType, setLanguageType] = useState<LanguageType>('ppl'); // Default to PPL
+  const languageTypeRef = useRef<LanguageType>('ppl'); // Default to PPL
   const [isDualEditor, setIsDualEditor] = useState(false); // Default to PPL
   const [currentQuery, setCurrentQuery] = useState<Query>({
     query: '',
     prompt: '',
-    language: languageType,
+    language: languageTypeRef.current,
     dataset: 'test',
   });
 
-  const onQueryStringChange = (value: string, isPrompt: boolean) => {
+  const onQuerystringChange = (value: string, isPrompt: boolean) => {
     const query = {
       ...currentQuery,
     };
@@ -48,19 +43,22 @@ const QueryPanel = () => {
     const detector = new QueryTypeDetector();
     const result = detector.detect(query);
     console.log('Detected:', result.type, result.confidence.toFixed(2));
-    setLanguageType(result.type);
-    // Update UI with result.type or set state
+    languageTypeRef.current = result.type;
+    setCurrentQuery((prevQuery) => ({
+      ...prevQuery,
+      language: result.type,
+    }));
   }, 300); // Adjust debounce time as needed
 
   const onPromptChange = (value: string) => {
     console.log('Prompt changed:', value);
     detectLanguageType(value);
-    onQueryStringChange(value, true);
+    onQuerystringChange(value, true);
   };
 
   const onQueryChange = (value: string) => {
     console.log('Query changed:', value);
-    onQueryStringChange(value, false);
+    onQuerystringChange(value, false);
     if (!inputQueryRef.current) return;
 
     const currentLineCount = inputQueryRef.current.getModel()?.getLineCount();
@@ -68,8 +66,29 @@ const QueryPanel = () => {
     setLineCount(currentLineCount);
   };
 
-  const handleQueryRun = () => {
+  const handleQueryRun = (querystring?: string | undefined) => {
+    console.log('Running queryString when enter:', querystring);
     console.log('Running query:', currentQuery.query);
+    // Add logic to run the query
+  };
+
+  const handlePromptRun = (querystring?: string | undefined) => {
+    const detectedLang = languageTypeRef.current;
+
+    if (detectedLang === 'nl') {
+      console.log('Detected NL, calling NL API...');
+      // Call NL Api
+      // on successful ppl gene3rated
+      setIsDualEditor(true);
+      setCurrentQuery((prevQuery) => ({
+        ...prevQuery,
+        query: 'source=test | where state=CA and year=2023 | sort=asc',
+      }));
+      // update query object with ppl query
+    } else {
+      setIsDualEditor(false);
+      handleQueryRun(querystring);
+    }
     // Add logic to run the query
   };
 
@@ -78,7 +97,7 @@ const QueryPanel = () => {
       footer={
         <QueryEditorFooter
           isDualEditor={isDualEditor}
-          languageType={languageType}
+          languageType={languageTypeRef.current}
           handleQueryRun={handleQueryRun}
         />
       }
@@ -86,8 +105,12 @@ const QueryPanel = () => {
       <EditorStack
         onPromptChange={onPromptChange}
         onQueryChange={onQueryChange}
-        languageType={languageType}
+        languageType={languageTypeRef.current}
         isDualEditor={isDualEditor}
+        handleQueryRun={handleQueryRun}
+        handlePromptRun={handlePromptRun}
+        queryString={currentQuery.query}
+        prompt={currentQuery.prompt}
       />
     </QueryPanelLayout>
   );
