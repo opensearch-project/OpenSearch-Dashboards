@@ -129,18 +129,29 @@ export class SidecarService {
     const getSidecarConfig$ = () => sidecarConfig$.pipe(takeUntil(this.stop$));
 
     const setSidecarConfig = (config: Partial<ISidecarConfig>) => {
-      if (
-        sidecarConfig$.value ||
-        // init
-        (!sidecarConfig$.value && config.dockedMode && config.paddingSize)
-      ) {
-        sidecarConfig$.next({
+      let newSidecarConfig: ISidecarConfig | undefined;
+      if (sidecarConfig$.value) {
+        // Handle exsiting config
+        newSidecarConfig = {
           ...sidecarConfig$.value,
           ...config,
-          ...(config.paddingSize
-            ? { paddingSize: calculateNewPaddingSize(config.dockedMode, config.paddingSize) }
-            : {}),
-        } as ISidecarConfig);
+        };
+      } else if (config.dockedMode && config.paddingSize) {
+        // Handle inital config
+        newSidecarConfig = {
+          dockedMode: config.dockedMode,
+          paddingSize: config.paddingSize,
+          isHidden: config.isHidden,
+        };
+      }
+      if (newSidecarConfig) {
+        sidecarConfig$.next({
+          ...newSidecarConfig,
+          paddingSize: calculateNewPaddingSize(
+            newSidecarConfig.dockedMode,
+            newSidecarConfig.paddingSize
+          ),
+        });
       }
     };
 

@@ -138,4 +138,49 @@ describe('SidecarService', () => {
       expect(content.hasClass('osdSidecarFlyout--hide')).toEqual(false);
     });
   });
+
+  describe('setSidecarConfig', () => {
+    it('updates existing configuration when sidecarConfig$ has updated', () => {
+      sidecar.open(mountText('Sidecar content'), options);
+      let currentConfig;
+      sidecar.getSidecarConfig$().subscribe((config) => {
+        currentConfig = config;
+      });
+      expect(currentConfig).toEqual({
+        dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+        paddingSize: 460,
+      });
+
+      sidecar.setSidecarConfig({ dockedMode: SIDECAR_DOCKED_MODE.LEFT });
+      expect(currentConfig).toEqual({
+        dockedMode: SIDECAR_DOCKED_MODE.LEFT,
+        paddingSize: 460,
+      });
+    });
+
+    it('creates new configuration when the service is initialized', () => {
+      const newService = new SidecarService();
+      const newSidecar = newService.start({
+        i18n: i18nMock,
+        targetDomElement: document.createElement('div'),
+      });
+
+      let currentConfig;
+      newSidecar.getSidecarConfig$().subscribe((config) => {
+        currentConfig = config;
+      });
+      expect(currentConfig).toBeUndefined();
+
+      newSidecar.setSidecarConfig({
+        dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
+        paddingSize: 500,
+        isHidden: true,
+      });
+      expect(currentConfig).toEqual({
+        dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
+        paddingSize: 500,
+        isHidden: true,
+      });
+    });
+  });
 });
