@@ -35,7 +35,7 @@ describe('<WorkspaceSelector />', () => {
       navigateToApp,
     };
 
-    const mockCurrentWorkspace = [{ id: 'workspace-1', name: 'workspace 1' }];
+    const mockCurrentWorkspace = { id: 'workspace-1', name: 'workspace 1' };
     coreStartMock.workspaces.currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(
       mockCurrentWorkspace
     );

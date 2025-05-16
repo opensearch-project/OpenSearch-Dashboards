@@ -38,6 +38,9 @@ const clientMock = {
   setup: jest.fn(),
   destroy: jest.fn(),
   setSavedObjects: jest.fn(),
+  setUiSettings: jest.fn(),
+  associate: jest.fn(),
+  dissociate: jest.fn(),
 };
 
 export const createExportableType = (name: string): exportMock.SavedObjectsType => {

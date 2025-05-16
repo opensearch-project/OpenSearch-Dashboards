@@ -17,7 +17,7 @@ jest.mock('../../../plugins/opensearch_dashboards_react/public', () => ({
 }));
 
 jest.mock('./components/add_collaborators_modal', () => ({
-  AddCollaboratorsModal: ({ onClose, onAddCollaborators }) => (
+  AddCollaboratorsModal: ({ onClose, onAddCollaborators }: any) => (
     <div>
       <button
         onClick={() => {
