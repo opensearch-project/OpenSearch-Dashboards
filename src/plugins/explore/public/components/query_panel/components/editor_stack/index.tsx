@@ -11,6 +11,7 @@ interface EditorStackProps {
   onPromptChange: (value: string) => void;
   onQueryChange: (value: string) => void;
   languageType: LanguageType;
+  isDualEditor: Boolean;
 }
 
 const EditorStack: React.FC<EditorStackProps> = ({

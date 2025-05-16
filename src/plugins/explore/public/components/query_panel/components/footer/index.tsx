@@ -11,8 +11,20 @@ import { SaveQueryButton } from './save_query';
 // import { Actions } from './actions';
 import { DateTimeRangePicker } from './date_time_selector';
 import { RunQueryButton } from './run_query';
+import { ShowInputType } from './show_input_type';
+import { LanguageType } from '../editor_stack/shared';
 
-export const QueryEditorFooter: React.FC = () => {
+interface QueryEditorFooterProps {
+  languageType: LanguageType;
+  handleQueryRun: () => void;
+  isDualEditor: Boolean;
+}
+
+export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
+  languageType,
+  handleQueryRun,
+  isDualEditor,
+}) => {
   return (
     <div className="query-editor-footer">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
@@ -28,6 +40,7 @@ export const QueryEditorFooter: React.FC = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              {/* <hr className="vertical-separator" /> */}
               <EuiHorizontalRule margin="xs" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -38,6 +51,9 @@ export const QueryEditorFooter: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SaveQueryButton />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ShowInputType languageType={languageType} isDualEditor={isDualEditor} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -58,12 +74,7 @@ export const QueryEditorFooter: React.FC = () => {
               <EuiHorizontalRule margin="xs" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RunQueryButton
-                onClick={() => {
-                  // console.log('Run Query clicked');
-                }}
-                isDisabled={false}
-              />
+              <RunQueryButton onClick={handleQueryRun} isDisabled={false} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
