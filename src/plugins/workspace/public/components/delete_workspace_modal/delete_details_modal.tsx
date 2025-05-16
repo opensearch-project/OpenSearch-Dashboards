@@ -19,6 +19,15 @@ import {
 } from '@elastic/eui';
 import { CoreStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
 
+export interface DeleteDetailsModalProps {
+  selectedWorkspaces: WorkspaceAttribute[];
+  failedWorksapces: WorkspaceAttribute[];
+  openModal: (
+    node: React.ReactNode,
+    options?: Parameters<CoreStart['overlays']['openModal']>['1']
+  ) => ReturnType<CoreStart['overlays']['openModal']>;
+}
+
 export const DeleteDetailsModal = (
   selectedWorkspaces: WorkspaceAttribute[],
   failedWorksapces: WorkspaceAttribute[],
@@ -50,7 +59,10 @@ export const DeleteDetailsModal = (
             <EuiText>started to delete workspace</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color={isFailed ? 'danger' : 'success'}>
+            <EuiBadge
+              data-test-subj={`delete-details-modal-bager-${isFailed ? 'danger' : 'success'}`}
+              color={isFailed ? 'danger' : 'success'}
+            >
               {isFailed ? 'fail' : 'success'}
             </EuiBadge>
           </EuiFlexItem>
@@ -58,7 +70,7 @@ export const DeleteDetailsModal = (
       ),
       type: isFailed ? 'regular' : 'update',
       children: (
-        <EuiText size="s">
+        <EuiText data-test-subj="delete-details-modal-name" size="s">
           <p>{selectedWorkspace.name} </p>
         </EuiText>
       ),
@@ -70,14 +82,21 @@ export const DeleteDetailsModal = (
 
   const modal = openModal(
     <EuiModal style={{ width: 800, minHeight: 400 }} onClose={() => modal.close()}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>Delete workspace details</EuiModalHeaderTitle>
+      <EuiModalHeader data-test-subj="delete-details-modal-header">
+        <EuiModalHeaderTitle data-test-subj="delete-details-modal-title">
+          Delete workspace details
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody>
-        <EuiCommentList comments={updateMessages} />
+      <EuiModalBody data-test-subj="delete-details-modal-body">
+        <EuiCommentList data-test-subj="delete-details-modal-list" comments={updateMessages} />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiSmallButton fill color="primary" onClick={() => modal.close()}>
+            <EuiSmallButton
+              data-test-subj="delete-details-modal-close-button"
+              fill
+              color="primary"
+              onClick={() => modal.close()}
+            >
               Close
             </EuiSmallButton>
           </EuiFlexItem>
