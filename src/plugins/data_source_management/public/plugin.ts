@@ -112,8 +112,7 @@ export class DataSourceManagementPlugin
   private dataSourceSelection: DataSourceSelectionService = new DataSourceSelectionService();
   private featureFlagStatus: boolean = false;
   private bannerId: string | null = null; // To store the banner ID for unmounting
-  private currentAppId: string | undefined = undefined; // To store the current appId
-  private currentDashboardId: string | undefined = undefined; // To store the current dashboardId
+  private core: CoreStart | null = null; // To store the CoreStart instance
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
@@ -232,6 +231,8 @@ export class DataSourceManagementPlugin
 
   public start(core: CoreStart): DataSourceManagementPluginStart {
     this.started = true;
+    this.core = core;
+
     setApplication(core.application);
     core.http.intercept({
       request: catalogRequestIntercept(),
@@ -309,66 +310,16 @@ export class DataSourceManagementPlugin
     };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
-    // Mount the DashboardDirectQuerySync component as a banner
-    core.application.currentAppId$.subscribe((appId: string | undefined) => {
-      // Store the current appId
-      this.currentAppId = appId;
-
-      // Show the banner only in the Dashboard application on the view route
-      if (appId === 'dashboards') {
-        const hash = window.location.hash;
-        // Check if the current route is a dashboard view (e.g., /app/dashboards#/view/[dashboard-id])
-        const isDashboardViewMatch = hash.match(/#\/view\/([^\/?]+)(\?.*)?$/); // Matches /app/dashboards#/view/[dashboard-id]
-        if (isDashboardViewMatch && isDashboardViewMatch[1]) {
-          // Extract the dashboard ID (e.g., "logs-waf-dashboard")
-          this.currentDashboardId = isDashboardViewMatch[1];
-          console.log('Current Dashboard ID:', this.currentDashboardId); // Log the dashboard ID for verification
-
-          if (!this.bannerId) {
-            // Mount the banner if it hasn't been mounted yet
-            this.bannerId = core.overlays.banners.add(
-              toMountPoint(React.createElement(DashboardDirectQuerySync))
-            );
-          }
-        } else if (!isDashboardViewMatch && this.bannerId) {
-          // Remove the banner if we're not on a dashboard view page
-          core.overlays.banners.remove(this.bannerId);
-          this.bannerId = null;
-          this.currentDashboardId = undefined; // Clear the dashboard ID
-        }
-      } else {
-        // Remove the banner when not in the Dashboard application
-        if (this.bannerId) {
-          core.overlays.banners.remove(this.bannerId);
-          this.bannerId = null;
-          this.currentDashboardId = undefined; // Clear the dashboard ID
-        }
-      }
-    });
-
-    // Listen for hash changes to handle in-app navigation
-    window.addEventListener('hashchange', () => {
-      const appId = this.currentAppId;
-      const hash = window.location.hash;
-      const isDashboardViewMatch = hash.match(/#\/view\/([^\/?]+)(\?.*)?$/);
-      if (appId === 'dashboards') {
-        if (isDashboardViewMatch && isDashboardViewMatch[1]) {
-          // Extract the dashboard ID (e.g., "logs-waf-dashboard")
-          this.currentDashboardId = isDashboardViewMatch[1];
-          console.log('Current Dashboard ID (hashchange):', this.currentDashboardId); // Log the dashboard ID for verification
-
-          if (!this.bannerId) {
-            this.bannerId = core.overlays.banners.add(
-              toMountPoint(React.createElement(DashboardDirectQuerySync))
-            );
-          }
-        } else if (!isDashboardViewMatch && this.bannerId) {
-          core.overlays.banners.remove(this.bannerId);
-          this.bannerId = null;
-          this.currentDashboardId = undefined; // Clear the dashboard ID
-        }
-      }
-    });
+    // Mount the DashboardDirectQuerySync component as a banner, passing currentAppId$
+    if (!this.bannerId) {
+      this.bannerId = core.overlays.banners.add(
+        toMountPoint(
+          React.createElement(DashboardDirectQuerySync, {
+            currentAppId$: core.application.currentAppId$,
+          })
+        )
+      );
+    }
 
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
@@ -377,10 +328,9 @@ export class DataSourceManagementPlugin
 
   public stop() {
     // Clean up the banner on plugin stop
-    if (this.bannerId) {
-      // Note: We don't have access to core.overlays here, so we rely on the subscription cleanup
+    if (this.bannerId && this.core) {
+      this.core.overlays.banners.remove(this.bannerId);
       this.bannerId = null;
-      this.currentDashboardId = undefined; // Clear the dashboard ID
     }
   }
 }
