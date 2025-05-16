@@ -16,6 +16,7 @@ import {
   EuiCommentList,
   EuiCommentProps,
   EuiBadge,
+  EuiModalFooter,
 } from '@elastic/eui';
 import { CoreStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
 
@@ -89,6 +90,8 @@ export const DeleteDetailsModal = (
       </EuiModalHeader>
       <EuiModalBody data-test-subj="delete-details-modal-body">
         <EuiCommentList data-test-subj="delete-details-modal-list" comments={updateMessages} />
+      </EuiModalBody>
+      <EuiModalFooter>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiSmallButton
@@ -101,7 +104,7 @@ export const DeleteDetailsModal = (
             </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiModalBody>
+      </EuiModalFooter>
     </EuiModal>
   );
 };
