@@ -39,6 +39,14 @@ exports[`render 1`] = `
               "kibanaSavedObjectMeta",
             ],
             "name": "Saved search",
+            "type": "search",
+          },
+          Object {
+            "getIconForSavedObject": [Function],
+            "includeFields": Array [
+              "kibanaSavedObjectMeta",
+            ],
+            "name": "Saved explore",
             "type": "explore",
           },
         ]

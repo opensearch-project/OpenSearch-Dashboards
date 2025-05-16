@@ -103,7 +103,7 @@ const createMockServices = (): DiscoverViewServices => {
 const history = createMemoryHistory();
 const mockStore = {
   getState: () => ({
-    discover: {
+    logs: {
       savedSearch: 'test-saved-search',
       sort: [],
       interval: 'auto',
