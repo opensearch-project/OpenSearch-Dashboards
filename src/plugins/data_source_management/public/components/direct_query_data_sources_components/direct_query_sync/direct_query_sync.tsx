@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
+import './direct_query_sync.scss';
 
 interface Props {
   currentAppId$: Observable<string | undefined>;
@@ -47,7 +48,7 @@ export const DashboardDirectQuerySync: React.FC<Props> = ({ currentAppId$ }) => 
   }
 
   return (
-    <EuiText size="m">
+    <EuiText size="m" className="direct-query-sync">
       Data scheduled to sync every x mins. Last sync: 3 minutes ago. Synchronize Now
     </EuiText>
   );
