@@ -47,6 +47,7 @@ import { SavedObjectFinderUi } from '../../../../../../../../saved_objects/publi
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { SAVED_OBJECT_TYPE } from '../../../saved_searches/_saved_search';
+import { setSavedSearchId } from '../../utils/state_management';
 
 interface Props {
   onClose: () => void;
@@ -60,6 +61,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
       addBasePath,
       data,
       filterManager,
+      store,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
 
@@ -106,11 +108,19 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
             filterManager.setAppFilters([]);
             data.query.queryString.clearQuery();
             if (type === 'search') {
+              // Explore will still show saved searches for backwards
+              // compatibility, but they should open in classic Discover.
               application.navigateToApp('discover', { path: `#/view/${id}` });
             } else {
+              // In classic Discover, URL goes from
+              // app/data-explorer/discover#/ -> app/discover#/view/uuid ->
+              // app/data-explorer/discover#/view/uuid, the appId change causes
+              // a new store to be created using URL. In Explore, URL goes from
+              // app/explore/logs#/ -> app/explore/logs#/view/uuid. There is no
+              // appId change and no new store created, so we need to dispatch
+              // the state change.
+              store!.dispatch({ type: setSavedSearchId.type, payload: id });
               application.navigateToApp('explore', { path: `${LOGS_VIEW_ID}#/view/${id}` });
-              // TODO FIXME this is a workaround to load saved explore state without URL change
-              window.location.reload();
             }
             onClose();
           }}

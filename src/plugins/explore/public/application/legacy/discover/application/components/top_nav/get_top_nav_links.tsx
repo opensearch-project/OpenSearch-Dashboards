@@ -320,6 +320,9 @@ export const getTopNavLinks = (
       core.application.navigateToApp('explore', {
         path: `${LOGS_VIEW_ID}#/`,
       });
+      // TODO this behavior is different from Discover. Clicking New in Explore
+      // only closes the saved search and does not change the query.
+      store!.dispatch({ type: setSavedSearchId.type, payload: undefined });
     },
     testId: 'discoverNewButton',
     ariaLabel: i18n.translate('explore.discover.topNav.discoverNewButtonLabel', {
