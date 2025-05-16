@@ -11,7 +11,6 @@ import {
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-  generateAllTestConfigurations,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateRecentQueriesTestConfiguration,
@@ -20,6 +19,7 @@ import {
   //TODO: QueryRegex,
 } from '../../../../../../utils/apps/query_enhancements/recent_queries';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspace = getRandomizedWorkspaceName();
 const runRecentQueryTests = () => {
@@ -57,7 +57,7 @@ const runRecentQueryTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllTestConfigurations(generateRecentQueriesTestConfiguration)
+    generateAllExploreTestConfigurations(generateRecentQueriesTestConfiguration)
       .filter(Boolean) // removes undefined values
       .forEach((config) => {
         it(`check max queries for ${config.testName}`, () => {

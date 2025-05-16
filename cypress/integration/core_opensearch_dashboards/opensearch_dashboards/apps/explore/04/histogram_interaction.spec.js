@@ -12,13 +12,13 @@ import {
   DATASOURCE_NAME,
 } from '../../../../../../utils/apps/constants';
 import {
-  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/query_enhancements/histogram_interaction';
 import { DatasetTypes } from '../../../../../../utils/apps/query_enhancements/constants';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspace = getRandomizedWorkspaceName();
 
@@ -48,7 +48,7 @@ const runHistogramInteractionTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllTestConfigurations(generateHistogramTestConfigurations).forEach((config) => {
+    generateAllExploreTestConfigurations(generateHistogramTestConfigurations).forEach((config) => {
       it(`check histogram visibility for ${config.testName}`, () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.setQueryLanguage(config.language);

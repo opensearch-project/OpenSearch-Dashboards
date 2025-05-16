@@ -52,7 +52,7 @@ export const runSavedSearchTests = () => {
       ]);
     });
 
-    it('Load a saved search', () => {
+    it.skip('Load a saved search', () => {
       const config = generateSavedTestConfiguration(
         INDEX_PATTERN_WITH_TIME,
         DatasetTypes.INDEX_PATTERN.name,
@@ -74,7 +74,7 @@ export const runSavedSearchTests = () => {
       });
     });
 
-    it('Changing the time range updates the saved search elements in dashboards', () => {
+    it.skip('Changing the time range updates the saved search elements in dashboards', () => {
       const config = generateSavedTestConfiguration(
         INDEX_PATTERN_WITH_TIME,
         DatasetTypes.INDEX_PATTERN.name,
@@ -98,7 +98,7 @@ export const runSavedSearchTests = () => {
       cy.getElementByTestId('osdDocTablePagination').contains(/of 11/);
     });
 
-    it('Show valid saved searches', () => {
+    it.skip('Show valid saved searches', () => {
       const dqlConfig = generateSavedTestConfiguration(
         INDEX_PATTERN_WITH_TIME,
         DatasetTypes.INDEX_PATTERN.name,

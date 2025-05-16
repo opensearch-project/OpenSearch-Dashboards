@@ -8,11 +8,11 @@ import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_t
 import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../../utils/apps/query_enhancements/field_display_filtering.js';
 import { BASE_PATH } from '../../../../../../utils/constants';
 import {
-  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspace = getRandomizedWorkspaceName();
 
@@ -44,7 +44,7 @@ const fieldDisplayFilteringTestSuite = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {
+    generateAllExploreTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {
       index: INDEX_WITH_TIME_1,
       indexPattern: `${INDEX_WITH_TIME_1}*`,
     }).forEach((config) => {

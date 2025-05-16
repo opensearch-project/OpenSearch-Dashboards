@@ -12,11 +12,13 @@ import {
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateAutocompleteTestConfiguration,
-  generateAutocompleteTestConfigurations,
-  LanguageConfigs,
   getDatasetName,
 } from '../../../../../../utils/apps/query_enhancements/autocomplete';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  generateAutocompleteTestConfigurations,
+  LanguageConfigs,
+} from '../../../../../../utils/apps/explore/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
 

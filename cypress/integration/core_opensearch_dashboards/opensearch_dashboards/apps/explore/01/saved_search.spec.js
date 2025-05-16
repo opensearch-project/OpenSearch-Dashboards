@@ -10,7 +10,6 @@ import {
   DATASOURCE_NAME,
 } from '../../../../../../utils/constants';
 import {
-  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
@@ -24,6 +23,7 @@ import {
   updateSavedSearchAndNotSaveAndVerify,
 } from '../../../../../../utils/apps/query_enhancements/saved';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -50,7 +50,7 @@ const runSavedSearchTests = () => {
       ]);
     });
 
-    generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
+    generateAllExploreTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
       it(`create and load for ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,

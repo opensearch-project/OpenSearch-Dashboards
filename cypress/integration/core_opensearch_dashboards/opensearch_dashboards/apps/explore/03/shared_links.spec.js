@@ -10,7 +10,6 @@ import {
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
-  generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   setHistogramIntervalIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
@@ -22,6 +21,7 @@ import {
 } from '../../../../../../utils/apps/query_enhancements/shared_links';
 import { setSort } from '../../../../../../utils/apps/query_enhancements/table';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -86,7 +86,7 @@ export const runSharedLinksTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllTestConfigurations(generateShareUrlsTestConfiguration, {
+    generateAllExploreTestConfigurations(generateShareUrlsTestConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {

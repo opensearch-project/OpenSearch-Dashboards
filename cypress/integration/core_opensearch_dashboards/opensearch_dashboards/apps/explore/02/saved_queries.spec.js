@@ -22,11 +22,11 @@ import {
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-  generateAllTestConfigurations,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 
 import { generateSavedTestConfiguration } from '../../../../../../utils/apps/query_enhancements/saved';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -131,7 +131,7 @@ const runSavedQueriesUITests = () => {
       ]);
     });
 
-    const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
+    const testConfigurations = generateAllExploreTestConfigurations(generateSavedTestConfiguration);
 
     testConfigurations.forEach((config) => {
       it(`should create, load, update, modify and delete the saved query: ${config.testName}`, () => {

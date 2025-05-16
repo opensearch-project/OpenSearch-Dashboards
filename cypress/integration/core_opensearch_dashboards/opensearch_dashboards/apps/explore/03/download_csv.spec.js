@@ -16,7 +16,6 @@ import {
 } from '../../../../../../utils/apps/query_enhancements/constants';
 import {
   downloadCsvAndVerify,
-  generateDownloadCsvTestConfigurations,
   getFirstRowForDownloadWithFields,
   getFirstRowTimeForSourceDownload,
   getHeadersForDownloadWithFields,
@@ -27,6 +26,7 @@ import {
   toggleFieldsForCsvDownload,
 } from '../../../../../../utils/apps/query_enhancements/download_csv';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateDownloadCsvTestConfigurations } from '../../../../../../utils/apps/explore/download_csv';
 
 const workspaceName = getRandomizedWorkspaceName();
 

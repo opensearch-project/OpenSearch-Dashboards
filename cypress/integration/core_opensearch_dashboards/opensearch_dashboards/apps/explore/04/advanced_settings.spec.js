@@ -14,13 +14,14 @@ import {
   generateBaseConfiguration,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateQueryTestConfigurations } from '../../../../../../utils/apps/query_enhancements/queries';
+import { generateQueryTestConfigurations } from '../../../../../../utils/apps/explore/queries';
 import { getDatasetName } from '../../../../../../utils/apps/query_enhancements/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
 
 export const runAdvancedSettingsTests = () => {
-  describe('discover autocomplete tests', () => {
+  // This test was only for DQL & Lucene
+  describe.skip('discover autocomplete tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,

@@ -15,11 +15,11 @@ import {
 import {
   validateQueryResults,
   generateAutocompleteTestConfiguration,
-  generateAutocompleteTestConfigurations,
   createOtherQueryUsingAutocomplete,
   createDQLQueryUsingAutocomplete,
 } from '../../../../../../utils/apps/query_enhancements/autocomplete';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAutocompleteTestConfigurations } from '../../../../../../utils/apps/explore/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -56,6 +56,7 @@ export const runAutocompleteTests = () => {
             cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             cy.setQueryLanguage(config.language);
             setDatePickerDatesAndSearchIfRelevant(config.language);
+            cy.wait(2000);
             cy.clearQueryEditor();
 
             if (config.language === QueryLanguages.DQL.name) {

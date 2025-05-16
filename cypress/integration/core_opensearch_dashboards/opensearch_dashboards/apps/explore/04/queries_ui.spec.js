@@ -11,14 +11,14 @@ import {
 import {
   getRandomizedWorkspaceName,
   generateBaseConfiguration,
-  generateAllTestConfigurations,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateQueryTestConfigurations,
   LanguageConfigs,
-} from '../../../../../../utils/apps/query_enhancements/queries';
+} from '../../../../../../utils/apps/explore/queries';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -96,7 +96,7 @@ export const runQueryTests = () => {
       });
     });
 
-    generateAllTestConfigurations(generateBaseConfiguration, {
+    generateAllExploreTestConfigurations(generateBaseConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {

@@ -9,12 +9,10 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
 } from '../../../../../../utils/constants';
-import {
-  generateAllTestConfigurations,
-  getRandomizedWorkspaceName,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
 import { generateTimeRangeTestConfiguration } from '../../../../../../utils/apps/query_enhancements/time_range_selection';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -48,7 +46,7 @@ export const runTimeRangeSelectionTests = () => {
       ]);
     });
 
-    generateAllTestConfigurations(generateTimeRangeTestConfiguration).forEach((config) => {
+    generateAllExploreTestConfigurations(generateTimeRangeTestConfiguration).forEach((config) => {
       it(`Time Range Selection using the quick select menu ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,

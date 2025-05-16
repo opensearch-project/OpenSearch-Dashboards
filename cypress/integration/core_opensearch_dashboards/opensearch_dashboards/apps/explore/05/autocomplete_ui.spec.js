@@ -14,13 +14,13 @@ import {
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateAutocompleteTestConfiguration,
-  generateAutocompleteTestConfigurations,
   validateQueryResults,
   showSuggestionAndHint,
   hideWidgets,
   createQuery,
 } from '../../../../../../utils/apps/query_enhancements/autocomplete';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAutocompleteTestConfigurations } from '../../../../../../utils/apps/explore/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -57,6 +57,7 @@ export const runAutocompleteTests = () => {
             cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             cy.setQueryLanguage(config.language);
             setDatePickerDatesAndSearchIfRelevant(config.language);
+            cy.wait(2000);
             cy.clearQueryEditor();
 
             const editorType =
@@ -87,6 +88,7 @@ export const runAutocompleteTests = () => {
             cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             cy.setQueryLanguage(config.language);
             setDatePickerDatesAndSearchIfRelevant(config.language);
+            cy.wait(2000);
             cy.clearQueryEditor();
 
             createQuery(config, false); // use mouse
@@ -103,6 +105,7 @@ export const runAutocompleteTests = () => {
             cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             cy.setQueryLanguage(config.language);
             setDatePickerDatesAndSearchIfRelevant(config.language);
+            cy.wait(2000);
             cy.clearQueryEditor();
 
             createQuery(config, true); // use keyboard

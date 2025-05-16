@@ -11,7 +11,6 @@ import {
   QueryLanguages,
 } from '../../../../../../utils/apps/query_enhancements/constants';
 import {
-  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
@@ -19,6 +18,7 @@ import { getDocTableField } from '../../../../../../utils/apps/query_enhancement
 import * as sideBar from '../../../../../../utils/apps/query_enhancements/sidebar';
 import { generateSideBarTestConfiguration } from '../../../../../../utils/apps/query_enhancements/sidebar';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -146,6 +146,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (
   }
 
   if (config.language === QueryLanguages.PPL.name) {
+    cy.wait(2000);
     cy.intercept('**/api/enhancements/search/ppl').as('query');
     cy.setQueryEditor(pplQuery);
     cy.wait('@query').then(() => {
@@ -260,7 +261,7 @@ export const runSideBarTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllTestConfigurations(generateSideBarTestConfiguration, {
+    generateAllExploreTestConfigurations(generateSideBarTestConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {

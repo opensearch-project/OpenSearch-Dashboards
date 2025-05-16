@@ -12,7 +12,6 @@ import {
 import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
 import { BASE_PATH } from '../../../../../../utils/constants.js';
 import {
-  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared.js';
@@ -25,6 +24,7 @@ import {
   visualizationTitlesWithInspectOptions,
 } from '../../../../../../utils/apps/query_enhancements/inspect.js';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -48,7 +48,7 @@ const inspectTestSuite = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllTestConfigurations(generateInspectTestConfiguration).forEach((config) => {
+    generateAllExploreTestConfigurations(generateInspectTestConfiguration).forEach((config) => {
       it(`should inspect and validate the first row data for ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName: workspaceName,

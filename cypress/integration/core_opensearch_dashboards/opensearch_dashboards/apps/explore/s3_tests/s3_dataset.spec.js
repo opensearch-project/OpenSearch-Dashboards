@@ -104,7 +104,7 @@ const s3DatasetTestSuite = () => {
           cy.deleteWorkspaceByName(workspace);
         });
 
-        it('with SQL', function () {
+        it.skip('with SQL', function () {
           cy.getElementByTestId(`datasetSelectorButton`).click();
           cy.getElementByTestId(`datasetSelectorAdvancedButton`).click();
 

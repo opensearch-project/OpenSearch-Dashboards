@@ -11,7 +11,6 @@ import {
   QueryLanguages,
 } from '../../../../../../utils/constants';
 import {
-  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
@@ -20,6 +19,7 @@ import {
   getLanguageReferenceTestText,
 } from '../../../../../../utils/apps/query_enhancements/language_specific_display';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -46,7 +46,7 @@ export const runDisplayTests = () => {
       ]);
     });
 
-    generateAllTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
+    generateAllExploreTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
       it(`should correctly display all UI components for ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
