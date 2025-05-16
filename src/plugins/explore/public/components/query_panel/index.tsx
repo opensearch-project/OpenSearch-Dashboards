@@ -24,6 +24,7 @@ const QueryPanel = () => {
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
   const inputQueryRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [languageType, setLanguageType] = useState<LanguageType>('ppl'); // Default to PPL
+  const [isDualEditor, setIsDualEditor] = useState(false); // Default to PPL
   const [currentQuery, setCurrentQuery] = useState<Query>({
     query: '',
     prompt: '',
@@ -52,7 +53,7 @@ const QueryPanel = () => {
   }, 300); // Adjust debounce time as needed
 
   const onPromptChange = (value: string) => {
-    console.log('prompt changed:', value);
+    console.log('Prompt changed:', value);
     detectLanguageType(value);
     onQueryStringChange(value, true);
   };
@@ -67,12 +68,26 @@ const QueryPanel = () => {
     setLineCount(currentLineCount);
   };
 
+  const handleQueryRun = () => {
+    console.log('Running query:', currentQuery.query);
+    // Add logic to run the query
+  };
+
   return (
-    <QueryPanelLayout footer={<QueryEditorFooter />}>
+    <QueryPanelLayout
+      footer={
+        <QueryEditorFooter
+          isDualEditor={isDualEditor}
+          languageType={languageType}
+          handleQueryRun={handleQueryRun}
+        />
+      }
+    >
       <EditorStack
         onPromptChange={onPromptChange}
         onQueryChange={onQueryChange}
         languageType={languageType}
+        isDualEditor={isDualEditor}
       />
     </QueryPanelLayout>
   );

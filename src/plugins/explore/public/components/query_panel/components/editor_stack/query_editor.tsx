@@ -31,7 +31,7 @@ export const QueryEditor: React.FC<PromptEditorProps> = ({ languageType, onChang
       <CodeEditor
         height={100}
         languageId={languageType}
-        value={'query'}
+        value={'source="test"'}
         onChange={onChange}
         editorDidMount={handleEditorDidMount}
         options={{
