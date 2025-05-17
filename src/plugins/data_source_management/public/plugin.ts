@@ -329,6 +329,7 @@ export class DataSourceManagementPlugin
                 React.createElement(DashboardDirectQuerySync, {
                   dashboardId,
                   http: core.http,
+                  savedObjectsClient: core.savedObjects.client, // Pass savedObjectsClient
                   removeBanner: () => {
                     if (this.bannerId) {
                       core.overlays.banners.remove(this.bannerId);
@@ -367,6 +368,7 @@ export class DataSourceManagementPlugin
                 React.createElement(DashboardDirectQuerySync, {
                   dashboardId,
                   http: core.http,
+                  savedObjectsClient: core.savedObjects.client, // Pass savedObjectsClient
                   removeBanner: () => {
                     if (this.bannerId) {
                       core.overlays.banners.remove(this.bannerId);
