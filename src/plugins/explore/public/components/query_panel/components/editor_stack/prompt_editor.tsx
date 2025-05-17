@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { getEditorConfig, LanguageType } from './shared';
+import { EuiIcon } from '@elastic/eui';
 
 interface PromptEditorProps {
   languageType: LanguageType;
@@ -21,54 +22,108 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
   handlePromptRun,
   prompt,
 }) => {
+  const [isReadOnly, setIsReadOnly] = useState(false);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorConfig = getEditorConfig(languageType);
 
-  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    // Call the original editorDidMount function
-    // editorDidMount(editor);
+  const handleEditClick = () => {
+    setIsReadOnly(false);
+    editorRef.current?.updateOptions({ readOnly: false });
+    editorRef.current?.focus();
+  };
 
-    // Return the original editor instance
+  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    editorRef.current = editor;
 
     editor.addCommand(monaco.KeyCode.Enter, () => {
-      console.log('Enter key pressed');
-      handlePromptRun(editor.getValue());
+      const promptValue = editor.getValue();
+      handlePromptRun(promptValue);
+      editor.updateOptions({ readOnly: true });
+      setIsReadOnly(true);
+    });
+
+    // Add command for Shift + Enter to insert a new line
+    editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+      const currentPosition = editor.getPosition();
+      if (currentPosition) {
+        editor.executeEdits('', [
+          {
+            range: new monaco.Range(
+              currentPosition.lineNumber,
+              currentPosition.column,
+              currentPosition.lineNumber,
+              currentPosition.column
+            ),
+            text: '\n',
+            forceMoveMarkers: true,
+          },
+        ]);
+        editor.setPosition({
+          lineNumber: currentPosition.lineNumber + 1,
+          column: 1,
+        });
+      }
+    });
+
+    editor.onDidContentSizeChange(() => {
+      const contentHeight = editor.getContentHeight();
+      editor.layout({ width: editor.getLayoutInfo().width, height: contentHeight });
     });
     return editor;
   };
 
   return (
-    <div className="promptEditor" data-test-subj="osdQueryEditor__multiLine">
-      <CodeEditor
-        height={32}
-        languageId={editorConfig.languageId}
-        value={prompt}
-        onChange={onChange}
-        editorDidMount={handleEditorDidMount}
-        options={{
-          fixedOverflowWidgets: true,
-          lineNumbers: 'off', // Disabled line numbers
-          lineHeight: 32,
-          fontSize: 14,
-          fontFamily: 'Roboto Mono',
-          minimap: {
-            enabled: false,
-          },
-          scrollBeyondLastLine: false,
-          wordWrap: 'off', // Disabled word wrapping
-          wrappingIndent: 'none', // No indent since wrapping is off
-          folding: false,
-          glyphMargin: false,
-          lineDecorationsWidth: 0,
-          scrollbar: {
-            vertical: 'hidden',
-            horizontalScrollbarSize: 1,
-          },
-          overviewRulerLanes: 0,
-          hideCursorInOverviewRuler: true,
-          cursorStyle: 'line',
-          ...editorConfig, // Spread the dynamic configuration
-        }}
-      />
+    <div className="promptEditorWrapper" style={{ position: 'relative' }}>
+      <div
+        className={`promptEditor ${isReadOnly ? 'promptEditor--readonly' : ''}`}
+        data-test-subj="osdQueryEditor__multiLine"
+      >
+        <CodeEditor
+          languageId={editorConfig.languageId}
+          value={prompt}
+          onChange={onChange}
+          editorDidMount={handleEditorDidMount}
+          options={{
+            fixedOverflowWidgets: true,
+            lineNumbers: 'off', // Disabled line numbers
+            lineHeight: 18,
+            fontSize: 14,
+            fontFamily: 'Roboto Mono',
+            minimap: {
+              enabled: false,
+            },
+            padding: {
+              top: 7, // (32 - 18) / 2 = 7
+              bottom: 7,
+            },
+            scrollBeyondLastLine: false,
+            wordWrap: 'on', // Disabled word wrapping
+            wrappingIndent: 'indent', // No indent since wrapping is off
+            folding: false,
+            glyphMargin: false,
+            lineDecorationsWidth: 0,
+            scrollbar: {
+              vertical: 'hidden',
+              horizontalScrollbarSize: 1,
+            },
+            overviewRulerLanes: 0,
+            hideCursorInOverviewRuler: true,
+            cursorStyle: 'line-thin',
+            cursorBlinking: 'blink',
+            ...editorConfig, // Spread the dynamic configuration
+          }}
+        />
+
+        {isReadOnly && (
+          <div className="promptEditor__editOverlay" onClick={handleEditClick}>
+            <span className="edit_toolbar">
+              {' '}
+              <EuiIcon type="pencil" /> Edit prompt <span> | </span>{' '}
+              <EuiIcon type="crossInCircleEmpty" /> Clear editor{' '}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
