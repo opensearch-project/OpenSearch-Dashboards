@@ -40,6 +40,29 @@ export const QueryEditor: React.FC<PromptEditorProps> = ({
       handleQueryRun(editor.getValue());
     });
 
+    // Add command for Shift + Enter to insert a new line
+    editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+      const currentPosition = editor.getPosition();
+      if (currentPosition) {
+        editor.executeEdits('', [
+          {
+            range: new monaco.Range(
+              currentPosition.lineNumber,
+              currentPosition.column,
+              currentPosition.lineNumber,
+              currentPosition.column
+            ),
+            text: '\n',
+            forceMoveMarkers: true,
+          },
+        ]);
+        editor.setPosition({
+          lineNumber: currentPosition.lineNumber + 1,
+          column: 1,
+        });
+      }
+    });
+
     return () => {
       focusDisposable.dispose();
       blurDisposable.dispose();
@@ -49,18 +72,6 @@ export const QueryEditor: React.FC<PromptEditorProps> = ({
     };
   }, []);
 
-  // Simple wrapper for editorDidMount
-  // const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-  //   // Call the original editorDidMount function
-  //   // editorDidMount(editor);
-
-  //   // Return the original editor instance
-
-  //   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-  //     onSubmit(editor.getValue());
-  //   });
-  //   return editor;
-  //};
   return (
     <div className="queryEditor" data-test-subj="osdQueryEditor__multiLine">
       <CodeEditor

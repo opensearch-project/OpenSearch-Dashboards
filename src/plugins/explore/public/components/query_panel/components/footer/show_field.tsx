@@ -20,6 +20,8 @@ export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onT
     onToggle(checked);
   };
 
+  // menuLeft;
+  // menurIGHT;
   return (
     <EuiSwitch
       label="Hide Fields"
