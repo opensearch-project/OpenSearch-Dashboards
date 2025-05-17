@@ -16,7 +16,7 @@ export const SaveQueryButton: React.FC = () => {
       button={
         <EuiButtonEmpty
           onClick={onButtonClick}
-          iconType="folderOpen" // Add the folderOpen icon
+          iconType="save" // Add the folderOpen icon
           style={{ color: '#0073e6' }} // Highlighted text style
           data-test-subj="saveQueryButton"
         >
