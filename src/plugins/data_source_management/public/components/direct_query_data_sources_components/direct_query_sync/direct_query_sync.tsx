@@ -4,20 +4,23 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { DirectQueryLoadingStatus } from '../../../../framework/types';
 
 import { fetchDirectQuerySyncInfo, DirectQuerySyncInfo } from './direct_query_sync_utils';
+import { EMR_STATES, intervalAsMinutes } from '../../../constants';
 import './direct_query_sync.scss';
 
-interface Props {
+interface DashboardDirectQuerySyncProps {
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   dashboardId: string;
   removeBanner: () => void;
 }
 
-export const DashboardDirectQuerySync: React.FC<Props> = ({
+export const DashboardDirectQuerySync: React.FC<DashboardDirectQuerySyncProps> = ({
   http,
   savedObjectsClient,
   dashboardId,
@@ -25,13 +28,6 @@ export const DashboardDirectQuerySync: React.FC<Props> = ({
 }) => {
   const [syncInfo, setSyncInfo] = useState<DirectQuerySyncInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Convert interval from milliseconds to minutes for display
-  const intervalAsMinutes = (interval: number | null): string => {
-    if (interval === null) return 'N/A';
-    const minutes = Math.floor(interval / 60000);
-    return minutes === 1 ? '1 minute' : `${minutes} minutes`;
-  };
 
   // Fetch sync information using the utility function
   useEffect(() => {
@@ -54,12 +50,20 @@ export const DashboardDirectQuerySync: React.FC<Props> = ({
     loadSyncInfo();
   }, [dashboardId, http, savedObjectsClient, removeBanner]);
 
+  // Placeholder for the "Sync Now" action
+  const handleSynchronize = () => {
+    // To be implemented later with polling and direct query logic
+    console.log('Synchronize Now clicked');
+  };
+
   // Show error if fetching failed
   if (error) {
     return (
-      <EuiText size="m" className="direct-query-sync" color="danger">
-        {error}
-      </EuiText>
+      <div className="direct-query-sync" data-test-subj="directQuerySyncError">
+        <EuiText size="s" color="danger">
+          {error}
+        </EuiText>
+      </div>
     );
   }
 
@@ -68,14 +72,47 @@ export const DashboardDirectQuerySync: React.FC<Props> = ({
     return null;
   }
 
-  // Render the component with the sync info
+  // Use the actual component's UI design
+  const loadStatus: DirectQueryLoadingStatus = 'fresh'; // Default until polling is implemented
+  const state = EMR_STATES.get(loadStatus)!;
+
   return (
-    <EuiText size="m" className="direct-query-sync">
-      Data scheduled to sync every {intervalAsMinutes(syncInfo.refreshInterval)}. Last sync:{' '}
-      {syncInfo.lastRefreshTime !== null
-        ? `${Math.floor((Date.now() - syncInfo.lastRefreshTime) / 60000)} minutes ago`
-        : 'N/A'}{' '}
-      Synchronize Now
-    </EuiText>
+    <div className="direct-query-sync" data-test-subj="directQuerySyncBar">
+      {state.terminal ? (
+        <EuiText size="s">
+          {i18n.translate('dataSourcesManagement.directQuerySync.dataScheduledToSync', {
+            defaultMessage: 'Data scheduled to sync every {interval}. Last sync: {lastSyncTime}.',
+            values: {
+              interval: syncInfo.refreshInterval
+                ? intervalAsMinutes(1000 * syncInfo.refreshInterval)
+                : '--',
+              lastSyncTime: syncInfo.lastRefreshTime
+                ? `${new Date(syncInfo.lastRefreshTime).toLocaleString()} (${intervalAsMinutes(
+                    new Date().getTime() - syncInfo.lastRefreshTime
+                  )} ago)`
+                : '--',
+            },
+          })}
+
+          <EuiLink onClick={handleSynchronize}>
+            {i18n.translate('dataSourcesManagement.directQuerySync.syncDataLink', {
+              defaultMessage: 'Sync data',
+            })}
+          </EuiLink>
+        </EuiText>
+      ) : (
+        <EuiCallOut size="s">
+          <EuiLoadingSpinner size="s" />
+
+          {i18n.translate('dataSourcesManagement.directQuerySync.dataSyncInProgress', {
+            defaultMessage:
+              'Data sync is in progress ({progress}% complete). The dashboard will reload on completion.',
+            values: {
+              progress: state.ord,
+            },
+          })}
+        </EuiCallOut>
+      )}
+    </div>
   );
 };
