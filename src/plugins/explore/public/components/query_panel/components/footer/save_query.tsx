@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
-import { EuiPopover, EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty, EuiText, EuiIcon } from '@elastic/eui';
 
 export const SaveQueryButton: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -17,10 +17,11 @@ export const SaveQueryButton: React.FC = () => {
         <EuiButtonEmpty
           onClick={onButtonClick}
           iconType="save" // Add the folderOpen icon
-          style={{ color: '#0073e6' }} // Highlighted text style
+          style={{ color: '#0073e6', padding: '0px' }} // Highlighted text style
           data-test-subj="saveQueryButton"
         >
           Saved Queries
+          <EuiIcon type="arrowDown" style={{ marginLeft: '5px' }} /> {/* Add arrowDown icon */}
         </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}
@@ -31,7 +32,6 @@ export const SaveQueryButton: React.FC = () => {
         <EuiText size="s">
           <p>Save your query for future use.</p>
         </EuiText>
-        {/* Add additional save query options or forms here */}
       </div>
     </EuiPopover>
   );

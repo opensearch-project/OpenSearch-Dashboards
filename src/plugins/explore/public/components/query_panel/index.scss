@@ -25,12 +25,17 @@
       font-weight: 400;
       line-height: 21px; 
      }
+
+    .euiButtonEmpty .euiButtonEmpty__content {
+      padding: 0px;
+    }
   }
 
   .vertical-separator {
     width: 1px;
     height: 16px;
     background: #D9D9D9;
+    margin: 0 8px;
   }
 }
 
@@ -40,12 +45,12 @@
   background-color: white;
   font-family: $euiCodeFontFamily;
   border-radius: 1px;
+  font-family: 'Roboto Mono';
 
   .promptEditorWrapper{
-
     .promptEditor {
       border: 1px solid #D6D9DD;
-      border-bottom: 1px solid #006BB4;
+      // border-bottom: 1px solid #006BB4;
       border-radius: 1px;
         .monaco-editor .view-overlays .current-line {
           border: none;
@@ -106,9 +111,7 @@
       }
 
     }
-
   } 
-
 
   .queryEditor {
     border: $euiBorderThin;
@@ -132,6 +135,10 @@
       .view-lines{
         font-size: 13px;
       }
+
+      .comment-line {
+        color: rgba(0, 255, 0, 0.1); /* Light green background */
+      }
     }
   
     .monaco-editor,
@@ -142,4 +149,5 @@
       font-size: 13px;
     }
   }
+
 }

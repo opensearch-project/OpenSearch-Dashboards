@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 interface ShowFieldToggleProps {
   isEnabled: boolean;
@@ -12,23 +12,22 @@ interface ShowFieldToggleProps {
 }
 
 export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onToggle }) => {
-  const [isChecked, setIsChecked] = useState(isEnabled);
+  const [showField, setShowField] = useState(isEnabled);
 
-  const handleToggle = (e: any) => {
-    const checked = e.target.checked;
-    setIsChecked(checked);
-    onToggle(checked);
+  const handleToggle = () => {
+    const newState = !showField;
+    setShowField(newState);
+    onToggle(newState);
   };
 
-  // menuLeft;
-  // menurIGHT;
   return (
-    <EuiSwitch
-      label="Hide Fields"
-      checked={isChecked}
-      onChange={(e) => handleToggle(e)}
-      data-test-subj="showFieldsToggle"
-      compressed
-    />
+    <EuiButtonEmpty
+      onClick={handleToggle}
+      iconType={showField ? 'menuLeft' : 'menuRight'} // Add the folderOpen icon
+      style={{ color: '#0073e6', padding: '0px' }} // Highlighted text style
+      data-test-subj="showFields"
+    >
+      {showField ? 'Hide Fields' : 'Show Fields'}
+    </EuiButtonEmpty>
   );
 };

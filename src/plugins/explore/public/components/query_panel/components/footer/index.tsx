@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { ShowFieldToggle } from './show_field';
 import { RecentQueries } from './recent_queries';
 import { SaveQueryButton } from './save_query';
-// import { Actions } from './actions';
+import { Actions } from './actions';
 import { DateTimeRangePicker } from './date_time_selector';
 import { RunQueryButton } from './run_query';
 import { ShowInputType } from './show_input_type';
@@ -40,14 +40,13 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {/* <hr className="vertical-separator" /> */}
-              <EuiHorizontalRule margin="xs" />
+              <EuiHorizontalRule margin="xs" className="vertical-separator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <RecentQueries />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="xs" />
+              <EuiHorizontalRule margin="xs" className="vertical-separator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SaveQueryButton />
@@ -61,17 +60,11 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
         {/* Right Section */}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            {/* <EuiFlexItem grow={false}>
-              <Actions />
-            </EuiFlexItem> */}
             <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="xs" />
+              <Actions />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DateTimeRangePicker />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="xs" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <RunQueryButton onClick={handleQueryRun} isDisabled={false} />
