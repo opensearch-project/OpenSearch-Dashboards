@@ -25,6 +25,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
   const [isReadOnly, setIsReadOnly] = useState(false);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorConfig = getEditorConfig(languageType);
+  const [editorIsFocused, setEditorIsFocused] = useState(false);
 
   const handleEditClick = () => {
     setIsReadOnly(false);
@@ -35,6 +36,18 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
 
+    editor.onDidFocusEditorText(() => {
+      setEditorIsFocused(true);
+    });
+
+    editor.onDidBlurEditorText(() => {
+      setEditorIsFocused(false);
+    });
+
+    editor.updateOptions({
+      placeholder: 'Enter your prompt here...',
+    });
+
     editor.addCommand(monaco.KeyCode.Enter, () => {
       const promptValue = editor.getValue();
       handlePromptRun(promptValue);
@@ -44,24 +57,27 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
 
     // Add command for Shift + Enter to insert a new line
     editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
-      const currentPosition = editor.getPosition();
-      if (currentPosition) {
-        editor.executeEdits('', [
-          {
-            range: new monaco.Range(
-              currentPosition.lineNumber,
-              currentPosition.column,
-              currentPosition.lineNumber,
-              currentPosition.column
-            ),
-            text: '\n',
-            forceMoveMarkers: true,
-          },
-        ]);
-        editor.setPosition({
-          lineNumber: currentPosition.lineNumber + 1,
-          column: 1,
-        });
+      if (editor.hasTextFocus()) {
+        console.log('Shift + Enter pressed prompt');
+        const currentPosition = editor.getPosition();
+        if (currentPosition) {
+          editor.executeEdits('', [
+            {
+              range: new monaco.Range(
+                currentPosition.lineNumber,
+                currentPosition.column,
+                currentPosition.lineNumber,
+                currentPosition.column
+              ),
+              text: '\n',
+              forceMoveMarkers: true,
+            },
+          ]);
+          editor.setPosition({
+            lineNumber: currentPosition.lineNumber + 1,
+            column: 1,
+          });
+        }
       }
     });
 
@@ -76,6 +92,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
     <div className="promptEditorWrapper" style={{ position: 'relative' }}>
       <div
         className={`promptEditor ${isReadOnly ? 'promptEditor--readonly' : ''}`}
+        style={editorIsFocused && !isReadOnly ? { borderBottom: '1px solid #006BB4' } : {}}
         data-test-subj="osdQueryEditor__multiLine"
       >
         <CodeEditor
@@ -93,7 +110,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
               enabled: false,
             },
             padding: {
-              top: 7, // (32 - 18) / 2 = 7
+              top: 7,
               bottom: 7,
             },
             scrollBeyondLastLine: false,
@@ -113,6 +130,26 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
             ...editorConfig, // Spread the dynamic configuration
           }}
         />
+
+        {!prompt && !editorIsFocused && !isReadOnly && (
+          <div
+            className="monacoPlaceholder"
+            style={{
+              position: 'absolute',
+              top: 10,
+              left: 10,
+              color: '#676E75',
+              fontSize: 14,
+              fontWeight: 400,
+              fontFamily: 'Roboto Mono',
+              pointerEvents: 'none',
+              zIndex: 1,
+            }}
+          >
+            Ask a question or search using
+            <EuiIcon type="editorCodeBlock" /> PPL
+          </div>
+        )}
 
         {isReadOnly && (
           <div className="promptEditor__editOverlay" onClick={handleEditClick}>

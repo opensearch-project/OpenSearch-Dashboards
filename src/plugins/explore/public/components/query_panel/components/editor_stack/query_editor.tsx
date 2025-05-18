@@ -3,77 +3,105 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { LanguageType } from './shared';
 
-interface PromptEditorProps {
+interface QueryEditorProps {
   languageType: LanguageType;
   queryString: string;
   onChange: (value: string) => void;
   handleQueryRun: (queryString?: string) => void;
-  // editorDidMount: (editor: any) => void;
 }
 
-export const QueryEditor: React.FC<PromptEditorProps> = ({
+const FIXED_COMMENT = '// This is a fixed comment';
+
+export const QueryEditor: React.FC<QueryEditorProps> = ({
   queryString,
   languageType,
   onChange,
   handleQueryRun,
 }) => {
-  // const editorConfig = getEditorConfig(languageType);
+  const [editorIsFocused, setEditorIsFocused] = useState(false);
+  const [decorated, setDecorated] = useState(false);
 
-  const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
-  const handleEditorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    const focusDisposable = editor.onDidFocusEditorText(() => {
-      if (blurTimeoutRef.current) {
-        clearTimeout(blurTimeoutRef.current);
+  // 🧠 Inject comment only once when content is loaded
+  useEffect(() => {
+    if (!queryString.startsWith(FIXED_COMMENT)) {
+      onChange(`${FIXED_COMMENT}\n${queryString}`);
+    }
+  }, [queryString, onChange]);
+
+  const handleEditorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editor.onDidFocusEditorText(() => {
+        setEditorIsFocused(true);
+      });
+
+      editor.onDidBlurEditorText(() => {
+        setEditorIsFocused(false);
+      });
+
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+        handleQueryRun(editor.getValue());
+      });
+
+      // Add command for Shift + Enter to insert a new line
+      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+        if (editor.hasTextFocus()) {
+          const currentPosition = editor.getPosition();
+          if (currentPosition) {
+            editor.executeEdits('', [
+              {
+                range: new monaco.Range(
+                  currentPosition.lineNumber,
+                  currentPosition.column,
+                  currentPosition.lineNumber,
+                  currentPosition.column
+                ),
+                text: '\n',
+                forceMoveMarkers: true,
+              },
+            ]);
+            editor.setPosition({
+              lineNumber: currentPosition.lineNumber + 1,
+              column: 1,
+            });
+          }
+        }
+      });
+
+      // ✅ Add fixed comment if not already present
+      const fixedComment = '// This is a fixed comment';
+      if (!queryString.startsWith(fixedComment)) {
+        const updated = `${fixedComment}\n${queryString}`;
+        onChange(updated);
       }
-    });
 
-    const blurDisposable = editor.onDidBlurEditorText(() => {
-      blurTimeoutRef.current = setTimeout(() => {}, 500);
-    });
-
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-      handleQueryRun(editor.getValue());
-    });
-
-    // Add command for Shift + Enter to insert a new line
-    editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
-      const currentPosition = editor.getPosition();
-      if (currentPosition) {
-        editor.executeEdits('', [
+      // ✅ Decorate comment line after mount (only once)
+      if (!decorated) {
+        editor.createDecorationsCollection([
           {
-            range: new monaco.Range(
-              currentPosition.lineNumber,
-              currentPosition.column,
-              currentPosition.lineNumber,
-              currentPosition.column
-            ),
-            text: '\n',
-            forceMoveMarkers: true,
+            range: new monaco.Range(1, 1, 1, 1),
+            options: {
+              isWholeLine: true,
+              className: 'comment-line',
+            },
           },
         ]);
-        editor.setPosition({
-          lineNumber: currentPosition.lineNumber + 1,
-          column: 1,
-        });
+        setDecorated(true);
       }
-    });
-
-    return () => {
-      focusDisposable.dispose();
-      blurDisposable.dispose();
-      if (blurTimeoutRef.current) {
-        clearTimeout(blurTimeoutRef.current);
-      }
-    };
-  }, []);
+    },
+    [decorated, handleQueryRun, prompt]
+  );
 
   return (
-    <div className="queryEditor" data-test-subj="osdQueryEditor__multiLine">
+    <div
+      className="queryEditor"
+      data-test-subj="osdQueryEditor__multiLine"
+      style={editorIsFocused ? { borderBottom: '1px solid #006BB4' } : {}}
+    >
       <CodeEditor
         height={100}
         languageId={languageType}
@@ -92,7 +120,6 @@ export const QueryEditor: React.FC<PromptEditorProps> = ({
           wrappingIndent: 'same',
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 1,
-          // Configure suggestion behavior
           suggest: {
             snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
             filterGraceful: false, // Don't filter suggestions

@@ -31,6 +31,7 @@ export const RecentQueries: React.FC = () => {
           <EuiButtonEmpty
             onClick={onButtonClick}
             iconType="clock"
+            style={{ padding: '0px' }}
             data-test-subj="recentQueriesButton"
           >
             Recent Queries

@@ -4,7 +4,13 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+  EuiIcon,
+} from '@elastic/eui';
 import { useState } from 'react';
 import { queryBarActionsRegistry } from './registry';
 
@@ -27,9 +33,10 @@ export const Actions: React.FC = () => {
   return (
     <EuiPopover
       button={
-        <EuiButton iconType="arrowDown" onClick={() => setIsOpen(!isOpen)}>
+        <EuiButtonEmpty onClick={() => setIsOpen(!isOpen)}>
           Actions
-        </EuiButton>
+          <EuiIcon type="arrowDown" style={{ margin: '0px 5px' }} />
+        </EuiButtonEmpty>
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
