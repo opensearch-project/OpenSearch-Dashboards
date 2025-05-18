@@ -28,6 +28,7 @@ export interface DirectQuerySyncInfo {
   refreshInterval: number | null;
   lastRefreshTime: number | null;
   mappingName: string | null;
+  mdsId?: string;
 }
 
 const DIRECT_QUERY_BASE = '/api/directquery';
@@ -143,7 +144,7 @@ export async function fetchDirectQuerySyncInfo({
     const refreshQuery = generateRefreshQuery(parts);
     console.log('Generated Refresh Query:', refreshQuery);
 
-    return { refreshQuery, refreshInterval, lastRefreshTime, mappingName };
+    return { refreshQuery, refreshInterval, lastRefreshTime, mappingName, mdsId: localMdsId };
   } catch (err) {
     console.error('Error fetching sync info:', err);
     onError('Failed to fetch dashboard information');

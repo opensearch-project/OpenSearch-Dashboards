@@ -6,28 +6,37 @@
 import React, { useState, useEffect } from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { DirectQueryLoadingStatus } from '../../../../framework/types';
+import {
+  HttpStart,
+  NotificationsStart,
+  SavedObjectsClientContract,
+} from 'opensearch-dashboards/public';
 
 import { fetchDirectQuerySyncInfo, DirectQuerySyncInfo } from './direct_query_sync_utils';
 import { EMR_STATES, intervalAsMinutes } from '../../../constants';
+import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
 import './direct_query_sync.scss';
 
-interface DashboardDirectQuerySyncProps {
+interface DirectQuerySyncProps {
   http: HttpStart;
+  notifications: NotificationsStart;
   savedObjectsClient: SavedObjectsClientContract;
   dashboardId: string;
   removeBanner: () => void;
 }
 
-export const DashboardDirectQuerySync: React.FC<DashboardDirectQuerySyncProps> = ({
+export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
   http,
+  notifications,
   savedObjectsClient,
   dashboardId,
   removeBanner,
 }) => {
   const [syncInfo, setSyncInfo] = useState<DirectQuerySyncInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Initialize the useDirectQuery hook
+  const { loadStatus, startLoading } = useDirectQuery(http, notifications, syncInfo?.mdsId);
 
   // Fetch sync information using the utility function
   useEffect(() => {
@@ -50,16 +59,51 @@ export const DashboardDirectQuerySync: React.FC<DashboardDirectQuerySyncProps> =
     loadSyncInfo();
   }, [dashboardId, http, savedObjectsClient, removeBanner]);
 
-  // Placeholder for the "Sync Now" action
+  // Refresh the window when loadStatus becomes 'success'
+  useEffect(() => {
+    if (loadStatus === 'success') {
+      window.location.reload();
+    }
+  }, [loadStatus]);
+
+  // Handle the "Sync Now" action
   const handleSynchronize = () => {
-    // To be implemented later with polling and direct query logic
-    console.log('Synchronize Now clicked');
+    if (!syncInfo || !syncInfo.refreshQuery) {
+      console.error('Cannot synchronize: refreshQuery is missing');
+      return;
+    }
+
+    const match = syncInfo.refreshQuery.match(
+      /REFRESH MATERIALIZED VIEW `(.+?)`\.`(.+?)`\.`(.+?)`/
+    );
+    if (!match || match.length < 4) {
+      console.error('Cannot synchronize: failed to parse datasource from refreshQuery');
+      return;
+    }
+
+    const datasource = match[1];
+
+    // Construct the DirectQueryRequest payload
+    const requestPayload = {
+      datasource,
+      query: syncInfo.refreshQuery,
+      lang: 'sql' as const,
+    };
+
+    startLoading(requestPayload);
   };
+
+  // Refresh the window when loadStatus becomes 'success'
+  useEffect(() => {
+    if (loadStatus === 'success') {
+      window.location.reload();
+    }
+  }, [loadStatus]);
 
   // Show error if fetching failed
   if (error) {
     return (
-      <div className="direct-query-sync" data-test-subj="directQuerySyncError">
+      <div className="dshDashboardGrid__syncBar" data-test-subj="dashboardDirectQuerySyncBar">
         <EuiText size="s" color="danger">
           {error}
         </EuiText>
@@ -72,8 +116,6 @@ export const DashboardDirectQuerySync: React.FC<DashboardDirectQuerySyncProps> =
     return null;
   }
 
-  // Use the actual component's UI design
-  const loadStatus: DirectQueryLoadingStatus = 'fresh'; // Default until polling is implemented
   const state = EMR_STATES.get(loadStatus)!;
 
   return (
