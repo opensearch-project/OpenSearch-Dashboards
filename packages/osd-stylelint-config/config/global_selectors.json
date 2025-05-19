@@ -29,6 +29,7 @@
     ]
   },
   "/\\.explore/": {
-    "approved": ["src/plugins/explore/"]
+    "explanation": "\"explore\" prefix is preserved for Explore plugin",
+    "approved": ["src/plugins/explore/", "examples/expressions_example/public/index.scss"]
   }
 }
