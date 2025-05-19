@@ -1,0 +1,222 @@
+Summary
+
+Implementing a coordinated state management solution in OSD to prevent race conditions when multiple state updates happen simultaneously, particularly when loading saved searches or switching datasets. A transaction-based middleware approach was evaluated to ensure atomicity of related state changes. This doc was discussed State Trx Mngr for Saved Search.
+
+Details
+
+Challenges
+
+OSD currently splits state across three independent stores, leading to potential race conditions:
+
+// Three separate state stores that update independently
+const _g = { time: { from: 'now-2y', to: 'now' } };            // Global state
+const _q = { query: 'source = issues', dataset: 'issues' };    // Query state
+const _a = { columns: ['_source'], sort: [] };                 // Application state
+
+
+When these stores update asynchronously (like when loading a saved search), the UI can show inconsistent states and multiple redundant queries may execute.
+
+Language-Agnostic
+
+We should consider when we added more languages in the future creating a language-agnostic solution that doesn't assume PPL as the only query language:
+
+// Query middleware with transaction logic
+const queryMiddleware = ({ getState, dispatch }) => {
+  return next => async action => {
+    const result = next(action);     // Let action update the state first
+    if (action.type === 'COMMIT_STATE_TRANSACTION') {
+      const state = getState();
+
+      // Create search source with all current state
+      // Note: We don't transform the query - we assume it's already properly formatted
+      const searchSource = await initSearchSource();
+      searchSource
+        .setField('index', state.query.dataset)
+        .setField('query', state.query.query) // Use query as-is without language assumptions
+        .setField('filter', getTimeRangeFilter(state));
+        
+      // Execute a single query with the complete state
+      executeQuery(searchSource);
+    }
+    
+    return result;
+  };
+};
+
+Making language-specific assumptions would create technical debt:
+
+* Would require middleware modifications for each new query language
+* Limits extensibility for plugins with specialized query languages
+* Complicates testing as language options grow
+
+State Transition Flow
+
+The transaction approach batches related state changes before executing a single query:
+
+Stage	Current	Transaction
+Load saved search	Multiple async updates to _g, _q, and _a	Start transaction → Collect all updates
+During transition	Race condition between dataset and query updates	Updates stored but not yet applied
+Complete transition	Multiple queries executed in unpredictable order	Commit transaction → Execute single query
+Result	Potential UI inconsistency	Consistent, coordinated state
+
+Example: Loading a Saved Explorer
+
+When loading a saved explorer, multiple state changes must happen atomically:
+
+Without Transaction Management
+
+function loadSavedExplorer(id) {
+  const savedExplorer = await getSavedExplorer(id);
+  
+  // These dispatches happen in sequence but resolve asynchronously
+  dispatch(setDataset(savedExplorer.dataset));        // Triggers query #1
+  dispatch(setQuery(savedExplorer.query));            // Triggers query #2
+  dispatch(setTimeRange(savedExplorer.timeRange));    // Triggers query #3
+  dispatch(setColumns(savedExplorer.columns));        // No query
+}
+
+
+Result: Three separate queries execute, UI may show inconsistent state during loading, final state depends on which query completes last.
+
+With Transaction Management
+
+function loadSavedExplorer(id) {
+  const savedExplorer = await getSavedExplorer(id);
+  
+  // Start a transaction to batch state updates
+  dispatch(startTransaction());
+  
+  // Updates collected but don't trigger queries yet
+  dispatch(setDataset(savedExplorer.dataset));
+  dispatch(setQuery(savedExplorer.query));
+  dispatch(setTimeRange(savedExplorer.timeRange));
+  dispatch(setColumns(savedExplorer.columns));
+  
+  // Apply all updates and execute a single query
+  dispatch(commitTransaction());
+}
+
+
+Result: Single query executes with complete, consistent state; UI updates all at once; better performance.
+
+Cache Management
+
+The team discussed cache invalidation rules for different state changes:
+
+State Change	Cache Behavior	Reason
+Dataset change	Clear cache	Different data source means previous results aren't relevant
+Query change	Clear cache	Different selection criteria means new results needed
+Time range change	Clear cache	Different time window requires new data
+Column change	Reuse cache	Same data, just displayed differently
+Tab switch	Check cache by query+time key	May be able to reuse cached results
+
+Requirements
+
+* Coordinated State Updates: 
+    * Group related state changes together to prevent inconsistency
+    * Ensure only one query executes after all state changes are complete
+* Language-Agnostic Design: 
+    * Don't assume specific query language in middleware
+    * Support current and future query languages (PPL, SQL, PromQL, etc.)
+* Effective Caching: 
+    * Cache results based on query + time range + dataset
+    * Clear cache appropriately when relevant state changes
+* Plugin Extensibility: 
+    * Allow plugins to register custom state transition handlers
+    * Support different query languages and data sources
+
+Action Items
+
+* Implement transaction-based middleware to batch state updates
+* Create language-agnostic query handling mechanism
+* Develop caching with appropriate invalidation rules
+* Test implementation with saved search loading scenarios
+* Support different query languages without middleware changes
+* Document component responsibility for query transformation
+
+
+
+-----------------2-------------------------
+
+State Trx Mngr for Saved Search
+
+Overview
+
+OpenSearch Dashboards (OSD) state management currently relies on three distinct state stores:
+
+* Global State (_g): Manages global configurations such as time range and global filters.
+* Query State (_q): Controls query language, query text, and dataset selection.
+* Application State (_a): Handles application-specific settings including columns, sorting order, and saved searches.
+
+These states are managed independently, often leading to asynchronous updates, race conditions, inconsistent UI states, and user confusion, especially when datasets aren't pre-cached.
+This document proposes implementing a centralized transaction-based state synchronization solution to ensure atomic updates across these states while allowing plugins to register custom logic for handling state transitions.
+
+Problem
+
+Challenges in Current State Management
+
+* Independent and asynchronous state updates via URL utilities and Redux. while saved searches has a saved query, filters, etc.
+* Race conditions causing inconsistent UI states.
+
+Example of Current Problematic Workflow
+
+Action	URL	_g	_q	_a
+Initial state	/w/xyz/app/data-explorer/discover	{ time: { from: 'now-2y', to: 'now' } }	{ query: 'source = issues', dataset: 'issues', language: 'PPL' }	{ columns: ['_source'], sort: [] }
+Midway during loading	/w/xyz/app/data-explorer/discover/#/view/abc123	{ time: { from: 'now-2y', to: 'now' } }	(Previous dataset retained, but UI does not update correctly, causing inconsistency)	(Filters do not appear immediately, columns in transition)
+After saved search selection	/w/xyz/app/data-explorer/discover/#/view/def456	{ time: { from: 'now-2y', to: 'now' } }	{ query: '', dataset: 'logs', language: 'kuery' }	{ columns: ['number', 'title', 'closed_at', 'labels.name'], sort: [['closed_at', 'asc']] } (filters missing until refresh)
+
+Plugin-Driven State Handling
+
+Here we are essentially enabling the plugin to have the power but get the state updates from us. While the StateTransactionManager ensures atomic updates, different plugins may require unique ways of handling state transitions. To support this, plugins can register handlers that dictate how state should be applied when transitioning between saved searches, datasets, or query languages.
+
+interface StateUpdateHandler {
+  applyGlobalState: (state: any) => void;
+  applyQueryState: (state: any) => void;
+  applyAppState: (state: any) => void;
+}
+
+class StateTransactionManager {
+  private batchMode = false;
+  private pendingUpdates: Record<string, any> = {};
+  private handlers: StateUpdateHandler[] = [];
+
+  registerHandler(handler: StateUpdateHandler) {
+    this.handlers.push(handler);
+  }
+
+  startTransaction() {
+    this.batchMode = true;
+    this.pendingUpdates = {};
+  }
+
+  addUpdate(stateName: string, update: any) {
+    if (this.batchMode) {
+      this.pendingUpdates[stateName] = update;
+    } else {
+      this.applyUpdate(stateName, update);
+    }
+  }
+
+  commitTransaction() {
+    this.batchMode = false;
+    for (const handler of this.handlers) {
+      if (this.pendingUpdates._g) handler.applyGlobalState(this.pendingUpdates._g);
+      if (this.pendingUpdates._q) handler.applyQueryState(this.pendingUpdates._q);
+      if (this.pendingUpdates._a) handler.applyAppState(this.pendingUpdates._a);
+    }
+    this.pendingUpdates = {};
+  }
+}
+
+Example of Improved Workflow with Plugin Customization
+
+Action	URL	_g	_q	_a	Manager Status
+Initial state	/w/xyz/app/data-explorer/discover	{ time: { from: 'now-2y', to: 'now' } }	{ query: 'source = issues', dataset: 'issues', language: 'PPL' }	{ columns: ['_source'], sort: [] }	Synchronized
+Midway during loading	/w/xyz/app/data-explorer/discover/#/view/abc123	Transaction initiated	Transaction initiated (Dataset transition queued before query change)	Transaction initiated (filters and columns queued)	Pending commit
+After saved search selection	/w/xyz/app/data-explorer/discover/#/view/def456	{ time: { from: 'now-2y', to: 'now' } }	{ query: '', dataset: 'logs', language: 'kuery' }	{ columns: ['number', 'title', 'closed_at', 'labels.name'], sort: [['closed_at', 'asc']], filters applied without refresh }	Committed atomically
+
+Workspaces and Dashboards
+
+Workspaces (w/{id}) allow users to operate within isolated environments, each maintaining its own state configurations (_g, _q, _a). Proper synchronization ensures seamless context switching between workspaces while preventing unintended state loss when switching datasets.
+
+Dashboards linked to Discover views or saved searches require careful synchronization to prevent unintended cross-state impacts. Centralized state synchronization prevents unintended interactions and maintains a consistent user experience across workspaces and dashboards.

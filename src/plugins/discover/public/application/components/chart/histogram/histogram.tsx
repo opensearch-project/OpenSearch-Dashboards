@@ -229,6 +229,18 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
       return null;
     }
 
+    // DEBUG: Log chartData structure for comparison with Explore plugin
+    console.log('🔍 [DISCOVER] DiscoverHistogram chartData:', {
+      hasOrdered: !!chartData.ordered,
+      orderedKeys: chartData.ordered ? Object.keys(chartData.ordered) : 'N/A',
+      ordered: chartData.ordered,
+      hasValues: !!chartData.values,
+      valuesLength: chartData.values?.length || 0,
+      hasXAxisOrderedValues: !!chartData.xAxisOrderedValues,
+      xAxisOrderedValuesLength: chartData.xAxisOrderedValues?.length || 0,
+      chartDataKeys: Object.keys(chartData),
+    });
+
     const data = chartData.values;
 
     /**

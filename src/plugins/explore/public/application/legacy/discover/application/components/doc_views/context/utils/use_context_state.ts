@@ -6,12 +6,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../../../../../../common/legacy/discover';
-import { DiscoverServices } from '../../../../../build_services';
+import { ExploreServices } from '../../../../../../../../types';
 import { AppState, getState } from './context_state';
 import { IndexPattern } from '../../../../../opensearch_dashboards_services';
 
 export interface Props {
-  services: DiscoverServices;
+  services: ExploreServices;
   indexPattern: IndexPattern;
 }
 

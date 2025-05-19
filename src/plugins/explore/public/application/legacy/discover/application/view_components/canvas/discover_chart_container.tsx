@@ -5,33 +5,69 @@
 
 import './discover_chart_container.scss';
 import React, { useMemo } from 'react';
-import { DiscoverViewServices } from '../../../build_services';
+import { useSelector } from 'react-redux';
+import { ExploreServices } from '../../../../../../types';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { useDiscoverContext } from '../context';
-import { SearchData } from '../utils/use_search';
 import { DiscoverChart } from '../../components/chart/chart';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../../../../common/legacy/discover';
+import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
 
-export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
-  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+export const DiscoverChartContainer = () => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const { uiSettings, data } = services;
-  const { indexPattern } = useDiscoverContext();
-  const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
 
-  const isTimeBased = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
+  const dataset = useSelector((state: any) => state.query?.dataset);
+  const executionCacheKeys = useSelector((state: any) => state.ui?.executionCacheKeys || []);
+
+  // Get the first cache key for histogram data (or could be made configurable)
+  const cacheKey = executionCacheKeys.length > 0 ? executionCacheKeys[0] : '';
+  const results = useSelector((state: any) => (cacheKey ? state.results[cacheKey] : null));
+
+  // Get IndexPattern from centralized context
+  const {
     indexPattern,
-  ]);
+    isLoading: indexPatternLoading,
+    error: indexPatternError,
+  } = useIndexPatternContext();
 
-  if (!hits || !isTimeBased) return null;
+  const isTimeBased = useMemo(() => {
+    return indexPattern ? indexPattern.isTimeBased() : false;
+  }, [indexPattern]);
+
+  console.log('🔍 DiscoverChartContainer - cacheKey:', cacheKey);
+  console.log('🔍 DiscoverChartContainer - isTimeBased:', isTimeBased);
+  console.log('🔍 DiscoverChartContainer - dataset:', dataset);
+  console.log('🔍 DiscoverChartContainer - indexPattern (from context):', indexPattern);
+  console.log('🔍 DiscoverChartContainer - indexPatternLoading:', indexPatternLoading);
+  console.log('🔍 DiscoverChartContainer - indexPatternError:', indexPatternError);
+  console.log('🔍 DiscoverChartContainer - hasResults:', !!results);
+
+  if (!isTimeBased) {
+    console.log('❌ DiscoverChartContainer: Not time-based, returning null');
+    return null;
+  }
+
+  console.log('🔍 DiscoverChartContainer Final Data:', {
+    cacheKey,
+    hasResults: !!results,
+    hasChartData: !!results?.chartData,
+    hasBucketInterval: !!results?.bucketInterval,
+    rowsLength: results?.hits?.hits?.length || 0,
+  });
+
+  // Return null if no results or no meaningful data
+  if (!results || (!results.chartData && !results.hits?.hits?.length)) {
+    console.log('❌ DiscoverChartContainer: No data available, returning null');
+    return null;
+  }
 
   return (
     <DiscoverChart
-      bucketInterval={bucketInterval}
-      chartData={chartData}
+      bucketInterval={results.bucketInterval}
+      chartData={results.chartData}
       config={uiSettings}
       data={data}
       services={services}
-      isEnhancementsEnabled={isEnhancementsEnabled}
+      isEnhancementsEnabled={true}
     />
   );
 };

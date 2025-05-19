@@ -1,0 +1,71 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreApp {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.exploreTopNav {
+  flex-shrink: 0;
+  padding: $euiSizeS;
+  border-bottom: $euiBorderThin;
+  background-color: $euiColorEmptyShade;
+
+  &__datasetSelector {
+    min-width: 200px;
+  }
+}
+
+.exploreContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.exploreMainContent {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.exploreSidebar {
+  width: 300px;
+  flex-shrink: 0;
+  border-right: $euiBorderThin;
+  overflow-y: auto;
+}
+
+.exploreRightContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// Query Panel specific styles
+.exploreQueryPanel {
+  flex-shrink: 0;
+  margin: $euiSizeS;
+}
+
+// Chart container styles
+.exploreChartContainer {
+  flex-shrink: 0;
+  height: 200px;
+  margin: $euiSizeS;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+}
+
+// Tab content styles
+.exploreTabContent {
+  flex: 1;
+  overflow: hidden;
+  margin: $euiSizeS;
+}

@@ -27,7 +27,7 @@ export function filterColumns(
     return columns.length > 0 ? columns : ['_source'];
   }
   // if true, we keep columns that exist in the new index pattern
-  const fieldsName = indexPattern?.fields.getAll().map((fld) => fld.name) || [];
+  const fieldsName = indexPattern?.fields?.getAll?.()?.map((fld) => fld.name) || [];
   // combine columns and defaultColumns without duplicates
   const combinedColumns = [...new Set([...columns, ...defaultColumns])];
   const filteredColumns = combinedColumns.filter((column) => fieldsName.includes(column));

@@ -147,26 +147,76 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const displayToNavLinkInPortal =
     isEnhancementsEnabled && !!opts?.optionalRef?.topLinkRef?.current && !showActionsInGroup;
 
+  // Debug logging for comparison with explore
+  console.log('Discover TopNav Debug:', {
+    isEnhancementsEnabled,
+    topLinkRefExists: !!opts?.optionalRef?.topLinkRef?.current,
+    showActionsInGroup,
+    displayToNavLinkInPortal,
+    topNavLinksLength: topNavLinks?.length,
+    config: displayToNavLinkInPortal ? 'EMPTY_ARRAY' : 'topNavLinks',
+  });
+
+  // Deep debug: Check opts.optionalRef structure
+  console.log('Discover opts.optionalRef Debug:', {
+    hasOptionalRef: !!opts?.optionalRef,
+    topLinkRef: opts?.optionalRef?.topLinkRef ? 'EXISTS' : 'MISSING',
+    topLinkRefCurrent: opts?.optionalRef?.topLinkRef?.current ? 'EXISTS' : 'NULL',
+    datasetSelectorRef: opts?.optionalRef?.datasetSelectorRef ? 'EXISTS' : 'MISSING',
+    datasetSelectorRefCurrent: opts?.optionalRef?.datasetSelectorRef?.current ? 'EXISTS' : 'NULL',
+    datePickerRef: opts?.optionalRef?.datePickerRef ? 'EXISTS' : 'MISSING',
+    datePickerRefCurrent: opts?.optionalRef?.datePickerRef?.current ? 'EXISTS' : 'NULL',
+  });
+
+  // Ultra deep debug: Check TopNavMenu props
+  console.log('Discover TopNavMenu Props Debug:', {
+    appName: PLUGIN_ID,
+    configLength: (displayToNavLinkInPortal ? [] : topNavLinks)?.length,
+    showSearchBar: TopNavMenuItemRenderType.IN_PLACE,
+    showDatePicker: showDatePicker && TopNavMenuItemRenderType.IN_PORTAL,
+    groupActions: showActionsInGroup,
+    showQueryBar: !!opts?.optionalRef?.datasetSelectorRef,
+    screenTitle,
+  });
+
+  // Detailed action structure comparison
+  console.log('Discover Action Structure Debug:', {
+    totalActions: topNavLinks?.length,
+    actions: topNavLinks?.map((link, index) => ({
+      index,
+      id: (link as any).id,
+      label: (link as any).label,
+      tooltip: (link as any).tooltip,
+      iconType: (link as any).iconType,
+      controlType: (link as any).controlType,
+      hasRun: !!(link as any).run,
+      ariaLabel: (link as any).ariaLabel,
+    })),
+  });
+
   return (
     <>
       {displayToNavLinkInPortal &&
         createPortal(
           <EuiFlexGroup gutterSize="m">
-            {topNavLinks.map((topNavLink) => (
-              <EuiFlexItem grow={false} key={topNavLink.id}>
-                <EuiToolTip position="bottom" content={topNavLink.label}>
+            {topNavLinks.map((topNavLink, index) => (
+              <EuiFlexItem grow={false} key={(topNavLink as any).id || index}>
+                <EuiToolTip
+                  position="bottom"
+                  content={(topNavLink as any).label || (topNavLink as any).tooltip}
+                >
                   <EuiButtonIcon
-                    onClick={(event) => {
-                      topNavLink.run(event.currentTarget);
+                    onClick={(event: any) => {
+                      (topNavLink as any).run(event.currentTarget);
                     }}
-                    iconType={topNavLink.iconType}
-                    aria-label={topNavLink.ariaLabel}
+                    iconType={(topNavLink as any).iconType}
+                    aria-label={(topNavLink as any).ariaLabel}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>,
-          opts.optionalRef.topLinkRef.current
+          opts.optionalRef?.topLinkRef?.current!
         )}
       <TopNavMenu
         appName={PLUGIN_ID}

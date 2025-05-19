@@ -7,7 +7,8 @@ import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSmallButtonEmpty } from '@elastic/eui';
 import { getServices } from '../../../opensearch_dashboards_services';
-import { useDiscoverContext } from '../../view_components/context';
+import { useSelector, useDispatch } from '../../utils/state_management';
+import { setAbortController } from '../../../../../utils/state_management/slices/ui_slice';
 
 export enum DiscoverDownloadCsvToastId {
   Cancelled = 'csvDownloadCancelled',
@@ -17,12 +18,14 @@ export enum DiscoverDownloadCsvToastId {
 }
 
 export const useDiscoverDownloadCsvToasts = () => {
-  const { fetchForMaxCsvStateRef } = useDiscoverContext();
+  const dispatch = useDispatch();
+  const abortController = useSelector((state: any) => state.ui.abortController);
   const { toastNotifications } = getServices();
 
   const onAbort = () => {
-    if (fetchForMaxCsvStateRef.current.abortController) {
-      fetchForMaxCsvStateRef.current.abortController.abort();
+    if (abortController) {
+      abortController.abort();
+      dispatch(setAbortController(null));
       toastNotifications.remove(DiscoverDownloadCsvToastId.Loading);
       toastNotifications.addWarning({
         id: DiscoverDownloadCsvToastId.Cancelled,
