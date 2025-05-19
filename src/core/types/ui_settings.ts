@@ -64,6 +64,7 @@ export enum UiSettingScope {
   GLOBAL = 'global',
   USER = 'user',
   WORKSPACE = 'workspace',
+  DASHBOARD_ADMIN = 'dashboard_admin',
 }
 
 /**
@@ -157,4 +158,5 @@ export interface ImageValidation {
 export interface UserProvidedValues<T = any> {
   userValue?: T;
   isOverridden?: boolean;
+  isPermissionControlled?: boolean;
 }

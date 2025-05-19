@@ -46,6 +46,7 @@ const createSetupContractMock = () => {
     isDefault: jest.fn(),
     isCustom: jest.fn(),
     isOverridden: jest.fn(),
+    isPermissionControlled: jest.fn(),
     overrideLocalDefault: jest.fn(),
     getUpdate$: jest.fn(),
     getSaved$: jest.fn(),

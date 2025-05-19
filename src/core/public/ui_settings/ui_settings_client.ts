@@ -192,6 +192,10 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
   }
 
+  isPermissionControlled(key: string) {
+    return this.isDeclared(key) && Boolean(this.cache[key].isPermissionControlled);
+  }
+
   overrideLocalDefault(key: string, newDefault: any) {
     // capture the previous value
     const prevDefault = this.defaults[key] ? this.defaults[key].value : undefined;

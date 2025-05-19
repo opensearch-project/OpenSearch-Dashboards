@@ -28,9 +28,9 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { mapToObject } from '@osd/std';
+import { combineLatest, Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
+import { firstValueFrom, mapToObject } from '@osd/std';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -48,6 +48,9 @@ import {
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
+import { PermissionControlUiSettingsWrapper } from './saved_objects/permission_control_ui_settings_wrapper';
+import { uiSettingWithPermission } from './saved_objects/ui_settings_permissions';
+import { savedObjectsConfig, SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -58,13 +61,18 @@ export interface SetupDeps {
 export class UiSettingsService
   implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart> {
   private readonly log: Logger;
-  private readonly config$: Observable<UiSettingsConfigType>;
+  private readonly config$: Observable<[UiSettingsConfigType, SavedObjectsConfigType]>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
+  private permissionControlUiSettingsWrapper?: PermissionControlUiSettingsWrapper;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
-    this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
+
+    this.config$ = combineLatest([
+      coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path),
+      coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
+    ]);
   }
 
   public async setup({ http, savedObjects }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
@@ -74,11 +82,30 @@ export class UiSettingsService
     registerRoutes(http.createRouter(''));
     this.register(getCoreSettings());
 
-    const config = await this.config$.pipe(first()).toPromise();
-    this.overrides = config.overrides || {};
+    const config = await firstValueFrom(
+      this.config$.pipe(
+        map(([uiSettingsConfig, savedObjectConfig]) => {
+          return { uiSettingsConfig, savedObjectConfig };
+        })
+      )
+    );
+
+    this.overrides = config.uiSettingsConfig.overrides || {};
 
     // Use uiSettings.defaults from the config file
-    this.validateAndUpdateConfiguredDefaults(config.defaults);
+    this.validateAndUpdateConfiguredDefaults(config.uiSettingsConfig.defaults);
+
+    this.permissionControlUiSettingsWrapper = new PermissionControlUiSettingsWrapper(
+      config.savedObjectConfig.permission.enabled
+    );
+
+    savedObjects.addClientWrapper(
+      100,
+      'permission-controll-ui-settings',
+      this.permissionControlUiSettingsWrapper.wrapperFactory
+    );
+
+    this.register(uiSettingWithPermission);
 
     return {
       register: this.register.bind(this),

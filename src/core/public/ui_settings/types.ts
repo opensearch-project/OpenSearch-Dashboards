@@ -124,6 +124,11 @@ export interface IUiSettingsClient {
   isOverridden: (key: string) => boolean;
 
   /**
+   * Shows whether the uiSettings value set by the dashboard admin only.
+   */
+  isPermissionControlled: (key: string) => boolean;
+
+  /**
    * Returns an Observable that notifies subscribers of each update to the uiSettings,
    * including the key, newValue, and oldValue of the setting that changed.
    */
