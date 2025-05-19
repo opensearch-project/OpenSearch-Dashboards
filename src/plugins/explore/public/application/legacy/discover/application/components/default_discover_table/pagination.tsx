@@ -38,7 +38,7 @@ export const Pagination = ({
         <EuiFlexItem grow={false}>
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="explore.discover.docTable.limitedSearchResultLabel"
+              id="discover.docTable.limitedSearchResultLabel"
               defaultMessage="Limited to {sampleSize} results. Refine your search."
               values={{ sampleSize }}
             />
@@ -47,7 +47,7 @@ export const Pagination = ({
       )}
       <EuiFlexItem grow={false}>
         <FormattedMessage
-          id="explore.discover.docTable.pagerControl.pagesCountLabel"
+          id="discover.docTable.pagerControl.pagesCountLabel"
           defaultMessage="{startItem}&ndash;{endItem} of {totalItems}"
           values={{
             startItem,

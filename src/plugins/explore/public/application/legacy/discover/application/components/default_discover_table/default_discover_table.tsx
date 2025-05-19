@@ -19,8 +19,8 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../../../../common/legacy/discover';
-import { UI_SETTINGS } from '../../../../../../../../data/common';
+} from '../../../../common';
+import { UI_SETTINGS } from '../../../../../data/common';
 
 export interface DefaultDiscoverTableProps {
   columns: string[];
@@ -290,17 +290,14 @@ const DefaultDiscoverTableUI = ({
         {!showPagination && rows.length === sampleSize && (
           <EuiCallOut className="dscTable__footer" data-test-subj="discoverDocTableFooter">
             <FormattedMessage
-              id="explore.discover.howToSeeOtherMatchingDocumentsDescription"
+              id="discover.howToSeeOtherMatchingDocumentsDescription"
               defaultMessage="These are the first {sampleSize} documents matching
               your search, refine your search to see others."
               values={{ sampleSize }}
             />
 
             <EuiSmallButtonEmpty onClick={scrollToTop}>
-              <FormattedMessage
-                id="explore.discover.backToTopLinkText"
-                defaultMessage="Back to top."
-              />
+              <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
             </EuiSmallButtonEmpty>
           </EuiCallOut>
         )}

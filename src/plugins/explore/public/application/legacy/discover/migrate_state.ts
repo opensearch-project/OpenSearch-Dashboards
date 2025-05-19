@@ -4,11 +4,8 @@
  */
 
 import { matchPath } from 'react-router-dom';
-import {
-  getStateFromOsdUrl,
-  setStateToOsdUrl,
-} from '../../../../../opensearch_dashboards_utils/public';
-import { Filter, Query } from '../../../../../data/public';
+import { getStateFromOsdUrl, setStateToOsdUrl } from '../../opensearch_dashboards_utils/public';
+import { Filter, Query } from '../../data/public';
 
 interface CommonParams {
   appState?: string;

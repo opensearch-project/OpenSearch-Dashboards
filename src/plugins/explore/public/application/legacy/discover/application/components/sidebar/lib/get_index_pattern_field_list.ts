@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../../../../../../data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 
 export function getIndexPatternFieldList(
   indexPattern?: IndexPattern,

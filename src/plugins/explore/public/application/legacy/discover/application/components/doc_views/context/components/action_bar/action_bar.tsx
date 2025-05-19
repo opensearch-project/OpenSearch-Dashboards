@@ -132,10 +132,7 @@ export function ActionBar({
               }}
               flush="right"
             >
-              <FormattedMessage
-                id="explore.discover.context.loadButtonLabel"
-                defaultMessage="Load"
-              />
+              <FormattedMessage id="discover.context.loadButtonLabel" defaultMessage="Load" />
             </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -143,10 +140,10 @@ export function ActionBar({
               <EuiCompressedFieldNumber
                 aria-label={
                   isSuccessor
-                    ? i18n.translate('explore.discover.context.olderDocumentsAriaLabel', {
+                    ? i18n.translate('discover.context.olderDocumentsAriaLabel', {
                         defaultMessage: 'Number of older documents',
                       })
-                    : i18n.translate('explore.discover.context.newerDocumentsAriaLabel', {
+                    : i18n.translate('discover.context.newerDocumentsAriaLabel', {
                         defaultMessage: 'Number of newer documents',
                       })
                 }
@@ -172,12 +169,12 @@ export function ActionBar({
             <EuiFormRow display="centerCompressed">
               {isSuccessor ? (
                 <FormattedMessage
-                  id="explore.discover.context.olderDocumentsDescription"
+                  id="discover.context.olderDocumentsDescription"
                   defaultMessage="older documents"
                 />
               ) : (
                 <FormattedMessage
-                  id="explore.discover.context.newerDocumentsDescription"
+                  id="discover.context.newerDocumentsDescription"
                   defaultMessage="newer documents"
                 />
               )}

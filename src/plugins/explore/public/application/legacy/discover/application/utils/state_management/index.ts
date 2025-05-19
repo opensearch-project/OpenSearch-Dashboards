@@ -9,13 +9,13 @@ import {
   setIndexPattern as updateIndexPattern,
   useTypedDispatch,
   useTypedSelector,
-} from '../../../../data_explorer';
+} from '../../../../../data_explorer/public';
 import { DiscoverState } from './discover_slice';
 
 export * from './discover_slice';
 
 export interface DiscoverRootState extends RootState {
-  logs: DiscoverState;
+  discover: DiscoverState;
 }
 
 export const useSelector: TypedUseSelectorHook<DiscoverRootState> = useTypedSelector;

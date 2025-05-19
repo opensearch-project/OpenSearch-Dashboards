@@ -5,7 +5,7 @@
 
 import { Slice } from '@reduxjs/toolkit';
 import { LazyExoticComponent } from 'react';
-import { AppMountParameters } from 'opensearch-dashboards/public';
+import { AppMountParameters } from '../../../../../core/public';
 import { RootState } from '../../utils/state_management';
 
 interface ViewListItem {

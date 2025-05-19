@@ -71,14 +71,14 @@ export function HitsCounter({ hits, showResetButton, onResetQuery, rows }: HitsC
           <EuiText size="s">
             <strong>
               <FormattedMessage
-                id="explore.discover.hitsResultTitle"
+                id="discover.hitsResultTitle"
                 defaultMessage="{rowsCount, plural, one {Result} other {Results}}"
                 values={{ rowsCount }}
               />{' '}
               (
               <span
                 data-test-subj="discoverQueryRowsCount"
-                aria-label={i18n.translate('explore.discover.hitsCounterRowsCount', {
+                aria-label={i18n.translate('discover.hitsCounterRowsCount', {
                   defaultMessage: '{rowsCount} {rowsCount, plural, one {row} other {rows}} shown',
                   values: { rowsCount },
                 })}
@@ -90,7 +90,7 @@ export function HitsCounter({ hits, showResetButton, onResetQuery, rows }: HitsC
                   /
                   <span
                     data-test-subj="discoverQueryHits"
-                    aria-label={i18n.translate('explore.discover.hitsCounterHitsCount', {
+                    aria-label={i18n.translate('discover.hitsCounterHitsCount', {
                       defaultMessage: '{hits} {hits, plural, one {hit} other {hits}}',
                       values: { hits },
                     })}
@@ -110,12 +110,12 @@ export function HitsCounter({ hits, showResetButton, onResetQuery, rows }: HitsC
               data-test-subj="resetSavedSearch"
               onClick={onResetQuery}
               size="s"
-              aria-label={i18n.translate('explore.explore.discover.reloadSavedSearchButton', {
+              aria-label={i18n.translate('discover.reloadSavedSearchButton', {
                 defaultMessage: 'Reset search',
               })}
             >
               <FormattedMessage
-                id="explore.explore.discover.reloadSavedSearchButton"
+                id="discover.reloadSavedSearchButton"
                 defaultMessage="Reset search"
               />
             </EuiButtonEmpty>

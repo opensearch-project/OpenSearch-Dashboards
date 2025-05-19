@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IndexPatternField } from '../../../../../../../../../data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 interface GroupedFields {

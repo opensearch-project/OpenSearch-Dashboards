@@ -32,11 +32,9 @@
     border-color: $euiFormBorderColor;
     background-color: $euiFormBackgroundColor;
 
-    /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
     & > .euiButtonContent {
       justify-content: space-between;
 
-      /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
       .euiIcon {
         fill: $euiTextSubduedColor;
       }
@@ -47,7 +45,6 @@
 .dscSideBar_fieldGroup {
   width: 100%;
 
-  /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
   .euiButtonEmpty__content {
     font-size: $euiFontSizeXS;
     font-weight: $euiFontWeightSemiBold;

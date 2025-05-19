@@ -48,7 +48,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
               title={
                 <h2>
                   <FormattedMessage
-                    id="explore.discover.uninitializedTitle"
+                    id="discover.uninitializedTitle"
                     defaultMessage="Start searching"
                   />
                 </h2>
@@ -56,7 +56,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
               body={
                 <p>
                   <FormattedMessage
-                    id="explore.discover.uninitializedText"
+                    id="discover.uninitializedText"
                     defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
                   />
                 </p>
@@ -69,7 +69,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
                   data-test-subj="discover-refreshDataButton"
                 >
                   <FormattedMessage
-                    id="explore.discover.uninitializedRefreshButtonText"
+                    id="discover.uninitializedRefreshButtonText"
                     defaultMessage="Refresh data"
                   />
                 </EuiSmallButton>

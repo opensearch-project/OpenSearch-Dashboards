@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../../../../../../common/legacy/discover';
+import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../../../common';
 import { DiscoverServices } from '../../../../../build_services';
 import { AppState, getState } from './context_state';
 import { IndexPattern } from '../../../../../opensearch_dashboards_services';

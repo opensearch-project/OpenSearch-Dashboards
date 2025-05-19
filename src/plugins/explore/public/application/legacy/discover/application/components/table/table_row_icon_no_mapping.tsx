@@ -33,14 +33,11 @@ import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export function DocViewTableRowIconNoMapping() {
-  const ariaLabel = i18n.translate(
-    'explore.discover.docViews.table.noCachedMappingForThisFieldAriaLabel',
-    {
-      defaultMessage: 'Warning',
-    }
-  );
+  const ariaLabel = i18n.translate('discover.docViews.table.noCachedMappingForThisFieldAriaLabel', {
+    defaultMessage: 'Warning',
+  });
   const tooltipContent = i18n.translate(
-    'explore.discover.docViews.table.noCachedMappingForThisFieldTooltip',
+    'discover.docViews.table.noCachedMappingForThisFieldTooltip',
     {
       defaultMessage:
         'No cached mapping for this field. Refresh field list from the Management > Index Patterns page',

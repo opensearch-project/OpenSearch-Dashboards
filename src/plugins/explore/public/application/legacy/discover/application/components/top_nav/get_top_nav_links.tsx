@@ -5,27 +5,23 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
-import { Adapters } from '../../../../../../../../inspector/public';
-import { TopNavMenuData, TopNavMenuIconData } from '../../../../../../../../navigation/public';
+import { Adapters } from '../../../../../inspector/public';
+import { TopNavMenuData, TopNavMenuIconData } from '../../../../../navigation/public';
 import { ISearchSource, unhashUrl } from '../../../opensearch_dashboards_services';
 import {
   OnSaveProps,
   SavedObjectSaveModal,
   SaveResult,
   showSaveModal,
-} from '../../../../../../../../saved_objects/public';
+} from '../../../../../saved_objects/public';
 import {
   OpenSearchDashboardsContextProvider,
   toMountPoint,
-} from '../../../../../../../../opensearch_dashboards_react/public';
+} from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../../../../common/legacy/discover';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { OpenSearchPanel } from './open_search_panel';
@@ -50,19 +46,19 @@ const getLegacyTopNavLinks = (
 
   const newSearch: TopNavMenuData = {
     id: 'new',
-    label: i18n.translate('explore.explore.discover.localMenu.localMenu.newSearchTitle', {
+    label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
       defaultMessage: 'New',
     }),
-    description: i18n.translate('explore.discover.localMenu.newSearchDescription', {
+    description: i18n.translate('discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
     }),
     run() {
-      core.application.navigateToApp('explore', {
-        path: `${LOGS_VIEW_ID}#/`,
+      core.application.navigateToApp('discover', {
+        path: '#/',
       });
     },
     testId: 'discoverNewButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverNewButtonLabel', {
+    ariaLabel: i18n.translate('discover.topNav.discoverNewButtonLabel', {
       defaultMessage: `New Search`,
     }),
     iconType: 'plusInCircle',
@@ -70,14 +66,14 @@ const getLegacyTopNavLinks = (
 
   const saveSearch: TopNavMenuData = {
     id: 'save',
-    label: i18n.translate('explore.explore.discover.localMenu.saveTitle', {
+    label: i18n.translate('discover.localMenu.saveTitle', {
       defaultMessage: 'Save',
     }),
-    description: i18n.translate('explore.discover.localMenu.saveSearchDescription', {
+    description: i18n.translate('discover.localMenu.saveSearchDescription', {
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverSaveButtonLabel', {
+    ariaLabel: i18n.translate('discover.topNav.discoverSaveButtonLabel', {
       defaultMessage: `Save search`,
     }),
     run: async () => {
@@ -96,7 +92,7 @@ const getLegacyTopNavLinks = (
           onTitleDuplicate,
         };
 
-        const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
+        const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
 
         savedSearch.columns = state.columns;
         savedSearch.sort = state.sort;
@@ -107,7 +103,7 @@ const getLegacyTopNavLinks = (
           // If the title is a duplicate, the id will be an empty string. Checking for this condition here
           if (id) {
             toastNotifications.addSuccess({
-              title: i18n.translate('explore.explore.discover.notifications.savedSearchTitle', {
+              title: i18n.translate('discover.notifications.savedSearchTitle', {
                 defaultMessage: `Search '{savedSearchTitle}' was saved`,
                 values: {
                   savedSearchTitle: savedSearch.title,
@@ -133,7 +129,7 @@ const getLegacyTopNavLinks = (
           }
         } catch (error) {
           toastNotifications.addDanger({
-            title: i18n.translate('explore.explore.discover.notifications.notSavedSearchTitle', {
+            title: i18n.translate('discover.notifications.notSavedSearchTitle', {
               defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
               values: {
                 savedSearchTitle: savedSearch.title,
@@ -156,13 +152,10 @@ const getLegacyTopNavLinks = (
           title={savedSearch.title}
           showCopyOnSave={!!savedSearch.id}
           objectType="search"
-          description={i18n.translate(
-            'explore.explore.discover.localMenu.saveSaveSearchDescription',
-            {
-              defaultMessage:
-                'Save your Discover search so you can use it in visualizations and dashboards',
-            }
-          )}
+          description={i18n.translate('discover.localMenu.saveSaveSearchDescription', {
+            defaultMessage:
+              'Save your Discover search so you can use it in visualizations and dashboards',
+          })}
           showDescription={false}
         />
       );
@@ -173,14 +166,14 @@ const getLegacyTopNavLinks = (
 
   const openSearch: TopNavMenuData = {
     id: 'open',
-    label: i18n.translate('explore.explore.discover.localMenu.openTitle', {
+    label: i18n.translate('discover.localMenu.openTitle', {
       defaultMessage: 'Open',
     }),
-    description: i18n.translate('explore.discover.localMenu.openSavedSearchDescription', {
+    description: i18n.translate('discover.localMenu.openSavedSearchDescription', {
       defaultMessage: 'Open Saved Search',
     }),
     testId: 'discoverOpenButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverOpenButtonLabel', {
+    ariaLabel: i18n.translate('discover.topNav.discoverOpenButtonLabel', {
       defaultMessage: `Open Saved Search`,
     }),
     run: () => {
@@ -204,18 +197,18 @@ const getLegacyTopNavLinks = (
 
   const shareSearch: TopNavMenuData = {
     id: 'share',
-    label: i18n.translate('explore.discover.localMenu.shareTitle', {
+    label: i18n.translate('discover.localMenu.shareTitle', {
       defaultMessage: 'Share',
     }),
-    description: i18n.translate('explore.discover.localMenu.shareSearchDescription', {
+    description: i18n.translate('discover.localMenu.shareSearchDescription', {
       defaultMessage: 'Share Search',
     }),
     testId: 'shareTopNavButton',
-    ariaLabel: i18n.translate('explore.discover.topNav.discoverShareButtonLabel', {
+    ariaLabel: i18n.translate('discover.topNav.discoverShareButtonLabel', {
       defaultMessage: `Share search`,
     }),
     run: async (anchorElement) => {
-      const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
+      const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
       const sharingData = await getSharingData({
         searchSource: savedSearch.searchSource,
         state,
@@ -240,14 +233,14 @@ const getLegacyTopNavLinks = (
 
   const inspectSearch: TopNavMenuData = {
     id: 'inspect',
-    label: i18n.translate('explore.discover.localMenu.inspectTitle', {
+    label: i18n.translate('discover.localMenu.inspectTitle', {
       defaultMessage: 'Inspect',
     }),
-    description: i18n.translate('explore.discover.localMenu.openInspectorForSearchDescription', {
+    description: i18n.translate('discover.localMenu.openInspectorForSearchDescription', {
       defaultMessage: 'Open Inspector for search',
     }),
     testId: 'openInspectorButton',
-    ariaLabel: i18n.translate('explore.discover.topNav.discoverInspectorButtonLabel', {
+    ariaLabel: i18n.translate('discover.topNav.discoverInspectorButtonLabel', {
       defaultMessage: `Open Inspector for search`,
     }),
     run() {
@@ -313,19 +306,16 @@ export const getTopNavLinks = (
 
   // New
   const newSearch: TopNavMenuIconData = {
-    tooltip: i18n.translate('explore.discover.localMenu.localMenu.newSearchTitle', {
+    tooltip: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
       defaultMessage: 'New',
     }),
     run() {
-      core.application.navigateToApp('explore', {
-        path: `${LOGS_VIEW_ID}#/`,
+      core.application.navigateToApp('discover', {
+        path: '#/',
       });
-      // TODO this behavior is different from Discover. Clicking New in Explore
-      // only closes the saved search and does not change the query.
-      store!.dispatch({ type: setSavedSearchId.type, payload: undefined });
     },
     testId: 'discoverNewButton',
-    ariaLabel: i18n.translate('explore.discover.topNav.discoverNewButtonLabel', {
+    ariaLabel: i18n.translate('discover.topNav.discoverNewButtonLabel', {
       defaultMessage: `New Search`,
     }),
     iconType: 'plusInCircle',
@@ -335,11 +325,11 @@ export const getTopNavLinks = (
 
   // Open
   const openSearch: TopNavMenuIconData = {
-    tooltip: i18n.translate('explore.discover.localMenu.openTitle', {
+    tooltip: i18n.translate('discover.localMenu.openTitle', {
       defaultMessage: 'Open',
     }),
     testId: 'discoverOpenButton',
-    ariaLabel: i18n.translate('explore.discover.topNav.discoverOpenButtonLabel', {
+    ariaLabel: i18n.translate('discover.topNav.discoverOpenButtonLabel', {
       defaultMessage: `Open Saved Search`,
     }),
     run: () => {
@@ -362,11 +352,11 @@ export const getTopNavLinks = (
   // Save
   if (capabilities.discover?.save) {
     const saveSearch: TopNavMenuIconData = {
-      tooltip: i18n.translate('explore.discover.localMenu.saveTitle', {
+      tooltip: i18n.translate('discover.localMenu.saveTitle', {
         defaultMessage: 'Save',
       }),
       testId: 'discoverSaveButton',
-      ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverSaveButtonLabel', {
+      ariaLabel: i18n.translate('discover.topNav.discoverSaveButtonLabel', {
         defaultMessage: `Save search`,
       }),
       run: async () => {
@@ -385,7 +375,7 @@ export const getTopNavLinks = (
             onTitleDuplicate,
           };
 
-          const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
+          const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
 
           savedSearch.columns = state.columns;
           savedSearch.sort = state.sort;
@@ -396,7 +386,7 @@ export const getTopNavLinks = (
             // If the title is a duplicate, the id will be an empty string. Checking for this condition here
             if (id) {
               toastNotifications.addSuccess({
-                title: i18n.translate('explore.explore.discover.notifications.savedSearchTitle', {
+                title: i18n.translate('discover.notifications.savedSearchTitle', {
                   defaultMessage: `Search '{savedSearchTitle}' was saved`,
                   values: {
                     savedSearchTitle: savedSearch.title,
@@ -422,7 +412,7 @@ export const getTopNavLinks = (
             }
           } catch (error) {
             toastNotifications.addDanger({
-              title: i18n.translate('explore.explore.discover.notifications.notSavedSearchTitle', {
+              title: i18n.translate('discover.notifications.notSavedSearchTitle', {
                 defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
                 values: {
                   savedSearchTitle: savedSearch.title,
@@ -445,13 +435,10 @@ export const getTopNavLinks = (
             title={savedSearch.title}
             showCopyOnSave={!!savedSearch.id}
             objectType="search"
-            description={i18n.translate(
-              'explore.explore.discover.localMenu.saveSaveSearchDescription',
-              {
-                defaultMessage:
-                  'Save your Discover search so you can use it in visualizations and dashboards',
-              }
-            )}
+            description={i18n.translate('discover.localMenu.saveSaveSearchDescription', {
+              defaultMessage:
+                'Save your Discover search so you can use it in visualizations and dashboards',
+            })}
             showDescription={false}
           />
         );
@@ -466,15 +453,15 @@ export const getTopNavLinks = (
   // Share
   if (share) {
     const shareSearch: TopNavMenuIconData = {
-      tooltip: i18n.translate('explore.explore.discover.localMenu.shareTitle', {
+      tooltip: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
       testId: 'shareTopNavButton',
-      ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverShareButtonLabel', {
+      ariaLabel: i18n.translate('discover.topNav.discoverShareButtonLabel', {
         defaultMessage: `Share search`,
       }),
       run: async (anchorElement) => {
-        const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
+        const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
         const sharingData = await getSharingData({
           searchSource: savedSearch.searchSource,
           state,
@@ -501,11 +488,11 @@ export const getTopNavLinks = (
   }
 
   const inspectSearch: TopNavMenuIconData = {
-    tooltip: i18n.translate('explore.explore.discover.localMenu.inspectTitle', {
+    tooltip: i18n.translate('discover.localMenu.inspectTitle', {
       defaultMessage: 'Inspect',
     }),
     testId: 'openInspectorButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverInspectorButtonLabel', {
+    ariaLabel: i18n.translate('discover.topNav.discoverInspectorButtonLabel', {
       defaultMessage: `Open Inspector for search`,
     }),
     run() {

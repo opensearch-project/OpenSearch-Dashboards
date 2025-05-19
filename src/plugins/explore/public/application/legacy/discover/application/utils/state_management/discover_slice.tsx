@@ -5,10 +5,9 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { matchPath } from 'react-router-dom';
-import { LOGS_VIEW_ID } from '../../../../../../../common';
-import { Filter, Query } from '../../../../../../../../data/public';
+import { Filter, Query } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
-import { DefaultViewState } from '../../../../data_explorer';
+import { RootState, DefaultViewState } from '../../../../../data_explorer/public';
 import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../saved_searches/types';
@@ -16,7 +15,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
   PLUGIN_ID,
   QUERY_ENHANCEMENT_ENABLED_SETTING,
-} from '../../../../../../../common/legacy/discover';
+} from '../../../../common';
 
 export interface DiscoverState {
   /**
@@ -60,6 +59,10 @@ export interface DiscoverState {
   };
 }
 
+export interface DiscoverRootState extends RootState {
+  discover: DiscoverState;
+}
+
 const initialState: DiscoverState = {
   columns: ['_source'],
   sort: [],
@@ -93,7 +96,7 @@ export const getPreloadedState = async ({
         metadata: {
           ...(indexPatternId &&
             !config.get(QUERY_ENHANCEMENT_ENABLED_SETTING) && { indexPattern: indexPatternId }),
-          view: LOGS_VIEW_ID,
+          view: PLUGIN_ID,
         },
       };
 
@@ -107,7 +110,7 @@ export const getPreloadedState = async ({
 };
 
 export const discoverSlice = createSlice({
-  name: 'logs',
+  name: 'discover',
   initialState,
   reducers: {
     setState(state, action: PayloadAction<DiscoverState>) {

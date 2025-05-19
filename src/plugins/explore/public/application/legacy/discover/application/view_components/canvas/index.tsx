@@ -5,10 +5,8 @@
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import { HeaderVariant } from 'opensearch-dashboards/public';
-import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { TopNav } from './top_nav';
-import { ViewProps } from '../../../../data_explorer';
+import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
 import { DiscoverChartContainer } from './discover_chart_container';
 import { useDiscoverContext } from '../context';
@@ -19,10 +17,11 @@ import { DiscoverUninitialized } from '../../components/uninitialized/uninitiali
 import { LoadingSpinner } from '../../components/loading_spinner/loading_spinner';
 import { DiscoverResultsActionBar } from '../../components/results_action_bar/results_action_bar';
 import { DiscoverViewServices } from '../../../build_services';
-import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../../../../common/legacy/discover';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
+import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
 import './discover_canvas.scss';
+import { HeaderVariant } from '../../../../../../core/public';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: ViewProps) {
@@ -106,9 +105,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       hits={fetchState.hits}
       showResetButton={!!savedSearch?.id}
       resetQuery={() => {
-        core.application.navigateToApp('explore', {
-          path: `${LOGS_VIEW_ID}#/view/${savedSearch?.id}`,
-        });
+        core.application.navigateToApp('discover', { path: `#/view/${savedSearch?.id}` });
       }}
       rows={rows}
       indexPattern={indexPattern}

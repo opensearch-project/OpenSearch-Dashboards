@@ -29,7 +29,7 @@
  */
 
 import { has } from 'lodash';
-import { Query } from '../../../../../../../data/public';
+import { Query } from 'src/plugins/data/public';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure OpenSearch query DSL

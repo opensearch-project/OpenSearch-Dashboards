@@ -8,14 +8,11 @@ import {
   ISearchSource,
   indexPatterns as indexPatternUtils,
   AggConfigs,
-} from '../../../../../../../../data/public';
+} from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { SortOrder } from '../../../saved_searches/types';
 import { getSortForSearchSource } from './get_sort_for_search_source';
-import {
-  SORT_DEFAULT_ORDER_SETTING,
-  SAMPLE_SIZE_SETTING,
-} from '../../../../../../../common/legacy/discover';
+import { SORT_DEFAULT_ORDER_SETTING, SAMPLE_SIZE_SETTING } from '../../../../common';
 
 interface Props {
   indexPattern: IndexPattern;
