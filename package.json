@@ -336,6 +336,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^12.1.5",
     "@testing-library/react-hooks": "^7.0.2",
+    "@testing-library/user-event": "^13.5.0",
     "@types/archiver": "^5.3.1",
     "@types/babel__core": "^7.1.17",
     "@types/bluebird": "^3.1.1",
