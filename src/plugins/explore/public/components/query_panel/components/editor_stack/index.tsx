@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PromptEditor } from './prompt_editor';
 import { QueryEditor } from './query_editor';
 import { LanguageType } from './shared';
@@ -14,6 +14,7 @@ interface EditorStackProps {
   isDualEditor: Boolean;
   handleQueryRun: (queryString?: string) => void;
   handlePromptRun: (queryString?: string) => void;
+  handleClearEditor: () => void;
   queryString: string;
   prompt: string;
 }
@@ -25,9 +26,13 @@ const EditorStack: React.FC<EditorStackProps> = ({
   languageType,
   handleQueryRun,
   handlePromptRun,
+  handleClearEditor,
   queryString,
   prompt,
 }) => {
+  const [isPromptReadOnly, setIsPromptReadOnly] = useState(false);
+  const [isEditorReadOnly, setIsEditorReadOnly] = useState(false);
+
   return (
     <div className="editor-stack">
       <PromptEditor
@@ -35,6 +40,12 @@ const EditorStack: React.FC<EditorStackProps> = ({
         languageType={languageType}
         handlePromptRun={handlePromptRun}
         prompt={prompt}
+        isPromptReadOnly={isPromptReadOnly}
+        handlePromptEdit={() => {
+          setIsEditorReadOnly(true);
+          setIsPromptReadOnly(false);
+        }}
+        handleClearEditor={handleClearEditor}
       />
       {isDualEditor && (
         <QueryEditor
@@ -42,6 +53,11 @@ const EditorStack: React.FC<EditorStackProps> = ({
           languageType="ppl"
           handleQueryRun={handleQueryRun}
           queryString={queryString}
+          isEditorReadOnly={isEditorReadOnly}
+          handleQueryEdit={() => {
+            setIsEditorReadOnly(false);
+          }}
+          handleClearEditor={handleClearEditor}
         />
       )}
     </div>
