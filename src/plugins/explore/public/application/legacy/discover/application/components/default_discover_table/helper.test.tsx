@@ -5,10 +5,10 @@
 
 import { getLegacyDisplayedColumns } from './helper';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { getOsdFieldOverrides } from 'src/plugins/data/common/osd_field_types/osd_field_types';
+import { getOsdFieldOverrides } from '../../../../../../../../data/common/osd_field_types/osd_field_types';
 
 const mockGetFieldByName = jest.fn();
-jest.mock('src/plugins/data/common/osd_field_types/osd_field_types');
+jest.mock('../../../../../../../../data/common/osd_field_types/osd_field_types');
 const mockedGetOsdFieldOverrides = jest.mocked(getOsdFieldOverrides);
 
 describe('getLegacyDisplayedColumns', () => {

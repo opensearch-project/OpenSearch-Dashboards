@@ -15,7 +15,7 @@ exports[`render 1`] = `
       <h2>
         <FormattedMessage
           defaultMessage="OpenSearch"
-          id="discover.topNav.openSearchPanel.openSearchTitle"
+          id="explore.discover.topNav.openSearchPanel.openSearchTitle"
           values={Object {}}
         />
       </h2>
@@ -26,7 +26,7 @@ exports[`render 1`] = `
       noItemsMessage={
         <FormattedMessage
           defaultMessage="No matching searches found."
-          id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
+          id="explore.discover.topNav.openSearchPanel.noSearchesFoundDescription"
           values={Object {}}
         />
       }
@@ -40,6 +40,14 @@ exports[`render 1`] = `
             ],
             "name": "Saved search",
             "type": "search",
+          },
+          Object {
+            "getIconForSavedObject": [Function],
+            "includeFields": Array [
+              "kibanaSavedObjectMeta",
+            ],
+            "name": "Saved explore",
+            "type": "explore",
           },
         ]
       }
@@ -55,12 +63,12 @@ exports[`render 1`] = `
         grow={false}
       >
         <EuiSmallButtonEmpty
-          href="/app/management/opensearch-dashboards/objects?_a=(tab:search)"
+          href="/app/management/opensearch-dashboards/objects?_a=(tab:explore)"
           onClick={[Function]}
         >
           <FormattedMessage
             defaultMessage="Manage searches"
-            id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+            id="explore.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
             values={Object {}}
           />
         </EuiSmallButtonEmpty>

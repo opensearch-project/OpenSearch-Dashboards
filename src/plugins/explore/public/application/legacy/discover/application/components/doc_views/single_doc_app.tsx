@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DiscoverServices } from '../../../build_services';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
@@ -51,7 +51,7 @@ export function SingleDocApp() {
     chrome.setBreadcrumbs([
       ...getRootBreadcrumbs(),
       {
-        text: i18n.translate('discover.single.breadcrumb', {
+        text: i18n.translate('explore.discover.single.breadcrumb', {
           defaultMessage: '{index}#{docId}',
           values: {
             index,

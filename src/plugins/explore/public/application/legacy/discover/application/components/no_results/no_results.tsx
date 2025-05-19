@@ -46,7 +46,7 @@ import {
   QueryStringContract,
   SavedQuery,
   SavedQueryService,
-} from '../../../../../data/public/';
+} from '../../../../../../../../data/public';
 
 interface Props {
   queryString: QueryStringContract;
@@ -236,7 +236,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
         ? [
             {
               id: 'sample_queries',
-              name: i18n.translate('discover.emptyPrompt.sampleQueries.title', {
+              name: i18n.translate('explore.discover.emptyPrompt.sampleQueries.title', {
                 defaultMessage: 'Sample Queries',
               }),
               content: (
@@ -256,7 +256,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
         ? [
             {
               id: 'saved_queries',
-              name: i18n.translate('discover.emptyPrompt.savedQueries.title', {
+              name: i18n.translate('explore.discover.emptyPrompt.savedQueries.title', {
                 defaultMessage: 'Saved Queries',
               }),
               content: (
@@ -283,7 +283,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
           title={
             <EuiText size="s">
               <h2>
-                {i18n.translate('discover.emptyPrompt.title', {
+                {i18n.translate('explore.discover.emptyPrompt.title', {
                   defaultMessage: 'No Results',
                 })}
               </h2>
@@ -292,7 +292,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
           body={
             <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
               <p>
-                {i18n.translate('discover.emptyPrompt.body', {
+                {i18n.translate('explore.discover.emptyPrompt.body', {
                   defaultMessage:
                     'Try selecting a different data source, expanding your time range or modifying the query & filters.',
                 })}

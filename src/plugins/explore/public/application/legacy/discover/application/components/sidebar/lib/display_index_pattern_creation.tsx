@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern, DATA_FRAME_TYPES } from '../../../../../../data/public';
+import { IndexPattern, DATA_FRAME_TYPES } from '../../../../../../../../../data/public';
 
 /**
  * if we should display index pattern creation in the sidebar

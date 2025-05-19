@@ -30,7 +30,7 @@
 
 import { ComponentType } from 'react';
 import { SearchResponse } from 'elasticsearch';
-import { IndexPattern } from '../../../../data/public';
+import { IndexPattern } from '../../../../../../../data/public';
 
 export type OpenSearchSearchHit<T = unknown> = SearchResponse<T>['hits']['hits'][number] & {
   isAnchor?: boolean;

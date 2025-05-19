@@ -187,10 +187,13 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const headerDataValue = headerData.value;
     const formattedValue = this.formatXValue(headerDataValue);
 
-    const partialDataText = i18n.translate('discover.histogram.partialData.bucketTooltipText', {
-      defaultMessage:
-        'The selected time range does not include this entire bucket, it may contain partial data.',
-    });
+    const partialDataText = i18n.translate(
+      'explore.discover.histogram.partialData.bucketTooltipText',
+      {
+        defaultMessage:
+          'The selected time range does not include this entire bucket, it may contain partial data.',
+      }
+    );
 
     if (headerDataValue < domainStart || headerDataValue + xInterval > domainEnd) {
       return (

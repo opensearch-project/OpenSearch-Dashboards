@@ -40,7 +40,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
-import { IndexPatternField } from '../../../../../data/public';
+import { IndexPatternField } from '../../../../../../../../data/public';
 import './discover_field_bucket.scss';
 
 interface Props {
@@ -50,21 +50,27 @@ interface Props {
 }
 
 export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
-  const emptyTxt = i18n.translate('discover.fieldChooser.detailViews.emptyStringText', {
+  const emptyTxt = i18n.translate('explore.discover.fieldChooser.detailViews.emptyStringText', {
     defaultMessage: 'Empty string',
   });
-  const addText = i18n.translate('discover.fieldChooser.detailViews.filterValueButton', {
+  const addText = i18n.translate('explore.discover.fieldChooser.detailViews.filterValueButton', {
     defaultMessage: 'Filter for value',
   });
-  const addLabel = i18n.translate('discover.fieldChooser.detailViews.filterValueButtonAriaLabel', {
-    defaultMessage: 'Filter for {field}: "{value}"',
-    values: { value: bucket.value, field: field.name },
-  });
-  const removeText = i18n.translate('discover.fieldChooser.detailViews.filterOutValueButton', {
-    defaultMessage: 'Filter out value',
-  });
+  const addLabel = i18n.translate(
+    'explore.explore.discover.fieldChooser.detailViews.filterValueButtonAriaLabel',
+    {
+      defaultMessage: 'Filter for {field}: "{value}"',
+      values: { value: bucket.value, field: field.name },
+    }
+  );
+  const removeText = i18n.translate(
+    'explore.discover.fieldChooser.detailViews.filterOutValueButton',
+    {
+      defaultMessage: 'Filter out value',
+    }
+  );
   const removeLabel = i18n.translate(
-    'discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
+    'explore.explore.discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
     {
       defaultMessage: 'Filter out {field}: "{value}"',
       values: { value: bucket.value, field: field.name },

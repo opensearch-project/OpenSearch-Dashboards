@@ -9,7 +9,7 @@ import moment from 'moment';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useDiscoverContext } from '../../view_components/context';
 import { useSelector } from '../../utils/state_management';
-import { AbortError, IndexPattern } from '../../../../../data/common';
+import { AbortError, IndexPattern } from '../../../../../../../../data/common';
 import { setServices } from '../../../opensearch_dashboards_services';
 import { discoverPluginMock } from '../../../mocks';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';

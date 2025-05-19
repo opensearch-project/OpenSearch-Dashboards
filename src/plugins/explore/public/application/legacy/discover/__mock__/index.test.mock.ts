@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataSource } from 'src/plugins/data/public';
+import { DataSource } from '../../../../../../data/public';
 
 interface DataSourceConfig {
   name: string;

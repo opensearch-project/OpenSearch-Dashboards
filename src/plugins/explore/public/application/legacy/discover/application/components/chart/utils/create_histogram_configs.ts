@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataPublicPluginStart, IndexPattern } from '../../../../../../data/public';
+import { DataPublicPluginStart, IndexPattern } from '../../../../../../../../../data/public';
 
 export function createHistogramConfigs(
   indexPattern: IndexPattern,

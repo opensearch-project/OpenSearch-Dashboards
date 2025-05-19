@@ -33,9 +33,9 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
-} from '../../../../../../ui_actions/public';
+} from '../../../../../../../../../ui_actions/public';
 import { getUiActions } from '../../../../opensearch_dashboards_services';
-import { IndexPatternField, OSD_FIELD_TYPES } from '../../../../../../data/public';
+import { IndexPatternField, OSD_FIELD_TYPES } from '../../../../../../../../../data/public';
 
 function getTriggerConstant(type: string) {
   return type === OSD_FIELD_TYPES.GEO_POINT || type === OSD_FIELD_TYPES.GEO_SHAPE

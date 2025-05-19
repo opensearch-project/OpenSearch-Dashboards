@@ -32,7 +32,7 @@ import { uniq } from 'lodash';
 import { Duration, Moment } from 'moment';
 import { Unit } from '@elastic/datemath';
 
-import { SerializedFieldFormat } from '../../../../../../expressions/common/types';
+import { SerializedFieldFormat } from '../../../../../../../../../expressions/common/types';
 
 export interface Column {
   id: string;

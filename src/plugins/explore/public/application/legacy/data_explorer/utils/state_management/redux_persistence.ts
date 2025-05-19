@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Dataset, DEFAULT_DATA } from '../../../../data/common';
+import { Dataset, DEFAULT_DATA } from '../../../../../../../data/common';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
 import { DataExplorerServices } from '../../types';
 import { getPreloadedState } from './preload';

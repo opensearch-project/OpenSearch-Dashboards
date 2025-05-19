@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IndexPattern, IndexPatternsService } from '../../../../data/public';
+import { IndexPattern, IndexPatternsService } from '../../../../../../../data/public';
 import { popularizeField } from './popularize_field';
 
 describe('Popularize field', () => {

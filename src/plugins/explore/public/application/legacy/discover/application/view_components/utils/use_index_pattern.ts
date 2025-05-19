@@ -5,8 +5,8 @@
 
 import { i18n } from '@osd/i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { IndexPattern, useQueryStringManager } from '../../../../../data/public';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
+import { IndexPattern, useQueryStringManager } from '../../../../../../../../data/public';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../../../../common/legacy/discover';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
 import { updateIndexPattern, useSelector } from '../../utils/state_management';
@@ -92,7 +92,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
       handleIndexPattern();
     } catch (error) {
       if (isMounted) {
-        const warningMessage = i18n.translate('discover.indexPatternFetchErrorWarning', {
+        const warningMessage = i18n.translate('explore.discover.indexPatternFetchErrorWarning', {
           defaultMessage: 'Error fetching index pattern: {error}',
           values: { error: (error as Error).message },
         });

@@ -31,13 +31,13 @@
 import _ from 'lodash';
 import { createHashHistory } from 'history';
 import { ScopedHistory, AppMountParameters } from 'opensearch-dashboards/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../ui_actions/public';
 import { DiscoverServices } from './build_services';
-import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
-import { search } from '../../data/public';
+import { createGetterSetter } from '../../../../../opensearch_dashboards_utils/public';
+import { search } from '../../../../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UsageCollectionSetup } from '../../../../../usage_collection/public';
 
 let services: DiscoverServices | null = null;
 let uiActions: UiActionsStart;
@@ -68,10 +68,6 @@ export const [getDocViewsLinksRegistry, setDocViewsLinksRegistry] = createGetter
   DocViewsLinksRegistry
 >('DocViewsLinksRegistry');
 
-export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
-  'UsageCollector'
-);
-
 /**
  * Makes sure discover and context are using one instance of history.
  */
@@ -95,8 +91,8 @@ export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHis
 );
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-export { unhashUrl, redirectWhenMissing } from '../../opensearch_dashboards_utils/public';
-export { formatMsg, formatStack } from '../../opensearch_dashboards_legacy/public';
+export { unhashUrl, redirectWhenMissing } from '../../../../../opensearch_dashboards_utils/public';
+export { formatMsg, formatStack } from '../../../../../opensearch_dashboards_legacy/public';
 
 // EXPORT types
 export {
@@ -108,4 +104,4 @@ export {
   ISearchSource,
   OpenSearchQuerySortValue,
   SortDirection,
-} from '../../data/public';
+} from '../../../../../data/public';

@@ -33,8 +33,8 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
-} from 'src/plugins/embeddable/public';
-import { Filter, IIndexPattern, TimeRange, Query } from 'src/plugins/data/public';
+} from '../../../../../../embeddable/public';
+import { Filter, IIndexPattern, TimeRange, Query } from '../../../../../../data/public';
 import { SortOrder } from '../saved_searches/types';
 import { SavedSearch } from '../saved_searches';
 

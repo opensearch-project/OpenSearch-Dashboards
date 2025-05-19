@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IndexPatternField } from '../../../../../../data/public';
+import { IndexPatternField } from '../../../../../../../../../data/public';
 
 export interface FieldFilterState {
   missing: boolean;

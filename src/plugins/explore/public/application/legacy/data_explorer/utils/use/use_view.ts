@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { useTypedDispatch, useTypedSelector } from '../state_management';
 import { setView } from '../state_management/metadata_slice';

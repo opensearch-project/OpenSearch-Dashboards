@@ -54,9 +54,12 @@ const TableRowUI = ({
           color="text"
           onClick={handleExpanding}
           iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-          aria-label={i18n.translate('discover.defaultTable.docTableExpandToggleColumnLabel', {
-            defaultMessage: `Toggle row details`,
-          })}
+          aria-label={i18n.translate(
+            'explore.discover.defaultTable.docTableExpandToggleColumnLabel',
+            {
+              defaultMessage: `Toggle row details`,
+            }
+          )}
           data-test-subj="docTableExpandToggleColumn"
         />
       </td>

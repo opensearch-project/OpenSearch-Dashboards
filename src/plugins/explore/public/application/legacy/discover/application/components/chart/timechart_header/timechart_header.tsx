@@ -127,7 +127,7 @@ export function TimechartHeader({
       <EuiFlexGroup gutterSize="s" responsive alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            content={i18n.translate('discover.howToChangeTheTimeTooltip', {
+            content={i18n.translate('explore.discover.howToChangeTheTimeTooltip', {
               defaultMessage: 'To change the time, use the global time filter above',
             })}
             delay="long"
@@ -139,7 +139,7 @@ export function TimechartHeader({
             >
               {`${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${
                 interval !== 'auto'
-                  ? i18n.translate('discover.timechartHeader.timeIntervalSelect.per', {
+                  ? i18n.translate('explore.discover.timechartHeader.timeIntervalSelect.per', {
                       defaultMessage: 'per',
                     })
                   : ''
@@ -149,9 +149,12 @@ export function TimechartHeader({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
-            aria-label={i18n.translate('discover.timechartHeader.timeIntervalSelect.ariaLabel', {
-              defaultMessage: 'Time interval',
-            })}
+            aria-label={i18n.translate(
+              'explore.discover.timechartHeader.timeIntervalSelect.ariaLabel',
+              {
+                defaultMessage: 'Time interval',
+              }
+            )}
             compressed
             id="dscResultsIntervalSelector"
             data-test-subj="discoverIntervalSelect"
@@ -170,18 +173,24 @@ export function TimechartHeader({
               bucketInterval.scaled ? (
                 <EuiIconTip
                   id="discoverIntervalIconTip"
-                  content={i18n.translate('discover.bucketIntervalTooltip', {
+                  content={i18n.translate('explore.discover.bucketIntervalTooltip', {
                     defaultMessage:
                       'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
                     values: {
                       bucketsDescription:
                         bucketInterval!.scale && bucketInterval!.scale > 1
-                          ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
-                              defaultMessage: 'buckets that are too large',
-                            })
-                          : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
-                              defaultMessage: 'too many buckets',
-                            }),
+                          ? i18n.translate(
+                              'explore.explore.discover.bucketIntervalTooltip.tooLargeBucketsText',
+                              {
+                                defaultMessage: 'buckets that are too large',
+                              }
+                            )
+                          : i18n.translate(
+                              'explore.explore.discover.bucketIntervalTooltip.tooManyBucketsText',
+                              {
+                                defaultMessage: 'too many buckets',
+                              }
+                            ),
                       bucketIntervalDescription: bucketInterval.description,
                     },
                   })}

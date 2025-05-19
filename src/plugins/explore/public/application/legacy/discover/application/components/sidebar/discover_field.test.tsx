@@ -33,9 +33,9 @@ import React from 'react';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { render, screen, fireEvent } from 'test_utils/testing_lib_helpers';
 import { DiscoverField } from './discover_field';
-import { coreMock } from '../../../../../../core/public/mocks';
-import { IndexPatternField } from '../../../../../data/public';
-import { getStubIndexPattern } from '../../../../../data/public/test_utils';
+import { coreMock } from 'opensearch-dashboards/public/mocks';
+import { IndexPatternField } from '../../../../../../../../data/public';
+import { getStubIndexPattern } from '../../../../../../../../data/public/test_utils';
 
 jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: () => ({

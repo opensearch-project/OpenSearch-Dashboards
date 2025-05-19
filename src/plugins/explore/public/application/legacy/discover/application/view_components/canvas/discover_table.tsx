@@ -4,9 +4,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
+} from '../../../../../../../common/legacy/discover';
 import { DiscoverViewServices } from '../../../build_services';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { useDiscoverContext } from '../context';
 import {
@@ -17,7 +20,7 @@ import {
   useDispatch,
   useSelector,
 } from '../../utils/state_management';
-import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
+import { IndexPatternField, opensearchFilters } from '../../../../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../saved_searches/types';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
@@ -43,7 +46,7 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
 
   const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
   const { columns } = useSelector((state) => {
-    const stateColumns = state.discover.columns;
+    const stateColumns = state.logs.columns;
     // check if state columns is not undefined, otherwise use buildColumns
     return {
       columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
@@ -58,7 +61,7 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
     );
   }, [columns, indexPattern, uiSettings]);
   const { sort } = useSelector((state) => {
-    const stateSort = state.discover.sort;
+    const stateSort = state.logs.sort;
     // check if state sort is not undefined, otherwise assign an empty array
     return {
       sort: stateSort !== undefined ? stateSort : [],

@@ -14,14 +14,14 @@ import {
 } from '@elastic/eui';
 import { Suspense } from 'react';
 import classNames from 'classnames';
-import { AppMountParameters } from '../../../../core/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { Sidebar } from './sidebar';
 import { NoView } from './no_view';
 import { View } from '../services/view_service/view';
 import { shallowEqual } from '../utils/use/shallow_equal';
 import './app_container.scss';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { IDataPluginServices } from '../../../data/public';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { IDataPluginServices } from '../../../../../../data/public';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from './constants';
 import { DISCOVER_LOAD_EVENT, NEW_DISCOVER_LOAD_EVENT, trackUiMetric } from '../ui_metric';
 

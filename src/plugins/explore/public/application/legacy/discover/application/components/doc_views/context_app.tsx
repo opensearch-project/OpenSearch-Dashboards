@@ -6,11 +6,11 @@
 import React, { useMemo, useCallback } from 'react';
 import { SurrDocType } from './context/api/context';
 import { ActionBar } from './context/components/action_bar/action_bar';
-import { CONTEXT_STEP_SETTING } from '../../../../common';
+import { CONTEXT_STEP_SETTING } from '../../../../../../../common/legacy/discover';
 import { DiscoverViewServices } from '../../../build_services';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { LOADING_STATUS } from './context/utils/context_query_state';
-import { SortDirection } from '../../../../../data/public';
+import { SortDirection } from '../../../../../../../../data/public';
 import { DataGridTable } from '../data_grid/data_grid_table';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';

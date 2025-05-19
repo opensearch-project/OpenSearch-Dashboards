@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { indexPatterns } from '../../../data/public';
+import { indexPatterns } from '../../../../../../data/public';
 import { IndexPattern } from '../opensearch_dashboards_services';
-import { IIndexPatternFieldList } from '../../../data/common';
+import { IIndexPatternFieldList } from '../../../../../../data/common';
 
 // Initial data of index pattern fields
 const fieldsData = [

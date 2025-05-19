@@ -31,11 +31,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-jest.mock('../../../../../saved_objects/public', () => ({
+jest.mock('../../../../../../../../saved_objects/public', () => ({
   SavedObjectFinderUi: () => <div />,
 }));
 
-jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
+jest.mock('../../../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
     services: {
       core: { uiSettings: {}, savedObjects: {} },

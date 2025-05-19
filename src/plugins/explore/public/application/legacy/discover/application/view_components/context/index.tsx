@@ -4,11 +4,11 @@
  */
 
 import React from 'react';
-import { DataExplorerServices, ViewProps } from '../../../../../data_explorer/public';
+import { DataExplorerServices, ViewProps } from '../../../../data_explorer';
 import {
   OpenSearchDashboardsContextProvider,
   useOpenSearchDashboards,
-} from '../../../../../opensearch_dashboards_react/public';
+} from '../../../../../../../../opensearch_dashboards_react/public';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { useSearch, SearchContextValue } from '../utils/use_search';
 

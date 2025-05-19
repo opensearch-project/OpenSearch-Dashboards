@@ -28,13 +28,14 @@
  * under the License.
  */
 
+import { LOGS_VIEW_ID } from '../../../../../common';
 import {
   createSavedObjectClass,
   SavedObject,
   SavedObjectOpenSearchDashboardsServices,
-} from '../../../saved_objects/public';
+} from '../../../../../../saved_objects/public';
 
-export const SAVED_OBJECT_TYPE = 'search';
+export const SAVED_OBJECT_TYPE = 'explore';
 
 export function createSavedSearchClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);
@@ -59,7 +60,7 @@ export function createSavedSearchClass(services: SavedObjectOpenSearchDashboards
     constructor(id: string) {
       super({
         id,
-        type: 'search',
+        type: 'explore',
         mapping: {
           title: 'text',
           description: 'text',
@@ -80,7 +81,7 @@ export function createSavedSearchClass(services: SavedObjectOpenSearchDashboards
       });
       this.showInRecentlyAccessed = true;
       this.id = id;
-      this.getFullPath = () => `/app/discover#/view/${String(this.id)}`;
+      this.getFullPath = () => `/app/explore/${LOGS_VIEW_ID}#/view/${String(this.id)}`;
     }
   }
 

@@ -35,9 +35,9 @@ import {
   opensearchFilters,
   QueryState,
   RefreshInterval,
-} from '../../data/public';
-import { setStateToOsdUrl } from '../../opensearch_dashboards_utils/public';
-import { UrlGeneratorsDefinition } from '../../share/public';
+} from '../../../../../data/public';
+import { setStateToOsdUrl } from '../../../../../opensearch_dashboards_utils/public';
+import { UrlGeneratorsDefinition } from '../../../../../share/public';
 
 export const DISCOVER_APP_URL_GENERATOR = 'DISCOVER_APP_URL_GENERATOR';
 

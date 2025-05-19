@@ -30,8 +30,8 @@
 
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { IAggConfigs } from '../../../../../../data/common';
-import { search } from '../../../../../../data/public';
+import { IAggConfigs } from '../../../../../../../../../data/common';
+import { search } from '../../../../../../../../../data/public';
 
 export function getDimensions(aggs: IAggConfigs, data: any) {
   const [metric, agg] = aggs.aggs;

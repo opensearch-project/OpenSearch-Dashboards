@@ -30,8 +30,8 @@
 
 import { getState } from './context_state';
 import { createBrowserHistory, History } from 'history';
-import { FilterManager, Filter } from '../../../../../../../data/public';
-import { coreMock } from '../../../../../../../../core/public/mocks';
+import { FilterManager, Filter } from '../../../../../../../../../../data/public';
+import { coreMock } from 'opensearch-dashboards/public/mocks';
 const setupMock = coreMock.createSetup();
 
 describe('Test Discover Context State', () => {

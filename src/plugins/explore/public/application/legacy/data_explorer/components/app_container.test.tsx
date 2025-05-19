@@ -6,7 +6,7 @@
 import React from 'react';
 import { AppContainer } from './app_container';
 import { View } from '../services/view_service/view';
-import { AppMountParameters } from '../../../../core/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { render } from 'test_utils/testing_lib_helpers';
 
 describe('DataExplorerApp', () => {

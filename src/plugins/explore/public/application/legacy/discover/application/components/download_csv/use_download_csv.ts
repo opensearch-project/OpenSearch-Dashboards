@@ -12,9 +12,9 @@ import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { useSelector } from '../../utils/state_management';
 import { getLegacyDisplayedColumns } from '../default_discover_table/helper';
-import { IndexPattern, UI_SETTINGS } from '../../../../../data/common';
+import { IndexPattern, UI_SETTINGS } from '../../../../../../../../data/common';
 import { getServices } from '../../../opensearch_dashboards_services';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../../../common/legacy/discover';
 
 export interface UseDiscoverDownloadCsvProps {
   hits?: number;
@@ -73,7 +73,7 @@ export const useDiscoverDownloadCsv = ({
   const [isLoading, setIsLoading] = useState(false);
   const displayedColumnNames = useSelector((state) => {
     const displayedColumns = getLegacyDisplayedColumns(
-      state.discover.columns,
+      state.logs.columns,
       indexPattern,
       uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
       uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE)

@@ -11,10 +11,10 @@ import {
   DataGridTable,
   DataGridTableProps,
 } from '../application/components/data_grid/data_grid_table';
-import { VisualizationNoResults } from '../../../visualizations/public';
+import { VisualizationNoResults } from '../../../../../../visualizations/public';
 import { getServices } from '../opensearch_dashboards_services';
 import './search_embeddable.scss';
-import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../../../opensearch_dashboards_react/public';
 
 interface SearchEmbeddableProps {
   searchProps: SearchProps;

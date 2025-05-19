@@ -11,9 +11,9 @@ import {
   DataSourceGroup,
   DataSourceSelectable,
   UI_SETTINGS,
-} from '../../../../data/public';
-import { DataSourceOption } from '../../../../data/public/';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+} from '../../../../../../../data/public';
+import { DataSourceOption } from '../../../../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
@@ -107,7 +107,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, datasetSelectorRef }) => {
     () => (error: Error) => {
       toasts.addError(error, {
         title:
-          i18n.translate('dataExplorer.sidebar.failedToGetDataSetErrorDescription', {
+          i18n.translate('explore.dataExplorer.sidebar.failedToGetDataSetErrorDescription', {
             defaultMessage: 'Failed to get data set: ',
           }) + (error.message || error.name),
       });

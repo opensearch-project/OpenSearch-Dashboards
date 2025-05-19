@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { UiStatsMetricType } from 'packages/osd-analytics/target/types';
-import { METRIC_TYPE } from '../../../usage_collection/public';
+import { UiStatsMetricType } from '@osd/analytics';
+import { METRIC_TYPE } from '../../../../../../usage_collection/public';
 import { NEW_DISCOVER_APP_NAME } from './constants';
 import { getUsageCollector } from '../services';
 

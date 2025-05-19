@@ -29,14 +29,14 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../ui_actions/public';
 import { getServices } from '../opensearch_dashboards_services';
 import {
   EmbeddableFactoryDefinition,
   Container,
   ErrorEmbeddable,
-} from '../../../embeddable/public';
-import { TimeRange } from '../../../data/public';
+} from '../../../../../../embeddable/public';
+import { TimeRange } from '../../../../../../data/public';
 import { SearchEmbeddable } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
@@ -50,7 +50,7 @@ export class SearchEmbeddableFactory
   implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SearchEmbeddable> {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
-    name: i18n.translate('discover.savedSearch.savedObjectName', {
+    name: i18n.translate('explore.discover.savedSearch.savedObjectName', {
       defaultMessage: 'Saved search',
     }),
     type: 'search',
@@ -69,7 +69,7 @@ export class SearchEmbeddableFactory
   };
 
   public getDisplayName() {
-    return i18n.translate('discover.embeddable.search.displayName', {
+    return i18n.translate('explore.discover.embeddable.search.displayName', {
       defaultMessage: 'search',
     });
   }

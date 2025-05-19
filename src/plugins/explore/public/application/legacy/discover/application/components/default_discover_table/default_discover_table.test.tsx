@@ -8,8 +8,8 @@ import { IntlProvider } from 'react-intl';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { DefaultDiscoverTable } from './default_discover_table';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import { coreMock } from '../../../../../../core/public/mocks';
-import { getStubIndexPattern } from '../../../../../data/public/test_utils';
+import { coreMock } from 'opensearch-dashboards/public/mocks';
+import { getStubIndexPattern } from '../../../../../../../../data/public/test_utils';
 
 jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: jest.fn().mockReturnValue({

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern, IndexPatternsContract } from '../../../../data/public';
+import { IndexPattern, IndexPatternsContract } from '../../../../../../../data/public';
 import { SearchData } from '../view_components/utils/use_search';
 
 function getDataSet(

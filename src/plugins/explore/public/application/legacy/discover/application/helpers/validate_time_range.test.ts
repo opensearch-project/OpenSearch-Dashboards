@@ -29,7 +29,7 @@
  */
 
 import { validateTimeRange } from './validate_time_range';
-import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { notificationServiceMock } from 'opensearch-dashboards/public/mocks';
 
 describe('Discover validateTimeRange', () => {
   test('validates given time ranges correctly', async () => {

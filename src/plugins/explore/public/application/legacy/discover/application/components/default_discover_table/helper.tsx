@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { getOsdFieldOverrides } from '../../../../../../plugins/data/common';
+import { getOsdFieldOverrides } from '../../../../../../../../data/common';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { shortenDottedString } from '../../helpers';
 

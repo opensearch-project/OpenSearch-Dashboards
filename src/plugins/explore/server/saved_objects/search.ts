@@ -32,7 +32,7 @@ import { SavedObjectsType } from 'opensearch-dashboards/server';
 import { searchMigrations } from './search_migrations';
 
 export const searchSavedObjectType: SavedObjectsType = {
-  name: 'search',
+  name: 'explore',
   hidden: false,
   namespaceType: 'single',
   management: {

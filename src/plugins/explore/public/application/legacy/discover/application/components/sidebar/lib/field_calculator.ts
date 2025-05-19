@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../../../../../data/public';
 import { FieldValueCounts } from '../types';
 
 const NO_ANALYSIS_TYPES = ['geo_point', 'geo_shape', 'attachment'];
@@ -58,7 +58,7 @@ const getFieldValueCounts = (params: FieldValueCountsParams): FieldValueCounts =
   if (NO_ANALYSIS_TYPES.includes(fieldType)) {
     return {
       error: i18n.translate(
-        'discover.fieldChooser.fieldCalculator.analysisIsNotAvailableForGeoFieldsErrorMessage',
+        'explore.discover.fieldChooser.fieldCalculator.analysisIsNotAvailableForGeoFieldsErrorMessage',
         {
           defaultMessage: 'Analysis is not available for {fieldType} fields.',
           values: {
@@ -87,7 +87,7 @@ const getFieldValueCounts = (params: FieldValueCountsParams): FieldValueCounts =
     if (hits.length === missing) {
       return {
         error: i18n.translate(
-          'discover.fieldChooser.fieldCalculator.fieldIsNotPresentInDocumentsErrorMessage',
+          'explore.discover.fieldChooser.fieldCalculator.fieldIsNotPresentInDocumentsErrorMessage',
           {
             defaultMessage:
               'This field is present in your OpenSearch mapping but not in the {hitsLength} documents shown in the doc table. You may still be able to visualize or search on it.',
@@ -123,7 +123,7 @@ const groupValues = (
       if (v instanceof Object && !Array.isArray(v)) {
         throw new Error(
           i18n.translate(
-            'discover.fieldChooser.fieldCalculator.analysisIsNotAvailableForObjectFieldsErrorMessage',
+            'explore.discover.fieldChooser.fieldCalculator.analysisIsNotAvailableForObjectFieldsErrorMessage',
             {
               defaultMessage: 'Analysis is not available for object fields.',
             }

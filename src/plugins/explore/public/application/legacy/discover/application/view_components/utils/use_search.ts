@@ -11,9 +11,9 @@ import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
-import { RequestAdapter } from '../../../../../inspector/public';
+import { RequestAdapter } from '../../../../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { search, syncQueryStateWithUrl, UI_SETTINGS } from '../../../../../data/public';
+import { search, syncQueryStateWithUrl, UI_SETTINGS } from '../../../../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
@@ -32,17 +32,17 @@ import {
 } from '../../components/chart/utils';
 import { SavedSearch } from '../../../saved_searches';
 import { useSelector } from '../../utils/state_management';
-import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
+import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../../../../common/legacy/discover';
 import { trackQueryMetric } from '../../../ui_metric';
 
-import { ABORT_DATA_QUERY_TRIGGER } from '../../../../../ui_actions/public';
+import { ABORT_DATA_QUERY_TRIGGER } from '../../../../../../../../ui_actions/public';
 import {
   ACTION_ABORT_DATA_QUERY,
   AbortDataQueryContext,
   createAbortDataQueryAction,
-} from '../../../../public/actions/abort_data_query_action';
+} from '../../../actions/abort_data_query_action';
 
-declare module '../../../../../ui_actions/public' {
+declare module '../../../../../../../../ui_actions/public' {
   export interface TriggerContextMapping {
     [ABORT_DATA_QUERY_TRIGGER]: AbortDataQueryContext;
   }
@@ -120,7 +120,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval, savedQuery } = useSelector(
-    (state) => state.discover
+    (state) => state.logs
   );
   const indexPattern = useIndexPattern(services);
   const skipInitialFetch = useRef(false);
@@ -275,10 +275,10 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       // Initialize inspect adapter for search source
       inspectorAdapters.requests.reset();
-      const title = i18n.translate('discover.inspectorRequestDataTitle', {
+      const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
         defaultMessage: 'data',
       });
-      const description = i18n.translate('discover.inspectorRequestDescription', {
+      const description = i18n.translate('explore.discover.inspectorRequestDescription', {
         defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
       });
       const inspectorRequest = inspectorAdapters.requests.start(title, { description });

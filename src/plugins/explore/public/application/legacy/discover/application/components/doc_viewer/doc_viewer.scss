@@ -24,6 +24,7 @@
 
   td,
   pre {
+    /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
     font-family: $euiCodeFontFamily;
   }
 

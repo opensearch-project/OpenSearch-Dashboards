@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { SortDirection } from '../../../../../../../../data/public';
+import { SortDirection } from '../../../../../../../../../../../data/public';
 
 export type IntervalValue = number | null;
 

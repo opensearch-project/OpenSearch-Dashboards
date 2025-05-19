@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IndexPattern, IndexPatternsContract } from '../../../../data/public';
+import { IndexPattern, IndexPatternsContract } from '../../../../../../../data/public';
 
 async function popularizeField(
   indexPattern: IndexPattern,

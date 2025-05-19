@@ -6,12 +6,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DiscoverServices } from '../../../build_services';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { SurroundingDocsView } from './surrounding_docs_view';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { PLUGIN_ID } from '../../../../common';
+import { PLUGIN_ID } from '../../../../../../../common/legacy/discover';
 
 export interface SurroundingDocsUrlParams {
   id: string;
@@ -49,7 +49,7 @@ export function SurroundingDocsApp() {
     chrome.setBreadcrumbs([
       ...getRootBreadcrumbs(),
       {
-        text: i18n.translate('discover.context.breadcrumb', {
+        text: i18n.translate('explore.discover.context.breadcrumb', {
           defaultMessage: `Context of #{docId}`,
           values: {
             docId: id,

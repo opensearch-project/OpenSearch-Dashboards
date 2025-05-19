@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { CoreService } from '../../../../../core/types';
+import { CoreService } from '../../../../../../../../core/types';
 import { ViewDefinition } from './types';
 import { View } from './view';
 

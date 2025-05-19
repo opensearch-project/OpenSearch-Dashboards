@@ -27,7 +27,7 @@ export const useDiscoverDownloadCsvToasts = () => {
       toastNotifications.addWarning({
         id: DiscoverDownloadCsvToastId.Cancelled,
         iconType: 'alert',
-        title: i18n.translate('discover.downloadCsvCancelledToast', {
+        title: i18n.translate('explore.discover.downloadCsvCancelledToast', {
           defaultMessage: 'Download CSV cancelled',
         }),
         'data-test-subj': 'dscDownloadCsvToastCancelled',
@@ -41,7 +41,7 @@ export const useDiscoverDownloadCsvToasts = () => {
         id: DiscoverDownloadCsvToastId.Loading,
         color: 'primary',
         iconType: 'iInCircle',
-        title: i18n.translate('discover.downloadCsvLoadingToast', {
+        title: i18n.translate('explore.discover.downloadCsvLoadingToast', {
           defaultMessage: 'Working on CSV file',
         }),
         // TODO: Update the toast notification API to accept ReactNodes
@@ -52,7 +52,7 @@ export const useDiscoverDownloadCsvToasts = () => {
             color="danger"
             data-test-subj="dscDownloadCsvAbort"
           >
-            {i18n.translate('discover.downloadCsvCancelToast', {
+            {i18n.translate('explore.discover.downloadCsvCancelToast', {
               defaultMessage: 'Cancel download',
             })}
           </EuiSmallButtonEmpty>
@@ -70,7 +70,7 @@ export const useDiscoverDownloadCsvToasts = () => {
       id: DiscoverDownloadCsvToastId.Success,
       color: 'success',
       iconType: 'check',
-      title: i18n.translate('discover.downloadCsvSuccessToast', {
+      title: i18n.translate('explore.discover.downloadCsvSuccessToast', {
         defaultMessage: 'CSV download successful.',
       }),
       'data-test-subj': 'dscDownloadCsvToastSuccess',
@@ -83,7 +83,7 @@ export const useDiscoverDownloadCsvToasts = () => {
       id: DiscoverDownloadCsvToastId.Error,
       color: 'danger',
       iconType: 'alert',
-      title: i18n.translate('discover.downloadCsvErrorToast', {
+      title: i18n.translate('explore.discover.downloadCsvErrorToast', {
         defaultMessage: 'Unable to download CSV. Please try again.',
       }),
       'data-test-subj': 'dscDownloadCsvToastError',

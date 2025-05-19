@@ -40,9 +40,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
-import { FieldIcon } from '../../../../../opensearch_dashboards_react/public';
+import { FieldIcon } from '../../../../../../../../opensearch_dashboards_react/public';
 import { FieldDetails } from './types';
-import { IndexPatternField, IndexPattern } from '../../../../../data/public';
+import { IndexPatternField, IndexPattern } from '../../../../../../../../data/public';
 import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
 import './discover_field.scss';
@@ -98,21 +98,27 @@ export const DiscoverField = ({
   getDetails,
   useShortDots,
 }: DiscoverFieldProps) => {
-  const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
-    defaultMessage: 'Add {field} to table',
-    values: { field: field.name },
-  });
+  const addLabelAria = i18n.translate(
+    'explore.discover.fieldChooser.discoverField.addButtonAriaLabel',
+    {
+      defaultMessage: 'Add {field} to table',
+      values: { field: field.name },
+    }
+  );
   const removeLabelAria = i18n.translate(
-    'discover.fieldChooser.discoverField.removeButtonAriaLabel',
+    'explore.discover.fieldChooser.discoverField.removeButtonAriaLabel',
     {
       defaultMessage: 'Remove {field} from table',
       values: { field: field.name },
     }
   );
-  const infoLabelAria = i18n.translate('discover.fieldChooser.discoverField.infoButtonAriaLabel', {
-    defaultMessage: 'View {field} summary',
-    values: { field: field.name },
-  });
+  const infoLabelAria = i18n.translate(
+    'explore.discover.fieldChooser.discoverField.infoButtonAriaLabel',
+    {
+      defaultMessage: 'View {field} summary',
+      values: { field: field.name },
+    }
+  );
   const isSourceField = field.name === '_source';
 
   const [infoIsOpen, setOpen] = useState(false);
@@ -148,7 +154,7 @@ export const DiscoverField = ({
     actionButton = (
       <EuiToolTip
         delay="long"
-        content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+        content={i18n.translate('explore.discover.fieldChooser.discoverField.addFieldTooltip', {
           defaultMessage: 'Add field as column',
         })}
       >
@@ -173,7 +179,7 @@ export const DiscoverField = ({
     actionButton = (
       <EuiToolTip
         delay="long"
-        content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+        content={i18n.translate('explore.discover.fieldChooser.discoverField.removeFieldTooltip', {
           defaultMessage: 'Remove field from table',
         })}
       >
@@ -238,7 +244,7 @@ export const DiscoverField = ({
           >
             <EuiPopoverTitle tabIndex={0}>
               {' '}
-              {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+              {i18n.translate('explore.discover.fieldChooser.discoverField.fieldTopValuesLabel', {
                 defaultMessage: 'Top 5 values',
               })}
             </EuiPopoverTitle>

@@ -29,7 +29,7 @@
  */
 
 import { getDefaultFieldFilter, setFieldFilterProp, isFieldFiltered } from './field_filter';
-import { IndexPatternField } from '../../../../../../data/public';
+import { IndexPatternField } from '../../../../../../../../../data/public';
 
 describe('field_filter', function () {
   it('getDefaultFieldFilter should return default filter state', function () {

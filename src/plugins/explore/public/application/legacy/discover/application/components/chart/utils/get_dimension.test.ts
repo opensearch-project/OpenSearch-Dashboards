@@ -6,13 +6,13 @@
 import { getDimensions } from './get_dimensions';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { search } from '../../../../../../data/public';
-import { dataPluginMock } from '../../../../../../data/public/mocks';
+import { search } from '../../../../../../../../../data/public';
+import { dataPluginMock } from '../../../../../../../../../data/public/mocks';
 import {
   calculateBounds,
   IBucketDateHistogramAggConfig,
   IAggConfigs,
-} from '../../../../../../data/common';
+} from '../../../../../../../../../data/common';
 
 describe('getDimensions', () => {
   it('should return dimensions when buckets and bounds are defined', () => {

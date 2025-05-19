@@ -10,8 +10,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HitsCounter } from '../chart/hits_counter';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
-import { IndexPattern } from '../../../../../data/common';
-import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../data/public';
+import { IndexPattern } from '../../../../../../../../data/common';
+import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../../../data/public';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;

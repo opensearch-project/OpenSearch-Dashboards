@@ -9,12 +9,12 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { Subject } from 'rxjs';
-import { createDataExplorerServicesMock } from '../../../../../data_explorer/public/utils/mocks';
+import { createDataExplorerServicesMock } from '../../../../data_explorer/utils/mocks';
 import { DiscoverViewServices } from '../../../build_services';
 import { discoverPluginMock } from '../../../mocks';
 import { ResultStatus, safeJSONParse, useSearch } from './use_search';
-import { Filter, ISearchSource, UI_SETTINGS } from '../../../../../data/common';
-import { opensearchFilters } from 'src/plugins/data/public';
+import { Filter, ISearchSource, UI_SETTINGS } from '../../../../../../../../data/common';
+import { opensearchFilters } from '../../../../../../../../data/public';
 
 jest.mock('./use_index_pattern', () => ({
   useIndexPattern: jest.fn().mockReturnValue(true),
@@ -103,7 +103,7 @@ const createMockServices = (): DiscoverViewServices => {
 const history = createMemoryHistory();
 const mockStore = {
   getState: () => ({
-    discover: {
+    logs: {
       savedSearch: 'test-saved-search',
       sort: [],
       interval: 'auto',

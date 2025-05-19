@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { IndexPatternField } from '../../../../../../data/public';
+import { IndexPatternField } from '../../../../../../../../../data/public';
 
 export function getWarnings(field: IndexPatternField) {
   let warnings = [];
@@ -37,7 +37,7 @@ export function getWarnings(field: IndexPatternField) {
   if (field.scripted) {
     warnings.push(
       i18n.translate(
-        'discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription',
+        'explore.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription',
         {
           defaultMessage: 'Scripted fields can take a long time to execute.',
         }

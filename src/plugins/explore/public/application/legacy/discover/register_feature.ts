@@ -29,18 +29,18 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../../../home/public';
 
 export function registerFeature(home: HomePublicPluginSetup) {
   home.featureCatalogue.register({
     id: 'discover',
-    title: i18n.translate('discover.discoverTitle', {
+    title: i18n.translate('explore.discover.discoverTitle', {
       defaultMessage: 'Discover',
     }),
-    subtitle: i18n.translate('discover.discoverSubtitle', {
+    subtitle: i18n.translate('explore.discover.discoverSubtitle', {
       defaultMessage: 'Search and find insights.',
     }),
-    description: i18n.translate('discover.discoverDescription', {
+    description: i18n.translate('explore.discover.discoverDescription', {
       defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
     }),
     icon: 'discoverApp',

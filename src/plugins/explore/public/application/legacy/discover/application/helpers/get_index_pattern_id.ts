@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../../../data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../data/common/index_patterns';
 
 export function findIndexPatternById(
   indexPatterns: IIndexPattern[],

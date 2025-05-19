@@ -43,12 +43,12 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
         title={
           docCount === 0 ? (
             <FormattedMessage
-              id="discover.context.newerDocumentsWarningZero"
+              id="explore.explore.discover.context.newerDocumentsWarningZero"
               defaultMessage="No documents newer than the anchor could be found."
             />
           ) : (
             <FormattedMessage
-              id="discover.context.newerDocumentsWarning"
+              id="explore.discover.context.newerDocumentsWarning"
               defaultMessage="Only {docCount} documents newer than the anchor could be found."
               values={{ docCount }}
             />
@@ -67,12 +67,12 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
       title={
         docCount === 0 ? (
           <FormattedMessage
-            id="discover.context.olderDocumentsWarningZero"
+            id="explore.explore.discover.context.olderDocumentsWarningZero"
             defaultMessage="No documents older than the anchor could be found."
           />
         ) : (
           <FormattedMessage
-            id="discover.context.olderDocumentsWarning"
+            id="explore.discover.context.olderDocumentsWarning"
             defaultMessage="Only {docCount} documents older than the anchor could be found."
             values={{ docCount }}
           />

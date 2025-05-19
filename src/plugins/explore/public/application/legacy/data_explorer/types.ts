@@ -4,13 +4,13 @@
  */
 
 import { CoreStart, ScopedHistory } from 'opensearch-dashboards/public';
-import { EmbeddableStart } from '../../embeddable/public';
-import { ExpressionsStart } from '../../expressions/public';
+import { EmbeddableStart } from '../../../../../embeddable/public';
+import { ExpressionsStart } from '../../../../../expressions/public';
 import { ViewServiceStart, ViewServiceSetup } from './services/view_service';
-import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
+import { IOsdUrlStateStorage } from '../../../../../opensearch_dashboards_utils/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../../data/public';
 import { Store } from './utils/state_management';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UsageCollectionSetup } from '../../../../../usage_collection/public';
 
 export type DataExplorerPluginSetup = ViewServiceSetup;
 

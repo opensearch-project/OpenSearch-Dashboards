@@ -34,8 +34,8 @@ import { Subscription } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@osd/i18n';
-import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
-import { RequestAdapter, Adapters } from '../../../inspector/public';
+import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../../../ui_actions/public';
+import { RequestAdapter, Adapters } from '../../../../../../inspector/public';
 import {
   opensearchFilters,
   Filter,
@@ -44,8 +44,8 @@ import {
   getTime,
   Query,
   IFieldType,
-} from '../../../data/public';
-import { Container, Embeddable } from '../../../embeddable/public';
+} from '../../../../../../data/public';
+import { Container, Embeddable } from '../../../../../../embeddable/public';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { getSortForSearchSource } from '../application/view_components/utils/get_sort_for_search_source';
 import {
@@ -62,7 +62,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
-} from '../../common';
+} from '../../../../../common/legacy/discover';
 import { SearchEmbeddableComponent } from './search_embeddable_component';
 import { DiscoverServices } from '../build_services';
 import * as columnActions from '../application/utils/state_management/common';
@@ -328,10 +328,10 @@ export class SearchEmbeddable
 
     // Log request to inspector
     this.inspectorAdaptors.requests.reset();
-    const title = i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
+    const title = i18n.translate('explore.discover.embeddable.inspectorRequestDataTitle', {
       defaultMessage: 'Data',
     });
-    const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
+    const description = i18n.translate('explore.discover.embeddable.inspectorRequestDescription', {
       defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });

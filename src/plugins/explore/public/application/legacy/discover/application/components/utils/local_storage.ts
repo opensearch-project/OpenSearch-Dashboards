@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Storage } from '../../../../../opensearch_dashboards_utils/public';
+import { Storage } from '../../../../../../../../opensearch_dashboards_utils/public';
 
 /**
  * @deprecated - We will only support legacy discover

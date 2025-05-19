@@ -23,14 +23,17 @@ export const NoView = () => {
         iconColor="danger"
         title={
           <h2>
-            <FormattedMessage id="dataExplorer.noView.title" defaultMessage="View not found" />
+            <FormattedMessage
+              id="explore.dataExplorer.noView.title"
+              defaultMessage="View not found"
+            />
           </h2>
         }
         body={
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="dataExplorer.noView.body"
+                id="explore.dataExplorer.noView.body"
                 defaultMessage="The view you are trying to access does not exist. Please check the URL and try again."
               />
             </p>

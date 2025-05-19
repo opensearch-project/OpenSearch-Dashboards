@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { AppMountParameters } from '../../../../core/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useView } from '../utils/use';
 import { AppContainer } from './app_container';
 

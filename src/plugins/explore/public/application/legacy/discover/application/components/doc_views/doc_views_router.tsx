@@ -7,7 +7,7 @@ import React from 'react';
 import { Switch, Router, Route, Redirect } from 'react-router-dom';
 import { History } from 'history';
 import { getServices } from '../../../opensearch_dashboards_services';
-import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../../../../../opensearch_dashboards_react/public';
 import { SingleDocApp } from './single_doc_app';
 import { SurroundingDocsApp } from './surrounding_docs_app';
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ActionByType, createAction } from '../../../ui_actions/public';
+import { ActionByType, createAction } from '../../../../../../ui_actions/public';
 
 export const ACTION_ABORT_DATA_QUERY = 'ACTION_ABORT_DATA_QUERY';
 

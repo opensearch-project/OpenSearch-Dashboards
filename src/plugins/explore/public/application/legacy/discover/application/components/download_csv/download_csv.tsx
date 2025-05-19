@@ -10,7 +10,7 @@ import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_conten
 import { useDiscoverDownloadCsv } from './use_download_csv';
 import { DownloadCsvFormId } from './constants';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import { IndexPattern } from '../../../../../data/common';
+import { IndexPattern } from '../../../../../../../../data/common';
 import { useDiscoverDownloadCsvToasts } from './use_download_csv_toasts';
 
 export interface DiscoverDownloadCsvProps {
@@ -49,7 +49,10 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
           iconSide="left"
           onClick={openPopover}
         >
-          <FormattedMessage id="discover.downloadCsvButtonText" defaultMessage="Download as CSV" />
+          <FormattedMessage
+            id="explore.discover.downloadCsvButtonText"
+            defaultMessage="Download as CSV"
+          />
         </EuiSmallButtonEmpty>
       }
       isOpen={isPopoverOpen}

@@ -12,7 +12,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import classNames from 'classnames';
-import { DataPublicPluginStart, search } from '../../../../../data/public';
+import { DataPublicPluginStart, search } from '../../../../../../../../data/public';
 import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_header';
 import { DiscoverHistogram } from './histogram/histogram';
 import { DiscoverServices } from '../../../build_services';
@@ -43,7 +43,7 @@ export const DiscoverChart = ({
     from: dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
     to: dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
   };
-  const { interval } = useSelector((state) => state.discover);
+  const { interval } = useSelector((state) => state.logs);
   const dispatch = useDispatch();
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
@@ -75,7 +75,7 @@ export const DiscoverChart = ({
     </div>
   );
 
-  const toggleLabel = i18n.translate('discover.histogram.collapse', {
+  const toggleLabel = i18n.translate('explore.discover.histogram.collapse', {
     defaultMessage: 'Toggle histogram',
   });
 
@@ -128,7 +128,7 @@ export const DiscoverChart = ({
       {chartData && showHistogram && (
         <EuiFlexItem grow={false}>
           <section
-            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+            aria-label={i18n.translate('explore.discover.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
             className="dscTimechart"

@@ -18,7 +18,7 @@ export const DiscoverDownloadCsvCallout = () => {
     >
       <EuiText size="s" className="dscDownloadCsvCallout__text">
         <FormattedMessage
-          id="discover.downloadCsvCallout"
+          id="explore.discover.downloadCsvCallout"
           defaultMessage="There is a limit of {max} total result downloads."
           values={{ max: MAX_DOWNLOAD_CSV_COUNT.toLocaleString() }}
         />

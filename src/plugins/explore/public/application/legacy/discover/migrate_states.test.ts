@@ -4,9 +4,12 @@
  */
 
 import { migrateUrlState } from './migrate_state';
-import { setStateToOsdUrl, getStateFromOsdUrl } from '../../opensearch_dashboards_utils/public';
+import {
+  setStateToOsdUrl,
+  getStateFromOsdUrl,
+} from '../../../../../opensearch_dashboards_utils/public';
 
-jest.mock('../../opensearch_dashboards_utils/public', () => ({
+jest.mock('../../../../../opensearch_dashboards_utils/public', () => ({
   setStateToOsdUrl: jest.fn(),
   getStateFromOsdUrl: jest.fn(),
 }));

@@ -30,16 +30,17 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { LOGS_VIEW_ID } from '../../../../../../common';
 import { getServices } from '../../opensearch_dashboards_services';
 
 export function getRootBreadcrumbs(): EuiBreadcrumb[] {
   const { core } = getServices();
   return [
     {
-      text: i18n.translate('discover.rootBreadcrumb', {
+      text: i18n.translate('explore.discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
-      onClick: () => core.application.navigateToApp('data-explorer', { path: 'discover' }),
+      onClick: () => core.application.navigateToApp('explore', { path: `${LOGS_VIEW_ID}#/` }),
     },
   ];
 }

@@ -30,7 +30,10 @@
 
 import React from 'react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
-import { formatMsg, formatStack } from '../../../../../opensearch_dashboards_legacy/public';
+import {
+  formatMsg,
+  formatStack,
+} from '../../../../../../../../opensearch_dashboards_legacy/public';
 
 interface Props {
   error: Error | string;

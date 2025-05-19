@@ -40,8 +40,8 @@ import {
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../data/public';
-import { FIELDS_LIMIT_SETTING } from '../../../../common';
+import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../../../../data/public';
+import { FIELDS_LIMIT_SETTING } from '../../../../../../../common/legacy/discover';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldDataFrame } from './discover_field_data_frame';
@@ -206,7 +206,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
         <EuiSplitPanel.Outer
           className="sidebar-list eui-yScroll"
           aria-label={i18n.translate(
-            'discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
+            'explore.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
             {
               defaultMessage: 'Index and fields',
             }
@@ -243,9 +243,12 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
                   fields={selectedFields}
                   getDetailsByField={getDetailsByField}
                   shortDotsEnabled={shortDotsEnabled}
-                  title={i18n.translate('discover.fieldChooser.filter.selectedFieldsTitle', {
-                    defaultMessage: 'Selected fields',
-                  })}
+                  title={i18n.translate(
+                    'explore.discover.fieldChooser.filter.selectedFieldsTitle',
+                    {
+                      defaultMessage: 'Selected fields',
+                    }
+                  )}
                   {...props}
                 />
                 {popularFields.length > 0 && (
@@ -254,7 +257,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
                     fields={popularFields}
                     getDetailsByField={getDetailsByField}
                     shortDotsEnabled={shortDotsEnabled}
-                    title={i18n.translate('discover.fieldChooser.filter.popularTitle', {
+                    title={i18n.translate('explore.discover.fieldChooser.filter.popularTitle', {
                       defaultMessage: 'Popular fields',
                     })}
                     {...props}
@@ -265,9 +268,12 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
                   fields={unpopularFields}
                   getDetailsByField={getDetailsByField}
                   shortDotsEnabled={shortDotsEnabled}
-                  title={i18n.translate('discover.fieldChooser.filter.availableFieldsTitle', {
-                    defaultMessage: 'Available fields',
-                  })}
+                  title={i18n.translate(
+                    'explore.discover.fieldChooser.filter.availableFieldsTitle',
+                    {
+                      defaultMessage: 'Available fields',
+                    }
+                  )}
                   {...props}
                 />
               </>

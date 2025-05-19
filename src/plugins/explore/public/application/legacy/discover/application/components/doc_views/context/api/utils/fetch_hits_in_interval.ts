@@ -32,7 +32,7 @@ import {
   ISearchSource,
   OpenSearchQuerySortValue,
   SortDirection,
-} from '../../../../../../../../data/public';
+} from '../../../../../../../../../../../data/public';
 import { convertTimeValueToIso } from './date_conversion';
 import { OpenSearchHitRecordList, OpenSearchHitRecord } from '../context';
 import { IntervalValue } from './generate_intervals';

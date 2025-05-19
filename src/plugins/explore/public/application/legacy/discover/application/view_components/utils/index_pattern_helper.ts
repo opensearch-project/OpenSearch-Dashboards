@@ -4,8 +4,8 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { SearchSource, IndexPattern } from 'src/plugins/data/public';
 import { SavedObject, ToastsStart } from 'opensearch-dashboards/public';
+import { SearchSource, IndexPattern } from '../../../../../../../../data/public';
 import { redirectWhenMissing, getUrlTracker } from '../../../opensearch_dashboards_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
 
@@ -75,17 +75,20 @@ export function resolveIndexPattern(
   }
 
   if (stateVal && !stateValFound) {
-    const warningTitle = i18n.translate('discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
-      defaultMessage: '{id} is not a configured index pattern ID',
-      values: {
-        id: `"${stateVal}"`,
-      },
-    });
+    const warningTitle = i18n.translate(
+      'explore.discover.valueIsNotConfiguredIndexPatternIDWarningTitle',
+      {
+        defaultMessage: '{id} is not a configured index pattern ID',
+        values: {
+          id: `"${stateVal}"`,
+        },
+      }
+    );
 
     if (ownIndexPattern) {
       toastNotifications.addWarning({
         title: warningTitle,
-        text: i18n.translate('discover.showingSavedIndexPatternWarningDescription', {
+        text: i18n.translate('explore.discover.showingSavedIndexPatternWarningDescription', {
           defaultMessage:
             'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
           values: {
@@ -99,7 +102,7 @@ export function resolveIndexPattern(
 
     toastNotifications.addWarning({
       title: warningTitle,
-      text: i18n.translate('discover.showingDefaultIndexPatternWarningDescription', {
+      text: i18n.translate('explore.discover.showingDefaultIndexPatternWarningDescription', {
         defaultMessage:
           'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
         values: {

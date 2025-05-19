@@ -6,11 +6,11 @@
 import './discover_chart_container.scss';
 import React, { useMemo } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { useDiscoverContext } from '../context';
 import { SearchData } from '../utils/use_search';
 import { DiscoverChart } from '../../components/chart/chart';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../../../../common/legacy/discover';
 
 export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();

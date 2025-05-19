@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ViewProps } from '../../../../../data_explorer/public';
+import { ViewProps } from '../../../../data_explorer';
 import {
   addColumn,
   removeColumn,
@@ -16,8 +16,12 @@ import {
 import { DiscoverSidebar } from '../../components/sidebar';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
-import { IndexPatternField, UI_SETTINGS, opensearchFilters } from '../../../../../data/public';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import {
+  IndexPatternField,
+  UI_SETTINGS,
+  opensearchFilters,
+} from '../../../../../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';
@@ -37,7 +41,7 @@ export default function DiscoverPanel(props: ViewProps) {
   const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
 
   const { columns } = useSelector((state) => {
-    const stateColumns = state.discover.columns;
+    const stateColumns = state.logs.columns;
     // check if state columns is not undefined, otherwise use buildColumns
     return {
       columns: stateColumns !== undefined ? stateColumns : buildColumns([]),

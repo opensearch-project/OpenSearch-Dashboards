@@ -5,7 +5,7 @@
 
 import { EuiListGroupItemProps } from '@elastic/eui';
 import { OpenSearchSearchHit } from '../doc_views/doc_views_types';
-import { IndexPattern } from '../../../../data/public';
+import { IndexPattern } from '../../../../../../../data/public';
 
 export interface DocViewLink extends EuiListGroupItemProps {
   href?: string;

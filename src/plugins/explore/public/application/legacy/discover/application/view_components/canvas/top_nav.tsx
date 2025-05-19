@@ -4,19 +4,19 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Query, TimeRange } from 'src/plugins/data/common';
 import { createPortal } from 'react-dom';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { AppMountParameters } from '../../../../../../core/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
+import { Query, TimeRange } from '../../../../../../../../data/common';
 import {
   useConnectStorageToQueryState,
   opensearchFilters,
   QueryStatus,
   useSyncQueryStateWithUrl,
-} from '../../../../../data/public';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { PLUGIN_ID } from '../../../../common';
+} from '../../../../../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
+import { PLUGIN_ID } from '../../../../../../../common/legacy/discover';
 import { DiscoverViewServices } from '../../../build_services';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
@@ -25,7 +25,7 @@ import { useDiscoverContext } from '../context';
 import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_management';
 
 import './discover_canvas.scss';
-import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
+import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
 import { ResultStatus } from '../utils';
 
 export interface TopNavProps {
@@ -44,7 +44,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
   const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
-  const state = useSelector((s) => s.discover);
+  const state = useSelector((s) => s.logs);
   const dispatch = useDispatch();
 
   const {
@@ -130,7 +130,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   useEffect(() => {
     setScreenTitle(
       savedSearch?.title ||
-        i18n.translate('discover.savedSearch.newTitle', {
+        i18n.translate('explore.discover.savedSearch.newTitle', {
           defaultMessage: 'New search',
         })
     );

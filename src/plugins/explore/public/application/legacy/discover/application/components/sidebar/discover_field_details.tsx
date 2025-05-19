@@ -39,7 +39,7 @@ import {
   getVisualizeHref,
 } from './lib/visualize_trigger_utils';
 import { Bucket, FieldDetails } from './types';
-import { IndexPatternField, IndexPattern } from '../../../../../data/public';
+import { IndexPatternField, IndexPattern } from '../../../../../../../../data/public';
 
 interface DiscoverFieldDetailsProps {
   columns: string[];
@@ -115,7 +115,7 @@ export function DiscoverFieldDetails({
               data-test-subj={`fieldVisualize-${field.name}`}
             >
               <FormattedMessage
-                id="discover.fieldChooser.detailViews.visualizeLinkText"
+                id="explore.discover.fieldChooser.detailViews.visualizeLinkText"
                 defaultMessage="Visualize"
               />
             </EuiButton>
@@ -131,7 +131,7 @@ export function DiscoverFieldDetails({
             {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
               <EuiLink onClick={() => onAddFilter('_exists_', field.name, '+')}>
                 <FormattedMessage
-                  id="discover.fieldChooser.detailViews.existsText"
+                  id="explore.discover.fieldChooser.detailViews.existsText"
                   defaultMessage="Exists in"
                 />{' '}
                 {details.exists}
@@ -141,7 +141,7 @@ export function DiscoverFieldDetails({
             )}{' '}
             / {details.total}{' '}
             <FormattedMessage
-              id="discover.fieldChooser.detailViews.recordsText"
+              id="explore.discover.fieldChooser.detailViews.recordsText"
               defaultMessage="records"
             />
           </EuiText>

@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import { SavedObject } from '../../../saved_objects/public';
-import { ISearchSource } from '../../../data/public';
+import { SavedObject } from '../../../../../../saved_objects/public';
+import { ISearchSource } from '../../../../../../data/public';
 
 export type SortDirection = 'asc' | 'desc';
 export type SortOrder = [string, SortDirection];

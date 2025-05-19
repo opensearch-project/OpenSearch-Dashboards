@@ -8,7 +8,7 @@ import { IntlProvider } from 'react-intl';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { DiscoverDownloadCsv, DiscoverDownloadCsvProps } from './download_csv';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import { IndexPattern } from '../../../../../data/common';
+import { IndexPattern } from '../../../../../../../../data/common';
 import { useDiscoverDownloadCsv } from './use_download_csv';
 import { DownloadCsvFormId } from './constants';
 

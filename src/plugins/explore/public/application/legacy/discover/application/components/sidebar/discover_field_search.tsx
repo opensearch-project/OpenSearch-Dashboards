@@ -88,16 +88,19 @@ export function DiscoverFieldSearch({
   types,
   isEnhancementsEnabledOverride,
 }: Props) {
-  const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
+  const searchPlaceholder = i18n.translate('explore.discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
-  const aggregatableLabel = i18n.translate('discover.fieldChooser.filter.aggregatableLabel', {
-    defaultMessage: 'Aggregatable',
-  });
-  const searchableLabel = i18n.translate('discover.fieldChooser.filter.searchableLabel', {
+  const aggregatableLabel = i18n.translate(
+    'explore.discover.fieldChooser.filter.aggregatableLabel',
+    {
+      defaultMessage: 'Aggregatable',
+    }
+  );
+  const searchableLabel = i18n.translate('explore.discover.fieldChooser.filter.searchableLabel', {
     defaultMessage: 'Searchable',
   });
-  const typeLabel = i18n.translate('discover.fieldChooser.filter.typeLabel', {
+  const typeLabel = i18n.translate('explore.discover.fieldChooser.filter.typeLabel', {
     defaultMessage: 'Type',
   });
   const typeOptions = types
@@ -116,10 +119,10 @@ export function DiscoverFieldSearch({
   });
 
   const filterBtnAriaLabel = isPopoverOpen
-    ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
+    ? i18n.translate('explore.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
         defaultMessage: 'Hide field filter settings',
       })
-    : i18n.translate('discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
+    : i18n.translate('explore.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
         defaultMessage: 'Show field filter settings',
       });
 
@@ -189,7 +192,7 @@ export function DiscoverFieldSearch({
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
           handleValueChange(id, e.target.value)
         }
-        aria-label={i18n.translate('discover.fieldChooser.filter.fieldSelectorLabel', {
+        aria-label={i18n.translate('explore.discover.fieldChooser.filter.fieldSelectorLabel', {
           defaultMessage: 'Selection of {id} filter options',
           values: { id },
         })}
@@ -287,7 +290,7 @@ export function DiscoverFieldSearch({
         >
           {!isEnhancementsEnabledOverride && (
             <FormattedMessage
-              id="discover.fieldChooser.fieldFilterFacetButtonLabel"
+              id="explore.discover.fieldChooser.fieldFilterFacetButtonLabel"
               defaultMessage="Filter by type"
             />
           )}
@@ -295,14 +298,14 @@ export function DiscoverFieldSearch({
       }
     >
       <EuiPopoverTitle>
-        {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
+        {i18n.translate('explore.discover.fieldChooser.filter.filterByTypeLabel', {
           defaultMessage: 'Filter by type',
         })}
       </EuiPopoverTitle>
       {selectionPanel}
       <EuiPopoverFooter>
         <EuiCompressedSwitch
-          label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
+          label={i18n.translate('explore.discover.fieldChooser.filter.hideMissingFieldsLabel', {
             defaultMessage: 'Hide missing fields',
           })}
           checked={values.missing}
