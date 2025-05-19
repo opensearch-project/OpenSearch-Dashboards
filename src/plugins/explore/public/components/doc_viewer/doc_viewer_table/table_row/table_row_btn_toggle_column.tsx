@@ -21,7 +21,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         aria-label={i18n.translate('explore.docViews.table.toggleColumnInTableButtonAriaLabel', {
           defaultMessage: 'Toggle column in table',
         })}
-        className="osdDocViewer__actionButton"
+        className="expDocViewer__actionButton"
         data-test-subj="toggleColumnButton"
         disabled
         iconType={'tableOfContents'}
@@ -45,7 +45,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         })}
         aria-pressed={active}
         onClick={onClick}
-        className="osdDocViewer__actionButton"
+        className="expDocViewer__actionButton"
         data-test-subj="toggleColumnButton"
         iconType={'tableOfContents'}
         iconSize={'s'}

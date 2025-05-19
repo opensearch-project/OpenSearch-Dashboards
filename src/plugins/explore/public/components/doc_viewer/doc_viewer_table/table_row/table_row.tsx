@@ -10,7 +10,6 @@ import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
-import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 import { FieldName } from './field_name/field_name';
@@ -48,14 +47,14 @@ export function DocViewTableRow({
 }: Props) {
   const valueClassName = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    osdDocViewer__value: true,
+    expDocViewer__value: true,
     'truncate-by-height': isCollapsible && isCollapsed,
   });
 
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
       {typeof onFilter === 'function' && (
-        <td className="osdDocViewer__buttons" data-test-subj="osdDocViewerButtons">
+        <td className="expDocViewer__buttons" data-test-subj="osdDocViewerButtons">
           <DocViewTableRowBtnFilterAdd
             disabled={!fieldMapping || !fieldMapping.filterable}
             onClick={() => onFilter(fieldMapping, valueRaw, '+')}
@@ -67,14 +66,9 @@ export function DocViewTableRow({
           {typeof onToggleColumn === 'function' && (
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}
-          <DocViewTableRowBtnFilterExists
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter('_exists_', field, '+')}
-            scripted={fieldMapping && fieldMapping.scripted}
-          />
         </td>
       )}
-      <td className="osdDocViewer__field" data-test-subj="osdDocViewerField">
+      <td className="expDocViewer__field" data-test-subj="osdDocViewerField">
         <FieldName
           fieldName={field}
           fieldType={fieldType}

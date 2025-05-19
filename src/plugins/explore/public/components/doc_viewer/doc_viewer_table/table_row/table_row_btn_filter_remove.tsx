@@ -32,7 +32,7 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
         aria-label={i18n.translate('explore.docViews.table.filterOutValueButtonAriaLabel', {
           defaultMessage: 'Filter out value',
         })}
-        className="osdDocViewer__actionButton"
+        className="expDocViewer__actionButton"
         data-test-subj="removeInclusiveFilterButton"
         disabled={disabled}
         onClick={onClick}

@@ -28,7 +28,7 @@ export function DocViewTableRowIconUnderscore() {
       content={tooltipContent}
       color="warning"
       iconProps={{
-        className: 'osdDocViewer__warning',
+        className: 'expDocViewer__warning',
         'data-test-subj': 'underscoreWarning',
       }}
       size="s"
