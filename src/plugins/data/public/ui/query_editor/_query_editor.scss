@@ -137,7 +137,7 @@
 .osdQueryEditor__header {
   display: flex;
   align-items: center;
-  padding: 0 $euiSizeXS $euiSizeS;
+  padding: 0 $euiSizeXS;
 }
 
 .osdQueryEditor__topBar {
@@ -178,8 +178,12 @@
 }
 
 // TODO: improve how this is styled. Styling just for the DQL editor.
-.osdQueryEditor__body .globalFilterGroup__wrapper {
-  margin-top: -$euiSizeS;
+.osdQueryEditor__body {
+  margin-top: $euiSizeS;
+
+  .globalFilterGroup__wrapper {
+    margin-top: -$euiSizeS;
+  }
 }
 
 .osdQuerEditor__singleLine {

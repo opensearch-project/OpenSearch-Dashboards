@@ -66,7 +66,7 @@ export interface DataPublicPluginSetup {
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
   /**
-   * @internal
+   * @experimental
    */
   __enhance: (enhancements: DataPublicPluginEnhancements) => void;
 }

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { duration } from 'moment';
 import { loggingSystemMock } from '../../../core/server/mocks';
 import { DataSourcePluginConfigType } from '../config';
 import { DataSourceService } from './data_source_service';
@@ -20,6 +21,10 @@ describe('Data Source Service', () => {
       enabled: true,
       clientPool: {
         size: 5,
+      },
+      globalOpenSearchConfig: {
+        requestTimeout: duration(100, 'seconds'),
+        pingTimeout: duration(10, 'seconds'),
       },
     } as DataSourcePluginConfigType;
   });

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 
@@ -77,6 +77,48 @@ const setupAssociationDataSourceModal = ({
   return {};
 };
 
+const setupAssociationDataSourceModalForCrossClusterSearch = ({
+  mode,
+  excludedConnectionIds,
+  handleAssignDataSourceConnections,
+}: Partial<AssociationDataSourceModalProps> = {}) => {
+  const coreServices = coreMock.createStart();
+  jest.spyOn(utilsExports, 'getDataSourcesList').mockResolvedValue([]);
+  jest.spyOn(utilsExports, 'fetchDataSourceConnections').mockResolvedValueOnce([
+    {
+      id: 'ds1',
+      name: 'Data Source 1',
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      type: 'OpenSearch',
+      relatedConnections: [
+        {
+          id: 'ds1:connection-alias-1',
+          name: 'ds1:connection-alias-1',
+          parentId: 'ds1',
+          connectionType: DataSourceConnectionType.OpenSearchConnection,
+          type: 'OpenSearch(Cross-cluster search)',
+        },
+      ],
+    },
+  ]);
+  const { logos } = chromeServiceMock.createStartContract();
+  render(
+    <IntlProvider locale="en">
+      <AssociationDataSourceModal
+        logos={logos}
+        mode={AssociationDataSourceModalMode.OpenSearchConnections}
+        http={coreServices.http}
+        notifications={coreServices.notifications}
+        savedObjects={coreServices.savedObjects}
+        closeModal={jest.fn()}
+        excludedConnectionIds={excludedConnectionIds ?? []}
+        handleAssignDataSourceConnections={jest.fn()}
+      />
+    </IntlProvider>
+  );
+  return {};
+};
+
 describe('AssociationDataSourceModal', () => {
   const originalOffsetHeight = Object.getOwnPropertyDescriptor(
     HTMLElement.prototype,
@@ -137,7 +179,7 @@ describe('AssociationDataSourceModal', () => {
     expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
-      expect(screen.queryByText('+ 1 related')).not.toBeInTheDocument();
+      expect(screen.queryByText('+ 1 Direct query')).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
       expect(screen.queryByRole('option', { name: 'dqc1' })).not.toBeInTheDocument();
     });
@@ -149,7 +191,7 @@ describe('AssociationDataSourceModal', () => {
     });
     expect(screen.getByText('Associate direct query data sources')).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText('+ 1 related')).toBeInTheDocument();
+      expect(screen.getByText('+ 1 Direct query')).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'dqc1' })).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
       expect(screen.getByRole('option', { name: 'dqc1' })).toBeInTheDocument();
@@ -221,5 +263,73 @@ describe('AssociationDataSourceModal', () => {
         type: 'AWS Security Lake',
       },
     ]);
+  });
+});
+
+describe('Cross-Cluster Search in AssociationDataSourceModal', () => {
+  const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'offsetHeight'
+  );
+  const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+
+  beforeEach(() => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetHeight',
+      originalOffsetHeight as PropertyDescriptor
+    );
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetWidth',
+      originalOffsetWidth as PropertyDescriptor
+    );
+  });
+
+  it('should display cross-cluster connections when associating OpenSearch data sources', async () => {
+    await act(async () => {
+      setupAssociationDataSourceModalForCrossClusterSearch();
+    });
+
+    expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
+      expect(screen.getByText('+ 1 Cross cluster')).toBeInTheDocument();
+    });
+  });
+
+  it('should display related cross-cluster connections after selecting a data source', async () => {
+    await act(async () => {
+      setupAssociationDataSourceModalForCrossClusterSearch();
+    });
+
+    expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('+ 1 Cross cluster')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('option', { name: 'ds1:connection-alias-1' })
+      ).not.toBeInTheDocument();
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'ds1:connection-alias-1' })).toBeInTheDocument();
+    });
   });
 });

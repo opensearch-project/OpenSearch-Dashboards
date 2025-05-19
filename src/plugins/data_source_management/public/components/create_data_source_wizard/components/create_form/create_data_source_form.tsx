@@ -351,7 +351,7 @@ export class CreateDataSourceForm extends React.Component<
     return {
       title: this.state.title,
       description: this.state.description,
-      endpoint: this.state.endpoint,
+      endpoint: this.state.endpoint.trim(),
       auth: { ...this.state.auth, credentials },
     };
   };

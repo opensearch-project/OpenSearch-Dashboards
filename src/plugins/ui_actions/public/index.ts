@@ -63,6 +63,8 @@ export {
   visualizeGeoFieldTrigger,
   EXTERNAL_ACTION_TRIGGER,
   externalActionTrigger,
+  ABORT_DATA_QUERY_TRIGGER,
+  abortDataQueryTrigger,
 } from './triggers';
 export {
   TriggerContextMapping,

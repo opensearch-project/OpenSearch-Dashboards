@@ -68,11 +68,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup JDK (Windows only)
-        if: matrix.os == 'windows-latest'
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '21'
           distribution: 'adopt'
 
       - name: Setup Node
@@ -184,6 +183,10 @@ jobs:
             exit 1
           fi
 
+      - name: Run TypeScript error check
+        id: typeScript-error-check
+        run: yarn typecheck
+
       - name: Run linter
         id: linter
         run: yarn lint
@@ -232,11 +235,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup JDK (Windows only)
-        if: matrix.os == 'windows-latest'
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '21'
           distribution: 'adopt'
 
       - name: Setup Node
@@ -349,11 +351,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup JDK (Windows only)
-        if: matrix.os == 'windows-latest'
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '21'
           distribution: 'adopt'
 
       - name: Setup Node

@@ -26,6 +26,7 @@ export const QueryEditor = (props: QueryEditorProps) => (
 export type { QueryEditorProps };
 
 export {
+  ACTION_BAR_BUTTONS_CONTAINER_ID,
   QueryEditorExtensions,
   QueryEditorExtensionDependencies,
   QueryEditorExtensionConfig,

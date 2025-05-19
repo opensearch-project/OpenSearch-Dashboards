@@ -83,6 +83,10 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
    */
   readonly type: T;
 
+  isDisabled?(context: ActionExecutionContext<Context>): boolean;
+
+  getTooltip?(context: ActionExecutionContext<Context>): string;
+
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
@@ -157,6 +161,9 @@ export interface ActionDefinition<Context extends BaseContext = {}>
    * without first showing up in context menu.
    * false by default.
    */
+  isDisabled?(context: ActionExecutionContext<Context>): boolean;
+
+  getTooltip?(context: ActionExecutionContext<Context>): string;
   shouldAutoExecute?(context: ActionDefinitionContext<Context>): Promise<boolean>;
 
   /**

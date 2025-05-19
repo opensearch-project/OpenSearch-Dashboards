@@ -12,6 +12,8 @@
     - [User_stories](multi-datasource/user_stories.md)
   - [Openapi](openapi/README.md)
   - Plugins
+    - data
+      - [Query editor enhancements](plugins/data/query-editor-enhancements.md)
     - discover
       - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
       - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
@@ -38,11 +40,13 @@
       - [Dashboard](../src/plugins/dashboard/README.md)
       - [Data](../src/plugins/data/README.md)
       - [Data_explorer](../src/plugins/data_explorer/README.md)
+      - [Data_importer](../src/plugins/data_importer/README.md)
       - [Data_source](../src/plugins/data_source/README.md)
       - [Data_source_management](../src/plugins/data_source_management/README.md)
       - [Dev_tools](../src/plugins/dev_tools/README.md)
       - [Discover](../src/plugins/discover/README.md)
       - [Embeddable](../src/plugins/embeddable/README.md)
+      - [Explore](../src/plugins/explore/README.md)
       - [Expressions](../src/plugins/expressions/README.md)
       - [Home](../src/plugins/home/README.md)
       - index_pattern_management
@@ -126,6 +130,7 @@
     - [Osd pm](../packages/osd-pm/README.md)
     - [Osd spec to console](../packages/osd-spec-to-console/README.md)
     - [Osd std](../packages/osd-std/README.md)
+    - [Osd storybook](../packages/osd-storybook/README.md)
     - [Osd stylelint config](../packages/osd-stylelint-config/README.md)
     - [Osd stylelint plugin stylelint](../packages/osd-stylelint-plugin-stylelint/README.md)
     - [Osd telemetry tools](../packages/osd-telemetry-tools/README.md)
@@ -186,6 +191,8 @@
     - [Opensearch dashboards.release notes 2.8.0](../release-notes/opensearch-dashboards.release-notes-2.8.0.md)
     - [Opensearch dashboards.release notes 2.9.0](../release-notes/opensearch-dashboards.release-notes-2.9.0.md)
     - [Opensearch dashboards.release notes 3.0.0 alpha1](../release-notes/opensearch-dashboards.release-notes-3.0.0-alpha1.md)
+    - [Opensearch dashboards.release notes 3.0.0 beta1](../release-notes/opensearch-dashboards.release-notes-3.0.0-beta1.md)
+    - [Opensearch dashboards.release notes 3.0.0](../release-notes/opensearch-dashboards.release-notes-3.0.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)

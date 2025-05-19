@@ -44,7 +44,7 @@ export default function () {
     opensearchTestCluster: {
       license: 'oss',
       from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['search.concurrent_segment_search.mode=none'],
     },
 
     osdTestServer: {
@@ -58,7 +58,6 @@ export default function () {
         `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
         `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
         `--home.disableWelcomeScreen=false`,
-        `--home.disableNewThemeModal=true`,
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
         //`--security.showInsecureClusterWarning=false`,
@@ -73,10 +72,10 @@ export default function () {
         // `--newsfeed.service.urlRoot=${servers.opensearchDashboards.protocol}://${servers.opensearchDashboards.hostname}:${servers.opensearchDashboards.port}`,
         // `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/opensearch-dashboards/v{VERSION}.json`,
         // Custom branding config
-        `--opensearchDashboards.branding.logo.defaultUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg`,
-        `--opensearchDashboards.branding.logo.darkModeUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg`,
-        `--opensearchDashboards.branding.mark.defaultUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg`,
-        `--opensearchDashboards.branding.mark.darkModeUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg`,
+        `--opensearchDashboards.branding.logo.defaultUrl=https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg`,
+        `--opensearchDashboards.branding.logo.darkModeUrl=https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_darkmode.svg`,
+        `--opensearchDashboards.branding.mark.defaultUrl=https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_default.svg`,
+        `--opensearchDashboards.branding.mark.darkModeUrl=https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_darkmode.svg`,
         `--opensearchDashboards.branding.applicationTitle=OpenSearch`,
         `--uiSettings.overrides['query:enhancements:enabled']=false`,
       ],

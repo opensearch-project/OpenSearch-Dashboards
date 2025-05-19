@@ -20,6 +20,7 @@ import {
   EnhancedFetchContext,
   fetch,
   formatDate,
+  isPPLSearchQuery,
   QueryAggConfig,
   SEARCH_STRATEGY,
 } from '../../common';
@@ -95,6 +96,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     const datasetService = queryString.getDatasetService();
     if (datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker === false)
       return query;
+    // Only append time range if query is running search command
+    if (!isPPLSearchQuery(query)) return query;
 
     const [baseQuery, ...afterPipeParts] = query.query.split('|');
     const afterPipe = afterPipeParts.length > 0 ? ` | ${afterPipeParts.join('|').trim()}` : '';

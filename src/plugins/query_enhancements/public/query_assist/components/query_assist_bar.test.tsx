@@ -8,12 +8,13 @@ import React, { ComponentProps, PropsWithChildren } from 'react';
 import { IntlProvider } from 'react-intl';
 import { of } from 'rxjs';
 import { QueryAssistBar } from '.';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { DataStorage } from '../../../../data/common';
 import { QueryEditorExtensionDependencies, QueryStringContract } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { setData, setStorage } from '../../services';
+import { setData, setStorage, setUiActions } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistInput } from './query_assist_input';
@@ -29,9 +30,9 @@ jest.mock('../hooks', () => ({
 }));
 
 jest.mock('./query_assist_input', () => ({
-  QueryAssistInput: ({ inputRef, error }: ComponentProps<typeof QueryAssistInput>) => (
+  QueryAssistInput: ({ inputRef, error, placeholder }: ComponentProps<typeof QueryAssistInput>) => (
     <>
-      <input ref={inputRef} />
+      <input placeholder={placeholder} ref={inputRef} />
       <div>{JSON.stringify(error)}</div>
     </>
   ),
@@ -53,6 +54,11 @@ const dependencies: QueryEditorExtensionDependencies = {
   query: {
     query: '',
     language: '',
+    dataset: {
+      type: 'INDEX_PATTERN',
+      id: '',
+      title: '',
+    },
   },
 };
 
@@ -61,6 +67,14 @@ type Props = ComponentProps<typeof QueryAssistBar>;
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
+
+const uiActionsStartMock = uiActionsPluginMock.createStartContract();
+uiActionsStartMock.getTrigger.mockReturnValue({
+  id: '',
+  exec: jest.fn(),
+});
+
+setUiActions(uiActionsStartMock);
 
 const renderQueryAssistBar = (overrideProps: Partial<Props> = {}) => {
   const props: Props = Object.assign<Props, Partial<Props>>({ dependencies }, overrideProps);
@@ -107,8 +121,18 @@ describe('QueryAssistBar', () => {
   });
 
   it('displays callout when dataset is not selected on submit', async () => {
-    queryStringMock.getQuery.mockReturnValueOnce({ query: '', language: 'kuery' });
-    queryStringMock.getUpdates$.mockReturnValueOnce(of({ query: '', language: 'kuery' }));
+    queryStringMock.getQuery.mockReturnValueOnce({
+      query: '',
+      language: 'kuery',
+      dataset: { type: 'INDEX_PATTERN', id: '', title: '' },
+    });
+    queryStringMock.getUpdates$.mockReturnValueOnce(
+      of({
+        query: '',
+        language: 'kuery',
+        dataset: { type: 'INDEX_PATTERN', id: '', title: '' },
+      })
+    );
     renderQueryAssistBar();
 
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'test query' } });
@@ -129,6 +153,26 @@ describe('QueryAssistBar', () => {
     renderQueryAssistBar();
 
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'test query' } });
+    fireEvent.click(screen.getByRole('button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('query-assist-guard-callout')).toBeInTheDocument();
+    });
+  });
+
+  it('display callout for AgentError', async () => {
+    const generateQueryMock = jest.fn().mockResolvedValue({
+      error: new AgentError({
+        error: { type: 'mock-type', reason: 'mock-reason', details: 'mock-details' },
+        status: 404,
+      }),
+    });
+    (useGenerateQuery as jest.Mock).mockReturnValue({
+      generateQuery: generateQueryMock,
+      loading: false,
+    });
+    renderQueryAssistBar();
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'false query' } });
     fireEvent.click(screen.getByRole('button'));
 
     await waitFor(() => {
@@ -222,5 +266,28 @@ describe('QueryAssistBar', () => {
       true
     );
     expect(screen.getByTestId('query-assist-query-generated-callout')).toBeInTheDocument();
+  });
+
+  it('should show unsupported placeholder when dataset is not supported', async () => {
+    const mockedQuery = {
+      query: '',
+      language: 'kuery',
+      dataset: {
+        id: 'foo',
+        title: 'mock',
+        type: 'S3',
+      },
+    };
+    queryStringMock.getUpdates$.mockReturnValueOnce(of(mockedQuery));
+    const { component } = renderQueryAssistBar({
+      dependencies: {
+        ...dependencies,
+        query: mockedQuery,
+      },
+    });
+
+    await component.findByPlaceholderText(
+      'Query Assist is not supported by mock. Please select another data source that is compatible to start entering questions or enter PPL below.'
+    );
   });
 });

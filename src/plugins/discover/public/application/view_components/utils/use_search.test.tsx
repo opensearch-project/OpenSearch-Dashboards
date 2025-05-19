@@ -12,7 +12,7 @@ import { Subject } from 'rxjs';
 import { createDataExplorerServicesMock } from '../../../../../data_explorer/public/utils/mocks';
 import { DiscoverViewServices } from '../../../build_services';
 import { discoverPluginMock } from '../../../mocks';
-import { ResultStatus, useSearch } from './use_search';
+import { ResultStatus, safeJSONParse, useSearch } from './use_search';
 import { Filter, ISearchSource, UI_SETTINGS } from '../../../../../data/common';
 import { opensearchFilters } from 'src/plugins/data/public';
 
@@ -416,5 +416,14 @@ describe('useSearch', () => {
       abortSignal: expect.anything(),
       withLongNumeralsSupport: undefined,
     });
+  });
+});
+
+describe('safeJSONParse', () => {
+  it('should covert string to JSON if possible', () => {
+    const validJSONString = '{"result":true, "count":42}';
+    const invalidJSONString = 'invalidJSON';
+    expect(safeJSONParse(validJSONString)).toEqual(JSON.parse(validJSONString));
+    expect(safeJSONParse(invalidJSONString)).toEqual(invalidJSONString);
   });
 });

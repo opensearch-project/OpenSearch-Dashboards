@@ -9,6 +9,7 @@ import { useEffectOnce } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { c } from 'tar';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
   DataSourceManagementContext,
@@ -53,7 +54,10 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     application,
     navigation,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
-  const dataSourceID: string = props.match.params.id;
+  const dataSourceID: string = props.match.params.id.split(':')[0];
+  const crossClusterConnectionAlias = props.match.params.id.includes(':')
+    ? props.match.params.id.split(':')[1]
+    : undefined;
 
   /* State Variables */
   const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
@@ -184,6 +188,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
             displayToastMessage={handleDisplayToastMessage}
             handleTestConnection={handleTestConnection}
             canManageDataSource={!!application.capabilities?.dataSource?.canManage}
+            crossClusterConnectionAlias={crossClusterConnectionAlias}
           />
         ) : null}
         {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}

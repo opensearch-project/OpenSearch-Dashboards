@@ -116,7 +116,8 @@ export const runQueryTests = () => {
               const version = versionText.replace('v ', '').trim();
               let docsVersion;
 
-              if (version === '3.0.0') {
+              // FIXME: using version to decide docsVersion is fragile, each time the version bumped, the test needs to updated accordingly
+              if (version === '3.1.0') {
                 docsVersion = 'latest';
               } else {
                 const [major, minor, patch] = version.split('.');

@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import './resizable_button.scss';
-import { getPosition } from '../helper';
+import { getPosition, calculateNewPaddingSize, MIN_SIDECAR_SIZE } from '../helper';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../sidecar_service';
+import { debounce } from '../../../../../core/public/utils';
 
 interface Props {
   onResize: (size: number) => void;
@@ -15,7 +16,7 @@ interface Props {
   dockedMode: ISidecarConfig['dockedMode'] | undefined;
 }
 
-export const MIN_SIDECAR_SIZE = 350;
+const RESIZE_DEBOUNCE_DELAY = 50;
 
 export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => {
   const isHorizontal = dockedMode !== SIDECAR_DOCKED_MODE.TAKEOVER;
@@ -29,6 +30,29 @@ export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => 
   const initialFlyoutSize = useRef(flyoutSize);
   const setFocus = (e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.focus();
 
+  const currentFlyoutSize = useRef(flyoutSize);
+  currentFlyoutSize.current = flyoutSize;
+
+  useEffect(() => {
+    const debouncedResize = debounce(() => {
+      const currentSize = currentFlyoutSize.current;
+
+      if (currentSize > MIN_SIDECAR_SIZE) {
+        // Make sure flyout never below min size even if the window goes below the size
+        const newPaddingSize = calculateNewPaddingSize(dockedMode, currentSize);
+        if (currentSize > newPaddingSize) {
+          onResize(newPaddingSize);
+        }
+      }
+    }, RESIZE_DEBOUNCE_DELAY);
+
+    window.addEventListener('resize', debouncedResize);
+
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+    };
+  }, [dockedMode, onResize]);
+
   const onMouseDown = useCallback(
     (event: React.MouseEvent | React.TouchEvent) => {
       const onMouseUp = () => {
@@ -39,6 +63,17 @@ export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => 
         window.removeEventListener('touchend', onMouseUp);
       };
       const onMouseMove = (e: MouseEvent | TouchEvent) => {
+        if (
+          e instanceof MouseEvent &&
+          (e.clientX < 0 ||
+            e.clientX > window.innerWidth ||
+            e.clientY < 0 ||
+            e.clientY > window.innerHeight)
+        ) {
+          // Stop resize calculation if the user mouse move out of window
+          return;
+        }
+
         let offset;
         if (dockedMode === SIDECAR_DOCKED_MODE.LEFT) {
           offset = getPosition(e, isHorizontal) - initialMouseXorY.current;

@@ -129,6 +129,7 @@ export interface DataStructure {
   columnHeader?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
+  remoteConnections?: string[];
 }
 
 /**
@@ -256,6 +257,8 @@ export interface Dataset extends BaseDataset {
     id: string;
     type: string;
   };
+  /** Optional parameter to indicate if the dataset is from a remote cluster(Cross Cluster search) */
+  isRemoteDataset?: boolean;
 }
 
 export interface DatasetField {

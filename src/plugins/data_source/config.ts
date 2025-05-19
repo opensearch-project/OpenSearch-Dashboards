@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { Duration } from 'moment';
 import { schema, TypeOf } from '@osd/config-schema';
 import { fileAppenderSchema } from './audit_config';
 
@@ -61,4 +61,11 @@ export const configSchema = schema.object({
   }),
 });
 
-export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;
+export type ConfigSchema = TypeOf<typeof configSchema>;
+
+export type DataSourcePluginConfigType = ConfigSchema & {
+  globalOpenSearchConfig: {
+    requestTimeout: Duration;
+    pingTimeout: Duration;
+  };
+};

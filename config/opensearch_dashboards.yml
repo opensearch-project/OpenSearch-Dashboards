@@ -46,9 +46,6 @@
 # Set the value to true to disable the welcome screen
 #home.disableWelcomeScreen: false
 
-# Set the value to true to disable the new theme introduction modal
-#home.disableNewThemeModal: false
-
 # Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
 # This settings should be used for large clusters or for clusters with ingest heavy nodes.
 # It allows Dashboards to only healthcheck using the local OpenSearch node rather than fan out requests across all nodes.
@@ -369,6 +366,9 @@
 
 # Set the value to true to enable dynamic config service to obtain configs from a config store. By default, it's disabled
 # dynamic_config_service.enabled: false
+
+# Set the value to true to enable direct data import from a file
+# data_importer.enabled: false
 
 # Set the backend roles in groups or users, whoever has the backend roles or exactly match the user ids defined in this config will be regard as dashboard admin.
 # Dashboard admin will have the access to all the workspaces(workspace.enabled: true) and objects inside OpenSearch Dashboards.
