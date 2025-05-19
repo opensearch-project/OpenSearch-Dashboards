@@ -7,7 +7,8 @@ import React, { useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { getEditorConfig, LanguageType } from './shared';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import { EditOrClear } from './edit_or_clear';
 
 interface PromptEditorProps {
   languageType: LanguageType;
@@ -56,30 +57,33 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
       handlePromptEdit();
     });
 
-    // Add command for Shift + Enter to insert a new line
-    editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
-      if (editor.hasTextFocus()) {
-        console.log('Shift + Enter pressed prompt');
-        const currentPosition = editor.getPosition();
-        if (currentPosition) {
-          editor.executeEdits('', [
-            {
-              range: new monaco.Range(
-                currentPosition.lineNumber,
-                currentPosition.column,
-                currentPosition.lineNumber,
-                currentPosition.column
-              ),
-              text: '\n',
-              forceMoveMarkers: true,
-            },
-          ]);
-          editor.setPosition({
-            lineNumber: currentPosition.lineNumber + 1,
-            column: 1,
-          });
+    editor.addAction({
+      id: 'insert-new-line-prompt',
+      label: 'Insert New Line Prompt',
+      keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+      run: (ed) => {
+        if (ed.hasTextFocus()) {
+          const currentPosition = ed.getPosition();
+          if (currentPosition) {
+            ed.executeEdits('', [
+              {
+                range: new monaco.Range(
+                  currentPosition.lineNumber,
+                  currentPosition.column,
+                  currentPosition.lineNumber,
+                  currentPosition.column
+                ),
+                text: '\n',
+                forceMoveMarkers: true,
+              },
+            ]);
+            ed.setPosition({
+              lineNumber: currentPosition.lineNumber + 1,
+              column: 1,
+            });
+          }
         }
-      }
+      },
     });
 
     editor.onDidContentSizeChange(() => {
@@ -153,34 +157,13 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
         )}
 
         {isPromptReadOnly && (
-          <div className="promptEditor__editOverlay">
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="s"
-              justifyContent="spaceAround"
-              className="edit_toolbar"
-            >
-              <EuiFlexItem grow={false}>
-                <span onClick={handleEditClick}>
-                  <EuiIcon type="pencil" style={{ marginRight: '2px' }} />{' '}
-                  <span style={{ textDecorationLine: 'underline' }}> Edit prompt </span>
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiHorizontalRule
-                  margin="xs"
-                  className="vertical-separator"
-                  style={{ margin: '0px' }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <span onClick={handleClearEditor}>
-                  <EuiIcon type="crossInCircleEmpty" style={{ marginRight: '3px' }} />
-                  <span style={{ textDecorationLine: 'underline' }}> Clear editor</span>
-                </span>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
+          <EditOrClear
+            className="promptEditor__editOverlay"
+            handleClearEditor={handleClearEditor}
+            handleEditClick={handleEditClick}
+            editText="Edit Prompt"
+            clearText="Clear Editor"
+          />
         )}
       </div>
     </div>
