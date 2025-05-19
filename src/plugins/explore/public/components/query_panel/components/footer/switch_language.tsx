@@ -14,7 +14,6 @@ export const SwitchLanguage: React.FC = () => {
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
-    // console.log(`Language switched to: ${language}`);
     closePopover();
   };
 
