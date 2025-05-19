@@ -24,6 +24,8 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
   }
 
   public setup(core: CoreSetup) {
+    this.logger.debug('explore: Setup');
+
     core.capabilities.registerProvider(capabilitiesProvider);
     core.capabilities.registerSwitcher(async (request, capabilites) => {
       return await core.security.readonlyService().hideForReadonly(request, capabilites, {

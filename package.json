@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "3.0.0",
+  "version": "3.1.0",
   "branch": "main",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -57,6 +57,8 @@
     "test:ftr": "scripts/use_node scripts/functional_tests",
     "test:ftr:server": "scripts/use_node scripts/functional_tests_server",
     "test:ftr:runner": "scripts/use_node scripts/functional_test_runner",
+    "typecheck": "node ./scripts/ts_error_checker.js",
+    "update-ts-baseline": "node ./scripts/update_ts_baseline.js",
     "checkLicenses": "scripts/use_node scripts/check_licenses --dev",
     "notice:validate": "scripts/use_node scripts/notice --validate",
     "notice:generate": "scripts/use_node scripts/notice",
