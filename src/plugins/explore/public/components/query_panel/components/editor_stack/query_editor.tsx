@@ -7,7 +7,7 @@ import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { LanguageType } from './shared';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EditOrClear } from './edit_or_clear';
 
 interface QueryEditorProps {
   languageType: LanguageType;
@@ -49,6 +49,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
 
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editorRef.current = editor;
       editor.onDidFocusEditorText(() => {
         setEditorIsFocused(true);
       });
@@ -61,29 +62,33 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
         handleQueryRun(editor.getValue());
       });
 
-      // Add command for Shift + Enter to insert a new line
-      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
-        if (editor.hasTextFocus()) {
-          const currentPosition = editor.getPosition();
-          if (currentPosition) {
-            editor.executeEdits('', [
-              {
-                range: new monaco.Range(
-                  currentPosition.lineNumber,
-                  currentPosition.column,
-                  currentPosition.lineNumber,
-                  currentPosition.column
-                ),
-                text: '\n',
-                forceMoveMarkers: true,
-              },
-            ]);
-            editor.setPosition({
-              lineNumber: currentPosition.lineNumber + 1,
-              column: 1,
-            });
+      editor.addAction({
+        id: 'insert-new-line-query',
+        label: 'Insert New Line Query',
+        keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+        run: (ed) => {
+          if (ed.hasTextFocus()) {
+            const currentPosition = ed.getPosition();
+            if (currentPosition) {
+              ed.executeEdits('', [
+                {
+                  range: new monaco.Range(
+                    currentPosition.lineNumber,
+                    currentPosition.column,
+                    currentPosition.lineNumber,
+                    currentPosition.column
+                  ),
+                  text: '\n',
+                  forceMoveMarkers: true,
+                },
+              ]);
+              ed.setPosition({
+                lineNumber: currentPosition.lineNumber + 1,
+                column: 1,
+              });
+            }
           }
-        }
+        },
       });
 
       // ✅ Decorate comment line after mount (only once)
@@ -153,34 +158,13 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
         />
 
         {isEditorReadOnly && (
-          <div className="queryEditor__editOverlay">
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="s"
-              justifyContent="spaceAround"
-              className="edit_toolbar"
-            >
-              <EuiFlexItem grow={false}>
-                <span onClick={handleEditClick}>
-                  <EuiIcon type="pencil" style={{ marginRight: '2px' }} />{' '}
-                  <span style={{ textDecorationLine: 'underline' }}> Edit query </span>
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiHorizontalRule
-                  margin="xs"
-                  className="vertical-separator"
-                  style={{ margin: '0px' }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <span onClick={handleClearEditor}>
-                  <EuiIcon type="crossInCircleEmpty" style={{ marginRight: '3px' }} />
-                  <span style={{ textDecorationLine: 'underline' }}> Clear editor</span>
-                </span>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
+          <EditOrClear
+            className="queryEditor__editOverlay"
+            handleClearEditor={handleClearEditor}
+            handleEditClick={handleEditClick}
+            editText="Edit Query"
+            clearText="Clear Editor"
+          />
         )}
       </div>
     </div>

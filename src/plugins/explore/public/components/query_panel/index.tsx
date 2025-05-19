@@ -46,7 +46,6 @@ const QueryPanel = () => {
   const detectLanguageType = debounce((query) => {
     const detector = new QueryTypeDetector();
     const result = detector.detect(query);
-    console.log('Detected:', result.type, result.confidence.toFixed(2));
     languageTypeRef.current = result.type;
     setCurrentQuery((prevQuery) => ({
       ...prevQuery,
@@ -77,7 +76,7 @@ const QueryPanel = () => {
 
   const handleClearEditor = () => {
     setIsDualEditor(false);
-    setCurrentQuery(intitialQuery(languageTypeRef.current, 'test'));
+    setCurrentQuery(intitialQuery('ppl', 'test'));
   };
 
   const handlePromptRun = (querystring?: string | undefined) => {
@@ -90,7 +89,7 @@ const QueryPanel = () => {
       setIsDualEditor(true);
       setCurrentQuery((prevQuery) => ({
         ...prevQuery,
-        query: 'source=test | where state=CA and year=2023 | sort=asc',
+        query: 'source=test\n| where state=CA and year=2023\n| sort=asc',
       }));
       // update query object with ppl query
     } else {
@@ -105,7 +104,7 @@ const QueryPanel = () => {
       footer={
         <QueryEditorFooter
           isDualEditor={isDualEditor}
-          languageType={languageTypeRef.current}
+          languageType={currentQuery.language}
           handleQueryRun={handleQueryRun}
         />
       }
@@ -113,7 +112,7 @@ const QueryPanel = () => {
       <EditorStack
         onPromptChange={onPromptChange}
         onQueryChange={onQueryChange}
-        languageType={languageTypeRef.current}
+        languageType={currentQuery.language}
         isDualEditor={isDualEditor}
         handleQueryRun={handleQueryRun}
         handlePromptRun={handlePromptRun}
