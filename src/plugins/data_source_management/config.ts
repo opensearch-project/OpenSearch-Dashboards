@@ -15,6 +15,9 @@ export const configSchema = schema.object({
       defaultValue: [],
     }),
   }),
+  dashboardDirectQuerySyncEnabled: schema.boolean({
+    defaultValue: false,
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

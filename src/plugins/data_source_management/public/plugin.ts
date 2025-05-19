@@ -53,6 +53,7 @@ import { AccelerationDetailsFlyout } from './components/direct_query_data_source
 import { CreateAcceleration } from './components/direct_query_data_sources_components/acceleration_creation/create/create_acceleration';
 import { AssociatedObjectsDetailsFlyout } from './components/direct_query_data_sources_components/associated_object_management/associated_objects_details_flyout';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
+import { ConfigSchema } from '../config';
 
 export const [
   getRenderAccelerationDetailsFlyout,
@@ -105,7 +106,8 @@ export class DataSourceManagementPlugin
     Plugin<
       DataSourceManagementPluginSetup,
       DataSourceManagementPluginStart,
-      DataSourceManagementSetupDependencies
+      DataSourceManagementSetupDependencies,
+      ConfigSchema
     > {
   private started: boolean = false;
   private authMethodsRegistry: IAuthenticationMethodRegistry = new AuthenticationMethodRegistry();
@@ -114,6 +116,11 @@ export class DataSourceManagementPlugin
   private bannerId: string | null = null; // To store the banner ID for unmounting
   private core: CoreStart | null = null; // To store the CoreStart instance
   private currentAppId: string | undefined = undefined; // To store the current appId
+  private config: ConfigSchema;
+
+  constructor(initializerContext: { config: { get: () => ConfigSchema } }) {
+    this.config = initializerContext.config.get();
+  }
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
@@ -311,82 +318,85 @@ export class DataSourceManagementPlugin
     };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
-    // Dynamically add/remove the banner based on the route
-    core.application.currentAppId$.subscribe((appId: string | undefined) => {
-      // Store the current appId
-      this.currentAppId = appId;
+    // Only mount the banner if the feature flag is enabled
+    if (this.config.dashboardDirectQuerySyncEnabled) {
+      // Dynamically add/remove the banner based on the route
+      core.application.currentAppId$.subscribe((appId: string | undefined) => {
+        // Store the current appId
+        this.currentAppId = appId;
 
-      // Show the banner only in the Dashboard application on the view route
-      if (appId === 'dashboards') {
+        // Show the banner only in the Dashboard application on the view route
+        if (appId === 'dashboards') {
+          const hash = window.location.hash;
+          const isDashboardViewMatch = hash.match(/#\/view\/([^\/?]+)(\?.*)?$/);
+          if (isDashboardViewMatch && isDashboardViewMatch[1]) {
+            const dashboardId = isDashboardViewMatch[1];
+            // Mount the banner if it hasn't been mounted yet
+            if (!this.bannerId) {
+              this.bannerId = core.overlays.banners.add(
+                toMountPoint(
+                  React.createElement(DashboardDirectQuerySync, {
+                    dashboardId,
+                    http: core.http,
+                    notifications: core.notifications,
+                    savedObjectsClient: core.savedObjects.client,
+                    removeBanner: () => {
+                      if (this.bannerId) {
+                        core.overlays.banners.remove(this.bannerId);
+                        this.bannerId = null;
+                      }
+                    },
+                  })
+                )
+              );
+            }
+          } else if (!isDashboardViewMatch && this.bannerId) {
+            // Remove the banner if we're not on a dashboard view page
+            core.overlays.banners.remove(this.bannerId);
+            this.bannerId = null;
+          }
+        } else {
+          // Remove the banner when not in the Dashboard application
+          if (this.bannerId) {
+            core.overlays.banners.remove(this.bannerId);
+            this.bannerId = null;
+          }
+        }
+      });
+
+      // Listen for hash changes to handle in-app navigation
+      window.addEventListener('hashchange', () => {
+        const appId = this.currentAppId; // Use the stored appId
         const hash = window.location.hash;
         const isDashboardViewMatch = hash.match(/#\/view\/([^\/?]+)(\?.*)?$/);
-        if (isDashboardViewMatch && isDashboardViewMatch[1]) {
-          const dashboardId = isDashboardViewMatch[1];
-          // Mount the banner if it hasn't been mounted yet
-          if (!this.bannerId) {
-            this.bannerId = core.overlays.banners.add(
-              toMountPoint(
-                React.createElement(DashboardDirectQuerySync, {
-                  dashboardId,
-                  http: core.http,
-                  savedObjectsClient: core.savedObjects.client,
-                  notifications: core.notifications,
-                  removeBanner: () => {
-                    if (this.bannerId) {
-                      core.overlays.banners.remove(this.bannerId);
-                      this.bannerId = null;
-                    }
-                  },
-                })
-              )
-            );
+        if (appId === 'dashboards') {
+          if (isDashboardViewMatch && isDashboardViewMatch[1]) {
+            const dashboardId = isDashboardViewMatch[1];
+            if (!this.bannerId) {
+              this.bannerId = core.overlays.banners.add(
+                toMountPoint(
+                  React.createElement(DashboardDirectQuerySync, {
+                    dashboardId,
+                    http: core.http,
+                    notifications: core.notifications,
+                    savedObjectsClient: core.savedObjects.client,
+                    removeBanner: () => {
+                      if (this.bannerId) {
+                        core.overlays.banners.remove(this.bannerId);
+                        this.bannerId = null;
+                      }
+                    },
+                  })
+                )
+              );
+            }
+          } else if (!isDashboardViewMatch && this.bannerId) {
+            core.overlays.banners.remove(this.bannerId);
+            this.bannerId = null;
           }
-        } else if (!isDashboardViewMatch && this.bannerId) {
-          // Remove the banner if we're not on a dashboard view page
-          core.overlays.banners.remove(this.bannerId);
-          this.bannerId = null;
         }
-      } else {
-        // Remove the banner when not in the Dashboard application
-        if (this.bannerId) {
-          core.overlays.banners.remove(this.bannerId);
-          this.bannerId = null;
-        }
-      }
-    });
-
-    // Listen for hash changes to handle in-app navigation
-    window.addEventListener('hashchange', () => {
-      const appId = this.currentAppId; // Use the stored appId
-      const hash = window.location.hash;
-      const isDashboardViewMatch = hash.match(/#\/view\/([^\/?]+)(\?.*)?$/);
-      if (appId === 'dashboards') {
-        if (isDashboardViewMatch && isDashboardViewMatch[1]) {
-          const dashboardId = isDashboardViewMatch[1];
-          if (!this.bannerId) {
-            this.bannerId = core.overlays.banners.add(
-              toMountPoint(
-                React.createElement(DashboardDirectQuerySync, {
-                  dashboardId,
-                  http: core.http,
-                  savedObjectsClient: core.savedObjects.client,
-                  notifications: core.notifications,
-                  removeBanner: () => {
-                    if (this.bannerId) {
-                      core.overlays.banners.remove(this.bannerId);
-                      this.bannerId = null;
-                    }
-                  },
-                })
-              )
-            );
-          }
-        } else if (!isDashboardViewMatch && this.bannerId) {
-          core.overlays.banners.remove(this.bannerId);
-          this.bannerId = null;
-        }
-      }
-    });
+      });
+    }
 
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
