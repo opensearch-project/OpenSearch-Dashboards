@@ -14,18 +14,22 @@ import { QueryTypeDetector } from './utils/typeDetection';
 import { Query } from './types';
 import './index.scss';
 
+const intitialQuery = (language: LanguageType, dataset: string) => ({
+  query: '',
+  prompt: '',
+  language: language,
+  dataset: dataset,
+});
+
 const QueryPanel = () => {
   const [lineCount, setLineCount] = useState<number | undefined>(undefined);
   // const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
   const inputQueryRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const languageTypeRef = useRef<LanguageType>('ppl'); // Default to PPL
   const [isDualEditor, setIsDualEditor] = useState(false); // Default to PPL
-  const [currentQuery, setCurrentQuery] = useState<Query>({
-    query: '',
-    prompt: '',
-    language: languageTypeRef.current,
-    dataset: 'test',
-  });
+  const [currentQuery, setCurrentQuery] = useState<Query>(
+    intitialQuery(languageTypeRef.current, 'test')
+  );
 
   const onQuerystringChange = (value: string, isPrompt: boolean) => {
     const query = {
@@ -68,8 +72,12 @@ const QueryPanel = () => {
 
   const handleQueryRun = (querystring?: string | undefined) => {
     console.log('Running queryString when enter:', querystring);
-    console.log('Running query:', currentQuery.query);
     // Add logic to run the query
+  };
+
+  const handleClearEditor = () => {
+    setIsDualEditor(false);
+    setCurrentQuery(intitialQuery(languageTypeRef.current, 'test'));
   };
 
   const handlePromptRun = (querystring?: string | undefined) => {
@@ -111,6 +119,7 @@ const QueryPanel = () => {
         handlePromptRun={handlePromptRun}
         queryString={currentQuery.query}
         prompt={currentQuery.prompt}
+        handleClearEditor={handleClearEditor}
       />
     </QueryPanelLayout>
   );

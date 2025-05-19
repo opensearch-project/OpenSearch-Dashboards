@@ -7,13 +7,16 @@ import React, { useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { getEditorConfig, LanguageType } from './shared';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 
 interface PromptEditorProps {
   languageType: LanguageType;
   prompt: string;
   onChange: (value: string) => void;
   handlePromptRun: (queryString?: string) => void;
+  isPromptReadOnly: boolean;
+  handlePromptEdit: () => void;
+  handleClearEditor: () => void;
 }
 
 const PromptEditor: React.FC<PromptEditorProps> = ({
@@ -21,14 +24,16 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
   onChange,
   handlePromptRun,
   prompt,
+  isPromptReadOnly,
+  handlePromptEdit,
+  handleClearEditor,
 }) => {
-  const [isReadOnly, setIsReadOnly] = useState(false);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorConfig = getEditorConfig(languageType);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
 
   const handleEditClick = () => {
-    setIsReadOnly(false);
+    handlePromptEdit();
     editorRef.current?.updateOptions({ readOnly: false });
     editorRef.current?.focus();
   };
@@ -44,15 +49,11 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
       setEditorIsFocused(false);
     });
 
-    editor.updateOptions({
-      placeholder: 'Enter your prompt here...',
-    });
-
     editor.addCommand(monaco.KeyCode.Enter, () => {
+      console.log('Enter pressed prompt');
       const promptValue = editor.getValue();
       handlePromptRun(promptValue);
-      editor.updateOptions({ readOnly: true });
-      setIsReadOnly(true);
+      handlePromptEdit();
     });
 
     // Add command for Shift + Enter to insert a new line
@@ -91,8 +92,8 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
   return (
     <div className="promptEditorWrapper" style={{ position: 'relative' }}>
       <div
-        className={`promptEditor ${isReadOnly ? 'promptEditor--readonly' : ''}`}
-        style={editorIsFocused && !isReadOnly ? { borderBottom: '1px solid #006BB4' } : {}}
+        className={`promptEditor ${isPromptReadOnly ? 'promptEditor--readonly' : ''}`}
+        style={editorIsFocused && !isPromptReadOnly ? { borderBottom: '1px solid #006BB4' } : {}}
         data-test-subj="osdQueryEditor__multiLine"
       >
         <CodeEditor
@@ -131,7 +132,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
           }}
         />
 
-        {!prompt && !editorIsFocused && !isReadOnly && (
+        {!prompt && !editorIsFocused && !isPromptReadOnly && (
           <div
             className="monacoPlaceholder"
             style={{
@@ -151,13 +152,34 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
           </div>
         )}
 
-        {isReadOnly && (
-          <div className="promptEditor__editOverlay" onClick={handleEditClick}>
-            <span className="edit_toolbar">
-              {' '}
-              <EuiIcon type="pencil" /> Edit prompt <span> | </span>{' '}
-              <EuiIcon type="crossInCircleEmpty" /> Clear editor{' '}
-            </span>
+        {isPromptReadOnly && (
+          <div className="promptEditor__editOverlay">
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="s"
+              justifyContent="spaceAround"
+              className="edit_toolbar"
+            >
+              <EuiFlexItem grow={false}>
+                <span onClick={handleEditClick}>
+                  <EuiIcon type="pencil" style={{ marginRight: '2px' }} />{' '}
+                  <span style={{ textDecorationLine: 'underline' }}> Edit prompt </span>
+                </span>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiHorizontalRule
+                  margin="xs"
+                  className="vertical-separator"
+                  style={{ margin: '0px' }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span onClick={handleClearEditor}>
+                  <EuiIcon type="crossInCircleEmpty" style={{ marginRight: '3px' }} />
+                  <span style={{ textDecorationLine: 'underline' }}> Clear editor</span>
+                </span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
         )}
       </div>
