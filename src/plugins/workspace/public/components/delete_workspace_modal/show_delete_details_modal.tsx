@@ -19,8 +19,9 @@ import {
   EuiModalFooter,
 } from '@elastic/eui';
 import { CoreStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 
-export interface DeleteDetailsModalProps {
+export interface ShowDeleteDetailsModalProps {
   selectedWorkspaces: WorkspaceAttribute[];
   failedWorksapces: WorkspaceAttribute[];
   openModal: (
@@ -29,7 +30,7 @@ export interface DeleteDetailsModalProps {
   ) => ReturnType<CoreStart['overlays']['openModal']>;
 }
 
-export const DeleteDetailsModal = (
+export const ShowDeleteDetailsModal = (
   selectedWorkspaces: WorkspaceAttribute[],
   failedWorksapces: WorkspaceAttribute[],
   openModal: (
@@ -85,7 +86,9 @@ export const DeleteDetailsModal = (
     <EuiModal style={{ width: 800, minHeight: 400 }} onClose={() => modal.close()}>
       <EuiModalHeader data-test-subj="delete-details-modal-header">
         <EuiModalHeaderTitle data-test-subj="delete-details-modal-title">
-          Delete workspace details
+          {i18n.translate('workspace.deleteDetails.title', {
+            defaultMessage: 'Delete workspace details',
+          })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody data-test-subj="delete-details-modal-body">
@@ -100,7 +103,9 @@ export const DeleteDetailsModal = (
               color="primary"
               onClick={() => modal.close()}
             >
-              Close
+              {i18n.translate('workspace.deleteDetails.close', {
+                defaultMessage: 'Close',
+              })}
             </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
