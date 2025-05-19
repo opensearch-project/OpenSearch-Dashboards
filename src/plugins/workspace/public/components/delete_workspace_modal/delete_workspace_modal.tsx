@@ -25,7 +25,7 @@ import {
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
-import { DeleteDetailsModal } from './delete_details_modal';
+import { ShowDeleteDetailsModal } from './show_delete_details_modal';
 
 export interface DeleteWorkspaceModalProps {
   onClose: () => void;
@@ -85,10 +85,12 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
                   <EuiSmallButton
                     color="success"
                     onClick={() =>
-                      DeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
+                      ShowDeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
                     }
                   >
-                    View Delete Details
+                    {i18n.translate('workspace.delete.detail', {
+                      defaultMessage: 'View Delete Details',
+                    })}
                   </EuiSmallButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -120,7 +122,9 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           text: toMountPoint(
             <>
               <div>
-                Failed workspace name:{' '}
+                {i18n.translate('workspace.delete.failed.name', {
+                  defaultMessage: 'Failed workspace name ',
+                })}
                 {failedWorksapces.map((selectedWorkspace) => selectedWorkspace.name).join(', ')}{' '}
               </div>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -128,10 +132,12 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
                   <EuiSmallButton
                     color={isAllFailed ? 'danger' : 'warning'}
                     onClick={() =>
-                      DeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
+                      ShowDeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
                     }
                   >
-                    View Delete Details
+                    {i18n.translate('workspace.delete.detail', {
+                      defaultMessage: 'View Delete Details',
+                    })}
                   </EuiSmallButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -148,14 +154,21 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   return (
     <EuiModal onClose={onClose} className="delete-workspace-modal" aria-label="modal">
       <EuiModalHeader data-test-subj="delete-workspace-modal-header">
-        <EuiModalHeaderTitle>Delete workspace</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('workspace.delete.title', {
+            defaultMessage: 'Delete workspace',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody data-test-subj="delete-workspace-modal-body">
         {selectedWorkspaces && selectedWorkspaces.length > 0 ? (
           <div style={{ lineHeight: 1.5 }}>
             <p>
-              The following workspace will be permanently deleted. This action cannot be undone.
+              {i18n.translate('workspace.delete.note', {
+                defaultMessage:
+                  'The following workspace will be permanently deleted. This action cannot be undone.',
+              })}
             </p>
             <ul style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
               {selectedWorkspaces.map((selectedWorkspace) => {
@@ -184,7 +197,9 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           onClick={onClose}
           data-test-subj="delete-workspace-modal-cancel-button"
         >
-          Cancel
+          {i18n.translate('workspace.delete.cancel.button', {
+            defaultMessage: 'Cancel',
+          })}
         </EuiSmallButtonEmpty>
         <EuiSmallButton
           data-test-subj="delete-workspace-modal-confirm"
@@ -194,7 +209,9 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           disabled={value !== typeTextToConfirm}
           isLoading={deleting}
         >
-          Delete
+          {i18n.translate('workspace.delete.confirm.button', {
+            defaultMessage: 'Delete',
+          })}
         </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>

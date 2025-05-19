@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { DeleteDetailsModal } from './delete_details_modal'; // Correct import path
+import { ShowDeleteDetailsModal } from './show_delete_details_modal'; // Correct import path
 import { WorkspaceAttribute, OverlayRef } from 'opensearch-dashboards/public'; // Import OverlayRef
 
 const mockOpenModal = jest.fn(
@@ -20,7 +20,7 @@ const mockOpenModal = jest.fn(
   }
 );
 
-describe('DeleteDetailsModal', () => {
+describe('ShowDeleteDetailsModal', () => {
   let modalClose: () => void;
 
   it('should render the modal with correct details for successful deletions', async () => {
@@ -39,7 +39,7 @@ describe('DeleteDetailsModal', () => {
     });
 
     // Act
-    DeleteDetailsModal(selectedWorkspaces, failedWorkspaces, mockOpenModal); // *Render the modal content*
+    ShowDeleteDetailsModal(selectedWorkspaces, failedWorkspaces, mockOpenModal); // *Render the modal content*
 
     // Assert
     expect(mockOpenModal).toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('DeleteDetailsModal', () => {
     });
 
     // Act
-    DeleteDetailsModal(selectedWorkspaces, failedWorkspaces, mockOpenModal); // *Render the modal content*
+    ShowDeleteDetailsModal(selectedWorkspaces, failedWorkspaces, mockOpenModal); // *Render the modal content*
 
     // Assert
     expect(mockOpenModal).toHaveBeenCalled();
@@ -110,7 +110,7 @@ describe('DeleteDetailsModal', () => {
     });
 
     // Act
-    DeleteDetailsModal(selectedWorkspaces, failedWorkspaces, mockOpenModal); // *Render the modal content*
+    ShowDeleteDetailsModal(selectedWorkspaces, failedWorkspaces, mockOpenModal); // *Render the modal content*
 
     // Assert
     expect(mockOpenModal).toHaveBeenCalled();
@@ -138,7 +138,7 @@ describe('DeleteDetailsModal', () => {
       return { close, onClose: Promise.resolve() };
     });
 
-    DeleteDetailsModal(selectedWorkspaces, failedWorkspaces, mockOpenModal);
+    ShowDeleteDetailsModal(selectedWorkspaces, failedWorkspaces, mockOpenModal);
 
     // Act
     const closeButton = screen.getByTestId('delete-details-modal-close-button');
