@@ -23,11 +23,6 @@ const DASHBOARD_ADMIN_SETTINGS_ID = '_dashboard_admin';
 
 type AttributesObject = Record<string, unknown>;
 
-interface UiSettingWithPermission {
-  value: unknown;
-  isPermissionControlled: boolean;
-}
-
 interface ProcessedAttributes {
   permissionAttributes: AttributesObject;
   regularAttributes: AttributesObject;
@@ -65,25 +60,13 @@ export class PermissionControlUiSettingsWrapper {
           }
         }
 
-        const hasPermission = this.isPermissionControlEnabled
-          ? this.isDashboardAdmin(wrapperOptions)
-          : true;
-
-        const adminUiSettingAttributes: Record<string, UiSettingWithPermission> = adminSettings
-          ? Object.fromEntries(
-              Object.entries(
-                (adminSettings.attributes as unknown) as UiSettingWithPermission
-              ).map(([key, value]) => [key, { value, isPermissionControlled: !hasPermission }])
-            )
-          : {};
-
         const uiSettings = await wrapperOptions.client.get<T>(type, id, options);
 
         return {
           ...uiSettings,
           attributes: {
             ...uiSettings.attributes,
-            ...((adminUiSettingAttributes as unknown) as T),
+            ...((adminSettings?.attributes as unknown) as T),
           },
         };
       }

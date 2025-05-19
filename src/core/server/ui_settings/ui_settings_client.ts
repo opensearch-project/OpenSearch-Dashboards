@@ -63,7 +63,6 @@ interface ReadOptions {
 interface UserProvidedValue<T = unknown> {
   userValue?: T;
   isOverridden?: boolean;
-  isPermissionControlled?: boolean;
 }
 
 type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
@@ -276,14 +275,10 @@ export class UiSettingsClient implements IUiSettingsClient {
     for (const [key, userValue] of Object.entries(values)) {
       if (userValue === null || this.isOverridden(key)) continue;
       try {
-        if (userValue && (userValue as any).hasOwnProperty('isPermissionControlled')) {
-          filteredValues[key] = userValue as { value: T; isPermissionControlled: boolean };
-        } else {
-          this.validateKey(key, userValue);
-          filteredValues[key] = {
-            userValue: userValue as T,
-          };
-        }
+        this.validateKey(key, userValue);
+        filteredValues[key] = {
+          userValue: userValue as T,
+        };
       } catch (error) {
         this.log.warn(`Ignore invalid UiSettings value. ${error}.`);
       }

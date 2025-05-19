@@ -126,7 +126,7 @@ export interface IUiSettingsClient {
   /**
    * Shows whether the uiSettings value set by the dashboard admin only.
    */
-  isPermissionControlled: (key: string) => boolean;
+  isPermissionControlled: (key: string, isDashboardAdmin: boolean) => boolean;
 
   /**
    * Returns an Observable that notifies subscribers of each update to the uiSettings,

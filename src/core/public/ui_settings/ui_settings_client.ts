@@ -37,7 +37,7 @@ import {
   PublicUiSettingsParams,
   UiSettingsType,
   UiSettingScope,
-} from '../../server/ui_settings/types';
+} from '../../../core/server/types';
 import { IUiSettingsClient, UiSettingsState } from './types';
 
 import { UiSettingsApi } from './ui_settings_api';
@@ -192,8 +192,11 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
   }
 
-  isPermissionControlled(key: string) {
-    return this.isDeclared(key) && Boolean(this.cache[key].isPermissionControlled);
+  isPermissionControlled(key: string, isDashboardAdmin: boolean) {
+    return (
+      this.isDeclared(key) &&
+      Boolean(this.cache[key].scope === UiSettingScope.DASHBOARD_ADMIN && !isDashboardAdmin)
+    );
   }
 
   overrideLocalDefault(key: string, newDefault: any) {

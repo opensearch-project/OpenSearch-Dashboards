@@ -172,6 +172,8 @@ export class AdvancedSettingsComponent extends Component<
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     const userSettingsEnabled = config.get('theme:enableUserControl');
+    const isDashboardAdmin = !!this.props.application?.capabilities?.dashboards?.isDashboardAdmin;
+
     return Object.entries(all)
       .filter(([, setting]) => {
         const scope = setting.scope;
@@ -199,7 +201,7 @@ export class AdvancedSettingsComponent extends Component<
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
           isOverridden: config.isOverridden(setting[0]),
-          isPermissionControlled: config.isPermissionControlled(setting[0]),
+          isPermissionControlled: config.isPermissionControlled(setting[0], isDashboardAdmin),
           userSettingsEnabled,
         });
       })
