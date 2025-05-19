@@ -52,6 +52,7 @@ export const runSavedSearchTests = () => {
       ]);
     });
 
+    // TODO currently saved search isn't working in explore, enable this when it is fixed
     it.skip('Load a saved search', () => {
       const config = generateSavedTestConfiguration(
         INDEX_PATTERN_WITH_TIME,
