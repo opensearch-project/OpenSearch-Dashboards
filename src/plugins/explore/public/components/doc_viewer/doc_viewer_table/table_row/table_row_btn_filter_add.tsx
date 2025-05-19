@@ -32,7 +32,7 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
         aria-label={i18n.translate('explore.docViews.table.filterForValueButtonAriaLabel', {
           defaultMessage: 'Filter for value',
         })}
-        className="expDocViewer__actionButton"
+        className="exploreDocViewer__actionButton"
         data-test-subj="addInclusiveFilterButton"
         disabled={disabled}
         onClick={onClick}

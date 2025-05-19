@@ -19,7 +19,10 @@ export function DocViewTable({
   const flattened = indexPattern.flattenHit(hit);
 
   return (
-    <table className="table table-condensed expDocViewerTable" data-test-subj="osdDocViewerTable">
+    <table
+      className="table table-condensed exploreDocViewerTable"
+      data-test-subj="osdDocViewerTable"
+    >
       <tbody>
         {Object.keys(flattened)
           .sort()

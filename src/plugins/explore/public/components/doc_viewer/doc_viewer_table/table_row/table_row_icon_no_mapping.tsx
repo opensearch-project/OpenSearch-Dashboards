@@ -24,7 +24,7 @@ export function DocViewTableRowIconNoMapping() {
       color="warning"
       content={tooltipContent}
       iconProps={{
-        className: 'expDocViewer__warning',
+        className: 'exploreDocViewer__warning',
         'data-test-subj': 'noMappingWarning',
       }}
       size="s"

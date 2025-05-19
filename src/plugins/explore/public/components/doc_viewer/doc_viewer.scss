@@ -1,10 +1,10 @@
-.expDocViewerTable {
+.exploreDocViewerTable {
   margin-top: $euiSizeS;
 }
 
-.expDocViewer {
+.exploreDocViewer {
   pre,
-  .expDocViewer__value {
+  .exploreDocViewer__value {
     display: inline-block;
     word-break: break-all;
     word-wrap: break-word;
@@ -14,7 +14,7 @@
     padding-top: 2px;
   }
 
-  .expDocViewer__field {
+  .exploreDocViewer__field {
     padding-top: 8px;
   }
 
@@ -32,34 +32,34 @@
   }
 
   tr:hover {
-    .expDocViewer__actionButton {
+    .exploreDocViewer__actionButton {
       opacity: 1;
     }
   }
 }
 
-.expDocViewer__buttons,
-.expDocViewer__field {
+.exploreDocViewer__buttons,
+.exploreDocViewer__field {
   white-space: nowrap;
 }
 
-.expDocViewer__buttons {
+.exploreDocViewer__buttons {
   width: 60px;
 
   // Show all icons if one is focused,
   // IE doesn't support, but the fallback is just the focused button becomes visible
   &:focus-within {
-    .expDocViewer__actionButton {
+    .exploreDocViewer__actionButton {
       opacity: 1;
     }
   }
 }
 
-.expDocViewer__field {
+.exploreDocViewer__field {
   width: 160px;
 }
 
-.expDocViewer__actionButton {
+.exploreDocViewer__actionButton {
   opacity: 0;
 
   &:focus {
@@ -67,6 +67,6 @@
   }
 }
 
-.expDocViewer__warning {
+.exploreDocViewer__warning {
   margin-right: $euiSizeS;
 }

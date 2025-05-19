@@ -45,7 +45,7 @@ export function DocViewTableRowBtnFilterExists({
           defaultMessage: 'Filter for field present',
         })}
         onClick={onClick}
-        className="expDocViewer__actionButton"
+        className="exploreDocViewer__actionButton"
         data-test-subj="addExistsFilterButton"
         disabled={disabled}
         iconType={'indexOpen'}
