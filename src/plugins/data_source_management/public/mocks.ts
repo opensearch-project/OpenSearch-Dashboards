@@ -31,6 +31,7 @@ import {
 } from '../framework/types';
 import { AvailableIntegrationsTableProps } from './components/direct_query_data_sources_components/integrations/available_integration_table';
 import { navigationPluginMock } from '../../navigation/public/mocks';
+import packageInfo from '../../../../package.json';
 
 /* Mock Types */
 
@@ -379,6 +380,7 @@ export const mockDataSourceAttributesWithAuth = {
       password: 'test123',
     },
   },
+  dataSourceVersion: packageInfo.version,
 };
 
 export const mockDataSourceAttributesWithSigV4Auth = {
@@ -417,6 +419,7 @@ export const mockDataSourceAttributesWithRegisteredAuth = {
     type: 'Some Auth Type',
     credentials: {} as { [key: string]: string },
   },
+  dataSourceVersion: packageInfo.version,
 } as DataSourceAttributes;
 
 export const getDataSourceByIdWithCredential = {

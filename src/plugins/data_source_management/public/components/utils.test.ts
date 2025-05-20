@@ -49,16 +49,9 @@ import {
   usernamePasswordAuthMethod,
 } from '../types';
 import { HttpStart, IToasts, SavedObject } from 'opensearch-dashboards/public';
-import { i18n } from '@osd/i18n';
 import { AuthenticationMethod, AuthenticationMethodRegistry } from '../auth_registry';
 import { deepEqual } from 'assert';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
-import {
-  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
-  CONNECT_DATASOURCES_MESSAGE,
-  NO_COMPATIBLE_DATASOURCES_MESSAGE,
-  NO_DATASOURCES_CONNECTED_MESSAGE,
-} from './constants';
 import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
@@ -686,7 +679,7 @@ describe('DataSourceManagement: Utils.ts', () => {
 
     it('should return the first data source if no default option, hideLocalCluster is ture and no default datasource', () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
-      const result = getDefaultDataSource(getDataSourceOptions, LocalCluster, uiSettings, true);
+      const result = getDefaultDataSource(getDataSourceOptions, LocalCluster, '', true);
       expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
     });
   });

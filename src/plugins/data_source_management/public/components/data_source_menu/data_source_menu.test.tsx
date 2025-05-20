@@ -14,6 +14,8 @@ import * as utils from '../utils';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 import { mockManagementPlugin } from '../../mocks';
 
+const onManageDataSourceMock = jest.fn();
+
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
@@ -42,6 +44,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -58,6 +61,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -72,6 +76,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -85,6 +90,7 @@ describe('DataSourceMenu', () => {
           fullWidth: true,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -100,6 +106,7 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test', label: 'test-label' }],
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -115,6 +122,7 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test' }],
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -131,6 +139,7 @@ describe('DataSourceMenu', () => {
           notifications,
           displayAllCompatibleDataSources: true,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(container).toMatchSnapshot();
@@ -139,12 +148,13 @@ describe('DataSourceMenu', () => {
   it('should render nothing', () => {
     const container = render(
       <DataSourceMenu
-        componentType={''}
+        componentType={'' as DataSourceComponentType}
         componentConfig={{
           fullWidth: true,
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(container).toMatchSnapshot();
@@ -159,6 +169,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(container).toMatchSnapshot();

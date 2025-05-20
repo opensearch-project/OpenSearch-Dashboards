@@ -315,8 +315,7 @@ describe('DataSourceTable', () => {
       });
       // Mock that the current user is dashboard admin
       mockedContext.application.capabilities = {
-        ...capabilities,
-        dashboards: { isDashboardAdmin: true },
+        dataSource: { canManage: true },
       };
 
       await act(async () => {
@@ -361,7 +360,7 @@ describe('DataSourceTable', () => {
       // Mock that the current user is not dashboard admin
       mockedContext.application.capabilities = {
         ...capabilities,
-        dashboards: { isDashboardAdmin: false },
+        dataSource: { canManage: false },
       };
 
       await act(async () => {
@@ -405,7 +404,7 @@ describe('DataSourceTable', () => {
       // Mock that the current user is dashboard admin
       mockedContext.application.capabilities = {
         ...capabilities,
-        dashboards: { isDashboardAdmin: true },
+        dataSource: { canManage: true },
       };
 
       await act(async () => {
