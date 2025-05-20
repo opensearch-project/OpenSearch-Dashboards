@@ -13,6 +13,10 @@ interface EditorStackProps {
   onQueryChange: (value: string) => void;
   languageType: LanguageType;
   isDualEditor: Boolean;
+  isPromptReadOnly: boolean;
+  isEditorReadOnly: boolean;
+  handleQueryEdit: () => void;
+  handlePromptEdit: () => void;
   handleQueryRun: (queryString?: string) => void;
   handlePromptRun: (queryString?: string) => void;
   handleClearEditor: () => void;
@@ -22,18 +26,19 @@ interface EditorStackProps {
 
 const EditorStack: React.FC<EditorStackProps> = ({
   isDualEditor,
+  isPromptReadOnly,
+  isEditorReadOnly,
   onPromptChange,
   onQueryChange,
   languageType,
+  handleQueryEdit,
+  handlePromptEdit,
   handleQueryRun,
   handlePromptRun,
   handleClearEditor,
   queryString,
   prompt,
 }) => {
-  const [isPromptReadOnly, setIsPromptReadOnly] = useState(false);
-  const [isEditorReadOnly, setIsEditorReadOnly] = useState(false);
-
   return (
     <div className="editor-stack">
       <PromptEditor
@@ -42,10 +47,7 @@ const EditorStack: React.FC<EditorStackProps> = ({
         handlePromptRun={handlePromptRun}
         prompt={prompt}
         isPromptReadOnly={isPromptReadOnly}
-        handlePromptEdit={() => {
-          setIsEditorReadOnly(true);
-          setIsPromptReadOnly(false);
-        }}
+        handlePromptEdit={handlePromptEdit}
         handleClearEditor={handleClearEditor}
       />
       {isDualEditor && (
@@ -55,7 +57,7 @@ const EditorStack: React.FC<EditorStackProps> = ({
           handleQueryRun={handleQueryRun}
           queryString={queryString}
           isEditorReadOnly={isEditorReadOnly}
-          handleQueryEdit={() => setIsEditorReadOnly(false)}
+          handleQueryEdit={handleQueryEdit}
           handleClearEditor={handleClearEditor}
         />
       )}

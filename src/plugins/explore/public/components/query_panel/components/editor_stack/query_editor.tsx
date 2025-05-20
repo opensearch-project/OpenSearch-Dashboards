@@ -33,6 +33,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   const [editorIsFocused, setEditorIsFocused] = useState(false);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [decorated, setDecorated] = useState(false);
+  const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
 
   // 🧠 Inject comment only once when content is loaded
   useEffect(() => {
@@ -49,17 +50,35 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
 
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      editorRef.current = editor;
-      editor.onDidFocusEditorText(() => {
+      const focusDisposable = editor.onDidFocusEditorText(() => {
+        if (blurTimeoutRef.current) {
+          clearTimeout(blurTimeoutRef.current);
+        }
         setEditorIsFocused(true);
       });
 
-      editor.onDidBlurEditorText(() => {
-        setEditorIsFocused(false);
+      const blurDisposable = editor.onDidBlurEditorText(() => {
+        blurTimeoutRef.current = setTimeout(() => {
+          setEditorIsFocused(false);
+        }, 300);
       });
 
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-        handleQueryRun(editor.getValue());
+      editorRef.current = editor;
+
+      // editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      //   handleQueryRun(editor.getValue());
+      // });
+
+      // Set up Enter key handling
+      editor.addAction({
+        id: 'run-query-on-enter',
+        label: 'Run Query on Enter',
+        keybindings: [monaco.KeyCode.Enter],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 1.5,
+        run: () => {
+          handleQueryRun(editor.getValue());
+        },
       });
 
       editor.addAction({
@@ -104,6 +123,14 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
         ]);
         setDecorated(true);
       }
+
+      return () => {
+        focusDisposable.dispose();
+        blurDisposable.dispose();
+        if (blurTimeoutRef.current) {
+          clearTimeout(blurTimeoutRef.current);
+        }
+      };
     },
     [decorated, handleQueryRun, queryString]
   );

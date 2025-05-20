@@ -17,14 +17,16 @@ import { ErrorDisplay } from './error_display';
 
 interface QueryEditorFooterProps {
   languageType: LanguageType;
-  handleQueryRun: () => void;
-  isDualEditor: Boolean;
+  handleRunClick: () => void;
+  isDualEditor: boolean;
+  isLoading: boolean;
 }
 
 export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
   languageType,
-  handleQueryRun,
+  handleRunClick,
   isDualEditor,
+  isLoading,
 }) => {
   return (
     <div className="query-editor-footer">
@@ -74,7 +76,7 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               <DateTimeRangePicker />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RunQueryButton onClick={handleQueryRun} isDisabled={false} />
+              <RunQueryButton onClick={handleRunClick} isDisabled={false} isLoading={isLoading} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

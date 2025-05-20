@@ -76,9 +76,9 @@ export const SaveQueryButton: React.FC = () => {
       >
         <EuiPopoverTitle>SAVED QUERIES</EuiPopoverTitle>
         <div style={{ padding: '10px' }} data-test-subj="saveQueryPopoverBody">
-          <EuiText size="s" style={{ color: '#676E75' }}>
+          <EuiText size="s" style={{ color: '#676E75', maxWidth: '500px' }}>
             <p>
-              There are no saved queries. Save query text and filters that you want to use again.
+              There are no saved queries.Save query text and filters that you want to use again.
             </p>
           </EuiText>
         </div>
@@ -120,7 +120,7 @@ export const SaveQueryButton: React.FC = () => {
               </EuiText>
 
               <EuiFormRow label="Description">
-                <EuiTextArea
+                <EuiFieldText
                   placeholder="Enter query description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}

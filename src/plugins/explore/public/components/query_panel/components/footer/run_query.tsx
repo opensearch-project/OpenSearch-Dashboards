@@ -8,10 +8,15 @@ import { EuiButton } from '@elastic/eui'; // Ensure this import is correct and m
 
 interface RunQueryButtonProps {
   onClick: () => void;
-  isDisabled?: boolean;
+  isDisabled?: Boolean;
+  isLoading?: Boolean;
 }
 
-export const RunQueryButton: React.FC<RunQueryButtonProps> = ({ onClick, isDisabled = false }) => {
+export const RunQueryButton: React.FC<RunQueryButtonProps> = ({
+  onClick,
+  isDisabled = false,
+  isLoading,
+}) => {
   return (
     <EuiButton
       fill
@@ -19,6 +24,7 @@ export const RunQueryButton: React.FC<RunQueryButtonProps> = ({ onClick, isDisab
       isDisabled={isDisabled}
       data-test-subj="runQueryButton"
       size="s"
+      isLoading={isLoading}
     >
       Run query
     </EuiButton>
