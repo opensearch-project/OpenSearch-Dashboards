@@ -9,6 +9,8 @@ import {
   testDataSourceManagementPlugin,
   createAuthenticationMethod,
   mockInitializerContext,
+  managementMock,
+  indexPatternManagementMock,
 } from './mocks';
 import {
   DataSourceManagementPlugin,
@@ -27,22 +29,6 @@ describe('#dataSourceManagement', () => {
   let coreSetup: any;
   let coreStart: any;
   let mockDataSourceManagementPluginStart: MockedKeys<DataSourceManagementPluginStart>;
-
-  const managementMock = {
-    sections: {
-      section: {
-        opensearchDashboards: {
-          registerApp: jest.fn(),
-        },
-      },
-    },
-  };
-
-  const indexPatternManagementMock = {
-    columns: {
-      register: jest.fn(),
-    },
-  };
 
   beforeEach(() => {
     mockDataSourceManagementPluginStart = {

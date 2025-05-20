@@ -46,6 +46,110 @@ export const mockInitializerContext = {
   },
 };
 
+export const managementMock = {
+  sections: {
+    register: jest.fn(),
+    section: {
+      ingest: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'ingest',
+        title: 'Ingest',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      data: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'data',
+        title: 'Data',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      insightsAndAlerting: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'insightsAndAlerting',
+        title: 'Insights and Alerting',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      security: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'security',
+        title: 'Security',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      stack: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'stack',
+        title: 'Stack',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      opensearchDashboards: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'opensearchDashboards',
+        title: 'OpenSearch Dashboards',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+    },
+  },
+};
+
+export const indexPatternManagementMock = {
+  creation: {
+    addCreationConfig: jest.fn(),
+  },
+  list: {
+    addListConfig: jest.fn(),
+  },
+  fieldFormatEditors: {
+    register: jest.fn(),
+  },
+  environment: {
+    update: jest.fn(),
+  },
+  columns: {
+    register: jest.fn(),
+  },
+};
+
 /* Mock Types */
 
 export const docLinks = {
