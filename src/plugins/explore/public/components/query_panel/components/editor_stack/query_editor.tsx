@@ -109,11 +109,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   );
 
   return (
-    <div
-      className="queryEditor"
-      data-test-subj="osdQueryEditor__multiLine"
-      style={editorIsFocused ? { borderBottom: '1px solid #006BB4' } : {}}
-    >
+    <div className="queryEditorWrapper" data-test-subj="osdQueryEditor__multiLine">
       <div
         className={`queryEditor ${isEditorReadOnly ? 'queryEditor--readonly' : ''}`}
         style={editorIsFocused && !isEditorReadOnly ? { borderBottom: '1px solid #006BB4' } : {}}

@@ -50,7 +50,6 @@
   .promptEditorWrapper{
     .promptEditor {
       border: 1px solid #D6D9DD;
-      // border-bottom: 1px solid #006BB4;
       border-radius: 1px;
         .monaco-editor .view-overlays .current-line {
           border: none;
@@ -111,8 +110,10 @@
     }
   } 
 
-  .queryEditor {
+  .queryEditorWrapper{
+   .queryEditor {
     border: $euiBorderThin;
+    border-top: 0px;
     font-size: 13px !important;
     border-radius: 1px;
     position: relative;
@@ -136,10 +137,14 @@
         font-size: 13px;
       }
 
-      .comment-line {
+      .comment-line span {
         color: rgba(0, 255, 0, 0.1); /* Light green background */
       }
     }
+
+    // .monaco-editor .view-lines .view-line .mtk1 {
+    //   color: #00c853 !important;
+    // }
   
     .monaco-editor,
     .monaco-editor-background,
@@ -186,8 +191,7 @@
       }
 
     }
-
-
   }
+}
 
 }
