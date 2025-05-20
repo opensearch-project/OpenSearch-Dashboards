@@ -104,30 +104,50 @@ export class QueryTypeDetector {
     const reasons: string[] = [];
     const warnings: string[] = [];
 
-    const kvPattern = /(\w+)\s*=\s*"[^"]*"/g;
-    const kvMatches = [...query.matchAll(kvPattern)];
-    const booleanOps = /\b(and|or)\b/i.test(query);
+    const quotedKvPattern = /(\w+)\s*=\s*(['"])[^'"]*\2/g; // key="value" or key='value'
+    const unquotedKvPattern = /(\w+)\s*=\s*[^"'\s]+/g; // key=value
+    const booleanOpsPattern = /\b(and|or)\b/gi; // boolean operators
+    const sourcePattern = /^\s*source\s*=\s*\S+/i; // source= at start
 
-    if (kvMatches.length > 0) {
-      score += 0.4 + (kvMatches.length - 1) * 0.1;
-      reasons.push(`Detected ${kvMatches.length} key="value" pair(s)`);
+    const quotedMatches = [...query.matchAll(quotedKvPattern)];
+    const unquotedMatches = [...query.matchAll(unquotedKvPattern)];
+    const booleanMatches = [...query.matchAll(booleanOpsPattern)];
+    const hasSourceStart = sourcePattern.test(query);
+
+    // De-duplicate overlapping matches (quoted matches are subset of unquoted)
+    const totalKvCount = new Set([
+      ...quotedMatches.map((m) => m.index),
+      ...unquotedMatches.map((m) => m.index),
+    ]).size;
+
+    if (totalKvCount > 0) {
+      score += 0.4 + (totalKvCount - 1) * 0.1;
+      reasons.push(`Detected ${totalKvCount} key=value pair(s)`);
     }
 
-    if (booleanOps) {
+    if (booleanMatches.length > 0) {
       score += 0.2;
-      reasons.push('Contains boolean operators (and/or)');
+      reasons.push(
+        `Contains boolean operator(s): ${[
+          ...new Set(booleanMatches.map((m) => m[0].toLowerCase())),
+        ].join(', ')}`
+      );
     }
 
-    if (/^\s*\w+\s*=\s*".+?"/.test(query)) {
-      score += 0.2;
-      reasons.push('Query starts with key="value" pattern');
+    if (hasSourceStart) {
+      score += 0.1;
+      reasons.push('Starts with source= pattern');
     }
 
     if (/\|/.test(query)) {
       warnings.push('Pipe character found; possibly mixed with PPL');
     }
 
-    return { score, reason: reasons.join('; '), warnings };
+    return {
+      score,
+      reason: reasons.join('; '),
+      warnings,
+    };
   }
 
   private _checkNaturalLanguage(query: string): ScoreResult {
