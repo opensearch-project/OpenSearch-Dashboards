@@ -91,7 +91,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
       editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
+      supportedAppNames: ['discover', 'data-explorer', 'explore'],
       sampleQueries: [
         {
           title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
@@ -157,7 +157,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, sqlControls, DefaultInput),
       editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
+      supportedAppNames: ['discover', 'data-explorer', 'explore'],
       hideDatePicker: true,
       sampleQueries: [
         {

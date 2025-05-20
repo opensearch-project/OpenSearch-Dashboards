@@ -6595,11 +6595,564 @@
       "message": "Type 'P' does not satisfy the constraint 'SerializableState'."
     },
     {
-      "file": "src/plugins/explore/public/plugin.ts",
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/components/app_container.test.tsx",
+      "line": 25,
+      "column": 9,
+      "code": "TS2740",
+      "message": "Type '{ element: HTMLDivElement; history: any; onAppLeave: Mock<any, any>; setHeaderActionMenu: Mock<any, any>; appBasePath: string; }' is missing the following properties from type 'AppMountParameters<unknown>': setHeaderLeftControls, setHeaderCenterControls, setHeaderRightControls, setHeaderBadgeControls, and 2 more."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/components/sidebar/index.test.tsx",
+      "line": 82,
+      "column": 10,
+      "code": "TS2739",
+      "message": "Type '{}' is missing the following properties from type 'SidebarProps': children, datasetSelectorRef"
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/components/sidebar/index.test.tsx",
+      "line": 92,
+      "column": 10,
+      "code": "TS2739",
+      "message": "Type '{}' is missing the following properties from type 'SidebarProps': children, datasetSelectorRef"
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/components/sidebar/index.test.tsx",
+      "line": 107,
+      "column": 12,
+      "code": "TS2739",
+      "message": "Type '{}' is missing the following properties from type 'SidebarProps': children, datasetSelectorRef"
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/services/view_service/view_service.test.ts",
+      "line": 9,
+      "column": 7,
+      "code": "TS2739",
+      "message": "Type '{ id: string; title: string; defaultPath: string; appExtentions: any; ui: any; }' is missing the following properties from type 'ViewDefinition<any>': Canvas, Panel, Context"
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/utils/use/shallow_equal.test.ts",
+      "line": 12,
+      "column": 11,
+      "code": "TS7034",
+      "message": "Variable 'ignoreKeys' implicitly has type 'any[]' in some locations where its type cannot be determined."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/utils/use/shallow_equal.test.ts",
+      "line": 14,
+      "column": 37,
+      "code": "TS7005",
+      "message": "Variable 'ignoreKeys' implicitly has an 'any[]' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/utils/use/shallow_equal.test.ts",
+      "line": 20,
+      "column": 11,
+      "code": "TS7034",
+      "message": "Variable 'ignoreKeys' implicitly has type 'any[]' in some locations where its type cannot be determined."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/utils/use/shallow_equal.test.ts",
+      "line": 22,
+      "column": 37,
+      "code": "TS7005",
+      "message": "Variable 'ignoreKeys' implicitly has an 'any[]' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/utils/use/shallow_equal.test.ts",
+      "line": 28,
+      "column": 11,
+      "code": "TS7034",
+      "message": "Variable 'ignoreKeys' implicitly has type 'any[]' in some locations where its type cannot be determined."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/data_explorer/utils/use/shallow_equal.test.ts",
+      "line": 30,
+      "column": 37,
+      "code": "TS7005",
+      "message": "Variable 'ignoreKeys' implicitly has an 'any[]' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/__mock__/index_pattern_mock.ts",
+      "line": 69,
+      "column": 26,
+      "code": "TS7006",
+      "message": "Parameter 'hit' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/__mock__/index_pattern_mock.ts",
+      "line": 69,
+      "column": 31,
+      "code": "TS7006",
+      "message": "Parameter 'field' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/__mock__/index_pattern_mock.ts",
+      "line": 78,
+      "column": 59,
+      "code": "TS7006",
+      "message": "Parameter 'fields' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/__mock__/index_pattern_mock.ts",
+      "line": 93,
+      "column": 52,
+      "code": "TS7006",
+      "message": "Parameter 'fields' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/actions/abort_data_query_action.test.ts",
+      "line": 39,
+      "column": 26,
+      "code": "TS2345",
+      "message": "Argument of type '{ reason: string; }' is not assignable to parameter of type 'ActionExecutionContext<AbortDataQueryContext>'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/actions/abort_data_query_action.test.ts",
+      "line": 53,
+      "column": 26,
+      "code": "TS2345",
+      "message": "Argument of type '{ reason: string; }' is not assignable to parameter of type 'ActionExecutionContext<AbortDataQueryContext>'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/actions/abort_data_query_action.test.ts",
+      "line": 64,
+      "column": 33,
+      "code": "TS2345",
+      "message": "Argument of type '{ reason: string; }' is not assignable to parameter of type 'ActionExecutionContext<AbortDataQueryContext>'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/actions/abort_data_query_action.test.ts",
+      "line": 80,
+      "column": 14,
+      "code": "TS2554",
+      "message": "Expected 2 arguments, but got 1."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/actions/abort_data_query_action.test.ts",
+      "line": 82,
+      "column": 26,
+      "code": "TS2345",
+      "message": "Argument of type '{ reason: string; }' is not assignable to parameter of type 'ActionExecutionContext<AbortDataQueryContext>'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/chart/histogram/type.ts",
+      "line": 12,
+      "column": 16,
+      "code": "TS2304",
+      "message": "Cannot find name 'Dimension'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/chart/histogram/type.ts",
+      "line": 13,
+      "column": 15,
+      "code": "TS2304",
+      "message": "Cannot find name 'Column'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/chart/histogram/type.ts",
+      "line": 14,
+      "column": 16,
+      "code": "TS2304",
+      "message": "Cannot find name 'Column'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/chart/histogram/type.ts",
+      "line": 15,
+      "column": 12,
+      "code": "TS2304",
+      "message": "Cannot find name 'Ordered'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/chart/utils/get_dimension.test.ts",
+      "line": 42,
+      "column": 14,
+      "code": "TS2740",
+      "message": "Type '{ toSerializedFieldFormat: Mock<string, []>; makeLabel: Mock<string, []>; }' is missing the following properties from type 'AggConfig': aggConfigs, id, enabled, params, and 26 more."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/chart/utils/get_dimension.test.ts",
+      "line": 42,
+      "column": 22,
+      "code": "TS2740",
+      "message": "Type '{ params: { timeRange: null; }; buckets: { getInterval: Mock<{ opensearchUnit: string; opensearchValue: number; }, []>; getScaledDateFormat: Mock<string, []>; getBounds: Mock<string, []>; }; makeLabel: Mock<...>; toSerializedFieldFormat: Mock<...>; }' is missing the following properties from type 'AggConfig': aggConfigs, id, enabled, __type, and 25 more."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/chart/utils/get_dimension.test.ts",
+      "line": 47,
+      "column": 5,
+      "code": "TS2322",
+      "message": "Type 'Mock<boolean, [bucketAgg: any]>' is not assignable to type '(agg: any) => agg is IBucketDateHistogramAggConfig'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/default_discover_table/default_discover_table.tsx",
+      "line": 198,
+      "column": 5,
+      "code": "TS2571",
+      "message": "Object is of type 'unknown'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/default_discover_table/table_header.tsx",
+      "line": 14,
+      "column": 1,
+      "code": "TS6133",
+      "message": "'i18n' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_viewer/doc_viewer.test.tsx",
+      "line": 36,
+      "column": 36,
+      "code": "TS2307",
+      "message": "Cannot find module '../../../doc_views/doc_views_types' or its corresponding type declarations."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_viewer/doc_viewer_render_tab.test.tsx",
+      "line": 34,
+      "column": 36,
+      "code": "TS2307",
+      "message": "Cannot find module '../../../doc_views/doc_views_types' or its corresponding type declarations."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_viewer/doc_viewer_tab.test.tsx",
+      "line": 8,
+      "column": 24,
+      "code": "TS2305",
+      "message": "Module '\"./doc_viewer_tab\"' has no exported member 'DocViewerTabProps'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_viewer_links/doc_viewer_links.test.tsx",
+      "line": 10,
+      "column": 40,
+      "code": "TS2307",
+      "message": "Cannot find module '../doc_views/doc_views_links/doc_views_links_types' or its corresponding type declarations."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_viewer_links/doc_viewer_links.tsx",
       "line": 6,
       "column": 1,
       "code": "TS6133",
       "message": "'i18n' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_views/context/api/_stubs.ts",
+      "line": 71,
+      "column": 7,
+      "code": "TS2464",
+      "message": "A computed property name must be of type 'string', 'number', 'symbol', or 'any'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_views/context/api/_stubs.ts",
+      "line": 88,
+      "column": 16,
+      "code": "TS2532",
+      "message": "Object is possibly 'undefined'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_views/context/api/anchor.ts",
+      "line": 59,
+      "column": 10,
+      "code": "TS2352",
+      "message": "Conversion of type '{ isAnchor: true; _index: string; _type: string; _id: string; _score: number; _source: any; _version?: number | undefined; _explanation?: Explanation | undefined; fields?: any; highlight?: any; inner_hits?: any; matched_queries?: string[] | undefined; sort?: string[] | undefined; }' to type 'OpenSearchHitRecord' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_views/context/api/context.ts",
+      "line": 33,
+      "column": 3,
+      "code": "TS6133",
+      "message": "'IndexPatternsContract' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_views/context/utils/use_context_state.ts",
+      "line": 32,
+      "column": 7,
+      "code": "TS2322",
+      "message": "Type 'string | undefined' is not assignable to type 'string'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_views/context/utils/use_context_state.ts",
+      "line": 39,
+      "column": 83,
+      "code": "TS2339",
+      "message": "Property 'getState' does not exist on type 'BaseStateContainer<AppState>'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_views/context/utils/use_context_state.ts",
+      "line": 46,
+      "column": 62,
+      "code": "TS2339",
+      "message": "Property 'subscribe' does not exist on type 'BaseStateContainer<AppState>'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_views/context/utils/use_context_state.ts",
+      "line": 46,
+      "column": 73,
+      "code": "TS7006",
+      "message": "Parameter 'newState' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/results_action_bar/results_action_bar.test.tsx",
+      "line": 37,
+      "column": 3,
+      "code": "TS2322",
+      "message": "Type '{ hits: number; showResetButton: false; resetQuery: jest.Mock<any, any>; rows: OpenSearchSearchHit<Record<string, string | number>>[]; isEnhancementsEnabled: boolean; indexPattern: any; }' is not assignable to type 'DiscoverResultsActionBarProps'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/sidebar/discover_field_search.test.tsx",
+      "line": 35,
+      "column": 31,
+      "code": "TS6133",
+      "message": "'NUM_FILTERS' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/sidebar/discover_field_search.test.tsx",
+      "line": 48,
+      "column": 27,
+      "code": "TS2322",
+      "message": "Type '{ onChange: (field: string, value: string | boolean | undefined) => void; value?: string | undefined; types: string[]; isEnhancementsEnabledOverride: boolean; } | { onChange: Mock<any, any>; value: string; types: string[]; }' is not assignable to type 'IntrinsicAttributes & Props'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/sidebar/discover_field_search.test.tsx",
+      "line": 64,
+      "column": 38,
+      "code": "TS2345",
+      "message": "Argument of type '{ onChange: jest.Mock<any, any>; value: string; types: string[]; }' is not assignable to parameter of type 'Props'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/sidebar/discover_field_search.test.tsx",
+      "line": 125,
+      "column": 38,
+      "code": "TS2345",
+      "message": "Argument of type '{ onChange: jest.Mock<any, any>; value: string; types: string[]; }' is not assignable to parameter of type 'Props'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/sidebar/discover_field_search.test.tsx",
+      "line": 140,
+      "column": 38,
+      "code": "TS2345",
+      "message": "Argument of type '{ onChange: jest.Mock<any, any>; value: string; types: string[]; }' is not assignable to parameter of type 'Props'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/sidebar/discover_sidebar.test.tsx",
+      "line": 94,
+      "column": 3,
+      "code": "TS2741",
+      "message": "Property 'isEnhancementsEnabledOverride' is missing in type '{ columns: string[]; fieldCounts: Record<string, number>; hits: Record<string, unknown>[]; onAddFilter: jest.Mock<any, any>; onAddField: jest.Mock<any, any>; onRemoveField: jest.Mock<...>; onNormalize: jest.Mock<...>; onCreateIndexPattern: jest.Mock<...>; selectedIndexPattern: IndexPattern; onReorderFields: jest.Moc...' but required in type 'DiscoverSidebarProps'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/table/table_row.tsx",
+      "line": 31,
+      "column": 1,
+      "code": "TS6133",
+      "message": "'i18n' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/components/top_nav/get_top_nav_links.tsx",
+      "line": 217,
+      "column": 17,
+      "code": "TS7006",
+      "message": "Parameter 'anchorElement' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/utils/state_management/discover_slice.tsx",
+      "line": 17,
+      "column": 3,
+      "code": "TS6133",
+      "message": "'PLUGIN_ID' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/canvas/top_nav.tsx",
+      "line": 156,
+      "column": 57,
+      "code": "TS2339",
+      "message": "Property 'id' does not exist on type 'TopNavMenuData | { id?: string | undefined; label: string; run: TopNavMenuAction; description?: string | undefined; testId?: string | undefined; ... 6 more ...; type?: \"button\" | ... 1 more ... | undefined; }'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/canvas/top_nav.tsx",
+      "line": 157,
+      "column": 67,
+      "code": "TS2339",
+      "message": "Property 'label' does not exist on type 'TopNavMenuData | { id?: string | undefined; label: string; run: TopNavMenuAction; description?: string | undefined; testId?: string | undefined; ... 6 more ...; type?: \"button\" | ... 1 more ... | undefined; }'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/canvas/top_nav.tsx",
+      "line": 159,
+      "column": 31,
+      "code": "TS7006",
+      "message": "Parameter 'event' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/canvas/top_nav.tsx",
+      "line": 160,
+      "column": 23,
+      "code": "TS2722",
+      "message": "Cannot invoke an object which is possibly 'undefined'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/canvas/top_nav.tsx",
+      "line": 160,
+      "column": 34,
+      "code": "TS2554",
+      "message": "Expected 2 arguments, but got 1."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/canvas/top_nav.tsx",
+      "line": 162,
+      "column": 42,
+      "code": "TS2339",
+      "message": "Property 'iconType' does not exist on type 'TopNavMenuData | { id?: string | undefined; label: string; run: TopNavMenuAction; description?: string | undefined; testId?: string | undefined; ... 6 more ...; type?: \"button\" | ... 1 more ... | undefined; }'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/canvas/top_nav.tsx",
+      "line": 169,
+      "column": 11,
+      "code": "TS2532",
+      "message": "Object is possibly 'undefined'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/canvas/top_nav.tsx",
+      "line": 169,
+      "column": 11,
+      "code": "TS2345",
+      "message": "Argument of type 'HTMLDivElement | null' is not assignable to parameter of type 'Element'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/index_pattern_helper.ts",
+      "line": 9,
+      "column": 31,
+      "code": "TS2305",
+      "message": "Module '\"../../../opensearch_dashboards_services\"' has no exported member 'getUrlTracker'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/index_pattern_helper.ts",
+      "line": 19,
+      "column": 41,
+      "code": "TS7006",
+      "message": "Parameter 'data' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/index_pattern_helper.ts",
+      "line": 19,
+      "column": 47,
+      "code": "TS7006",
+      "message": "Parameter 'config' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/index_pattern_helper.ts",
+      "line": 33,
+      "column": 3,
+      "code": "TS7006",
+      "message": "Parameter 'core' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/index_pattern_helper.ts",
+      "line": 34,
+      "column": 3,
+      "code": "TS7006",
+      "message": "Parameter 'basePath' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/index_pattern_helper.ts",
+      "line": 35,
+      "column": 3,
+      "code": "TS7006",
+      "message": "Parameter 'history' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/index_pattern_helper.ts",
+      "line": 36,
+      "column": 3,
+      "code": "TS7006",
+      "message": "Parameter 'savedSearchId' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/index_pattern_helper.ts",
+      "line": 37,
+      "column": 3,
+      "code": "TS7006",
+      "message": "Parameter 'services' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/index_pattern_helper.ts",
+      "line": 38,
+      "column": 3,
+      "code": "TS7006",
+      "message": "Parameter 'toastNotifications' implicitly has an 'any' type."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/use_index_pattern.ts",
+      "line": 75,
+      "column": 13,
+      "code": "TS2345",
+      "message": "Argument of type 'SavedObject<IndexPatternSavedObjectAttrs>[]' is not assignable to parameter of type 'IIndexPattern[]'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/utils/use_search.test.tsx",
+      "line": 118,
+      "column": 15,
+      "code": "TS2769",
+      "message": "No overload matches this call."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/embeddable/search_embeddable_factory.tsx",
+      "line": 98,
+      "column": 21,
+      "code": "TS2532",
+      "message": "Object is possibly 'undefined'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/migrate_state.ts",
+      "line": 21,
+      "column": 11,
+      "code": "TS6196",
+      "message": "'ContextParams' is declared but never used."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/migrate_state.ts",
+      "line": 26,
+      "column": 11,
+      "code": "TS6196",
+      "message": "'DocParams' is declared but never used."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/mocks.ts",
+      "line": 32,
+      "column": 10,
+      "code": "TS2305",
+      "message": "Module '\"./index\"' has no exported member 'DiscoverSetup'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/mocks.ts",
+      "line": 32,
+      "column": 25,
+      "code": "TS2305",
+      "message": "Module '\"./index\"' has no exported member 'DiscoverStart'."
+    },
+    {
+      "file": "src/plugins/explore/public/application/legacy/discover/opensearch_dashboards_services.ts",
+      "line": 40,
+      "column": 1,
+      "code": "TS6133",
+      "message": "'UsageCollectionSetup' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/explore/public/plugin.ts",
+      "line": 73,
+      "column": 11,
+      "code": "TS6133",
+      "message": "'config' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/explore/server/plugin.ts",
+      "line": 17,
+      "column": 1,
+      "code": "TS6133",
+      "message": "'uiSettings' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/explore/server/plugin.ts",
+      "line": 22,
+      "column": 32,
+      "code": "TS6138",
+      "message": "Property 'initializerContext' is declared but its value is never read."
     },
     {
       "file": "src/plugins/expressions/common/expression_types/expression_type.test.ts",
@@ -7418,7 +7971,7 @@
       "line": 333,
       "column": 11,
       "code": "TS2322",
-      "message": "Type '({ sortable: boolean; 'data-test-subj': string; hidden?: boolean | undefined; color?: string | undefined; content?: string | undefined; style?: CSSProperties | undefined; ... 276 more ...; hideForMobile?: boolean | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
+      "message": "Type '({ sortable: boolean; 'data-test-subj': string; abbr?: string | undefined; footer?: string | ReactElement<any, string | JSXElementConstructor<any>> | ((props: EuiTableFooterProps<...>) => ReactNode) | undefined; ... 278 more ...; hideForMobile?: boolean | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
     },
     {
       "file": "src/plugins/index_pattern_management/public/mocks.ts",
@@ -7863,21 +8416,21 @@
     },
     {
       "file": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-      "line": 206,
+      "line": 217,
       "column": 52,
       "code": "TS2339",
       "message": "Property 'searchSourceJSON' does not exist on type 'string'."
     },
     {
       "file": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-      "line": 218,
+      "line": 229,
       "column": 5,
       "code": "TS2322",
       "message": "Type '({ attributes: FinderAttributes; _version?: string | undefined; id: string; type: string; migrationVersion: SavedObjectsMigrationVersion | undefined; error: SavedObjectError | undefined; references: SavedObjectReference[]; updated_at: string | undefined; workspaces: string[] | undefined; } | undefined)[]' is not assignable to type 'SimpleSavedObject<FinderAttributes>[]'."
     },
     {
       "file": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-      "line": 224,
+      "line": 235,
       "column": 41,
       "code": "TS2345",
       "message": "Argument of type '{ attributes: FinderAttributes; _version?: string | undefined; id: string; type: string; migrationVersion: SavedObjectsMigrationVersion | undefined; error: SavedObjectError | undefined; references: SavedObjectReference[]; updated_at: string | undefined; workspaces: string[] | undefined; }' is not assignable to parameter of type 'SimpleSavedObject<unknown>'."
@@ -8587,14 +9140,14 @@
       "line": 221,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | \"grid\" | \"invert\" | \"dot\" | \"menu\" | \"filter\" | \"scale\" | \"wordWrap\" | ... 456 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | \"image\" | \"polygon\" | \"stop\" | \"search\" | \"download\" | \"list\" | \"alert\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
       "line": 224,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | \"grid\" | \"invert\" | \"dot\" | \"menu\" | \"filter\" | \"scale\" | \"wordWrap\" | ... 456 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | \"image\" | \"polygon\" | \"stop\" | \"search\" | \"download\" | \"list\" | \"alert\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
@@ -10365,7 +10918,7 @@
       "line": 47,
       "column": 50,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | ... 464 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_selector/workspace_selector.test.tsx",
@@ -10379,7 +10932,7 @@
       "line": 51,
       "column": 54,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | ... 464 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_use_case_overview_app.test.tsx",
@@ -10387,13 +10940,6 @@
       "column": 43,
       "code": "TS6133",
       "message": "'screen' is declared but its value is never read."
-    },
-    {
-      "file": "src/plugins/workspace/public/plugin.test.ts",
-      "line": 7,
-      "column": 1,
-      "code": "TS6133",
-      "message": "'waitFor' is declared but its value is never read."
     },
     {
       "file": "src/plugins/workspace/public/plugin.ts",
@@ -10424,43 +10970,36 @@
       "message": "Type 'BehaviorSubject<{ id: string; title: string; }[]>' is not assignable to type 'Observable<PublicAppInfo[]>'."
     },
     {
-      "file": "src/plugins/workspace/public/utils.test.ts",
-      "line": 1185,
-      "column": 56,
-      "code": "TS2345",
-      "message": "Argument of type '{ id: string; title: string; dataSourceEngineType: string; description: string; type: string; }[]' is not assignable to parameter of type 'DataSource[]'."
-    },
-    {
       "file": "src/plugins/workspace/public/utils.ts",
-      "line": 317,
+      "line": 313,
       "column": 6,
       "code": "TS2349",
       "message": "This expression is not callable."
     },
     {
       "file": "src/plugins/workspace/public/utils.ts",
-      "line": 317,
+      "line": 313,
       "column": 14,
       "code": "TS7006",
       "message": "Parameter 'ds' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/workspace/public/utils.ts",
-      "line": 329,
+      "line": 325,
       "column": 6,
       "code": "TS2349",
       "message": "This expression is not callable."
     },
     {
       "file": "src/plugins/workspace/public/utils.ts",
-      "line": 329,
+      "line": 325,
       "column": 14,
       "code": "TS7006",
       "message": "Parameter 'ds' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/workspace/public/utils.ts",
-      "line": 330,
+      "line": 326,
       "column": 11,
       "code": "TS7006",
       "message": "Parameter 'ds' implicitly has an 'any' type."
@@ -10509,13 +11048,6 @@
     },
     {
       "file": "src/plugins/workspace/server/routes/index.test.ts",
-      "line": 30,
-      "column": 5,
-      "code": "TS2739",
-      "message": "Type '{ setup: Mock<any, any>; setSavedObjects: Mock<any, any>; setUiSettings: Mock<any, any>; create: Mock<any, any>; list: Mock<any, any>; get: Mock<any, any>; update: Mock<...>; delete: Mock<...>; destroy: Mock<...>; }' is missing the following properties from type 'IWorkspaceClientImpl': associate, dissociate"
-    },
-    {
-      "file": "src/plugins/workspace/server/routes/index.test.ts",
       "line": 32,
       "column": 20,
       "code": "TS2345",
@@ -10527,48 +11059,6 @@
       "column": 45,
       "code": "TS2322",
       "message": "Type '{ requestWorkspaceId: string; }' is not assignable to type 'OpenSearchDashboardsRequestState'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 16,
-      "column": 58,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 80,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 212,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 229,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 312,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 369,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
     },
     {
       "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
@@ -10586,24 +11076,10 @@
     },
     {
       "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 629,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
       "line": 637,
       "column": 52,
       "code": "TS2322",
       "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
-    },
-    {
-      "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 659,
-      "column": 73,
-      "code": "TS2345",
-      "message": "Argument of type '{ setup: jest.Mock<any, any>; setSavedObjects: jest.Mock<any, any>; setUiSettings: jest.Mock<any, any>; create: jest.Mock<any, any>; list: jest.Mock<any, any>; get: jest.Mock<...>; update: jest.Mock<...>; delete: jest.Mock<...>; destroy: jest.Mock<...>; }' is not assignable to parameter of type 'IWorkspaceClientImpl'."
     },
     {
       "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
@@ -10613,6 +11089,6 @@
       "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
     }
   ],
-  "updatedAt": "2025-05-03T00:27:30.418Z",
+  "updatedAt": "2025-05-19T23:39:19.100Z",
   "tsconfig": "/home/ubuntu/OpenSearch-Dashboards/tsconfig.check.json"
 }
