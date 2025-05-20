@@ -5,8 +5,8 @@
 
 import './discover_visualization.scss';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useDiscoverContext } from '../context';
@@ -14,7 +14,7 @@ import { useDiscoverContext } from '../context';
 import { SearchData } from '../utils';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
 import { useVisualizationType } from '../utils/use_visualization_types';
-import { style } from '../../../../../expressions/common/expression_types/specs/style';
+import { LineChartStyleControls } from '../../components/visualizations/line/line_vis_type';
 
 export const DiscoverVisualization = ({
   hits,
@@ -35,9 +35,9 @@ export const DiscoverVisualization = ({
   // Get configs and expression utils from a specific visualization type
   const { toExpression } = useVisualizationType();
   const visOptions = useVisualizationType().ui.style.render;
-  const defaultStyle = useVisualizationType().ui.style.defaults;
-  //   const { aggConfigs, indexPattern } = useAggs();
+  const defaultStyles = useVisualizationType().ui.style.defaults;
   const [expression, setExpression] = useState<string>();
+  const [styleOptions, setStyleOptions] = useState<LineChartStyleControls>(defaultStyles);
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -53,13 +53,19 @@ export const DiscoverVisualization = ({
       if (!rows || !indexPattern) {
         return;
       }
-      const exp = await toExpression(services, searchContext, rows, indexPattern, fieldSchema);
-      console.log('expression for vis in discover', exp);
+      const exp = await toExpression(
+        services,
+        searchContext,
+        rows,
+        indexPattern,
+        fieldSchema,
+        styleOptions
+      );
       setExpression(exp);
     }
 
     loadExpression();
-  }, [toExpression, searchContext, rows, indexPattern, services, fieldSchema]);
+  }, [toExpression, searchContext, rows, indexPattern, services, fieldSchema, styleOptions]);
 
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
@@ -93,7 +99,7 @@ export const DiscoverVisualization = ({
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <EuiPanel className="stylePanel" data-test-subj="stylePanel">
-          {visOptions(defaultStyle)}
+          {visOptions({ defaultStyles, onChange: setStyleOptions })}
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
