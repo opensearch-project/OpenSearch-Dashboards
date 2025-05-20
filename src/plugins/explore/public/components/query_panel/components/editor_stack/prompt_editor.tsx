@@ -31,6 +31,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorConfig = getEditorConfig(languageType);
+  const langText = languageType !== 'nl' ? 'query' : 'prompt';
   const [editorIsFocused, setEditorIsFocused] = useState(false);
   const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
 
@@ -120,50 +121,24 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
         }
       };
     },
-    [handlePromptRun, prompt]
+    [handlePromptRun, languageType, handlePromptEdit]
   );
 
   return (
-    <div className="promptEditorWrapper" style={{ position: 'relative' }}>
+    <div className={`${langText}EditorWrapper`} style={{ position: 'relative' }}>
       <div
-        className={`promptEditor ${isPromptReadOnly ? 'promptEditor--readonly' : ''}`}
+        className={`${langText}Editor ${isPromptReadOnly ? `${langText}Editor--readonly` : ''}`}
         style={editorIsFocused && !isPromptReadOnly ? { borderBottom: '1px solid #006BB4' } : {}}
-        data-test-subj="osdQueryEditor__multiLine"
+        data-test-subj="osdPromptEditor__multiLine"
       >
         <CodeEditor
           languageId={editorConfig.languageId}
           value={prompt}
           onChange={onChange}
           editorDidMount={handleEditorDidMount}
-          options={{
-            fixedOverflowWidgets: true,
-            lineNumbers: 'off', // Disabled line numbers
-            lineHeight: 18,
-            fontSize: 14,
-            fontFamily: 'Roboto Mono',
-            minimap: {
-              enabled: false,
-            },
-            padding: {
-              top: 7,
-              bottom: 7,
-            },
-            scrollBeyondLastLine: false,
-            wordWrap: 'on', // Disabled word wrapping
-            wrappingIndent: 'indent', // No indent since wrapping is off
-            folding: false,
-            glyphMargin: false,
-            lineDecorationsWidth: 0,
-            scrollbar: {
-              vertical: 'hidden',
-              horizontalScrollbarSize: 1,
-            },
-            overviewRulerLanes: 0,
-            hideCursorInOverviewRuler: true,
-            cursorStyle: 'line-thin',
-            cursorBlinking: 'blink',
-            ...editorConfig, // Spread the dynamic configuration
-          }}
+          options={editorConfig.options}
+          languageConfiguration={editorConfig.languageConfiguration}
+          triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
         />
 
         {!prompt && !editorIsFocused && !isPromptReadOnly && (
@@ -188,7 +163,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
 
         {isPromptReadOnly && (
           <EditOrClear
-            className="promptEditor__editOverlay"
+            className={`promptEditor__editOverlay`}
             handleClearEditor={handleClearEditor}
             handleEditClick={handleEditClick}
             editText="Edit Prompt"

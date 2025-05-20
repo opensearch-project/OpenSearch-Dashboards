@@ -8,8 +8,8 @@ import { EuiButton } from '@elastic/eui'; // Ensure this import is correct and m
 
 interface RunQueryButtonProps {
   onClick: () => void;
-  isDisabled?: Boolean;
-  isLoading?: Boolean;
+  isDisabled?: boolean;
+  isLoading?: boolean;
 }
 
 export const RunQueryButton: React.FC<RunQueryButtonProps> = ({

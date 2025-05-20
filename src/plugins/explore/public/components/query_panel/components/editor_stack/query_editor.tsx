@@ -6,8 +6,8 @@
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
-import { LanguageType } from './shared';
 import { EditOrClear } from './edit_or_clear';
+import { getEditorConfig, LanguageType } from './shared';
 
 interface QueryEditorProps {
   languageType: LanguageType;
@@ -34,6 +34,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [decorated, setDecorated] = useState(false);
   const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
+  const editorConfig = getEditorConfig(languageType);
 
   // 🧠 Inject comment only once when content is loaded
   useEffect(() => {
@@ -64,10 +65,6 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
       });
 
       editorRef.current = editor;
-
-      // editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-      //   handleQueryRun(editor.getValue());
-      // });
 
       // Set up Enter key handling
       editor.addAction({
@@ -144,40 +141,13 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
       >
         <CodeEditor
           height={100}
-          languageId={languageType}
+          languageId={editorConfig.languageId}
           value={queryString}
           onChange={onChange}
           editorDidMount={handleEditorDidMount}
-          options={{
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            fontSize: 12,
-            lineHeight: 20,
-            fontFamily: 'var(--font-code)',
-            lineNumbers: 'on',
-            folding: true,
-            wordWrap: 'on',
-            wrappingIndent: 'same',
-            lineDecorationsWidth: 0,
-            lineNumbersMinChars: 1,
-            suggest: {
-              snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
-              filterGraceful: false, // Don't filter suggestions
-              showStatusBar: true, // Enable the built-in status bar with default text
-              showWords: false, // Disable word-based suggestions
-            },
-            acceptSuggestionOnEnter: 'off',
-          }}
-          languageConfiguration={{
-            autoClosingPairs: [
-              { open: '(', close: ')' },
-              { open: '[', close: ']' },
-              { open: '{', close: '}' },
-              { open: '"', close: '"' },
-              { open: "'", close: "'" },
-            ],
-          }}
-          triggerSuggestOnFocus={true}
+          options={editorConfig.options}
+          languageConfiguration={editorConfig.languageConfiguration}
+          triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
         />
 
         {isEditorReadOnly && (

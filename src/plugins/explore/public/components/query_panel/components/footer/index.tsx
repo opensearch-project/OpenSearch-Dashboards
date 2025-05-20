@@ -20,6 +20,7 @@ interface QueryEditorFooterProps {
   handleRunClick: () => void;
   isDualEditor: boolean;
   isLoading: boolean;
+  noInput: boolean;
 }
 
 export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
@@ -27,6 +28,7 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
   handleRunClick,
   isDualEditor,
   isLoading,
+  noInput,
 }) => {
   return (
     <div className="query-editor-footer">
@@ -61,7 +63,11 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               <ErrorDisplay errorDetails="error Details" />
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ marginLeft: '10px' }}>
-              <ShowInputType languageType={languageType} isDualEditor={isDualEditor} />
+              <ShowInputType
+                languageType={languageType}
+                isDualEditor={isDualEditor}
+                noInput={noInput}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -76,7 +82,7 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               <DateTimeRangePicker />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RunQueryButton onClick={handleRunClick} isDisabled={false} isLoading={isLoading} />
+              <RunQueryButton onClick={handleRunClick} isDisabled={noInput} isLoading={isLoading} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
