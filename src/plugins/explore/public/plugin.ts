@@ -216,6 +216,7 @@ export class ExplorePlugin
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
+      updater$: this.appStateUpdater.asObservable(),
       order: 1000,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
@@ -235,6 +236,7 @@ export class ExplorePlugin
           !isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)
         ) {
           coreStart.application.navigateToApp('discover', { replace: true });
+          return () => {};
         }
 
         const { renderApp } = await import('./application');
@@ -284,6 +286,7 @@ export class ExplorePlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        showInAllNavGroup: false,
       },
     ]);
 
