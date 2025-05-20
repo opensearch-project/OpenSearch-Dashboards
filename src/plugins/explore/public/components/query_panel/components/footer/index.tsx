@@ -60,7 +60,13 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               <EuiHorizontalRule margin="xs" className="vertical-separator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ErrorDisplay errorDetails="error Details" />
+              <ErrorDisplay
+                errorDetails={{
+                  statusCode: 500,
+                  message:
+                    'PPL Compilation Error: Unknown field [timestam]. Did you mean [timestamp]?',
+                }}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ marginLeft: '10px' }}>
               <ShowInputType
