@@ -158,4 +158,5 @@ export interface ImageValidation {
 export interface UserProvidedValues<T = any> {
   userValue?: T;
   isOverridden?: boolean;
+  isPermissionControlled?: boolean;
 }
