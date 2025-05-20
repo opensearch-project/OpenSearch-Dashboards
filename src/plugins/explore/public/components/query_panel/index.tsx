@@ -25,7 +25,7 @@ const QueryPanel = () => {
   const [lineCount, setLineCount] = useState<number | undefined>(undefined);
   // const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
   const inputQueryRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const languageTypeRef = useRef<LanguageType>('ppl'); // Default to PPL
+  const languageTypeRef = useRef<LanguageType>('nl'); // Default to PPL
   const [isDualEditor, setIsDualEditor] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPromptReadOnly, setIsPromptReadOnly] = useState(false);
@@ -47,6 +47,7 @@ const QueryPanel = () => {
   };
 
   const detectLanguageType = debounce((query) => {
+    console.log(query, 'query');
     const detector = new QueryTypeDetector();
     const result = detector.detect(query);
     languageTypeRef.current = result.type;
@@ -55,16 +56,16 @@ const QueryPanel = () => {
       ...prevQuery,
       language: result.type,
     }));
-  }, 300); // Adjust debounce time as needed
+  }, 500); // Adjust debounce time as needed
 
   const onPromptChange = (value: string) => {
-    console.log('Prompt changed:', value);
+    // console.log('Prompt changed:', value);
     detectLanguageType(value);
     onQuerystringChange(value, true);
   };
 
   const onQueryChange = (value: string) => {
-    console.log('Query changed:', value);
+    // console.log('Query changed:', value);
     onQuerystringChange(value, false);
     if (!inputQueryRef.current) return;
 
@@ -74,7 +75,7 @@ const QueryPanel = () => {
   };
 
   const handleQueryRun = async (querystring?: string | undefined) => {
-    console.log('Running queryString when enter:', querystring);
+    // console.log('Running queryString when enter:', querystring);
     setIsLoading(true); // Set loading to true
     await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
     // Add logic to run the query
@@ -86,18 +87,18 @@ const QueryPanel = () => {
     setIsDualEditor(false);
     setIsEditorReadOnly(false);
     setIsPromptReadOnly(false);
-    setCurrentQuery(intitialQuery('ppl', 'test'));
+    setCurrentQuery(intitialQuery('nl', 'test'));
   };
 
   const handlePromptRun = async (querystring?: string | undefined) => {
-    console.log(querystring, 'querystring');
+    // console.log(querystring, 'querystring');
     setIsLoading(true); // Set loading to true
     await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
 
     const detectedLang = languageTypeRef.current;
 
     if (detectedLang === 'nl') {
-      console.log('Detected NL, calling NL API...');
+      // console.log('Detected NL, calling NL API...');
 
       // Call NL Api
       // on successful ppl generated
@@ -143,6 +144,7 @@ const QueryPanel = () => {
           isLoading={isLoading}
           languageType={currentQuery.language}
           handleRunClick={handleRunClick}
+          noInput={!currentQuery.query && !currentQuery.prompt}
         />
       }
     >
@@ -151,7 +153,7 @@ const QueryPanel = () => {
         isPromptReadOnly={isPromptReadOnly}
         isEditorReadOnly={isEditorReadOnly}
         queryString={currentQuery.query}
-        languageType={currentQuery.language}
+        languageType={languageTypeRef.current}
         prompt={currentQuery.prompt}
         onPromptChange={onPromptChange}
         onQueryChange={onQueryChange}

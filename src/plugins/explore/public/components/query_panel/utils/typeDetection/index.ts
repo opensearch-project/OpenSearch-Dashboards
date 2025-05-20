@@ -22,22 +22,22 @@ interface ScoreResult {
 export class QueryTypeDetector {
   private pplStartPatterns: RegExp[];
   private pplPipePatterns: RegExp[];
-  private kvPatterns: RegExp[];
   private nlStarters: RegExp[];
 
   constructor() {
-    this.pplStartPatterns = [/^\s*source\s*=/i, /^\s*from\s+\w+/i, /^\s*search\s+index\s*=/i];
-    this.pplPipePatterns = [/\|\s*(where|filter|fields|sort|limit|stats|rename|eval)\b/i];
-    this.kvPatterns = [
-      /^\s*source\s*=/i, // Starts with source=
-      /(\w+)\s*=\s*(['"])[^'"]*\2/g, // key="value" or key='value'
-      /(\w+)\s*=\s*\S+/g, // key=value (non-quoted)
-      /\b(and|or)\b/i, // Boolean ops
+    this.pplStartPatterns = [
+      /^\s*source\b/i, // Matches "source" as a standalone word
+      /^\s*source\s*=/i, // Matches "source=" with optional spaces
+      /^\s*from\s+\w+/i, // Matches "from <word>"
+      /^\s*search\s+index\s*=/i, // Matches "search index="
     ];
+    this.pplPipePatterns = [/\|\s*(where|filter|fields|sort|limit|stats|rename|eval)\b/i];
     this.nlStarters = [
-      /^\s*(show|list|get|find|search|display|give|retrieve|fetch|tell)\b/i,
-      /^\s*(what|how|when|where|why|which|who)\b/i,
-      /^\s*(can|could|would|will|please)\b/i,
+      /^\s*(show|list|get|find|search|display|give|retrieve|fetch|tell)\b/i, // Common action verbs
+      /^\s*(what|how|when|where|why|which|who)\b/i, // Question starters
+      /^\s*(can|could|would|will|please|should|may|might|shall)\b/i, // Modal verbs
+      /^\s*(explain|describe|summarize|analyze|compare|calculate)\b/i, // Analytical verbs
+      /^\s*(is|are|was|were|do|does|did|has|have|had|am|be|being|been|the)\b/i, // Auxiliary verbs
     ];
   }
 
@@ -45,7 +45,7 @@ export class QueryTypeDetector {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) {
       return {
-        type: 'ppl',
+        type: 'nl',
         confidence: 0,
         reason: 'Empty query',
         warnings: ['No input provided'],
@@ -90,6 +90,12 @@ export class QueryTypeDetector {
     if (this.pplPipePatterns.some((p) => p.test(query))) {
       score += 0.1;
       reasons.push('Has known PPL pipe commands');
+    }
+
+    // Reduce score if NL starters or general English words are detected
+    if (this.nlStarters.some((p) => p.test(query))) {
+      score -= 0.2;
+      reasons.push('Contains natural language starter (e.g., show, what, can, if is)');
     }
 
     if (score > 0 && score < 0.3) {
@@ -137,6 +143,12 @@ export class QueryTypeDetector {
     if (hasSourceStart) {
       score += 0.1;
       reasons.push('Starts with source= pattern');
+    }
+
+    // Reduce score if NL starters or general English words are detected
+    if (this.nlStarters.some((p) => p.test(query))) {
+      score -= 0.2;
+      reasons.push('Contains natural language starter (e.g., show, what, can)');
     }
 
     if (/\|/.test(query)) {

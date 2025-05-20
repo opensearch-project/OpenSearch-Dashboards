@@ -7,29 +7,74 @@ export type LanguageType = 'nl' | 'kv' | 'ppl';
 
 export const getEditorConfig = (languageType: LanguageType) => {
   switch (languageType) {
-    case 'nl':
-      return {
-        languageId: 'natural-language',
-        ariaLabel: 'Type your natural language query here',
-        suggest: {
-          showWords: true,
-        },
-      };
+    case 'ppl':
     case 'kv':
       return {
         languageId: 'ppl',
-        ariaLabel: 'Type your key-value query here',
-        suggest: {
-          showWords: false,
+        options: {
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          fontSize: 12,
+          lineHeight: 20,
+          fontFamily: 'var(--font-code)',
+          lineNumbers: 'on' as const,
+          folding: true,
+          wordWrap: 'on' as const,
+          wrappingIndent: 'same' as const,
+          lineDecorationsWidth: 0,
+          lineNumbersMinChars: 1,
+          suggest: {
+            snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
+            filterGraceful: false, // Don't filter suggestions
+            showStatusBar: true, // Enable the built-in status bar with default text
+            showWords: false, // Disable word-based suggestions
+          },
+          acceptSuggestionOnEnter: 'off' as const,
         },
+        languageConfiguration: {
+          autoClosingPairs: [
+            { open: '(', close: ')' },
+            { open: '[', close: ']' },
+            { open: '{', close: '}' },
+            { open: '"', close: '"' },
+            { open: "'", close: "'" },
+          ],
+        },
+        triggerSuggestOnFocus: false,
       };
-    case 'ppl':
+    case 'nl':
     default:
       return {
-        languageId: 'ppl',
-        ariaLabel: 'Type your PPL query here',
-        suggest: {
-          showWords: false,
+        languageId: 'plaintext',
+        options: {
+          lineNumbers: 'off' as const, // Disable line numbers for NL
+          wordWrap: 'on' as const, // Enable word wrapping for NL
+          folding: false, // Disable folding
+          fixedOverflowWidgets: true,
+          lineHeight: 18,
+          fontSize: 14,
+          fontFamily: 'Roboto Mono',
+          minimap: {
+            enabled: false,
+          },
+          padding: {
+            top: 7,
+            bottom: 7,
+          },
+          scrollBeyondLastLine: false,
+          wrappingIndent: 'indent' as const, // No indent since wrapping is off
+          glyphMargin: false,
+          lineDecorationsWidth: 0,
+          scrollbar: {
+            vertical: 'hidden' as const,
+            horizontalScrollbarSize: 1,
+          },
+          overviewRulerLanes: 0,
+          hideCursorInOverviewRuler: true,
+          cursorStyle: 'line-thin' as const,
+          cursorBlinking: 'blink' as const,
+          languageConfiguration: {},
+          triggerSuggestOnFocus: false,
         },
       };
   }
