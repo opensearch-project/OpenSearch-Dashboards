@@ -20,11 +20,10 @@ export const Actions: React.FC = () => {
 
   const items = actions.map((action, index) => (
     <EuiContextMenuItem
-      key="action"
-      data-test-subj="actionMenuOpenDocs"
-      onClick={() => {
-        // console.log('open');
-      }}
+      key={index}
+      icon={<EuiIcon type={action.iconType} />}
+      onClick={action.onClick}
+      data-test-subj={`actionMenuItem-${index}`}
     >
       {action.label}
     </EuiContextMenuItem>

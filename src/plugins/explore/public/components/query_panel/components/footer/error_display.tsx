@@ -4,10 +4,20 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiButtonEmpty, EuiText, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiText,
+  EuiPopoverTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 interface ErrorDisplayProps {
-  errorDetails: string; // Error details to display in the modal
+  errorDetails: {
+    statusCode: number;
+    message: string;
+  }; // Error details to display in the modal
 }
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorDetails }) => {
@@ -18,16 +28,14 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorDetails }) => {
 
   return (
     <>
-      {/* Error Text with Popover */}
       <EuiPopover
         button={
           <EuiButtonEmpty
-            iconType="alert"
             onClick={onPopoverButtonClick}
-            style={{ color: 'red', fontWeight: '' }}
+            style={{ color: 'red' }}
             data-test-subj="errorDisplayButton"
           >
-            err
+            error
           </EuiButtonEmpty>
         }
         isOpen={isPopoverOpen}
@@ -35,9 +43,15 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorDetails }) => {
         anchorPosition="downCenter"
       >
         <EuiPopoverTitle>Error Details</EuiPopoverTitle>
-        <EuiText size="s" style={{ padding: '10px', maxWidth: '300px' }}>
-          <p>PPL Compilation Error: Unknown field [timestam]. Did you mean [timestamp]?</p>
-        </EuiText>
+        <EuiFlexGroup direction="column" gutterSize="s" style={{ width: '300px' }}>
+          <EuiFlexItem>
+            <strong>Status Code:</strong> <EuiText size="s"> {errorDetails.statusCode}</EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <strong>Message:</strong> <EuiText size="s">{errorDetails.message}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopover>
     </>
   );
