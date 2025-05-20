@@ -384,6 +384,8 @@ export {
   WORKSPACE_TYPE,
   DEFAULT_NAV_GROUPS,
   WORKSPACE_PATH_PREFIX,
+  WORKSPACE_USE_CASE_PREFIX,
+  getUseCaseFeatureConfig,
 } from '../utils';
 
 export {
