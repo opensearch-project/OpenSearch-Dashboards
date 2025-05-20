@@ -137,7 +137,6 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     description: i18n.translate('workspace.usecase.search.description', {
       defaultMessage: 'Discover and query your data with ease',
     }),
-    icon: 'wsSearch',
     features: [
       'discover',
       'dashboards',

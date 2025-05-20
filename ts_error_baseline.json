@@ -915,7 +915,7 @@
       "line": 35,
       "column": 1,
       "code": "TS2322",
-      "message": "Type 'Mock<Promise<{ json: () => Promise<{}>; }>, []>' is not assignable to type '{ (input: RequestInfo, init?: RequestInit | undefined): Promise<Response>; (input: string | URL | Request, init?: RequestInit | undefined): Promise<...>; }'."
+      "message": "Type 'Mock<Promise<{ json: () => Promise<{}>; }>, []>' is not assignable to type '{ (input: RequestInfo, init?: RequestInit | undefined): Promise<Response>; (input: string | Request | URL, init?: RequestInit | undefined): Promise<...>; }'."
     },
     {
       "file": "src/plugins/console/server/routes/api/console/proxy/create_handler.ts",
@@ -1944,70 +1944,70 @@
       "line": 78,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 86,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 96,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 108,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 119,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 130,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 141,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 152,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 165,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 178,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/query_editor/editors/dql_editor/index.tsx",
@@ -2154,7 +2154,7 @@
       "line": 91,
       "column": 41,
       "code": "TS2345",
-      "message": "Argument of type 'import(\"/Users/zxshen/Documents/OSD/OpenSearch-Dashboards/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind | import(\"/Users/zxshen/Documents/OSD/OpenSearch-Dashboards/src/plugins/data/public/autocomplete/providers/query_suggestion_provider\").QuerySuggestionTypes' is not assignable to parameter of type 'string'."
+      "message": "Argument of type 'import(\"/Users/zxshen/Documents/OSD/OpenSearch-Dashboards/src/plugins/data/public/autocomplete/providers/query_suggestion_provider\").QuerySuggestionTypes | import(\"/Users/zxshen/Documents/OSD/OpenSearch-Dashboards/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind' is not assignable to parameter of type 'string'."
     },
     {
       "file": "src/plugins/data/server/index_patterns/fetcher/lib/opensearch_api.ts",
@@ -2721,7 +2721,7 @@
       "line": 351,
       "column": 5,
       "code": "TS2741",
-      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { credentials: UsernamePasswordTypedContent | SigV4Content | { [key: string]: string; }; type: string; }; }' but required in type 'DataSourceAttributes'."
+      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { credentials: SigV4Content | UsernamePasswordTypedContent | { [key: string]: string; }; type: string; }; }' but required in type 'DataSourceAttributes'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/create_data_source_wizard/components/create_form/create_data_source_form.tsx",
@@ -3029,21 +3029,21 @@
       "line": 56,
       "column": 31,
       "code": "TS2741",
-      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceSelectable\"; componentConfig: { fullWidth: boolean; onSelectedDataSources: Mock<any, any>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"application\" | \"uiSettings\" | \"hideLocalCluster\">'."
+      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceSelectable\"; componentConfig: { fullWidth: boolean; onSelectedDataSources: Mock<any, any>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"uiSettings\" | \"application\" | \"hideLocalCluster\">'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/data_source_menu/create_data_source_menu.test.tsx",
       "line": 84,
       "column": 27,
       "code": "TS2741",
-      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceSelectable\"; hideLocalCluster: boolean; componentConfig: { fullWidth: boolean; onSelectedDataSources: Mock<any, any>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"application\" | \"uiSettings\" | \"hideLocalCluster\">'."
+      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceSelectable\"; hideLocalCluster: boolean; componentConfig: { fullWidth: boolean; onSelectedDataSources: Mock<any, any>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"uiSettings\" | \"application\" | \"hideLocalCluster\">'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/data_source_menu/create_data_source_menu.test.tsx",
       "line": 153,
       "column": 31,
       "code": "TS2741",
-      "message": "Property 'onManageDataSource' is missing in type '{ setMenuMountPoint: Mock<(mountPoint: MountPoint<HTMLElement>) => void, any>; componentType: \"DataSourceSelectable\"; componentConfig: { fullWidth: boolean; hideLocalCluster: boolean; onSelectedDataSources: Mock<...>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"application\" | \"uiSettings\" | \"hideLocalCluster\">'."
+      "message": "Property 'onManageDataSource' is missing in type '{ setMenuMountPoint: Mock<(mountPoint: MountPoint<HTMLElement>) => void, any>; componentType: \"DataSourceSelectable\"; componentConfig: { fullWidth: boolean; hideLocalCluster: boolean; onSelectedDataSources: Mock<...>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"uiSettings\" | \"application\" | \"hideLocalCluster\">'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/data_source_menu/data_source_menu.test.tsx",
@@ -4219,7 +4219,7 @@
       "line": 36,
       "column": 3,
       "code": "TS2740",
-      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, remove, get$, addSuccess, and 3 more."
+      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, get$, remove, addSuccess, and 3 more."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/associated_object_management/associated_objects_details_flyout.test.tsx",
@@ -4275,7 +4275,7 @@
       "line": 47,
       "column": 3,
       "code": "TS2740",
-      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, remove, get$, addSuccess, and 3 more."
+      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, get$, remove, addSuccess, and 3 more."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/associated_object_management/associated_objects_tab.test.tsx",
@@ -4506,7 +4506,7 @@
       "line": 116,
       "column": 13,
       "code": "TS2741",
-      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceView\"; setMenuMountPoint: (menuMount: MountPoint<HTMLElement> | undefined) => void; componentConfig: { activeOption: { id: string; }[]; savedObjects: SavedObjectsClientContract; notifications: NotificationsStart; fullWidth: boolean; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceViewConfig>, \"application\" | \"uiSettings\" | \"hideLocalCluster\">'."
+      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceView\"; setMenuMountPoint: (menuMount: MountPoint<HTMLElement> | undefined) => void; componentConfig: { activeOption: { id: string; }[]; savedObjects: SavedObjectsClientContract; notifications: NotificationsStart; fullWidth: boolean; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceViewConfig>, \"uiSettings\" | \"application\" | \"hideLocalCluster\">'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/connection_detail/direct_query_connection_detail.tsx",
@@ -4618,7 +4618,7 @@
       "line": 104,
       "column": 8,
       "code": "TS2739",
-      "message": "Type '{ roles: { label: string; value: string; }[]; selectedQueryPermissionRoles: never[]; setSelectedQueryPermissionRoles: Mock<any, any>; currentName: string; currentDetails: string; currentArn: string; ... 13 more ...; setArnForRequest: Mock<...>; }' is missing the following properties from type 'Readonly<Pick<ConfigureS3DatasourceProps, \"application\" | \"navigation\" | \"error\" | \"roles\" | \"setError\" | \"useNewUX\" | \"hasSecurityAccess\" | \"selectedQueryPermissionRoles\" | ... 14 more ... | \"setArnForRequest\">>': application, navigation, useNewUX"
+      "message": "Type '{ roles: { label: string; value: string; }[]; selectedQueryPermissionRoles: never[]; setSelectedQueryPermissionRoles: Mock<any, any>; currentName: string; currentDetails: string; currentArn: string; ... 13 more ...; setArnForRequest: Mock<...>; }' is missing the following properties from type 'Readonly<Pick<ConfigureS3DatasourceProps, \"error\" | \"application\" | \"navigation\" | \"setError\" | \"roles\" | \"useNewUX\" | \"setNameForRequest\" | \"setDetailsForRequest\" | ... 14 more ... | \"setArnForRequest\">>': application, navigation, useNewUX"
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/direct_query_data_source_configuration/amazon_s3/review_amazon_s3_data_source.test.tsx",
@@ -4981,8 +4981,8 @@
       "file": "src/plugins/data_source_management/public/components/edit_data_source/components/edit_form/edit_data_source_form.test.tsx",
       "line": 85,
       "column": 13,
-      "code": "TS2322",
-      "message": "Type '{ id: string; title: string; description: string; endpoint: string; auth: { type: AuthType; credentials: { username: string; password: string; }; }; }' is not assignable to type 'DataSourceAttributes'."
+      "code": "TS2741",
+      "message": "Property 'dataSourceVersion' is missing in type '{ id: string; title: string; description: string; endpoint: string; auth: { type: AuthType; credentials: { username: string; password: string; }; }; }' but required in type 'DataSourceAttributes'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/edit_data_source/components/edit_form/edit_data_source_form.test.tsx",
@@ -5192,14 +5192,14 @@
       "line": 356,
       "column": 13,
       "code": "TS2739",
-      "message": "Type '{ title: string; description: string; auth: { type: string; credentials: UsernamePasswordTypedContent | SigV4Content | { [key: string]: string; } | undefined; }; }' is missing the following properties from type 'DataSourceAttributes': endpoint, dataSourceVersion"
+      "message": "Type '{ title: string; description: string; auth: { type: string; credentials: SigV4Content | UsernamePasswordTypedContent | { [key: string]: string; } | undefined; }; }' is missing the following properties from type 'DataSourceAttributes': endpoint, dataSourceVersion"
     },
     {
       "file": "src/plugins/data_source_management/public/components/edit_data_source/components/edit_form/edit_data_source_form.tsx",
       "line": 460,
       "column": 11,
       "code": "TS2741",
-      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { credentials: UsernamePasswordTypedContent | SigV4Content | { [key: string]: string; } | undefined; type: string; }; }' but required in type 'DataSourceAttributes'."
+      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { credentials: SigV4Content | UsernamePasswordTypedContent | { [key: string]: string; } | undefined; type: string; }; }' but required in type 'DataSourceAttributes'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/edit_data_source/components/edit_form/edit_data_source_form.tsx",
@@ -5304,7 +5304,7 @@
       "line": 1126,
       "column": 11,
       "code": "TS2741",
-      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { type: string; credentials: UsernamePasswordTypedContent | SigV4Content | { ...; } | undefined; }; }' but required in type 'DataSourceAttributes'."
+      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { type: string; credentials: SigV4Content | UsernamePasswordTypedContent | { ...; } | undefined; }; }' but required in type 'DataSourceAttributes'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/edit_data_source/components/header/header.test.tsx",
@@ -7418,7 +7418,7 @@
       "line": 333,
       "column": 11,
       "code": "TS2322",
-      "message": "Type '({ sortable: boolean; 'data-test-subj': string; hidden?: boolean | undefined; color?: string | undefined; content?: string | undefined; style?: CSSProperties | undefined; ... 276 more ...; hideForMobile?: boolean | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
+      "message": "Type '({ sortable: boolean; 'data-test-subj': string; name: ReactNode; color?: string | undefined; rel?: string | undefined; className?: string | undefined; 'aria-label'?: string | undefined; ... 275 more ...; valign?: \"baseline\" | ... 3 more ... | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
     },
     {
       "file": "src/plugins/index_pattern_management/public/mocks.ts",
@@ -8587,14 +8587,14 @@
       "line": 221,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | \"grid\" | \"invert\" | \"dot\" | \"menu\" | \"filter\" | \"scale\" | \"wordWrap\" | ... 456 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"copy\" | \"filter\" | \"search\" | \"link\" | \"stop\" | \"color\" | \"download\" | \"documentation\" | \"accessibility\" | ... 458 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
       "line": 224,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | \"grid\" | \"invert\" | \"dot\" | \"menu\" | \"filter\" | \"scale\" | \"wordWrap\" | ... 456 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"copy\" | \"filter\" | \"search\" | \"link\" | \"stop\" | \"color\" | \"download\" | \"documentation\" | \"accessibility\" | ... 458 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
@@ -9777,7 +9777,7 @@
       "line": 121,
       "column": 46,
       "code": "TS2345",
-      "message": "Argument of type '{ name: string; title: string; icon: string; description: string; visConfig: { defaults: { type: string; addTooltip: boolean; addLegend: boolean; isDisplayWarning: boolean; gauge: { alignment: \"automatic\"; ... 13 more ...; style: { ...; }; }; }; }; visualization: typeof VislibVisController; editorConfig: { ...; }; u...' is not assignable to parameter of type 'BaseVisTypeOptions<VisParams>'."
+      "message": "Argument of type '{ name: string; title: string; icon: string; description: string; toExpressionAst: (vis: Vis<VisParams>, params: any) => Promise<ExpressionAstExpression>; ... 4 more ...; editorConfig: { ...; }; } | ... 6 more ... | { ...; }' is not assignable to parameter of type 'BaseVisTypeOptions<VisParams>'."
     },
     {
       "file": "src/plugins/vis_type_vislib/public/vislib/lib/binder.ts",
@@ -9826,70 +9826,70 @@
       "line": 104,
       "column": 8,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 119,
       "column": 8,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 134,
       "column": 8,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 159,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 176,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 199,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 6 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 6 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 225,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 246,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 266,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 282,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"uiSettings\" | \"application\" | \"onClose\" | ... 8 more ... | \"originatingApp\">'."
     },
     {
       "file": "src/plugins/visualize/public/actions/visualize_field_action.ts",
@@ -9934,179 +9934,116 @@
       "message": "Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?"
     },
     {
-      "file": "src/plugins/workspace/public/components/data_source_association/data_source_association.test.tsx",
-      "line": 41,
-      "column": 7,
-      "code": "TS2554",
-      "message": "Expected 1 arguments, but got 0."
+      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.ts",
+      "line": 118,
+      "column": 69,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'Pick<WorkspacePermissionSetting, \"id\"> & Partial<WorkspacePermissionSetting>'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_creator.test.tsx",
-      "line": 175,
-      "column": 45,
-      "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; }[]; id: string; title: string; description: string; icon: string; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.ts",
+      "line": 119,
+      "column": 70,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'Pick<WorkspacePermissionSetting, \"id\"> & Partial<WorkspacePermissionSetting>'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_creator.tsx",
-      "line": 225,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type '(data: WorkspaceFormSubmitData) => Promise<void>' is not assignable to type '(formData: WorkspaceFormSubmitData, refresh?: boolean | undefined) => Promise<{ result: boolean; success: true; } | undefined>'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_creator_form.test.tsx",
-      "line": 40,
-      "column": 6,
-      "code": "TS2739",
-      "message": "Type '{ isSubmitting: false; application: { capabilities: { dashboards: { isDashboardAdmin: boolean; }; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<...>; workspaces: Readonly<...>; }; ... 11 more ...; setAppBottomControls: ...' is missing the following properties from type 'WorkspaceCreatorFormProps': goToCollaborators, onGoToCollaboratorsChange, onAppLeave"
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/select_data_source_panel.test.tsx",
-      "line": 74,
-      "column": 59,
-      "code": "TS2345",
-      "message": "Argument of type '{ id: string; title: string; description: string; auth: string; dataSourceEngineType: DataSourceEngineType; workspaces: never[]; }[]' is not assignable to parameter of type '{ id: string; title: any; auth: any; description: any; dataSourceEngineType: any; workspaces: string[]; type: string; connectionType: any; }[] | Promise<{ id: string; title: any; auth: any; description: any; dataSourceEngineType: any; workspaces: string[]; type: string; connectionType: any; }[]>'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 29,
-      "column": 5,
-      "code": "TS2739",
-      "message": "Type '{ application: Mocked<ApplicationStart>; defaultValues: WorkspaceFormSubmitData; onSubmit: Mock<any, any>; operationType: WorkspaceOperationType.Create; permissionEnabled: boolean; }' is missing the following properties from type 'WorkspaceFormProps': savedObjects, availableUseCases, onAppLeave"
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 54,
-      "column": 52,
-      "code": "TS2345",
-      "message": "Argument of type '{ preventDefault: jest.Mock<any, any>; }' is not assignable to parameter of type 'FormEvent<Element>'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 68,
-      "column": 7,
-      "code": "TS2741",
-      "message": "Property 'features' is missing in type '{ name: string; }' but required in type 'WorkspaceFormSubmitData'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 75,
-      "column": 52,
-      "code": "TS2345",
-      "message": "Argument of type '{ preventDefault: jest.Mock<any, any>; }' is not assignable to parameter of type 'FormEvent<Element>'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 97,
-      "column": 52,
-      "code": "TS2345",
-      "message": "Argument of type '{ preventDefault: jest.Mock<any, any>; }' is not assignable to parameter of type 'FormEvent<Element>'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 40,
-      "column": 54,
-      "code": "TS2322",
-      "message": "Type '\"unknown\"' is not assignable to type 'WorkspaceCollaboratorPermissionType'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 93,
-      "column": 20,
-      "code": "TS2322",
-      "message": "Type '{ displayedCollaboratorTypes: ({ id: string; name: string; buttonLabel: string; onAdd: () => Promise<void>; getDisplayedType: ({ permissionType }: { permissionType: string; }) => \"User\" | undefined; } | { ...; })[]; permissionSettings: ({ ...; } | ... 1 more ... | { ...; })[]; handleSubmitPermissionSettings: Mock<.....' is not assignable to type 'Props'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 106,
-      "column": 35,
-      "code": "TS2322",
-      "message": "Type '{ displayedCollaboratorTypes: ({ id: string; name: string; buttonLabel: string; onAdd: () => Promise<void>; getDisplayedType: ({ permissionType }: { permissionType: string; }) => \"User\" | undefined; } | { ...; })[]; permissionSettings: ({ ...; } | ... 1 more ... | { ...; })[]; handleSubmitPermissionSettings: Mock<.....' is not assignable to type 'Props'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 123,
-      "column": 52,
-      "code": "TS2322",
-      "message": "Type '{ id: number; modes: string[]; type: string; userId: string; }[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 156,
-      "column": 13,
-      "code": "TS2322",
-      "message": "Type '() => Promise<void>' is not assignable to type '(permissionSettings: WorkspacePermissionSetting[]) => Promise<IWorkspaceResponse<boolean>>'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 157,
-      "column": 13,
-      "code": "TS2322",
-      "message": "Type '{ id: number; modes: string[]; type: string; userId: string; }[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 209,
-      "column": 52,
-      "code": "TS2322",
-      "message": "Type '({ id: number; modes: string[]; type: string; userId: string; group?: undefined; } | { id: number; modes: string[]; type: string; group: string; userId?: undefined; })[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 236,
-      "column": 52,
-      "code": "TS2322",
-      "message": "Type '({ id: number; modes: string[]; type: string; userId: string; group?: undefined; } | { id: number; modes: string[]; type: string; group: string; userId?: undefined; })[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 268,
-      "column": 11,
-      "code": "TS2322",
-      "message": "Type '({ id: number; modes: string[]; type: string; userId: string; group?: undefined; } | { id: number; modes: string[]; type: string; group: string; userId?: undefined; })[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 331,
-      "column": 13,
-      "code": "TS2322",
-      "message": "Type '() => Promise<void>' is not assignable to type '(permissionSettings: WorkspacePermissionSetting[]) => Promise<IWorkspaceResponse<boolean>>'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 332,
-      "column": 13,
-      "code": "TS2322",
-      "message": "Type '{ id: number; modes: string[]; type: string; userId: string; }[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_permission_setting_input.test.tsx",
-      "line": 21,
-      "column": 6,
-      "code": "TS2322",
-      "message": "Type '{ index: number; type: WorkspacePermissionItemType; userId?: string | undefined; group?: string | undefined; modes?: WorkspacePermissionMode[] | undefined; ... 6 more ...; onDelete: Mock<...> | ((index: number) => void); }' is not assignable to type 'WorkspacePermissionSettingInputProps'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_initial/workspace_initial.test.tsx",
-      "line": 45,
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 79,
       "column": 27,
-      "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; }[]; id: string; title: string; description: string; icon: string; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'Partial<WorkspacePermissionSetting>'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_list/default_workspace.test.tsx",
-      "line": 93,
-      "column": 32,
-      "code": "TS7031",
-      "message": "Binding element 'controls' implicitly has an 'any' type."
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 79,
+      "column": 63,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'WorkspacePermissionSetting'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_list/default_workspace.test.tsx",
-      "line": 123,
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 82,
+      "column": 27,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'Partial<WorkspacePermissionSetting>'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 82,
+      "column": 62,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'WorkspacePermissionSetting'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 125,
+      "column": 73,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'WorkspacePermissionSetting'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 127,
+      "column": 57,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'WorkspacePermissionSetting'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 130,
+      "column": 75,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'WorkspacePermissionSetting'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 132,
+      "column": 58,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'WorkspacePermissionSetting'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 358,
+      "column": 70,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'Pick<WorkspacePermissionSetting, \"id\"> & Partial<WorkspacePermissionSetting>'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 374,
+      "column": 72,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'Pick<WorkspacePermissionSetting, \"id\"> & Partial<WorkspacePermissionSetting>'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
+      "line": 43,
       "column": 9,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; }[]; id: string; title: string; description: string; icon: string; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type '\"unknown\"' is not assignable to type 'WorkspacePermissionItemType'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.tsx",
+      "line": 212,
+      "column": 32,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'PermissionSetting'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.tsx",
+      "line": 217,
+      "column": 32,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'PermissionSetting'."
+    },
+    {
+      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.tsx",
+      "line": 222,
+      "column": 82,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type '{ displayedType: string | undefined; accessLevel: string | undefined; id: number; type?: WorkspacePermissionItemType | undefined; userId?: string | undefined; modes?: WorkspacePermissionMode[] | undefined; } | { ...; } | { ...; } | { ...; }'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_list/default_workspace.test.tsx",
@@ -10116,25 +10053,18 @@
       "message": "Type '{ workspaces: { workspaceList$: BehaviorSubject<WorkspaceObject[]>; currentWorkspaceId$: BehaviorSubject<string>; currentWorkspace$: BehaviorSubject<...>; initialized$: BehaviorSubject<...>; client$: BehaviorSubject<...>; workspaceError$: BehaviorSubject<...>; }; ... 12 more ...; fatalErrors: jest.Mocked<...>; }' is not assignable to type 'Services'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_list/index.test.tsx",
-      "line": 140,
-      "column": 24,
-      "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; }[]; id: string; title: string; description: string; icon: string; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
-    },
-    {
       "file": "src/plugins/workspace/public/components/workspace_menu/workspace_menu.test.tsx",
       "line": 47,
       "column": 50,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"accessibility\" | \"addDataApp\" | ... 465 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"wsObservability\" | \"wsSecurityAnalytics\" | ... 465 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | unde...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_selector/workspace_selector.test.tsx",
       "line": 51,
       "column": 54,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"accessibility\" | \"addDataApp\" | ... 465 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"wsObservability\" | \"wsSecurityAnalytics\" | ... 465 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | unde...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/services/use_case_service.test.ts",
@@ -10158,6 +10088,6 @@
       "message": "This expression is not callable."
     }
   ],
-  "updatedAt": "2025-05-16T07:45:29.090Z",
+  "updatedAt": "2025-05-20T03:39:33.587Z",
   "tsconfig": "/Users/zxshen/Documents/OSD/OpenSearch-Dashboards/tsconfig.check.json"
 }

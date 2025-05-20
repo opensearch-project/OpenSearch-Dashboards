@@ -16,14 +16,14 @@ import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceUserPermissionSetting {
   id: number;
-  type: WorkspacePermissionItemType.User;
+  type: WorkspacePermissionItemType;
   userId: string;
   modes: WorkspacePermissionMode[];
 }
 
 export interface WorkspaceUserGroupPermissionSetting {
   id: number;
-  type: WorkspacePermissionItemType.Group;
+  type: WorkspacePermissionItemType;
   group: string;
   modes: WorkspacePermissionMode[];
 }
@@ -75,7 +75,7 @@ export interface WorkspaceFormProps {
   onSubmit?: (
     formData: WorkspaceFormSubmitData,
     refresh?: boolean
-  ) => Promise<{ result: boolean; success: true } | undefined>;
+  ) => Promise<{ result: boolean; success: boolean } | undefined>;
   defaultValues?: Partial<WorkspaceFormSubmitData>;
   operationType: WorkspaceOperationType;
   permissionEnabled?: boolean;

@@ -193,7 +193,7 @@ describe('WorkspaceCreator', () => {
       // @ts-ignore
       delete window.location;
     }
-    window.location = {} as Location;
+    window.location = {} as Location & string;
     Object.defineProperty(window.location, 'href', {
       get: () => 'http://localhost/w/workspace/app/workspace_create',
       set: setHrefSpy,
@@ -201,7 +201,7 @@ describe('WorkspaceCreator', () => {
   });
 
   afterAll(() => {
-    window.location = location;
+    window.location = location as Location & string;
   });
 
   it('should not create workspace when name is empty', async () => {

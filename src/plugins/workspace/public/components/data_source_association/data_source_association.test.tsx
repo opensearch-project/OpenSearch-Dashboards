@@ -38,7 +38,7 @@ describe('<DataSourceAssociation />', () => {
       return () => render(<>{node}</>);
     });
     servicesMock.overlays.openModal.mockImplementation((fn) => {
-      fn();
+      fn(document.createElement('div'));
       return { close: jest.fn(), onClose: Promise.resolve() };
     });
   });

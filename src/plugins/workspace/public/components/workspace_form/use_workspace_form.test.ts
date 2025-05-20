@@ -4,7 +4,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { applicationServiceMock } from '../../../../../core/public/mocks';
+import { applicationServiceMock, coreMock } from '../../../../../core/public/mocks';
 import { PermissionModeId } from '../../../../../core/public';
 import {
   optionIdToWorkspacePermissionModesMap,
@@ -32,12 +32,33 @@ const setup = ({
       onSubmit: onSubmitMock,
       operationType: WorkspaceOperationType.Create,
       permissionEnabled,
+      savedObjects: coreMock.createStart().savedObjects,
+      availableUseCases: [],
+      onAppLeave: () => {},
     },
   });
   return {
     renderResult,
     onSubmitMock,
   };
+};
+
+const mockFormEvent: React.FormEvent<Element> = {
+  preventDefault: jest.fn(),
+  bubbles: false,
+  cancelable: false,
+  currentTarget: {} as EventTarget & Element,
+  defaultPrevented: false,
+  eventPhase: 0,
+  isDefaultPrevented: jest.fn(() => false),
+  isPropagationStopped: jest.fn(() => false),
+  isTrusted: true,
+  nativeEvent: {} as Event,
+  persist: jest.fn(),
+  stopPropagation: jest.fn(),
+  target: {} as EventTarget & Element,
+  timeStamp: 0,
+  type: 'submit',
 };
 
 describe('useWorkspaceForm', () => {
@@ -51,7 +72,7 @@ describe('useWorkspaceForm', () => {
     expect(renderResult.result.current.formErrors).toEqual({});
 
     act(() => {
-      renderResult.result.current.handleFormSubmit({ preventDefault: jest.fn() });
+      renderResult.result.current.handleFormSubmit(mockFormEvent);
     });
     expect(renderResult.result.current.formErrors).toEqual(
       expect.objectContaining({
@@ -67,12 +88,13 @@ describe('useWorkspaceForm', () => {
     const { renderResult, onSubmitMock } = setup({
       defaultValues: {
         name: 'test-workspace-name',
+        features: [],
       },
     });
     expect(renderResult.result.current.formErrors).toEqual({});
 
     act(() => {
-      renderResult.result.current.handleFormSubmit({ preventDefault: jest.fn() });
+      renderResult.result.current.handleFormSubmit(mockFormEvent);
     });
     expect(renderResult.result.current.formErrors).toEqual(
       expect.objectContaining({
@@ -94,7 +116,7 @@ describe('useWorkspaceForm', () => {
     expect(renderResult.result.current.formErrors).toEqual({});
 
     act(() => {
-      renderResult.result.current.handleFormSubmit({ preventDefault: jest.fn() });
+      renderResult.result.current.handleFormSubmit(mockFormEvent);
     });
     expect(onSubmitMock).toHaveBeenCalledWith(
       expect.objectContaining({
