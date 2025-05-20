@@ -12,6 +12,7 @@ import {
 import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
 import { IFieldType, IndexPattern } from '../../../../../../data/public';
 import { DiscoverViewServices } from '../../../../build_services';
+import { LineChartStyleControls } from './line_vis_type';
 
 export type DiscoverVisFieldType = 'numerical' | 'categorical' | 'date';
 
@@ -27,7 +28,8 @@ export const toExpression = async (
   searchContext: IExpressionLoaderParams['searchContext'],
   rows: OpenSearchSearchHit[],
   indexPattern: IndexPattern,
-  fieldSchema: Array<Partial<IFieldType>>
+  fieldSchema?: Array<Partial<IFieldType>>,
+  styleOptions?: Partial<LineChartStyleControls>
 ) => {
   if (
     !indexPattern ||
@@ -37,7 +39,7 @@ export const toExpression = async (
     return '';
   }
 
-  const columns: DiscoverVisColumn[] = fieldSchema.map((field, index) => {
+  const columns: DiscoverVisColumn[] = fieldSchema!.map((field, index) => {
     // Create a clean version of the field name
     return {
       id: index,
@@ -76,7 +78,8 @@ export const toExpression = async (
       indexPattern,
       columns,
       numericalColumns,
-      categoricalColumns
+      categoricalColumns,
+      styleOptions
     );
   } else {
     vegaSpec = '{}'; // Table visualization
@@ -117,7 +120,8 @@ const createVegaLineSpec = (
   indexPattern: IndexPattern,
   columns: DiscoverVisColumn[],
   numericalFields: any,
-  categoricalFields: any
+  categoricalFields: any,
+  styleOptions?: Partial<LineChartStyleControls>
 ) => {
   // Transform data to a format Vega can use
   const data = rows.map((row: OpenSearchSearchHit) => {
@@ -188,7 +192,8 @@ const createVegaLineSpec = (
     };
   });
 
-  const spec = {
+  // Create the base Vega spec
+  const baseSpec = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: data },
@@ -205,6 +210,27 @@ const createVegaLineSpec = (
     },
   };
 
-  console.log('vega spec REVISED:', spec);
-  return spec;
+  const newSpec = { ...baseSpec };
+
+  // Apply style options
+  if (styleOptions) {
+    if (newSpec.layer) {
+      newSpec.layer = newSpec.layer.map((layer: any) => {
+        if (layer.encoding?.color) {
+          if (!styleOptions.addLegend) {
+            layer.encoding.color.legend = null;
+          } else {
+            layer.encoding.color.legend = {
+              ...layer.encoding.color.legend,
+              orient: styleOptions.legendPosition,
+            };
+          }
+        }
+        return layer;
+      });
+    }
+  }
+
+  console.log('vega spec REVISED:', newSpec);
+  return newSpec;
 };
