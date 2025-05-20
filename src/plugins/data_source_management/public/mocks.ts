@@ -32,6 +32,19 @@ import {
 import { AvailableIntegrationsTableProps } from './components/direct_query_data_sources_components/integrations/available_integration_table';
 import { navigationPluginMock } from '../../navigation/public/mocks';
 import packageInfo from '../../../../package.json';
+import { ConfigSchema } from '../config';
+
+export const mockInitializerContext = {
+  config: {
+    get: jest.fn(
+      (): ConfigSchema => ({
+        manageableBy: 'all',
+        dataSourceAdmin: { groups: [] as string[] },
+        dashboardDirectQuerySyncEnabled: false,
+      })
+    ),
+  },
+};
 
 /* Mock Types */
 
@@ -506,7 +519,7 @@ export const testDataSourceManagementPlugin = (
   coreSetup: any,
   coreStart: any
 ): TestPluginReturn => {
-  const plugin = new DataSourceManagementPlugin();
+  const plugin = new DataSourceManagementPlugin(mockInitializerContext);
   const setup = plugin.setup(coreSetup, {
     management: managementPluginMock.createSetupContract(),
     indexPatternManagement: indexPatternManagementPluginMock.createSetupContract(),
