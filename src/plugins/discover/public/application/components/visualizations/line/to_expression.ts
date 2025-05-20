@@ -12,7 +12,6 @@ import {
 import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
 import { IFieldType, IndexPattern } from '../../../../../../data/public';
 import { DiscoverViewServices } from '../../../../build_services';
-import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 
 export type DiscoverVisFieldType = 'numerical' | 'categorical' | 'date';
 
