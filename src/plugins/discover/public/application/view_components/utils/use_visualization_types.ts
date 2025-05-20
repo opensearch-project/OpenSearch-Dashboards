@@ -5,10 +5,14 @@
 
 import { IconType } from '@elastic/eui';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { createLineConfig } from '../../components/visualizations/line/line_vis_type';
+import {
+  createLineConfig,
+  LineChartStyleControls,
+} from '../../components/visualizations/line/line_vis_type';
 import { DiscoverViewServices } from '../../../build_services';
 import { IFieldType, IndexPattern } from '../../../opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
+import { LineChartStyleControlsProps } from '../../components/visualizations/line/line_vis_options';
 
 export interface VisualizationType<T = any> {
   readonly name: string;
@@ -18,8 +22,8 @@ export interface VisualizationType<T = any> {
   readonly stage?: 'production';
   readonly ui: {
     style: {
-      defaults: any;
-      render: (defaultStyle: any) => any;
+      defaults: LineChartStyleControls;
+      render: ({ defaultStyles, onChange }: LineChartStyleControlsProps) => JSX.Element;
     };
   };
   readonly toExpression: (
@@ -27,7 +31,8 @@ export interface VisualizationType<T = any> {
     searchContext: IExpressionLoaderParams['searchContext'],
     rows: OpenSearchSearchHit[],
     indexPattern: IndexPattern,
-    fieldSchema: Array<Partial<IFieldType>>
+    fieldSchema?: Array<Partial<IFieldType>>,
+    styleOptions?: Partial<LineChartStyleControls>
   ) => Promise<string | undefined>;
 }
 

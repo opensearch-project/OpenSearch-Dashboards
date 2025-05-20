@@ -3,12 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@osd/i18n';
 import { Option } from '../../style_panel/option';
 import { BasicVisOptions } from '../../style_panel/basic_vis_options';
+import { LineChartStyleControls } from './line_vis_type';
 
-function LineVisOptions(defaultStyle: any) {
+export interface LineChartStyleControlsProps {
+  defaultStyles: LineChartStyleControls;
+  onChange: (styles: LineChartStyleControls) => void;
+}
+
+export function LineVisStyleControls(props: LineChartStyleControlsProps) {
   return (
     <>
       <Option
@@ -16,10 +22,8 @@ function LineVisOptions(defaultStyle: any) {
           defaultMessage: 'Style settings',
         })}
       >
-        <BasicVisOptions defaultStyle={defaultStyle} />
+        <BasicVisOptions defaultStyles={props.defaultStyles} onChange={props.onChange} />
       </Option>
     </>
   );
 }
-
-export { LineVisOptions };
