@@ -33,7 +33,6 @@ export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
   removeBanner,
 }) => {
   const [syncInfo, setSyncInfo] = useState<DirectQuerySyncInfo | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   // Initialize the useDirectQuery hook
   const { loadStatus, startLoading } = useDirectQuery(http, notifications, syncInfo?.mdsId);
@@ -45,7 +44,9 @@ export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
         http,
         savedObjectsClient,
         dashboardId,
-        onError: (errMsg: React.SetStateAction<string | null>) => setError(errMsg),
+        onError: () => {
+          setSyncInfo(null);
+        },
       });
 
       if (!result) {
@@ -69,7 +70,6 @@ export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
   // Handle the "Sync Now" action
   const handleSynchronize = () => {
     if (!syncInfo || !syncInfo.refreshQuery) {
-      console.error('Cannot synchronize: refreshQuery is missing');
       return;
     }
 
@@ -77,7 +77,6 @@ export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
       /REFRESH MATERIALIZED VIEW `(.+?)`\.`(.+?)`\.`(.+?)`/
     );
     if (!match || match.length < 4) {
-      console.error('Cannot synchronize: failed to parse datasource from refreshQuery');
       return;
     }
 
@@ -93,25 +92,6 @@ export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
     startLoading(requestPayload);
   };
 
-  // Refresh the window when loadStatus becomes 'success'
-  useEffect(() => {
-    if (loadStatus === 'success') {
-      window.location.reload();
-    }
-  }, [loadStatus]);
-
-  // Show error if fetching failed
-  if (error) {
-    return (
-      <div className="dshDashboardGrid__syncBar" data-test-subj="dashboardDirectQuerySyncBar">
-        <EuiText size="s" color="danger">
-          {error}
-        </EuiText>
-      </div>
-    );
-  }
-
-  // Don’t render if we failed to fetch sync info
   if (!syncInfo) {
     return null;
   }
