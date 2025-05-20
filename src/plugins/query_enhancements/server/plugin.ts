@@ -73,6 +73,7 @@ export class QueryEnhancementsPlugin
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL_ASYNC, sqlAsyncSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_ASYNC, pplAsyncSearchStrategy);
 
+    // @ts-ignore https://github.com/opensearch-project/openSearch-Dashboards/issues/4274
     core.http.registerRouteHandlerContext('query_assist', () => ({
       logger: this.logger,
       configPromise: this.initializerContext.config
@@ -82,6 +83,7 @@ export class QueryEnhancementsPlugin
       dataSourceEnabled: !!dataSource,
     }));
 
+    // @ts-ignore https://github.com/opensearch-project/openSearch-Dashboards/issues/4274
     core.http.registerRouteHandlerContext('data_source_connection', () => ({
       logger: this.logger,
       configPromise: this.initializerContext.config
