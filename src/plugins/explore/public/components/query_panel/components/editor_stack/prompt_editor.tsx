@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { getEditorConfig, LanguageType } from './shared';
@@ -32,6 +32,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorConfig = getEditorConfig(languageType);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
+  const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
 
   const handleEditClick = () => {
     handlePromptEdit();
@@ -39,59 +40,88 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
     editorRef.current?.focus();
   };
 
-  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    editorRef.current = editor;
+  const handleEditorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editorRef.current = editor;
 
-    editor.onDidFocusEditorText(() => {
-      setEditorIsFocused(true);
-    });
+      editor.onDidFocusEditorText(() => {
+        setEditorIsFocused(true);
+      });
 
-    editor.onDidBlurEditorText(() => {
-      setEditorIsFocused(false);
-    });
+      editor.onDidBlurEditorText(() => {
+        setEditorIsFocused(false);
+      });
+      // Set up Enter key handling
+      editor.addAction({
+        id: 'run-prompt-on-enter',
+        label: 'Run Prompt on Enter',
+        keybindings: [monaco.KeyCode.Enter],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 1.5,
+        run: () => {
+          const promptValue = editor.getValue();
+          handlePromptRun(promptValue);
+          handlePromptEdit();
+        },
+      });
 
-    editor.addCommand(monaco.KeyCode.Enter, () => {
-      console.log('Enter pressed prompt');
-      const promptValue = editor.getValue();
-      handlePromptRun(promptValue);
-      handlePromptEdit();
-    });
-
-    editor.addAction({
-      id: 'insert-new-line-prompt',
-      label: 'Insert New Line Prompt',
-      keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
-      run: (ed) => {
-        if (ed.hasTextFocus()) {
-          const currentPosition = ed.getPosition();
-          if (currentPosition) {
-            ed.executeEdits('', [
-              {
-                range: new monaco.Range(
-                  currentPosition.lineNumber,
-                  currentPosition.column,
-                  currentPosition.lineNumber,
-                  currentPosition.column
-                ),
-                text: '\n',
-                forceMoveMarkers: true,
-              },
-            ]);
-            ed.setPosition({
-              lineNumber: currentPosition.lineNumber + 1,
-              column: 1,
-            });
+      editor.addAction({
+        id: 'insert-new-line-prompt',
+        label: 'Insert New Line Prompt',
+        keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+        run: (ed) => {
+          if (ed.hasTextFocus()) {
+            const currentPosition = ed.getPosition();
+            if (currentPosition) {
+              ed.executeEdits('', [
+                {
+                  range: new monaco.Range(
+                    currentPosition.lineNumber,
+                    currentPosition.column,
+                    currentPosition.lineNumber,
+                    currentPosition.column
+                  ),
+                  text: '\n',
+                  forceMoveMarkers: true,
+                },
+              ]);
+              ed.setPosition({
+                lineNumber: currentPosition.lineNumber + 1,
+                column: 1,
+              });
+            }
           }
-        }
-      },
-    });
+        },
+      });
 
-    editor.onDidContentSizeChange(() => {
-      const contentHeight = editor.getContentHeight();
-      editor.layout({ width: editor.getLayoutInfo().width, height: contentHeight });
-    });
-    return editor;
-  };
+      editor.onDidContentSizeChange(() => {
+        const contentHeight = editor.getContentHeight();
+        editor.layout({ width: editor.getLayoutInfo().width, height: contentHeight });
+      });
+
+      const focusDisposable = editor.onDidFocusEditorText(() => {
+        if (blurTimeoutRef.current) {
+          clearTimeout(blurTimeoutRef.current);
+        }
+        setEditorIsFocused(true);
+      });
+
+      const blurDisposable = editor.onDidBlurEditorText(() => {
+        blurTimeoutRef.current = setTimeout(() => {
+          setEditorIsFocused(false);
+        }, 300);
+      });
+
+      return () => {
+        focusDisposable.dispose();
+        blurDisposable.dispose();
+        if (blurTimeoutRef.current) {
+          clearTimeout(blurTimeoutRef.current);
+        }
+      };
+    },
+    [handlePromptRun, prompt]
+  );
 
   return (
     <div className="promptEditorWrapper" style={{ position: 'relative' }}>

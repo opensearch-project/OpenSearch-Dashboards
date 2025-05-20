@@ -26,7 +26,10 @@ const QueryPanel = () => {
   // const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
   const inputQueryRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const languageTypeRef = useRef<LanguageType>('ppl'); // Default to PPL
-  const [isDualEditor, setIsDualEditor] = useState(false); // Default to PPL
+  const [isDualEditor, setIsDualEditor] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPromptReadOnly, setIsPromptReadOnly] = useState(false);
+  const [isEditorReadOnly, setIsEditorReadOnly] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<Query>(
     intitialQuery(languageTypeRef.current, 'test')
   );
@@ -47,6 +50,7 @@ const QueryPanel = () => {
     const detector = new QueryTypeDetector();
     const result = detector.detect(query);
     languageTypeRef.current = result.type;
+    console.log('language changed:', result.type);
     setCurrentQuery((prevQuery) => ({
       ...prevQuery,
       language: result.type,
@@ -69,34 +73,66 @@ const QueryPanel = () => {
     setLineCount(currentLineCount);
   };
 
-  const handleQueryRun = (querystring?: string | undefined) => {
+  const handleQueryRun = async (querystring?: string | undefined) => {
     console.log('Running queryString when enter:', querystring);
+    setIsLoading(true); // Set loading to true
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
     // Add logic to run the query
+    setIsPromptReadOnly(true);
+    setIsLoading(false);
   };
 
   const handleClearEditor = () => {
     setIsDualEditor(false);
+    setIsEditorReadOnly(false);
+    setIsPromptReadOnly(false);
     setCurrentQuery(intitialQuery('ppl', 'test'));
   };
 
-  const handlePromptRun = (querystring?: string | undefined) => {
+  const handlePromptRun = async (querystring?: string | undefined) => {
+    console.log(querystring, 'querystring');
+    setIsLoading(true); // Set loading to true
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
+
     const detectedLang = languageTypeRef.current;
 
     if (detectedLang === 'nl') {
       console.log('Detected NL, calling NL API...');
+
       // Call NL Api
-      // on successful ppl gene3rated
+      // on successful ppl generated
+
       setIsDualEditor(true);
       setCurrentQuery((prevQuery) => ({
         ...prevQuery,
         query: 'source=test\n| where state=CA and year=2023\n| sort=asc',
       }));
-      // update query object with ppl query
+      // update query object with  generated ppl query
     } else {
       setIsDualEditor(false);
-      handleQueryRun(querystring);
+      setCurrentQuery((prevQuery) => ({
+        ...prevQuery,
+        query: '',
+      }));
     }
-    // Add logic to run the query
+    setIsLoading(false); // Set loading to false after the delay
+  };
+
+  const handlePromptEdit = () => {
+    setIsEditorReadOnly(true);
+    setIsPromptReadOnly(false);
+  };
+
+  const handleQueryEdit = () => {
+    setIsEditorReadOnly(false);
+  };
+
+  const handleRunClick = () => {
+    if (isDualEditor) {
+      handleQueryRun(currentQuery.query);
+    } else {
+      handlePromptRun(currentQuery.prompt);
+    }
   };
 
   return (
@@ -104,20 +140,25 @@ const QueryPanel = () => {
       footer={
         <QueryEditorFooter
           isDualEditor={isDualEditor}
+          isLoading={isLoading}
           languageType={currentQuery.language}
-          handleQueryRun={handleQueryRun}
+          handleRunClick={handleRunClick}
         />
       }
     >
       <EditorStack
+        isDualEditor={isDualEditor}
+        isPromptReadOnly={isPromptReadOnly}
+        isEditorReadOnly={isEditorReadOnly}
+        queryString={currentQuery.query}
+        languageType={currentQuery.language}
+        prompt={currentQuery.prompt}
         onPromptChange={onPromptChange}
         onQueryChange={onQueryChange}
-        languageType={currentQuery.language}
-        isDualEditor={isDualEditor}
+        handlePromptEdit={handlePromptEdit}
+        handleQueryEdit={handleQueryEdit}
         handleQueryRun={handleQueryRun}
         handlePromptRun={handlePromptRun}
-        queryString={currentQuery.query}
-        prompt={currentQuery.prompt}
         handleClearEditor={handleClearEditor}
       />
     </QueryPanelLayout>
