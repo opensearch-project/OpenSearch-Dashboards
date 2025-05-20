@@ -2161,7 +2161,7 @@
       "line": 91,
       "column": 41,
       "code": "TS2345",
-      "message": "Argument of type 'import(\"/Users/zxshen/Documents/OSD/OpenSearch-Dashboards/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind | import(\"/Users/zxshen/Documents/OSD/OpenSearch-Dashboards/src/plugins/data/public/autocomplete/providers/query_suggestion_provider\").QuerySuggestionTypes' is not assignable to parameter of type 'string'."
+      "message": "Argument of type 'import(\"/Users/zxshen/Documents/OSD/OpenSearch-Dashboards/src/plugins/data/public/autocomplete/providers/query_suggestion_provider\").QuerySuggestionTypes | import(\"/Users/zxshen/Documents/OSD/OpenSearch-Dashboards/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind' is not assignable to parameter of type 'string'."
     },
     {
       "file": "src/plugins/data/server/index_patterns/fetcher/lib/opensearch_api.ts",
@@ -9970,151 +9970,102 @@
       "message": "Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?"
     },
     {
-      "file": "src/plugins/workspace/public/components/data_source_association/data_source_association.test.tsx",
-      "line": 41,
-      "column": 7,
-      "code": "TS2554",
-      "message": "Expected 1 arguments, but got 0."
+      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.ts",
+      "line": 118,
+      "column": 69,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'Pick<WorkspacePermissionSetting, \"id\"> & Partial<WorkspacePermissionSetting>'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_creator.test.tsx",
-      "line": 175,
-      "column": 45,
-      "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; }[]; id: string; title: string; description: string; icon: string; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.ts",
+      "line": 119,
+      "column": 70,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'Pick<WorkspacePermissionSetting, \"id\"> & Partial<WorkspacePermissionSetting>'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_creator.tsx",
-      "line": 225,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type '(data: WorkspaceFormSubmitData) => Promise<void>' is not assignable to type '(formData: WorkspaceFormSubmitData, refresh?: boolean | undefined) => Promise<{ result: boolean; success: true; } | undefined>'."
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 79,
+      "column": 27,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'Partial<WorkspacePermissionSetting>'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_creator/workspace_creator_form.test.tsx",
-      "line": 40,
-      "column": 6,
-      "code": "TS2739",
-      "message": "Type '{ isSubmitting: false; application: { capabilities: { dashboards: { isDashboardAdmin: boolean; }; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<...>; workspaces: Readonly<...>; }; ... 11 more ...; setAppBottomControls: ...' is missing the following properties from type 'WorkspaceCreatorFormProps': goToCollaborators, onGoToCollaboratorsChange, onAppLeave"
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 79,
+      "column": 63,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'WorkspacePermissionSetting'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/select_data_source_panel.test.tsx",
-      "line": 74,
-      "column": 59,
-      "code": "TS2345",
-      "message": "Argument of type '{ id: string; title: string; description: string; auth: string; dataSourceEngineType: DataSourceEngineType; workspaces: never[]; }[]' is not assignable to parameter of type '{ id: string; title: any; auth: any; description: any; dataSourceEngineType: any; workspaces: string[]; type: string; connectionType: any; }[] | Promise<{ id: string; title: any; auth: any; description: any; dataSourceEngineType: any; workspaces: string[]; type: string; connectionType: any; }[]>'."
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 82,
+      "column": 27,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'Partial<WorkspacePermissionSetting>'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 29,
-      "column": 5,
-      "code": "TS2739",
-      "message": "Type '{ application: Mocked<ApplicationStart>; defaultValues: WorkspaceFormSubmitData; onSubmit: Mock<any, any>; operationType: WorkspaceOperationType.Create; permissionEnabled: boolean; }' is missing the following properties from type 'WorkspaceFormProps': savedObjects, availableUseCases, onAppLeave"
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 82,
+      "column": 62,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'WorkspacePermissionSetting'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 54,
-      "column": 52,
-      "code": "TS2345",
-      "message": "Argument of type '{ preventDefault: jest.Mock<any, any>; }' is not assignable to parameter of type 'FormEvent<Element>'."
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 125,
+      "column": 73,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'WorkspacePermissionSetting'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 68,
-      "column": 7,
-      "code": "TS2741",
-      "message": "Property 'features' is missing in type '{ name: string; }' but required in type 'WorkspaceFormSubmitData'."
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 127,
+      "column": 57,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'WorkspacePermissionSetting'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 75,
-      "column": 52,
-      "code": "TS2345",
-      "message": "Argument of type '{ preventDefault: jest.Mock<any, any>; }' is not assignable to parameter of type 'FormEvent<Element>'."
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 130,
+      "column": 75,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'WorkspacePermissionSetting'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/use_workspace_form.test.ts",
-      "line": 97,
-      "column": 52,
-      "code": "TS2345",
-      "message": "Argument of type '{ preventDefault: jest.Mock<any, any>; }' is not assignable to parameter of type 'FormEvent<Element>'."
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 132,
+      "column": 58,
+      "code": "TS2339",
+      "message": "Property 'group' does not exist on type 'WorkspacePermissionSetting'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 40,
-      "column": 54,
-      "code": "TS2322",
-      "message": "Type '\"unknown\"' is not assignable to type 'WorkspaceCollaboratorPermissionType'."
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 358,
+      "column": 70,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'Pick<WorkspacePermissionSetting, \"id\"> & Partial<WorkspacePermissionSetting>'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 93,
-      "column": 20,
-      "code": "TS2322",
-      "message": "Type '{ displayedCollaboratorTypes: ({ id: string; name: string; buttonLabel: string; onAdd: () => Promise<void>; getDisplayedType: ({ permissionType }: { permissionType: string; }) => \"User\" | undefined; } | { ...; })[]; permissionSettings: ({ ...; } | ... 1 more ... | { ...; })[]; handleSubmitPermissionSettings: Mock<.....' is not assignable to type 'Props'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 106,
-      "column": 35,
-      "code": "TS2322",
-      "message": "Type '{ displayedCollaboratorTypes: ({ id: string; name: string; buttonLabel: string; onAdd: () => Promise<void>; getDisplayedType: ({ permissionType }: { permissionType: string; }) => \"User\" | undefined; } | { ...; })[]; permissionSettings: ({ ...; } | ... 1 more ... | { ...; })[]; handleSubmitPermissionSettings: Mock<.....' is not assignable to type 'Props'."
+      "file": "src/plugins/workspace/public/components/workspace_form/utils.ts",
+      "line": 374,
+      "column": 72,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'Pick<WorkspacePermissionSetting, \"id\"> & Partial<WorkspacePermissionSetting>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 123,
-      "column": 52,
+      "line": 43,
+      "column": 9,
       "code": "TS2322",
-      "message": "Type '{ id: number; modes: string[]; type: string; userId: string; }[]' is not assignable to type 'PermissionSetting[]'."
+      "message": "Type '\"unknown\"' is not assignable to type 'WorkspacePermissionItemType'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 156,
-      "column": 13,
-      "code": "TS2322",
-      "message": "Type '() => Promise<void>' is not assignable to type '(permissionSettings: WorkspacePermissionSetting[]) => Promise<IWorkspaceResponse<boolean>>'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 157,
-      "column": 13,
-      "code": "TS2322",
-      "message": "Type '{ id: number; modes: string[]; type: string; userId: string; }[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 209,
-      "column": 52,
-      "code": "TS2322",
-      "message": "Type '({ id: number; modes: string[]; type: string; userId: string; group?: undefined; } | { id: number; modes: string[]; type: string; group: string; userId?: undefined; })[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 236,
-      "column": 52,
-      "code": "TS2322",
-      "message": "Type '({ id: number; modes: string[]; type: string; userId: string; group?: undefined; } | { id: number; modes: string[]; type: string; group: string; userId?: undefined; })[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 268,
-      "column": 11,
-      "code": "TS2322",
-      "message": "Type '({ id: number; modes: string[]; type: string; userId: string; group?: undefined; } | { id: number; modes: string[]; type: string; group: string; userId?: undefined; })[]' is not assignable to type 'PermissionSetting[]'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 331,
-      "column": 13,
-      "code": "TS2322",
-      "message": "Type '() => Promise<void>' is not assignable to type '(permissionSettings: WorkspacePermissionSetting[]) => Promise<IWorkspaceResponse<boolean>>'."
-    },
-    {
-      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.test.tsx",
-      "line": 332,
-      "column": 13,
-      "code": "TS2322",
-      "message": "Type '{ id: number; modes: string[]; type: string; userId: string; }[]' is not assignable to type 'PermissionSetting[]'."
+      "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.tsx",
+      "line": 212,
+      "column": 32,
+      "code": "TS2339",
+      "message": "Property 'userId' does not exist on type 'PermissionSetting'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_form/workspace_collaborator_table.tsx",
@@ -10138,18 +10089,11 @@
       "message": "Type '{ workspaces: { workspaceList$: BehaviorSubject<WorkspaceObject[]>; currentWorkspaceId$: BehaviorSubject<string>; currentWorkspace$: BehaviorSubject<...>; initialized$: BehaviorSubject<...>; client$: BehaviorSubject<...>; workspaceError$: BehaviorSubject<...>; }; ... 12 more ...; fatalErrors: jest.Mocked<...>; }' is not assignable to type 'Services'."
     },
     {
-      "file": "src/plugins/workspace/public/components/workspace_list/index.test.tsx",
-      "line": 140,
-      "column": 24,
-      "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; }[]; id: string; title: string; description: string; icon: string; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
-    },
-    {
       "file": "src/plugins/workspace/public/components/workspace_menu/workspace_menu.test.tsx",
       "line": 47,
       "column": 50,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"accessibility\" | \"addDataApp\" | ... 465 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"wsObservability\" | \"wsSecurityAnalytics\" | ... 465 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | unde...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_selector/workspace_selector.test.tsx",
