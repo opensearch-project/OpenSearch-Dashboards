@@ -2,37 +2,158 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import React, { useState } from 'react';
-import { EuiPopover, EuiButtonEmpty, EuiText, EuiIcon } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiText,
+  EuiIcon,
+  EuiPopoverTitle,
+  EuiPopoverFooter,
+  EuiButton,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeaderTitle,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiTextArea,
+  EuiSwitch,
+} from '@elastic/eui';
 
 export const SaveQueryButton: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [queryName, setQueryName] = useState('');
+  const [description, setDescription] = useState('');
+  const [includeFilters, setIncludeFilters] = useState(false);
+  const [includeTimeFilter, setIncludeTimeFilter] = useState(false);
+  const [error, setError] = useState('');
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
+  const openModal = () => {
+    setIsModalOpen(true);
+    closePopover();
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setError(''); // Clear error on modal close
+  };
+
+  const handleSave = () => {
+    if (!queryName.trim()) {
+      setError(
+        'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.'
+      );
+      return;
+    }
+    closeModal();
+  };
+
   return (
-    <EuiPopover
-      button={
-        <EuiButtonEmpty
-          onClick={onButtonClick}
-          iconType="save" // Add the folderOpen icon
-          style={{ color: '#0073e6', padding: '0px' }} // Highlighted text style
-          data-test-subj="saveQueryButton"
-        >
-          Saved Queries
-          <EuiIcon type="arrowDown" style={{ marginLeft: '5px' }} /> {/* Add arrowDown icon */}
-        </EuiButtonEmpty>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      anchorPosition="downCenter"
-    >
-      <div style={{ padding: '10px' }} data-test-subj="saveQueryPopover">
-        <EuiText size="s">
-          <p>Save your query for future use.</p>
-        </EuiText>
-      </div>
-    </EuiPopover>
+    <>
+      <EuiPopover
+        button={
+          <EuiButtonEmpty
+            onClick={onButtonClick}
+            iconType="save"
+            style={{ color: '#0073e6', padding: '0px' }}
+            data-test-subj="saveQueryButton"
+          >
+            Saved Queries
+            <EuiIcon type="arrowDown" style={{ marginLeft: '5px' }} />
+          </EuiButtonEmpty>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        anchorPosition="downCenter"
+      >
+        <EuiPopoverTitle>SAVED QUERIES</EuiPopoverTitle>
+        <div style={{ padding: '10px' }} data-test-subj="saveQueryPopoverBody">
+          <EuiText size="s" style={{ color: '#676E75' }}>
+            <p>
+              There are no saved queries. Save query text and filters that you want to use again.
+            </p>
+          </EuiText>
+        </div>
+        <EuiPopoverFooter>
+          <div style={{ textAlign: 'right' }}>
+            <EuiButton size="s" onClick={openModal} fill>
+              Save current query
+            </EuiButton>
+          </div>
+        </EuiPopoverFooter>
+      </EuiPopover>
+
+      {isModalOpen && (
+        <EuiModal onClose={closeModal} style={{ width: '500px' }}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Save query</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText size="s" style={{ marginBottom: '15px', color: '#676E75' }}>
+              <p>
+                There are no saved queries. Save query text and filters that you want to use again.
+              </p>
+            </EuiText>
+            <EuiForm>
+              {/* Name Field */}
+              <EuiFormRow label="Name" isInvalid={!!error} error={error}>
+                <EuiFieldText
+                  placeholder="Enter query name"
+                  value={queryName}
+                  onChange={(e) => setQueryName(e.target.value)}
+                  isInvalid={!!error}
+                />
+              </EuiFormRow>
+              <EuiText size="s" style={{ margin: '15px 0', color: '#676E75' }}>
+                <p>
+                  There are no saved queries. Save query text and filters that you want to use
+                  again.
+                </p>
+              </EuiText>
+
+              <EuiFormRow label="Description">
+                <EuiTextArea
+                  placeholder="Enter query description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </EuiFormRow>
+
+              <EuiFormRow>
+                <EuiSwitch
+                  label="Include filters"
+                  checked={includeFilters}
+                  onChange={(e) => setIncludeFilters(e.target.checked)}
+                />
+              </EuiFormRow>
+
+              <EuiFormRow>
+                <EuiSwitch
+                  label="Include time filter"
+                  checked={includeTimeFilter}
+                  onChange={(e) => setIncludeTimeFilter(e.target.checked)}
+                />
+              </EuiFormRow>
+            </EuiForm>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={closeModal} color="text">
+              Cancel
+            </EuiButton>
+            <EuiButton onClick={handleSave} fill>
+              Save
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+    </>
   );
 };

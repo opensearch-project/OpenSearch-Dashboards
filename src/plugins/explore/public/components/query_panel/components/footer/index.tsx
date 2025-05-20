@@ -13,6 +13,7 @@ import { DateTimeRangePicker } from './date_time_selector';
 import { RunQueryButton } from './run_query';
 import { ShowInputType } from './show_input_type';
 import { LanguageType } from '../editor_stack/shared';
+import { ErrorDisplay } from './error_display';
 
 interface QueryEditorFooterProps {
   languageType: LanguageType;
@@ -52,6 +53,12 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               <SaveQueryButton />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <EuiHorizontalRule margin="xs" className="vertical-separator" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ErrorDisplay errorDetails="error Details" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ marginLeft: '10px' }}>
               <ShowInputType languageType={languageType} isDualEditor={isDualEditor} />
             </EuiFlexItem>
           </EuiFlexGroup>
