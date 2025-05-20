@@ -72,6 +72,7 @@ function mockConfig() {
     displayName: 'defaultName',
     requiresPageReload: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ariaName: 'ariaName',
     readOnly: false,
     isCustom: false,
@@ -304,6 +305,33 @@ describe('AdvancedSettings', () => {
         .filterWhere(
           (n: ReactWrapper) =>
             (n.prop('setting') as Record<string, string>).name === 'test:string:setting'
+        )
+        .prop('enableSaving')
+    ).toBe(false);
+  });
+
+  it('should render read-only when the setting is permission controlled', async () => {
+    const component = mountWithI18nProvider(
+      <AdvancedSettingsComponent
+        queryText="test:isPermissionControlled:string"
+        enableSaving={false}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
+        uiSettings={mockConfig().core.uiSettings}
+        componentRegistry={new ComponentRegistry().start}
+        useUpdatedUX={false}
+        navigationUI={navigationUI}
+        application={applicationMock}
+      />
+    );
+
+    expect(
+      component
+        .find('Field')
+        .filterWhere(
+          (n: ReactWrapper) =>
+            (n.prop('setting') as Record<string, string>).name ===
+            'test:isPermissionControlled:string'
         )
         .prop('enableSaving')
     ).toBe(false);

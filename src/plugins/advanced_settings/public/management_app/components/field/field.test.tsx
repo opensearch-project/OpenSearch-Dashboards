@@ -71,6 +71,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: ['default_value'],
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   boolean: {
@@ -83,6 +84,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: true,
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   image: {
@@ -95,6 +97,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: null,
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     validation: {
       maxSize: {
         length: 1000,
@@ -113,6 +116,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: '{}',
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   markdown: {
@@ -125,6 +129,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: '',
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   number: {
@@ -137,6 +142,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: 5,
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   select: {
@@ -148,6 +154,7 @@ const settings: Record<string, FieldSetting> = {
     value: undefined,
     defVal: 'orange',
     isCustom: false,
+    isPermissionControlled: false,
     isOverridden: false,
     options: ['apple', 'orange', 'banana'],
     optionLabels: {
@@ -167,6 +174,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: null,
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   stringWithValidation: {
@@ -183,6 +191,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: 'foo-default',
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
 };
@@ -241,6 +250,25 @@ describe('Field', () => {
               // @ts-ignore
               value: userValues[type],
               isOverridden: true,
+            }}
+            handleChange={handleChange}
+            enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
+          />
+        );
+
+        expect(component).toMatchSnapshot();
+      });
+
+      it('should render as read only with help text if permission controlled', async () => {
+        const component = shallowWithI18nProvider(
+          <Field
+            setting={{
+              ...setting,
+              // @ts-ignore
+              value: userValues[type],
+              isPermissionControlled: true,
             }}
             handleChange={handleChange}
             enableSaving={true}

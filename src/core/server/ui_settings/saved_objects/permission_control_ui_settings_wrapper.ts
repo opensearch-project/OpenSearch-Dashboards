@@ -17,7 +17,7 @@ import {
   SavedObjectsUpdateOptions,
 } from 'opensearch-dashboards/server';
 import { getWorkspaceState } from 'opensearch-dashboards/server/utils';
-import { uiSettingWithPermission } from './ui_settings_permissions';
+import { adminUiSettings } from './admin_ui_settings';
 
 const DASHBOARD_ADMIN_SETTINGS_ID = '_dashboard_admin';
 
@@ -201,9 +201,8 @@ export class PermissionControlUiSettingsWrapper {
     const regularAttributes: AttributesObject = {};
 
     Object.entries(attributes).forEach(([key, value]) => {
-      if (key in uiSettingWithPermission) {
-        // TODO: check if this manual set back to default is necessary
-        permissionAttributes[key] = value !== null ? value : uiSettingWithPermission[key].value;
+      if (key in adminUiSettings) {
+        permissionAttributes[key] = value;
       } else {
         regularAttributes[key] = value;
       }
@@ -216,9 +215,9 @@ export class PermissionControlUiSettingsWrapper {
     options: SavedObjectsBaseOptions,
     wrapperOptions: SavedObjectsClientWrapperOptions
   ): Promise<SavedObject<AttributesObject>> {
-    // Verify that attributes only contains keys from uiSettingWithPermission
+    // Verify that attributes only contains keys from adminUiSettings
     const invalidKeys = Object.keys(attributes).filter(
-      (key) => !uiSettingWithPermission.hasOwnProperty(key)
+      (key) => !adminUiSettings.hasOwnProperty(key)
     );
     if (invalidKeys.length > 0) {
       throw new Error(`Invalid admin settings keys: ${invalidKeys.join(', ')}.`);

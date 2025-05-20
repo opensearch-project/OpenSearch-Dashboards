@@ -29,7 +29,7 @@
  */
 
 import { combineLatest, Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { firstValueFrom, mapToObject } from '@osd/std';
 
 import { CoreService } from '../../types';
@@ -49,7 +49,7 @@ import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { PermissionControlUiSettingsWrapper } from './saved_objects/permission_control_ui_settings_wrapper';
-import { uiSettingWithPermission } from './saved_objects/ui_settings_permissions';
+import { adminUiSettings } from './saved_objects/admin_ui_settings';
 import { savedObjectsConfig, SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 
 export interface SetupDeps {
@@ -101,11 +101,11 @@ export class UiSettingsService
 
     savedObjects.addClientWrapper(
       100,
-      'permission-controll-ui-settings',
+      'permission-control-ui-settings',
       this.permissionControlUiSettingsWrapper.wrapperFactory
     );
 
-    this.register(uiSettingWithPermission);
+    this.register(adminUiSettings);
 
     return {
       register: this.register.bind(this),

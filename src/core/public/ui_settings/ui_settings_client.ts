@@ -32,12 +32,7 @@ import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import {
-  UserProvidedValues,
-  PublicUiSettingsParams,
-  UiSettingsType,
-  UiSettingScope,
-} from '../../../core/server/types';
+import { UserProvidedValues, PublicUiSettingsParams, UiSettingsType } from 'src/core/server/types';
 import { IUiSettingsClient, UiSettingsState } from './types';
 
 import { UiSettingsApi } from './ui_settings_api';
@@ -190,13 +185,6 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
   isOverridden(key: string) {
     return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
-  }
-
-  isPermissionControlled(key: string, isDashboardAdmin: boolean) {
-    return (
-      this.isDeclared(key) &&
-      Boolean(this.cache[key].scope === UiSettingScope.DASHBOARD_ADMIN && !isDashboardAdmin)
-    );
   }
 
   overrideLocalDefault(key: string, newDefault: any) {

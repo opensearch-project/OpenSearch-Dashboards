@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { schema } from '@osd/config-schema';
+
 export const MockUiSettingsClientConstructor = jest.fn();
 jest.doMock('./ui_settings_client', () => ({
   UiSettingsClient: MockUiSettingsClientConstructor,
@@ -36,4 +38,18 @@ jest.doMock('./ui_settings_client', () => ({
 export const getCoreSettingsMock = jest.fn();
 jest.doMock('./settings', () => ({
   getCoreSettings: getCoreSettingsMock,
+}));
+
+export const adminUiSettingsMock = {
+  adminFoo: {
+    name: 'adminFoo',
+    value: 'adminBar',
+    category: [],
+    description: '',
+    schema: schema.string(),
+  },
+};
+
+jest.doMock('./saved_objects/admin_ui_settings', () => ({
+  adminUiSettings: adminUiSettingsMock,
 }));

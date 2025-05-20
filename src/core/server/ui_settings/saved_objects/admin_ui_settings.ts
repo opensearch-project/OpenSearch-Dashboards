@@ -8,9 +8,9 @@ import { UiSettingScope, UiSettingsParams } from '../types';
 
 const ENABLE_DASHBOARD_ASSISTANT_FEATURE = 'enableDashboardAssistantFeature';
 
-export const uiSettingWithPermission: Record<string, UiSettingsParams> = {
+export const adminUiSettings: Record<string, UiSettingsParams> = {
   [ENABLE_DASHBOARD_ASSISTANT_FEATURE]: {
-    name: 'Enable dashboard assistant plugin features',
+    name: 'Enable dashboard assistant',
     value: true,
     description: 'Enable dashboard assistant plugin features',
     scope: UiSettingScope.DASHBOARD_ADMIN,
