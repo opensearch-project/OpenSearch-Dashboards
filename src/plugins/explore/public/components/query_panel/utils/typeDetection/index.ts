@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { KnownFields } from './constants';
+// import { KnownFields } from './constants';
 import { LanguageType } from '../../components/editor_stack/shared';
 
 export interface DetectionResult {
@@ -20,18 +20,20 @@ interface ScoreResult {
 }
 
 export class QueryTypeDetector {
-  private knownFields: Set<string>;
   private pplStartPatterns: RegExp[];
   private pplPipePatterns: RegExp[];
   private kvPatterns: RegExp[];
   private nlStarters: RegExp[];
 
   constructor() {
-    this.knownFields = new Set(KnownFields.map((f) => f.toLowerCase()));
-
     this.pplStartPatterns = [/^\s*source\s*=/i, /^\s*from\s+\w+/i, /^\s*search\s+index\s*=/i];
     this.pplPipePatterns = [/\|\s*(where|filter|fields|sort|limit|stats|rename|eval)\b/i];
-    this.kvPatterns = [/(\w+)\s*=\s*("[^"]+"|'[^']+'|\S+)/g, /\b(and|or)\b/i];
+    this.kvPatterns = [
+      /^\s*source\s*=/i, // Starts with source=
+      /(\w+)\s*=\s*(['"])[^'"]*\2/g, // key="value" or key='value'
+      /(\w+)\s*=\s*\S+/g, // key=value (non-quoted)
+      /\b(and|or)\b/i, // Boolean ops
+    ];
     this.nlStarters = [
       /^\s*(show|list|get|find|search|display|give|retrieve|fetch|tell)\b/i,
       /^\s*(what|how|when|where|why|which|who)\b/i,
@@ -102,32 +104,27 @@ export class QueryTypeDetector {
     const reasons: string[] = [];
     const warnings: string[] = [];
 
-    const kvMatches = [...query.matchAll(this.kvPatterns[0])];
-    const booleanOps = this.kvPatterns[1].test(query);
+    const kvPattern = /(\w+)\s*=\s*"[^"]*"/g;
+    const kvMatches = [...query.matchAll(kvPattern)];
+    const booleanOps = /\b(and|or)\b/i.test(query);
 
     if (kvMatches.length > 0) {
-      score += 0.3 + (kvMatches.length - 1) * 0.1;
-      reasons.push(`Found ${kvMatches.length} key=value pairs`);
-
-      const knownMatches = kvMatches.filter((match) => {
-        const key = match[1];
-        return this.knownFields.has(key.toLowerCase());
-      });
-
-      if (knownMatches.length > 0) {
-        score += 0.1;
-        reasons.push('Matched known field(s): ' + knownMatches.map((m) => m[1]).join(', '));
-      }
+      score += 0.4 + (kvMatches.length - 1) * 0.1;
+      reasons.push(`Detected ${kvMatches.length} key="value" pair(s)`);
     }
 
     if (booleanOps) {
-      score += 0.1;
-      reasons.push('Uses boolean operators (and/or)');
+      score += 0.2;
+      reasons.push('Contains boolean operators (and/or)');
     }
 
-    if (/\b(show|list|get)\b/i.test(query)) {
-      score -= 0.1;
-      warnings.push('May be mixed with natural language');
+    if (/^\s*\w+\s*=\s*".+?"/.test(query)) {
+      score += 0.2;
+      reasons.push('Query starts with key="value" pattern');
+    }
+
+    if (/\|/.test(query)) {
+      warnings.push('Pipe character found; possibly mixed with PPL');
     }
 
     return { score, reason: reasons.join('; '), warnings };
