@@ -34,7 +34,16 @@ const emptyStateIdentifier = '[data-test-subj="datasourceTableEmptyState"]';
 describe('DataSourceTable', () => {
   const mockedContext = {
     ...mockManagementPlugin.createDataSourceManagementContext(),
-    application: { capabilities: { dataSource: { canManage: true } } },
+    application: {
+      capabilities: {
+        dataSource: {
+          canManage: true,
+        },
+        dashboards: {
+          isDashboardAdmin: false,
+        },
+      },
+    },
   };
   const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -315,7 +324,8 @@ describe('DataSourceTable', () => {
       });
       // Mock that the current user is dashboard admin
       mockedContext.application.capabilities = {
-        dataSource: { canManage: true },
+        dataSource: { canManage: false },
+        dashboards: { isDashboardAdmin: true },
       };
 
       await act(async () => {
@@ -360,7 +370,7 @@ describe('DataSourceTable', () => {
       // Mock that the current user is not dashboard admin
       mockedContext.application.capabilities = {
         ...capabilities,
-        dataSource: { canManage: false },
+        dashboards: { isDashboardAdmin: false },
       };
 
       await act(async () => {

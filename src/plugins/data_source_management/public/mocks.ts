@@ -106,6 +106,7 @@ export const getDataSource = [
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,
+      dataSourceVersion: packageInfo.version,
     },
   },
   {
@@ -117,6 +118,7 @@ export const getDataSource = [
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,
+      dataSourceVersion: packageInfo.version,
     },
   },
   {
@@ -128,6 +130,7 @@ export const getDataSource = [
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,
+      dataSourceVersion: packageInfo.version,
     },
   },
 ];
