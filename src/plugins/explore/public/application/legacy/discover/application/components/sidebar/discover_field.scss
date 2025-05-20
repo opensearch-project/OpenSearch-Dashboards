@@ -1,0 +1,32 @@
+.dscSidebarItem__fieldPopoverPanel {
+  min-width: 260px;
+  max-width: 300px;
+}
+
+.dscSidebarField {
+  &__actionButton {
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast;
+
+    @include ouiBreakpoint("xs", "s", "m") {
+      opacity: 1;
+    }
+  }
+
+  &:hover &__actionButton,
+  &:focus &__actionButton,
+  .dscSidebarField__actionButton:focus {
+    opacity: 1;
+  }
+}
+
+.osdDiscoverSideBar__wrap {
+  max-width: 100%;
+  z-index: $euiZContentMenu;
+}
+
+.toggleFieldFilterButton {
+  span:is([class$="__textShift"]) {
+    min-width: 0;
+  }
+}
