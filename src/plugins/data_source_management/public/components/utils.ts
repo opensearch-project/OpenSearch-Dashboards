@@ -352,7 +352,7 @@ export async function getDefaultDataSourceId(
     );
     return result;
   }
-  return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID);
+  return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
 }
 
 export function getDefaultDataSourceId$(uiSettings?: IUiSettingsClient) {
