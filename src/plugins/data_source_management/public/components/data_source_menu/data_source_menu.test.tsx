@@ -12,10 +12,13 @@ import { render } from '@testing-library/react';
 import { DataSourceComponentType } from './types';
 import * as utils from '../utils';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
+import { mockManagementPlugin } from '../../mocks';
+
+const onManageDataSourceMock = jest.fn();
 
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-
+  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
@@ -26,6 +29,9 @@ describe('DataSourceMenu', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    mockedContext.workspaces.currentWorkspaceId$.getValue = jest
+      .fn()
+      .mockReturnValue('mock-workspace-id');
   });
 
   it('should render data source selectable only with local cluster not hidden', () => {
@@ -38,6 +44,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -54,6 +61,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -68,6 +76,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -81,6 +90,7 @@ describe('DataSourceMenu', () => {
           fullWidth: true,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -96,6 +106,7 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test', label: 'test-label' }],
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -111,6 +122,7 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test' }],
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -127,6 +139,7 @@ describe('DataSourceMenu', () => {
           notifications,
           displayAllCompatibleDataSources: true,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(container).toMatchSnapshot();
@@ -135,12 +148,13 @@ describe('DataSourceMenu', () => {
   it('should render nothing', () => {
     const container = render(
       <DataSourceMenu
-        componentType={''}
+        componentType={'' as DataSourceComponentType}
         componentConfig={{
           fullWidth: true,
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(container).toMatchSnapshot();
@@ -155,6 +169,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
       />
     );
     expect(container).toMatchSnapshot();
