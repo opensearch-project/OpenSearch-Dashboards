@@ -49,33 +49,33 @@ describe('DataSourceTable', () => {
   const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
-  // describe('should get datasources failed', () => {
-  //   beforeEach(async () => {
-  //     spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
-  //     await act(async () => {
-  //       component = await mount(
-  //         wrapWithIntl(
-  //           <DataSourceTable
-  //             history={history}
-  //             location={({} as unknown) as RouteComponentProps['location']}
-  //             match={({} as unknown) as RouteComponentProps['match']}
-  //           />
-  //         ),
-  //         {
-  //           wrappingComponent: OpenSearchDashboardsContextProvider,
-  //           wrappingComponentProps: {
-  //             services: mockedContext,
-  //           },
-  //         }
-  //       );
-  //     });
-  //     component.update();
-  //   });
-  //   test('should render empty table', () => {
-  //     expect(component).toMatchSnapshot();
-  //     expect(component.find(emptyStateIdentifier).exists()).toBe(true);
-  //   });
-  // });
+  describe('should get datasources failed', () => {
+    beforeEach(async () => {
+      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
+      await act(async () => {
+        component = await mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+    });
+    test('should render empty table', () => {
+      expect(component).toMatchSnapshot();
+      expect(component.find(emptyStateIdentifier).exists()).toBe(true);
+    });
+  });
 
   describe('should get datasources successful', () => {
     beforeEach(async () => {
