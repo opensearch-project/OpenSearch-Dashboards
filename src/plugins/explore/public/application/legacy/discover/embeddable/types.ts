@@ -35,8 +35,8 @@ import {
   IEmbeddable,
 } from '../../../../../../embeddable/public';
 import { Filter, IIndexPattern, TimeRange, Query } from '../../../../../../data/public';
-import { SortOrder } from '../saved_searches/types';
-import { SavedSearch } from '../saved_searches';
+import { SortOrder } from '../../../../saved_explore/types';
+import { SavedExplore } from '../../../../saved_explore';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -54,7 +54,7 @@ export interface SearchOutput extends EmbeddableOutput {
 }
 
 export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
-  getSavedSearch(): SavedSearch;
+  getSavedSearch(): SavedExplore;
 }
 
 export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {

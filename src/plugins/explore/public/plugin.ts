@@ -71,6 +71,7 @@ export class ExplorePlugin
       ExploreSetupDependencies,
       ExploreStartDependencies
     > {
+  // @ts-ignore
   private config: ConfigSchema;
   /** data_explorer */
   private viewService = new ViewService();

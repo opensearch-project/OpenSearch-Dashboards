@@ -30,7 +30,7 @@ import {
   createHistogramConfigs,
   getDimensions,
 } from '../../components/chart/utils';
-import { SavedSearch } from '../../../saved_searches';
+import { SavedExplore } from '../../../../../../saved_explore';
 import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../../../../common/legacy/discover';
 import { trackQueryMetric } from '../../../ui_metric';
@@ -118,7 +118,7 @@ export type RefetchSubject = Subject<SearchRefetch>;
 export const useSearch = (services: DiscoverViewServices) => {
   const { pathname } = useLocation();
   const initalSearchComplete = useRef(false);
-  const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
+  const [savedSearch, setSavedSearch] = useState<SavedExplore | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval, savedQuery } = useSelector(
     (state) => state.logs
   );

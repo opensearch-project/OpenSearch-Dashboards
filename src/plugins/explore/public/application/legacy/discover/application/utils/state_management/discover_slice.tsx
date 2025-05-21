@@ -11,10 +11,9 @@ import { DiscoverServices } from '../../../build_services';
 import { DefaultViewState } from '../../../../data_explorer';
 import { buildColumns } from '../columns';
 import * as utils from './common';
-import { SortOrder } from '../../../saved_searches/types';
+import { SortOrder } from '../../../../../../saved_explore/types';
 import {
   DEFAULT_COLUMNS_SETTING,
-  PLUGIN_ID,
   QUERY_ENHANCEMENT_ENABLED_SETTING,
 } from '../../../../../../../common/legacy/discover';
 
