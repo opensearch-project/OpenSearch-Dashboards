@@ -5,3 +5,4 @@
 
 export * from './base_action';
 export * from './base_selector';
+export * from './state_adapter';

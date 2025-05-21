@@ -9,10 +9,11 @@ import {
   StateManagementExamplePluginStart,
   AppPluginStartDependencies,
 } from './types';
-import { COUNTER_SERVICE_PLUGIN_KEY, PLUGIN_NAME } from '../common';
-import { CounterService } from './counter_service';
+import { COUNTER_SERVICE_PLUGIN_KEY, REDUX_COUNTER_KEY, PLUGIN_NAME } from '../common';
+import { ObservableBasedCounterService } from './observable_counter_service';
 import { globalStoreServiceRegister } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import { ReduxBasedCounterService } from './redux_counter_service';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -22,13 +23,23 @@ export class StateManagementExamplePlugin
   implements Plugin<StateManagementExamplePluginSetup, StateManagementExamplePluginStart> {
   public setup(core: CoreSetup, { developerExamples }: SetupDeps) {
     // Register an application into the side navigation menu
-    const counterService = new CounterService();
-    const counterServiceStart = counterService.start();
+    // Initialize Observable-based counter (original approach)
+    const observableCounterService = new ObservableBasedCounterService();
+    const observableCounterServiceStart = observableCounterService.start();
 
     globalStoreServiceRegister(
       COUNTER_SERVICE_PLUGIN_KEY,
-      counterServiceStart.selectors,
-      counterServiceStart.actions
+      observableCounterServiceStart.selectors,
+      observableCounterServiceStart.actions
+    );
+
+    const reduxCounterService = new ReduxBasedCounterService();
+    const reduxCounterServiceStart = reduxCounterService.start();
+
+    globalStoreServiceRegister(
+      REDUX_COUNTER_KEY,
+      reduxCounterServiceStart.selectors,
+      reduxCounterServiceStart.actions
     );
 
     core.application.register({

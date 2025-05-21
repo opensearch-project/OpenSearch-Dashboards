@@ -19,8 +19,6 @@ interface PluginStoreProviderProps {
 
 /**
  * @experimental
- */
-/**
  * React context provider for the plugin state Store.
  *
  * Wrap your application (or subtree) with this provider to make the Store instance
@@ -42,6 +40,7 @@ export const PluginStoreProvider = ({ children, store }: PluginStoreProviderProp
 };
 
 /**
+ * @experimental
  * React hook to access the current Store instance from context.
  *
  * Must be used within a PluginStoreProvider. Throws an error if used outside.

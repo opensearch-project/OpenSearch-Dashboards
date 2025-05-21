@@ -5,11 +5,8 @@
 
 import { useStore } from '../context';
 import { BaseActions } from '../../../../opensearch_dashboards_utils/public';
-
 /**
  * @experimental
- */
-/**
  * React hook to access actions for a specific plugin from the central state store.
  *
  * @param pluginKey - The unique key for the plugin whose actions you want to access.

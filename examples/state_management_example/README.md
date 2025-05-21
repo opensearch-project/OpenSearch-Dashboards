@@ -1,149 +1,160 @@
 # State Management Example Plugin
 
-This plugin demonstrates the usage of state management utilities in OpenSearch Dashboards, including `BaseActions`, `BaseSelectors`, `usePluginKeys`, `useSelector`, and `useActions`.
+This plugin demonstrates the flexible state management system in OpenSearch Dashboards that supports both Observable-based and Redux-based state backends with a consistent API.
 
 ## Overview
 
-The `state_management_example` plugin showcases how to manage state effectively using:
+The state management system provides:
 
-- **BaseActions**: Encapsulates state-changing logic.
-- **BaseSelectors**: Provides read-only access to specific parts of the state.
-- **usePluginKeys**: Retrieves all registered plugin keys.
-- **useSelector**: Subscribes to specific parts of the state.
-- **useActions**: Accesses actions for a specific plugin.
+- Support for multiple state backends (Observable/Redux)
+- Type-safe state management
+- Efficient component re-rendering
+- Consistent API through hooks
 
-## Utilities Used
+## Core Components
 
-### 1. BaseActions
+### StateAdapter
 
-`BaseActions` is used to encapsulate state-changing logic. In this example, `CounterActions` extends `BaseActions` to provide methods for incrementing, decrementing, and resetting the counter.
+The adapter pattern provides a unified interface for different state backends:
 
-#### Example:
 ```typescript
-import { BehaviorSubject } from 'rxjs';
-import { BaseActions } from '../../../../src/plugins/opensearch_dashboards_utils/public';
-import { CounterState } from './counter_state';
+// For RxJS Observables
+const observableAdapter = new BehaviorSubjectAdapter(subject);
 
-export class CounterActions extends BaseActions<CounterState> {
-  constructor(state$: BehaviorSubject<CounterState>) {
-    super(state$);
+// For Redux stores
+const reduxAdapter = new ReduxStateAdapter(store, state => state.mySlice);
+```
+
+### BaseActions
+
+Define state-changing logic that works with any state backend:
+
+```typescript
+class CounterActions extends BaseActions<CounterState> {
+  // Works with both Observable and Redux backends
+  constructor(adapterOrObservable: StateAdapter<CounterState> | ObservableLike<CounterState>) {
+    super(adapterOrObservable);
   }
 
-  public increment(): void {
-    this.updateState((state) => ({
+  increment() {
+    this.updateState(state => ({
       ...state,
-      count: state.count + 1,
-    }));
-  }
-
-  public decrement(): void {
-    this.updateState((state) => ({
-      ...state,
-      count: state.count - 1,
-    }));
-  }
-
-  public reset(): void {
-    this.updateState((state) => ({
-      ...state,
-      count: 0,
+      count: state.count + 1
     }));
   }
 }
 ```
 
-### 2. BaseSelectors
+### BaseSelectors
 
-`BaseSelectors` provides read-only access to specific parts of the state. It ensures that components only re-render when the selected state changes.
+Access state in a read-only manner:
 
-#### Example:
 ```typescript
-import { BaseSelectors } from '../../../../src/plugins/opensearch_dashboards_utils/public';
-import { CounterState } from './counter_state';
-
-export class CounterSelectors extends BaseSelectors<CounterState> {
-  public getCount(): number {
-    return this.getState().count;
+class CounterSelectors extends BaseSelectors<CounterState> {
+  // Works with both Observable and Redux backends
+  constructor(adapterOrObservable: StateAdapter<CounterState> | ObservableLike<CounterState>) {
+    super(adapterOrObservable);
+  }
+  
+  // The base class provides getState() by default
+  isPositive() {
+    return this.getState().count > 0;
   }
 }
 ```
 
-### 3. usePluginKeys
+## React Hooks
 
-`usePluginKeys` retrieves all registered plugin keys. This is useful for dynamically listing available plugins.
+### useAction
 
-#### Example:
+Access actions from a registered service:
+
 ```typescript
-import { usePluginKeys } from '../../../../src/plugins/opensearch_dashboards_react/public';
-
-const PluginList = () => {
-  const pluginKeys = usePluginKeys();
-
-  return (
-    <ul>
-      {pluginKeys.map((key) => (
-        <li key={key}>{key}</li>
-      ))}
-    </ul>
-  );
-};
+// In a React component
+const actions = useAction<CounterState>('counterService');
+// Then use actions
+<button onClick={() => actions.increment()}>+</button>
 ```
 
-### 4. useSelector
+### useSelector
 
-`useSelector` subscribes to specific parts of the state and re-renders the component only when the selected state changes.
+Subscribe to state changes:
 
-#### Example:
 ```typescript
-import { useSelector } from '../../../../src/plugins/opensearch_dashboards_react/public';
-
-const CounterDisplay = () => {
-  const count = useSelector('counterPlugin', (state) => state.count);
-
-  return <div>Count: {count}</div>;
-};
+// Only re-renders when the selected value changes
+const count = useSelector<CounterState, number>(
+  'counterService',
+  state => state.count
+);
 ```
 
-### 5. useActions
+## Example Implementations
 
-`useActions` provides access to actions for a specific plugin.
+### Observable-Based Counter
 
-#### Example:
 ```typescript
-import { useActions } from '../../../../src/plugins/opensearch_dashboards_react/public';
+// Create with Observable pattern
+const state$ = new BehaviorSubject<CounterState>({ count: 0 });
+const actions = new CounterActions(state$);
+const selectors = new CounterSelectors(state$);
 
-const CounterControls = () => {
-  const actions = useActions('counterPlugin');
+// Register with global store
+globalStoreServiceRegister('observableCounter', selectors, actions);
+```
 
+### Redux-Based Counter
+
+```typescript
+// Create with Redux pattern
+const store = configureStore({
+  reducer: { counter: counterReducer }
+});
+const adapter = new ReduxStateAdapter<CounterState>(store, state => state.counter);
+const actions = new CounterActions(adapter);
+const selectors = new CounterSelectors(adapter);
+
+// Register with global store
+globalStoreServiceRegister('reduxCounter', selectors, actions);
+```
+
+### Component Usage
+
+```tsx
+// The same component works with both backends
+function CounterDisplay({ serviceKey }) {
+  const count = useSelector(serviceKey, state => state.count);
+  const actions = useAction(serviceKey);
+  
   return (
     <div>
-      <button onClick={actions.increment}>Increment</button>
-      <button onClick={actions.decrement}>Decrement</button>
-      <button onClick={actions.reset}>Reset</button>
+      <p>Count: {count}</p>
+      <button onClick={() => actions.increment()}>Increment</button>
     </div>
   );
-};
+}
+
+// Use it with either backend
+<CounterDisplay serviceKey="observableCounter" />
+<CounterDisplay serviceKey="reduxCounter" />
 ```
 
-## Plugin Structure
+## Key Benefits
 
-The plugin is structured as follows:
-
-- **State**: Defines the state shape and initial values.
-- **Actions**: Encapsulates state-changing logic.
-- **Selectors**: Provides read-only access to state.
-- **Components**: Demonstrates how to use hooks like `useSelector` and `useActions`.
+1. **Backend Flexibility**: Choose the state management pattern that best fits your needs
+2. **Consistent API**: Components use the same hooks regardless of backend
+3. **Easy Migration**: Switch backends without changing component code
+4. **Type Safety**: Full TypeScript support throughout
 
 ## Running the Example
 
-1. Start OpenSearch Dashboards with the `--run-examples` flag:
+1. Start OpenSearch Dashboards with the development flag:
    ```bash
    yarn start --run-examples
    ```
-2. Navigate to the `State Management Example` plugin in the UI.
+2. Navigate to the State Management Example plugin in the UI
 
 ## Learn More
 
-- [useSelector Documentation](../../docs/state_containers/react/use_selector.md)
-- [BaseActions Documentation](../../docs/state_containers/base_actions.md)
-- [BaseSelectors Documentation](../../docs/state_containers/base_selectors.md)
+- [BaseActions Documentation](../../src/plugins/opensearch_dashboards_utils/common/state_management/base_action.ts)
+- [BaseSelectors Documentation](../../src/plugins/opensearch_dashboards_utils/common/state_management/base_selector.ts)
+- [State Adapters Documentation](../../src/plugins/opensearch_dashboards_utils/common/state_management/state_adapter.ts)

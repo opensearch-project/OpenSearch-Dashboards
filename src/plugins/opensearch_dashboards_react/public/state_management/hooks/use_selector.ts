@@ -3,13 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
 import { useSyncExternalStore } from 'use-sync-external-store/shim';
 import { useStore } from '../context';
 /**
  * @experimental
- */
-/**
  * React hook to select and subscribe to a portion of a plugin's state.
  *
  * @param pluginKey - The unique key for the plugin whose state you want to select from.
@@ -32,15 +29,12 @@ export function useSelector<TState, TResult>(
 
   const selector = store.getSelector(pluginKey);
 
-  // Memoize selector function to prevent unnecessary re-renders
-  const select = useMemo(() => (state: TState) => selectorFn(state), [selectorFn]);
-
   return useSyncExternalStore(
     // Subscribe function
     (onStoreChange) => selector?.subscribe(onStoreChange) ?? (() => {}),
     // GetSnapshot function
-    () => (selector ? select(selector.getState()) : undefined),
+    () => (selector ? selectorFn(selector.getState()) : undefined),
     // Optional getServerSnapshot for SSR - use same as client snapshot
-    () => (selector ? select(selector.getState()) : undefined)
+    () => (selector ? selectorFn(selector.getState()) : undefined)
   );
 }

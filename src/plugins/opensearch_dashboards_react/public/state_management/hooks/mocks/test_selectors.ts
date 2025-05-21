@@ -8,22 +8,9 @@ import { TestState } from './test_state';
 import { BaseSelectors } from '../../../../../opensearch_dashboards_utils/public';
 
 export class TestSelectors extends BaseSelectors<TestState> {
-  private state$: BehaviorSubject<TestState>;
-
   constructor(state$: BehaviorSubject<TestState>) {
-    super();
-    this.state$ = state$;
-
-    // Subscribe to state changes and emit change notifications immediately
-    this.state$.subscribe({
-      next: () => {
-        // Emit change to notify all subscribers
-        this.emitChange();
-      },
-    });
+    super(state$);
   }
 
-  public getState(): TestState {
-    return this.state$.getValue();
-  }
+  // BaseSelectors now implements getState() for us using the stateAdapter
 }

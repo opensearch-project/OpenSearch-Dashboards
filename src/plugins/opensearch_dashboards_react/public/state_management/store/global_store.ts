@@ -7,16 +7,12 @@ import { Store } from './action_selector_store';
 
 /**
  * @experimental
- */
-/**
  * Provides the global store that we can use to register the selector and action
  */
 export const globalStore = new Store();
 
 /**
  * @experimental
- */
-/**
  * Utility function to register a service in the global store.
  * @param pluginKey - The unique key for the plugin.
  * @param selector - The selector instance for the plugin.

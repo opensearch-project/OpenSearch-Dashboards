@@ -4,17 +4,26 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { StateAdapter, BehaviorSubjectAdapter, isStateAdapter } from './state_adapter';
 
+/*
+ * @experimental
+ */
 export abstract class BaseActions<T> {
-  protected state$: BehaviorSubject<T>;
+  protected stateAdapter: StateAdapter<T>;
+  protected state$?: BehaviorSubject<T>; // Keep for backward compatibility
 
-  constructor(state$: BehaviorSubject<T>) {
-    this.state$ = state$;
+  constructor(adapterOrSubject: StateAdapter<T> | BehaviorSubject<T>) {
+    if (isStateAdapter(adapterOrSubject)) {
+      this.stateAdapter = adapterOrSubject;
+    } else {
+      const subject = adapterOrSubject as BehaviorSubject<T>;
+      this.state$ = subject; // Store for backward compatibility
+      this.stateAdapter = new BehaviorSubjectAdapter(subject);
+    }
   }
 
   protected updateState(updater: (prevState: T) => T) {
-    const current = this.state$.getValue();
-    const updated = updater(current);
-    this.state$.next(updated);
+    this.stateAdapter.setState(updater);
   }
 }

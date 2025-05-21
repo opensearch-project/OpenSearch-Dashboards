@@ -12,10 +12,9 @@ export class TestActions extends BaseActions<TestState> {
   }
 
   public increment(): void {
-    const currentState = this.state$.getValue();
     this.updateState((state) => ({
       ...state,
-      value: currentState.value + 1,
+      value: state.value + 1,
     }));
   }
 }
