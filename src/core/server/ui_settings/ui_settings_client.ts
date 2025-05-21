@@ -113,6 +113,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly userLevelSettingsKeys: string[] = [];
   private readonly workspaceLevelSettingsKeys: string[] = [];
   private readonly globalLevelSettingsKeys: string[] = [];
+  private readonly adminUiSettingsKeys: string[] = [];
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
@@ -189,7 +190,7 @@ export class UiSettingsClient implements IUiSettingsClient {
       await this.write({ changes, scope });
     } else {
       // group changes into different scope
-      const [global, personal, workspace] = this.groupChanges(changes);
+      const [global, personal, workspace, admin] = this.groupChanges(changes);
       if (global && Object.keys(global).length > 0) {
         await this.write({ changes: global });
       }
@@ -199,8 +200,8 @@ export class UiSettingsClient implements IUiSettingsClient {
       if (workspace && Object.keys(workspace).length > 0) {
         await this.write({ changes: workspace, scope: UiSettingScope.WORKSPACE });
       }
-      if (workspace && Object.keys(workspace).length > 0) {
-        await this.write({ changes: workspace, scope: UiSettingScope.WORKSPACE });
+      if (admin && Object.keys(admin).length > 0) {
+        await this.write({ changes: admin, scope: UiSettingScope.DASHBOARD_ADMIN });
       }
     }
   }
@@ -310,6 +311,12 @@ export class UiSettingsClient implements IUiSettingsClient {
       ) {
         this.globalLevelSettingsKeys.push(key);
       }
+      if (
+        value.scope === UiSettingScope.DASHBOARD_ADMIN ||
+        (Array.isArray(value.scope) && value.scope.includes(UiSettingScope.DASHBOARD_ADMIN))
+      ) {
+        this.adminUiSettingsKeys.push(key);
+      }
     });
   }
 
@@ -321,6 +328,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   private groupChanges(changes: Record<string, any>) {
     const userChanges = {} as Record<string, any>;
     const globalChanges = {} as Record<string, any>;
+    const adminSettingChanges = {} as Record<string, any>;
     const workspaceChanges = {} as Record<string, any>;
 
     Object.entries(changes).forEach(([key, val]) => {
@@ -329,6 +337,8 @@ export class UiSettingsClient implements IUiSettingsClient {
         throw new Error(`Unable to update "${key}", because it has multiple scopes`);
       } else if (this.userLevelSettingsKeys.includes(key)) {
         userChanges[key] = val;
+      } else if (this.adminUiSettingsKeys.includes(key)) {
+        adminSettingChanges[key] = val;
       } else if (this.workspaceLevelSettingsKeys.includes(key)) {
         workspaceChanges[key] = val;
       } else {
@@ -336,7 +346,7 @@ export class UiSettingsClient implements IUiSettingsClient {
       }
     });
 
-    return [globalChanges, userChanges, workspaceChanges];
+    return [globalChanges, userChanges, workspaceChanges, adminSettingChanges];
   }
 
   private async write({

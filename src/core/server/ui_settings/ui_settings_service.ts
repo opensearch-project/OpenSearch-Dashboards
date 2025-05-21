@@ -48,9 +48,13 @@ import {
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
-import { PermissionControlUiSettingsWrapper } from './saved_objects/permission_control_ui_settings_wrapper';
+import { PermissionControlledUiSettingsWrapper } from './saved_objects/permission_controlled_ui_settings_wrapper';
 import { adminUiSettings } from './saved_objects/admin_ui_settings';
 import { savedObjectsConfig, SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
+import {
+  PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
+  PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
+} from './utils';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -64,7 +68,7 @@ export class UiSettingsService
   private readonly config$: Observable<[UiSettingsConfigType, SavedObjectsConfigType]>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
-  private permissionControlUiSettingsWrapper?: PermissionControlUiSettingsWrapper;
+  private PermissionControlledUiSettingsWrapper?: PermissionControlledUiSettingsWrapper;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -95,14 +99,14 @@ export class UiSettingsService
     // Use uiSettings.defaults from the config file
     this.validateAndUpdateConfiguredDefaults(config.uiSettingsConfig.defaults);
 
-    this.permissionControlUiSettingsWrapper = new PermissionControlUiSettingsWrapper(
+    this.PermissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
       config.savedObjectConfig.permission.enabled
     );
 
     savedObjects.addClientWrapper(
-      100,
-      'permission-control-ui-settings',
-      this.permissionControlUiSettingsWrapper.wrapperFactory
+      PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
+      PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
+      this.PermissionControlledUiSettingsWrapper.wrapperFactory
     );
 
     this.register(adminUiSettings);

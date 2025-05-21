@@ -8,7 +8,7 @@ import {
   httpServerMock,
   savedObjectsClientMock,
 } from 'opensearch-dashboards/server/mocks';
-import { PermissionControlUiSettingsWrapper } from './permission_control_ui_settings_wrapper';
+import { PermissionControlledUiSettingsWrapper } from './permission_controlled_ui_settings_wrapper';
 import { SavedObjectsErrorHelpers } from 'opensearch-dashboards/server';
 import { DASHBOARD_ADMIN_SETTINGS_ID } from '../utils';
 
@@ -25,14 +25,14 @@ jest.mock('opensearch-dashboards/server/utils', () => ({
   },
 }));
 
-describe('PermissionControlUiSettingsWrapper', () => {
+describe('PermissionControlledUiSettingsWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
   const mockedClient = savedObjectsClientMock.create();
   const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
 
   // Helper to build wrapper instance
   const buildWrapperInstance = (permissionEnabled: boolean, isDashboardAdmin = true) => {
-    const wrapperInstance = new PermissionControlUiSettingsWrapper(permissionEnabled);
+    const wrapperInstance = new PermissionControlledUiSettingsWrapper(permissionEnabled);
     // Set isDashboardAdmin property on request
     (requestMock as any).isDashboardAdmin = isDashboardAdmin;
 

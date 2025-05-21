@@ -27,7 +27,7 @@ type AttributesObject = Record<string, unknown>;
  * Wrapper for admin UI settings that enforces permission controls
  * Handles special cases for admin UI settings with appropriate access controls
  */
-export class PermissionControlUiSettingsWrapper {
+export class PermissionControlledUiSettingsWrapper {
   private aclInstance?: ACL;
 
   /**
