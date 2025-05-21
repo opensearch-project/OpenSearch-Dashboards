@@ -1245,7 +1245,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "description": "Description for permission controlled string",
               "displayName": "An permission controlled string",
               "isCustom": false,
-              "isOverridden": false,
+              "isOverridden": true,
               "isPermissionControlled": false,
               "name": "test:isPermissionControlled:string",
               "optionLabels": undefined,

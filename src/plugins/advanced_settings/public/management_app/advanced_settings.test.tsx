@@ -199,6 +199,14 @@ function mockConfig() {
         type: 'select',
         options: ['apple', 'orange', 'banana'],
       },
+      'test:isPermissionControlled:string': {
+        ...defaultConfig,
+        isOverridden: true,
+        value: 'foo',
+        name: 'An permission controlled string',
+        description: 'Description for permission controlled string',
+        type: 'string',
+      },
     };
   };
 

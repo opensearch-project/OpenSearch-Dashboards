@@ -196,7 +196,7 @@ exports[`Field for array setting should render as read only with help text if pe
         size="xs"
       >
         <FormattedMessage
-          defaultMessage="This setting is control by dashboard admin only."
+          defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
@@ -708,7 +708,7 @@ exports[`Field for boolean setting should render as read only with help text if 
         size="xs"
       >
         <FormattedMessage
-          defaultMessage="This setting is control by dashboard admin only."
+          defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
@@ -1235,7 +1235,7 @@ exports[`Field for image setting should render as read only with help text if pe
         size="xs"
       >
         <FormattedMessage
-          defaultMessage="This setting is control by dashboard admin only."
+          defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
@@ -1819,7 +1819,7 @@ exports[`Field for json setting should render as read only with help text if per
         size="xs"
       >
         <FormattedMessage
-          defaultMessage="This setting is control by dashboard admin only."
+          defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
@@ -2504,7 +2504,7 @@ exports[`Field for markdown setting should render as read only with help text if
         size="xs"
       >
         <FormattedMessage
-          defaultMessage="This setting is control by dashboard admin only."
+          defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
@@ -3100,7 +3100,7 @@ exports[`Field for number setting should render as read only with help text if p
         size="xs"
       >
         <FormattedMessage
-          defaultMessage="This setting is control by dashboard admin only."
+          defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
@@ -3628,7 +3628,7 @@ exports[`Field for select setting should render as read only with help text if p
         size="xs"
       >
         <FormattedMessage
-          defaultMessage="This setting is control by dashboard admin only."
+          defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
@@ -4204,7 +4204,7 @@ exports[`Field for string setting should render as read only with help text if p
         size="xs"
       >
         <FormattedMessage
-          defaultMessage="This setting is control by dashboard admin only."
+          defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
@@ -4700,7 +4700,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
         size="xs"
       >
         <FormattedMessage
-          defaultMessage="This setting is control by dashboard admin only."
+          defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
