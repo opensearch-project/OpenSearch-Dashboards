@@ -14,7 +14,6 @@ import { capabilitiesProvider } from './capabilities_provider';
 import { searchSavedObjectType } from './saved_objects';
 
 import { ExplorePluginSetup, ExplorePluginStart } from './types';
-import { uiSettings } from './ui_settings';
 
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
   private readonly logger: Logger;

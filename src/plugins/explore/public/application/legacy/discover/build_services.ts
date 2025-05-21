@@ -52,7 +52,7 @@ import { UiActionsStart } from '../../../../../ui_actions/public';
 import { VisualizationsStart } from '../../../../../visualizations/public';
 import { SavedObjectOpenSearchDashboardsServices } from '../../../../../saved_objects/public';
 
-import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
+import { createSavedExploreLoader, SavedExplore } from '../../..';
 import { getHistory } from './opensearch_dashboards_services';
 import { OpenSearchDashboardsLegacyStart } from '../../../../../opensearch_dashboards_legacy/public';
 import { UrlForwardingStart } from '../../../../../url_forwarding/public';
@@ -80,7 +80,7 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id?: string) => Promise<SavedSearch>;
+  getSavedSearchById: (id?: string) => Promise<SavedExplore>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
@@ -100,7 +100,7 @@ export function buildServices(
     chrome: core.chrome,
     overlays: core.overlays,
   };
-  const savedObjectService = createSavedSearchesLoader(services);
+  const savedObjectService = createSavedExploreLoader(services);
   const storage = new Storage(localStorage);
 
   return {

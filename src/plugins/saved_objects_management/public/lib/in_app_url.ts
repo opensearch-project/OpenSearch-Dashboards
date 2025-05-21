@@ -35,6 +35,8 @@ export function canViewInApp(uiCapabilities: Capabilities, type: string): boolea
     case 'search':
     case 'searches':
       return uiCapabilities.discover.show as boolean;
+    case 'explore':
+      return uiCapabilities.explore?.show as boolean;
     case 'visualization':
     case 'visualizations':
       return uiCapabilities.visualize.show as boolean;
