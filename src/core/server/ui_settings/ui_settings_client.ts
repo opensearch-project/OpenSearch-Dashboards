@@ -199,6 +199,9 @@ export class UiSettingsClient implements IUiSettingsClient {
       if (workspace && Object.keys(workspace).length > 0) {
         await this.write({ changes: workspace, scope: UiSettingScope.WORKSPACE });
       }
+      if (workspace && Object.keys(workspace).length > 0) {
+        await this.write({ changes: workspace, scope: UiSettingScope.WORKSPACE });
+      }
     }
   }
 

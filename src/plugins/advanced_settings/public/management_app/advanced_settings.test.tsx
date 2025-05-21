@@ -217,7 +217,6 @@ function mockConfig() {
       }>(),
     isDeclared: (key: string) => true,
     isDefault: (key: string) => true,
-    getDefault: (key: string) => config.getAll()[key] as any,
 
     getSaved$: () =>
       new Observable<{
