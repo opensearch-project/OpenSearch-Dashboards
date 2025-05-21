@@ -92,6 +92,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
+  const previousDataSourcesRef = useRef(0);
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -163,6 +164,18 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         true
       );
       setDataSources(finalData);
+
+      // If all data sources have been deleted and new ones are being associated,
+      // we need to ensure a default data source is set.
+      if (previousDataSourcesRef.current === 0 && finalData.length >= 1) {
+        await setFirstDataSourceAsDefault(
+          savedObjects.client,
+          uiSettings,
+          true,
+          currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
+        );
+      }
+      previousDataSourcesRef.current = finalData.length;
     } catch (error) {
       setDataSources([]);
       handleDisplayToastMessage({
@@ -173,7 +186,14 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [handleDisplayToastMessage, http, notifications, savedObjects.client]);
+  }, [
+    handleDisplayToastMessage,
+    http,
+    uiSettings,
+    notifications,
+    savedObjects.client,
+    currentWorkspace,
+  ]);
 
   const onDissociate = useCallback(
     async (item: DataSourceTableItem | DataSourceTableItem[]) => {
