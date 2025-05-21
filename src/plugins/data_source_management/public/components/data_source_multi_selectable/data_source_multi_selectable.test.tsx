@@ -172,7 +172,7 @@ describe('DataSourceMultiSelectable', () => {
       />
     );
     await component.instance().componentDidMount!();
-    expect(uiSettings.get).toBeCalledWith('defaultDataSource');
+    expect(uiSettings.get).toBeCalledWith('defaultDataSource', null);
     expect(component.state('defaultDataSource')).toEqual('test1');
     expect(component.state('selectedOptions')).toHaveLength(4);
   });

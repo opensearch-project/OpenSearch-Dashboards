@@ -209,7 +209,7 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(uiSettings.get).toBeCalledWith('defaultDataSource');
+    expect(uiSettings.get).toBeCalledWith('defaultDataSource', null);
   });
 
   it('should not render options with default badge when id does not matches defaultDataSource', () => {
