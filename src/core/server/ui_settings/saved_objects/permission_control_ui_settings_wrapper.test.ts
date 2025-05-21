@@ -9,9 +9,10 @@ import {
   savedObjectsClientMock,
 } from 'opensearch-dashboards/server/mocks';
 import { PermissionControlUiSettingsWrapper } from './permission_control_ui_settings_wrapper';
-import { SavedObjectsErrorHelpers } from 'opensearch-dashboards/server/saved_objects';
+import { SavedObjectsErrorHelpers } from 'opensearch-dashboards/server';
+import { DASHBOARD_ADMIN_SETTINGS_ID } from '../utils';
 
-// Mock the getWorkspaceState function and pkg
+// Mock the getWorkspaceState function
 jest.mock('opensearch-dashboards/server/utils', () => ({
   getWorkspaceState: jest.fn().mockImplementation((request) => ({
     isDashboardAdmin: request.isDashboardAdmin,
@@ -21,14 +22,6 @@ jest.mock('opensearch-dashboards/server/utils', () => ({
       distributable: true,
       release: true,
     },
-  },
-}));
-
-// Mock the uiSettingWithPermission
-jest.mock('./ui_settings_permissions', () => ({
-  uiSettingWithPermission: {
-    'test.setting': { value: 'default_value' },
-    'test.setting2': { value: 'default_value2' },
   },
 }));
 
@@ -78,83 +71,51 @@ describe('PermissionControlUiSettingsWrapper', () => {
       expect(result).toEqual(mockResponse);
     });
 
-    it('should merge admin settings with regular settings for dashboard admin', async () => {
-      const wrapperClient = buildWrapperInstance(true, true);
-
-      const regularSettings = {
-        id: '3.0.0',
-        type: 'config',
-        attributes: { 'regular.setting': 'value' },
-        references: [],
-      };
-
+    it('should handle admin settings requests', async () => {
+      const wrapperClient = buildWrapperInstance(true);
       const adminSettings = {
-        id: '_dashboard_admin',
+        id: DASHBOARD_ADMIN_SETTINGS_ID,
         type: 'config',
         attributes: { 'test.setting': 'admin_value' },
         references: [],
       };
+      mockedClient.get.mockResolvedValue(adminSettings);
 
-      mockedClient.get.mockImplementation((type, id) => {
-        if (id === '3.0.0') {
-          return Promise.resolve(regularSettings) as any;
-        } else if (id === '_dashboard_admin') {
-          return Promise.resolve(adminSettings) as any;
-        }
-      });
+      const result = await wrapperClient.get('config', DASHBOARD_ADMIN_SETTINGS_ID);
 
-      const result = await wrapperClient.get('config', '3.0.0');
-
-      expect(mockedClient.get).toHaveBeenNthCalledWith(1, 'config', '_dashboard_admin', {});
-      expect(mockedClient.get).toHaveBeenNthCalledWith(2, 'config', '3.0.0', {});
-
-      expect(result).toEqual({
-        ...regularSettings,
-        attributes: {
-          'regular.setting': 'value',
-          'test.setting': { value: 'admin_value', hasPermission: true },
-        },
-      });
+      expect(mockedClient.get).toBeCalledWith('config', DASHBOARD_ADMIN_SETTINGS_ID, {});
+      expect(result).toEqual(adminSettings);
     });
 
-    it('should handle case when admin settings do not exist', async () => {
-      const wrapperClient = buildWrapperInstance(true, true);
+    it('should return empty object when admin settings do not exist', async () => {
+      const wrapperClient = buildWrapperInstance(true);
 
-      const regularSettings = {
-        id: '3.0.0',
-        type: 'config',
-        attributes: { 'regular.setting': 'value' },
-        references: [],
-      };
-
-      mockedClient.get.mockImplementation((type, id) => {
-        if (id === '3.0.0') {
-          return Promise.resolve(regularSettings) as any;
-        } else if (id === '_dashboard_admin') {
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError('config', '_dashboard_admin');
-        }
+      mockedClient.get.mockImplementation(() => {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          'config',
+          DASHBOARD_ADMIN_SETTINGS_ID
+        );
       });
 
-      const result = await wrapperClient.get('config', '3.0.0');
+      const result = await wrapperClient.get('config', DASHBOARD_ADMIN_SETTINGS_ID);
 
-      expect(mockedClient.get).toHaveBeenNthCalledWith(1, 'config', '_dashboard_admin', {});
-      expect(mockedClient.get).toHaveBeenNthCalledWith(2, 'config', '3.0.0', {});
-
-      expect(result).toEqual(regularSettings);
+      expect(mockedClient.get).toBeCalledWith('config', DASHBOARD_ADMIN_SETTINGS_ID, {});
+      expect(result).toEqual({
+        id: DASHBOARD_ADMIN_SETTINGS_ID,
+        type: 'config',
+        attributes: {},
+        references: [],
+      });
     });
 
     it('should propagate errors other than not found', async () => {
-      const wrapperClient = buildWrapperInstance(true, true);
-
+      const wrapperClient = buildWrapperInstance(true);
       const error = new Error('Database error');
+      mockedClient.get.mockRejectedValue(error);
 
-      mockedClient.get.mockImplementation((type, id) => {
-        if (id === '_dashboard_admin') {
-          return Promise.reject(error) as any;
-        }
-      });
-
-      await expect(wrapperClient.get('config', '3.0.0')).rejects.toThrow('Database error');
+      await expect(wrapperClient.get('config', DASHBOARD_ADMIN_SETTINGS_ID)).rejects.toThrow(
+        'Database error'
+      );
     });
   });
 
@@ -170,76 +131,80 @@ describe('PermissionControlUiSettingsWrapper', () => {
       expect(mockedClient.create).toBeCalledWith('dashboard', attributes, {});
     });
 
-    it('should handle regular attributes for config type', async () => {
+    it('should pass through regular config requests', async () => {
       const wrapperClient = buildWrapperInstance(true);
       const attributes = { 'regular.setting': 'value' };
       await wrapperClient.create('config', attributes);
       expect(mockedClient.create).toBeCalledWith('config', attributes, {});
     });
 
-    it('should create admin settings for permission attributes when user is dashboard admin', async () => {
-      const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = {
-        'regular.setting': 'value',
-        'test.setting': 'admin_value',
-      };
+    it('should skip creating admin settings when only buildNum is provided', async () => {
+      const wrapperClient = buildWrapperInstance(true);
+      const attributes = { buildNum: 12345 };
 
-      await wrapperClient.create('config', attributes);
+      const result = await wrapperClient.create('config', attributes, {
+        id: DASHBOARD_ADMIN_SETTINGS_ID,
+      });
 
-      // Should create admin settings
-      expect(mockedClient.create).toHaveBeenNthCalledWith(
-        1,
-        'config',
-        { 'test.setting': 'admin_value' },
-        {
-          overwrite: true,
-          id: '_dashboard_admin',
-          permissions: expect.any(Object),
-        }
-      );
-
-      // Should create regular settings
-      expect(mockedClient.create).toHaveBeenNthCalledWith(
-        2,
-        'config',
-        { 'regular.setting': 'value' },
-        {}
-      );
+      expect(mockedClient.create).not.toBeCalled();
+      expect(result).toEqual({
+        id: DASHBOARD_ADMIN_SETTINGS_ID,
+        type: 'config',
+        attributes: {},
+        references: [],
+      });
     });
 
-    it('should not create admin settings when user is not dashboard admin', async () => {
-      const wrapperClient = buildWrapperInstance(true, false);
-      const attributes = {
-        'regular.setting': 'value',
-        'test.setting': 'admin_value',
+    it('should create admin settings when user is dashboard admin', async () => {
+      const wrapperClient = buildWrapperInstance(true, true);
+      const attributes = { enableDashboardAssistantFeature: true };
+      const mockResponse = {
+        id: DASHBOARD_ADMIN_SETTINGS_ID,
+        type: 'config',
+        attributes,
+        references: [],
       };
 
-      await wrapperClient.create('config', attributes);
+      mockedClient.create.mockResolvedValue(mockResponse);
 
-      // Should only create regular settings
-      expect(mockedClient.create).toBeCalledTimes(1);
-      expect(mockedClient.create).toBeCalledWith('config', { 'regular.setting': 'value' }, {});
+      await wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID });
+
+      expect(mockedClient.create).toBeCalledWith('config', attributes, {
+        id: DASHBOARD_ADMIN_SETTINGS_ID,
+        overwrite: true,
+        permissions: expect.any(Object),
+      });
+    });
+
+    it('should throw permission error when user is not dashboard admin', async () => {
+      const wrapperClient = buildWrapperInstance(true, false);
+      const attributes = { enableDashboardAssistantFeature: true };
+
+      await expect(
+        wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID })
+      ).rejects.toThrow('No permission for admin UI settings operations');
     });
 
     it('should not add permissions when permission control is disabled', async () => {
       const wrapperClient = buildWrapperInstance(false, true);
-      const attributes = {
-        'regular.setting': 'value',
-        'test.setting': 'admin_value',
-      };
+      const attributes = { enableDashboardAssistantFeature: true };
 
-      await wrapperClient.create('config', attributes);
+      await wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID });
 
-      // Should create admin settings without permissions
-      expect(mockedClient.create).toHaveBeenNthCalledWith(
-        1,
-        'config',
-        { 'test.setting': 'admin_value' },
-        {
-          overwrite: true,
-          id: '_dashboard_admin',
-        }
-      );
+      expect(mockedClient.create).toBeCalledWith('config', attributes, {
+        id: DASHBOARD_ADMIN_SETTINGS_ID,
+        overwrite: true,
+      });
+      expect(mockedClient.create.mock.calls[0][2]).not.toHaveProperty('permissions');
+    });
+
+    it('should throw validation error for invalid admin settings keys', async () => {
+      const wrapperClient = buildWrapperInstance(true, true);
+      const attributes = { invalidSetting: true };
+
+      await expect(
+        wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID })
+      ).rejects.toThrow('Invalid admin settings keys: invalidSetting');
     });
   });
 
@@ -255,102 +220,166 @@ describe('PermissionControlUiSettingsWrapper', () => {
       expect(mockedClient.update).toBeCalledWith('dashboard', 'test-id', attributes, {});
     });
 
-    it('should handle regular attributes for config type', async () => {
+    it('should pass through regular config requests', async () => {
       const wrapperClient = buildWrapperInstance(true);
       const attributes = { 'regular.setting': 'updated_value' };
       await wrapperClient.update('config', '3.0.0', attributes);
       expect(mockedClient.update).toBeCalledWith('config', '3.0.0', attributes, {});
     });
 
-    it('should update admin settings for permission attributes', async () => {
+    it('should update admin settings when user is dashboard admin', async () => {
       const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = {
-        'regular.setting': 'updated_value',
-        'test.setting': 'updated_admin_value',
+      const attributes = { enableDashboardAssistantFeature: false };
+      const mockResponse = {
+        id: DASHBOARD_ADMIN_SETTINGS_ID,
+        type: 'config',
+        attributes,
+        references: [],
       };
 
-      await wrapperClient.update('config', '3.0.0', attributes);
+      mockedClient.update.mockResolvedValue(mockResponse);
 
-      // Should update admin settings
-      expect(mockedClient.update).toHaveBeenNthCalledWith(
-        1,
+      await wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes);
+
+      expect(mockedClient.update).toBeCalledWith(
         'config',
-        '_dashboard_admin',
-        { 'test.setting': 'updated_admin_value' },
+        DASHBOARD_ADMIN_SETTINGS_ID,
+        attributes,
         {}
       );
+    });
 
-      // Should update regular settings
-      expect(mockedClient.update).toHaveBeenNthCalledWith(
-        2,
+    it('should ignore buildNum when updating admin settings', async () => {
+      const wrapperClient = buildWrapperInstance(true, true);
+      const attributes = {
+        enableDashboardAssistantFeature: false,
+        buildNum: 12345,
+      };
+
+      await wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes);
+
+      expect(mockedClient.update).toBeCalledWith(
         'config',
-        '3.0.0',
-        { 'regular.setting': 'updated_value' },
+        DASHBOARD_ADMIN_SETTINGS_ID,
+        { enableDashboardAssistantFeature: false },
         {}
       );
+    });
+
+    it('should throw permission error when user is not dashboard admin', async () => {
+      const wrapperClient = buildWrapperInstance(true, false);
+      const attributes = { enableDashboardAssistantFeature: false };
+
+      await expect(
+        wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes)
+      ).rejects.toThrow('No permission for admin UI settings operations');
     });
 
     it('should create admin settings if they do not exist during update', async () => {
       const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = {
-        'regular.setting': 'updated_value',
-        'test.setting': 'updated_admin_value',
-      };
+      const attributes = { enableDashboardAssistantFeature: true };
 
-      mockedClient.update.mockImplementation((type, id, attrs) => {
-        if (id === '_dashboard_admin') {
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError('config', '_dashboard_admin');
-        }
-        return Promise.resolve({ id, type, attributes: attrs, references: [] });
+      mockedClient.update.mockImplementation(() => {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          'config',
+          DASHBOARD_ADMIN_SETTINGS_ID
+        );
       });
 
-      await wrapperClient.update('config', '3.0.0', attributes);
+      await wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes);
 
-      // Should try to update admin settings
-      expect(mockedClient.update).toHaveBeenCalledWith(
-        'config',
-        '_dashboard_admin',
-        { 'test.setting': 'updated_admin_value' },
-        {}
-      );
-
-      // Should create admin settings since they don't exist
-      expect(mockedClient.create).toHaveBeenCalledWith(
-        'config',
-        { 'test.setting': 'updated_admin_value' },
-        {
-          overwrite: true,
-          id: '_dashboard_admin',
-          permissions: expect.any(Object),
-        }
-      );
-
-      // Should update regular settings
-      expect(mockedClient.update).toHaveBeenCalledWith(
-        'config',
-        '3.0.0',
-        { 'regular.setting': 'updated_value' },
-        {}
-      );
+      expect(mockedClient.create).toBeCalledWith('config', attributes, {
+        id: DASHBOARD_ADMIN_SETTINGS_ID,
+        overwrite: true,
+        permissions: expect.any(Object),
+      });
     });
 
-    it('should propagate errors other than not found during admin settings update', async () => {
+    it('should throw validation error for invalid admin settings keys', async () => {
       const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = {
-        'regular.setting': 'updated_value',
-        'test.setting': 'updated_admin_value',
-      };
+      const attributes = { invalidSetting: true };
 
-      const error = new Error('Database error');
-      mockedClient.update.mockImplementation((type, id, attrs) => {
-        if (id === '_dashboard_admin') {
-          return Promise.reject(error);
-        }
-        return Promise.resolve({ id, type, attributes: attrs, references: [] });
-      });
+      await expect(
+        wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes)
+      ).rejects.toThrow('Invalid admin settings keys: invalidSetting');
+    });
+  });
 
-      await expect(wrapperClient.update('config', '3.0.0', attributes)).rejects.toThrow(
-        'Database error'
+  describe('#bulkCreate', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should pass through regular bulk create requests', async () => {
+      const wrapperClient = buildWrapperInstance(true);
+      const objects = [
+        { type: 'dashboard', id: 'test-id', attributes: { title: 'Test Dashboard' } },
+      ];
+
+      await wrapperClient.bulkCreate(objects);
+
+      expect(mockedClient.bulkCreate).toBeCalledWith(objects, undefined);
+    });
+
+    it('should throw error when trying to bulk create with admin settings ID', async () => {
+      const wrapperClient = buildWrapperInstance(true);
+      const objects = [
+        { type: 'dashboard', id: 'test-id', attributes: { title: 'Test Dashboard' } },
+      ];
+
+      await expect(
+        wrapperClient.bulkCreate(objects, { id: DASHBOARD_ADMIN_SETTINGS_ID })
+      ).rejects.toThrow('Bulk create is not supported for admin settings');
+    });
+
+    it('should throw error when trying to bulk create admin settings', async () => {
+      const wrapperClient = buildWrapperInstance(true);
+      const objects = [
+        {
+          type: 'config',
+          id: DASHBOARD_ADMIN_SETTINGS_ID,
+          attributes: { enableDashboardAssistantFeature: true },
+        },
+      ];
+
+      await expect(wrapperClient.bulkCreate(objects)).rejects.toThrow(
+        'Bulk create is not supported for admin settings'
+      );
+    });
+  });
+
+  describe('#bulkUpdate', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should pass through regular bulk update requests', async () => {
+      const wrapperClient = buildWrapperInstance(true);
+      const objects = [
+        {
+          type: 'dashboard',
+          id: 'test-id',
+          attributes: { title: 'Updated Dashboard' },
+        },
+      ];
+
+      await wrapperClient.bulkUpdate(objects);
+
+      expect(mockedClient.bulkUpdate).toBeCalledWith(objects, undefined);
+    });
+
+    it('should throw error when trying to bulk update admin settings', async () => {
+      const wrapperClient = buildWrapperInstance(true);
+      const objects = [
+        {
+          type: 'config',
+          id: DASHBOARD_ADMIN_SETTINGS_ID,
+          attributes: { enableDashboardAssistantFeature: true },
+        },
+      ];
+
+      await expect(wrapperClient.bulkUpdate(objects)).rejects.toThrow(
+        'Bulk update is not supported for admin settings'
       );
     });
   });

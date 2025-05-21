@@ -485,7 +485,7 @@ export class Field extends PureComponent<FieldProps> {
         <EuiText size="xs">
           <FormattedMessage
             id="advancedSettings.field.permissionControlledHelpText"
-            defaultMessage="This setting is control by dashboard admin only."
+            defaultMessage="This setting is controlled by dashboard admin only."
           />
         </EuiText>
       );

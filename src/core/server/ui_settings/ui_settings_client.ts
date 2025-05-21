@@ -97,7 +97,7 @@ const UiSettingScopeReadOptions = [
   {
     scope: UiSettingScope.DASHBOARD_ADMIN,
     ignore401Errors: false,
-    autoCreateOrUpgradeIfMissing: true,
+    autoCreateOrUpgradeIfMissing: false,
     ignore404Errors: true,
   },
 ] as ReadOptions[];

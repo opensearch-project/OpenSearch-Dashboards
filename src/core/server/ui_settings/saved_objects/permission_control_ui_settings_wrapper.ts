@@ -15,22 +15,24 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from 'opensearch-dashboards/server';
 import { getWorkspaceState } from 'opensearch-dashboards/server/utils';
 import { adminUiSettings } from './admin_ui_settings';
-
-const DASHBOARD_ADMIN_SETTINGS_ID = '_dashboard_admin';
+import { DASHBOARD_ADMIN_SETTINGS_ID } from '../utils';
 
 type AttributesObject = Record<string, unknown>;
 
-interface ProcessedAttributes {
-  permissionAttributes: AttributesObject;
-  regularAttributes: AttributesObject;
-}
-
+/**
+ * Wrapper for admin UI settings that enforces permission controls
+ * Handles special cases for admin UI settings with appropriate access controls
+ */
 export class PermissionControlUiSettingsWrapper {
   private aclInstance?: ACL;
 
+  /**
+   * @param isPermissionControlEnabled
+   */
   constructor(private readonly isPermissionControlEnabled: boolean) {}
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
@@ -39,36 +41,23 @@ export class PermissionControlUiSettingsWrapper {
       id: string,
       options: SavedObjectsBaseOptions = {}
     ): Promise<SavedObject<T>> => {
-      if (type === 'config') {
-        if (id === DASHBOARD_ADMIN_SETTINGS_ID) {
-          // Get admin UI only, return the saved object directly
-          // if not found, automatically throw the error
-          return wrapperOptions.client.get<T>('config', id, options);
-        }
-
-        let adminSettings: SavedObject<T> | undefined;
+      if (type === 'config' && id === DASHBOARD_ADMIN_SETTINGS_ID) {
+        // No permission checking since everyone can read admin UI settings
         try {
-          adminSettings = await wrapperOptions.client.get<T>(
-            'config',
-            DASHBOARD_ADMIN_SETTINGS_ID,
-            options
-          );
+          return wrapperOptions.client.get<T>('config', DASHBOARD_ADMIN_SETTINGS_ID, options);
         } catch (error) {
           // If no admin config, ignore this because no admin settings is being set previously
           if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
             throw error;
           }
+          // Return empty object
+          return {
+            id: DASHBOARD_ADMIN_SETTINGS_ID,
+            type: 'config',
+            attributes: {} as T,
+            references: [],
+          };
         }
-
-        const uiSettings = await wrapperOptions.client.get<T>(type, id, options);
-
-        return {
-          ...uiSettings,
-          attributes: {
-            ...uiSettings.attributes,
-            ...((adminSettings?.attributes as unknown) as T),
-          },
-        };
       }
 
       return wrapperOptions.client.get<T>(type, id, options);
@@ -79,23 +68,23 @@ export class PermissionControlUiSettingsWrapper {
       attributes: T,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObject<T>> => {
-      if (type === 'config') {
-        const isCreatingAdminSettings = options.id && options.id === DASHBOARD_ADMIN_SETTINGS_ID;
-        if (isCreatingAdminSettings) {
-          return this.createPermissionUiSetting(
-            attributes as AttributesObject,
-            options,
-            wrapperOptions
-          ) as Promise<SavedObject<T>>;
+      if (type === 'config' && options.id && options.id === DASHBOARD_ADMIN_SETTINGS_ID) {
+        // Skip createPermissionUiSetting if attributes only contains buildNum
+        const keys = Object.keys(attributes as AttributesObject);
+        if (keys.length === 1 && keys[0] === 'buildNum') {
+          return {
+            id: DASHBOARD_ADMIN_SETTINGS_ID,
+            type: 'config',
+            attributes: {} as T,
+            references: [],
+          };
         }
 
-        const { permissionAttributes, regularAttributes } = this.processAttributes(
-          attributes as AttributesObject
-        );
-        if (Object.keys(permissionAttributes).length > 0 && this.isDashboardAdmin(wrapperOptions)) {
-          await this.createPermissionUiSetting(permissionAttributes, options, wrapperOptions);
-        }
-        return wrapperOptions.client.create<T>(type, regularAttributes as T, options);
+        return (await this.createPermissionUiSetting(
+          attributes as AttributesObject,
+          options,
+          wrapperOptions
+        )) as SavedObject<T>;
       }
 
       return wrapperOptions.client.create<T>(type, attributes, options);
@@ -106,43 +95,30 @@ export class PermissionControlUiSettingsWrapper {
       id: string,
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
-    ) => {
-      if (type === 'config') {
-        if (id.includes(DASHBOARD_ADMIN_SETTINGS_ID)) {
-          // Update admin UI only, do the update and return the saved object directly
-          return wrapperOptions.client.update<T>('config', id, attributes, options);
-        }
+    ): Promise<SavedObjectsUpdateResponse<T>> => {
+      if (type === 'config' && id === DASHBOARD_ADMIN_SETTINGS_ID) {
+        this.checkAdminPermission(wrapperOptions);
+        this.validateAdminSettings(attributes);
 
-        const { permissionAttributes, regularAttributes } = this.processAttributes(
-          attributes as AttributesObject
-        );
-
-        if (Object.keys(permissionAttributes).length > 0) {
-          try {
-            await wrapperOptions.client.update<AttributesObject>(
-              type,
-              DASHBOARD_ADMIN_SETTINGS_ID,
-              permissionAttributes,
-              options
-            );
-          } catch (error) {
-            if (
-              SavedObjectsErrorHelpers.isNotFoundError(error) &&
-              this.isDashboardAdmin(wrapperOptions)
-            ) {
-              await this.createPermissionUiSetting(permissionAttributes, options, wrapperOptions);
-            } else {
-              throw error;
-            }
+        try {
+          const { buildNum, ...other } = attributes as AttributesObject;
+          return ((await wrapperOptions.client.update<AttributesObject>(
+            type,
+            DASHBOARD_ADMIN_SETTINGS_ID,
+            other,
+            options
+          )) as unknown) as SavedObjectsUpdateResponse<T>;
+        } catch (error) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            return (await this.createPermissionUiSetting(
+              attributes as AttributesObject,
+              options,
+              wrapperOptions
+            )) as SavedObjectsUpdateResponse<T>;
+          } else {
+            throw error;
           }
         }
-
-        return wrapperOptions.client.update<Partial<T>>(
-          type,
-          id,
-          regularAttributes as Partial<T>,
-          options
-        );
       }
 
       return wrapperOptions.client.update<T>(type, id, attributes, options);
@@ -155,6 +131,16 @@ export class PermissionControlUiSettingsWrapper {
       if (options?.id === DASHBOARD_ADMIN_SETTINGS_ID) {
         throw new Error('Bulk create is not supported for admin settings');
       }
+
+      // Check if any object is trying to create admin settings
+      const adminSettingObject = objects.find(
+        (obj) => obj.type === 'config' && obj.id === DASHBOARD_ADMIN_SETTINGS_ID
+      );
+
+      if (adminSettingObject) {
+        throw new Error('Bulk create is not supported for admin settings');
+      }
+
       return wrapperOptions.client.bulkCreate<T>(objects, options);
     };
 
@@ -162,7 +148,10 @@ export class PermissionControlUiSettingsWrapper {
       objects: Array<SavedObjectsBulkUpdateObject<T>>,
       options?: SavedObjectsBulkUpdateOptions
     ) => {
-      const adminSettingObject = objects.find((obj) => obj.id === DASHBOARD_ADMIN_SETTINGS_ID);
+      const adminSettingObject = objects.find(
+        (obj) => obj.type === 'config' && obj.id === DASHBOARD_ADMIN_SETTINGS_ID
+      );
+
       if (adminSettingObject) {
         throw new Error('Bulk update is not supported for admin settings');
       }
@@ -188,42 +177,35 @@ export class PermissionControlUiSettingsWrapper {
     };
   };
 
-  private isDashboardAdmin(wrapperOptions: SavedObjectsClientWrapperOptions): boolean {
+  private checkAdminPermission(wrapperOptions: SavedObjectsClientWrapperOptions): void {
     // If saved object permission is disabled, everyone should be treated as admin here
-    return (
+    const isDashboardAdmin =
       getWorkspaceState(wrapperOptions.request).isDashboardAdmin !== false ||
-      !this.isPermissionControlEnabled
-    );
+      !this.isPermissionControlEnabled;
+
+    if (!isDashboardAdmin) {
+      throw new Error('No permission for admin UI settings operations');
+    }
   }
 
-  private processAttributes(attributes: AttributesObject): ProcessedAttributes {
-    const permissionAttributes: AttributesObject = {};
-    const regularAttributes: AttributesObject = {};
-
-    Object.entries(attributes).forEach(([key, value]) => {
-      if (key in adminUiSettings) {
-        permissionAttributes[key] = value;
-      } else {
-        regularAttributes[key] = value;
-      }
-    });
-    return { permissionAttributes, regularAttributes };
-  }
-
-  private async createPermissionUiSetting(
-    attributes: AttributesObject,
-    options: SavedObjectsBaseOptions,
-    wrapperOptions: SavedObjectsClientWrapperOptions
-  ): Promise<SavedObject<AttributesObject>> {
-    // Verify that attributes only contains keys from adminUiSettings
+  private validateAdminSettings(attributes: AttributesObject): void {
+    // Verify that attributes only contains keys from adminUiSettings, should not allow any
+    // chance that non-admin UI settings being saved or updated into admin UI saved object.
     const invalidKeys = Object.keys(attributes).filter(
-      (key) => !adminUiSettings.hasOwnProperty(key)
+      (key) => !adminUiSettings.hasOwnProperty(key) && key !== 'buildNum'
     );
+
     if (invalidKeys.length > 0) {
       throw new Error(`Invalid admin settings keys: ${invalidKeys.join(', ')}.`);
     }
+  }
 
-    if (this.isPermissionControlEnabled && !this.aclInstance) {
+  private getAclInstance(): ACL | undefined {
+    if (!this.isPermissionControlEnabled) {
+      return undefined;
+    }
+
+    if (!this.aclInstance) {
       // Allow read for all users but no write for any users
       // This means only dashboard admin would have permission to bypass ACL
       this.aclInstance = new ACL().addPermission(['read'], {
@@ -231,13 +213,24 @@ export class PermissionControlUiSettingsWrapper {
       });
     }
 
+    return this.aclInstance;
+  }
+
+  private async createPermissionUiSetting(
+    attributes: AttributesObject,
+    options: SavedObjectsBaseOptions,
+    wrapperOptions: SavedObjectsClientWrapperOptions
+  ): Promise<SavedObject<AttributesObject>> {
+    this.checkAdminPermission(wrapperOptions);
+    this.validateAdminSettings(attributes);
+
+    const aclInstance = this.getAclInstance();
+
     return wrapperOptions.client.create('config', attributes, {
       ...options,
       overwrite: true,
       id: DASHBOARD_ADMIN_SETTINGS_ID,
-      ...(this.isPermissionControlEnabled && this.aclInstance
-        ? { permissions: this.aclInstance.getPermissions() }
-        : {}),
+      ...(aclInstance ? { permissions: aclInstance.getPermissions() } : {}),
     });
   }
 }

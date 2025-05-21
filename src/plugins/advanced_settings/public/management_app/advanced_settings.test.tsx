@@ -217,6 +217,7 @@ function mockConfig() {
       }>(),
     isDeclared: (key: string) => true,
     isDefault: (key: string) => true,
+    getDefault: (key: string) => config.getAll()[key] as any,
 
     getSaved$: () =>
       new Observable<{
@@ -224,7 +225,6 @@ function mockConfig() {
         newValue: any;
         oldValue: any;
       }>(),
-
     getUpdateErrors$: () => new Observable<Error>(),
     get: (key: string, defaultOverride?: any): any => config.getAll()[key] || defaultOverride,
     get$: (key: string) => new Observable<any>(config.get(key)),
