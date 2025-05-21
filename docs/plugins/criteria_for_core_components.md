@@ -14,19 +14,15 @@ The lack of clear criteria for classifying components as core or non-core has le
 A component should be considered "core" if it meets the following criteria:
 
 ### 1. Essential Functionality
-- Necessary for fundamental platform capabilities, like saved objects management, embeddable, data plugin.
+- Necessary for fundamental platform capabilities, aka required by core plugins / more than 5 external plugins, like saved objects management, embeddable, data plugin.
 - Platform application frameworks. These are common interfaces that are suited for various usecases and should support customizations based on usecases, E.g. Dashboards, Discover, Visualize. The function of the application should not rely on any service from external plugins, and work well with minimal distribution of OpenSearch.
-
-### 2. Cross-cutting Concerns
-- Provides services used by multiple other components, like navigation
-- Implements critical infrastructure patterns, like workspace
 - Handles system-wide state management, like advanced settings
 
-### 3. Security and Compliance
+### 2. Security and Compliance
 - Implements critical security features
 - Handles authentication/authorization fundamentals
 
-### 4. Performance Impact
+### 3. Performance Impact
 - Critical for baseline performance
 - Required for initial page load and basic navigation
 - Essential for system stability
@@ -38,10 +34,11 @@ Components should be non-core if they:
 1. Serve specific use cases rather than general purposes, e.g. Security dashboard, APM, traces
 2. Can be loaded on-demand without impacting basic functionality
 3. Have specialized dependencies not required by other components
+4. Have dependency on external backend plugin
 
 ## Questions for Discussion
 
-1. How should we handle components that partially meet core criteria? Do we need to add a bar and add score for each rule?
+1. How should we handle components that partially fulfill core requirements? Should we implement a scoring system with individual criteria ratings?
 
 ## References
 - Related discussion: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9806
