@@ -18,7 +18,6 @@ import {
   SavedObjectsUpdateResponse,
 } from 'opensearch-dashboards/server';
 import { getWorkspaceState } from 'opensearch-dashboards/server/utils';
-import { adminUiSettings } from './admin_ui_settings';
 import { DASHBOARD_ADMIN_SETTINGS_ID } from '../utils';
 
 type AttributesObject = Record<string, unknown>;
@@ -36,33 +35,6 @@ export class PermissionControlledUiSettingsWrapper {
   constructor(private readonly isPermissionControlEnabled: boolean) {}
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
-    const getUiSettingsWithPermission = async <T = unknown>(
-      type: string,
-      id: string,
-      options: SavedObjectsBaseOptions = {}
-    ): Promise<SavedObject<T>> => {
-      if (type === 'config' && id === DASHBOARD_ADMIN_SETTINGS_ID) {
-        // No permission checking since everyone can read admin UI settings
-        try {
-          return wrapperOptions.client.get<T>('config', DASHBOARD_ADMIN_SETTINGS_ID, options);
-        } catch (error) {
-          // If no admin config, ignore this because no admin settings is being set previously
-          if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-            throw error;
-          }
-          // Return empty object
-          return {
-            id: DASHBOARD_ADMIN_SETTINGS_ID,
-            type: 'config',
-            attributes: {} as T,
-            references: [],
-          };
-        }
-      }
-
-      return wrapperOptions.client.get<T>(type, id, options);
-    };
-
     const createUiSettingWithPermission = async <T = unknown>(
       type: string,
       attributes: T,
@@ -80,11 +52,11 @@ export class PermissionControlledUiSettingsWrapper {
           };
         }
 
-        return (await this.createPermissionUiSetting(
+        return (this.createPermissionUiSetting(
           attributes as AttributesObject,
           options,
           wrapperOptions
-        )) as SavedObject<T>;
+        ) as unknown) as SavedObject<T>;
       }
 
       return wrapperOptions.client.create<T>(type, attributes, options);
@@ -98,7 +70,6 @@ export class PermissionControlledUiSettingsWrapper {
     ): Promise<SavedObjectsUpdateResponse<T>> => {
       if (type === 'config' && id === DASHBOARD_ADMIN_SETTINGS_ID) {
         this.checkAdminPermission(wrapperOptions);
-        this.validateAdminSettings(attributes);
 
         try {
           const { buildNum, ...other } = attributes as AttributesObject;
@@ -110,11 +81,11 @@ export class PermissionControlledUiSettingsWrapper {
           )) as unknown) as SavedObjectsUpdateResponse<T>;
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-            return (await this.createPermissionUiSetting(
+            return (this.createPermissionUiSetting(
               attributes as AttributesObject,
               options,
               wrapperOptions
-            )) as SavedObjectsUpdateResponse<T>;
+            ) as unknown) as SavedObjectsUpdateResponse<T>;
           } else {
             throw error;
           }
@@ -166,7 +137,7 @@ export class PermissionControlledUiSettingsWrapper {
       delete: wrapperOptions.client.delete,
       update: updateUiSettingsWithPermission,
       bulkUpdate: bulkUpdateWithPermission,
-      get: getUiSettingsWithPermission,
+      get: wrapperOptions.client.get,
       checkConflicts: wrapperOptions.client.checkConflicts,
       errors: wrapperOptions.client.errors,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
@@ -185,18 +156,6 @@ export class PermissionControlledUiSettingsWrapper {
 
     if (!isDashboardAdmin) {
       throw new Error('No permission for admin UI settings operations');
-    }
-  }
-
-  private validateAdminSettings(attributes: AttributesObject): void {
-    // Verify that attributes only contains keys from adminUiSettings, should not allow any
-    // chance that non-admin UI settings being saved or updated into admin UI saved object.
-    const invalidKeys = Object.keys(attributes).filter(
-      (key) => !adminUiSettings.hasOwnProperty(key) && key !== 'buildNum'
-    );
-
-    if (invalidKeys.length > 0) {
-      throw new Error(`Invalid admin settings keys: ${invalidKeys.join(', ')}.`);
     }
   }
 
@@ -222,7 +181,6 @@ export class PermissionControlledUiSettingsWrapper {
     wrapperOptions: SavedObjectsClientWrapperOptions
   ): Promise<SavedObject<AttributesObject>> {
     this.checkAdminPermission(wrapperOptions);
-    this.validateAdminSettings(attributes);
 
     const aclInstance = this.getAclInstance();
 

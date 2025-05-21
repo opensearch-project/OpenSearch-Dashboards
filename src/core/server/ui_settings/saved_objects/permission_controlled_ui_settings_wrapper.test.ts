@@ -52,7 +52,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     it('should pass through non-config type requests', async () => {
       const wrapperClient = buildWrapperInstance(true);
       await wrapperClient.get('dashboard', 'test-id');
-      expect(mockedClient.get).toBeCalledWith('dashboard', 'test-id', {});
+      expect(mockedClient.get).toBeCalledWith('dashboard', 'test-id');
     });
 
     it('should handle regular config requests', async () => {
@@ -67,7 +67,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       const result = await wrapperClient.get('config', '3.0.0');
 
-      expect(mockedClient.get).toBeCalledWith('config', '3.0.0', {});
+      expect(mockedClient.get).toBeCalledWith('config', '3.0.0');
       expect(result).toEqual(mockResponse);
     });
 
@@ -83,29 +83,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       const result = await wrapperClient.get('config', DASHBOARD_ADMIN_SETTINGS_ID);
 
-      expect(mockedClient.get).toBeCalledWith('config', DASHBOARD_ADMIN_SETTINGS_ID, {});
+      expect(mockedClient.get).toBeCalledWith('config', DASHBOARD_ADMIN_SETTINGS_ID);
       expect(result).toEqual(adminSettings);
-    });
-
-    it('should return empty object when admin settings do not exist', async () => {
-      const wrapperClient = buildWrapperInstance(true);
-
-      mockedClient.get.mockImplementation(() => {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
-          'config',
-          DASHBOARD_ADMIN_SETTINGS_ID
-        );
-      });
-
-      const result = await wrapperClient.get('config', DASHBOARD_ADMIN_SETTINGS_ID);
-
-      expect(mockedClient.get).toBeCalledWith('config', DASHBOARD_ADMIN_SETTINGS_ID, {});
-      expect(result).toEqual({
-        id: DASHBOARD_ADMIN_SETTINGS_ID,
-        type: 'config',
-        attributes: {},
-        references: [],
-      });
     });
 
     it('should propagate errors other than not found', async () => {
@@ -157,7 +136,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
     it('should create admin settings when user is dashboard admin', async () => {
       const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = { enableDashboardAssistantFeature: true };
+      const attributes = { permissionControlledSetting: true };
       const mockResponse = {
         id: DASHBOARD_ADMIN_SETTINGS_ID,
         type: 'config',
@@ -178,7 +157,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
     it('should throw permission error when user is not dashboard admin', async () => {
       const wrapperClient = buildWrapperInstance(true, false);
-      const attributes = { enableDashboardAssistantFeature: true };
+      const attributes = { permission: true };
 
       await expect(
         wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID })
@@ -187,7 +166,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
     it('should not add permissions when permission control is disabled', async () => {
       const wrapperClient = buildWrapperInstance(false, true);
-      const attributes = { enableDashboardAssistantFeature: true };
+      const attributes = { permissionControlled: true };
 
       await wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID });
 
@@ -196,15 +175,6 @@ describe('PermissionControlledUiSettingsWrapper', () => {
         overwrite: true,
       });
       expect(mockedClient.create.mock.calls[0][2]).not.toHaveProperty('permissions');
-    });
-
-    it('should throw validation error for invalid admin settings keys', async () => {
-      const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = { invalidSetting: true };
-
-      await expect(
-        wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID })
-      ).rejects.toThrow('Invalid admin settings keys: invalidSetting');
     });
   });
 
@@ -229,7 +199,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
     it('should update admin settings when user is dashboard admin', async () => {
       const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = { enableDashboardAssistantFeature: false };
+      const attributes = { permissionControlledSetting: false };
       const mockResponse = {
         id: DASHBOARD_ADMIN_SETTINGS_ID,
         type: 'config',
@@ -252,7 +222,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     it('should ignore buildNum when updating admin settings', async () => {
       const wrapperClient = buildWrapperInstance(true, true);
       const attributes = {
-        enableDashboardAssistantFeature: false,
+        permissionControlledSetting: false,
         buildNum: 12345,
       };
 
@@ -261,14 +231,14 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       expect(mockedClient.update).toBeCalledWith(
         'config',
         DASHBOARD_ADMIN_SETTINGS_ID,
-        { enableDashboardAssistantFeature: false },
+        { permissionControlledSetting: false },
         {}
       );
     });
 
     it('should throw permission error when user is not dashboard admin', async () => {
       const wrapperClient = buildWrapperInstance(true, false);
-      const attributes = { enableDashboardAssistantFeature: false };
+      const attributes = { permissionControlledSetting: false };
 
       await expect(
         wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes)
@@ -277,7 +247,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
     it('should create admin settings if they do not exist during update', async () => {
       const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = { enableDashboardAssistantFeature: true };
+      const attributes = { permissionControlledSetting: true };
 
       mockedClient.update.mockImplementation(() => {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(
@@ -293,15 +263,6 @@ describe('PermissionControlledUiSettingsWrapper', () => {
         overwrite: true,
         permissions: expect.any(Object),
       });
-    });
-
-    it('should throw validation error for invalid admin settings keys', async () => {
-      const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = { invalidSetting: true };
-
-      await expect(
-        wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes)
-      ).rejects.toThrow('Invalid admin settings keys: invalidSetting');
     });
   });
 
@@ -338,7 +299,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
         {
           type: 'config',
           id: DASHBOARD_ADMIN_SETTINGS_ID,
-          attributes: { enableDashboardAssistantFeature: true },
+          attributes: { permissionControlledSetting: true },
         },
       ];
 
@@ -374,7 +335,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
         {
           type: 'config',
           id: DASHBOARD_ADMIN_SETTINGS_ID,
-          attributes: { enableDashboardAssistantFeature: true },
+          attributes: { permissionControlledSetting: true },
         },
       ];
 

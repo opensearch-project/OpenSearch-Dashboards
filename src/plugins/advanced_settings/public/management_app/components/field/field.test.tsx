@@ -48,7 +48,7 @@ const defaults = {
   category: ['category'],
 };
 
-const exampleValues = {
+const exampleValues: any = {
   array: ['example_value'],
   boolean: false,
   image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=',
@@ -195,7 +195,7 @@ const settings: Record<string, FieldSetting> = {
     ...defaults,
   },
 };
-const userValues = {
+const userValues: Record<string, any> = {
   array: ['user', 'value'],
   boolean: false,
   image: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
@@ -207,7 +207,7 @@ const userValues = {
   stringWithValidation: 'fooUserValue',
 };
 
-const invalidUserValues = {
+const invalidUserValues: Record<string, any> = {
   stringWithValidation: 'invalidUserValue',
 };
 
@@ -247,7 +247,6 @@ describe('Field', () => {
           <Field
             setting={{
               ...setting,
-              // @ts-ignore
               value: userValues[type],
               isOverridden: true,
             }}
@@ -266,7 +265,6 @@ describe('Field', () => {
           <Field
             setting={{
               ...setting,
-              // @ts-ignore
               value: userValues[type],
               isPermissionControlled: true,
             }}
@@ -298,7 +296,6 @@ describe('Field', () => {
           <Field
             setting={{
               ...setting,
-              // @ts-ignore
               value: userValues[type],
             }}
             handleChange={handleChange}
@@ -338,7 +335,6 @@ describe('Field', () => {
             toasts={notificationServiceMock.createStartContract().toasts}
             dockLinks={docLinksServiceMock.createStartContract().links}
             unsavedChanges={{
-              // @ts-ignore
               value: exampleValues[setting.type],
             }}
           />
@@ -362,10 +358,8 @@ describe('Field', () => {
           />
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
-        // @ts-ignore
         const values = select.find('option').map((option) => option.prop('value'));
         expect(values).toEqual(['apple', 'orange', 'banana']);
-        // @ts-ignore
         const labels = select.find('option').map((option) => option.text());
         expect(labels).toEqual(['Apple', 'Orange', 'banana']);
       });
@@ -476,12 +470,10 @@ describe('Field', () => {
     } else {
       describe(`for changing ${type} setting`, () => {
         const { wrapper, component } = setup();
-        // @ts-ignore
         const userValue = userValues[type];
         const fieldUserValue = type === 'array' ? userValue.join(', ') : userValue;
 
         if (setting.validation) {
-          // @ts-ignore
           const invalidUserValue = invalidUserValues[type];
           it('should display an error when validation fails', async () => {
             await (component.instance() as Field).onFieldChange(invalidUserValue);
