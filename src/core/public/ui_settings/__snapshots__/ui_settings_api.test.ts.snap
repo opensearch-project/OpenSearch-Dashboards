@@ -159,7 +159,7 @@ Array [
 exports[`#batchSet sends a single without scope change immediately: single without scope 1`] = `
 Array [
   Array [
-    "/foo/bar/api/opensearch-dashboards/settings?scope=global",
+    "/foo/bar/api/opensearch-dashboards/settings",
     Object {
       "headers": Object {
         "accept": "application/json",

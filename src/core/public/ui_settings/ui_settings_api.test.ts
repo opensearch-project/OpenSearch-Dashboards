@@ -74,7 +74,7 @@ describe('#batchSet', () => {
       body: { settings: {} },
     });
 
-    const { uiSettingsApi } = setup(UiSettingScope.GLOBAL);
+    const { uiSettingsApi } = setup();
     await uiSettingsApi.batchSet('foo', 'bar');
     const calls = fetchMock.calls();
     expect(calls.length).toBe(1);

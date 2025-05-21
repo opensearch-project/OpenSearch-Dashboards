@@ -828,7 +828,7 @@ describe('ui settings', () => {
         if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
           return Promise.resolve({
             attributes: {
-              bar: 'my personal value',
+              bar: 'workspace value',
             },
           } as any);
         } else if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
@@ -839,7 +839,7 @@ describe('ui settings', () => {
           return Promise.resolve({
             attributes: {
               foo: 'default1',
-              bar: 'global value',
+              bar: 'workspace value',
             },
           } as any);
         }
@@ -847,7 +847,7 @@ describe('ui settings', () => {
 
       expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'default1',
-        bar: 'my personal value',
+        bar: 'workspace value',
       });
     });
 

@@ -65,6 +65,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isGetingDefaultDataSource, setIsGetingDefaultDataSource] = useState<boolean>(false);
   const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>(null);
   const useNewUX = uiSettings.get('home:useNewHomePage');
   const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
@@ -79,13 +80,13 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
   const loadDefaultDataSourceId = useCallback(async () => {
     try {
-      setIsLoading(true);
+      setIsGetingDefaultDataSource(true);
       const id = await getDefaultDataSourceId(uiSettings, scope);
       setDefaultDataSourceId(id);
     } catch (error) {
       toasts.addWarning(error.message);
     } finally {
-      setIsLoading(false);
+      setIsGetingDefaultDataSource(false);
     }
   }, [uiSettings, scope, toasts]);
 
@@ -220,7 +221,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
             crossClusterConnectionAlias={crossClusterConnectionAlias}
           />
         ) : null}
-        {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}
+        {isLoading || isGetingDefaultDataSource || !dataSource?.endpoint ? <LoadingMask /> : null}
       </>
     );
   };
