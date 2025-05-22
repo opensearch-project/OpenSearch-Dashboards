@@ -15,8 +15,7 @@
     "uiActions",
     "visualizations",
     "usageCollection",
-    "expressions",
-    "visTypeVislib"
+    "expressions"
   ],
   "optionalPlugins": ["home", "share"],
   "requiredBundles": [

@@ -7,7 +7,7 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { Option } from '../../style_panel/option';
 import { BasicVisOptions } from '../../style_panel/basic_vis_options';
-import { LineChartStyleControls } from './line_vis_type';
+import { LineChartStyleControls } from './line_vis_config';
 
 export interface LineChartStyleControlsProps {
   defaultStyles: LineChartStyleControls;

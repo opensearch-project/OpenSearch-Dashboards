@@ -3,15 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Positions } from '../../../../../../vis_type_vislib/public';
 import { VisualizationType } from '../../../view_components/utils/use_visualization_types';
+import { Positions } from '../utils/collections';
 import { LineVisStyleControls } from './line_vis_options';
 import { toExpression } from './to_expression';
-
-export interface LineOptionsDefaults {
-  type: 'line';
-}
-
 export interface LineChartStyleControls {
   addTooltip: boolean;
   addLegend: boolean;
@@ -24,11 +19,9 @@ const defaultLineChartStyles: LineChartStyleControls = {
   legendPosition: Positions.RIGHT,
 };
 
-export const createLineConfig = (): VisualizationType<LineOptionsDefaults> => ({
+export const createLineConfig = (): VisualizationType => ({
   name: 'line',
-  title: 'Line',
-  icon: 'visLine',
-  description: 'Display line chart',
+  type: 'line',
   toExpression,
   ui: {
     style: {

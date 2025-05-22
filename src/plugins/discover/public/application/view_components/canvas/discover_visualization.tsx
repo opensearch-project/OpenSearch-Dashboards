@@ -13,16 +13,13 @@ import { useDiscoverContext } from '../context';
 
 import { SearchData } from '../utils';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { useVisualizationType } from '../utils/use_visualization_types';
-import { LineChartStyleControls } from '../../components/visualizations/line/line_vis_type';
+import { getVisualizationType, VisualizationType } from '../utils/use_visualization_types';
+import { LineChartStyleControls } from '../../components/visualizations/line/line_vis_config';
+import { visualizationRegistry } from '../../components/visualizations/visualization_registry';
+import { lineChartRule } from '../../components/visualizations/line/line_chart_rules';
+import { DiscoverVisColumn } from '../../components/visualizations/types';
 
-export const DiscoverVisualization = ({
-  hits,
-  bucketInterval,
-  chartData,
-  rows,
-  fieldSchema,
-}: SearchData) => {
+export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
     data: {
@@ -32,12 +29,21 @@ export const DiscoverVisualization = ({
   } = services;
   const { indexPattern } = useDiscoverContext();
 
-  // Get configs and expression utils from a specific visualization type
-  const { toExpression } = useVisualizationType();
-  const visOptions = useVisualizationType().ui.style.render;
-  const defaultStyles = useVisualizationType().ui.style.defaults;
+  // Register all rules
+  visualizationRegistry.registerRule(lineChartRule);
+
+  const [visualizationData, setVisualizationData] = useState<
+    | {
+        visualizationType: VisualizationType;
+        numericalColumns: DiscoverVisColumn[];
+        categoricalColumns: DiscoverVisColumn[];
+        dateColumns: DiscoverVisColumn[];
+      }
+    | undefined
+  >(undefined);
+
   const [expression, setExpression] = useState<string>();
-  const [styleOptions, setStyleOptions] = useState<LineChartStyleControls>(defaultStyles);
+  const [styleOptions, setStyleOptions] = useState<LineChartStyleControls | undefined>(undefined);
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -49,15 +55,29 @@ export const DiscoverVisualization = ({
   );
 
   useEffect(() => {
+    if (fieldSchema) {
+      console.log('fieldSchema', fieldSchema);
+      const result = getVisualizationType(rows, fieldSchema);
+      setVisualizationData(result);
+
+      // Todo: everytime the fields change, do we reset the style options?
+      setStyleOptions(result?.visualizationType.ui.style.defaults);
+    }
+  }, [fieldSchema, rows]);
+
+  useEffect(() => {
     async function loadExpression() {
-      if (!rows || !indexPattern) {
+      if (!rows || !indexPattern || !visualizationData) {
         return;
       }
-      const exp = await toExpression(
+      const exp = await visualizationData.visualizationType.toExpression(
         services,
         searchContext,
         rows,
         indexPattern,
+        visualizationData.numericalColumns,
+        visualizationData.categoricalColumns,
+        visualizationData.dateColumns,
         fieldSchema,
         styleOptions
       );
@@ -65,7 +85,7 @@ export const DiscoverVisualization = ({
     }
 
     loadExpression();
-  }, [toExpression, searchContext, rows, indexPattern, services, fieldSchema, styleOptions]);
+  }, [searchContext, rows, indexPattern, services, fieldSchema, styleOptions, visualizationData]);
 
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
@@ -99,7 +119,11 @@ export const DiscoverVisualization = ({
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <EuiPanel className="stylePanel" data-test-subj="stylePanel">
-          {visOptions({ defaultStyles, onChange: setStyleOptions })}
+          {visualizationData &&
+            visualizationData.visualizationType.ui.style.render({
+              defaultStyles: visualizationData.visualizationType.ui.style.defaults,
+              onChange: setStyleOptions,
+            })}
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -6,9 +6,9 @@
 import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import { SelectOption, SwitchOption } from '../../../../../charts/public';
-import { getConfigCollections } from '../../../../../vis_type_vislib/public';
-import { LineChartStyleControls } from '../visualizations/line/line_vis_type';
+import { LineChartStyleControls } from '../visualizations/line/line_vis_config';
 import { LineChartStyleControlsProps } from '../visualizations/line/line_vis_options';
+import { getPositions } from '../visualizations/utils/collections';
 
 export const BasicVisOptions = ({ defaultStyles, onChange }: LineChartStyleControlsProps) => {
   const [styles, setStyles] = useState<LineChartStyleControls>(defaultStyles);
@@ -17,14 +17,16 @@ export const BasicVisOptions = ({ defaultStyles, onChange }: LineChartStyleContr
     setStyles(newStyles);
     onChange(newStyles);
   };
-  const { legendPositions } = getConfigCollections();
+  // Could import and reuse { getConfigCollections } from '../../../../../vis_type_vislib/public';
+  // That requires adding vis_type_vislib as a dependency to discover, and somehow that throw errors
+  const legendPostions = getPositions();
   return (
     <>
       <SelectOption
         label={i18n.translate('visBuilder.controls.vislibBasicOptions.legendPositionLabel', {
           defaultMessage: 'Legend position',
         })}
-        options={legendPositions}
+        options={legendPostions}
         paramName="legendPosition"
         value={styles.legendPosition}
         setValue={(_, value) => updateStyle('legendPosition', value)}
