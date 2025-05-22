@@ -21,16 +21,7 @@ import {
 import { CoreStart, WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 
-export interface ShowDeleteDetailsModalProps {
-  selectedWorkspaces: WorkspaceAttribute[];
-  failedWorksapces: WorkspaceAttribute[];
-  openModal: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openModal']>['1']
-  ) => ReturnType<CoreStart['overlays']['openModal']>;
-}
-
-export const ShowDeleteDetailsModal = (
+export const showDeleteDetailsModal = (
   selectedWorkspaces: WorkspaceAttribute[],
   failedWorksapces: WorkspaceAttribute[],
   openModal: (

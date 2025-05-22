@@ -25,7 +25,7 @@ import {
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
-import { ShowDeleteDetailsModal } from './show_delete_details_modal';
+import { showDeleteDetailsModal } from './show_delete_details_modal';
 
 export interface DeleteWorkspaceModalProps {
   onClose: () => void;
@@ -85,7 +85,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
                   <EuiSmallButton
                     color="success"
                     onClick={() =>
-                      ShowDeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
+                      showDeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
                     }
                   >
                     {i18n.translate('workspace.delete.detail', {
@@ -132,7 +132,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
                   <EuiSmallButton
                     color={isAllFailed ? 'danger' : 'warning'}
                     onClick={() =>
-                      ShowDeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
+                      showDeleteDetailsModal(selectedWorkspaces, failedWorksapces, openModal)
                     }
                   >
                     {i18n.translate('workspace.delete.detail', {
