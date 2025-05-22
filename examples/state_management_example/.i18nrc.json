@@ -1,0 +1,7 @@
+{
+  "prefix": "stateManagementExample",
+  "paths": {
+    "stateManagementExample": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
