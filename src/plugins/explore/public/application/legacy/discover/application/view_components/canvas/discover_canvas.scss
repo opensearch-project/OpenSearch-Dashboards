@@ -1,0 +1,59 @@
+.dscCanvas {
+  @include euiYScroll;
+
+  /* stylelint-disable-next-line */
+  container-type: inline-size; // containment context
+  /* stylelint-disable-next-line */
+  container-name: canvas;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &_results {
+    border: none;
+    border-top: $ouiBorderThin;
+    margin-left: $euiSizeM;
+    position: relative;
+  }
+
+  &_options {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+// TopNav styles for the Discover
+/* stylelint-disable-next-line */
+@container canvas (max-width: 900px) {
+  .globalQueryBar {
+    .osdQueryBar--withDatePicker {
+      flex-wrap: wrap;
+
+      /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+      & > .euiFlexItem {
+        width: 100% !important;
+
+        &:first-child {
+          order: 1;
+        }
+      }
+
+      .osdQueryBar__datePickerWrapper {
+        max-width: initial;
+        width: 100%;
+
+        /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+        .euiSuperDatePicker__flexWrapper {
+          width: auto;
+        }
+      }
+    }
+  }
+}
+
+.topNav {
+  .hidden {
+    display: none;
+  }
+}

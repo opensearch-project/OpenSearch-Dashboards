@@ -204,7 +204,8 @@ Cypress.Commands.add(
     cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Index Patterns"]`).click();
 
-    cy.get(`[title="${dataSourceName}::${indexPattern}"]`)
+    cy.getElementByTestId('datasetExplorerWindow')
+      .find(`[title="${dataSourceName}::${indexPattern}"]`)
       .should('be.visible')
       .click({ force: true });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();

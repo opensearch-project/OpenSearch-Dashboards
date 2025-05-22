@@ -15,6 +15,7 @@
     "devTools": "plugins/dev_tools",
     "discover": "plugins/discover",
     "embeddableApi": "plugins/embeddable",
+    "explore": "plugins/explore",
     "expressions": "plugins/expressions",
     "home": "plugins/home",
     "indexPatternManagement": "plugins/index_pattern_management",

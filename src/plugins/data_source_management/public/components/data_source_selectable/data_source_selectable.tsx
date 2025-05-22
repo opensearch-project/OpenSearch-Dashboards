@@ -213,8 +213,8 @@ export class DataSourceSelectable extends React.Component<
         });
         return;
       }
-
-      const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
+      // for data source selectable, get default data source from cache
+      const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
 
       if (this.props.selectedOption?.length) {
         this.handleSelectedOption(dataSourceOptions, defaultDataSource);
