@@ -12,52 +12,26 @@ import {
 import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
 import { IFieldType, IndexPattern } from '../../../../../../data/public';
 import { DiscoverViewServices } from '../../../../build_services';
-import { LineChartStyleControls } from './line_vis_type';
-
-export type DiscoverVisFieldType = 'numerical' | 'categorical' | 'date';
-
-interface DiscoverVisColumn {
-  id: number;
-  name: string;
-  schema: DiscoverVisFieldType;
-  column: string;
-}
+import { LineChartStyleControls } from './line_vis_config';
+import { DiscoverVisColumn } from '../types';
 
 export const toExpression = async (
   services: DiscoverViewServices,
   searchContext: IExpressionLoaderParams['searchContext'],
   rows: OpenSearchSearchHit[],
   indexPattern: IndexPattern,
-  fieldSchema?: Array<Partial<IFieldType>>,
+  numericalColumns: DiscoverVisColumn[],
+  categoricalColumns: DiscoverVisColumn[],
+  dateColumns: DiscoverVisColumn[],
   styleOptions?: Partial<LineChartStyleControls>
 ) => {
+  console.log('line chart', numericalColumns, categoricalColumns, dateColumns);
   if (
     !indexPattern ||
     !searchContext ||
     !JSON.stringify(searchContext.query).toLowerCase().includes('stats') // Empty visualization if query is not aggregated
   ) {
     return '';
-  }
-
-  const columns: DiscoverVisColumn[] = fieldSchema!.map((field, index) => {
-    // Create a clean version of the field name
-    return {
-      id: index,
-      schema: getFieldTypeFromSchema(field.type),
-      name: field.name || '',
-      column: `field-${index}`,
-    };
-  });
-
-  const numericalColumns = columns.filter((column) => column.schema === 'numerical');
-  const categoricalColumns = columns.filter((column) => column.schema === 'categorical');
-
-  if (rows.length < 1) {
-    return ''; // no visualization
-  }
-
-  if (rows.length === 1) {
-    return ''; // metric/markdown visualization
   }
 
   const opensearchDashboards = buildExpressionFunction<ExpressionFunctionOpenSearchDashboards>(
@@ -70,20 +44,14 @@ export const toExpression = async (
     query: JSON.stringify(searchContext.query || []),
   });
 
-  let vegaSpec;
-  if (numericalColumns.length >= 1 && categoricalColumns.length === 1) {
-    // Satisfy the condition of line chart
-    vegaSpec = createVegaLineSpec(
-      rows,
-      indexPattern,
-      columns,
-      numericalColumns,
-      categoricalColumns,
-      styleOptions
-    );
-  } else {
-    vegaSpec = '{}'; // Table visualization
-  }
+  const vegaSpec = createVegaLineSpec(
+    rows,
+    indexPattern,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions
+  );
 
   const vega = buildExpressionFunction<any>('vega', {
     spec: JSON.stringify(vegaSpec),
@@ -92,35 +60,13 @@ export const toExpression = async (
   return buildExpression([opensearchDashboards, opensearchDashboardsContext, vega]).toString();
 };
 
-// TODO: map OSD_FIELD_TYPES to DiscoverVisFieldType
-const getFieldTypeFromSchema = (schema?: string): DiscoverVisFieldType => {
-  switch (schema) {
-    case 'string':
-      return 'categorical';
-    case 'number':
-      return 'numerical';
-    case 'double':
-      return 'numerical';
-    case 'integer':
-      return 'numerical';
-    case 'long':
-      return 'numerical';
-    case 'float':
-      return 'numerical';
-    case 'boolean':
-      return 'numerical';
-    case 'date':
-      return 'date';
-  }
-  return 'categorical';
-};
-
+// Todo: this func needs modification based on the new mapping rules
 const createVegaLineSpec = (
   rows: OpenSearchSearchHit[],
   indexPattern: IndexPattern,
-  columns: DiscoverVisColumn[],
-  numericalFields: any,
-  categoricalFields: any,
+  numericalColumns: DiscoverVisColumn[],
+  categoricalColumns: DiscoverVisColumn[],
+  dateColumns: DiscoverVisColumn[],
   styleOptions?: Partial<LineChartStyleControls>
 ) => {
   // Transform data to a format Vega can use
