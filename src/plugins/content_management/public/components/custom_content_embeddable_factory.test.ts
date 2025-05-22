@@ -10,6 +10,7 @@ test('create CustomContentEmbeddableFactory', async () => {
   const factory = new CustomContentEmbeddableFactoryDefinition();
   expect(factory.type).toBe(CUSTOM_CONTENT_EMBEDDABLE);
   expect(await factory.isEditable()).toBe(false);
+  expect(factory.canCreateNew()).toBe(false);
   expect(factory.getDisplayName()).toBe('Content');
   expect(await factory.create({ id: 'id', render: jest.fn() })).toBeInstanceOf(
     CustomContentEmbeddable
