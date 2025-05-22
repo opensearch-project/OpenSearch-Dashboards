@@ -4,9 +4,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { waitFor } from '@testing-library/dom';
 import { first } from 'rxjs/operators';
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock } from 'opensearch-dashboards/public/mocks';
 import {
   ChromeBreadcrumb,
   NavGroupStatus,
@@ -15,7 +14,7 @@ import {
   WorkspaceAvailability,
   AppStatus,
   WorkspaceError,
-} from '../../../core/public';
+} from 'opensearch-dashboards/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
@@ -543,6 +542,99 @@ describe('Workspace plugin', () => {
 
     const appState = await appUpdater$.pipe(first()).toPromise();
     expect(appState(mockApp)).toEqual({ status: AppStatus.inaccessible });
+  });
+
+  it('#start should remove non-workspace chrome page search service', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+
+    workspacePlugin.start(coreStart, getMockDependencies());
+
+    expect(coreStart.chrome.globalSearch.unregisterSearchCommand).toBeCalledWith('pagesSearch');
+  });
+
+  it('#start should update collaboratorsAppUpdater correctly if permission enabled', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+
+    const appUpdaterSpy = jest.spyOn((workspacePlugin as any).collaboratorsAppUpdater$, 'next');
+
+    const startMock = {
+      ...coreStart,
+      chrome: {
+        ...coreStart.chrome,
+        navGroup: {
+          ...coreStart.chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(true),
+        },
+      },
+      application: {
+        ...coreStart.application,
+        capabilities: {
+          ...coreStart.application.capabilities,
+          workspaces: {
+            ...coreStart.application.capabilities.workspaces,
+            permissionEnabled: true,
+          },
+        },
+      },
+    };
+
+    workspacePlugin.start(startMock, getMockDependencies());
+
+    expect(appUpdaterSpy).toHaveBeenCalled();
+    const updaterFn = appUpdaterSpy.mock.calls[0][0];
+    const result = (updaterFn as any)();
+
+    expect(result).toStrictEqual({
+      status: AppStatus.accessible,
+      navLinkStatus: AppNavLinkStatus.visible,
+    });
+  });
+
+  it('#start should update collaboratorsAppUpdater correctly if permission disabled', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+
+    const appUpdaterSpy = jest.spyOn((workspacePlugin as any).collaboratorsAppUpdater$, 'next');
+
+    const startMock = {
+      ...coreStart,
+      chrome: {
+        ...coreStart.chrome,
+        navGroup: {
+          ...coreStart.chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(false),
+        },
+      },
+      application: {
+        ...coreStart.application,
+        capabilities: {
+          ...coreStart.application.capabilities,
+          workspaces: {
+            ...coreStart.application.capabilities.workspaces,
+            permissionEnabled: false,
+          },
+        },
+      },
+    };
+
+    workspacePlugin.start(startMock, getMockDependencies());
+
+    expect(appUpdaterSpy).toHaveBeenCalled();
+    const updaterFn = appUpdaterSpy.mock.calls[0][0];
+    const result = (updaterFn as any)();
+
+    expect(result).toStrictEqual({
+      status: AppStatus.inaccessible,
+      navLinkStatus: AppNavLinkStatus.hidden,
+    });
   });
 
   it('#stop should call unregisterNavGroupUpdater', async () => {

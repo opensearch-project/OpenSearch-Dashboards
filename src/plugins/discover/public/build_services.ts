@@ -48,6 +48,7 @@ import {
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { VisualizationsStart } from 'src/plugins/visualizations/public';
 import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
 
@@ -84,6 +85,7 @@ export interface DiscoverServices {
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
   storage: Storage;
+  uiActions: UiActionsStart;
 }
 
 export function buildServices(
@@ -127,6 +129,7 @@ export function buildServices(
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
     storage,
+    uiActions: plugins.uiActions,
   };
 }
 

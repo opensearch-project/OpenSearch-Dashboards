@@ -24,6 +24,7 @@ import {
   defaultAuthType,
   noAuthCredentialAuthMethod,
 } from '../types';
+import { UiSettingScope } from '../../../../core/public';
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
 import { DataSourceGroupLabelOption } from './data_source_menu/types';
@@ -72,7 +73,7 @@ export const getRemoteClusterConnections = async (dataSourceId: string, http: Ht
 
   const remoteClusterConnections: DataSourceTableItem[] = response.map(
     (remoteClusterConnection: { connectionAlias: string }) => ({
-      id: `${dataSourceId}-${remoteClusterConnection.connectionAlias}`,
+      id: `${dataSourceId}:${remoteClusterConnection.connectionAlias}`,
       title: remoteClusterConnection.connectionAlias,
       type: DataSourceEngineType.OpenSearchCrossCluster,
       connectionType: DataSourceConnectionType.OpenSearchConnection,
@@ -272,25 +273,27 @@ export async function getDataSourcesWithFields(
 
 export async function handleSetDefaultDatasource(
   savedObjectsClient: SavedObjectsClientContract,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  scope: UiSettingScope
 ) {
-  if (!getDefaultDataSourceId(uiSettings)) {
-    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
+  if (!(await getDefaultDataSourceId(uiSettings, scope))) {
+    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false, scope);
   }
 }
 
 export async function setFirstDataSourceAsDefault(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient,
-  exists: boolean
+  exists: boolean,
+  scope: UiSettingScope
 ) {
   if (exists) {
-    uiSettings.remove(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID);
+    await uiSettings.remove(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, scope);
   }
   const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
   if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
     const datasourceId = listOfDataSources[0].id;
-    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, datasourceId);
+    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, datasourceId, scope);
   }
 }
 
@@ -335,8 +338,20 @@ export function getFilteredDataSources(
     .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 }
 
-export function getDefaultDataSourceId(uiSettings?: IUiSettingsClient) {
+export async function getDefaultDataSourceId(
+  uiSettings?: IUiSettingsClient,
+  scope?: UiSettingScope
+) {
   if (!uiSettings) return null;
+  // if specify the scope, then we will call getUserProvidedWithScope to request from server
+  // otherwise, we will get defaultDataSource stored in cache
+  if (scope) {
+    const result = await uiSettings.getUserProvidedWithScope<string | null>(
+      DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+      scope
+    );
+    return result;
+  }
   return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
 }
 

@@ -1,0 +1,12 @@
+/**
+   * 1. We want the osdDocTable__container to scroll only when embedded in an embeddable panel
+   * 2. Force a better looking scrollbar
+   */
+.embPanel {
+  .osdDocTable__container {
+    @include euiScrollBar; /* 2 */
+
+    flex: 1 1 0; /* 1 */
+    overflow: auto; /* 1 */
+  }
+}

@@ -1,0 +1,2 @@
+fix:
+- Remove * when calling find in data source association modal and in workspace list page ([#9409](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9409))

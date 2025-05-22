@@ -55,6 +55,7 @@ export interface GlobalSearchServiceSetupContract {
 
 export interface GlobalSearchServiceStartContract {
   getAllSearchCommands(): GlobalSearchCommand[];
+  unregisterSearchCommand(id: string): void;
 }
 
 /**
@@ -89,6 +90,12 @@ export class GlobalSearchService {
     this.searchCommands.push(searchHandler);
   }
 
+  private unregisterSearchCommand(id: string) {
+    this.searchCommands = this.searchCommands.filter((item) => {
+      return item.id !== id;
+    });
+  }
+
   public setup(): GlobalSearchServiceSetupContract {
     return {
       registerSearchCommand: this.registerSearchCommand.bind(this),
@@ -98,6 +105,7 @@ export class GlobalSearchService {
   public start(): GlobalSearchServiceStartContract {
     return {
       getAllSearchCommands: () => this.searchCommands,
+      unregisterSearchCommand: this.unregisterSearchCommand.bind(this),
     };
   }
 }

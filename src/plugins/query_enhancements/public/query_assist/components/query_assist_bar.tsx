@@ -14,7 +14,7 @@ import {
 } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { QueryAssistParameters } from '../../../common/query_assist';
-import { getStorage } from '../../services';
+import { getStorage, getUiActions } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { getPersistedLog, AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
@@ -36,7 +36,8 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     () => getPersistedLog(services.uiSettings, storage, 'query-assist'),
     [services.uiSettings, storage]
   );
-  const { generateQuery, loading } = useGenerateQuery();
+  const uiActions = getUiActions();
+  const { generateQuery, loading } = useGenerateQuery(uiActions);
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
   const [agentError, setAgentError] = useState<AgentError>();
@@ -79,6 +80,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       if (error instanceof ProhibitedQueryError) {
         setCallOutType('invalid_query');
       } else if (error instanceof AgentError) {
+        setCallOutType('invalid_query');
         setAgentError(error);
       } else {
         services.notifications.toasts.addError(error, { title: 'Failed to generate results' });

@@ -1,0 +1,2 @@
+fix:
+- Should clear previous query if input invalid questions ([#9605](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9605))

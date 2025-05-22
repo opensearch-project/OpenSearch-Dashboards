@@ -5,6 +5,7 @@
 
 import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import { DataSourcePluginStart } from 'src/plugins/data_source/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
@@ -26,6 +27,7 @@ export interface QueryEnhancementsPluginSetupDependencies {
 export interface QueryEnhancementsPluginStartDependencies {
   data: DataPublicPluginStart;
   dataSource?: DataSourcePluginStart;
+  uiActions: UiActionsStart;
 }
 
 export interface Connection {

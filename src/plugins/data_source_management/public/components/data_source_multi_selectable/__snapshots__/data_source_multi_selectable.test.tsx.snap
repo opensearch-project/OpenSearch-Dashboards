@@ -1,17 +1,425 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DataSourceMultiSelectable should render normally with local cluster hidden 1`] = `
-<DataSourceFilterGroup
-  defaultDataSource={null}
-  selectedOptions={Array []}
-  setSelectedOptions={[Function]}
-/>
+<DataSourceMultiSelectable
+  fullWidth={false}
+  hideLocalCluster={true}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  onSelectedDataSources={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          Array [
+            Object {
+              "checked": "on",
+              "id": "test1",
+              "label": "test1",
+              "visible": true,
+            },
+            Object {
+              "checked": "on",
+              "id": "test2",
+              "label": "test2",
+              "visible": true,
+            },
+            Object {
+              "checked": "on",
+              "id": "test3",
+              "label": "test3",
+              "visible": true,
+            },
+          ],
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "fields": Array [
+                "id",
+                "title",
+                "auth.type",
+                "dataSourceVersion",
+                "installedPlugins",
+              ],
+              "perPage": 10000,
+              "type": "data-source",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    }
+  }
+>
+  <DataSourceFilterGroup
+    defaultDataSource={null}
+    selectedOptions={
+      Array [
+        Object {
+          "checked": "on",
+          "id": "test1",
+          "label": "test1",
+          "visible": true,
+        },
+        Object {
+          "checked": "on",
+          "id": "test2",
+          "label": "test2",
+          "visible": true,
+        },
+        Object {
+          "checked": "on",
+          "id": "test3",
+          "label": "test3",
+          "visible": true,
+        },
+      ]
+    }
+    setSelectedOptions={[Function]}
+  >
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
+        <React.Fragment>
+          <EuiButtonEmpty
+            className="euiHeaderLink"
+            data-test-subj="dataSourceFilterGroupButton"
+            iconType="database"
+            onClick={[Function]}
+            size="s"
+          >
+            Data sources
+          </EuiButtonEmpty>
+          <EuiNotificationBadge
+            color="subdued"
+          >
+            3
+          </EuiNotificationBadge>
+        </React.Fragment>
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="popoverExampleMultiSelect"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownCenter"
+        id="popoverExampleMultiSelect"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <EuiButtonEmpty
+            className="euiHeaderLink"
+            data-test-subj="dataSourceFilterGroupButton"
+            iconType="database"
+            onClick={[Function]}
+            size="s"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+              data-test-subj="dataSourceFilterGroupButton"
+              disabled={false}
+              onClick={[Function]}
+              type="button"
+            >
+              <EuiButtonContent
+                className="euiButtonEmpty__content"
+                iconGap="m"
+                iconSide="left"
+                iconSize="m"
+                iconType="database"
+                textProps={
+                  Object {
+                    "className": "euiButtonEmpty__text",
+                  }
+                }
+              >
+                <span
+                  className="euiButtonContent euiButtonEmpty__content"
+                >
+                  <EuiIcon
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    size="m"
+                    type="database"
+                  >
+                    <span
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="database"
+                      size="m"
+                    />
+                  </EuiIcon>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    Data sources
+                  </span>
+                </span>
+              </EuiButtonContent>
+            </button>
+          </EuiButtonEmpty>
+          <EuiNotificationBadge
+            color="subdued"
+          >
+            <span
+              className="euiNotificationBadge euiNotificationBadge--subdued"
+            >
+              3
+            </span>
+          </EuiNotificationBadge>
+        </div>
+      </div>
+    </EuiPopover>
+  </DataSourceFilterGroup>
+</DataSourceMultiSelectable>
 `;
 
 exports[`DataSourceMultiSelectable should render normally with local cluster not hidden 1`] = `
-<DataSourceFilterGroup
-  defaultDataSource={null}
-  selectedOptions={Array []}
-  setSelectedOptions={[Function]}
-/>
+<DataSourceMultiSelectable
+  fullWidth={false}
+  hideLocalCluster={false}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  onSelectedDataSources={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          Array [
+            Object {
+              "checked": "on",
+              "id": "",
+              "label": "Local cluster",
+              "visible": true,
+            },
+            Object {
+              "checked": "on",
+              "id": "test1",
+              "label": "test1",
+              "visible": true,
+            },
+            Object {
+              "checked": "on",
+              "id": "test2",
+              "label": "test2",
+              "visible": true,
+            },
+            Object {
+              "checked": "on",
+              "id": "test3",
+              "label": "test3",
+              "visible": true,
+            },
+          ],
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "fields": Array [
+                "id",
+                "title",
+                "auth.type",
+                "dataSourceVersion",
+                "installedPlugins",
+              ],
+              "perPage": 10000,
+              "type": "data-source",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    }
+  }
+>
+  <DataSourceFilterGroup
+    defaultDataSource={null}
+    selectedOptions={
+      Array [
+        Object {
+          "checked": "on",
+          "id": "",
+          "label": "Local cluster",
+          "visible": true,
+        },
+        Object {
+          "checked": "on",
+          "id": "test1",
+          "label": "test1",
+          "visible": true,
+        },
+        Object {
+          "checked": "on",
+          "id": "test2",
+          "label": "test2",
+          "visible": true,
+        },
+        Object {
+          "checked": "on",
+          "id": "test3",
+          "label": "test3",
+          "visible": true,
+        },
+      ]
+    }
+    setSelectedOptions={[Function]}
+  >
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
+        <React.Fragment>
+          <EuiButtonEmpty
+            className="euiHeaderLink"
+            data-test-subj="dataSourceFilterGroupButton"
+            iconType="database"
+            onClick={[Function]}
+            size="s"
+          >
+            Data sources
+          </EuiButtonEmpty>
+          <EuiNotificationBadge
+            color="subdued"
+          >
+            4
+          </EuiNotificationBadge>
+        </React.Fragment>
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="popoverExampleMultiSelect"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownCenter"
+        id="popoverExampleMultiSelect"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <EuiButtonEmpty
+            className="euiHeaderLink"
+            data-test-subj="dataSourceFilterGroupButton"
+            iconType="database"
+            onClick={[Function]}
+            size="s"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+              data-test-subj="dataSourceFilterGroupButton"
+              disabled={false}
+              onClick={[Function]}
+              type="button"
+            >
+              <EuiButtonContent
+                className="euiButtonEmpty__content"
+                iconGap="m"
+                iconSide="left"
+                iconSize="m"
+                iconType="database"
+                textProps={
+                  Object {
+                    "className": "euiButtonEmpty__text",
+                  }
+                }
+              >
+                <span
+                  className="euiButtonContent euiButtonEmpty__content"
+                >
+                  <EuiIcon
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    size="m"
+                    type="database"
+                  >
+                    <span
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="database"
+                      size="m"
+                    />
+                  </EuiIcon>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    Data sources
+                  </span>
+                </span>
+              </EuiButtonContent>
+            </button>
+          </EuiButtonEmpty>
+          <EuiNotificationBadge
+            color="subdued"
+          >
+            <span
+              className="euiNotificationBadge euiNotificationBadge--subdued"
+            >
+              4
+            </span>
+          </EuiNotificationBadge>
+        </div>
+      </div>
+    </EuiPopover>
+  </DataSourceFilterGroup>
+</DataSourceMultiSelectable>
 `;

@@ -12,7 +12,6 @@ import {
   DEFAULT_NAV_GROUPS,
   WorkspacePermissionMode,
 } from '../../../../core/server';
-import { getUseCaseFeatureConfig } from '../../common/utils';
 import {
   MAX_WORKSPACE_NAME_LENGTH,
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
@@ -22,6 +21,7 @@ import { SavedObjectsPermissionControlContract } from '../permission_control/cli
 import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
+import { getUseCaseFeatureConfig } from '../../../../core/server';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 

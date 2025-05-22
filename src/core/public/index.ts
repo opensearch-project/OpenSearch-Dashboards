@@ -110,7 +110,10 @@ export { CoreContext, CoreSystem } from './core_system';
 export {
   DEFAULT_APP_CATEGORIES,
   WORKSPACE_TYPE,
+  WORKSPACE_USE_CASE_PREFIX,
   cleanWorkspaceId,
+  isNavGroupInFeatureConfigs,
+  getUseCaseFeatureConfig,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
   SEARCH_USE_CASE_ID,
@@ -413,3 +416,5 @@ export {
 } from './workspace';
 
 export { debounce } from './utils';
+
+export { searchNavigationLinks, GlobalSearchPageItem, renderNavGroupElement } from './chrome';

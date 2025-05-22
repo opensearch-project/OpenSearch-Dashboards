@@ -164,6 +164,24 @@ describe('setup', () => {
       '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
     );
   });
+
+  it('should register page search', () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const chrome = new ChromeService({ browserSupportsCsp: true });
+
+    const registerSearchCommandSpy = jest.fn();
+    jest.spyOn((chrome as any).globalSearch, 'setup').mockReturnValue({
+      registerSearchCommand: registerSearchCommandSpy,
+    });
+
+    chrome.setup({ uiSettings });
+
+    expect(registerSearchCommandSpy).toHaveBeenCalledWith({
+      id: 'pagesSearch',
+      type: 'PAGES',
+      run: expect.any(Function),
+    });
+  });
 });
 
 describe('start', () => {

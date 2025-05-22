@@ -9,7 +9,6 @@ import { htmlIdGenerator, EuiColorPickerProps } from '@elastic/eui';
 import { useApplications } from '../../hooks';
 import { getFirstUseCaseOfFeatureConfigs, isUseCaseFeatureConfig } from '../../utils';
 import { DataSourceConnection } from '../../../common/types';
-import { getUseCaseFeatureConfig } from '../../../common/utils';
 import {
   WorkspaceFormProps,
   WorkspaceFormErrors,
@@ -24,6 +23,7 @@ import {
   validateWorkspaceForm,
 } from './utils';
 import { WorkspacePermissionItemType } from './constants';
+import { getUseCaseFeatureConfig } from '../../../../../core/public';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 

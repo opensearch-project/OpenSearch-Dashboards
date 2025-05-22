@@ -469,7 +469,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
+    // Update local storage
     this.services.storage.set('userQueryLanguage', language);
+    this.services.data.query.queryString.getInitialQueryByLanguage(language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);

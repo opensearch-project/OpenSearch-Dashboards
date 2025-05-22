@@ -19,7 +19,7 @@ import { s3TypeConfig } from './datasets';
 import { createQueryAssistExtension } from './query_assist';
 import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
-import { setData, setStorage } from './services';
+import { setData, setStorage, setUiActions } from './services';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
@@ -91,7 +91,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
       editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
+      supportedAppNames: ['discover', 'data-explorer', 'explore'],
       sampleQueries: [
         {
           title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
@@ -157,7 +157,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, sqlControls, DefaultInput),
       editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
+      supportedAppNames: ['discover', 'data-explorer', 'explore'],
       hideDatePicker: true,
       sampleQueries: [
         {
@@ -225,10 +225,11 @@ export class QueryEnhancementsPlugin
 
   public start(
     core: CoreStart,
-    { data }: QueryEnhancementsPluginStartDependencies
+    { data, uiActions }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
     setStorage(this.storage);
     setData(data);
+    setUiActions(uiActions);
     return {};
   }
 

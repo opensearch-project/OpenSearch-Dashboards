@@ -41,3 +41,4 @@ export { url } from './url';
 export { now } from './now';
 export { calculateObjectHash } from './calculate_object_hash';
 export * from './persistable_state';
+export * from './state_management';

@@ -117,20 +117,42 @@ jobs:
           - group: 15
             config: query_enhanced
             test_location: source
+          # Explore tests - group 1
+          - group: 10Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 2
+          - group: 12Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 3
+          - group: 13Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 4
+          - group: 14Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 5
+          - group: 15
+            config: explore
+            test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: '--user 1001 --shm-size=2g'
     env:
       START_CMD: ${{ matrix.config == 'query_enhanced' &&
         'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true' ||
+        matrix.config == 'explore' &&
+        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true' ||
         matrix.config == 'dashboard' &&
         'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true' ||
         'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false' }}
-      OPENSEARCH_SNAPSHOT_CMD: ${{ matrix.config == 'query_enhanced' &&
+      OPENSEARCH_SNAPSHOT_CMD: ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore') &&
         '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
         matrix.config == 'dashboard' &&
-        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' ||
-        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' }}
+        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' ||
+        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' }}
       # prevents extra Cypress installation progress messages
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
@@ -243,26 +265,26 @@ jobs:
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       - name: Download OpenSearch
-        if: matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
           url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
 
       - name: Extract OpenSearch
-        if: matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
           tar -xzf opensearch-*.tar.gz
           rm -f opensearch-*.tar.gz
         shell: bash
 
       - name: Remove security plugin
-        if: matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
         shell: bash
 
       - name: Run OpenSearch
-        if: matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
           /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"
           sleep 30
@@ -275,7 +297,7 @@ jobs:
 
       # Run Dashboards Cypress tests within the source repo
       - name: Run Dashboards Cypress tests with query enhancements
-        if: matrix.test_location == 'source' && matrix.config == 'query_enhanced'
+        if: matrix.test_location == 'source' && (matrix.config == 'query_enhanced' || matrix.config == 'explore')
         uses: cypress-io/github-action@v6
         with:
           install-command: npx cypress install --force

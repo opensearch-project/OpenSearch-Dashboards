@@ -1,0 +1,41 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./build/tsbuildinfo/osd-type-check"
+  },
+  "include": [
+    "opensearch_dashboards.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "typings/**/*.ts",
+    "typings/**/*.tsx",
+    "test_utils/**/*.ts",
+    "test_utils/**/*.tsx"
+  ],
+  "exclude": [
+    "src/**/__fixtures__/**/*",
+    "src/test_utils/**/*",
+    "src/core/**/*",
+    "src/plugins/opensearch_dashboards_utils/**/*",
+    "src/plugins/opensearch_dashboards_react/**/*"
+    // In the build we actually exclude **/public/**/* from this config so that
+    // we can run the TSC on both this and the .browser version of this config
+    // file, but if we did it during development IDEs would not be able to find
+    // the tsconfig.json file for public files correctly.
+    // "src/**/public/**/*"
+  ],
+  "references": [
+    {
+      "path": "./src/test_utils/tsconfig.json"
+    },
+    {
+      "path": "./src/core/tsconfig.json"
+    },
+    {
+      "path": "./src/plugins/opensearch_dashboards_utils/tsconfig.json"
+    },
+    {
+      "path": "./src/plugins/opensearch_dashboards_react/tsconfig.json"
+    }
+  ]
+}

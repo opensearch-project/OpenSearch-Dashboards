@@ -1,2 +1,0 @@
-fix:
-- Skip appending time range to ppl when not querying with source ([#9603](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9603))

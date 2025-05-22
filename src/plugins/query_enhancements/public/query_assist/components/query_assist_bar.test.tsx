@@ -8,12 +8,13 @@ import React, { ComponentProps, PropsWithChildren } from 'react';
 import { IntlProvider } from 'react-intl';
 import { of } from 'rxjs';
 import { QueryAssistBar } from '.';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { DataStorage } from '../../../../data/common';
 import { QueryEditorExtensionDependencies, QueryStringContract } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { setData, setStorage } from '../../services';
+import { setData, setStorage, setUiActions } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistInput } from './query_assist_input';
@@ -66,6 +67,14 @@ type Props = ComponentProps<typeof QueryAssistBar>;
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
+
+const uiActionsStartMock = uiActionsPluginMock.createStartContract();
+uiActionsStartMock.getTrigger.mockReturnValue({
+  id: '',
+  exec: jest.fn(),
+});
+
+setUiActions(uiActionsStartMock);
 
 const renderQueryAssistBar = (overrideProps: Partial<Props> = {}) => {
   const props: Props = Object.assign<Props, Partial<Props>>({ dependencies }, overrideProps);
@@ -144,6 +153,26 @@ describe('QueryAssistBar', () => {
     renderQueryAssistBar();
 
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'test query' } });
+    fireEvent.click(screen.getByRole('button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('query-assist-guard-callout')).toBeInTheDocument();
+    });
+  });
+
+  it('display callout for AgentError', async () => {
+    const generateQueryMock = jest.fn().mockResolvedValue({
+      error: new AgentError({
+        error: { type: 'mock-type', reason: 'mock-reason', details: 'mock-details' },
+        status: 404,
+      }),
+    });
+    (useGenerateQuery as jest.Mock).mockReturnValue({
+      generateQuery: generateQueryMock,
+      loading: false,
+    });
+    renderQueryAssistBar();
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'false query' } });
     fireEvent.click(screen.getByRole('button'));
 
     await waitFor(() => {

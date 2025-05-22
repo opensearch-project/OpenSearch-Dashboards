@@ -177,9 +177,13 @@ export class QueryStringManager {
    * Updates the query.
    * @param {Query} query
    */
-  public setQuery = (query: Partial<Query>, force: boolean = false) => {
+  public setQuery = (
+    query: Partial<Query>,
+    force: boolean = false,
+    mergeCurrentQuery: boolean = true
+  ) => {
     const curQuery = this.query$.getValue();
-    let newQuery = { ...curQuery, ...query };
+    let newQuery = mergeCurrentQuery ? { ...curQuery, ...query } : (query as Query);
     // If the current query is different from the new query, or the user explicitly set force to true,
     // then proceed with updating the query.
     if (!isEqual(curQuery, newQuery) || force) {
@@ -225,7 +229,9 @@ export class QueryStringManager {
    * Resets the query to the default one.
    */
   public clearQuery = () => {
-    this.setQuery(this.getDefaultQuery());
+    const force = false;
+    const mergeCurrentQuery = false;
+    this.setQuery(this.getDefaultQuery(), force, mergeCurrentQuery);
   };
 
   // Todo: update this function to use the Query object when it is udpated, Query object should include time range and dataset

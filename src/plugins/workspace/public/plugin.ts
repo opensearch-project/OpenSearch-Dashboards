@@ -22,7 +22,8 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupType,
   ALL_USE_CASE_ID,
-} from '../../../core/public';
+} from 'opensearch-dashboards/public';
+import { getWorkspaceIdFromUrl } from 'opensearch-dashboards/public/utils';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
   WORKSPACE_DETAIL_APP_ID,
@@ -32,7 +33,6 @@ import {
   WORKSPACE_NAVIGATION_APP_ID,
   WORKSPACE_COLLABORATORS_APP_ID,
 } from '../common/constants';
-import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase, WorkspacePluginSetup } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
@@ -52,7 +52,6 @@ import {
   getFirstUseCaseOfFeatureConfigs,
   getUseCaseUrl,
   isAppAccessibleInWorkspace,
-  isNavGroupInFeatureConfigs,
 } from './utils';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { WorkspaceListCard } from './components/service_card';
@@ -71,8 +70,9 @@ import { UserDefaultWorkspace } from './components/workspace_list/default_worksp
 import { WorkspaceCollaboratorTypesService, UseCaseService } from './services';
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
-import { searchPages } from './components/global_search/search_pages_command';
 import { WorkspaceValidationService } from './services/workspace_validation_service';
+import { workspaceSearchPages } from './components/global_search/search_pages_command';
+import { isNavGroupInFeatureConfigs } from '../../../core/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -532,10 +532,10 @@ export class WorkspacePlugin
     ]);
 
     core.chrome.globalSearch.registerSearchCommand({
-      id: 'pagesSearch',
+      id: 'workspacePagesSearch',
       type: 'PAGES',
       run: async (query: string, callback: () => void) =>
-        searchPages(query, this.registeredUseCases$, this.coreStart, callback),
+        workspaceSearchPages(query, this.registeredUseCases$, this.coreStart, callback),
     });
 
     if (workspaceId) {
@@ -570,9 +570,10 @@ export class WorkspacePlugin
     this.collaboratorsAppUpdater$.next(() => {
       return {
         status: isPermissionEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-        navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus:
+          core.chrome.navGroup.getNavGroupEnabled() && isPermissionEnabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.hidden,
       };
     });
 
@@ -592,6 +593,9 @@ export class WorkspacePlugin
       });
 
     this.filterNavLinks(core);
+
+    // Unregister the page search that set by chrome service, since workspace has its own search
+    core.chrome.globalSearch.unregisterSearchCommand('pagesSearch');
 
     if (!core.chrome.navGroup.getNavGroupEnabled()) {
       this.addWorkspaceToBreadcrumbs(core);
