@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { QueryPanelLayout } from './layout';
 import { EditorStack } from './components/editor_stack';
@@ -11,8 +11,9 @@ import { QueryEditorFooter } from './components/footer/index';
 import { LanguageType } from './components/editor_stack/shared';
 import { debounce } from 'lodash';
 import { QueryTypeDetector } from './utils/typeDetection';
-import { Query } from './types';
+import { Query, TimeRange } from './types';
 import './index.scss';
+import { RecentQueriesTable } from './components/footer/recent_query/table';
 
 const intitialQuery = (language: LanguageType, dataset: string) => ({
   query: '',
@@ -23,7 +24,7 @@ const intitialQuery = (language: LanguageType, dataset: string) => ({
 
 const QueryPanel = () => {
   const [lineCount, setLineCount] = useState<number | undefined>(undefined);
-  // const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
+  const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
   const inputQueryRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const languageTypeRef = useRef<LanguageType>('nl'); // Default to PPL
   const [isDualEditor, setIsDualEditor] = useState(false);
@@ -74,7 +75,10 @@ const QueryPanel = () => {
     setLineCount(currentLineCount);
   };
 
-  const handleQueryRun = async (querystring?: string | undefined) => {
+  const handleQueryRun = async (
+    queryString?: string | { [key: string]: any },
+    timeRange?: TimeRange
+  ) => {
     // console.log('Running queryString when enter:', querystring);
     setIsLoading(true); // Set loading to true
     await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
@@ -90,8 +94,7 @@ const QueryPanel = () => {
     setCurrentQuery(intitialQuery('nl', 'test'));
   };
 
-  const handlePromptRun = async (querystring?: string | undefined) => {
-    // console.log(querystring, 'querystring');
+  const handlePromptRun = async (queryString?: string | { [key: string]: any }) => {
     setIsLoading(true); // Set loading to true
     await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
 
@@ -130,40 +133,73 @@ const QueryPanel = () => {
 
   const handleRunClick = () => {
     if (isDualEditor) {
-      handleQueryRun(currentQuery.query);
+      handleQueryRun();
     } else {
-      handlePromptRun(currentQuery.prompt);
+      handlePromptRun();
     }
   };
 
+  const handleRecentClick = () => {
+    setIsRecentQueryVisible(!isRecentQueryVisible);
+    console.log('Recent queries clicked');
+  };
+
+  const onClickRecentQuery = (recentQuery: Query, timeRange?: TimeRange) => {
+    setIsRecentQueryVisible(false);
+    setCurrentQuery(recentQuery);
+    // setIsEditorReadOnly(true);
+    // setIsPromptReadOnly(true);
+    handleQueryRun(recentQuery.query, timeRange);
+  };
+
   return (
-    <QueryPanelLayout
-      footer={
-        <QueryEditorFooter
+    <div className="query-container">
+      <QueryPanelLayout
+        footer={
+          <QueryEditorFooter
+            isDualEditor={isDualEditor}
+            isLoading={isLoading}
+            languageType={currentQuery.language}
+            handleRunClick={handleRunClick}
+            handleRecentClick={handleRecentClick}
+            noInput={!currentQuery.query && !currentQuery.prompt}
+          />
+        }
+      >
+        <EditorStack
           isDualEditor={isDualEditor}
-          isLoading={isLoading}
-          languageType={currentQuery.language}
-          handleRunClick={handleRunClick}
-          noInput={!currentQuery.query && !currentQuery.prompt}
+          isPromptReadOnly={isPromptReadOnly}
+          isEditorReadOnly={isEditorReadOnly}
+          queryString={typeof currentQuery.query === 'string' ? currentQuery.query : ''}
+          languageType={languageTypeRef.current}
+          prompt={currentQuery.prompt || ''}
+          onPromptChange={onPromptChange}
+          onQueryChange={onQueryChange}
+          handlePromptEdit={handlePromptEdit}
+          handleQueryEdit={handleQueryEdit}
+          handleQueryRun={handleQueryRun}
+          handlePromptRun={handlePromptRun}
+          handleClearEditor={handleClearEditor}
         />
-      }
-    >
-      <EditorStack
-        isDualEditor={isDualEditor}
-        isPromptReadOnly={isPromptReadOnly}
-        isEditorReadOnly={isEditorReadOnly}
-        queryString={currentQuery.query}
-        languageType={languageTypeRef.current}
-        prompt={currentQuery.prompt}
-        onPromptChange={onPromptChange}
-        onQueryChange={onQueryChange}
-        handlePromptEdit={handlePromptEdit}
-        handleQueryEdit={handleQueryEdit}
-        handleQueryRun={handleQueryRun}
-        handlePromptRun={handlePromptRun}
-        handleClearEditor={handleClearEditor}
-      />
-    </QueryPanelLayout>
+      </QueryPanelLayout>
+      {isRecentQueryVisible && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            right: 0,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            zIndex: 1000,
+          }}
+        >
+          <RecentQueriesTable
+            isVisible={isRecentQueryVisible}
+            onClickRecentQuery={onClickRecentQuery}
+            languageType={currentQuery.language}
+          />
+        </div>
+      )}
+    </div>
   );
 };
 
