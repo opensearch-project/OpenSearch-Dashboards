@@ -13,11 +13,16 @@ import { useDiscoverContext } from '../context';
 
 import { SearchData } from '../utils';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { getVisualizationType, VisualizationType } from '../utils/use_visualization_types';
+import {
+  getVisualizationType,
+  VisualizationType,
+  VisualizationTypeResult,
+} from '../utils/use_visualization_types';
 import { LineChartStyleControls } from '../../components/visualizations/line/line_vis_config';
 import { visualizationRegistry } from '../../components/visualizations/visualization_registry';
 import { lineChartRule } from '../../components/visualizations/line/line_chart_rules';
 import { DiscoverVisColumn } from '../../components/visualizations/types';
+import { re } from 'mathjs';
 
 export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -32,15 +37,9 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
   // Register all rules
   visualizationRegistry.registerRule(lineChartRule);
 
-  const [visualizationData, setVisualizationData] = useState<
-    | {
-        visualizationType: VisualizationType;
-        numericalColumns: DiscoverVisColumn[];
-        categoricalColumns: DiscoverVisColumn[];
-        dateColumns: DiscoverVisColumn[];
-      }
-    | undefined
-  >(undefined);
+  const [visualizationData, setVisualizationData] = useState<VisualizationTypeResult | undefined>(
+    undefined
+  );
 
   const [expression, setExpression] = useState<string>();
   const [styleOptions, setStyleOptions] = useState<LineChartStyleControls | undefined>(undefined);
@@ -58,10 +57,12 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
     if (fieldSchema) {
       console.log('fieldSchema', fieldSchema);
       const result = getVisualizationType(rows, fieldSchema);
-      setVisualizationData(result);
+      if (result) {
+        setVisualizationData({ ...result });
 
-      // Todo: everytime the fields change, do we reset the style options?
-      setStyleOptions(result?.visualizationType.ui.style.defaults);
+        // Todo: everytime the fields change, do we reset the style options?
+        setStyleOptions(result.visualizationType?.ui.style.defaults);
+      }
     }
   }, [fieldSchema, rows]);
 
@@ -70,22 +71,21 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
       if (!rows || !indexPattern || !visualizationData) {
         return;
       }
-      const exp = await visualizationData.visualizationType.toExpression(
+      const exp = await visualizationData.visualizationType?.toExpression(
         services,
         searchContext,
-        rows,
         indexPattern,
+        visualizationData.transformedData,
         visualizationData.numericalColumns,
         visualizationData.categoricalColumns,
         visualizationData.dateColumns,
-        fieldSchema,
         styleOptions
       );
       setExpression(exp);
     }
 
     loadExpression();
-  }, [searchContext, rows, indexPattern, services, fieldSchema, styleOptions, visualizationData]);
+  }, [searchContext, rows, indexPattern, services, styleOptions, visualizationData]);
 
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
@@ -120,7 +120,7 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
       <EuiFlexItem grow={1}>
         <EuiPanel className="stylePanel" data-test-subj="stylePanel">
           {visualizationData &&
-            visualizationData.visualizationType.ui.style.render({
+            visualizationData.visualizationType?.ui.style.render({
               defaultStyles: visualizationData.visualizationType.ui.style.defaults,
               onChange: setStyleOptions,
             })}
