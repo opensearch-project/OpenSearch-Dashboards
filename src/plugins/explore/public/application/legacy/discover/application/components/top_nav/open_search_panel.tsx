@@ -47,7 +47,6 @@ import { SavedObjectFinderUi } from '../../../../../../../../saved_objects/publi
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { SAVED_OBJECT_TYPE } from '../../../../../../saved_explore/_saved_explore';
-import { setSavedSearchId } from '../../utils/state_management';
 
 interface Props {
   onClose: () => void;

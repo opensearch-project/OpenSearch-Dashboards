@@ -18,6 +18,7 @@ import { ExplorePluginSetup, ExplorePluginStart } from './types';
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
   private readonly logger: Logger;
 
+  // @ts-ignore
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
