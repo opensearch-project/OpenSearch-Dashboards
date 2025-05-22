@@ -17,7 +17,6 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
   isDualEditor,
   noInput,
 }) => {
-  console.log(noInput, 'noInput');
   // Memoized function to determine the display text
   const getDisplayText = useMemo(() => {
     if (noInput) return '';
