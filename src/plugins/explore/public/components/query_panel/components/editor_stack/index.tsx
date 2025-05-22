@@ -17,10 +17,10 @@ interface EditorStackProps {
   isEditorReadOnly: boolean;
   handleQueryEdit: () => void;
   handlePromptEdit: () => void;
-  handleQueryRun: (queryString?: string) => void;
-  handlePromptRun: (queryString?: string) => void;
+  handleQueryRun: (query?: string) => void;
+  handlePromptRun: (prompt?: string) => void;
   handleClearEditor: () => void;
-  queryString: string;
+  queryString: string | { [key: string]: any };
   prompt: string;
 }
 

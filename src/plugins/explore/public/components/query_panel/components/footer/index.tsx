@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 // import { SwitchLanguage } from './switch_language';
 import { ShowFieldToggle } from './show_field';
-import { RecentQueries } from './recent_queries';
 import { SaveQueryButton } from './save_query';
 import { Actions } from './actions';
 import { DateTimeRangePicker } from './date_time_selector';
@@ -18,6 +17,7 @@ import { ErrorDisplay } from './error_display';
 interface QueryEditorFooterProps {
   languageType: LanguageType;
   handleRunClick: () => void;
+  handleRecentClick: () => void;
   isDualEditor: boolean;
   isLoading: boolean;
   noInput: boolean;
@@ -26,6 +26,7 @@ interface QueryEditorFooterProps {
 export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
   languageType,
   handleRunClick,
+  handleRecentClick,
   isDualEditor,
   isLoading,
   noInput,
@@ -48,7 +49,14 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               <EuiHorizontalRule margin="xs" className="vertical-separator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RecentQueries />
+              <EuiButtonEmpty
+                onClick={handleRecentClick}
+                iconType="clock"
+                style={{ padding: '0px' }}
+                data-test-subj="recentQueriesButton"
+              >
+                Recent Queries
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiHorizontalRule margin="xs" className="vertical-separator" />
