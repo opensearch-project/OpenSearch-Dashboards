@@ -33,7 +33,7 @@ import { OpenSearchPanel } from './open_search_panel';
 const getLegacyTopNavLinks = (
   services: DiscoverViewServices,
   inspectorAdapters: Adapters,
-  savedSearch: SavedSearch,
+  savedSearch: SavedExplore,
   startSyncingQueryStateWithUrl: () => void,
   isEnhancementEnabled: boolean = false
 ) => {
@@ -214,7 +214,7 @@ const getLegacyTopNavLinks = (
     ariaLabel: i18n.translate('explore.discover.topNav.discoverShareButtonLabel', {
       defaultMessage: `Share search`,
     }),
-    run: async (anchorElement) => {
+    run: async (anchorElement: HTMLElement) => {
       const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
       const sharingData = await getSharingData({
         searchSource: savedSearch.searchSource,

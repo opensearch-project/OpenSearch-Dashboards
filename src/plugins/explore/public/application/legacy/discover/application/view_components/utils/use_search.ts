@@ -119,9 +119,13 @@ export const useSearch = (services: DiscoverViewServices) => {
   const { pathname } = useLocation();
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedExplore | undefined>(undefined);
-  const { savedSearch: savedSearchId, sort, interval, savedQuery } = useSelector(
-    (state) => state.logs
-  );
+  const {
+    savedSearch: savedSearchId,
+    sort,
+    interval,
+    savedQuery,
+    saveExploreLoadCount,
+  } = useSelector((state) => state.logs);
   const indexPattern = useIndexPattern(services);
   const skipInitialFetch = useRef(false);
   const {
@@ -607,10 +611,8 @@ export const useSearch = (services: DiscoverViewServices) => {
     };
 
     loadSavedSearch();
-    // This effect will only run when getSavedSearchById is called, which is
-    // only called when the component is first mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getSavedSearchById, savedSearchId]);
+  }, [getSavedSearchById, savedSearchId, saveExploreLoadCount]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services

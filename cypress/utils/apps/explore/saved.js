@@ -111,9 +111,6 @@ export const updateSavedSearchAndSaveAndVerify = (
   saveAsNew
 ) => {
   cy.loadSaveSearch(config.saveName);
-  // TODO: Remove this wait and reload once refresh is not needed and state sync is fixed in explore
-  cy.wait(2000);
-  cy.reload();
 
   // Change the dataset type to use
   const [newDataset, newDatasetType] =
@@ -140,20 +137,12 @@ export const updateSavedSearchAndSaveAndVerify = (
 
   cy.loadSaveSearch(saveNameToUse);
 
-  // TODO: Remove this wait and reload once refresh is not needed and state sync is fixed in explore
-  cy.wait(2000);
-  cy.reload();
-
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);
 };
 
 export const updateSavedSearchAndNotSaveAndVerify = (config, datasourceName) => {
   cy.loadSaveSearch(config.saveName);
-
-  // TODO: Remove this wait and reload once refresh is not needed and state sync is fixed in explore
-  cy.wait(2000);
-  cy.reload();
 
   // Change the dataset type to use
   const [newDataset, newDatasetType] =
@@ -184,10 +173,6 @@ export const updateSavedSearchAndNotSaveAndVerify = (config, datasourceName) => 
 
   // Verify the original save is unchanged
   cy.loadSaveSearch(config.saveName);
-
-  // TODO: Remove this wait and reload once refresh is not needed and state sync is fixed in explore
-  cy.wait(2000);
-  cy.reload();
 
   setDatePickerDatesAndSearchIfRelevant(config.language);
   verifyDiscoverPageState(config);

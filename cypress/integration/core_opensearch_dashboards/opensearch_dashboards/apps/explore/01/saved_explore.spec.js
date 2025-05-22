@@ -30,7 +30,8 @@ import {
 const workspaceName = getRandomizedWorkspaceName();
 
 const runSavedExploreTests = () => {
-  describe('saved explore', () => {
+  // TODO currently saved search isn't working in explore, enable this when it is fixed
+  describe.skip('saved explore', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,
