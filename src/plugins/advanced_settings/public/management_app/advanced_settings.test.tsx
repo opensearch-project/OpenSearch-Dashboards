@@ -210,12 +210,11 @@ function mockConfig() {
     };
   };
 
-  const config = {
+  const config: IUiSettingsClient = {
     set: (key: string, value: any) => Promise.resolve(true),
     remove: (key: string) => Promise.resolve(true),
     isCustom: (key: string) => false,
     isOverridden: (key: string) => Boolean(config.getAll()[key].isOverridden),
-    getRegistered: () => ({} as Readonly<Record<string, PublicUiSettingsParams>>),
     overrideLocalDefault: (key: string, value: any) => {},
     getUpdate$: () =>
       new Observable<{

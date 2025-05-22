@@ -52,8 +52,9 @@ export class PermissionControlledUiSettingsWrapper {
           };
         }
 
+        const { buildNum, ...other } = attributes as AttributesObject;
         return (this.createPermissionUiSetting(
-          attributes as AttributesObject,
+          other,
           options,
           wrapperOptions
         ) as unknown) as SavedObject<T>;
@@ -69,10 +70,8 @@ export class PermissionControlledUiSettingsWrapper {
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
       if (type === 'config' && id === DASHBOARD_ADMIN_SETTINGS_ID) {
-        this.checkAdminPermission(wrapperOptions);
-
+        const { buildNum, ...other } = attributes as AttributesObject;
         try {
-          const { buildNum, ...other } = attributes as AttributesObject;
           return ((await wrapperOptions.client.update<AttributesObject>(
             type,
             DASHBOARD_ADMIN_SETTINGS_ID,
@@ -82,7 +81,7 @@ export class PermissionControlledUiSettingsWrapper {
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return (this.createPermissionUiSetting(
-              attributes as AttributesObject,
+              other,
               options,
               wrapperOptions
             ) as unknown) as SavedObjectsUpdateResponse<T>;
@@ -155,7 +154,9 @@ export class PermissionControlledUiSettingsWrapper {
       !this.isPermissionControlEnabled;
 
     if (!isDashboardAdmin) {
-      throw new Error('No permission for admin UI settings operations');
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(
+        new Error('No permission for admin UI settings operations')
+      );
     }
   }
 

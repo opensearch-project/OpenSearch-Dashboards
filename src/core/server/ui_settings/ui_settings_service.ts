@@ -67,7 +67,6 @@ export class UiSettingsService
   private readonly config$: Observable<[UiSettingsConfigType, SavedObjectsConfigType]>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
-  private PermissionControlledUiSettingsWrapper?: PermissionControlledUiSettingsWrapper;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -98,14 +97,14 @@ export class UiSettingsService
     // Use uiSettings.defaults from the config file
     this.validateAndUpdateConfiguredDefaults(config.uiSettingsConfig.defaults);
 
-    this.PermissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
+    const permissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
       config.savedObjectConfig.permission.enabled
     );
 
     savedObjects.addClientWrapper(
       PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
       PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
-      this.PermissionControlledUiSettingsWrapper.wrapperFactory
+      permissionControlledUiSettingsWrapper.wrapperFactory
     );
 
     return {

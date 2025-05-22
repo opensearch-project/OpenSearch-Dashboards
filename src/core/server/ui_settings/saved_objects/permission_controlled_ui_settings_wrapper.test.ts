@@ -236,15 +236,6 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       );
     });
 
-    it('should throw permission error when user is not dashboard admin', async () => {
-      const wrapperClient = buildWrapperInstance(true, false);
-      const attributes = { permissionControlledSetting: false };
-
-      await expect(
-        wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes)
-      ).rejects.toThrow('No permission for admin UI settings operations');
-    });
-
     it('should create admin settings if they do not exist during update', async () => {
       const wrapperClient = buildWrapperInstance(true, true);
       const attributes = { permissionControlledSetting: true };

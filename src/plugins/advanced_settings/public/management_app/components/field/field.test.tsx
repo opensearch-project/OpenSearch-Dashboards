@@ -48,7 +48,7 @@ const defaults = {
   category: ['category'],
 };
 
-const exampleValues: any = {
+const exampleValues: Record<string, unknown> = {
   array: ['example_value'],
   boolean: false,
   image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=',
@@ -195,7 +195,7 @@ const settings: Record<string, FieldSetting> = {
     ...defaults,
   },
 };
-const userValues: Record<string, any> = {
+const userValues: Record<string, unknown> = {
   array: ['user', 'value'],
   boolean: false,
   image: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
@@ -207,7 +207,7 @@ const userValues: Record<string, any> = {
   stringWithValidation: 'fooUserValue',
 };
 
-const invalidUserValues: Record<string, any> = {
+const invalidUserValues: Record<string, unknown> = {
   stringWithValidation: 'invalidUserValue',
 };
 
@@ -366,7 +366,7 @@ describe('Field', () => {
     }
 
     const setup = () => {
-      const Wrapper = (props: Record<string, any>) => (
+      const Wrapper = (props: Record<string, unknown>) => (
         <I18nProvider>
           <Field
             setting={setting}
@@ -471,7 +471,7 @@ describe('Field', () => {
       describe(`for changing ${type} setting`, () => {
         const { wrapper, component } = setup();
         const userValue = userValues[type];
-        const fieldUserValue = type === 'array' ? userValue.join(', ') : userValue;
+        const fieldUserValue = type === 'array' ? (userValue as unknown[]).join(', ') : userValue;
 
         if (setting.validation) {
           const invalidUserValue = invalidUserValues[type];

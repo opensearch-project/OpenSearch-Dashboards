@@ -451,7 +451,6 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
       "get$": [Function],
       "getAll": [Function],
       "getDefault": [MockFunction],
-      "getRegistered": [Function],
       "getSaved$": [Function],
       "getUpdate$": [Function],
       "getUpdateErrors$": [Function],

@@ -34,7 +34,6 @@ import { schema } from '@osd/config-schema';
 import {
   MockUiSettingsClientConstructor,
   getCoreSettingsMock,
-  adminUiSettingsMock,
 } from './ui_settings_service.test.mock';
 import { UiSettingsService, SetupDeps } from './ui_settings_service';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -49,6 +48,16 @@ const overrides = {
 
 const permission = {
   enabled: true,
+};
+
+const adminUiSettings = {
+  adminFoo: {
+    name: 'adminFoo',
+    value: 'adminBar',
+    category: [],
+    description: '',
+    schema: schema.string(),
+  },
 };
 
 const defaults: Record<string, any> = {
@@ -92,10 +101,11 @@ describe('uiSettings', () => {
     });
 
     it('register adminUiSettings', async () => {
-      await service.setup(setupDeps);
+      const setup = await service.setup(setupDeps);
+      setup.register(adminUiSettings);
       expect(setupDeps.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
 
-      expect((service as any).register).toHaveBeenCalledWith(adminUiSettingsMock);
+      expect((service as any).register).toHaveBeenCalledWith(adminUiSettings);
     });
 
     it('calls `getCoreSettings`', async () => {
@@ -192,18 +202,17 @@ describe('uiSettings', () => {
       it('passes a copy of set defaults to UiSettingsClient', async () => {
         const setup = await service.setup(setupDeps);
         setup.register(defaults);
+        setup.register(adminUiSettings);
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toMatchObject(defaults);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toMatchObject(
-          adminUiSettingsMock
+          adminUiSettings
         );
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
-        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(
-          adminUiSettingsMock
-        );
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(adminUiSettings);
       });
 
       it('passes configured defaults to UiSettingsClient', async () => {

@@ -11,6 +11,8 @@ export const CURRENT_WORKSPACE_PLACEHOLDER = '<current_workspace>';
 export const DASHBOARD_ADMIN_SETTINGS_ID = '_dashboard_admin';
 
 export const PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID = 'permission-control-ui-settings';
+// The wrapper handles the dashboard admin settings independently and will never conflict with
+// other wrappers, therefore the priorty can be any number and the priority of 100 is trival
 export const PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY = 100;
 
 export const buildDocIdWithScope = (id: string, scope?: UiSettingScope) => {
