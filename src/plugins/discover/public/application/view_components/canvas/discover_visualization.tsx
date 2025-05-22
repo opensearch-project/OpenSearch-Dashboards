@@ -13,16 +13,10 @@ import { useDiscoverContext } from '../context';
 
 import { SearchData } from '../utils';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import {
-  getVisualizationType,
-  VisualizationType,
-  VisualizationTypeResult,
-} from '../utils/use_visualization_types';
+import { getVisualizationType, VisualizationTypeResult } from '../utils/use_visualization_types';
 import { LineChartStyleControls } from '../../components/visualizations/line/line_vis_config';
 import { visualizationRegistry } from '../../components/visualizations/visualization_registry';
 import { lineChartRule } from '../../components/visualizations/line/line_chart_rules';
-import { DiscoverVisColumn } from '../../components/visualizations/types';
-import { re } from 'mathjs';
 
 export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -55,7 +49,6 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
 
   useEffect(() => {
     if (fieldSchema) {
-      console.log('fieldSchema', fieldSchema);
       const result = getVisualizationType(rows, fieldSchema);
       if (result) {
         setVisualizationData({ ...result });
