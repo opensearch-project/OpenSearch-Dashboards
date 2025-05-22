@@ -41,7 +41,10 @@ export interface ChromeRegistrationNavLink {
   parentNavLinkId?: string;
 
   /**
-   * If the nav link should be shown in 'all' nav group
+   * Whether the nav link should be shown in 'all' nav group. If unset or
+   * false, it will not show up unless added separately to 'all' nav group. If
+   * true, then it will show up under the registered nav group category. When
+   * adding nav links to the 'all' nav group, this option is not used.
    */
   showInAllNavGroup?: boolean;
 }
@@ -179,8 +182,12 @@ export class ChromeNavGroupService {
            */
           fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, navLinks).forEach(
             (navLink) => {
-              // Links that already exists in all use case do not need to reappend
-              if (navLinksResult.find((navLinkInAll) => navLinkInAll.id === navLink.id)) {
+              // Links that already exist in all use case or explicitly set
+              // showInAllNavGroup to false do not need to reappend
+              if (
+                navLinksResult.find((navLinkInAll) => navLinkInAll.id === navLink.id) ||
+                !navLink.showInAllNavGroup
+              ) {
                 return;
               }
               navLinksResult.push({
