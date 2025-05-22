@@ -322,8 +322,8 @@ export const convertDataSourcesToOpenSearchAndDataConnections = (
       };
     });
   const dataConnections = dataSources
-    .filter((ds: DataConnection | DataSource) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
-    .map((ds: DataConnection | DataSource) => {
+    .filter((ds) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
+    .map((ds) => {
       return {
         id: ds.id,
         type: (ds as DataConnection).connectionType,

@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IUiSettingsClient, WorkspaceAttribute } from 'src/core/server';
+import { IUiSettingsClient, UiSettingScope, WorkspaceAttribute } from 'src/core/server';
 
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 import { httpServerMock } from '../../../../../core/server/mocks';
-import { OpenSearchDashboardsRequestState } from 'opensearch-dashboards/server/http/router';
 
 describe('workspace ui settings saved object client wrapper', () => {
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
@@ -57,7 +56,7 @@ describe('workspace ui settings saved object client wrapper', () => {
   }, 30000);
 
   beforeEach(async () => {
-    await globalUiSettingsClient.set('defaultIndex', 'global-index');
+    await globalUiSettingsClient.set('defaultDatasource', 'global-ds', UiSettingScope.GLOBAL);
   });
 
   it('should get and update workspace ui settings when currently in a workspace', async () => {
@@ -65,10 +64,10 @@ describe('workspace ui settings saved object client wrapper', () => {
       httpServerMock.createOpenSearchDashboardsRequest({
         opensearchDashboardsRequestState: {
           requestWorkspaceId: testWorkspace.id,
-          requestId: testWorkspace.id,
-          requestUuid: testWorkspace.id,
-        } as OpenSearchDashboardsRequestState,
-      })
+          requestId: '',
+          requestUuid: '',
+        },
+      } as Partial<Parameters<typeof httpServerMock.createOpenSearchDashboardsRequest>['0']>)
     );
     const workspaceScopedUiSettingsClient = osd.coreStart.uiSettings.asScopedToClient(
       workspaceScopedSavedObjectsClient
