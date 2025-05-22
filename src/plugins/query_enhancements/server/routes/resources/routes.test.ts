@@ -14,6 +14,7 @@ import {
   RequestHandlerContext,
 } from '../../../../../core/server';
 import { setupServer } from '../../../../../core/server/test_utils';
+import { HttpService } from 'opensearch-dashboards/server/http';
 
 class TestManager extends BaseConnectionManager {
   handlePostRequestSpy: (
@@ -39,6 +40,7 @@ class TestManager extends BaseConnectionManager {
 }
 
 describe('Resource Routes', () => {
+  let testServer: HttpService;
   const DATA_CONNECTION_TYPE = 'datatype';
   const DATA_CONNECTION_ID = 'dataconnectionid';
   const DATA_CONNECTION_RESOURCE_TYPE = 'resourceType';
@@ -62,8 +64,15 @@ describe('Resource Routes', () => {
       createStoreFromRequest: jest.fn(),
     };
     await server.start({ dynamicConfigService });
+    testServer = server;
     return httpSetup;
   };
+
+  afterEach(async () => {
+    if (testServer) {
+      await testServer.stop();
+    }
+  });
 
   it('should connect to manager based on data connection type', async () => {
     const handlePostRequestSpy = jest.fn().mockResolvedValue({ message: 'succeed' });
