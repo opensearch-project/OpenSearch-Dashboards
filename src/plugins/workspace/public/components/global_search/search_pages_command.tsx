@@ -38,7 +38,7 @@ export const workspaceSearchPages = async (
       getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []) || ''
     );
 
-    const searchResult = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+    const searchResult = await searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
     const handleCallback = (link: NavLink) => {
       callback?.();

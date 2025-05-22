@@ -24,7 +24,7 @@ export const searchPages = async (
   if (navGroup && application) {
     const navGroupMap = await navGroup.getNavGroupsMap$().pipe(first()).toPromise();
 
-    const searchResult = searchNavigationLinks(
+    const searchResult = await searchNavigationLinks(
       [
         DEFAULT_NAV_GROUPS.all.id,
         DEFAULT_NAV_GROUPS.dataAdministration.id,
