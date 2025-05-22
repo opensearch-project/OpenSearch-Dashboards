@@ -49,7 +49,6 @@ import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { PermissionControlledUiSettingsWrapper } from './saved_objects/permission_controlled_ui_settings_wrapper';
-import { adminUiSettings } from './saved_objects/admin_ui_settings';
 import { savedObjectsConfig, SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import {
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
@@ -108,8 +107,6 @@ export class UiSettingsService
       PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
       this.PermissionControlledUiSettingsWrapper.wrapperFactory
     );
-
-    this.register(adminUiSettings);
 
     return {
       register: this.register.bind(this),
