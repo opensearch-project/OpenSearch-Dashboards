@@ -11,6 +11,7 @@ import {
   IUiSettingsClient,
   Principals,
   WorkspacePermissionMode,
+  UiSettingScope,
 } from '../../../core/server';
 import { updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
@@ -104,17 +105,33 @@ export const checkAndSetDefaultDataSource = async (
   if (dataSources?.length > 0) {
     if (!needCheck) {
       // Create# Will set first data source as default data source.
-      await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
+      await uiSettingsClient.set(
+        DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+        dataSources[0],
+        UiSettingScope.WORKSPACE
+      );
     } else {
       // Update will check if default DS still exists.
-      const defaultDSId = (await uiSettingsClient.get(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)) ?? '';
+      const defaultDSId =
+        (await uiSettingsClient.get(
+          DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+          UiSettingScope.WORKSPACE
+        )) ?? '';
       if (!dataSources.includes(defaultDSId)) {
-        await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
+        await uiSettingsClient.set(
+          DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+          dataSources[0],
+          UiSettingScope.WORKSPACE
+        );
       }
     }
   } else {
     // If there is no data source left, clear workspace level default data source.
-    await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, undefined);
+    await uiSettingsClient.set(
+      DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+      undefined,
+      UiSettingScope.WORKSPACE
+    );
   }
 };
 

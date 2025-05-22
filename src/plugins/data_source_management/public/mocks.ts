@@ -31,6 +31,7 @@ import {
 } from '../framework/types';
 import { AvailableIntegrationsTableProps } from './components/direct_query_data_sources_components/integrations/available_integration_table';
 import { navigationPluginMock } from '../../navigation/public/mocks';
+import packageInfo from '../../../../package.json';
 
 /* Mock Types */
 
@@ -105,6 +106,7 @@ export const getDataSource = [
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,
+      dataSourceVersion: packageInfo.version,
     },
   },
   {
@@ -116,6 +118,7 @@ export const getDataSource = [
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,
+      dataSourceVersion: packageInfo.version,
     },
   },
   {
@@ -127,6 +130,7 @@ export const getDataSource = [
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,
+      dataSourceVersion: packageInfo.version,
     },
   },
 ];
@@ -379,6 +383,7 @@ export const mockDataSourceAttributesWithAuth = {
       password: 'test123',
     },
   },
+  dataSourceVersion: packageInfo.version,
 };
 
 export const mockDataSourceAttributesWithSigV4Auth = {
@@ -417,6 +422,7 @@ export const mockDataSourceAttributesWithRegisteredAuth = {
     type: 'Some Auth Type',
     credentials: {} as { [key: string]: string },
   },
+  dataSourceVersion: packageInfo.version,
 } as DataSourceAttributes;
 
 export const getDataSourceByIdWithCredential = {
@@ -485,7 +491,7 @@ export const mockErrorResponseForSavedObjectsCalls = (
 
 export const mockUiSettingsCalls = (
   uiSettings: IUiSettingsClient,
-  uiSettingsMethodName: 'get' | 'set' | 'get$',
+  uiSettingsMethodName: 'get' | 'set' | 'get$' | 'getUserProvidedWithScope',
   response: any
 ) => {
   (uiSettings[uiSettingsMethodName] as jest.Mock).mockReturnValue(response);

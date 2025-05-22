@@ -1,13 +1,9 @@
 {
   "#opensearch-dashboards-body": {
-    "approved": [
-      "src/core/public/rendering/_base.scss"
-    ]
+    "approved": ["src/core/public/rendering/_base.scss"]
   },
   ".app-wrapper": {
-    "approved": [
-      "src/core/public/rendering/_base.scss"
-    ]
+    "approved": ["src/core/public/rendering/_base.scss"]
   },
   "/\\.[eo]ui/": {
     "approved": [
@@ -28,7 +24,12 @@
       "src/plugins/discover/public/application/components/sidebar/discover_sidebar.scss",
       "src/plugins/data/public/ui/query_string_input/_query_bar.scss",
       "src/plugins/data/public/ui/query_editor/_query_editor.scss",
-      "src/plugins/data/public/ui/dataset_selector/_dataset_selector.scss"
+      "src/plugins/data/public/ui/dataset_selector/_dataset_selector.scss",
+      "src/plugins/explore/public/components/data_table/tabe_cell/table_source_cell.scss"
     ]
+  },
+  "/\\.explore/": {
+    "explanation": "\"explore\" prefix is preserved for Explore plugin",
+    "approved": ["src/plugins/explore/", "examples/expressions_example/public/index.scss"]
   }
 }

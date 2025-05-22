@@ -1,0 +1,9 @@
+{
+  "id": "stateManagementExample",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["navigation","opensearchDashboardsReact","opensearchDashboardsUtils","developerExamples"],
+  "optionalPlugins": []
+}
