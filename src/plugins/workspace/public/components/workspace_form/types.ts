@@ -16,14 +16,14 @@ import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceUserPermissionSetting {
   id: number;
-  type: WorkspacePermissionItemType;
+  type: WorkspacePermissionItemType.User;
   userId: string;
   modes: WorkspacePermissionMode[];
 }
 
 export interface WorkspaceUserGroupPermissionSetting {
   id: number;
-  type: WorkspacePermissionItemType;
+  type: WorkspacePermissionItemType.Group;
   group: string;
   modes: WorkspacePermissionMode[];
 }
