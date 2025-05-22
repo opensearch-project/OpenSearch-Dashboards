@@ -25,12 +25,11 @@ export interface VisualizationType {
   readonly toExpression: (
     services: DiscoverViewServices,
     searchContext: IExpressionLoaderParams['searchContext'],
-    rows: OpenSearchSearchHit[],
     indexPattern: IndexPattern,
-    numericalColumns: DiscoverVisColumn[],
-    categoricalColumns: DiscoverVisColumn[],
-    dateColumns: DiscoverVisColumn[],
-    fieldSchema?: Array<Partial<IFieldType>>,
+    transformedData?: Array<Record<string, any>>,
+    numericalColumns?: DiscoverVisColumn[],
+    categoricalColumns?: DiscoverVisColumn[],
+    dateColumns?: DiscoverVisColumn[],
     styleOptions?: Partial<LineChartStyleControls>
   ) => Promise<string | undefined>;
 }
@@ -64,6 +63,14 @@ const FIELD_TYPE_MAP: Partial<Record<string, DiscoverVisFieldType>> = {
   [OPENSEARCH_FIELD_TYPES.WILDCARD]: 'categorical',
 };
 
+export interface VisualizationTypeResult {
+  visualizationType?: VisualizationType;
+  numericalColumns?: DiscoverVisColumn[];
+  categoricalColumns?: DiscoverVisColumn[];
+  dateColumns?: DiscoverVisColumn[];
+  transformedData?: Array<Record<string, any>>;
+}
+
 const getFieldTypeFromSchema = (schema?: string): DiscoverVisFieldType =>
   FIELD_TYPE_MAP[schema || ''] || 'unknown';
 
@@ -71,11 +78,11 @@ const getFieldTypeFromSchema = (schema?: string): DiscoverVisFieldType =>
 export const getVisualizationType = (
   rows?: OpenSearchSearchHit[],
   fieldSchema?: Array<Partial<IFieldType>>
-) => {
-  if (!fieldSchema) {
+): VisualizationTypeResult | undefined => {
+  if (!fieldSchema || !rows) {
     return;
   }
-  const columns: DiscoverVisColumn[] = fieldSchema!.map((field, index) => {
+  const columns: DiscoverVisColumn[] = fieldSchema.map((field, index) => {
     return {
       id: index,
       schema: getFieldTypeFromSchema(field.type),
@@ -83,6 +90,16 @@ export const getVisualizationType = (
       column: `field-${index}`,
     };
   });
+  const transformedData = rows.map((row: OpenSearchSearchHit) => {
+    const transformedRow: Record<string, any> = {};
+    for (const column of columns) {
+      transformedRow[column.column] = row._source[column.name];
+    }
+    return transformedRow;
+  });
 
-  return visualizationRegistry.getVisualizationType(columns);
+  return {
+    ...visualizationRegistry.getVisualizationType(columns),
+    transformedData,
+  };
 };
