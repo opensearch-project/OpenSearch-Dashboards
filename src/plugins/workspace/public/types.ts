@@ -39,7 +39,7 @@ export interface DataSourceAttributesWithWorkspaces extends Omit<DataSourceAttri
   workspaces?: string[];
 }
 
-export type WorkspaceCollaboratorPermissionType = 'user' | 'group' | 'unknown';
+export type WorkspaceCollaboratorPermissionType = 'user' | 'group';
 export type WorkspaceCollaboratorAccessLevel = 'readOnly' | 'readAndWrite' | 'admin';
 
 export interface WorkspaceCollaborator {

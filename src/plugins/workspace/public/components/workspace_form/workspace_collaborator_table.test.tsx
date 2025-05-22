@@ -11,24 +11,24 @@ import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_d
 import { coreMock } from '../../../../../core/public/mocks';
 import { WorkspacePermissionItemType } from './constants';
 import { IWorkspaceResponse, WorkspacePermissionMode } from 'opensearch-dashboards/public';
+import { WorkspaceCollaboratorType } from '../../services';
+import { WorkspaceCollaboratorPermissionType } from '../../types';
 
 const mockCoreStart = coreMock.createStart();
-const displayedCollaboratorTypes = [
+const displayedCollaboratorTypes: WorkspaceCollaboratorType[] = [
   {
     id: 'user',
     name: 'User',
     buttonLabel: 'Add Users',
     onAdd: async () => {},
-    getDisplayedType: ({ permissionType }: { permissionType: string }) =>
-      permissionType === 'user' ? 'User' : undefined,
+    getDisplayedType: ({ permissionType }) => (permissionType === 'user' ? 'User' : undefined),
   },
   {
     id: 'group',
     name: 'Group',
     buttonLabel: 'Add Groups',
     onAdd: async () => {},
-    getDisplayedType: ({ permissionType }: { permissionType: string }) =>
-      permissionType === 'group' ? 'Group' : undefined,
+    getDisplayedType: ({ permissionType }) => (permissionType === 'group' ? 'Group' : undefined),
   },
 ];
 
@@ -40,7 +40,7 @@ describe('getDisplayedTypes', () => {
   it('should return undefined if not match any collaborator type', () => {
     expect(
       getDisplayedType(displayedCollaboratorTypes, {
-        permissionType: 'unknown',
+        permissionType: 'unknown' as WorkspaceCollaboratorPermissionType,
         collaboratorId: 'unknown',
         accessLevel: 'readOnly',
       })

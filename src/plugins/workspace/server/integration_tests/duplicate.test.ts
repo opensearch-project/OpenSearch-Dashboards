@@ -13,6 +13,7 @@ import { registerDuplicateRoute } from '../routes/duplicate';
 import { createListStream } from '../../../../core/server/utils/streams';
 import Boom from '@hapi/boom';
 import { dynamicConfigServiceMock } from '../../../../core/server/mocks';
+import { workspaceClientMock } from '../workspace_client.mock';
 
 jest.mock('../../../../core/server/saved_objects/export', () => ({
   exportSavedObjectsToStream: jest.fn(),
@@ -24,24 +25,7 @@ const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const URL = '/api/workspaces/_duplicate_saved_objects';
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
 const logger = loggingSystemMock.create();
-const clientMock = {
-  init: jest.fn(),
-  enterWorkspace: jest.fn(),
-  getCurrentWorkspaceId: jest.fn(),
-  getCurrentWorkspace: jest.fn(),
-  create: jest.fn(),
-  delete: jest.fn(),
-  list: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn(),
-  stop: jest.fn(),
-  setup: jest.fn(),
-  destroy: jest.fn(),
-  setSavedObjects: jest.fn(),
-  setUiSettings: jest.fn(),
-  associate: jest.fn(),
-  dissociate: jest.fn(),
-};
+const clientMock = workspaceClientMock.create();
 
 export const createExportableType = (name: string): exportMock.SavedObjectsType => {
   return {

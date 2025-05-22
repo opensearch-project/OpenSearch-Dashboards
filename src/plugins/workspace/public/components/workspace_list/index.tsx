@@ -367,9 +367,7 @@ export const WorkspaceListInner = ({
           />
         )}
       </>
-    ) : (
-      <></>
-    );
+    ) : undefined;
   };
 
   const selectionValue: EuiTableSelectionType<WorkspaceAttribute> = {

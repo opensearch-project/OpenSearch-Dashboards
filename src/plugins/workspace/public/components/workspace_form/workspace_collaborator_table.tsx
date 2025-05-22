@@ -23,11 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useMountedState } from 'react-use';
-import {
-  WorkspacePermissionSetting,
-  WorkspaceUserGroupPermissionSetting,
-  WorkspaceUserPermissionSetting,
-} from './types';
+import { WorkspacePermissionSetting } from './types';
 import { WorkspacePermissionItemType } from './constants';
 import { getPermissionModeId, isWorkspacePermissionSetting } from './utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -38,7 +34,7 @@ import {
   WORKSPACE_ACCESS_LEVEL_NAMES,
   accessLevelNameToWorkspacePermissionModesMap,
 } from '../../constants';
-import { WorkspaceCollaboratorAccessLevel } from '../../types';
+import { WorkspaceCollaborator, WorkspaceCollaboratorAccessLevel } from '../../types';
 import { BackgroundPic } from '../../assets/background_pic';
 
 export type PermissionSetting = Pick<WorkspacePermissionSetting, 'id'> &
@@ -119,38 +115,17 @@ const BaseConfirmModal = ({
   );
 };
 
-interface WorkspaceCollaborator {
-  collaboratorId: string;
-  permissionType: WorkspacePermissionItemType;
-  accessLevel: WorkspaceCollaboratorAccessLevel; // Adjust 'string' to the actual type of accessLevel
-}
-
-export const convertPermissionSettingToWorkspaceCollaborator = (
-  permissionSetting: WorkspacePermissionSetting // <<-- ENSURE THIS PARAMETER IS TYPED CORRECTLY HERE
-): WorkspaceCollaborator => {
-  let collaboratorId: string;
-  let accessLevel: WorkspaceCollaboratorAccessLevel;
-
-  if (permissionSetting.type === WorkspacePermissionItemType.User) {
-    const userPermission = permissionSetting as WorkspaceUserPermissionSetting;
-    collaboratorId = userPermission.userId;
-    accessLevel =
-      permissionModeId2WorkspaceAccessLevelMap[getPermissionModeId(userPermission.modes)];
-  } else if (permissionSetting.type === WorkspacePermissionItemType.Group) {
-    const groupPermission = permissionSetting as WorkspaceUserGroupPermissionSetting;
-    collaboratorId = groupPermission.group;
-    accessLevel =
-      permissionModeId2WorkspaceAccessLevelMap[getPermissionModeId(groupPermission.modes)];
-  } else {
-    throw new Error(`Unknown permission type: ${permissionSetting.type}`);
-  }
-
-  return {
-    collaboratorId,
-    permissionType: permissionSetting.type,
-    accessLevel,
-  };
-};
+const convertPermissionSettingToWorkspaceCollaborator = (
+  permissionSetting: WorkspacePermissionSetting
+) => ({
+  collaboratorId:
+    permissionSetting.type === WorkspacePermissionItemType.User
+      ? permissionSetting.userId
+      : permissionSetting.group,
+  permissionType: permissionSetting.type,
+  accessLevel:
+    permissionModeId2WorkspaceAccessLevelMap[getPermissionModeId(permissionSetting.modes)],
+});
 
 export const getDisplayedType = (
   supportCollaboratorTypes: WorkspaceCollaboratorType[],

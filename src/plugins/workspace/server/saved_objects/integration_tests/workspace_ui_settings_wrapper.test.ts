@@ -7,6 +7,7 @@ import { IUiSettingsClient, WorkspaceAttribute } from 'src/core/server';
 
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 import { httpServerMock } from '../../../../../core/server/mocks';
+import { OpenSearchDashboardsRequestState } from 'opensearch-dashboards/server/http/router';
 
 describe('workspace ui settings saved object client wrapper', () => {
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
@@ -63,9 +64,10 @@ describe('workspace ui settings saved object client wrapper', () => {
     const workspaceScopedSavedObjectsClient = osd.coreStart.savedObjects.getScopedClient(
       httpServerMock.createOpenSearchDashboardsRequest({
         opensearchDashboardsRequestState: {
+          requestWorkspaceId: testWorkspace.id,
           requestId: testWorkspace.id,
           requestUuid: testWorkspace.id,
-        },
+        } as OpenSearchDashboardsRequestState,
       })
     );
     const workspaceScopedUiSettingsClient = osd.coreStart.uiSettings.asScopedToClient(

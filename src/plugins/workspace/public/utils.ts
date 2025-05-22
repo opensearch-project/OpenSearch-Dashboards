@@ -310,8 +310,8 @@ export const convertDataSourcesToOpenSearchAndDataConnections = (
   dataSources: DataConnection[] | DataSource[]
 ): Record<'openSearchConnections' | 'dataConnections', DataSourceConnection[]> => {
   const openSearchConnections = dataSources
-    .filter((ds: DataSource) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
-    .map((ds: DataSource) => {
+    .filter((ds: DataConnection | DataSource) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+    .map((ds: DataConnection | DataSource) => {
       return {
         id: ds.id,
         type: ds.dataSourceEngineType,
@@ -322,8 +322,8 @@ export const convertDataSourcesToOpenSearchAndDataConnections = (
       };
     });
   const dataConnections = dataSources
-    .filter((ds: DataSource) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
-    .map((ds: DataSource) => {
+    .filter((ds: DataConnection) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
+    .map((ds: DataConnection) => {
       return {
         id: ds.id,
         type: (ds as DataConnection).connectionType,

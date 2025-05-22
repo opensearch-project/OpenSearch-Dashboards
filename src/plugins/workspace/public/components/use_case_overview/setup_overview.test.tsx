@@ -13,16 +13,19 @@ import {
   registerEssentialOverviewContent,
   setEssentialOverviewSection,
 } from './setup_overview';
+// import { createSetupContract } from '../../../../../plugins/content_management/public/mocks';
+import { contentManagementPluginMocks } from '../../../../../plugins/content_management/public/mocks';
 
 describe('Setup use case overview', () => {
   const coreStart = coreMock.createStart();
   const registerContentProviderMock = jest.fn();
+  const { getPage } = contentManagementPluginMocks.createStartContract();
 
   const contentManagementStartMock: ContentManagementPluginStart = {
     registerContentProvider: registerContentProviderMock,
     renderPage: jest.fn(),
     updatePageSection: jest.fn(),
-    getPage: jest.fn(),
+    getPage,
   };
 
   const registerPageMock = jest.fn();

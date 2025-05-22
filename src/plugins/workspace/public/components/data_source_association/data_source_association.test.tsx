@@ -16,6 +16,7 @@ import { AssociationDataSourceModalContent } from './association_data_source_mod
 import { DataSourceConnectionType } from 'src/plugins/workspace/common/types';
 import { BehaviorSubject } from 'rxjs';
 import { IWorkspaceClient } from 'opensearch-dashboards/public';
+import { workspaceClientMock } from '../../workspace_client.mock';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
@@ -71,17 +72,10 @@ describe('<DataSourceAssociation />', () => {
       .fn()
       .mockResolvedValue({ success: true, result: [{ id: 'id1' }, { id: 'id2' }] });
     servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
-      associate: associateMock,
-      copy: jest.fn(),
+      ...workspaceClientMock,
+      associate: jest.fn(),
       dissociate: jest.fn(),
       ui: jest.fn(),
-      getCurrentWorkspaceId: jest.fn(),
-      getCurrentWorkspace: jest.fn(),
-      create: jest.fn(),
-      delete: jest.fn(),
-      list: jest.fn(),
-      get: jest.fn(),
-      update: jest.fn(),
     });
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
 
