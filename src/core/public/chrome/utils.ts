@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-ignore
+import { pipeline } from '@xenova/transformers';
+
 import { AppCategory } from 'opensearch-dashboards/public';
-import { pipeline } from '@huggingface/transformers';
 import { ChromeNavLink } from './nav_links';
 import { ChromeRegistrationNavLink, NavGroupItemInMap } from './nav_group';
 import { NavGroupStatus } from '../../../core/types';
@@ -277,16 +279,30 @@ export async function searchNavigationLinks(
   });
 
   const linksWithDesc = allSearchAbleLinks.filter((link) => !!link.description);
+  console.log('linksWithDesc: ', linksWithDesc);
   const semanticSearchResult = (await semanticSearch(query, linksWithDesc)).map((result) => {
+    console.log(result);
     const { embedding, score, ...link } = result;
     return link;
   });
-
+  console.log('semanticSearchResult: ', semanticSearchResult);
   return semanticSearchResult;
 }
 
 async function semanticSearch(query: string, documents: NavLinkWithNavGroup[]) {
-  const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+  console.log('-------------Enter semanticSearch-------------');
+  // const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+  const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
+    progress_callback: (args: any) => {
+      if (args.status === 'progress') {
+        // Log the percentage progress for the current file
+        console.log(`Model Loading Progress: ${args.file} - ${args.progress.toFixed(2)}%`);
+      } else if (args.status === 'done') {
+        console.log(`Model Loading Progress: Finished loading ${args.file}.`);
+      }
+    },
+  });
+  console.log('Model loaded: ', extractor);
 
   // Inside semanticSearch function
   const docEmbeddings = await Promise.all(
@@ -302,7 +318,7 @@ async function semanticSearch(query: string, documents: NavLinkWithNavGroup[]) {
 
   const scored = docEmbeddings.map((doc) => ({
     ...doc,
-    score: cosineSimilarity(queryEmbedding, doc.embedding),
+    score: cosineSimilarity(queryEmbedding as number[], doc.embedding as number[]),
   }));
 
   scored.sort((a, b) => b.score - a.score);
