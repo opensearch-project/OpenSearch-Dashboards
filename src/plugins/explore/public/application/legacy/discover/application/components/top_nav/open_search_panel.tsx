@@ -46,8 +46,7 @@ import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { SavedObjectFinderUi } from '../../../../../../../../saved_objects/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { SAVED_OBJECT_TYPE } from '../../../saved_searches/_saved_search';
-import { setSavedSearchId } from '../../utils/state_management';
+import { SAVED_OBJECT_TYPE } from '../../../../../../saved_explore/_saved_explore';
 
 interface Props {
   onClose: () => void;
@@ -119,7 +118,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
               // app/explore/logs#/ -> app/explore/logs#/view/uuid. There is no
               // appId change and no new store created, so we need to dispatch
               // the state change.
-              store!.dispatch({ type: setSavedSearchId.type, payload: id });
+              store!.dispatch({ type: 'logs/incrementSaveExploreLoadCount' });
               application.navigateToApp('explore', { path: `${LOGS_VIEW_ID}#/view/${id}` });
             }
             onClose();
