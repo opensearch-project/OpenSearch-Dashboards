@@ -540,4 +540,71 @@ describe('DataSourceTable', () => {
       expect(component.text()).toContain('connectionAlias1');
     });
   });
+
+  describe('fetchDataSources with previousDataSourcesRef', () => {
+    let comp: ReactWrapper;
+    let mountComponent: () => Promise<void>;
+    const mockEmptyDataSources: any[] = [];
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      jest.spyOn(utils, 'getDataSources').mockResolvedValue(mockEmptyDataSources);
+      jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValue(mockEmptyDataSources);
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockResolvedValue({});
+
+      mountComponent = async () => {
+        await act(async () => {
+          comp = mount(
+            wrapWithIntl(
+              <DataSourceTable
+                history={history}
+                location={{} as RouteComponentProps['location']}
+                match={{} as RouteComponentProps['match']}
+              />
+            ),
+            {
+              wrappingComponent: OpenSearchDashboardsContextProvider,
+              wrappingComponentProps: {
+                services: mockedContext,
+              },
+            }
+          );
+        });
+        comp.update();
+      };
+    });
+
+    afterEach(() => {
+      comp?.unmount();
+      jest.clearAllMocks();
+    });
+
+    test('should set first data source as default from 0 to 1+ data sources', async () => {
+      await mountComponent();
+      expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
+
+      (utils.getDataSources as jest.Mock).mockReturnValue(Promise.resolve(getMappedDataSources));
+      (utils.fetchDataSourceConnections as jest.Mock).mockReturnValue(
+        Promise.resolve(getDataSourcesWithCrossClusterConnections)
+      );
+      await act(async () => {
+        comp = mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      comp.update();
+      expect(utils.setFirstDataSourceAsDefault).toHaveBeenCalled();
+    });
+  });
 });
