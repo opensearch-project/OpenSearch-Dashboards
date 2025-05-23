@@ -318,7 +318,6 @@ export class DataSourceManagementPlugin
     };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
-    // Helper function to parse the directQuerySync URL parameter
     const getDirectQuerySyncFromUrl = (): boolean | null => {
       const hash = window.location.hash;
       const queryStringMatch = hash.match(/\?(.*)$/);
@@ -329,32 +328,26 @@ export class DataSourceManagementPlugin
         if (directQuerySync === 'true') return true;
         if (directQuerySync === 'false') return false;
       }
-      return null; // URL parameter not specified
+      return null;
     };
 
-    // Function to determine if the banner should be mounted based on URL flag and feature flag
     const shouldMountBanner = (): boolean => {
       const urlFlag = getDirectQuerySyncFromUrl();
       if (urlFlag !== null) {
-        // URL flag takes precedence
         return urlFlag;
       }
-      // Fall back to feature flag if URL flag is not specified
       return this.config.dashboardDirectQuerySyncEnabled;
     };
 
-    // Function to handle banner mounting/unmounting
     const updateBanner = () => {
       const appId = this.currentAppId;
 
-      // Show the banner only in the Dashboard application on the view route
       if (appId === 'dashboards') {
         const hash = window.location.hash;
         const isDashboardViewMatch = hash.match(/#\/view\/([^\/?]+)(\?.*)?$/);
         if (isDashboardViewMatch && isDashboardViewMatch[1]) {
           const dashboardId = isDashboardViewMatch[1];
           if (shouldMountBanner()) {
-            // Mount the banner if it hasn't been mounted yet
             if (!this.bannerId) {
               this.bannerId = core.overlays.banners.add(
                 toMountPoint(
@@ -374,34 +367,28 @@ export class DataSourceManagementPlugin
               );
             }
           } else if (this.bannerId) {
-            // Remove the banner if the feature is disabled
             core.overlays.banners.remove(this.bannerId);
             this.bannerId = null;
           }
         } else if (!isDashboardViewMatch && this.bannerId) {
-          // Remove the banner if we're not on a dashboard view page
           core.overlays.banners.remove(this.bannerId);
           this.bannerId = null;
         }
       } else if (this.bannerId) {
-        // Remove the banner when not in the Dashboard application
         core.overlays.banners.remove(this.bannerId);
         this.bannerId = null;
       }
     };
 
-    // Dynamically add/remove the banner based on the route and flags
     core.application.currentAppId$.subscribe((appId: string | undefined) => {
       this.currentAppId = appId;
       updateBanner();
     });
 
-    // Listen for hash changes to handle in-app navigation and URL flag changes
     window.addEventListener('hashchange', () => {
       updateBanner();
     });
 
-    // Initial check on start
     updateBanner();
 
     return {
@@ -410,7 +397,6 @@ export class DataSourceManagementPlugin
   }
 
   public stop() {
-    // Clean up the banner on plugin stop
     if (this.bannerId && this.core) {
       this.core.overlays.banners.remove(this.bannerId);
       this.bannerId = null;

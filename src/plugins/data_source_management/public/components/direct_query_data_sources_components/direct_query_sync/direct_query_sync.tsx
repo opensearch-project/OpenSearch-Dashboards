@@ -34,10 +34,8 @@ export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
 }) => {
   const [syncInfo, setSyncInfo] = useState<DirectQuerySyncInfo | null>(null);
 
-  // Initialize the useDirectQuery hook
   const { loadStatus, startLoading } = useDirectQuery(http, notifications, syncInfo?.mdsId);
 
-  // Fetch sync information using the utility function
   useEffect(() => {
     const loadSyncInfo = async () => {
       const result = await fetchDirectQuerySyncInfo({
@@ -82,7 +80,6 @@ export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
 
     const datasource = match[1];
 
-    // Construct the DirectQueryRequest payload
     const requestPayload = {
       datasource,
       query: syncInfo.refreshQuery,

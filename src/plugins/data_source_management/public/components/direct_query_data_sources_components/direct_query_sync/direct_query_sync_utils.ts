@@ -80,12 +80,6 @@ export async function fetchDirectQuerySyncInfo({
     const uniqueIndexPatternIds = Array.from(new Set(indexPatternIds));
     const isConsistent = uniqueIndexPatternIds.length <= 1;
 
-    console.log('Index Pattern Comparison:', {
-      indexPatternIds,
-      uniqueIndexPatternIds,
-      isConsistent,
-    });
-
     if (!isConsistent) {
       return null;
     }
@@ -99,10 +93,7 @@ export async function fetchDirectQuerySyncInfo({
       const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
       localMdsId = dataSourceRef?.id; // Can be undefined if no data-source reference
       indexTitle = indexPattern.attributes.title || null;
-
-      console.log('Fetched MDS ID:', localMdsId);
     } else if (uniqueIndexPatternIds.length === 0) {
-      // No index patterns, treat mdsId as undefined
       localMdsId = undefined;
       return null;
     }
@@ -113,14 +104,12 @@ export async function fetchDirectQuerySyncInfo({
 
     // Step 3: Resolve the index pattern to a concrete index
     const resolvedIndex = await resolveConcreteIndex(indexTitle, http, localMdsId);
-    console.log('Resolved Concrete Index:', resolvedIndex);
     if (!resolvedIndex) {
       return null;
     }
 
     // Step 4: Fetch the index mapping
     const localMapping = await fetchIndexMapping(resolvedIndex, http, localMdsId);
-    console.log('Fetched Index Mapping:', localMapping);
     if (!localMapping) {
       return null;
     }
@@ -130,29 +119,21 @@ export async function fetchDirectQuerySyncInfo({
       localMapping,
       resolvedIndex
     );
-    console.log('Extracted Index Info:', {
-      parts,
-      refreshInterval,
-      lastRefreshTime,
-      mappingName,
-    });
+
     if (!parts) {
       return null;
     }
 
     // Step 6: Generate the refresh query
     const refreshQuery = generateRefreshQuery(parts);
-    console.log('Generated Refresh Query:', refreshQuery);
 
     return { refreshQuery, refreshInterval, lastRefreshTime, mappingName, mdsId: localMdsId };
   } catch (err) {
-    console.error('Error fetching sync info:', err);
     onError('Failed to fetch dashboard information');
     return null;
   }
 }
 
-// Resolve the index pattern to a concrete index
 async function resolveConcreteIndex(
   indexTitle: string,
   httpClient: HttpStart,
@@ -169,12 +150,10 @@ async function resolveConcreteIndex(
     const matchedIndices = resolved?.indices || [];
     return matchedIndices.length > 0 ? matchedIndices[0].name : null;
   } catch (err) {
-    console.error('Error resolving concrete index:', err);
     return null;
   }
 }
 
-// Fetch the index mapping
 async function fetchIndexMapping(
   index: string,
   httpClient: HttpStart,
@@ -189,12 +168,10 @@ async function fetchIndexMapping(
 
     return response;
   } catch (err) {
-    console.error('Error fetching index mapping:', err);
     return null;
   }
 }
 
-// Extract index parts, refresh interval, last refresh time, and name
 function extractIndexInfo(
   mapping: Record<string, any>,
   concreteTitle: string
@@ -258,7 +235,6 @@ function extractIndexParts(mappingName?: string, concreteTitle?: string): IndexE
   return nullResult;
 }
 
-// Generate the refresh query
 function generateRefreshQuery(info: IndexExtractionResult): string {
   if (!info.datasource || !info.database || !info.index) {
     throw new Error(
