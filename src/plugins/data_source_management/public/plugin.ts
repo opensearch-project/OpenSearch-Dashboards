@@ -17,6 +17,7 @@ import {
 } from '../../../core/public';
 import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { DashboardDirectQuerySync } from './components/direct_query_data_sources_components/direct_query_sync/direct_query_sync';
+import { parseUrlHash } from '../../opensearch_dashboards_utils/public';
 
 import { PLUGIN_NAME } from '../common';
 import { createDataSourceSelector } from './components/data_source_selector/create_data_source_selector';
@@ -319,12 +320,9 @@ export class DataSourceManagementPlugin
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
     const getDirectQuerySyncFromUrl = (): boolean | null => {
-      const hash = window.location.hash;
-      const queryStringMatch = hash.match(/\?(.*)$/);
-      if (queryStringMatch) {
-        const queryString = queryStringMatch[1];
-        const params = new URLSearchParams(queryString);
-        const directQuerySync = params.get('directQuerySync');
+      const parsedHash = parseUrlHash(window.location.href);
+      if (parsedHash && parsedHash.query) {
+        const directQuerySync = parsedHash.query.directQuerySync;
         if (directQuerySync === 'true') return true;
         if (directQuerySync === 'false') return false;
       }
