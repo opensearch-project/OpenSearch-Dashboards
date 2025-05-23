@@ -22,7 +22,7 @@ import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
-import { DiscoverVisualization } from './discover_visualization';
+import { DiscoverVisualization } from '../../components/visualizations/discover_visualization';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: ViewProps) {
