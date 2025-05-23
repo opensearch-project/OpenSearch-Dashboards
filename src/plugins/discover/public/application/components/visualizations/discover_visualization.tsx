@@ -9,14 +9,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { useDiscoverContext } from '../context';
+import { useDiscoverContext } from '../../view_components/context';
 
-import { SearchData } from '../utils';
+import { SearchData } from '../../view_components/utils';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { getVisualizationType, VisualizationTypeResult } from '../utils/use_visualization_types';
-import { LineChartStyleControls } from '../../components/visualizations/line/line_vis_config';
-import { visualizationRegistry } from '../../components/visualizations/visualization_registry';
-import { lineChartRule } from '../../components/visualizations/line/line_chart_rules';
+import {
+  getVisualizationType,
+  VisualizationTypeResult,
+} from '../../view_components/utils/use_visualization_types';
+import { LineChartStyleControls } from './line/line_vis_config';
+import { visualizationRegistry } from './visualization_registry';
+import { lineChartRule } from './line/line_chart_rules';
 
 export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -36,7 +39,9 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
   );
 
   const [expression, setExpression] = useState<string>();
-  const [styleOptions, setStyleOptions] = useState<LineChartStyleControls | undefined>(undefined);
+  const [styleOptions, setStyleOptions] = useState<Partial<LineChartStyleControls> | undefined>(
+    undefined
+  );
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -114,8 +119,11 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
         <EuiPanel className="stylePanel" data-test-subj="stylePanel">
           {visualizationData &&
             visualizationData.visualizationType?.ui.style.render({
-              defaultStyles: visualizationData.visualizationType.ui.style.defaults,
-              onChange: setStyleOptions,
+              styleOptions: visualizationData.visualizationType.ui.style.defaults,
+              onStyleChange: setStyleOptions,
+              numericalColumns: visualizationData.numericalColumns,
+              categoricalColumns: visualizationData.categoricalColumns,
+              dateColumns: visualizationData.dateColumns,
             })}
         </EuiPanel>
       </EuiFlexItem>
