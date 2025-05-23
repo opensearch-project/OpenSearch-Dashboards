@@ -134,7 +134,7 @@ export async function fetchDirectQuerySyncInfo({
   }
 }
 
-async function resolveConcreteIndex(
+export async function resolveConcreteIndex(
   indexTitle: string,
   httpClient: HttpStart,
   mdsId?: string
@@ -154,7 +154,7 @@ async function resolveConcreteIndex(
   }
 }
 
-async function fetchIndexMapping(
+export async function fetchIndexMapping(
   index: string,
   httpClient: HttpStart,
   mdsId?: string
@@ -172,7 +172,7 @@ async function fetchIndexMapping(
   }
 }
 
-function extractIndexInfo(
+export function extractIndexInfo(
   mapping: Record<string, any>,
   concreteTitle: string
 ): {
@@ -194,7 +194,10 @@ function extractIndexInfo(
   return { parts, refreshInterval, lastRefreshTime, mappingName };
 }
 
-function extractIndexParts(mappingName?: string, concreteTitle?: string): IndexExtractionResult {
+export function extractIndexParts(
+  mappingName?: string,
+  concreteTitle?: string
+): IndexExtractionResult {
   const nullResult: IndexExtractionResult = {
     datasource: null,
     database: null,
@@ -235,7 +238,7 @@ function extractIndexParts(mappingName?: string, concreteTitle?: string): IndexE
   return nullResult;
 }
 
-function generateRefreshQuery(info: IndexExtractionResult): string {
+export function generateRefreshQuery(info: IndexExtractionResult): string {
   if (!info.datasource || !info.database || !info.index) {
     throw new Error(
       'Cannot generate refresh query: missing required datasource, database, or index'
