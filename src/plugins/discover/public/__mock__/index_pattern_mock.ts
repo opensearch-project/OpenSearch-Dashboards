@@ -51,11 +51,11 @@ export const indexPatternInitialMock = ({
   title: 'test_index',
   fields: indexPatternFieldMock,
   timeFieldName: 'order_date',
-  formatHit: jest.fn((hit) => (hit.fields ? hit.fields : hit._source)),
+  formatHit: (hit: any) => (hit.fields ? hit.fields : hit._source),
   flattenHit: undefined,
   formatField: undefined,
   metaFields: ['_id', '_index', '_source'],
-  getFieldByName: jest.fn(() => ({})),
+  getFieldByName: () => ({}),
 } as unknown) as IndexPattern;
 
 // Add a flattenHit method to the initial index pattern mock using flattenHitWrapper

@@ -41,7 +41,9 @@
     "rxjs": "^6.5.5",
     "serve-static": "1.14.1",
     "styled-components": "^5.3.9",
-    "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1"
+    "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.22.9",
+    "@babel/plugin-transform-optional-chaining": "^7.22.9"
   },
   "scripts": {
     "build": "tsc",

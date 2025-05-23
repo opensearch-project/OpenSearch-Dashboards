@@ -40,7 +40,7 @@ import { ViewService } from './application/legacy/data_explorer/services/view_se
 import { setUsageCollector } from './application/legacy/data_explorer/services';
 import { DataExplorerServices } from './application/legacy/data_explorer';
 import { getPreloadedStore } from './application/legacy/data_explorer/utils/state_management';
-import { DiscoverStart, DiscoverStartPlugins } from './application/legacy/discover/types';
+import { ExploreStart, DiscoverStartPlugins } from './application/legacy/discover/types';
 import { DocViewsRegistry } from './application/legacy/discover/application/doc_views/doc_views_registry';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import { JsonCodeBlock } from './application/legacy/discover/application/components/json_code_block/json_code_block';
@@ -59,8 +59,9 @@ import {
   getPreloadedState,
 } from './application/legacy/discover/application/utils/state_management';
 import { buildServices } from './application/legacy/discover/build_services';
-import { createSavedSearchesLoader } from './application/legacy/discover';
+import { createSavedExploreLoader } from '.';
 import { isNavGroupInFeatureConfigs } from '../../../core/public';
+import { ExploreUrlGenerator } from './url_generator';
 
 export class ExplorePlugin
   implements
@@ -70,6 +71,7 @@ export class ExplorePlugin
       ExploreSetupDependencies,
       ExploreStartDependencies
     > {
+  // @ts-ignore
   private config: ConfigSchema;
   /** data_explorer */
   private viewService = new ViewService();
@@ -81,7 +83,7 @@ export class ExplorePlugin
   private docViewsRegistry: DocViewsRegistry | null = null;
   private docViewsLinksRegistry: DocViewsLinksRegistry | null = null;
   private servicesInitialized: boolean = false;
-  private urlGenerator?: DiscoverStart['urlGenerator'];
+  private urlGenerator?: ExploreStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: DiscoverStartPlugins };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -92,6 +94,17 @@ export class ExplorePlugin
     core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
     setupDeps: ExploreSetupDependencies
   ): ExplorePluginSetup {
+    const baseUrl = core.http.basePath.prepend('/app/explore');
+
+    if (setupDeps.share) {
+      this.urlGenerator = setupDeps.share.urlGenerators.registerUrlGenerator(
+        new ExploreUrlGenerator({
+          appBasePath: baseUrl,
+          useHash: core.uiSettings.get('state:storeInSessionStorage'),
+        })
+      );
+    }
+
     const viewService = this.viewService;
 
     setUsageCollector(setupDeps.usageCollection);
@@ -367,7 +380,7 @@ export class ExplorePlugin
 
     return {
       urlGenerator: this.urlGenerator,
-      savedSearchLoader: createSavedSearchesLoader({
+      savedExploreLoader: createSavedExploreLoader({
         savedObjectsClient: core.savedObjects.client,
         indexPatterns: plugins.data.indexPatterns,
         search: plugins.data.search,
