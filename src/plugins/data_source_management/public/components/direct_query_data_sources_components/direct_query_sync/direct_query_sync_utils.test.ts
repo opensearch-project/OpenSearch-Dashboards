@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { HttpStart } from 'opensearch-dashboards/public';
 import { httpServiceMock, savedObjectsServiceMock } from '../../../../../../core/public/mocks';
 import {
   fetchDirectQuerySyncInfo,
@@ -12,20 +12,17 @@ import {
   extractIndexInfo,
   extractIndexParts,
   generateRefreshQuery,
-  DirectQuerySyncInfo,
   IndexExtractionResult,
 } from './direct_query_sync_utils';
 
 describe('DirectQuerySyncUtils', () => {
   let http: jest.Mocked<HttpStart>;
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsServiceMock.createStartContract>['client'];
   let onError: jest.Mock;
 
   beforeEach(() => {
     http = httpServiceMock.createStartContract();
-    savedObjectsClient = savedObjectsServiceMock.createStartContract();
-    // Explicitly mock savedObjectsClient.get as a Jest mock function
-    savedObjectsClient.get = jest.fn();
+    savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
     onError = jest.fn();
   });
 
