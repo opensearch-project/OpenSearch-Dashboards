@@ -29,7 +29,7 @@
  */
 
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { DiscoverSetup, DiscoverStart } from './index';
+import { DiscoverSetup, ExploreStart } from './index';
 import { chartPluginMock } from '../../../../../charts/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import { embeddablePluginMock } from '../../../../../embeddable/public/mocks';
@@ -42,7 +42,7 @@ import { visualizationsPluginMock } from '../../../../../visualizations/public/m
 import { buildServices, DiscoverServices } from './build_services';
 
 export type Setup = jest.Mocked<DiscoverSetup>;
-export type Start = jest.Mocked<DiscoverStart>;
+export type Start = jest.Mocked<ExploreStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
@@ -58,7 +58,7 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    savedSearchLoader: {} as any,
+    savedExploreLoader: {} as any,
     urlGenerator: {
       createUrl: jest.fn(),
     } as any,

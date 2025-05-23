@@ -31,7 +31,7 @@
 import { OpenSearchQuerySortValue, IndexPattern } from '../../../opensearch_dashboards_services';
 import { getSort } from './get_sort';
 import { getDefaultSort } from './get_default_sort';
-import { SortDirection, SortOrder } from '../../../saved_searches/types';
+import { SortDirection, SortOrder } from '../../../../../../saved_explore/types';
 
 /**
  * Prepares sort for search source, that's sending the request to OpenSearch

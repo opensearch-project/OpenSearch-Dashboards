@@ -4,13 +4,14 @@
  */
 
 import { discoverSlice, DiscoverState } from './discover_slice';
-import { SortOrder } from '../../../saved_searches/types';
+import { SortOrder } from '../../../../../../saved_explore/types';
 
 describe('discoverSlice', () => {
   let initialState: DiscoverState;
 
   beforeEach(() => {
     initialState = {
+      saveExploreLoadCount: 0,
       columns: [],
       sort: [],
     };
@@ -34,6 +35,7 @@ describe('discoverSlice', () => {
 
   it('should handle removeColumn', () => {
     initialState = {
+      saveExploreLoadCount: 0,
       columns: ['column1', 'column2'],
       sort: [['column1', 'asc']],
     };
@@ -45,6 +47,7 @@ describe('discoverSlice', () => {
 
   it('should handle reorderColumn', () => {
     initialState = {
+      saveExploreLoadCount: 0,
       columns: ['column1', 'column2', 'column3'],
       sort: [],
     };
@@ -73,6 +76,7 @@ describe('discoverSlice', () => {
 
   it('should handle updateState', () => {
     initialState = {
+      saveExploreLoadCount: 0,
       columns: ['column1', 'column2'],
       sort: [['field1', 'asc']],
     };
@@ -86,6 +90,7 @@ describe('discoverSlice', () => {
 
   it('should handle moveColumn', () => {
     initialState = {
+      saveExploreLoadCount: 0,
       columns: ['column1', 'column2', 'column3'],
       sort: [],
     };
@@ -99,6 +104,7 @@ describe('discoverSlice', () => {
 
   it('should maintain columns order when moving a column to its current position', () => {
     initialState = {
+      saveExploreLoadCount: 0,
       columns: ['column1', 'column2', 'column3'],
       sort: [],
     };
@@ -112,6 +118,7 @@ describe('discoverSlice', () => {
 
   it('should handle moveColumn when destination is out of range', () => {
     initialState = {
+      saveExploreLoadCount: 0,
       columns: ['column1', 'column2', 'column3'],
       sort: [],
     };
@@ -125,6 +132,7 @@ describe('discoverSlice', () => {
 
   it('should not change columns if column to move does not exist', () => {
     initialState = {
+      saveExploreLoadCount: 0,
       columns: ['column1', 'column2', 'column3'],
       sort: [],
     };

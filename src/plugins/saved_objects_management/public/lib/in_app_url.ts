@@ -34,22 +34,24 @@ export function canViewInApp(uiCapabilities: Capabilities, type: string): boolea
   switch (type) {
     case 'search':
     case 'searches':
-      return uiCapabilities.discover.show as boolean;
+      return uiCapabilities.discover?.show as boolean;
+    case 'explore':
+      return uiCapabilities.explore?.show as boolean;
     case 'visualization':
     case 'visualizations':
-      return uiCapabilities.visualize.show as boolean;
+      return uiCapabilities.visualize?.show as boolean;
     case 'augment-vis':
-      return uiCapabilities.visAugmenter.show as boolean;
+      return uiCapabilities.visAugmenter?.show as boolean;
     case 'index-pattern':
     case 'index-patterns':
     case 'indexPatterns':
       return uiCapabilities.management.opensearchDashboards.indexPatterns as boolean;
     case 'dashboard':
     case 'dashboards':
-      return uiCapabilities.dashboard.show as boolean;
+      return uiCapabilities.dashboard?.show as boolean;
     case 'homepage':
-      return uiCapabilities.home.show as boolean;
+      return uiCapabilities.home?.show as boolean;
     default:
-      return uiCapabilities[type].show as boolean;
+      return uiCapabilities[type]?.show as boolean;
   }
 }

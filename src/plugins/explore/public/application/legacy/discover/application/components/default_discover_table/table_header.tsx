@@ -11,13 +11,12 @@
 
 import './_table_header.scss';
 
-import { i18n } from '@osd/i18n';
 import React from 'react';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { TableHeaderColumn } from './table_header_column';
 import { LegacyDisplayedColumn } from './helper';
 import { getDefaultSort } from '../../view_components/utils/get_default_sort';
-import { SortDirection, SortOrder } from '../../../saved_searches/types';
+import { SortDirection, SortOrder } from '../../../../../../saved_explore/types';
 
 interface Props {
   displayedColumns: LegacyDisplayedColumn[];
