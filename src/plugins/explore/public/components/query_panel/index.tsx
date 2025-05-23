@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { QueryPanelLayout } from './layout';
 import { EditorStack } from './components/editor_stack';
@@ -48,7 +48,6 @@ const QueryPanel = () => {
   };
 
   const detectLanguageType = debounce((query) => {
-    console.log(query, 'query');
     const detector = new QueryTypeDetector();
     const result = detector.detect(query);
     languageTypeRef.current = result.type;
@@ -80,10 +79,40 @@ const QueryPanel = () => {
     timeRange?: TimeRange
   ) => {
     // console.log('Running queryString when enter:', querystring);
-    setIsLoading(true); // Set loading to true
-    await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
+    // setIsLoading(true); // Set loading to true
+    // await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
+    // // Add logic to run the query
+    // setIsPromptReadOnly(true);
+    // setIsLoading(false);
     // Add logic to run the query
+    onRun();
     setIsPromptReadOnly(true);
+  };
+
+  const onRun = async () => {
+    setIsLoading(true); // Set loading to true
+
+    // console.log(
+    //   currentQuery.query.trim() !== intitialQuery(languageTypeRef.current, 'test').query.trim()
+    // );
+
+    // console.log(
+    //   (currentQuery.prompt?.trim() ?? '') !==
+    //     intitialQuery(languageTypeRef.current, 'test').prompt.trim()
+    // );
+
+    // if (currentQuery.query.trim() !== intitialQuery(languageTypeRef.current, 'test').query.trim()) {
+    //   setIsPromptReadOnly(true);
+    // }
+
+    // if (
+    //   (currentQuery.prompt?.trim() ?? '') !==
+    //   intitialQuery(languageTypeRef.current, 'test').prompt.trim()
+    // ) {
+    //   setIsEditorReadOnly(true);
+    // }
+
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
     setIsLoading(false);
   };
 
@@ -95,9 +124,9 @@ const QueryPanel = () => {
   };
 
   const handlePromptRun = async (queryString?: string | { [key: string]: any }) => {
-    setIsLoading(true); // Set loading to true
-    await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
-
+    // setIsLoading(true); // Set loading to true
+    // await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
+    onRun();
     const detectedLang = languageTypeRef.current;
 
     if (detectedLang === 'nl') {
@@ -119,7 +148,7 @@ const QueryPanel = () => {
         query: '',
       }));
     }
-    setIsLoading(false); // Set loading to false after the delay
+    // setIsLoading(false); // Set loading to false after the delay
   };
 
   const handlePromptEdit = () => {
@@ -133,7 +162,7 @@ const QueryPanel = () => {
 
   const handleRunClick = () => {
     if (isDualEditor) {
-      handleQueryRun();
+      onRun();
     } else {
       handlePromptRun();
     }
@@ -147,10 +176,15 @@ const QueryPanel = () => {
   const onClickRecentQuery = (recentQuery: Query, timeRange?: TimeRange) => {
     setIsRecentQueryVisible(false);
     setCurrentQuery(recentQuery);
-    // setIsEditorReadOnly(true);
-    // setIsPromptReadOnly(true);
+    setIsDualEditor(true);
+
     handleQueryRun(recentQuery.query, timeRange);
   };
+
+  const noInput = React.useMemo(
+    () => !(currentQuery.query ?? '').trim() && !(currentQuery.prompt ?? '').trim(),
+    [currentQuery.query, currentQuery.prompt]
+  );
 
   return (
     <div className="query-container">
@@ -162,7 +196,7 @@ const QueryPanel = () => {
             languageType={currentQuery.language}
             handleRunClick={handleRunClick}
             handleRecentClick={handleRecentClick}
-            noInput={!currentQuery.query && !currentQuery.prompt}
+            noInput={noInput}
           />
         }
       >

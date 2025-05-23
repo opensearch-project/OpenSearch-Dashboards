@@ -19,6 +19,7 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
 }) => {
   // Memoized function to determine the display text
   const getDisplayText = useMemo(() => {
+    console.log(noInput, noInput);
     if (noInput) return '';
     if (languageType === 'nl') {
       return isDualEditor ? 'Natural Language | PPL' : 'Natural Language';

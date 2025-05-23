@@ -129,14 +129,6 @@ export const SaveQueryButton: React.FC = () => {
 
               <EuiFormRow>
                 <EuiSwitch
-                  label="Include filters"
-                  checked={includeFilters}
-                  onChange={(e) => setIncludeFilters(e.target.checked)}
-                />
-              </EuiFormRow>
-
-              <EuiFormRow>
-                <EuiSwitch
                   label="Include time filter"
                   checked={includeTimeFilter}
                   onChange={(e) => setIncludeTimeFilter(e.target.checked)}
