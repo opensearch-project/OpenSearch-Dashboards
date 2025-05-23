@@ -11,7 +11,8 @@
       "src/plugins/data/public/ui/typeahead/_suggestion.scss",
       "src/plugins/vis_type_timeseries/public/application/components/_error.scss",
       "packages/osd-ui-framework/src/components/form/check_box/_check_box.scss",
-      "src/plugins/discover/public/application/components/doc_viewer/doc_viewer.scss"
+      "src/plugins/discover/public/application/components/doc_viewer/doc_viewer.scss",
+      "src/plugins/explore/public/components/doc_viewer/doc_viewer.scss"
     ]
   }
 }
