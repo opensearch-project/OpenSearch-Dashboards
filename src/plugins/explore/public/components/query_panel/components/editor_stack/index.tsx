@@ -20,7 +20,7 @@ interface EditorStackProps {
   handleQueryRun: (query?: string) => void;
   handlePromptRun: (prompt?: string) => void;
   handleClearEditor: () => void;
-  queryString: string | { [key: string]: any };
+  queryString: string;
   prompt: string;
 }
 

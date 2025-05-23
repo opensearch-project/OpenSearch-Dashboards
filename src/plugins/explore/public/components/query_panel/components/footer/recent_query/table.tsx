@@ -110,7 +110,7 @@ export function RecentQueriesTable({
 
   const recentQueryItems: RecentQueryTableItem[] = recentQueries
     .filter((item, idx) => idx < MAX_RECENT_QUERY_SIZE)
-    .filter((item) => item.query.language === languageType && languageType !== 'nl')
+    // .filter((item) => item.query.language === languageType && languageType !== 'nl')
     .map((query) => ({
       id: query.id,
       query: query.query.query,
