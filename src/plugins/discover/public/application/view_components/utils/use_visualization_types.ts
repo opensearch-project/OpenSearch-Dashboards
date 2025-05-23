@@ -8,7 +8,7 @@ import { LineChartStyleControls } from '../../components/visualizations/line/lin
 import { DiscoverViewServices } from '../../../build_services';
 import { IFieldType, IndexPattern } from '../../../opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
-import { LineChartStyleControlsProps } from '../../components/visualizations/line/line_vis_options';
+import { LineVisStyleControlsProps } from '../../components/visualizations/line/line_vis_options';
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
 import { DiscoverVisColumn } from '../../components/visualizations/types';
 import { visualizationRegistry } from '../../components/visualizations/visualization_registry';
@@ -19,7 +19,13 @@ export interface VisualizationType {
   readonly ui: {
     style: {
       defaults: LineChartStyleControls;
-      render: ({ defaultStyles, onChange }: LineChartStyleControlsProps) => JSX.Element;
+      render: ({
+        styleOptions,
+        onStyleChange,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+      }: LineVisStyleControlsProps) => JSX.Element;
     };
   };
   readonly toExpression: (

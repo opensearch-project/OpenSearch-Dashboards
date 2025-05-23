@@ -13,6 +13,7 @@ import { IndexPattern } from '../../../../../../data/public';
 import { DiscoverViewServices } from '../../../../build_services';
 import { LineChartStyleControls } from './line_vis_config';
 import { DiscoverVisColumn } from '../types';
+import { Positions } from '../utils/collections';
 
 export const toExpression = async (
   services: DiscoverViewServices,
@@ -24,7 +25,6 @@ export const toExpression = async (
   dateColumns?: DiscoverVisColumn[],
   styleOptions?: Partial<LineChartStyleControls>
 ) => {
-  console.log('line chart');
   if (
     !indexPattern ||
     !searchContext ||
@@ -49,7 +49,8 @@ export const toExpression = async (
     numericalColumns,
     categoricalColumns,
     dateColumns,
-    styleOptions
+    styleOptions,
+    searchContext
   );
 
   const vega = buildExpressionFunction<any>('vega', {
@@ -59,22 +60,111 @@ export const toExpression = async (
   return buildExpression([opensearchDashboards, opensearchDashboardsContext, vega]).toString();
 };
 
-// Todo: this func needs modification based on the new mapping rules
+// Helper function to get stroke dash array for different line styles
+const getStrokeDash = (style: string): number[] | undefined => {
+  switch (style) {
+    case 'dashed':
+      return [5, 5];
+    case 'dot-dashed':
+      return [5, 5, 1, 5];
+    case 'full':
+    default:
+      return undefined;
+  }
+};
+
+// Helper function to create threshold line layer
+const createThresholdLayer = (
+  styles: LineChartStyleControls,
+  dateField?: string,
+  metricField?: string
+): any => {
+  if (!styles.thresholdLine?.show) {
+    return null;
+  }
+
+  const thresholdLayer: any = {
+    mark: {
+      type: 'rule',
+      color: styles.thresholdLine.color,
+      strokeWidth: styles.thresholdLine.width,
+      strokeDash: getStrokeDash(styles.thresholdLine.style),
+      tooltip: styles.addTooltip,
+    },
+    encoding: {
+      y: {
+        datum: styles.thresholdLine.value,
+        type: 'quantitative',
+      },
+    },
+  };
+
+  // Add tooltip content if enabled
+  if (styles.addTooltip) {
+    thresholdLayer.encoding.tooltip = {
+      value: `Threshold: ${styles.thresholdLine.value}`,
+    };
+  }
+
+  return thresholdLayer;
+};
+
+// Helper function to create time marker layer
+const createTimeMarkerLayer = (styles: LineChartStyleControls, dateField: string): any => {
+  if (!styles.addTimeMarker) {
+    return null;
+  }
+
+  return {
+    mark: {
+      type: 'rule',
+      color: '#FF6B6B',
+      strokeWidth: 2,
+      strokeDash: [3, 3],
+      tooltip: styles.addTooltip,
+    },
+    encoding: {
+      x: {
+        datum: { expr: 'now()' },
+        type: 'temporal',
+      },
+    },
+    ...(styles.addTooltip && {
+      encoding: {
+        ...{
+          x: {
+            datum: { expr: 'now()' },
+            type: 'temporal',
+          },
+        },
+        tooltip: {
+          value: 'Current Time',
+        },
+      },
+    }),
+  };
+};
+
+// Helper function to apply grid and axis styling
+const applyAxisStyling = (axis: any, styles: LineChartStyleControls): any => {
+  return {
+    ...axis,
+    grid: styles.grid?.categoryLines ?? true,
+    gridColor: '#E0E0E0',
+    gridOpacity: 0.5,
+  };
+};
+
+// Enhanced function with all new styling controls
 const createVegaLineSpec = (
   indexPattern: IndexPattern,
   transformedData?: Array<Record<string, any>>,
   numericalColumns?: DiscoverVisColumn[],
   categoricalColumns?: DiscoverVisColumn[],
   dateColumns?: DiscoverVisColumn[],
-  styleOptions?: Partial<LineChartStyleControls>
+  styleOptions?: Partial<LineChartStyleControls>,
+  searchContext?: IExpressionLoaderParams['searchContext']
 ) => {
-  console.log('transformedData', transformedData);
-  console.log('numericalColumns', numericalColumns);
-  console.log('categoricalColumns', categoricalColumns);
-  console.log('dateColumns', dateColumns);
-
-  // Todo: revise this to use the new mapping rules
-
   // Validate inputs
   if (!transformedData || transformedData.length === 0) {
     return null;
@@ -85,137 +175,255 @@ const createVegaLineSpec = (
   const numCategories = categoricalColumns?.length || 0;
   const numDates = dateColumns?.length || 0;
 
-  // Apply default style options
-  const defaultStyles: any = {
+  // Apply complete default style options using the interface
+  const defaultStyles: LineChartStyleControls = {
+    addTooltip: true,
     addLegend: true,
-    legendPosition: 'right',
-    lineWidth: 2,
-    showPoints: true,
-    interpolate: 'monotone',
-    // ... other defaults
+    legendPosition: Positions.RIGHT,
+    addTimeMarker: false,
+    thresholdLine: {
+      color: '#E7664C',
+      show: false,
+      style: 'full',
+      value: 10,
+      width: 1,
+    },
+    grid: {
+      categoryLines: true,
+      valueLines: true,
+    },
+    categoryAxes: [
+      {
+        id: 'CategoryAxis-1',
+        type: 'category',
+        position: 'bottom',
+        show: true,
+        style: {},
+        scale: {
+          type: 'linear',
+        },
+        labels: {
+          show: true,
+          filter: true,
+          rotate: 0,
+          truncate: 100,
+        },
+        title: {},
+      },
+    ],
+    valueAxes: [
+      {
+        id: 'ValueAxis-1',
+        name: 'LeftAxis-1',
+        type: 'value',
+        position: 'left',
+        show: true,
+        style: {},
+        scale: {
+          type: 'linear',
+          mode: 'normal',
+          defaultYExtents: false,
+          setYExtents: false,
+        },
+        labels: {
+          show: true,
+          rotate: 0,
+          filter: false,
+          truncate: 100,
+        },
+        title: {
+          text: 'Count',
+        },
+      },
+    ],
+    seriesParams: [
+      {
+        show: true,
+        type: 'line',
+        mode: 'normal',
+        data: {
+          id: '1',
+          label: 'Count',
+        },
+        valueAxis: 'ValueAxis-1',
+        drawLinesBetweenPoints: true,
+        lineWidth: 2,
+        interpolate: 'linear',
+        showCircles: true,
+      },
+    ],
+    labels: {},
+    dataConfig: {
+      fieldConfigs: {},
+      maxDataPoints: 1000,
+      sampleSize: undefined,
+      missingValueHandling: 'ignore',
+    },
+    times: [],
+    type: 'line',
+    orderBucketsBySum: true,
   };
 
   const styles = { ...defaultStyles, ...styleOptions };
-  console.log('defaultStyles', defaultStyles);
-  console.log('newstyles', styles);
 
-  let newSpec: any;
+  let baseSpec: any;
+  const layers: any[] = [];
 
   // Rule 1: 1 Metric & 1 Date → Line Chart
   if (numMetrics === 1 && numDates === 1 && numCategories === 0) {
-    const metricField = numericalColumns[0].column; // 'field-0'
-    const dateField = dateColumns[0].column; // 'field-1'
-    const metricName = numericalColumns[0].name; // 'avg ( products.base_price )'
-    const dateName = dateColumns[0].name; // 'order_date'
+    const metricField = numericalColumns![0].column;
+    const dateField = dateColumns![0].column;
+    const metricName = numericalColumns![0].name;
+    const dateName = dateColumns![0].name;
 
-    newSpec = {
-      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-      title: `${metricName} Over Time`,
-      data: { values: transformedData },
+    const mainLayer = {
       mark: {
         type: 'line',
-        point: styles.showPoints,
-        tooltip: true,
-        strokeWidth: styles.lineWidth,
-        interpolate: styles.interpolate,
+        point: true,
+        tooltip: styles.addTooltip,
+        strokeWidth: 2,
+        interpolate: 'monotone',
       },
       encoding: {
         x: {
           field: dateField,
           type: 'temporal',
-          axis: {
-            title: dateName,
-            labelAngle: -45,
-          },
+          axis: applyAxisStyling(
+            {
+              title: dateName,
+              labelAngle: -45,
+            },
+            styles
+          ),
         },
         y: {
           field: metricField,
           type: 'quantitative',
-          axis: { title: metricName },
+          axis: applyAxisStyling({ title: metricName }, styles),
         },
       },
+    };
+
+    layers.push(mainLayer);
+
+    // Add threshold layer if enabled
+    const thresholdLayer = createThresholdLayer(styles, dateField, metricField);
+    if (thresholdLayer) {
+      layers.push(thresholdLayer);
+    }
+
+    // Add time marker layer if enabled
+    const timeMarkerLayer = createTimeMarkerLayer(styles, dateField);
+    if (timeMarkerLayer) {
+      layers.push(timeMarkerLayer);
+    }
+
+    baseSpec = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      title: `${metricName} Over Time`,
+      data: { values: transformedData },
+      layer: layers,
     };
   }
 
   // Rule 2: 2 Metrics & 1 Date → Line + Bar Chart
   else if (numMetrics === 2 && numDates === 1 && numCategories === 0) {
-    const metric1Field = numericalColumns[0].column;
-    const metric2Field = numericalColumns[1].column;
-    const dateField = dateColumns[0].column;
-    const metric1Name = numericalColumns[0].name;
-    const metric2Name = numericalColumns[1].name;
-    const dateName = dateColumns[0].name;
+    const metric1Field = numericalColumns![0].column;
+    const metric2Field = numericalColumns![1].column;
+    const dateField = dateColumns![0].column;
+    const metric1Name = numericalColumns![0].name;
+    const metric2Name = numericalColumns![1].name;
+    const dateName = dateColumns![0].name;
 
-    newSpec = {
+    const barLayer = {
+      mark: {
+        type: 'bar',
+        opacity: 0.7,
+        tooltip: styles.addTooltip,
+      },
+      encoding: {
+        x: {
+          field: dateField,
+          type: 'temporal',
+          axis: applyAxisStyling(
+            {
+              title: dateName,
+              labelAngle: -45,
+            },
+            styles
+          ),
+        },
+        y: {
+          field: metric1Field,
+          type: 'quantitative',
+          axis: applyAxisStyling({ title: metric1Name }, styles),
+        },
+        color: {
+          datum: metric1Name,
+          legend: styles.addLegend
+            ? {
+                title: 'Metrics',
+                orient: styles.legendPosition,
+              }
+            : null,
+        },
+      },
+    };
+
+    const lineLayer = {
+      mark: {
+        type: 'line',
+        point: true,
+        tooltip: styles.addTooltip,
+        strokeWidth: 2,
+        interpolate: 'monotone',
+      },
+      encoding: {
+        x: {
+          field: dateField,
+          type: 'temporal',
+        },
+        y: {
+          field: metric2Field,
+          type: 'quantitative',
+          axis: {
+            title: metric2Name,
+            orient: 'right',
+            grid: styles.grid?.categoryLines ?? true,
+          },
+          scale: { zero: false },
+        },
+        color: {
+          datum: metric2Name,
+          legend: styles.addLegend
+            ? {
+                title: 'Metrics',
+                orient: styles.legendPosition,
+              }
+            : null,
+        },
+      },
+    };
+
+    layers.push(barLayer, lineLayer);
+
+    // Add threshold layer if enabled
+    const thresholdLayer = createThresholdLayer(styles, dateField, metric1Field);
+    if (thresholdLayer) {
+      layers.push(thresholdLayer);
+    }
+
+    // Add time marker layer if enabled
+    const timeMarkerLayer = createTimeMarkerLayer(styles, dateField);
+    if (timeMarkerLayer) {
+      layers.push(timeMarkerLayer);
+    }
+
+    baseSpec = {
       $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
       title: `${metric1Name} (Bar) and ${metric2Name} (Line) Over Time`,
       data: { values: transformedData },
-      layer: [
-        {
-          mark: {
-            type: 'bar',
-            opacity: 0.7,
-            tooltip: true,
-          },
-          encoding: {
-            x: {
-              field: dateField,
-              type: 'temporal',
-              axis: {
-                title: dateName,
-                labelAngle: -45,
-              },
-            },
-            y: {
-              field: metric1Field,
-              type: 'quantitative',
-              axis: { title: metric1Name },
-            },
-            color: {
-              datum: metric1Name,
-              legend: styles.addLegend
-                ? {
-                    title: 'Metrics',
-                    orient: styles.legendPosition,
-                  }
-                : null,
-            },
-          },
-        },
-        {
-          mark: {
-            type: 'line',
-            point: styles.showPoints,
-            tooltip: true,
-            strokeWidth: styles.lineWidth,
-            interpolate: styles.interpolate,
-          },
-          encoding: {
-            x: {
-              field: dateField,
-              type: 'temporal',
-            },
-            y: {
-              field: metric2Field,
-              type: 'quantitative',
-              axis: {
-                title: metric2Name,
-                orient: 'right',
-              },
-              scale: { zero: false },
-            },
-            color: {
-              datum: metric2Name,
-              legend: styles.addLegend
-                ? {
-                    title: 'Metrics',
-                    orient: styles.legendPosition,
-                  }
-                : null,
-            },
-          },
-        },
-      ],
+      layer: layers,
       resolve: {
         scale: { y: 'independent' },
       },
@@ -224,37 +432,37 @@ const createVegaLineSpec = (
 
   // Rule 3: 1 Metric & 1 Date & 1 Categorical → Multi-line Chart
   else if (numMetrics === 1 && numDates === 1 && numCategories === 1) {
-    const metricField = numericalColumns[0].column;
-    const dateField = dateColumns[0].column;
-    const categoryField = categoricalColumns[0].column;
-    const metricName = numericalColumns[0].name;
-    const dateName = dateColumns[0].name;
-    const categoryName = categoricalColumns[0].name;
+    const metricField = numericalColumns![0].column;
+    const dateField = dateColumns![0].column;
+    const categoryField = categoricalColumns![0].column;
+    const metricName = numericalColumns![0].name;
+    const dateName = dateColumns![0].name;
+    const categoryName = categoricalColumns![0].name;
 
-    newSpec = {
-      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-      title: `${metricName} Over Time by ${categoryName}`,
-      data: { values: transformedData },
+    const mainLayer = {
       mark: {
         type: 'line',
-        point: styles.showPoints,
-        tooltip: true,
-        strokeWidth: styles.lineWidth,
-        interpolate: styles.interpolate,
+        point: true,
+        tooltip: styles.addTooltip,
+        strokeWidth: 2,
+        interpolate: 'monotone',
       },
       encoding: {
         x: {
           field: dateField,
           type: 'temporal',
-          axis: {
-            title: dateName,
-            labelAngle: -45,
-          },
+          axis: applyAxisStyling(
+            {
+              title: dateName,
+              labelAngle: -45,
+            },
+            styles
+          ),
         },
         y: {
           field: metricField,
           type: 'quantitative',
-          axis: { title: metricName },
+          axis: applyAxisStyling({ title: metricName }, styles),
         },
         color: {
           field: categoryField,
@@ -268,20 +476,41 @@ const createVegaLineSpec = (
         },
       },
     };
+
+    layers.push(mainLayer);
+
+    // Add threshold layer if enabled
+    const thresholdLayer = createThresholdLayer(styles, dateField, metricField);
+    if (thresholdLayer) {
+      layers.push(thresholdLayer);
+    }
+
+    // Add time marker layer if enabled
+    const timeMarkerLayer = createTimeMarkerLayer(styles, dateField);
+    if (timeMarkerLayer) {
+      layers.push(timeMarkerLayer);
+    }
+
+    baseSpec = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      title: `${metricName} Over Time by ${categoryName}`,
+      data: { values: transformedData },
+      layer: layers,
+    };
   }
 
   // Rule 4: 1 Metric & 1 Date & 2 Categorical → Faceted Multi-line Chart
   else if (numMetrics === 1 && numDates === 1 && numCategories === 2) {
-    const metricField = numericalColumns[0].column;
-    const dateField = dateColumns[0].column;
-    const category1Field = categoricalColumns[0].column;
-    const category2Field = categoricalColumns[1].column;
-    const metricName = numericalColumns[0].name;
-    const dateName = dateColumns[0].name;
-    const category1Name = categoricalColumns[0].name;
-    const category2Name = categoricalColumns[1].name;
+    const metricField = numericalColumns![0].column;
+    const dateField = dateColumns![0].column;
+    const category1Field = categoricalColumns![0].column;
+    const category2Field = categoricalColumns![1].column;
+    const metricName = numericalColumns![0].name;
+    const dateName = dateColumns![0].name;
+    const category1Name = categoricalColumns![0].name;
+    const category2Name = categoricalColumns![1].name;
 
-    newSpec = {
+    baseSpec = {
       $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
       title: `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`,
       data: { values: transformedData },
@@ -294,143 +523,91 @@ const createVegaLineSpec = (
       spec: {
         width: 300,
         height: 200,
-        mark: {
-          type: 'line',
-          point: styles.showPoints,
-          tooltip: true,
-          strokeWidth: styles.lineWidth,
-          interpolate: styles.interpolate,
-        },
-        encoding: {
-          x: {
-            field: dateField,
-            type: 'temporal',
-            axis: {
-              title: dateName,
-              labelAngle: -45,
+        layer: [
+          {
+            mark: {
+              type: 'line',
+              point: true,
+              tooltip: styles.addTooltip,
+              strokeWidth: 2,
+              interpolate: 'monotone',
+            },
+            encoding: {
+              x: {
+                field: dateField,
+                type: 'temporal',
+                axis: applyAxisStyling(
+                  {
+                    title: dateName,
+                    labelAngle: -45,
+                  },
+                  styles
+                ),
+              },
+              y: {
+                field: metricField,
+                type: 'quantitative',
+                axis: applyAxisStyling({ title: metricName }, styles),
+              },
+              color: {
+                field: category1Field,
+                type: 'nominal',
+                legend: styles.addLegend
+                  ? {
+                      title: category1Name,
+                      orient: styles.legendPosition,
+                    }
+                  : null,
+              },
             },
           },
-          y: {
-            field: metricField,
-            type: 'quantitative',
-            axis: { title: metricName },
-          },
-          color: {
-            field: category1Field,
-            type: 'nominal',
-            legend: styles.addLegend
-              ? {
-                  title: category1Name,
-                  orient: styles.legendPosition,
-                }
-              : null,
-          },
-        },
+          // Add threshold layer to each facet if enabled
+          ...(styles.thresholdLine?.show
+            ? [
+                {
+                  mark: {
+                    type: 'rule',
+                    color: styles.thresholdLine.color,
+                    strokeWidth: styles.thresholdLine.width,
+                    strokeDash: getStrokeDash(styles.thresholdLine.style),
+                  },
+                  encoding: {
+                    y: {
+                      datum: styles.thresholdLine.value,
+                      type: 'quantitative',
+                    },
+                  },
+                },
+              ]
+            : []),
+          // Add time marker to each facet if enabled
+          ...(styles.addTimeMarker
+            ? [
+                {
+                  mark: {
+                    type: 'rule',
+                    color: '#FF6B6B',
+                    strokeWidth: 2,
+                    strokeDash: [3, 3],
+                  },
+                  encoding: {
+                    x: {
+                      datum: { expr: 'now()' },
+                      type: 'temporal',
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
       },
     };
   }
 
   // No matching rule found
   else {
-    console.warn('No matching visualization rule found for the given field combination');
     return null;
   }
 
-  return newSpec;
+  return baseSpec;
 };
-
-// // Transform data to a format Vega can use
-// const data = rows.map((row: OpenSearchSearchHit) => {
-//   const transformedRow: Record<number, any> = {};
-//   for (const column of columns) {
-//     // Make sure we're consistent with field vs name
-//     const fieldName = column.name;
-//     transformedRow[column.column] = row._source[fieldName];
-//   }
-//   return transformedRow;
-// });
-
-// // Colors for different lines
-// const colors = ['#4C78A8', '#E45756', '#72B7B2', '#F58518', '#54A24B', '#B279A2'];
-
-// // Create a layer for each numeric field
-// const layers = numericFields.map((numericField, index) => {
-//   const colorIndex = index % colors.length;
-
-//   return {
-//     mark: {
-//       type: 'line',
-//       point: true,
-//       tooltip: true,
-//       stroke: colors[colorIndex],
-//     },
-//     encoding: {
-//       x: {
-//         field: categoryField,
-//         type: 'nominal',
-//         axis: {
-//           // Only first layer needs axis config
-//           title: categoryField,
-//           labelAngle: -45,
-//         },
-//       },
-//       y: {
-//         field: numericField,
-//         type: 'quantitative',
-//         title: numericField,
-//         axis: { title: categoryField }, // Only first layer needs Y-axis
-//       },
-//       color: {
-//         datum: numericField, // Use field name for color legend
-//         legend: {
-//           title: null,
-//         },
-//       },
-//       tooltip: [
-//         { field: categoryField, title: categoryField },
-//         { field: numericField, title: numericField },
-//       ],
-//     },
-//   };
-// });
-
-// // Create the base Vega spec
-// const baseSpec = {
-//   $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-//   autosize: { type: 'fit', contains: 'padding' },
-//   data: { values: data },
-//   layer: layers,
-//   config: {
-//     axis: {
-//       labelFont: 'sans-serif',
-//       titleFont: 'sans-serif',
-//     },
-//     legend: {
-//       labelFont: 'sans-serif',
-//       titleFont: 'sans-serif',
-//     },
-//   },
-// };
-
-// const newSpec = { ...baseSpec };
-
-// // Apply style options
-// if (styleOptions) {
-//   if (newSpec.layer) {
-//     newSpec.layer = newSpec.layer.map((layer: any) => {
-//       if (layer.encoding?.color) {
-//         if (!styleOptions.addLegend) {
-//           layer.encoding.color.legend = null;
-//         } else {
-//           layer.encoding.color.legend = {
-//             ...layer.encoding.color.legend,
-//             orient: styleOptions.legendPosition,
-//           };
-//         }
-//       }
-//       return layer;
-//     });
-//   }
-// }
-
-// console.log('vega spec REVISED:', newSpec);
