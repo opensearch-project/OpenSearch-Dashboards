@@ -39,9 +39,7 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
   );
 
   const [expression, setExpression] = useState<string>();
-  const [styleOptions, setStyleOptions] = useState<Partial<LineChartStyleControls> | undefined>(
-    undefined
-  );
+  const [styleOptions, setStyleOptions] = useState<LineChartStyleControls | undefined>(undefined);
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -104,6 +102,12 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
     };
   }, [queryString, services.data.query.state$]);
 
+  const handleStyleChange = (newOptions: Partial<LineChartStyleControls>) => {
+    if (styleOptions) {
+      setStyleOptions({ ...styleOptions, ...newOptions });
+    }
+  };
+
   return enableViz && expression ? (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={3}>
@@ -118,9 +122,10 @@ export const DiscoverVisualization = ({ rows, fieldSchema }: SearchData) => {
       <EuiFlexItem grow={1}>
         <EuiPanel className="stylePanel" data-test-subj="stylePanel">
           {visualizationData &&
+            styleOptions &&
             visualizationData.visualizationType?.ui.style.render({
-              styleOptions: visualizationData.visualizationType.ui.style.defaults,
-              onStyleChange: setStyleOptions,
+              styleOptions,
+              onStyleChange: handleStyleChange,
               numericalColumns: visualizationData.numericalColumns,
               categoricalColumns: visualizationData.categoricalColumns,
               dateColumns: visualizationData.dateColumns,
