@@ -15,7 +15,7 @@ import { DataConfigPanel } from '../style_panel/data_config_panel';
 import { DiscoverVisColumn } from '../types';
 
 export interface LineVisStyleControlsProps {
-  styleOptions: LineChartStyleControls;
+  styleOptions: Partial<LineChartStyleControls>;
   onStyleChange: (newOptions: Partial<LineChartStyleControls>) => void;
   numericalColumns?: DiscoverVisColumn[];
   categoricalColumns?: DiscoverVisColumn[];
