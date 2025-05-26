@@ -231,7 +231,7 @@ describe('ChromeNavGroupService#start()', () => {
     expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
   });
 
-  it('should populate links with custom category if the nav link does not belong to any use case', async () => {
+  it('should populate links with custom category in all use case if the nav link does not belong to any use case', async () => {
     const chromeNavGroupService = new ChromeNavGroupService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
     const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
