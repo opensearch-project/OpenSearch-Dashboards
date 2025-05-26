@@ -219,7 +219,7 @@ export class HomePublicPlugin
         },
       ]);
 
-      // add search to all nav group
+      // add search overview to all nav group
       core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
         {
           id: SEARCH_OVERVIEW_PAGE_ID,
