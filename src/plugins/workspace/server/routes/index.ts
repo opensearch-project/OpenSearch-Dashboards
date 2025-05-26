@@ -22,6 +22,7 @@ import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
+import { cos_sim, pipeline } from '@huggingface/transformers';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -112,6 +113,9 @@ const updateWorkspaceAttributesSchema = schema.object({
   features: schema.maybe(featuresSchema),
   ...workspaceOptionalAttributesSchema,
 });
+
+// Declare a variable outside the route handler to cache the model.
+let semanticExtractor: any = null;
 
 export function registerRoutes({
   client,
@@ -341,6 +345,97 @@ export function registerRoutes({
       );
       return res.ok({ body: result });
     })
+  );
+
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_semantic_search`,
+      validate: {
+        body: schema.object({
+          query: schema.string(),
+          links: schema.arrayOf(
+            schema.object({
+              id: schema.string(),
+              title: schema.string(),
+              description: schema.maybe(schema.string()),
+            })
+          ),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      try {
+        const { query, links } = req.body;
+
+        // Filter links to ensure they have a description for the semantic search
+        let linksWithDescription = links.filter((link) => !!link.description);
+        linksWithDescription = Array.from(new Set(linksWithDescription.map((link) => link.id))).map(
+          (id) => linksWithDescription.find((link) => link.id === id)!
+        );
+
+        console.log('-------------Enter semanticSearch (Node.js)-------------');
+
+        // Load the model only once and reuse it later
+        if (!semanticExtractor) {
+          console.log('Model not yet loaded. Initializing pipeline...');
+          const startTime = performance.now();
+          semanticExtractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
+            progress_callback: (args: any) => {
+              if (args.status === 'progress') {
+                console.log(`[Node.js Model Loading] ${args.file}: ${args.progress.toFixed(2)}%`);
+              } else if (args.status === 'done') {
+                console.log(`[Node.js Model Loading] Finished loading ${args.file}.`);
+              }
+            },
+          });
+          const endTime = performance.now();
+          const loadingTimeMs = endTime - startTime;
+
+          console.log('[Node.js] Model loaded and ready for inference.');
+          console.log(`Model loading took: ${loadingTimeMs.toFixed(2)} ms`);
+        } else {
+          console.log('[Node.js] Model already loaded. Reusing existing pipeline.');
+        }
+
+        // Generate embeddings for links
+        const linkEmbeddings = await Promise.all(
+          linksWithDescription.map(async (link) => {
+            const output = await semanticExtractor(link.title + link.description || '', {
+              pooling: 'mean',
+              normalize: true,
+            });
+            return { ...link, embedding: Array.from(output.data) };
+          })
+        );
+
+        // Generate embedding for the query
+        const queryEmbedding = Array.from(
+          (await semanticExtractor(query, { pooling: 'mean', normalize: true })).data
+        );
+
+        // Calculate scores and sort
+        const scored = linkEmbeddings.map((link) => ({
+          ...link,
+          // score: cosineSimilarity(queryEmbedding as number[], link.embedding as number[]),
+          score: cos_sim(queryEmbedding as number[], link.embedding as number[]),
+        }));
+
+        scored.sort((a, b) => b.score - a.score);
+
+        const semanticSearchResult = scored
+          .slice(0, 8)
+          .filter((item) => item.score > 0.08)
+          .map(({ embedding, ...rest }) => rest);
+        console.log('semanticSearchResult: ', semanticSearchResult);
+
+        return res.ok({ body: semanticSearchResult });
+      } catch (error) {
+        console.error('Error during semantic search:', error);
+        return res.badRequest({
+          body: { message: 'Failed to perform semantic search' },
+        });
+      }
+    }
   );
 
   // duplicate saved objects among workspaces

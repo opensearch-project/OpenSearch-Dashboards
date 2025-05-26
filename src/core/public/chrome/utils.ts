@@ -3,17 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// @ts-ignore
-import { pipeline } from '@xenova/transformers';
-
-import { AppCategory } from 'opensearch-dashboards/public';
+import { AppCategory, HttpStart } from 'opensearch-dashboards/public';
 import { ChromeNavLink } from './nav_links';
 import { ChromeRegistrationNavLink, NavGroupItemInMap } from './nav_group';
 import { NavGroupStatus } from '../../../core/types';
-
 type KeyOf<T> = keyof T;
-type NavLinkWithNavGroup = ChromeRegistrationNavLink &
-  ChromeNavLink & { navGroup: NavGroupItemInMap };
 
 export const sortBy = <T>(key: KeyOf<T>) => {
   return (a: T, b: T): number => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0);
@@ -248,7 +242,8 @@ export function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage)
 export async function searchNavigationLinks(
   allAvailableCaseId: string[],
   navGroupMap: Record<string, NavGroupItemInMap>,
-  query: string
+  query: string,
+  http?: HttpStart
 ) {
   const allSearchAbleLinks = allAvailableCaseId.flatMap((useCaseId) => {
     const navGroup = navGroupMap[useCaseId];
@@ -280,56 +275,33 @@ export async function searchNavigationLinks(
 
   const linksWithDesc = allSearchAbleLinks.filter((link) => !!link.description);
   console.log('linksWithDesc: ', linksWithDesc);
-  const semanticSearchResult = (await semanticSearch(query, linksWithDesc)).map((result) => {
-    console.log(result);
-    const { embedding, score, ...link } = result;
-    return link;
-  });
-  console.log('semanticSearchResult: ', semanticSearchResult);
-  return semanticSearchResult;
-}
 
-async function semanticSearch(query: string, documents: NavLinkWithNavGroup[]) {
-  console.log('-------------Enter semanticSearch-------------');
-  // const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-  const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
-    progress_callback: (args: any) => {
-      if (args.status === 'progress') {
-        // Log the percentage progress for the current file
-        console.log(`Model Loading Progress: ${args.file} - ${args.progress.toFixed(2)}%`);
-      } else if (args.status === 'done') {
-        console.log(`Model Loading Progress: Finished loading ${args.file}.`);
-      }
-    },
-  });
-  console.log('Model loaded: ', extractor);
+  try {
+    const linksContext = linksWithDesc.map((link) => ({
+      id: link.id,
+      title: link.title,
+      description: link.description,
+    }));
+    const semanticSearchResult = await http?.post('/api/workspaces/_semantic_search', {
+      body: JSON.stringify({
+        query: query,
+        links: linksContext,
+      }),
+    });
 
-  // Inside semanticSearch function
-  const docEmbeddings = await Promise.all(
-    documents.map(async (doc) => {
-      const output = await extractor(doc.description || '', { pooling: 'mean', normalize: true });
-      return { ...doc, embedding: Array.from(output.data) };
-    })
-  );
+    console.log('Raw API Response Body: ', semanticSearchResult); // This will contain the ranked list from backend
 
-  const queryEmbedding = Array.from(
-    (await extractor(query, { pooling: 'mean', normalize: true })).data
-  );
+    const finalResult = semanticSearchResult
+      .map((link: any) => {
+        const originalFullLink = allSearchAbleLinks.find((fullLink) => fullLink.id === link.id);
+        return originalFullLink || null;
+      })
+      .filter(Boolean) as (ChromeRegistrationNavLink & ChromeNavLink)[];
 
-  const scored = docEmbeddings.map((doc) => ({
-    ...doc,
-    score: cosineSimilarity(queryEmbedding as number[], doc.embedding as number[]),
-  }));
-
-  scored.sort((a, b) => b.score - a.score);
-
-  return scored.slice(0, 3);
-}
-
-// Cosine similarity function
-function cosineSimilarity(a: number[], b: number[]) {
-  const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
-  const magA = Math.sqrt(a.reduce((sum, val) => sum + val ** 2, 0));
-  const magB = Math.sqrt(b.reduce((sum, val) => sum + val ** 2, 0));
-  return dot / (magA * magB);
+    console.log('Final Semantic Search Result (from backend): ', finalResult);
+    return finalResult;
+  } catch (error) {
+    console.error('Frontend API call error for semantic search:', error);
+    throw error;
+  }
 }

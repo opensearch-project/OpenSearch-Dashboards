@@ -115,6 +115,7 @@ interface ConstructorParams {
 
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;
+  http: HttpStart;
 }
 
 export interface StartDeps {
@@ -211,7 +212,7 @@ export class ChromeService {
     );
   }
 
-  public setup({ uiSettings }: SetupDeps): ChromeSetup {
+  public setup({ uiSettings, http }: SetupDeps): ChromeSetup {
     const navGroup = this.navGroup.setup({ uiSettings });
     const globalSearch = this.globalSearch.setup();
 
@@ -219,7 +220,7 @@ export class ChromeService {
       id: 'pagesSearch',
       type: 'PAGES',
       run: async (query: string, callback: () => void) =>
-        searchPages(query, this.navGroupStart, this.applicationStart, callback),
+        searchPages(query, this.navGroupStart, this.applicationStart, callback, http),
     });
 
     return {
