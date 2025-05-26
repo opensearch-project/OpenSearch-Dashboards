@@ -43,13 +43,11 @@ export const searchSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/opensearch-dashboards/objects/savedSearches/${encodeURIComponent(
-        obj.id
-      )}`;
+      return `/management/opensearch-dashboards/objects/savedExplore/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/discover#/view/${encodeURIComponent(obj.id)}`,
+        path: `/app/explore#/view/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'discover.show',
       };
     },

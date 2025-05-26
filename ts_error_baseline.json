@@ -33,14 +33,14 @@
       "line": 7,
       "column": 24,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'express'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/express/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'express'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/express/index.js' implicitly has an 'any' type."
     },
     {
       "file": "node_modules/@storybook/core-common/dist/ts3.9/utils/progress-reporting.d.ts",
       "line": 1,
       "column": 24,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'express'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/express/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'express'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/express/index.js' implicitly has an 'any' type."
     },
     {
       "file": "node_modules/antlr4ng/dist/CommonToken.d.ts",
@@ -54,14 +54,14 @@
       "line": 1,
       "column": 36,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'ip-address'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/ip-address/ip-address.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'ip-address'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/ip-address/ip-address.js' implicitly has an 'any' type."
     },
     {
       "file": "node_modules/ip-cidr/index.d.ts",
       "line": 2,
       "column": 28,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'jsbn'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/jsbn/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'jsbn'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/jsbn/index.js' implicitly has an 'any' type."
     },
     {
       "file": "node_modules/react-use/lib/useGeolocation.d.ts",
@@ -201,7 +201,7 @@
       "line": 32,
       "column": 19,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'node-fetch'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/node-fetch/lib/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'node-fetch'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/node-fetch/lib/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/dev/build/tasks/os_packages/create_os_package_tasks.test.ts",
@@ -1076,7 +1076,7 @@
       "line": 13,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/dashboard/public/application/embeddable/dashboard_container.test.tsx",
@@ -1090,7 +1090,7 @@
       "line": 31,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx",
@@ -2070,7 +2070,7 @@
       "line": 91,
       "column": 41,
       "code": "TS2345",
-      "message": "Argument of type 'import(\"/home/ubuntu/OpenSearch-Dashboards/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind | import(\"/home/ubuntu/OpenSearch-Dashboards/src/plugins/data/public/autocomplete/providers/query_suggestion_provider\").QuerySuggestionTypes' is not assignable to parameter of type 'string'."
+      "message": "Argument of type 'import(\"/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind | import(\"/Users/jungkm/workplace/OpenSearch-Dashboards/src/plugins/data/public/autocomplete/providers/query_suggestion_provider\").QuerySuggestionTypes' is not assignable to parameter of type 'string'."
     },
     {
       "file": "src/plugins/data/server/index_patterns/fetcher/lib/opensearch_api.ts",
@@ -2301,7 +2301,7 @@
       "line": 8,
       "column": 35,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module './http_aws_es/connector'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/data_source/server/legacy/http_aws_es/connector.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module './http_aws_es/connector'. '/Users/jungkm/workplace/OpenSearch-Dashboards/src/plugins/data_source/server/legacy/http_aws_es/connector.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source/server/legacy/configure_legacy_client.ts",
@@ -2406,7 +2406,7 @@
       "line": 6,
       "column": 17,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'dns-sync'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/dns-sync/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'dns-sync'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/dns-sync/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/framework/catalog_cache/cache_loader.tsx",
@@ -3631,21 +3631,21 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/materialized_view/add_column_popover.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/materialized_view/column_expression.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/materialized_view/column_expression.tsx",
@@ -3659,21 +3659,21 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/materialized_view/materialized_view_builder.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/query_visual_editor.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/query_visual_editor.test.tsx",
@@ -3708,21 +3708,21 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/skipping_index/delete_fields_modal.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/skipping_index/generate_fields.test.tsx",
       "line": 13,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/skipping_index/generate_fields.test.tsx",
@@ -3743,7 +3743,7 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/skipping_index/skipping_index_builder.test.tsx",
@@ -3953,7 +3953,7 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_management/acceleration_table.test.tsx",
@@ -4212,7 +4212,7 @@
       "line": 10,
       "column": 22,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'react-test-renderer'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'react-test-renderer'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/associated_object_management/associated_objects_table.test.tsx",
@@ -4632,7 +4632,7 @@
       "line": 7,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/integrations/create_integration_helpers.test.ts",
@@ -4695,7 +4695,7 @@
       "line": 7,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/integrations/installed_integrations_table.test.tsx",
@@ -4723,7 +4723,7 @@
       "line": 7,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/integrations/setup_integration.test.tsx",
@@ -4800,7 +4800,7 @@
       "line": 7,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/integrations/setup_integration_inputs.test.tsx",
@@ -6389,7 +6389,7 @@
       "line": 31,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/embeddable/server/types.ts",
@@ -6602,13 +6602,6 @@
       "message": "Object is of type 'unknown'."
     },
     {
-      "file": "src/plugins/explore/public/application/legacy/discover/application/components/default_discover_table/table_header.tsx",
-      "line": 14,
-      "column": 1,
-      "code": "TS6133",
-      "message": "'i18n' is declared but its value is never read."
-    },
-    {
       "file": "src/plugins/explore/public/application/legacy/discover/application/components/doc_viewer/doc_viewer.test.tsx",
       "line": 36,
       "column": 36,
@@ -6754,20 +6747,6 @@
       "column": 1,
       "code": "TS6133",
       "message": "'i18n' is declared but its value is never read."
-    },
-    {
-      "file": "src/plugins/explore/public/application/legacy/discover/application/components/top_nav/get_top_nav_links.tsx",
-      "line": 217,
-      "column": 17,
-      "code": "TS7006",
-      "message": "Parameter 'anchorElement' implicitly has an 'any' type."
-    },
-    {
-      "file": "src/plugins/explore/public/application/legacy/discover/application/utils/state_management/discover_slice.tsx",
-      "line": 17,
-      "column": 3,
-      "code": "TS6133",
-      "message": "'PLUGIN_ID' is declared but its value is never read."
     },
     {
       "file": "src/plugins/explore/public/application/legacy/discover/application/view_components/canvas/top_nav.tsx",
@@ -6924,48 +6903,6 @@
       "message": "'DocParams' is declared but never used."
     },
     {
-      "file": "src/plugins/explore/public/application/legacy/discover/mocks.ts",
-      "line": 32,
-      "column": 10,
-      "code": "TS2305",
-      "message": "Module '\"./index\"' has no exported member 'DiscoverSetup'."
-    },
-    {
-      "file": "src/plugins/explore/public/application/legacy/discover/mocks.ts",
-      "line": 32,
-      "column": 25,
-      "code": "TS2305",
-      "message": "Module '\"./index\"' has no exported member 'DiscoverStart'."
-    },
-    {
-      "file": "src/plugins/explore/public/application/legacy/discover/opensearch_dashboards_services.ts",
-      "line": 40,
-      "column": 1,
-      "code": "TS6133",
-      "message": "'UsageCollectionSetup' is declared but its value is never read."
-    },
-    {
-      "file": "src/plugins/explore/public/plugin.ts",
-      "line": 73,
-      "column": 11,
-      "code": "TS6133",
-      "message": "'config' is declared but its value is never read."
-    },
-    {
-      "file": "src/plugins/explore/server/plugin.ts",
-      "line": 17,
-      "column": 1,
-      "code": "TS6133",
-      "message": "'uiSettings' is declared but its value is never read."
-    },
-    {
-      "file": "src/plugins/explore/server/plugin.ts",
-      "line": 22,
-      "column": 32,
-      "code": "TS6138",
-      "message": "Property 'initializerContext' is declared but its value is never read."
-    },
-    {
       "file": "src/plugins/expressions/common/expression_types/expression_type.test.ts",
       "line": 58,
       "column": 7,
@@ -6998,7 +6935,7 @@
       "line": 10,
       "column": 46,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module './home_app'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/home/public/application/components/home_app.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module './home_app'. '/Users/jungkm/workplace/OpenSearch-Dashboards/src/plugins/home/public/application/components/home_app.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/home/public/application/components/home_app.test.tsx",
@@ -7705,7 +7642,7 @@
       "line": 35,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/index_pattern_management/public/components/index_pattern_table/empty_state/empty_state.tsx",
@@ -7803,7 +7740,7 @@
       "line": 44,
       "column": 8,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module './opensearch_dashboards_services'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/maps_legacy/public/opensearch_dashboards_services.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module './opensearch_dashboards_services'. '/Users/jungkm/workplace/OpenSearch-Dashboards/src/plugins/maps_legacy/public/opensearch_dashboards_services.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.test.tsx",
@@ -8076,7 +8013,7 @@
       "line": 8,
       "column": 31,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'react-test-renderer'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'react-test-renderer'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/region_map/public/components/region_map_options.test.tsx",
@@ -8139,7 +8076,7 @@
       "line": 8,
       "column": 31,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'react-test-renderer'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'react-test-renderer'. '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/region_map/public/components/style_options.test.tsx",
@@ -8217,48 +8154,6 @@
       "column": 3,
       "code": "TS2741",
       "message": "Property 'workspaces' is missing in type '{ navLinks: {}; management: {}; catalogue: {}; }' but required in type 'Capabilities'."
-    },
-    {
-      "file": "src/plugins/saved_objects_management/public/lib/in_app_url.ts",
-      "line": 37,
-      "column": 14,
-      "code": "TS2532",
-      "message": "Object is possibly 'undefined'."
-    },
-    {
-      "file": "src/plugins/saved_objects_management/public/lib/in_app_url.ts",
-      "line": 40,
-      "column": 14,
-      "code": "TS2532",
-      "message": "Object is possibly 'undefined'."
-    },
-    {
-      "file": "src/plugins/saved_objects_management/public/lib/in_app_url.ts",
-      "line": 42,
-      "column": 14,
-      "code": "TS2532",
-      "message": "Object is possibly 'undefined'."
-    },
-    {
-      "file": "src/plugins/saved_objects_management/public/lib/in_app_url.ts",
-      "line": 49,
-      "column": 14,
-      "code": "TS2532",
-      "message": "Object is possibly 'undefined'."
-    },
-    {
-      "file": "src/plugins/saved_objects_management/public/lib/in_app_url.ts",
-      "line": 51,
-      "column": 14,
-      "code": "TS2532",
-      "message": "Object is possibly 'undefined'."
-    },
-    {
-      "file": "src/plugins/saved_objects_management/public/lib/in_app_url.ts",
-      "line": 53,
-      "column": 14,
-      "code": "TS2532",
-      "message": "Object is possibly 'undefined'."
     },
     {
       "file": "src/plugins/saved_objects_management/public/lib/parse_query.test.ts",
@@ -8461,14 +8356,14 @@
       "line": 34,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/saved_objects_management/public/management_section/objects_table/components/table.test.tsx",
       "line": 33,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/saved_objects_management/public/management_section/objects_table/components/table.test.tsx",
@@ -9959,7 +9854,7 @@
       "line": 36,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/Users/jungkm/workplace/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/vis_type_vega/public/data_model/opensearch_query_parser.ts",
@@ -10022,7 +9917,7 @@
       "line": 42,
       "column": 32,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module '../lib/vega'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/vis_type_vega/public/lib/vega.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module '../lib/vega'. '/Users/jungkm/workplace/OpenSearch-Dashboards/src/plugins/vis_type_vega/public/lib/vega.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/vis_type_vega/public/vega_inspector/vega_adapter.ts",
@@ -10064,7 +9959,7 @@
       "line": 42,
       "column": 8,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module './vislib/response_handler'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/vis_type_vislib/public/vislib/response_handler.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module './vislib/response_handler'. '/Users/jungkm/workplace/OpenSearch-Dashboards/src/plugins/vis_type_vislib/public/vislib/response_handler.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/vis_type_vislib/public/plugin.ts",
