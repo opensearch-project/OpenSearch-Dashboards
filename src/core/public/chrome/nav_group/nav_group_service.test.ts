@@ -231,7 +231,7 @@ describe('ChromeNavGroupService#start()', () => {
     expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
   });
 
-  it('should populate links with custom category if the nav link is inside second level but no entry in all use case', async () => {
+  it('should populate links with custom category if the nav link does not belong to any use case', async () => {
     const chromeNavGroupService = new ChromeNavGroupService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
     const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
@@ -278,11 +278,6 @@ describe('ChromeNavGroupService#start()', () => {
     expect(groupsMap[ALL_USE_CASE_ID].navLinks).toEqual([
       {
         id: 'foo',
-      },
-      {
-        id: 'bar',
-        title: 'bar',
-        category: { id: 'custom', label: 'Custom', order: 8500 },
       },
       {
         id: 'customized_app',
