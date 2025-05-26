@@ -13,7 +13,6 @@ import {
   registerEssentialOverviewContent,
   setEssentialOverviewSection,
 } from './setup_overview';
-// import { createSetupContract } from '../../../../../plugins/content_management/public/mocks';
 import { contentManagementPluginMocks } from '../../../../../plugins/content_management/public/mocks';
 
 describe('Setup use case overview', () => {

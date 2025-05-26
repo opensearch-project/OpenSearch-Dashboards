@@ -81,7 +81,7 @@ export interface WorkspaceFormProps {
   permissionEnabled?: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   availableUseCases: WorkspaceUseCase[];
-  onAppLeave: AppMountParameters['onAppLeave'];
+  onAppLeave?: AppMountParameters['onAppLeave'];
 }
 
 export interface AvailableUseCaseItem

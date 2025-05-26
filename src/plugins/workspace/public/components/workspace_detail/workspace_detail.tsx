@@ -82,6 +82,9 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
 
   // When user has unsaved changes and navigates to other page, will show a confirm modal.
   useEffect(() => {
+    if (!onAppLeave) {
+      return;
+    }
     onAppLeave((actions) => {
       if (isEditing && numberOfChanges > 0) {
         return actions.confirm(

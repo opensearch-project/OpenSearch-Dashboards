@@ -84,11 +84,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
         setCurrentWorkspaceFormData({
           ...rawFormData,
           // Direct query connections info is not required for all tabs, it can be fetched later
-          selectedDataSourceConnections: mergeDataSourcesWithConnections(
-            dataSources,
-            [],
-            AssociationDataSourceModalMode.DirectQueryConnections
-          ),
+          selectedDataSourceConnections: mergeDataSourcesWithConnections(dataSources, []),
         });
       });
     }
