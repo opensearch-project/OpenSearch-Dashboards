@@ -65,9 +65,10 @@ const QueryPanel = () => {
   };
 
   const onQueryChange = (value: string) => {
-    // console.log('Query changed:', value);
     onQuerystringChange(value, false);
+
     if (!inputQueryRef.current) return;
+    console.log(inputQueryRef.current);
 
     const currentLineCount = inputQueryRef.current.getModel()?.getLineCount();
     if (lineCount === currentLineCount) return;
@@ -197,6 +198,7 @@ const QueryPanel = () => {
             handleRunClick={handleRunClick}
             handleRecentClick={handleRecentClick}
             noInput={noInput}
+            lineCount={lineCount}
           />
         }
       >

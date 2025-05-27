@@ -3,8 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-// import { SwitchLanguage } from './switch_language';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiText,
+} from '@elastic/eui';
+
 import { ShowFieldToggle } from './show_field';
 import { SaveQueryButton } from './save_query';
 import { Actions } from './actions';
@@ -12,7 +18,8 @@ import { DateTimeRangePicker } from './date_time_selector';
 import { RunQueryButton } from './run_query';
 import { ShowInputType } from './show_input_type';
 import { LanguageType } from '../editor_stack/shared';
-import { ErrorDisplay } from './error_display';
+import { QueryError } from './query_error';
+import { ResultStatus } from '../../types';
 
 interface QueryEditorFooterProps {
   languageType: LanguageType;
@@ -21,6 +28,7 @@ interface QueryEditorFooterProps {
   isDualEditor: boolean;
   isLoading: boolean;
   noInput: boolean;
+  lineCount: number | undefined;
 }
 
 export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
@@ -30,6 +38,7 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
   isDualEditor,
   isLoading,
   noInput,
+  lineCount,
 }) => {
   return (
     <div className="query-editor-footer">
@@ -68,11 +77,14 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               <EuiHorizontalRule margin="xs" className="vertical-separator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ErrorDisplay
-                errorDetails={{
-                  statusCode: 500,
-                  message:
-                    'PPL Compilation Error: Unknown field [timestam]. Did you mean [timestamp]?',
+              <QueryError
+                queryStatus={{
+                  status: ResultStatus.ERROR,
+                  body: {
+                    error: {
+                      error: 'An error occurred while processing the query.',
+                    },
+                  },
                 }}
               />
             </EuiFlexItem>
@@ -82,6 +94,16 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
                 isDualEditor={isDualEditor}
                 noInput={noInput}
               />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText
+                size="xs"
+                color="subdued"
+                className="queryEditor__footerItem"
+                data-test-subj="queryEditorFooterLineCount"
+              >
+                {`${lineCount ?? 1} ${lineCount === 1 || !lineCount ? 'line' : 'lines'}`}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { QueryResult } from './query_result';
+import { QueryError } from './query_error';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 enum ResultStatus {
@@ -24,7 +24,7 @@ describe('Query Result', () => {
         startTime: Number.NEGATIVE_INFINITY,
       },
     };
-    const component = shallowWithIntl(<QueryResult {...props} />);
+    const component = shallowWithIntl(<QueryError {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -35,7 +35,7 @@ describe('Query Result', () => {
         startTime: Number.NEGATIVE_INFINITY,
       },
     };
-    const component = shallowWithIntl(<QueryResult {...props} />);
+    const component = shallowWithIntl(<QueryError {...props} />);
     expect(component.isEmptyRender()).toBe(true);
   });
 
@@ -46,7 +46,7 @@ describe('Query Result', () => {
         startTime: new Date().getTime(),
       },
     };
-    const component = mountWithIntl(<QueryResult {...props} />);
+    const component = mountWithIntl(<QueryError {...props} />);
     const loadingIndicator = component.find(`[data-test-subj="queryResultLoading"]`);
     expect(loadingIndicator.exists()).toBeFalsy();
     expect(component.find('EuiText').text()).toEqual('Completed');
@@ -60,7 +60,7 @@ describe('Query Result', () => {
         elapsedMs: 500,
       },
     };
-    const component = mountWithIntl(<QueryResult {...props} />);
+    const component = mountWithIntl(<QueryError {...props} />);
     expect(component.find('EuiText').text()).toEqual('Completed in 500 ms');
   });
 
@@ -72,7 +72,7 @@ describe('Query Result', () => {
         elapsedMs: 2000,
       },
     };
-    const component = mountWithIntl(<QueryResult {...props} />);
+    const component = mountWithIntl(<QueryError {...props} />);
     expect(component.find('EuiText').text()).toEqual('Completed in 2.0 s');
   });
 
@@ -84,7 +84,7 @@ describe('Query Result', () => {
         elapsedMs: 2700,
       },
     };
-    const component = mountWithIntl(<QueryResult {...props} />);
+    const component = mountWithIntl(<QueryError {...props} />);
     expect(component.find('EuiText').text()).toEqual('Completed in 2.7 s');
   });
 
@@ -104,7 +104,7 @@ describe('Query Result', () => {
         },
       },
     };
-    const component = shallowWithIntl(<QueryResult {...props} />);
+    const component = shallowWithIntl(<QueryError {...props} />);
     expect(component.find(`[data-test-subj="queryResultError"]`).text()).toMatchInlineSnapshot(
       `"<EuiPopover />"`
     );
@@ -118,7 +118,7 @@ describe('Query Result', () => {
         status: ResultStatus.ERROR,
       },
     };
-    const component = shallowWithIntl(<QueryResult {...props} />);
+    const component = shallowWithIntl(<QueryError {...props} />);
     expect(component).toEqual({});
   });
 
@@ -143,7 +143,7 @@ describe('Query Result', () => {
       },
     };
 
-    render(<QueryResult {...props} />);
+    render(<QueryError {...props} />);
 
     await fireEvent.click(screen.getByText('Error'));
 
@@ -169,7 +169,7 @@ describe('Query Result', () => {
       },
     };
 
-    render(<QueryResult {...props} />);
+    render(<QueryError {...props} />);
 
     await fireEvent.click(screen.getByText('Error'));
 
@@ -195,7 +195,7 @@ describe('Query Result', () => {
       },
     };
 
-    render(<QueryResult {...props} />);
+    render(<QueryError {...props} />);
 
     await fireEvent.click(screen.getByText('Error'));
 
