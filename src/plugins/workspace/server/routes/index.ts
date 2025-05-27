@@ -379,32 +379,44 @@ export function registerRoutes({
         if (!semanticExtractor) {
           console.log('Model not yet loaded. Initializing pipeline...');
           const startTime = performance.now();
-          semanticExtractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
-            progress_callback: (args: any) => {
-              if (args.status === 'progress') {
-                console.log(`[Node.js Model Loading] ${args.file}: ${args.progress.toFixed(2)}%`);
-              } else if (args.status === 'done') {
-                console.log(`[Node.js Model Loading] Finished loading ${args.file}.`);
-              }
-            },
-          });
+          semanticExtractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
           const endTime = performance.now();
           const loadingTimeMs = endTime - startTime;
 
-          console.log('[Node.js] Model loaded and ready for inference.');
+          console.log('Model loaded and ready for inference.');
           console.log(`Model loading took: ${loadingTimeMs.toFixed(2)} ms`);
         } else {
-          console.log('[Node.js] Model already loaded. Reusing existing pipeline.');
+          console.log('Model already loaded. Reusing existing pipeline.');
         }
 
         // Generate embeddings for links
         const linkEmbeddings = await Promise.all(
           linksWithDescription.map(async (link) => {
-            const output = await semanticExtractor(link.title + link.description || '', {
+            const titleOutput = await semanticExtractor(link.title, {
               pooling: 'mean',
               normalize: true,
             });
-            return { ...link, embedding: Array.from(output.data) };
+            const titleEmbedding = Array.from(titleOutput.data) as number[];
+
+            let descriptionEmbedding: number[] | undefined;
+            if (link.description) {
+              const descOutput = await semanticExtractor(link.description, {
+                pooling: 'mean',
+                normalize: true,
+              });
+              descriptionEmbedding = Array.from(descOutput.data) as number[];
+            }
+
+            const WEIGHT_TITLE = 0.7;
+            const WEIGHT_DESC = 0.3;
+
+            let combinedEmbedding: number[] = [];
+
+            combinedEmbedding = titleEmbedding.map(
+              (val, i) => val * WEIGHT_TITLE + descriptionEmbedding![i] * WEIGHT_DESC
+            );
+
+            return { ...link, embedding: combinedEmbedding };
           })
         );
 
