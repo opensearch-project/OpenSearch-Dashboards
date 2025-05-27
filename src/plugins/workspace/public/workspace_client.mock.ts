@@ -5,7 +5,9 @@
 
 import { IWorkspaceClient } from 'opensearch-dashboards/public';
 
-export const createMockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
+export const createMockWorkspaceClient = (): jest.Mocked<
+  IWorkspaceClient & { enterWorkspace: (id: string) => Promise<null> }
+> => ({
   getCurrentWorkspaceId: jest.fn(),
   getCurrentWorkspace: jest.fn(),
   create: jest.fn(),
@@ -17,6 +19,7 @@ export const createMockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
   associate: jest.fn(),
   dissociate: jest.fn(),
   ui: jest.fn(),
+  enterWorkspace: jest.fn(),
 });
 
 export const workspaceClientMock = createMockWorkspaceClient();
