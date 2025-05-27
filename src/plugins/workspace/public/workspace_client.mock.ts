@@ -5,8 +5,18 @@
 
 import { IWorkspaceClient } from 'opensearch-dashboards/public';
 
+type IResponse<T> =
+  | {
+      result: T;
+      success: true;
+    }
+  | {
+      success: false;
+      error?: string;
+    };
+
 export const createMockWorkspaceClient = (): jest.Mocked<
-  IWorkspaceClient & { enterWorkspace: (id: string) => Promise<null> }
+  IWorkspaceClient & { enterWorkspace: (id: string) => Promise<IResponse<null>> }
 > => ({
   getCurrentWorkspaceId: jest.fn(),
   getCurrentWorkspace: jest.fn(),
