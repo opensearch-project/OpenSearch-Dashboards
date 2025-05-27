@@ -1,0 +1,15 @@
+.dscResultsActionBar {
+  border-bottom: $ouiBorderThin;
+  flex-grow: 0;
+  padding: $euiSizeXS 0;
+
+  &__extensions-container {
+    // each config instance of the extension will be wrapped by this container that will act as a flex item
+    .osdQueryEditorExtensionActionBarContainer {
+      flex-grow: 0;
+      flex-basis: auto;
+      display: flex;
+      flex-direction: row;
+    }
+  }
+}

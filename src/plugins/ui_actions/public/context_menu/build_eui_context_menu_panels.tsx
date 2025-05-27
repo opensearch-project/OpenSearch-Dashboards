@@ -206,7 +206,7 @@ export async function buildContextMenuForActions({
 
     // Add a context menu item for this action so it shows up on a context menu panel.
     // We add this within the parent group or default to the mainMenu panel.
-    panels[parentGroupId || 'mainMenu'].items!.push({
+    const contextItem = {
       name: action.MenuItem
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
@@ -216,9 +216,15 @@ export async function buildContextMenuForActions({
       href: action.getHref ? await action.getHref(context) : undefined,
       _order: action.order || 0,
       _title: action.getDisplayName(context),
-    });
+    };
+    if (typeof action?.getTooltip === 'function') {
+      contextItem.toolTipContent = action.getTooltip(context);
+    }
+    if (typeof action?.isDisabled === 'function') {
+      contextItem.disabled = action?.isDisabled(context);
+    }
+    panels[parentGroupId || 'mainMenu'].items!.push(contextItem);
   });
-
   await Promise.all(promises);
 
   // For each panel, sort items by order and title

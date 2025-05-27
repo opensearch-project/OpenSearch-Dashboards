@@ -21,6 +21,7 @@ import {
 } from '../../mocks';
 import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
+import { UiSettingScope } from '../../../../../core/public';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
 const tableIdentifier = 'EuiInMemoryTable';
@@ -33,7 +34,16 @@ const emptyStateIdentifier = '[data-test-subj="datasourceTableEmptyState"]';
 describe('DataSourceTable', () => {
   const mockedContext = {
     ...mockManagementPlugin.createDataSourceManagementContext(),
-    application: { capabilities: { dataSource: { canManage: true } } },
+    application: {
+      capabilities: {
+        dataSource: {
+          canManage: true,
+        },
+        dashboards: {
+          isDashboardAdmin: false,
+        },
+      },
+    },
   };
   const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -257,7 +267,11 @@ describe('DataSourceTable', () => {
         .find('[data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"]')
         .first()
         .simulate('click');
-      expect(uiSettings.set).toBeCalledWith(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, 'alpha-test');
+      expect(uiSettings.set).toBeCalledWith(
+        DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+        'alpha-test',
+        UiSettingScope.WORKSPACE
+      );
 
       // reset to original value
       mockedContext.workspaces.currentWorkspace$ = currentWorkspace$;
@@ -310,7 +324,7 @@ describe('DataSourceTable', () => {
       });
       // Mock that the current user is dashboard admin
       mockedContext.application.capabilities = {
-        ...capabilities,
+        dataSource: { canManage: false },
         dashboards: { isDashboardAdmin: true },
       };
 
@@ -400,7 +414,7 @@ describe('DataSourceTable', () => {
       // Mock that the current user is dashboard admin
       mockedContext.application.capabilities = {
         ...capabilities,
-        dashboards: { isDashboardAdmin: true },
+        dataSource: { canManage: true },
       };
 
       await act(async () => {

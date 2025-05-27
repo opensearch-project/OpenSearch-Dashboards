@@ -1,0 +1,50 @@
+$osdHeaderOffset: $euiHeaderHeightCompensation;
+
+.deSidebar {
+  height: 100%;
+
+  @include ouiBreakpoint("xs", "s", "m") {
+    max-width: initial;
+    width: 100%;
+  }
+}
+
+.deLayout {
+  height: calc(100vh - #{$osdHeaderOffset * 1});
+  padding: $euiSizeS;
+
+  &.dsc--next {
+    height: calc(100vh - #{$osdHeaderOffset * 2});
+  }
+
+  &__canvas {
+    height: 100%;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > .euiResizableContainer {
+    gap: $euiSizeXS;
+  }
+
+  .globalQueryBar {
+    padding: 0;
+  }
+}
+
+.headerIsExpanded .deLayout {
+  height: calc(100vh - #{$osdHeaderOffset * 2});
+
+  &.dsc--next {
+    height: calc(100vh - #{$osdHeaderOffset * 3});
+  }
+}
+
+.mainPage {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .navBar {
+    padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSizeM;
+    border-bottom: $euiBorderThin;
+  }
+}

@@ -46,6 +46,7 @@
       - [Dev_tools](../src/plugins/dev_tools/README.md)
       - [Discover](../src/plugins/discover/README.md)
       - [Embeddable](../src/plugins/embeddable/README.md)
+      - [Explore](../src/plugins/explore/README.md)
       - [Expressions](../src/plugins/expressions/README.md)
       - [Home](../src/plugins/home/README.md)
       - index_pattern_management
@@ -101,6 +102,7 @@
     - [Multiple_data_source_examples](../examples/multiple_data_source_examples/README.md)
     - [Routing_example](../examples/routing_example/README.md)
     - [Search_examples](../examples/search_examples/README.md)
+    - [State_management_example](../examples/state_management_example/README.md)
     - [Ui_action_examples](../examples/ui_action_examples/README.md)
     - [Ui_actions_explorer](../examples/ui_actions_explorer/README.md)
     - [Url_generators_examples](../examples/url_generators_examples/README.md)
@@ -191,6 +193,7 @@
     - [Opensearch dashboards.release notes 2.9.0](../release-notes/opensearch-dashboards.release-notes-2.9.0.md)
     - [Opensearch dashboards.release notes 3.0.0 alpha1](../release-notes/opensearch-dashboards.release-notes-3.0.0-alpha1.md)
     - [Opensearch dashboards.release notes 3.0.0 beta1](../release-notes/opensearch-dashboards.release-notes-3.0.0-beta1.md)
+    - [Opensearch dashboards.release notes 3.0.0](../release-notes/opensearch-dashboards.release-notes-3.0.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)

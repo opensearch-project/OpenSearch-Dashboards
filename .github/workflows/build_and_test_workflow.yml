@@ -183,6 +183,10 @@ jobs:
             exit 1
           fi
 
+      - name: Run TypeScript error check
+        id: typeScript-error-check
+        run: yarn typecheck
+
       - name: Run linter
         id: linter
         run: yarn lint

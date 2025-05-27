@@ -5,4 +5,5 @@
 
 export const storybookAliases = {
   discover: 'src/plugins/discover/.storybook',
+  explore: 'src/plugins/explore/.storybook',
 };

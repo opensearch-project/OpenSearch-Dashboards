@@ -342,6 +342,7 @@ exports[`DataSourceMenu should render data source selectable only with local clu
       "remove": [MockFunction],
     }
   }
+  onManageDataSource={[MockFunction]}
   onSelectedDataSources={[MockFunction]}
   savedObjectsClient={
     Object {
@@ -368,6 +369,7 @@ exports[`DataSourceMenu should render data source selectable only with local clu
       "remove": [MockFunction],
     }
   }
+  onManageDataSource={[MockFunction]}
   onSelectedDataSources={[MockFunction]}
   savedObjectsClient={
     Object {

@@ -72,6 +72,7 @@ import {
 } from '../../../plugins/content_management/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
+import { ExploreStart } from '../../explore/public';
 
 /**
  * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
@@ -106,6 +107,7 @@ export interface StartDependencies {
   visualizations?: VisualizationsStart;
   visAugmenter?: VisAugmenterStart;
   discover?: DiscoverStart;
+  explore?: ExploreStart;
   visBuilder?: VisBuilderStart;
   uiActions: UiActionsStart;
   contentManagement?: ContentManagementPluginStart;

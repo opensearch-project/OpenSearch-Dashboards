@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataExplorerApp should render the canvas and panel when selected 1`] = `
+<div>
+  <div
+    class="mainPage"
+  >
+    <div
+      class="euiPage deLayout"
+    >
+      <div>
+        Context
+      </div>
+    </div>
+  </div>
+</div>
+`;

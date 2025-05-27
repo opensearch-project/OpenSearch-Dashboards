@@ -42,12 +42,10 @@ import { FeatureCatalogueCategory } from '../../../services';
 import { getServices } from '../../opensearch_dashboards_services';
 import { AddData } from './add_data';
 import { ManageData } from './manage_data';
-import { NewThemeModal } from '../new_theme_modal';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from '../welcome';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
-const KEY_ENABLE_NEW_THEME_MODAL = 'home:newThemeModal:show';
 
 export class Home extends Component {
   constructor(props) {
@@ -56,12 +54,6 @@ export class Home extends Component {
     const isWelcomeEnabled = !(
       getServices().homeConfig.disableWelcomeScreen ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
-    );
-
-    const isNewThemeModalEnabled = !(
-      getServices().uiSettings.get('theme:version') === 'v7' ||
-      getServices().homeConfig.disableNewThemeModal ||
-      props.localStorage.getItem(KEY_ENABLE_NEW_THEME_MODAL) === 'false'
     );
 
     const body = document.querySelector('body');
@@ -75,7 +67,6 @@ export class Home extends Component {
       isLoading: isWelcomeEnabled,
       isNewOpenSearchDashboardsInstance: false,
       isWelcomeEnabled,
-      isNewThemeModalEnabled,
     };
   }
 
@@ -131,15 +122,6 @@ export class Home extends Component {
     this._isMounted && this.setState({ isWelcomeEnabled: false });
   };
 
-  dismissNewThemeModal = () => {
-    this.props.localStorage.setItem(KEY_ENABLE_NEW_THEME_MODAL, 'false');
-    this._isMounted && this.setState({ isNewThemeModalEnabled: false });
-  };
-
-  onCloseNewThemeModal = () => {
-    this.dismissNewThemeModal();
-  };
-
   findDirectoryById = (id) => this.props.directories.find((directory) => directory.id === id);
 
   getFeaturesByCategory = (category) =>
@@ -149,7 +131,6 @@ export class Home extends Component {
 
   renderNormal() {
     const { addBasePath, solutions, directories } = this.props;
-    const { isNewThemeModalEnabled } = this.state;
 
     const devTools = this.findDirectoryById('console');
     const addDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.DATA);
@@ -203,10 +184,6 @@ export class Home extends Component {
           </EuiFlexGroup>
 
           <EuiHorizontalRule margin="xl" aria-hidden="true" />
-
-          {isNewThemeModalEnabled && (
-            <NewThemeModal addBasePath={addBasePath} onClose={this.onCloseNewThemeModal} />
-          )}
 
           <OverviewPageFooter addBasePath={addBasePath} path={HOME_APP_BASE_PATH} />
         </div>

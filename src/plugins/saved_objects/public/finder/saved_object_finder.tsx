@@ -161,9 +161,20 @@ class SavedObjectFinderUi extends React.Component<
     if (!languageId || !currentAppId || !languageService) {
       return true;
     }
-    return (
-      languageService?.getLanguage(languageId)?.supportedAppNames?.includes(currentAppId) ?? true
-    );
+    const supportedInApp = languageService
+      ?.getLanguage(languageId)
+      ?.supportedAppNames?.includes(currentAppId);
+    // If the current app id is explore, although explore app might not support
+    // a language, it still supports all saved searches that are supported by
+    // discover by redirecting to discover for backward compatibility.
+    if (currentAppId === 'explore') {
+      return (
+        (supportedInApp ||
+          languageService?.getLanguage(languageId)?.supportedAppNames?.includes('discover')) ??
+        true
+      );
+    }
+    return supportedInApp ?? true;
   }
 
   private debouncedFetch = _.debounce(async (query: string) => {
