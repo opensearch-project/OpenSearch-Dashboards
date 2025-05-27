@@ -117,23 +117,6 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       expect(mockedClient.create).toBeCalledWith('config', attributes, {});
     });
 
-    it('should skip creating admin settings when only buildNum is provided', async () => {
-      const wrapperClient = buildWrapperInstance(true);
-      const attributes = { buildNum: 12345 };
-
-      const result = await wrapperClient.create('config', attributes, {
-        id: DASHBOARD_ADMIN_SETTINGS_ID,
-      });
-
-      expect(mockedClient.create).not.toBeCalled();
-      expect(result).toEqual({
-        id: DASHBOARD_ADMIN_SETTINGS_ID,
-        type: 'config',
-        attributes: {},
-        references: [],
-      });
-    });
-
     it('should create admin settings when user is dashboard admin', async () => {
       const wrapperClient = buildWrapperInstance(true, true);
       const attributes = { permissionControlledSetting: true };
@@ -215,23 +198,6 @@ describe('PermissionControlledUiSettingsWrapper', () => {
         'config',
         DASHBOARD_ADMIN_SETTINGS_ID,
         attributes,
-        {}
-      );
-    });
-
-    it('should ignore buildNum when updating admin settings', async () => {
-      const wrapperClient = buildWrapperInstance(true, true);
-      const attributes = {
-        permissionControlledSetting: false,
-        buildNum: 12345,
-      };
-
-      await wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes);
-
-      expect(mockedClient.update).toBeCalledWith(
-        'config',
-        DASHBOARD_ADMIN_SETTINGS_ID,
-        { permissionControlledSetting: false },
         {}
       );
     });

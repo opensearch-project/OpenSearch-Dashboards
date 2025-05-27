@@ -20,8 +20,6 @@ import {
 import { getWorkspaceState } from 'opensearch-dashboards/server/utils';
 import { DASHBOARD_ADMIN_SETTINGS_ID } from '../utils';
 
-type AttributesObject = Record<string, unknown>;
-
 /**
  * Wrapper for admin UI settings that enforces permission controls
  * Handles special cases for admin UI settings with appropriate access controls
@@ -41,23 +39,7 @@ export class PermissionControlledUiSettingsWrapper {
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObject<T>> => {
       if (type === 'config' && options.id && options.id === DASHBOARD_ADMIN_SETTINGS_ID) {
-        // Skip createPermissionUiSetting if attributes only contains buildNum
-        const keys = Object.keys(attributes as AttributesObject);
-        if (keys.length === 1 && keys[0] === 'buildNum') {
-          return {
-            id: DASHBOARD_ADMIN_SETTINGS_ID,
-            type: 'config',
-            attributes: {} as T,
-            references: [],
-          };
-        }
-
-        const { buildNum, ...other } = attributes as AttributesObject;
-        return (this.createPermissionUiSetting(
-          other,
-          options,
-          wrapperOptions
-        ) as unknown) as SavedObject<T>;
+        return this.createPermissionUiSetting(attributes, options, wrapperOptions);
       }
 
       return wrapperOptions.client.create<T>(type, attributes, options);
@@ -70,21 +52,16 @@ export class PermissionControlledUiSettingsWrapper {
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
       if (type === 'config' && id === DASHBOARD_ADMIN_SETTINGS_ID) {
-        const { buildNum, ...other } = attributes as AttributesObject;
         try {
-          return ((await wrapperOptions.client.update<AttributesObject>(
+          return ((await wrapperOptions.client.update<SavedObject<T>>(
             type,
             DASHBOARD_ADMIN_SETTINGS_ID,
-            other,
+            attributes,
             options
           )) as unknown) as SavedObjectsUpdateResponse<T>;
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-            return (this.createPermissionUiSetting(
-              other,
-              options,
-              wrapperOptions
-            ) as unknown) as SavedObjectsUpdateResponse<T>;
+            return this.createPermissionUiSetting(attributes, options, wrapperOptions);
           } else {
             throw error;
           }
@@ -147,7 +124,7 @@ export class PermissionControlledUiSettingsWrapper {
     };
   };
 
-  private checkAdminPermission(wrapperOptions: SavedObjectsClientWrapperOptions): void {
+  private hasUISettingsWritePermission(wrapperOptions: SavedObjectsClientWrapperOptions): void {
     // If saved object permission is disabled, everyone should be treated as admin here
     const isDashboardAdmin =
       getWorkspaceState(wrapperOptions.request).isDashboardAdmin !== false ||
@@ -176,12 +153,12 @@ export class PermissionControlledUiSettingsWrapper {
     return this.aclInstance;
   }
 
-  private async createPermissionUiSetting(
-    attributes: AttributesObject,
+  private async createPermissionUiSetting<T>(
+    attributes: T,
     options: SavedObjectsBaseOptions,
     wrapperOptions: SavedObjectsClientWrapperOptions
-  ): Promise<SavedObject<AttributesObject>> {
-    this.checkAdminPermission(wrapperOptions);
+  ): Promise<SavedObject<T>> {
+    this.hasUISettingsWritePermission(wrapperOptions);
 
     const aclInstance = this.getAclInstance();
 
