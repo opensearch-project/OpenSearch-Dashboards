@@ -48,6 +48,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
   const deleteWorkspaces = async () => {
+    if (deleting) return;
     setDeleting(true);
     let result: { success: number; fail: number; failedIds: string[] };
     let failedWorksapces: WorkspaceAttribute[];
@@ -67,6 +68,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
+        setDeleting(false);
         return onClose();
       }
 
