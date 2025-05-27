@@ -56,8 +56,8 @@ import {
   ISearchSource,
 } from '../opensearch_dashboards_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { SortOrder } from '../saved_searches/types';
-import { SavedSearch } from '../saved_searches';
+import { SortOrder } from '../../../../saved_explore/types';
+import { SavedExplore } from '../../../../saved_explore';
 import {
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -91,7 +91,7 @@ export interface SearchProps {
 }
 
 interface SearchEmbeddableConfig {
-  savedSearch: SavedSearch;
+  savedSearch: SavedExplore;
   editUrl: string;
   editPath: string;
   indexPatterns?: IndexPattern[];
@@ -103,7 +103,7 @@ interface SearchEmbeddableConfig {
 export class SearchEmbeddable
   extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {
-  private readonly savedSearch: SavedSearch;
+  private readonly savedSearch: SavedExplore;
   private inspectorAdaptors: Adapters;
   private searchProps?: SearchProps;
   private panelTitle: string = '';
