@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const workspaceClientMock = {
-  init: jest.fn(),
-  enterWorkspace: jest.fn(),
+import { IWorkspaceClient } from 'opensearch-dashboards/public';
+
+export const createMockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
   getCurrentWorkspaceId: jest.fn(),
   getCurrentWorkspace: jest.fn(),
   create: jest.fn(),
@@ -14,8 +14,12 @@ export const workspaceClientMock = {
   get: jest.fn(),
   update: jest.fn(),
   copy: jest.fn(),
-  stop: jest.fn(),
-};
+  associate: jest.fn(),
+  dissociate: jest.fn(),
+  ui: jest.fn(),
+});
+
+export const workspaceClientMock = createMockWorkspaceClient();
 
 export const WorkspaceClientMock = jest.fn(function () {
   return workspaceClientMock;
