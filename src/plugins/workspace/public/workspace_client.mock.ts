@@ -16,7 +16,7 @@ type IResponse<T> =
     };
 
 export const createMockWorkspaceClient = (): jest.Mocked<
-  IWorkspaceClient & { enterWorkspace: (id: string) => Promise<IResponse<null>> }
+  IWorkspaceClient & { enterWorkspace: (id: string) => Promise<IResponse<null>>; init: () => {} }
 > => ({
   getCurrentWorkspaceId: jest.fn(),
   getCurrentWorkspace: jest.fn(),
@@ -30,6 +30,7 @@ export const createMockWorkspaceClient = (): jest.Mocked<
   dissociate: jest.fn(),
   ui: jest.fn(),
   enterWorkspace: jest.fn(),
+  init: jest.fn(),
 });
 
 export const workspaceClientMock = createMockWorkspaceClient();
