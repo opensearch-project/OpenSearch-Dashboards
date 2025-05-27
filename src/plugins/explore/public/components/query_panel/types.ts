@@ -43,3 +43,11 @@ export interface RecentQueriesTableProps {
   isVisible: boolean;
   languageType: LanguageType;
 }
+
+export enum ResultStatus {
+  UNINITIALIZED = 'uninitialized',
+  LOADING = 'loading', // initial data load
+  READY = 'ready', // results came back
+  NO_RESULTS = 'none', // no results came back
+  ERROR = 'error', // error occurred
+}

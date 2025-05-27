@@ -24,7 +24,7 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
     if (languageType === 'nl') {
       return isDualEditor ? 'Natural Language | PPL' : 'Natural Language';
     }
-    return ''; // Default to empty for other language types
+    return 'PPL'; // Default to empty for other language types
   }, [languageType, isDualEditor, noInput]);
 
   return getDisplayText ? <span className="show-input-type">{getDisplayText} </span> : null;
