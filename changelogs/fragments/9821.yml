@@ -1,0 +1,2 @@
+fix:
+- UiSettingClient cannot reading property of undefined ([#9821](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9821))
