@@ -251,4 +251,10 @@ describe('json', () => {
 
     expect(stringify(input, replacer, 4)).toMatchSnapshot();
   });
+
+  it('can handle BigInt values and ANSI escape sequences', () => {
+    const input = {message: "hello \u001b[38;7;2mworld\u001b[0m", value: BigInt(Number.MAX_SAFE_INTEGER) * 2n};
+    const result = parse(stringify(input));
+    expect(result).toEqual(input);
+  })
 });
