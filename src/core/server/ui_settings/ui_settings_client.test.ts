@@ -38,7 +38,11 @@ import { SavedObjectsClient } from '../saved_objects';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
 import { UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
-import { CURRENT_USER_PLACEHOLDER, CURRENT_WORKSPACE_PLACEHOLDER } from './utils';
+import {
+  CURRENT_USER_PLACEHOLDER,
+  CURRENT_WORKSPACE_PLACEHOLDER,
+  DASHBOARD_ADMIN_SETTINGS_ID,
+} from './utils';
 import { UiSettingScope } from './types';
 
 const logger = loggingSystemMock.create().get();
@@ -400,7 +404,7 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.getUserProvided();
 
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
@@ -495,6 +499,12 @@ describe('ui settings', () => {
               foo: 'my personal workspace value',
             },
           } as any);
+        } else if (id === DASHBOARD_ADMIN_SETTINGS_ID) {
+          return Promise.resolve({
+            attributes: {
+              admin: 'admin ui setting',
+            },
+          } as any);
         } else {
           return Promise.resolve({
             attributes: {
@@ -517,6 +527,9 @@ describe('ui settings', () => {
         },
         other: {
           userValue: 'global value',
+        },
+        admin: {
+          userValue: 'admin ui setting',
         },
       });
     });
@@ -564,6 +577,9 @@ describe('ui settings', () => {
           Array [
             "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
         ]
       `);
     });
@@ -575,10 +591,12 @@ describe('ui settings', () => {
         .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
         .mockResolvedValueOnce({ attributes: {} })
         .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
+        .mockResolvedValueOnce({ attributes: {} })
+        .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
         .mockResolvedValueOnce({ attributes: {} });
 
       expect(await uiSettings.getUserProvided()).toStrictEqual({});
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(5);
 
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
@@ -673,7 +691,7 @@ describe('ui settings', () => {
       const opensearchDocSource = {};
       const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
       await uiSettings.getAll();
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
@@ -712,6 +730,9 @@ describe('ui settings', () => {
 
       expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
           Array [
             "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
@@ -794,6 +815,12 @@ describe('ui settings', () => {
           return Promise.resolve({
             attributes: {},
           } as any);
+        } else if (id === DASHBOARD_ADMIN_SETTINGS_ID) {
+          return Promise.resolve({
+            attributes: {
+              admin: 'admin ui setting',
+            },
+          } as any);
         } else {
           return Promise.resolve({
             attributes: {
@@ -807,6 +834,7 @@ describe('ui settings', () => {
       expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'default1',
         bar: 'my personal value',
+        admin: 'admin ui setting',
       });
     });
 
@@ -876,6 +904,12 @@ describe('ui settings', () => {
           return Promise.resolve({
             attributes: { foo: 'user-foo' },
           } as any);
+        } else if (id === DASHBOARD_ADMIN_SETTINGS_ID) {
+          return Promise.resolve({
+            attributes: {
+              admin: 'admin ui setting',
+            },
+          } as any);
         } else {
           return Promise.resolve({
             attributes: {
@@ -889,6 +923,7 @@ describe('ui settings', () => {
       expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'user-foo',
         bar: 'workspace-bar',
+        admin: 'admin ui setting',
       });
     });
   });
@@ -918,7 +953,7 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
       await uiSettings.get('any');
 
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
@@ -1019,6 +1054,9 @@ describe('ui settings', () => {
 
       expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
           Array [
             "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
