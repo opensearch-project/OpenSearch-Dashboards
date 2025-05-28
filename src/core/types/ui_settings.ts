@@ -157,6 +157,8 @@ export interface ImageValidation {
  * */
 export interface UserProvidedValues<T = any> {
   userValue?: T;
+  /** Use for disable the setting when it has been overridden by server config */
   isOverridden?: boolean;
+  /** Use for disable the setting when it has been controlled by saved object permissions */
   isPermissionControlled?: boolean;
 }

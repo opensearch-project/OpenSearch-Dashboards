@@ -79,7 +79,7 @@ export class PermissionControlledUiSettingsWrapper {
         throw new Error('Bulk create is not supported for admin settings');
       }
 
-      // Check if any object is trying to create admin settings
+      // Prevent bulk creation if any object targets admin settings
       const adminSettingObject = objects.find(
         (obj) => obj.type === 'config' && obj.id === DASHBOARD_ADMIN_SETTINGS_ID
       );
@@ -124,7 +124,7 @@ export class PermissionControlledUiSettingsWrapper {
     };
   };
 
-  private hasUISettingsWritePermission(wrapperOptions: SavedObjectsClientWrapperOptions): void {
+  private checkUiSettingsWritePermission(wrapperOptions: SavedObjectsClientWrapperOptions): void {
     // If saved object permission is disabled, everyone should be treated as admin here
     const isDashboardAdmin =
       getWorkspaceState(wrapperOptions.request).isDashboardAdmin !== false ||
@@ -158,7 +158,7 @@ export class PermissionControlledUiSettingsWrapper {
     options: SavedObjectsBaseOptions,
     wrapperOptions: SavedObjectsClientWrapperOptions
   ): Promise<SavedObject<T>> {
-    this.hasUISettingsWritePermission(wrapperOptions);
+    this.checkUiSettingsWritePermission(wrapperOptions);
 
     const aclInstance = this.getAclInstance();
 

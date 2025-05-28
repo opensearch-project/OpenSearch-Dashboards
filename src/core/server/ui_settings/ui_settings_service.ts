@@ -49,7 +49,10 @@ import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { PermissionControlledUiSettingsWrapper } from './saved_objects/permission_controlled_ui_settings_wrapper';
-import { savedObjectsConfig, SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
+import {
+  savedObjectsConfig as savedObjectsDefinition,
+  SavedObjectsConfigType,
+} from '../saved_objects/saved_objects_config';
 import {
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
@@ -73,7 +76,7 @@ export class UiSettingsService
 
     this.config$ = combineLatest([
       coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path),
-      coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
+      coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsDefinition.path),
     ]);
   }
 
@@ -86,8 +89,8 @@ export class UiSettingsService
 
     const config = await firstValueFrom(
       this.config$.pipe(
-        map(([uiSettingsConfig, savedObjectConfig]) => {
-          return { uiSettingsConfig, savedObjectConfig };
+        map(([uiSettingsConfig, savedObjectsConfig]) => {
+          return { uiSettingsConfig, savedObjectsConfig };
         })
       )
     );
@@ -98,7 +101,7 @@ export class UiSettingsService
     this.validateAndUpdateConfiguredDefaults(config.uiSettingsConfig.defaults);
 
     const permissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
-      config.savedObjectConfig.permission.enabled
+      config.savedObjectsConfig.permission.enabled
     );
 
     savedObjects.addClientWrapper(
