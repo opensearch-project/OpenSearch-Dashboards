@@ -57,6 +57,7 @@ import {
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
 } from './utils';
+import { getDashboardAssistantSettings } from './settings/dashboard_assistant';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -109,6 +110,8 @@ export class UiSettingsService
       PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
       permissionControlledUiSettingsWrapper.wrapperFactory
     );
+
+    this.register(getDashboardAssistantSettings());
 
     return {
       register: this.register.bind(this),
