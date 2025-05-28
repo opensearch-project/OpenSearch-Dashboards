@@ -47,6 +47,7 @@ describe('Settings', function () {
           requiresPageReload: false,
           type: 'string' as UiSettingsType,
           isOverridden: false,
+          isPermissionControlled: false,
           readOnly: false,
           options: [],
           optionLabels: { option: 'label' },
