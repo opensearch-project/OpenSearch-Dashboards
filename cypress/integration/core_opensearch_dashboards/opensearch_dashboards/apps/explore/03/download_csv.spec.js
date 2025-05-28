@@ -22,11 +22,13 @@ import {
   getHeadersForSourceDownload,
   getMaxCount,
   getVisibleCountForLanguage,
-  prepareDiscoverPageForDownload,
   toggleFieldsForCsvDownload,
 } from '../../../../../../utils/apps/query_enhancements/download_csv';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateDownloadCsvTestConfigurations } from '../../../../../../utils/apps/explore/download_csv';
+import {
+  generateDownloadCsvTestConfigurations,
+  prepareDiscoverPageForDownload,
+} from '../../../../../../utils/apps/explore/download_csv';
 
 const workspaceName = getRandomizedWorkspaceName();
 
