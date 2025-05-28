@@ -82,23 +82,22 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
 
   // When user has unsaved changes and navigates to other page, will show a confirm modal.
   useEffect(() => {
-    if (!onAppLeave) {
-      return;
+    if (onAppLeave) {
+      onAppLeave((actions) => {
+        if (isEditing && numberOfChanges > 0) {
+          return actions.confirm(
+            i18n.translate('workspace.detail.navigate.message', {
+              defaultMessage: 'Any unsaved changes will be lost.',
+            }),
+            i18n.translate('workspace.detail.navigate.title', {
+              defaultMessage: 'Navigate away?',
+            }),
+            handleResetForm
+          );
+        }
+        return actions.default();
+      });
     }
-    onAppLeave((actions) => {
-      if (isEditing && numberOfChanges > 0) {
-        return actions.confirm(
-          i18n.translate('workspace.detail.navigate.message', {
-            defaultMessage: 'Any unsaved changes will be lost.',
-          }),
-          i18n.translate('workspace.detail.navigate.title', {
-            defaultMessage: 'Navigate away?',
-          }),
-          handleResetForm
-        );
-      }
-      return actions.default();
-    });
   }, [handleResetForm, isEditing, numberOfChanges, onAppLeave]);
 
   const handleSetDefaultWorkspace = useCallback(
