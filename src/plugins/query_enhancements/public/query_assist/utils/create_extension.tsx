@@ -23,6 +23,7 @@ import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { QueryAssistContext, QueryAssistState } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
 import { isPPLSupportedType } from './language_support';
+import { ENABLE_DASHBOARD_ASSISTANT_FEATURE } from './constant';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -104,13 +105,24 @@ export const createQueryAssistExtension = (
     question: '',
     generatedQuery: '',
   });
+
+  const assistantEnabled$ = new BehaviorSubject<boolean>(true);
+  core.getStartServices().then(([coreStart, depsStart]) => {
+    const enabled = coreStart.uiSettings.get(ENABLE_DASHBOARD_ASSISTANT_FEATURE);
+    assistantEnabled$.next(enabled);
+  });
+
   return {
     id: 'query-assist',
     order: 1000,
     getDataStructureMeta: async (dataSourceId) => {
-      // [TODO] - The timmeout exists because the loading of the Datasource menu is prevented until this request completes. This if a single cluster is down the request holds the whole menu level in a loading state. We should make this call non blocking and load the datasource meta in the background.
-      const isEnabled = await getAvailableLanguagesForDataSource(http, dataSourceId, 3000) // 3s timeout for quick check
-        .then((languages) => languages.length > 0);
+      // [TODO] - The timmeout exists because the loading of the Datasource menu is prevented until this request completes.
+      // This if a single cluster is down the request holds the whole menu level in a loading state. We should make this
+      // call non blocking and load the datasource meta in the background.
+      const isEnabled =
+        assistantEnabled$.value &&
+        (await getAvailableLanguagesForDataSource(http, dataSourceId, 3000) // 3s timeout for quick check
+          .then((languages) => languages.length > 0));
       if (isEnabled) {
         return {
           type: DATA_STRUCTURE_META_TYPES.FEATURE,
@@ -130,6 +142,7 @@ export const createQueryAssistExtension = (
           dependencies={dependencies}
           http={http}
           data={data}
+          assistantEnabled$={assistantEnabled$}
           queryState$={assistQueryState$}
         >
           <QueryAssistBar dependencies={dependencies} />
@@ -143,6 +156,7 @@ export const createQueryAssistExtension = (
           dependencies={dependencies}
           http={http}
           data={data}
+          assistantEnabled$={assistantEnabled$}
           queryState$={assistQueryState$}
           invert
         >
@@ -159,6 +173,7 @@ export const createQueryAssistExtension = (
           dependencies={dependencies}
           http={http}
           data={data}
+          assistantEnabled$={assistantEnabled$}
           isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
           isSummaryAgentAvailable$={isSummaryAgentAvailable$}
           {...(config.summary.enabled && { resultSummaryEnabled$ })}
@@ -185,6 +200,7 @@ interface QueryAssistWrapperProps {
   http: HttpSetup;
   data: DataPublicPluginSetup;
   invert?: boolean;
+  assistantEnabled$: BehaviorSubject<boolean>;
   isQuerySummaryCollapsed$?: BehaviorSubject<boolean>;
   resultSummaryEnabled$?: BehaviorSubject<boolean>;
   isSummaryAgentAvailable$?: BehaviorSubject<boolean>;
@@ -238,7 +254,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     };
   }, [props]);
 
-  if (!visible) return null;
+  if (!visible || !props.assistantEnabled$.value) return null;
   return (
     <>
       <QueryAssistContext.Provider
