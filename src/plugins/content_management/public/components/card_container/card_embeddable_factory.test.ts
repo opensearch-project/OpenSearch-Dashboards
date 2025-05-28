@@ -11,6 +11,7 @@ test('create CardEmbeddableFactoryDefinition', async () => {
   expect(factory.type).toBe(CARD_EMBEDDABLE);
   expect(factory.getDisplayName()).toBe('Card');
   expect(await factory.isEditable()).toBe(false);
+  expect(factory.canCreateNew()).toBe(false);
   expect(await factory.create({ id: 'card-id', title: 'title', description: '' })).toBeInstanceOf(
     CardEmbeddable
   );

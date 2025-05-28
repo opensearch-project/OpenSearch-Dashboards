@@ -19,6 +19,10 @@ export class CustomContentEmbeddableFactoryDefinition implements EmbeddableFacto
     return false;
   }
 
+  public canCreateNew() {
+    return false;
+  }
+
   public async create(initialInput: CustomContentEmbeddableInput, parent?: IContainer) {
     return new CustomContentEmbeddable(initialInput, parent);
   }
