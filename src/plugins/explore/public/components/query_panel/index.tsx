@@ -4,7 +4,6 @@
  */
 
 import React, { useRef, useState } from 'react';
-import { monaco } from '@osd/monaco';
 import { QueryPanelLayout } from './layout';
 import { EditorStack } from './components/editor_stack';
 import { QueryEditorFooter } from './components/footer/index';
@@ -25,7 +24,6 @@ const intitialQuery = (language: LanguageType, dataset: string) => ({
 const QueryPanel = () => {
   const [lineCount, setLineCount] = useState<number | undefined>(undefined);
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
-  const inputQueryRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const languageTypeRef = useRef<LanguageType>('nl'); // Default to PPL
   const [isDualEditor, setIsDualEditor] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,17 +60,33 @@ const QueryPanel = () => {
     // console.log('Prompt changed:', value);
     detectLanguageType(value);
     onQuerystringChange(value, true);
+
+    // If not dual editor and prompt contains PPL, set line count
+    if (!isDualEditor && value.trim()) {
+      const lines = value.split('\n').length;
+      setLineCount(lines > 1 || value.trim() ? lines : undefined);
+    } else if (!isDualEditor) {
+      setLineCount(undefined);
+    }
   };
 
   const onQueryChange = (value: string) => {
     onQuerystringChange(value, false);
 
-    if (!inputQueryRef.current) return;
-    console.log(inputQueryRef.current);
+    //   if (!inputQueryRef.current) return;
+    //   console.log(inputQueryRef.current);
 
-    const currentLineCount = inputQueryRef.current.getModel()?.getLineCount();
-    if (lineCount === currentLineCount) return;
-    setLineCount(currentLineCount);
+    //   const currentLineCount = inputQueryRef.current.getModel()?.getLineCount();
+    //   if (lineCount === currentLineCount) return;
+    //   setLineCount(currentLineCount);
+
+    // In dual editor mode, use query editor's line count if there is PPL
+    if (isDualEditor && value.trim()) {
+      const lines = value.split('\n').length;
+      setLineCount(lines > 1 || value.trim() ? lines : undefined);
+    } else {
+      setLineCount(undefined);
+    }
   };
 
   const handleQueryRun = async (
@@ -92,26 +106,6 @@ const QueryPanel = () => {
 
   const onRun = async () => {
     setIsLoading(true); // Set loading to true
-
-    // console.log(
-    //   currentQuery.query.trim() !== intitialQuery(languageTypeRef.current, 'test').query.trim()
-    // );
-
-    // console.log(
-    //   (currentQuery.prompt?.trim() ?? '') !==
-    //     intitialQuery(languageTypeRef.current, 'test').prompt.trim()
-    // );
-
-    // if (currentQuery.query.trim() !== intitialQuery(languageTypeRef.current, 'test').query.trim()) {
-    //   setIsPromptReadOnly(true);
-    // }
-
-    // if (
-    //   (currentQuery.prompt?.trim() ?? '') !==
-    //   intitialQuery(languageTypeRef.current, 'test').prompt.trim()
-    // ) {
-    //   setIsEditorReadOnly(true);
-    // }
 
     await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
     setIsLoading(false);
