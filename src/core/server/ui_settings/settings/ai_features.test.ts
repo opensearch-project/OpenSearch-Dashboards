@@ -4,16 +4,16 @@
  */
 
 import { UiSettingsParams } from '../types';
-import { getDashboardAssistantSettings } from './dashboard_assistant';
+import { getAIFeaturesSetting } from './ai_features';
 
-describe('dashboard assistant settings', () => {
-  const dashboardAssistantSettings = getDashboardAssistantSettings();
+describe('AI features setting', () => {
+  const dashboardAssistantSettings = getAIFeaturesSetting();
 
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
     setting.schema.validate(value);
 
-  describe('enableDashboardAssistantFeature', () => {
-    const validate = getValidationFn(dashboardAssistantSettings.enableDashboardAssistantFeature);
+  describe('enableAIFeatures', () => {
+    const validate = getValidationFn(dashboardAssistantSettings.enableAIFeatures);
 
     it('should only accept boolean values', () => {
       expect(() => validate(true)).not.toThrow();
@@ -28,13 +28,11 @@ describe('dashboard assistant settings', () => {
     });
 
     it('should have the correct default value', () => {
-      expect(dashboardAssistantSettings.enableDashboardAssistantFeature.value).toBe(true);
+      expect(dashboardAssistantSettings.enableAIFeatures.value).toBe(true);
     });
 
     it('should require page reload', () => {
-      expect(dashboardAssistantSettings.enableDashboardAssistantFeature.requiresPageReload).toBe(
-        true
-      );
+      expect(dashboardAssistantSettings.enableAIFeatures.requiresPageReload).toBe(true);
     });
   });
 });
