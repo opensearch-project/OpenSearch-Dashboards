@@ -5,18 +5,38 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { SelectOption, SwitchOption } from '../../../../../../charts/public';
-import { getPositions } from '../utils/collections';
+import { getPositions, Positions } from '../utils/collections';
 
 interface BasicVisOptionsProps {
   addTooltip: boolean;
   addLegend: boolean;
   legendPosition: string;
   addTimeMarker: boolean;
+  mode: string;
+  showLine: boolean;
+  lineMode: string;
+  lineWidth: number;
+  showDots: boolean;
   onAddTooltipChange: (addTooltip: boolean) => void;
   onAddLegendChange: (addLegend: boolean) => void;
-  onLegendPositionChange: (legendPosition: string) => void;
+  onLegendPositionChange: (legendPosition: Positions) => void;
   onAddTimeMarkerChange: (addTimeMarker: boolean) => void;
+  onModeChange: (mode: string) => void;
+  onShowLineChange: (showLine: boolean) => void;
+  onLineModeChange: (lineMode: string) => void;
+  onLineWidthChange: (lineWidth: number) => void;
+  onShowDotsChange: (showDots: boolean) => void;
 }
 
 export const BasicVisOptions = ({
@@ -24,17 +44,104 @@ export const BasicVisOptions = ({
   addLegend,
   legendPosition,
   addTimeMarker,
+  showLine,
+  lineMode,
+  lineWidth,
+  showDots,
   onAddTooltipChange,
   onAddLegendChange,
   onLegendPositionChange,
   onAddTimeMarkerChange,
+  onModeChange,
+  onShowLineChange,
+  onLineModeChange,
+  onLineWidthChange,
+  onShowDotsChange,
 }: BasicVisOptionsProps) => {
   // Could import and reuse { getConfigCollections } from '../../../../../vis_type_vislib/public';
   // That requires adding vis_type_vislib as a dependency to discover, and somehow that throw errors
   const legendPositions = getPositions();
 
+  const lineModeOptions = [
+    { value: 'straight', text: 'Straight' },
+    { value: 'smooth', text: 'Smooth' },
+    { value: 'stepped', text: 'Stepped' },
+  ];
+
   return (
-    <>
+    <EuiPanel paddingSize="s">
+      <EuiTitle size="xs">
+        <h4>
+          {i18n.translate('discover.vis.gridOptions.basicSettings', {
+            defaultMessage: 'Basic Settings',
+          })}
+        </h4>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
+      {/* Show Line Toggle */}
+      <SwitchOption
+        label={i18n.translate('discover.stylePanel.basic.showLine', {
+          defaultMessage: 'Show line',
+        })}
+        paramName="showLine"
+        value={showLine}
+        setValue={(_, value) => onShowLineChange(value)}
+      />
+
+      {/* Line Configuration - Same Row */}
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('discover.stylePanel.basic.lineMode', {
+              defaultMessage: 'Line Mode',
+            })}
+          >
+            <EuiSelect
+              options={lineModeOptions}
+              value={lineMode}
+              onChange={(e) => onLineModeChange(e.target.value)}
+              disabled={!showLine}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('discover.stylePanel.basic.linewidth', {
+              defaultMessage: 'Line Width',
+            })}
+          >
+            <EuiFieldNumber
+              value={lineWidth}
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                onLineWidthChange(isNaN(value) ? 2 : value);
+              }}
+              min={1}
+              max={10}
+              step={1}
+              disabled={!showLine}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      {/* Show Dots Toggle */}
+      <SwitchOption
+        label={i18n.translate('discover.stylePanel.basic.showDots', {
+          defaultMessage: 'Show dots',
+        })}
+        paramName="showDots"
+        value={showDots}
+        setValue={(_, value) => onShowDotsChange(value)}
+      />
+
+      <EuiSpacer size="s" />
+
       <SwitchOption
         label={i18n.translate('discover.stylePanel.basic.showLegend', {
           defaultMessage: 'Show legend',
@@ -52,7 +159,7 @@ export const BasicVisOptions = ({
           options={legendPositions}
           paramName="legendPosition"
           value={legendPosition}
-          setValue={(_, value) => onLegendPositionChange(value)}
+          setValue={(_, value) => onLegendPositionChange(value as Positions)}
         />
       )}
 
@@ -73,6 +180,6 @@ export const BasicVisOptions = ({
         value={addTimeMarker}
         setValue={(_, value) => onAddTimeMarkerChange(value)}
       />
-    </>
+    </EuiPanel>
   );
 };
