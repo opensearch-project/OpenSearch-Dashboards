@@ -13,7 +13,6 @@ import { IndexPattern } from '../../../../../../data/public';
 import { DiscoverViewServices } from '../../../../build_services';
 import { LineChartStyleControls } from './line_vis_config';
 import { DiscoverVisColumn } from '../types';
-import { Positions } from '../utils/collections';
 
 export const toExpression = async (
   services: DiscoverViewServices,
@@ -74,12 +73,8 @@ const getStrokeDash = (style: string): number[] | undefined => {
 };
 
 // Helper function to create threshold line layer
-const createThresholdLayer = (
-  styles: LineChartStyleControls,
-  dateField?: string,
-  metricField?: string
-): any => {
-  if (!styles.thresholdLine?.show) {
+const createThresholdLayer = (styles: Partial<LineChartStyleControls> | undefined): any => {
+  if (!styles?.thresholdLine?.show) {
     return null;
   }
 
@@ -89,7 +84,7 @@ const createThresholdLayer = (
       color: styles.thresholdLine.color,
       strokeWidth: styles.thresholdLine.width,
       strokeDash: getStrokeDash(styles.thresholdLine.style),
-      tooltip: styles.addTooltip,
+      tooltip: styles.addTooltip !== false,
     },
     encoding: {
       y: {
@@ -100,7 +95,7 @@ const createThresholdLayer = (
   };
 
   // Add tooltip content if enabled
-  if (styles.addTooltip) {
+  if (styles.addTooltip !== false) {
     thresholdLayer.encoding.tooltip = {
       value: `Threshold: ${styles.thresholdLine.value}`,
     };
@@ -110,8 +105,8 @@ const createThresholdLayer = (
 };
 
 // Helper function to create time marker layer
-const createTimeMarkerLayer = (styles: LineChartStyleControls, dateField: string): any => {
-  if (!styles.addTimeMarker) {
+const createTimeMarkerLayer = (styles: Partial<LineChartStyleControls> | undefined): any => {
+  if (!styles?.addTimeMarker) {
     return null;
   }
 
@@ -121,38 +116,194 @@ const createTimeMarkerLayer = (styles: LineChartStyleControls, dateField: string
       color: '#FF6B6B',
       strokeWidth: 2,
       strokeDash: [3, 3],
-      tooltip: styles.addTooltip,
+      tooltip: styles.addTooltip !== false,
     },
     encoding: {
       x: {
         datum: { expr: 'now()' },
         type: 'temporal',
       },
-    },
-    ...(styles.addTooltip && {
-      encoding: {
-        ...{
-          x: {
-            datum: { expr: 'now()' },
-            type: 'temporal',
-          },
-        },
+      ...(styles.addTooltip !== false && {
         tooltip: {
           value: 'Current Time',
         },
-      },
-    }),
+      }),
+    },
   };
 };
 
+// Helper function to get Vega interpolation from UI lineMode
+const getVegaInterpolation = (lineMode: string): string => {
+  switch (lineMode) {
+    case 'straight':
+      return 'linear';
+    case 'smooth':
+      return 'monotone';
+    case 'stepped':
+      return 'step-after';
+    default:
+      return 'monotone';
+  }
+};
+
+// Fixed function to build proper Vega-Lite mark configuration
+const buildMarkConfig = (
+  styles: Partial<LineChartStyleControls> | undefined,
+  markType: 'line' | 'bar' = 'line'
+): any => {
+  // Default values - handle undefined styles object
+  const showLine = styles?.showLine !== false;
+  const showDots = styles?.showDots !== false;
+  const lineWidth = styles?.lineWidth ?? 2;
+  const lineMode = styles?.lineMode ?? 'smooth';
+  const addTooltip = styles?.addTooltip !== false;
+
+  if (markType === 'bar') {
+    return {
+      type: 'bar',
+      opacity: 0.7,
+      tooltip: addTooltip,
+    };
+  }
+
+  // For line charts
+  if (!showLine && showDots) {
+    // Only show points
+    return {
+      type: 'point',
+      tooltip: addTooltip,
+      size: 100,
+    };
+  } else if (showLine && !showDots) {
+    // Only show line
+    return {
+      type: 'line',
+      tooltip: addTooltip,
+      strokeWidth: lineWidth,
+      interpolate: getVegaInterpolation(lineMode),
+    };
+  } else if (showLine && showDots) {
+    // Show both line and points
+    return {
+      type: 'line',
+      point: true,
+      tooltip: addTooltip,
+      strokeWidth: lineWidth,
+      interpolate: getVegaInterpolation(lineMode),
+    };
+  } else {
+    // Neither line nor dots - fallback to points
+    return {
+      type: 'point',
+      tooltip: addTooltip,
+      size: 0, // Make points invisible
+    };
+  }
+};
+
 // Helper function to apply grid and axis styling
-const applyAxisStyling = (axis: any, styles: LineChartStyleControls): any => {
-  return {
+const applyAxisStyling = (
+  axis: any,
+  styles: Partial<LineChartStyleControls> | undefined,
+  axisType: 'category' | 'value',
+  numericalColumns?: DiscoverVisColumn[],
+  categoricalColumns?: DiscoverVisColumn[],
+  dateColumns?: DiscoverVisColumn[]
+): any => {
+  const gridEnabled =
+    axisType === 'category'
+      ? styles?.grid?.categoryLines ?? true
+      : styles?.grid?.valueLines ?? true;
+
+  // Get the axis configuration from styles
+  const axisConfig = axisType === 'category' ? styles?.categoryAxes?.[0] : styles?.valueAxes?.[0];
+
+  if (!axisConfig) {
+    // Fallback to basic styling if no config found
+    return {
+      ...axis,
+      grid: gridEnabled,
+      gridColor: '#E0E0E0',
+      gridOpacity: 0.5,
+    };
+  }
+
+  // Build the complete axis configuration
+  const fullAxisConfig: any = {
     ...axis,
-    grid: styles.grid?.categoryLines ?? true,
+    // Grid settings
+    grid: gridEnabled,
     gridColor: '#E0E0E0',
     gridOpacity: 0.5,
   };
+
+  // Apply axis visibility
+  if (!axisConfig.show) {
+    fullAxisConfig.labels = false;
+    fullAxisConfig.ticks = false;
+    fullAxisConfig.domain = false;
+    return fullAxisConfig;
+  }
+
+  // Apply position
+  if (axisConfig.position) {
+    fullAxisConfig.orient = axisConfig.position;
+  }
+
+  // Apply label settings
+  if (axisConfig.labels) {
+    if (!axisConfig.labels.show) {
+      fullAxisConfig.labels = false;
+    } else {
+      fullAxisConfig.labels = {};
+
+      // Apply label rotation/alignment
+      if (axisConfig.labels.rotate !== undefined) {
+        fullAxisConfig.labelAngle = axisConfig.labels.rotate;
+      }
+
+      // Apply label truncation
+      if (axisConfig.labels.truncate !== undefined && axisConfig.labels.truncate > 0) {
+        fullAxisConfig.labelLimit = axisConfig.labels.truncate;
+      }
+
+      // Apply label filtering (this controls overlapping labels)
+      if (axisConfig.labels.filter !== undefined) {
+        fullAxisConfig.labelOverlap = axisConfig.labels.filter ? 'greedy' : false;
+      }
+    }
+  }
+
+  // Apply title settings
+  let titleText = '';
+  if (axisConfig?.title?.text && axisConfig.title.text.trim() !== '') {
+    // User has explicitly set a title
+    titleText = axisConfig.title.text;
+  } else {
+    // Use smart default based on data
+    if (axisType === 'category') {
+      if (dateColumns?.length) {
+        titleText = dateColumns[0].name;
+      } else if (categoricalColumns?.length) {
+        titleText = categoricalColumns[0].name;
+      } else {
+        titleText = 'Category';
+      }
+    } else {
+      // value axis
+      if (numericalColumns?.length) {
+        titleText = numericalColumns[0].name;
+      } else {
+        titleText = 'Metric';
+      }
+    }
+  }
+
+  if (titleText) {
+    fullAxisConfig.title = titleText;
+  }
+
+  return fullAxisConfig;
 };
 
 // Enhanced function with all new styling controls
@@ -175,96 +326,7 @@ const createVegaLineSpec = (
   const numCategories = categoricalColumns?.length || 0;
   const numDates = dateColumns?.length || 0;
 
-  // Apply complete default style options using the interface
-  const defaultStyles: LineChartStyleControls = {
-    addTooltip: true,
-    addLegend: true,
-    legendPosition: Positions.RIGHT,
-    addTimeMarker: false,
-    thresholdLine: {
-      color: '#E7664C',
-      show: false,
-      style: 'full',
-      value: 10,
-      width: 1,
-    },
-    grid: {
-      categoryLines: true,
-      valueLines: true,
-    },
-    categoryAxes: [
-      {
-        id: 'CategoryAxis-1',
-        type: 'category',
-        position: 'bottom',
-        show: true,
-        style: {},
-        scale: {
-          type: 'linear',
-        },
-        labels: {
-          show: true,
-          filter: true,
-          rotate: 0,
-          truncate: 100,
-        },
-        title: {},
-      },
-    ],
-    valueAxes: [
-      {
-        id: 'ValueAxis-1',
-        name: 'LeftAxis-1',
-        type: 'value',
-        position: 'left',
-        show: true,
-        style: {},
-        scale: {
-          type: 'linear',
-          mode: 'normal',
-          defaultYExtents: false,
-          setYExtents: false,
-        },
-        labels: {
-          show: true,
-          rotate: 0,
-          filter: false,
-          truncate: 100,
-        },
-        title: {
-          text: 'Count',
-        },
-      },
-    ],
-    seriesParams: [
-      {
-        show: true,
-        type: 'line',
-        mode: 'normal',
-        data: {
-          id: '1',
-          label: 'Count',
-        },
-        valueAxis: 'ValueAxis-1',
-        drawLinesBetweenPoints: true,
-        lineWidth: 2,
-        interpolate: 'linear',
-        showCircles: true,
-      },
-    ],
-    labels: {},
-    dataConfig: {
-      fieldConfigs: {},
-      maxDataPoints: 1000,
-      sampleSize: undefined,
-      missingValueHandling: 'ignore',
-    },
-    times: [],
-    type: 'line',
-    orderBucketsBySum: true,
-  };
-
-  const styles = { ...defaultStyles, ...styleOptions };
+  const styles = { ...styleOptions };
 
   let baseSpec: any;
   const layers: any[] = [];
@@ -277,13 +339,7 @@ const createVegaLineSpec = (
     const dateName = dateColumns![0].name;
 
     const mainLayer = {
-      mark: {
-        type: 'line',
-        point: true,
-        tooltip: styles.addTooltip,
-        strokeWidth: 2,
-        interpolate: 'monotone',
-      },
+      mark: buildMarkConfig(styles, 'line'),
       encoding: {
         x: {
           field: dateField,
@@ -293,13 +349,24 @@ const createVegaLineSpec = (
               title: dateName,
               labelAngle: -45,
             },
-            styles
+            styles,
+            'category',
+            numericalColumns,
+            categoricalColumns,
+            dateColumns
           ),
         },
         y: {
           field: metricField,
           type: 'quantitative',
-          axis: applyAxisStyling({ title: metricName }, styles),
+          axis: applyAxisStyling(
+            { title: metricName },
+            styles,
+            'value',
+            numericalColumns,
+            categoricalColumns,
+            dateColumns
+          ),
         },
       },
     };
@@ -307,13 +374,13 @@ const createVegaLineSpec = (
     layers.push(mainLayer);
 
     // Add threshold layer if enabled
-    const thresholdLayer = createThresholdLayer(styles, dateField, metricField);
+    const thresholdLayer = createThresholdLayer(styles);
     if (thresholdLayer) {
       layers.push(thresholdLayer);
     }
 
     // Add time marker layer if enabled
-    const timeMarkerLayer = createTimeMarkerLayer(styles, dateField);
+    const timeMarkerLayer = createTimeMarkerLayer(styles);
     if (timeMarkerLayer) {
       layers.push(timeMarkerLayer);
     }
@@ -336,11 +403,7 @@ const createVegaLineSpec = (
     const dateName = dateColumns![0].name;
 
     const barLayer = {
-      mark: {
-        type: 'bar',
-        opacity: 0.7,
-        tooltip: styles.addTooltip,
-      },
+      mark: buildMarkConfig(styles, 'bar'),
       encoding: {
         x: {
           field: dateField,
@@ -350,13 +413,24 @@ const createVegaLineSpec = (
               title: dateName,
               labelAngle: -45,
             },
-            styles
+            styles,
+            'category',
+            numericalColumns,
+            categoricalColumns,
+            dateColumns
           ),
         },
         y: {
           field: metric1Field,
           type: 'quantitative',
-          axis: applyAxisStyling({ title: metric1Name }, styles),
+          axis: applyAxisStyling(
+            { title: metric1Name },
+            styles,
+            'value',
+            numericalColumns,
+            categoricalColumns,
+            dateColumns
+          ),
         },
         color: {
           datum: metric1Name,
@@ -371,13 +445,7 @@ const createVegaLineSpec = (
     };
 
     const lineLayer = {
-      mark: {
-        type: 'line',
-        point: true,
-        tooltip: styles.addTooltip,
-        strokeWidth: 2,
-        interpolate: 'monotone',
-      },
+      mark: buildMarkConfig(styles, 'line'),
       encoding: {
         x: {
           field: dateField,
@@ -386,11 +454,14 @@ const createVegaLineSpec = (
         y: {
           field: metric2Field,
           type: 'quantitative',
-          axis: {
-            title: metric2Name,
-            orient: 'right',
-            grid: styles.grid?.categoryLines ?? true,
-          },
+          axis: applyAxisStyling(
+            {
+              title: metric2Name,
+              orient: 'right',
+            },
+            styles,
+            'value'
+          ),
           scale: { zero: false },
         },
         color: {
@@ -408,13 +479,13 @@ const createVegaLineSpec = (
     layers.push(barLayer, lineLayer);
 
     // Add threshold layer if enabled
-    const thresholdLayer = createThresholdLayer(styles, dateField, metric1Field);
+    const thresholdLayer = createThresholdLayer(styles);
     if (thresholdLayer) {
       layers.push(thresholdLayer);
     }
 
     // Add time marker layer if enabled
-    const timeMarkerLayer = createTimeMarkerLayer(styles, dateField);
+    const timeMarkerLayer = createTimeMarkerLayer(styles);
     if (timeMarkerLayer) {
       layers.push(timeMarkerLayer);
     }
@@ -440,13 +511,7 @@ const createVegaLineSpec = (
     const categoryName = categoricalColumns![0].name;
 
     const mainLayer = {
-      mark: {
-        type: 'line',
-        point: true,
-        tooltip: styles.addTooltip,
-        strokeWidth: 2,
-        interpolate: 'monotone',
-      },
+      mark: buildMarkConfig(styles, 'line'),
       encoding: {
         x: {
           field: dateField,
@@ -456,23 +521,35 @@ const createVegaLineSpec = (
               title: dateName,
               labelAngle: -45,
             },
-            styles
+            styles,
+            'category',
+            numericalColumns,
+            categoricalColumns,
+            dateColumns
           ),
         },
         y: {
           field: metricField,
           type: 'quantitative',
-          axis: applyAxisStyling({ title: metricName }, styles),
+          axis: applyAxisStyling(
+            { title: metricName },
+            styles,
+            'value',
+            numericalColumns,
+            categoricalColumns,
+            dateColumns
+          ),
         },
         color: {
           field: categoryField,
           type: 'nominal',
-          legend: styles.addLegend
-            ? {
-                title: categoryName,
-                orient: styles.legendPosition,
-              }
-            : null,
+          legend:
+            styles?.addLegend !== false
+              ? {
+                  title: categoryName,
+                  orient: styles?.legendPosition || 'right',
+                }
+              : null,
         },
       },
     };
@@ -480,13 +557,13 @@ const createVegaLineSpec = (
     layers.push(mainLayer);
 
     // Add threshold layer if enabled
-    const thresholdLayer = createThresholdLayer(styles, dateField, metricField);
+    const thresholdLayer = createThresholdLayer(styles);
     if (thresholdLayer) {
       layers.push(thresholdLayer);
     }
 
     // Add time marker layer if enabled
-    const timeMarkerLayer = createTimeMarkerLayer(styles, dateField);
+    const timeMarkerLayer = createTimeMarkerLayer(styles);
     if (timeMarkerLayer) {
       layers.push(timeMarkerLayer);
     }
@@ -510,6 +587,9 @@ const createVegaLineSpec = (
     const category1Name = categoricalColumns![0].name;
     const category2Name = categoricalColumns![1].name;
 
+    // Create a mark config for the faceted spec
+    const facetMarkConfig = buildMarkConfig(styles, 'line');
+
     baseSpec = {
       $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
       title: `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`,
@@ -525,13 +605,7 @@ const createVegaLineSpec = (
         height: 200,
         layer: [
           {
-            mark: {
-              type: 'line',
-              point: true,
-              tooltip: styles.addTooltip,
-              strokeWidth: 2,
-              interpolate: 'monotone',
-            },
+            mark: facetMarkConfig,
             encoding: {
               x: {
                 field: dateField,
@@ -541,28 +615,40 @@ const createVegaLineSpec = (
                     title: dateName,
                     labelAngle: -45,
                   },
-                  styles
+                  styles,
+                  'category',
+                  numericalColumns,
+                  categoricalColumns,
+                  dateColumns
                 ),
               },
               y: {
                 field: metricField,
                 type: 'quantitative',
-                axis: applyAxisStyling({ title: metricName }, styles),
+                axis: applyAxisStyling(
+                  { title: metricName },
+                  styles,
+                  'value',
+                  numericalColumns,
+                  categoricalColumns,
+                  dateColumns
+                ),
               },
               color: {
                 field: category1Field,
                 type: 'nominal',
-                legend: styles.addLegend
-                  ? {
-                      title: category1Name,
-                      orient: styles.legendPosition,
-                    }
-                  : null,
+                legend:
+                  styles?.addLegend !== false
+                    ? {
+                        title: category1Name,
+                        orient: styles?.legendPosition || 'right',
+                      }
+                    : null,
               },
             },
           },
           // Add threshold layer to each facet if enabled
-          ...(styles.thresholdLine?.show
+          ...(styles?.thresholdLine?.show
             ? [
                 {
                   mark: {
@@ -570,18 +656,24 @@ const createVegaLineSpec = (
                     color: styles.thresholdLine.color,
                     strokeWidth: styles.thresholdLine.width,
                     strokeDash: getStrokeDash(styles.thresholdLine.style),
+                    tooltip: styles?.addTooltip !== false,
                   },
                   encoding: {
                     y: {
                       datum: styles.thresholdLine.value,
                       type: 'quantitative',
                     },
+                    ...(styles?.addTooltip !== false && {
+                      tooltip: {
+                        value: `Threshold: ${styles.thresholdLine.value}`,
+                      },
+                    }),
                   },
                 },
               ]
             : []),
           // Add time marker to each facet if enabled
-          ...(styles.addTimeMarker
+          ...(styles?.addTimeMarker
             ? [
                 {
                   mark: {
@@ -589,12 +681,18 @@ const createVegaLineSpec = (
                     color: '#FF6B6B',
                     strokeWidth: 2,
                     strokeDash: [3, 3],
+                    tooltip: styles?.addTooltip !== false,
                   },
                   encoding: {
                     x: {
                       datum: { expr: 'now()' },
                       type: 'temporal',
                     },
+                    ...(styles?.addTooltip !== false && {
+                      tooltip: {
+                        value: 'Current Time',
+                      },
+                    }),
                   },
                 },
               ]

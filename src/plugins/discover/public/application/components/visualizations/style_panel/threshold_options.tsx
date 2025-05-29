@@ -13,6 +13,9 @@ import {
   EuiRange,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { SwitchOption } from '../../../../../../charts/public';
 import { LineChartStyleControls, ThresholdLine } from '../line/line_vis_config';
@@ -44,7 +47,6 @@ const lineStyleOptions = [
 ];
 
 export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: ThresholdOptionsProps) => {
-  console.log('ThresholdOptions', thresholdLine);
   const updateThresholdOption = (key: keyof ThresholdLine, value: any) => {
     const newThresholdLine = {
       ...thresholdLine,
@@ -54,7 +56,17 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
   };
 
   return (
-    <>
+    <EuiPanel paddingSize="s">
+      <EuiTitle size="xs">
+        <h4>
+          {i18n.translate('discover.vis.gridOptions.threshold', {
+            defaultMessage: 'Threshold Settings',
+          })}
+        </h4>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
       <SwitchOption
         label={i18n.translate('discover.stylePanel.threshold.show', {
           defaultMessage: 'Show threshold line',
@@ -126,6 +138,6 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
           </EuiFormRow>
         </>
       )}
-    </>
+    </EuiPanel>
   );
 };
