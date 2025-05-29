@@ -8,19 +8,6 @@ import { VisualizationType } from '../../../view_components/utils/use_visualizat
 import { Positions } from '../utils/collections';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import { toExpression } from './to_expression';
-import { DiscoverVisColumn } from '../types';
-
-// Enhanced field configuration for data controls
-export interface EnhancedFieldConfig {
-  customLabel?: string;
-  sortBy?: 'count' | 'alphabetical' | 'metric';
-  sortOrder?: 'asc' | 'desc';
-  maxCategories?: number;
-  showOther?: boolean;
-  showMissing?: boolean;
-  interval?: string; // for date fields
-  precision?: number; // for metric fields
-}
 
 // Threshold line configuration
 export interface ThresholdLine {
@@ -85,37 +72,6 @@ export interface ValueAxis {
   title: AxisTitle;
 }
 
-// Series parameter configuration
-export interface SeriesParam {
-  show: boolean;
-  type: 'line' | 'area' | 'histogram';
-  mode: 'normal' | 'stacked' | 'percentage' | 'wiggle' | 'silhouette';
-  data: {
-    id: string;
-    label: string;
-  };
-  valueAxis: string;
-  drawLinesBetweenPoints: boolean;
-  lineWidth: number;
-  interpolate:
-    | 'linear'
-    | 'cardinal'
-    | 'step-after'
-    | 'step-before'
-    | 'basis'
-    | 'bundle'
-    | 'monotone';
-  showCircles: boolean;
-}
-
-// Data configuration for field-level controls
-export interface DataConfig {
-  fieldConfigs: Record<string, EnhancedFieldConfig>;
-  maxDataPoints: number;
-  sampleSize?: number;
-  missingValueHandling: 'ignore' | 'zero' | 'interpolate';
-}
-
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
   // Basic controls
@@ -124,6 +80,12 @@ export interface LineChartStyleControls {
   legendPosition: Positions;
   addTimeMarker: boolean;
 
+  mode: string;
+  showLine: boolean;
+  lineMode: string;
+  lineWidth: number;
+  showDots: boolean;
+
   // Threshold and grid
   thresholdLine: ThresholdLine;
   grid: GridOptions;
@@ -131,20 +93,6 @@ export interface LineChartStyleControls {
   // Axes configuration
   categoryAxes: CategoryAxis[];
   valueAxes: ValueAxis[];
-
-  // Series configuration
-  seriesParams: SeriesParam[];
-
-  // Labels configuration
-  labels: Record<string, any>;
-
-  // Data configuration
-  dataConfig: DataConfig;
-
-  // Additional vis_lib compatibility
-  times: any[];
-  type: string;
-  orderBucketsBySum?: boolean;
 }
 
 const defaultLineChartStyles: LineChartStyleControls = {
@@ -153,6 +101,12 @@ const defaultLineChartStyles: LineChartStyleControls = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
+
+  mode: 'normal',
+  showLine: true,
+  lineMode: 'smooth',
+  lineWidth: 2,
+  showDots: true,
 
   // Threshold and grid
   thresholdLine: {
@@ -184,7 +138,9 @@ const defaultLineChartStyles: LineChartStyleControls = {
         rotate: 0,
         truncate: 100,
       },
-      title: {},
+      title: {
+        text: '',
+      },
     },
   ],
 
@@ -210,44 +166,10 @@ const defaultLineChartStyles: LineChartStyleControls = {
         truncate: 100,
       },
       title: {
-        text: 'Count',
+        text: '',
       },
     },
   ],
-
-  // Series parameters
-  seriesParams: [
-    {
-      show: true,
-      type: 'line',
-      mode: 'normal',
-      data: {
-        id: '1',
-        label: 'Count',
-      },
-      valueAxis: 'ValueAxis-1',
-      drawLinesBetweenPoints: true,
-      lineWidth: 2,
-      interpolate: 'linear',
-      showCircles: true,
-    },
-  ],
-
-  // Labels
-  labels: {},
-
-  // Data configuration
-  dataConfig: {
-    fieldConfigs: {},
-    maxDataPoints: 1000,
-    sampleSize: undefined,
-    missingValueHandling: 'ignore',
-  },
-
-  // Additional properties
-  times: [],
-  type: 'line',
-  orderBucketsBySum: true,
 };
 
 export const createLineConfig = (): VisualizationType => ({

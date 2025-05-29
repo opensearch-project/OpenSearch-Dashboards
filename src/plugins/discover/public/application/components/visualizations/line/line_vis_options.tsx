@@ -10,9 +10,8 @@ import { LineChartStyleControls } from './line_vis_config';
 import { BasicVisOptions } from '../style_panel/basic_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptions } from '../style_panel/grid_options';
-import { SeriesPanel } from '../style_panel/series_panel';
-import { DataConfigPanel } from '../style_panel/data_config_panel';
 import { DiscoverVisColumn } from '../types';
+import { AxesOptions } from '../style_panel/axes_options';
 
 export interface LineVisStyleControlsProps {
   styleOptions: Partial<LineChartStyleControls>;
@@ -49,6 +48,10 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
           addLegend={styleOptions.addLegend}
           legendPosition={styleOptions.legendPosition}
           addTimeMarker={styleOptions.addTimeMarker}
+          showLine={styleOptions.showLine}
+          lineMode={styleOptions.lineMode}
+          lineWidth={styleOptions.lineWidth}
+          showDots={styleOptions.showDots}
           onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
           onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
           onLegendPositionChange={(legendPosition) =>
@@ -57,20 +60,10 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
           onAddTimeMarkerChange={(addTimeMarker) =>
             updateStyleOption('addTimeMarker', addTimeMarker)
           }
-        />
-      ),
-    },
-    {
-      id: 'series',
-      name: i18n.translate('discover.vis.lineChart.tabs.series', {
-        defaultMessage: 'Series',
-      }),
-      content: (
-        <SeriesPanel
-          seriesParams={styleOptions.seriesParams}
-          valueAxes={styleOptions.valueAxes}
-          onSeriesParamsChange={(seriesParams) => updateStyleOption('seriesParams', seriesParams)}
-          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
+          onShowLineChange={(showLine) => updateStyleOption('showLine', showLine)}
+          onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
+          onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
+          onShowDotsChange={(showDots) => updateStyleOption('showDots', showDots)}
         />
       ),
     },
@@ -89,28 +82,26 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
     {
       id: 'grid',
       name: i18n.translate('discover.vis.lineChart.tabs.grid', {
-        defaultMessage: 'Grid & Axes',
+        defaultMessage: 'Grid',
       }),
       content: (
         <GridOptions
           grid={styleOptions.grid}
-          categoryAxes={styleOptions.categoryAxes}
-          valueAxes={styleOptions.valueAxes}
           onGridChange={(grid) => updateStyleOption('grid', grid)}
-          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
-          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
         />
       ),
     },
     {
-      id: 'data',
-      name: i18n.translate('discover.vis.lineChart.tabs.data', {
-        defaultMessage: 'Data',
+      id: 'axes',
+      name: i18n.translate('discover.vis.lineChart.tabs.axes', {
+        defaultMessage: 'Axes',
       }),
       content: (
-        <DataConfigPanel
-          dataConfig={styleOptions.dataConfig}
-          onDataConfigChange={(dataConfig) => updateStyleOption('dataConfig', dataConfig)}
+        <AxesOptions
+          categoryAxes={styleOptions.categoryAxes}
+          valueAxes={styleOptions.valueAxes}
+          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
+          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
           numericalColumns={numericalColumns}
           categoricalColumns={categoricalColumns}
           dateColumns={dateColumns}
