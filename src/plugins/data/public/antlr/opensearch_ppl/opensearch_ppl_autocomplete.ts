@@ -19,6 +19,27 @@ import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
 import { removePotentialBackticks } from '../shared/utils';
 
 // These are keywords that we do not want to show in autocomplete
+const operatorsToInclude = [
+  OpenSearchPPLParser.PIPE,
+  OpenSearchPPLParser.EQUAL,
+  OpenSearchPPLParser.COMMA,
+  OpenSearchPPLParser.PLUS,
+  OpenSearchPPLParser.MINUS,
+  OpenSearchPPLParser.EQUAL,
+  OpenSearchPPLParser.NOT_EQUAL,
+  OpenSearchPPLParser.LESS,
+  OpenSearchPPLParser.NOT_LESS,
+  OpenSearchPPLParser.GREATER,
+  OpenSearchPPLParser.NOT_GREATER,
+  OpenSearchPPLParser.OR,
+  OpenSearchPPLParser.AND,
+  OpenSearchPPLParser.XOR,
+  OpenSearchPPLParser.NOT,
+  OpenSearchPPLParser.LT_PRTHS,
+  OpenSearchPPLParser.RT_PRTHS,
+  OpenSearchPPLParser.IN,
+];
+
 export function getIgnoredTokens(): number[] {
   // const tokens = [OpenSearchPPLParser.SPACE, OpenSearchPPLParser.EOF];
   const tokens = [];
@@ -31,26 +52,7 @@ export function getIgnoredTokens(): number[] {
 
   const firstFunctionIndex = OpenSearchPPLParser.CASE;
   const lastFunctionIndex = OpenSearchPPLParser.CAST;
-  const operatorsToInclude = [
-    OpenSearchPPLParser.PIPE,
-    OpenSearchPPLParser.EQUAL,
-    OpenSearchPPLParser.COMMA,
-    OpenSearchPPLParser.PLUS,
-    OpenSearchPPLParser.MINUS,
-    OpenSearchPPLParser.EQUAL,
-    OpenSearchPPLParser.NOT_EQUAL,
-    OpenSearchPPLParser.LESS,
-    OpenSearchPPLParser.NOT_LESS,
-    OpenSearchPPLParser.GREATER,
-    OpenSearchPPLParser.NOT_GREATER,
-    OpenSearchPPLParser.OR,
-    OpenSearchPPLParser.AND,
-    OpenSearchPPLParser.XOR,
-    OpenSearchPPLParser.NOT,
-    OpenSearchPPLParser.LT_PRTHS,
-    OpenSearchPPLParser.RT_PRTHS,
-    OpenSearchPPLParser.IN,
-  ];
+
   for (let i = firstFunctionIndex; i <= lastFunctionIndex; i++) {
     if (!operatorsToInclude.includes(i)) {
       tokens.push(i);
@@ -78,7 +80,7 @@ const tokenDictionary: any = {
 };
 
 const rulesToVisit = new Set([
-  OpenSearchPPLParser.RULE_fieldExpression,
+  // OpenSearchPPLParser.RULE_fieldExpression,
   OpenSearchPPLParser.RULE_statsFunctionName,
   OpenSearchPPLParser.RULE_percentileAggFunction,
   OpenSearchPPLParser.RULE_takeAggFunction,
@@ -94,13 +96,15 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_decimalLiteral,
   OpenSearchPPLParser.RULE_keywordsCanBeId,
   OpenSearchPPLParser.RULE_renameClasue,
-  OpenSearchPPLParser.RULE_logicalExpression,
+  OpenSearchPPLParser.RULE_qualifiedName,
+  OpenSearchPPLParser.RULE_tableQualifiedName,
 ]);
 
 export function processVisitedRules(
   rules: c3.CandidatesCollection['rules'],
   cursorTokenIndex: number,
-  tokenStream: TokenStream
+  tokenStream: TokenStream,
+  query: string
 ): ProcessVisitedRulesResult<OpenSearchPplAutocompleteResult> {
   let suggestSourcesOrTables: OpenSearchPplAutocompleteResult['suggestSourcesOrTables'];
   let suggestAggregateFunctions = false;
@@ -117,19 +121,22 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchPPLParser.RULE_logicalExpression: {
-        if (!rule.ruleList.includes(OpenSearchPPLParser.RULE_pplCommands)) {
-          // if our rule's parents doesn't include pplCommands, it must come through the 'commands' rule. this means
-          // we'd want the preferred rule descendant of logicalExpression to be active, so we rerun the completion
-          // engine's parse without this preferred rule blocking those descendants
-          rerunWithoutRules.push(ruleId);
-        }
+        rerunWithoutRules.push(ruleId);
         break;
       }
       case OpenSearchPPLParser.RULE_statsFunctionName: {
         suggestAggregateFunctions = true;
         break;
       }
-      case OpenSearchPPLParser.RULE_fieldExpression: {
+      case OpenSearchPPLParser.RULE_qualifiedName: {
+        const lastToken = findLastNonSpaceOperatorToken(tokenStream, cursorTokenIndex);
+        if (lastToken && lastToken.type === tokenDictionary.SOURCE) {
+          break;
+        }
+        shouldSuggestColumns = true;
+        break;
+      }
+      /* case OpenSearchPPLParser.RULE_fieldExpression: {
         if (cursorTokenIndex < 2) break; // should not happen due to grammar
 
         // get the last token that appears other than whitespace
@@ -137,17 +144,20 @@ export function processVisitedRules(
           tokenStream.get(cursorTokenIndex - 1).type === tokenDictionary.SPACE
             ? tokenStream.get(cursorTokenIndex - 2)
             : tokenStream.get(cursorTokenIndex - 1);
+        
+          console.log(lastToken);
+          console.log(cursorTokenIndex);
 
         if (
-          ![tokenDictionary.ID, tokenDictionary.BACKTICK_QUOTE, tokenDictionary.DOT].includes(
+          ![tokenDictionary.ID, tokenDictionary.BACKTICK_QUOTE, tokenDictionary.DOT, tokenDictionary.SOURCE].includes(
             lastToken.type
           )
         ) {
           shouldSuggestColumns = true;
         }
         break;
-      }
-      case OpenSearchPPLParser.RULE_tableIdent: {
+      }*/
+      case OpenSearchPPLParser.RULE_tableQualifiedName: {
         suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
         break;
       }
@@ -175,6 +185,8 @@ export function processVisitedRules(
         // has its own rule, and relevance ....
         // todo: create span rule
         // todo: check if relevance expressions have incorrect behavior here
+        if (cursorTokenIndex < 2) break; // should not happen due to grammar
+
         let currentIndex = cursorTokenIndex - 1;
 
         // get the last token that appears other than whitespace
@@ -243,10 +255,29 @@ export function processVisitedRules(
   };
 }
 
+// Helper functions for implicit where expression detection
+function findLastNonSpaceOperatorToken(
+  tokenStream: TokenStream,
+  currentIndex: number
+): Token | null {
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const token = tokenStream.get(i);
+    if (
+      token.type !== tokenDictionary.SPACE &&
+      token.type !== tokenDictionary.EOF &&
+      !operatorsToInclude.includes(token.type)
+    ) {
+      return token;
+    }
+  }
+  return null;
+}
+
 export function getParseTree(
   parser: OpenSearchPPLParser,
   type?: 'from' | 'alter' | 'insert' | 'update' | 'select'
 ): ParseTree {
+  parser.buildParseTrees = true;
   if (!type) {
     return parser.root();
   }
@@ -272,7 +303,7 @@ export function enrichAutocompleteResult(
     shouldSuggestColumnAliases,
     shouldSuggestConstraints,
     ...suggestionsFromRules
-  } = processVisitedRules(rules, cursorTokenIndex, tokenStream);
+  } = processVisitedRules(rules, cursorTokenIndex, tokenStream, query);
   const result: OpenSearchPplAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
