@@ -73,13 +73,6 @@ const QueryPanel = () => {
   const onQueryChange = (value: string) => {
     onQuerystringChange(value, false);
 
-    //   if (!inputQueryRef.current) return;
-    //   console.log(inputQueryRef.current);
-
-    //   const currentLineCount = inputQueryRef.current.getModel()?.getLineCount();
-    //   if (lineCount === currentLineCount) return;
-    //   setLineCount(currentLineCount);
-
     // In dual editor mode, use query editor's line count if there is PPL
     if (isDualEditor && value.trim()) {
       const lines = value.split('\n').length;
@@ -153,6 +146,7 @@ const QueryPanel = () => {
 
   const handleQueryEdit = () => {
     setIsEditorReadOnly(false);
+    setIsPromptReadOnly(true);
   };
 
   const handleRunClick = () => {
