@@ -80,7 +80,6 @@ export interface LineChartStyleControls {
   legendPosition: Positions;
   addTimeMarker: boolean;
 
-  mode: string;
   showLine: boolean;
   lineMode: string;
   lineWidth: number;
@@ -102,7 +101,6 @@ const defaultLineChartStyles: LineChartStyleControls = {
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
 
-  mode: 'normal',
   showLine: true,
   lineMode: 'smooth',
   lineWidth: 2,

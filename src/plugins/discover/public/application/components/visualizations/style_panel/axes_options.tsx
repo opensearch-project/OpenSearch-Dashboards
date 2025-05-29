@@ -19,6 +19,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { GridOptions as GridConfig, CategoryAxis, ValueAxis } from '../line/line_vis_config';
 import { DiscoverVisColumn } from '../types';
+import { useDebouncedValue, useDebouncedNumericValue } from '../utils/use_debounced_value';
 
 interface AxesOptionsProps {
   categoryAxes: CategoryAxis[];
@@ -50,6 +51,45 @@ const getDefaultValueAxisTitle = (numericalColumns?: DiscoverVisColumn[]) => {
   return `Metric`;
 };
 
+// Component for a single axis title input with debouncing
+const DebouncedAxisTitle: React.FC<{
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+  label: string;
+}> = ({ value, placeholder, onChange, label }) => {
+  const [localValue, handleChange] = useDebouncedValue(value, onChange, 500);
+
+  return (
+    <EuiFormRow label={label}>
+      <EuiFieldText
+        value={localValue}
+        onChange={(e) => handleChange(e.target.value)}
+        placeholder={placeholder}
+      />
+    </EuiFormRow>
+  );
+};
+
+// Component for a truncate field with debouncing
+const DebouncedTruncateField: React.FC<{
+  value: number;
+  onChange: (value: number) => void;
+  label: string;
+}> = ({ value, onChange, label }) => {
+  const [localValue, handleChange] = useDebouncedNumericValue(value, onChange, {
+    delay: 500,
+    min: 1,
+    defaultValue: 100,
+  });
+
+  return (
+    <EuiFormRow label={label}>
+      <EuiFieldNumber value={localValue} onChange={(e) => handleChange(e.target.value)} />
+    </EuiFormRow>
+  );
+};
+
 export const AxesOptions: React.FC<AxesOptionsProps> = ({
   categoryAxes,
   valueAxes,
@@ -59,7 +99,6 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
   categoricalColumns,
   dateColumns,
 }) => {
-  console.log('AxesOptions', categoryAxes, valueAxes);
   const updateCategoryAxis = (index: number, updates: Partial<CategoryAxis>) => {
     const updatedAxes = [...categoryAxes];
     updatedAxes[index] = {
@@ -85,12 +124,11 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     return getDefaultCategoryAxisTitle(dateColumns, categoricalColumns);
   };
 
-  const getValueAxisDisplayTitle = (axis: ValueAxis, index: number) => {
-    console.log('getValueAxisDisplayTitle', axis, index);
+  const getValueAxisDisplayTitle = (axis: ValueAxis) => {
     if (axis.title?.text && axis.title.text.trim() !== '') {
       return axis.title.text;
     }
-    return getDefaultValueAxisTitle(numericalColumns, index);
+    return getDefaultValueAxisTitle(numericalColumns);
   };
 
   return (
@@ -120,21 +158,18 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
         <div key={axis.id}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow
+              <DebouncedAxisTitle
+                value={getCategoryAxisDisplayTitle(axis)}
+                placeholder={getDefaultCategoryAxisTitle(dateColumns, categoricalColumns)}
+                onChange={(text) =>
+                  updateCategoryAxis(index, {
+                    title: { ...axis.title, text },
+                  })
+                }
                 label={i18n.translate('discover.vis.gridOptions.axisTitle', {
                   defaultMessage: 'Axis title',
                 })}
-              >
-                <EuiFieldText
-                  value={getCategoryAxisDisplayTitle(axis)}
-                  onChange={(e) =>
-                    updateCategoryAxis(index, {
-                      title: { ...axis.title, text: e.target.value },
-                    })
-                  }
-                  placeholder={getCategoryAxisDisplayTitle(axis)}
-                />
-              </EuiFormRow>
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
@@ -234,26 +269,20 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                       </EuiFormRow>
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiFormRow
+                      <DebouncedTruncateField
+                        value={axis.labels.truncate ?? 100}
+                        onChange={(truncateValue) => {
+                          updateCategoryAxis(index, {
+                            labels: {
+                              ...axis.labels,
+                              truncate: truncateValue,
+                            },
+                          });
+                        }}
                         label={i18n.translate('discover.vis.gridOptions.labelTruncate', {
-                          defaultMessage: 'Truncate at',
+                          defaultMessage: 'Truncate',
                         })}
-                      >
-                        <EuiFieldNumber
-                          value={axis.labels.truncate ?? 100}
-                          onChange={(e) => {
-                            const truncateValue = parseInt(e.target.value, 10);
-                            updateCategoryAxis(index, {
-                              labels: {
-                                ...axis.labels,
-                                truncate: isNaN(truncateValue) ? 100 : truncateValue,
-                              },
-                            });
-                          }}
-                          min={10}
-                          max={200}
-                        />
-                      </EuiFormRow>
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
@@ -280,21 +309,18 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
         <div key={axis.id}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow
+              <DebouncedAxisTitle
+                value={getValueAxisDisplayTitle(axis)}
+                placeholder={getDefaultValueAxisTitle(numericalColumns)}
+                onChange={(text) =>
+                  updateValueAxis(index, {
+                    title: { ...axis.title, text },
+                  })
+                }
                 label={i18n.translate('discover.vis.gridOptions.axisTitle', {
                   defaultMessage: 'Axis title',
                 })}
-              >
-                <EuiFieldText
-                  value={getValueAxisDisplayTitle(axis, index)}
-                  onChange={(e) =>
-                    updateValueAxis(index, {
-                      title: { ...axis.title, text: e.target.value },
-                    })
-                  }
-                  placeholder={getDefaultValueAxisTitle(numericalColumns, index)}
-                />
-              </EuiFormRow>
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
@@ -395,26 +421,20 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                       </EuiFormRow>
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiFormRow
+                      <DebouncedTruncateField
+                        value={axis.labels.truncate ?? 100}
+                        onChange={(truncateValue) => {
+                          updateValueAxis(index, {
+                            labels: {
+                              ...axis.labels,
+                              truncate: truncateValue,
+                            },
+                          });
+                        }}
                         label={i18n.translate('discover.vis.gridOptions.labelTruncate', {
-                          defaultMessage: 'Truncate at',
+                          defaultMessage: 'Truncate',
                         })}
-                      >
-                        <EuiFieldNumber
-                          value={axis.labels.truncate ?? 100}
-                          onChange={(e) => {
-                            const truncateValue = parseInt(e.target.value, 10);
-                            updateValueAxis(index, {
-                              labels: {
-                                ...axis.labels,
-                                truncate: isNaN(truncateValue) ? 100 : truncateValue,
-                              },
-                            });
-                          }}
-                          min={10}
-                          max={200}
-                        />
-                      </EuiFormRow>
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
