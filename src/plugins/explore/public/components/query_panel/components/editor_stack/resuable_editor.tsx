@@ -139,14 +139,12 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
       className={`${editorType}EditorWrapper`}
       style={{
         position: 'relative',
-        height: 'auto',
       }}
     >
       <div
         className={`${editorType}Editor ${isReadOnly ? `${editorType}Editor--readonly` : ''}`}
         style={{
           borderBottom: editorIsFocused && !isReadOnly ? '1px solid #006BB4' : undefined,
-          height: 'auto',
         }}
         data-test-subj={`osd${editorType}Editor__multiLine`}
       >

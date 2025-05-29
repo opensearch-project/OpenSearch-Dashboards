@@ -91,7 +91,7 @@
           .promptEditor__editOverlay{
             position: absolute;
             right: 4px;
-            bottom: -12px;
+            bottom: -7px;
             z-index: 10;
             box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
 
@@ -148,10 +148,6 @@
               color: rgba(0, 255, 0, 0.1); /* Light green background */
             }
           }
-
-          // .monaco-editor .view-lines .view-line .mtk1 {
-          //   color: #00c853 !important;
-          // }
         
           .monaco-editor,
           .monaco-editor-background,
