@@ -13,7 +13,7 @@ import {
 } from 'opensearch-dashboards/public';
 
 import { fetchDirectQuerySyncInfo, DirectQuerySyncInfo } from './direct_query_sync_utils';
-import { EMR_STATES, intervalAsMinutes } from '../../../constants';
+import { asProgress, intervalAsMinutes, Progress } from '../../../constants';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
 import './direct_query_sync_banner.scss';
 
@@ -33,8 +33,14 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
   removeBanner,
 }) => {
   const [syncInfo, setSyncInfo] = useState<DirectQuerySyncInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState<Progress>({ in_progress: false });
 
-  const { loadStatus, startLoading } = useDirectQuery(http, notifications, syncInfo?.mdsId);
+  const { loadStatus: queryStatus, startLoading: startQuerying } = useDirectQuery(
+    http,
+    notifications,
+    syncInfo?.mdsId
+  );
 
   useEffect(() => {
     const loadSyncInfo = async () => {
@@ -53,14 +59,28 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
     };
 
     loadSyncInfo();
+    const interval = setInterval(loadSyncInfo, 10000);
+    return () => clearInterval(interval);
   }, [dashboardId, http, savedObjectsClient, removeBanner]);
 
-  // Refresh the window when loadStatus becomes 'success'
   useEffect(() => {
-    if (loadStatus === 'success') {
+    if (!syncInfo) {
+      // Status data  isn't loaded, nothing to do yet
+      return;
+    }
+
+    const nextProgress = asProgress(
+      syncInfo.indexState,
+      queryStatus,
+      Boolean(syncInfo.lastRefreshTime)
+    );
+    if (nextProgress.in_progress) {
+      setIsLoading(true);
+    } else if (isLoading) {
       window.location.reload();
     }
-  }, [loadStatus]);
+    setProgress(nextProgress);
+  }, [syncInfo, queryStatus, isLoading]);
 
   // Handle the "Sync Now" action
   const handleSynchronize = () => {
@@ -83,18 +103,16 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
       lang: 'sql' as const,
     };
 
-    startLoading(requestPayload);
+    startQuerying(requestPayload);
   };
 
   if (!syncInfo) {
     return null;
   }
 
-  const state = EMR_STATES.get(loadStatus)!;
-
   return (
-    <div className="directQuerySync__banner" data-test-subj="directQuerySyncBar">
-      {state.terminal ? (
+    <div className="direct-query-sync" data-test-subj="directQuerySyncBar">
+      {!progress.in_progress ? (
         <EuiText size="s">
           {i18n.translate('dataSourcesManagement.directQuerySync.dataScheduledToSync', {
             defaultMessage:
@@ -109,9 +127,8 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
                   )}`
                 : '--',
             },
-          })}
-
-          <EuiLink className="directQuerySync__link" onClick={handleSynchronize}>
+          })}{' '}
+          <EuiLink onClick={handleSynchronize}>
             {i18n.translate('dataSourcesManagement.directQuerySync.syncDataLink', {
               defaultMessage: 'Sync data',
             })}
@@ -119,13 +136,12 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
         </EuiText>
       ) : (
         <EuiCallOut size="s">
-          <EuiLoadingSpinner size="s" />
-
+          <EuiLoadingSpinner size="s" />{' '}
           {i18n.translate('dataSourcesManagement.directQuerySync.dataSyncInProgress', {
             defaultMessage:
               'Data sync is in progress ({progress}% complete). The dashboard will reload on completion.',
             values: {
-              progress: state.ord,
+              progress: progress.percentage,
             },
           })}
         </EuiCallOut>

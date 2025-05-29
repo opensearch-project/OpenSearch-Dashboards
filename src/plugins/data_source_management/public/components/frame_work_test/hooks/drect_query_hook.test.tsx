@@ -28,7 +28,6 @@ describe('useDirectQuery', () => {
   let stopLoadingMock: jest.Mock;
   let fetchMock: jest.Mock;
   let fetchWithJobIdMock: jest.Mock;
-  let usePollingMock: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -77,7 +76,11 @@ describe('useDirectQuery', () => {
     const { result } = renderHook(() => useDirectQuery(httpMock, notificationsMock));
 
     await act(async () => {
-      await result.current.startLoading({ datasource: 'test_source' });
+      await result.current.startLoading({
+        datasource: 'test_source',
+        query: 'SELECT 1',
+        lang: 'sql',
+      });
     });
 
     expect(fetchMock).toHaveBeenCalledWith({ datasource: 'test_source' }, undefined);
@@ -91,7 +94,11 @@ describe('useDirectQuery', () => {
     const { result } = renderHook(() => useDirectQuery(httpMock, notificationsMock));
 
     await act(async () => {
-      await result.current.startLoading({ datasource: 'test_source' });
+      await result.current.startLoading({
+        datasource: 'test_source',
+        query: 'SELECT 1',
+        lang: 'sql',
+      });
     });
 
     expect(result.current.loadStatus).toBe(DirectQueryLoadingStatus.FAILED);

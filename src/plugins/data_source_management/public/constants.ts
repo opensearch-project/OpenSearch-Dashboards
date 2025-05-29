@@ -32,20 +32,65 @@ export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const observabilityMetricsID = 'observability-metrics';
 
-// Module for handling EMR states for Dashboards Progress Bar. All of these except "initial" are
-// directly from the EMR job run states. "ord" is used to approximate progress (eyeballed relative
-// stage times), and "terminal" indicates whether a job is in progress at all.
-export const EMR_STATES = new Map<DirectQueryLoadingStatus, { ord: number; terminal: boolean }>([
-  [DirectQueryLoadingStatus.SUBMITTED, { ord: 0, terminal: false }],
-  [DirectQueryLoadingStatus.SCHEDULED, { ord: 30, terminal: false }],
-  [DirectQueryLoadingStatus.RUNNING, { ord: 70, terminal: false }],
-  [DirectQueryLoadingStatus.SUCCESS, { ord: 100, terminal: true }],
-  [DirectQueryLoadingStatus.FAILED, { ord: 100, terminal: true }],
-  [DirectQueryLoadingStatus.CANCELED, { ord: 100, terminal: true }],
-  [DirectQueryLoadingStatus.INITIAL, { ord: 100, terminal: true }],
-]);
+export const EXTERNAL_INDEX_STATE = {
+  CREATING: 'creating',
+  ACTIVE: 'active',
+  REFRESHING: 'refreshing',
+  RECOVERING: 'recovering',
+  CANCELLING: 'cancelling',
+};
 
-export const MAX_ORD = 100;
+export type Progress = { in_progress: true; percentage: number } | { in_progress: false };
+
+/**
+ * Given the current state of an external index, convert it to a `Progress` value. Since the
+ * "active" state doesn't distinguish between a fresh-activated or older activated index, we also
+ * need to know if the index has been refreshed before.
+ *
+ * @param state An index state, as defined by the Flint State Machine.
+ * @param queryStatus the Direct Query status for any running queries.
+ * @param hasLastRefresh Whether the index has been refreshed before.
+ * @returns A `Progress` value
+ */
+export const asProgress = (
+  state: string | null,
+  queryStatus: DirectQueryLoadingStatus,
+  hasLastRefresh: boolean
+): Progress => {
+  // Query loading status takes precedence if in a processing state, otherwise fallback to state
+  switch (queryStatus) {
+    case DirectQueryLoadingStatus.SUBMITTED:
+      return { in_progress: true, percentage: 0 };
+    case DirectQueryLoadingStatus.SCHEDULED:
+      return { in_progress: true, percentage: 25 };
+    case DirectQueryLoadingStatus.WAITING:
+      return { in_progress: true, percentage: 50 };
+    case DirectQueryLoadingStatus.RUNNING:
+      return { in_progress: true, percentage: 75 };
+  }
+
+  switch (state ? state.toLowerCase() : null) {
+    case EXTERNAL_INDEX_STATE.ACTIVE:
+      if (hasLastRefresh) {
+        return { in_progress: false };
+      } else {
+        // This is equivalent to the 'creating' state: the index was activated but the follow-up
+        // population refresh job hasn't kicked in.
+        return { in_progress: true, percentage: 30 };
+      }
+    case EXTERNAL_INDEX_STATE.CREATING:
+      return { in_progress: true, percentage: 30 };
+    case EXTERNAL_INDEX_STATE.REFRESHING:
+      return { in_progress: true, percentage: 60 };
+    case EXTERNAL_INDEX_STATE.RECOVERING:
+      return { in_progress: true, percentage: 60 };
+    case EXTERNAL_INDEX_STATE.CANCELLING:
+      return { in_progress: true, percentage: 90 };
+    default:
+      // Null state, or other error states
+      return { in_progress: false };
+  }
+};
 
 export function intervalAsMinutes(interval: number): string {
   const minutes = Math.floor(interval / 60000);
