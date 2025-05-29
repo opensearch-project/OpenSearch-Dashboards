@@ -37,7 +37,6 @@ import { createGetterSetter } from '../../../../../opensearch_dashboards_utils/p
 import { search } from '../../../../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
-import { UsageCollectionSetup } from '../../../../../usage_collection/public';
 
 let services: DiscoverServices | null = null;
 let uiActions: UiActionsStart;

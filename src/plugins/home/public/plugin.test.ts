@@ -110,5 +110,15 @@ describe('HomePublicPlugin', () => {
       });
       expect(coreMocks.application.register).toBeCalledTimes(2);
     });
+
+    test('wires up and call addNavLinksToGroup if new navigation is enabled and workspace not enabled', async () => {
+      const coreMocks = coreMock.createSetup();
+      coreMocks.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+      await new HomePublicPlugin(mockInitializerContext).setup(coreMocks, {
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        contentManagement: contentManagementPluginMocks.createSetupContract(),
+      });
+      expect(coreMocks.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(3);
+    });
   });
 });

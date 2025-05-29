@@ -22,7 +22,7 @@ import {
 } from '../../utils/state_management';
 import { IndexPatternField, opensearchFilters } from '../../../../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
-import { SortOrder } from '../../../saved_searches/types';
+import { SortOrder } from '../../../../../../saved_explore/types';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';

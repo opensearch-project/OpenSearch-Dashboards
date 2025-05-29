@@ -15,7 +15,8 @@ declare namespace Cypress {
     | 'visualization'
     | 'visualization-visbuilder'
     | 'augment-vis'
-    | 'search';
+    | 'search'
+    | 'explore';
 
   interface Chainable<Subject> {
     /**

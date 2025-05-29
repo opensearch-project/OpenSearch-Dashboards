@@ -38,7 +38,7 @@ export const registerServices = async (
 ) => {
   const [
     ,
-    { home, dashboard, visualizations, visAugmenter, discover, visBuilder },
+    { home, dashboard, explore, visualizations, visAugmenter, discover, visBuilder },
   ] = await getStartServices();
 
   if (home) {
@@ -78,6 +78,14 @@ export const registerServices = async (
       id: 'savedSearches',
       title: 'searches',
       service: discover.savedSearchLoader,
+    });
+  }
+
+  if (explore) {
+    registry.register({
+      id: 'savedExplore',
+      title: 'explore',
+      service: explore.savedExploreLoader,
     });
   }
 

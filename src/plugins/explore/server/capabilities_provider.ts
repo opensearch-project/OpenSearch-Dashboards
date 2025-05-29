@@ -29,7 +29,7 @@
  */
 
 export const capabilitiesProvider = () => ({
-  discover: {
+  explore: {
     show: true,
     createShortUrl: true,
     save: true,

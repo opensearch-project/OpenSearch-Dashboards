@@ -7,7 +7,7 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
-import { SavedSearch } from '../../../saved_searches';
+import { SavedExplore } from '../../../../../../saved_explore';
 import { Adapters } from '../../../../../../../../inspector/public';
 import { TopNavMenuData, TopNavMenuIconData } from '../../../../../../../../navigation/public';
 import { ISearchSource, unhashUrl } from '../../../opensearch_dashboards_services';
@@ -33,7 +33,7 @@ import { OpenSearchPanel } from './open_search_panel';
 const getLegacyTopNavLinks = (
   services: DiscoverViewServices,
   inspectorAdapters: Adapters,
-  savedSearch: SavedSearch,
+  savedSearch: SavedExplore,
   startSyncingQueryStateWithUrl: () => void,
   isEnhancementEnabled: boolean = false
 ) => {
@@ -214,7 +214,7 @@ const getLegacyTopNavLinks = (
     ariaLabel: i18n.translate('explore.discover.topNav.discoverShareButtonLabel', {
       defaultMessage: `Share search`,
     }),
-    run: async (anchorElement) => {
+    run: async (anchorElement: HTMLElement) => {
       const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
       const sharingData = await getSharingData({
         searchSource: savedSearch.searchSource,
@@ -282,7 +282,7 @@ const getLegacyTopNavLinks = (
 export const getTopNavLinks = (
   services: DiscoverViewServices,
   inspectorAdapters: Adapters,
-  savedSearch: SavedSearch,
+  savedExplore: SavedExplore,
   startSyncingQueryStateWithUrl: () => void,
   isEnhancementEnabled: boolean = false,
   useNoIndexPatternsTopNav: boolean = false
@@ -304,7 +304,7 @@ export const getTopNavLinks = (
     return getLegacyTopNavLinks(
       services,
       inspectorAdapters,
-      savedSearch,
+      savedExplore,
       startSyncingQueryStateWithUrl,
       isEnhancementEnabled
     );
@@ -376,9 +376,9 @@ export const getTopNavLinks = (
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         }: OnSaveProps): Promise<SaveResult | undefined> => {
-          const currentTitle = savedSearch.title;
-          savedSearch.title = newTitle;
-          savedSearch.copyOnSave = newCopyOnSave;
+          const currentTitle = savedExplore.title;
+          savedExplore.title = newTitle;
+          savedExplore.copyOnSave = newCopyOnSave;
           const saveOptions = {
             confirmOverwrite: false,
             isTitleDuplicateConfirmed,
@@ -387,19 +387,19 @@ export const getTopNavLinks = (
 
           const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
 
-          savedSearch.columns = state.columns;
-          savedSearch.sort = state.sort;
+          savedExplore.columns = state.columns;
+          savedExplore.sort = state.sort;
 
           try {
-            const id = await savedSearch.save(saveOptions);
+            const id = await savedExplore.save(saveOptions);
 
             // If the title is a duplicate, the id will be an empty string. Checking for this condition here
             if (id) {
               toastNotifications.addSuccess({
-                title: i18n.translate('explore.explore.discover.notifications.savedSearchTitle', {
-                  defaultMessage: `Search '{savedSearchTitle}' was saved`,
+                title: i18n.translate('explore.explore.discover.notifications.savedExploreTitle', {
+                  defaultMessage: `Search '{savedExploreTitle}' was saved`,
                   values: {
-                    savedSearchTitle: savedSearch.title,
+                    savedExploreTitle: savedExplore.title,
                   },
                 }),
                 'data-test-subj': 'saveSearchSuccess',
@@ -408,8 +408,8 @@ export const getTopNavLinks = (
               if (id !== state.savedSearch) {
                 history().push(`/view/${encodeURIComponent(id)}`);
               } else {
-                chrome.docTitle.change(savedSearch.lastSavedTitle);
-                chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedSearch.title }]);
+                chrome.docTitle.change(savedExplore.lastSavedTitle);
+                chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedExplore.title }]);
               }
 
               // set App state to clean
@@ -422,17 +422,17 @@ export const getTopNavLinks = (
             }
           } catch (error) {
             toastNotifications.addDanger({
-              title: i18n.translate('explore.explore.discover.notifications.notSavedSearchTitle', {
-                defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
+              title: i18n.translate('explore.explore.discover.notifications.notSavedExploreTitle', {
+                defaultMessage: `Search '{savedExploreTitle}' was not saved.`,
                 values: {
-                  savedSearchTitle: savedSearch.title,
+                  savedExploreTitle: savedExplore.title,
                 },
               }),
               text: (error as Error).message,
             });
 
             // Reset the original title
-            savedSearch.title = currentTitle;
+            savedExplore.title = currentTitle;
 
             return { error };
           }
@@ -442,8 +442,8 @@ export const getTopNavLinks = (
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => {}}
-            title={savedSearch.title}
-            showCopyOnSave={!!savedSearch.id}
+            title={savedExplore.title}
+            showCopyOnSave={!!savedExplore.id}
             objectType="search"
             description={i18n.translate(
               'explore.explore.discover.localMenu.saveSaveSearchDescription',
@@ -476,7 +476,7 @@ export const getTopNavLinks = (
       run: async (anchorElement) => {
         const state: DiscoverState = store!.getState().logs; // store is defined before the view is loaded
         const sharingData = await getSharingData({
-          searchSource: savedSearch.searchSource,
+          searchSource: savedExplore.searchSource,
           state,
           services,
         });
@@ -485,13 +485,13 @@ export const getTopNavLinks = (
           allowEmbed: false,
           allowShortUrl: capabilities.discover?.createShortUrl as boolean,
           shareableUrl: unhashUrl(window.location.href),
-          objectId: savedSearch.id,
+          objectId: savedExplore.id,
           objectType: 'search',
           sharingData: {
             ...sharingData,
-            title: savedSearch.title,
+            title: savedExplore.title,
           },
-          isDirty: !savedSearch.id || state.isDirty || false,
+          isDirty: !savedExplore.id || state.isDirty || false,
         });
       },
       iconType: 'share',
@@ -510,7 +510,7 @@ export const getTopNavLinks = (
     }),
     run() {
       inspector.open(inspectorAdapters, {
-        title: savedSearch?.title || undefined,
+        title: savedExplore?.title || undefined,
       });
     },
     iconType: 'inspect',

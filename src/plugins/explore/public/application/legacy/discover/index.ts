@@ -27,9 +27,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
-
 export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './embeddable';
-export { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from './url_generator';
 export { SearchData, ResultStatus } from './application/view_components';
+export { DiscoverSetup, ExploreStart } from './types';

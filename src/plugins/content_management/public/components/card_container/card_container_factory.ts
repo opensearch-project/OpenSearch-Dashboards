@@ -11,7 +11,8 @@ import {
   EmbeddableFactory,
   ContainerOutput,
 } from '../../../../embeddable/public';
-import { CARD_CONTAINER, CardContainer, CardContainerInput } from './card_container';
+import { CARD_CONTAINER, CardContainer } from './card_container';
+import { CardContainerInput } from './types';
 
 interface StartServices {
   embeddableServices: EmbeddableStart;
@@ -26,6 +27,10 @@ export class CardContainerFactoryDefinition
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
+    return false;
+  }
+
+  public canCreateNew() {
     return false;
   }
 

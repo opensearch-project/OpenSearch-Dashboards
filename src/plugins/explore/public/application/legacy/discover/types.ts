@@ -44,8 +44,8 @@ export interface DiscoverSetup {
   };
 }
 
-export interface DiscoverStart {
-  savedSearchLoader: SavedObjectLoader;
+export interface ExploreStart {
+  savedExploreLoader: SavedObjectLoader;
 
   /**
    * `share` plugin URL generator for Discover app. Use it to generate links into
@@ -63,7 +63,7 @@ export interface DiscoverStart {
    * });
    * ```
    */
-  readonly urlGenerator: undefined | UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
+  readonly urlGenerator: undefined | UrlGeneratorContract<'EXPLORE_APP_URL_GENERATOR'>;
 }
 
 /**

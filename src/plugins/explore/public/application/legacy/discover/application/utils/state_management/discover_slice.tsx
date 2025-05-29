@@ -11,10 +11,9 @@ import { DiscoverServices } from '../../../build_services';
 import { DefaultViewState } from '../../../../data_explorer';
 import { buildColumns } from '../columns';
 import * as utils from './common';
-import { SortOrder } from '../../../saved_searches/types';
+import { SortOrder } from '../../../../../../saved_explore/types';
 import {
   DEFAULT_COLUMNS_SETTING,
-  PLUGIN_ID,
   QUERY_ENHANCEMENT_ENABLED_SETTING,
 } from '../../../../../../../common/legacy/discover';
 
@@ -58,12 +57,17 @@ export interface DiscoverState {
      */
     lineCount?: number;
   };
+  /**
+   * count of the number of times saved explore has loaded. This is a temporary solution to make discover work in explore
+   */
+  saveExploreLoadCount: number;
 }
 
 const initialState: DiscoverState = {
   columns: ['_source'],
   sort: [],
   isDirty: false,
+  saveExploreLoadCount: 0,
 };
 
 export const getPreloadedState = async ({
@@ -180,6 +184,12 @@ export const discoverSlice = createSlice({
         ...state,
         savedSearch: action.payload,
         isDirty: false,
+      };
+    },
+    incrementSaveExploreLoadCount(state) {
+      return {
+        ...state,
+        saveExploreLoadCount: state.saveExploreLoadCount + 1,
       };
     },
     setMetadata(state, action: PayloadAction<Partial<DiscoverState['metadata']>>) {

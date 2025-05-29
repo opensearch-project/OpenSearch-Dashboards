@@ -10,7 +10,7 @@ import {
   AggConfigs,
 } from '../../../../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
-import { SortOrder } from '../../../saved_searches/types';
+import { SortOrder } from '../../../../../../saved_explore/types';
 import { getSortForSearchSource } from './get_sort_for_search_source';
 import {
   SORT_DEFAULT_ORDER_SETTING,

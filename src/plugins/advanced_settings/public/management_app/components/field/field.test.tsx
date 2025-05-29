@@ -48,7 +48,7 @@ const defaults = {
   category: ['category'],
 };
 
-const exampleValues = {
+const exampleValues: Record<string, unknown> = {
   array: ['example_value'],
   boolean: false,
   image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=',
@@ -71,6 +71,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: ['default_value'],
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   boolean: {
@@ -83,6 +84,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: true,
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   image: {
@@ -95,6 +97,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: null,
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     validation: {
       maxSize: {
         length: 1000,
@@ -113,6 +116,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: '{}',
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   markdown: {
@@ -125,6 +129,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: '',
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   number: {
@@ -137,6 +142,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: 5,
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   select: {
@@ -148,6 +154,7 @@ const settings: Record<string, FieldSetting> = {
     value: undefined,
     defVal: 'orange',
     isCustom: false,
+    isPermissionControlled: false,
     isOverridden: false,
     options: ['apple', 'orange', 'banana'],
     optionLabels: {
@@ -167,6 +174,7 @@ const settings: Record<string, FieldSetting> = {
     defVal: null,
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
   stringWithValidation: {
@@ -183,10 +191,11 @@ const settings: Record<string, FieldSetting> = {
     defVal: 'foo-default',
     isCustom: false,
     isOverridden: false,
+    isPermissionControlled: false,
     ...defaults,
   },
 };
-const userValues = {
+const userValues: Record<string, unknown> = {
   array: ['user', 'value'],
   boolean: false,
   image: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
@@ -198,7 +207,7 @@ const userValues = {
   stringWithValidation: 'fooUserValue',
 };
 
-const invalidUserValues = {
+const invalidUserValues: Record<string, unknown> = {
   stringWithValidation: 'invalidUserValue',
 };
 
@@ -238,9 +247,26 @@ describe('Field', () => {
           <Field
             setting={{
               ...setting,
-              // @ts-ignore
               value: userValues[type],
               isOverridden: true,
+            }}
+            handleChange={handleChange}
+            enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
+          />
+        );
+
+        expect(component).toMatchSnapshot();
+      });
+
+      it('should render as read only with help text if permission controlled', async () => {
+        const component = shallowWithI18nProvider(
+          <Field
+            setting={{
+              ...setting,
+              value: userValues[type],
+              isPermissionControlled: true,
             }}
             handleChange={handleChange}
             enableSaving={true}
@@ -270,7 +296,6 @@ describe('Field', () => {
           <Field
             setting={{
               ...setting,
-              // @ts-ignore
               value: userValues[type],
             }}
             handleChange={handleChange}
@@ -310,7 +335,6 @@ describe('Field', () => {
             toasts={notificationServiceMock.createStartContract().toasts}
             dockLinks={docLinksServiceMock.createStartContract().links}
             unsavedChanges={{
-              // @ts-ignore
               value: exampleValues[setting.type],
             }}
           />
@@ -334,17 +358,15 @@ describe('Field', () => {
           />
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
-        // @ts-ignore
         const values = select.find('option').map((option) => option.prop('value'));
         expect(values).toEqual(['apple', 'orange', 'banana']);
-        // @ts-ignore
         const labels = select.find('option').map((option) => option.text());
         expect(labels).toEqual(['Apple', 'Orange', 'banana']);
       });
     }
 
     const setup = () => {
-      const Wrapper = (props: Record<string, any>) => (
+      const Wrapper = (props: Record<string, unknown>) => (
         <I18nProvider>
           <Field
             setting={setting}
@@ -448,12 +470,10 @@ describe('Field', () => {
     } else {
       describe(`for changing ${type} setting`, () => {
         const { wrapper, component } = setup();
-        // @ts-ignore
         const userValue = userValues[type];
-        const fieldUserValue = type === 'array' ? userValue.join(', ') : userValue;
+        const fieldUserValue = type === 'array' ? (userValue as unknown[]).join(', ') : userValue;
 
         if (setting.validation) {
-          // @ts-ignore
           const invalidUserValue = invalidUserValues[type];
           it('should display an error when validation fails', async () => {
             await (component.instance() as Field).onFieldChange(invalidUserValue);

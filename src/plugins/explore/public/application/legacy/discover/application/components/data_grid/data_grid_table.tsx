@@ -9,7 +9,7 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { buildColumns } from '../../utils/columns';
 import { DefaultDiscoverTable } from '../default_discover_table/default_discover_table';
-import { SortOrder } from '../../../saved_searches/types';
+import { SortOrder } from '../../../../../../saved_explore/types';
 
 export interface DataGridTableProps {
   columns: string[];

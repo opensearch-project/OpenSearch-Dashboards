@@ -41,7 +41,10 @@ export interface ChromeRegistrationNavLink {
   parentNavLinkId?: string;
 
   /**
-   * If the nav link should be shown in 'all' nav group
+   * @deprecated
+   * If the nav link should be shown in 'all' nav group, previously 'all' use case is a derived use case
+   * so we use this property to decide if the feature should be shown in `all` use case. Going forward we should
+   * use addNavLinksToGroup to keep the interfaces consistent.
    */
   showInAllNavGroup?: boolean;
 }
@@ -134,17 +137,30 @@ export class ChromeNavGroupService {
     navGroupsMap: Record<string, NavGroupItemInMap>,
     navLinks: Array<Readonly<ChromeNavLink>>
   ) {
+    const dedupNavLinks = (
+      navLinkWaitedToAppend: ChromeRegistrationNavLink[],
+      alreadyAppendedNavLinks: ChromeRegistrationNavLink[]
+    ) => {
+      return navLinkWaitedToAppend.filter((navLink) => {
+        return !alreadyAppendedNavLinks.find(
+          (alreadyAppendedNavLink) => alreadyAppendedNavLink.id === navLink.id
+        );
+      });
+    };
+
     // Note: we need to use a new pointer when `assign navGroupsMap[ALL_USE_CASE_ID]?.navLinks`
     // because we will mutate the array directly in the following code.
     const navLinksResult: ChromeRegistrationNavLink[] = [
       ...(navGroupsMap[ALL_USE_CASE_ID]?.navLinks || []),
     ];
 
+    const linksAddedIntoAllNavGroup = [...navGroupsMap[ALL_USE_CASE_ID].navLinks];
+
     // Append all the links that do not have use case info to keep backward compatible
     const linkIdsWithNavGroupInfo = Object.values(navGroupsMap).reduce((accumulator, navGroup) => {
       // Nav groups without type will be regarded as use case,
       // we should transform use cases to a category and append links with `showInAllNavGroup: true` under the category
-      if (!navGroup.type) {
+      if (!navGroup.type && navGroup.id !== ALL_USE_CASE_ID) {
         // Append use case section into left navigation
         const categoryInfo = {
           id: navGroup.id,
@@ -160,7 +176,11 @@ export class ChromeNavGroupService {
         const linksForAllUseCaseWithinNavGroup: ChromeRegistrationNavLink[] = [];
 
         fulfilledLinksOfNavGroup.forEach((navLink) => {
-          if (!navLink.showInAllNavGroup) {
+          if (navLink.showInAllNavGroup) {
+            linksAddedIntoAllNavGroup.push(navLink);
+          }
+
+          if (!linksAddedIntoAllNavGroup.find((link) => link.id === navLink.id)) {
             return;
           }
 
@@ -170,7 +190,7 @@ export class ChromeNavGroupService {
           });
         });
 
-        navLinksResult.push(...linksForAllUseCaseWithinNavGroup);
+        navLinksResult.push(...dedupNavLinks(linksForAllUseCaseWithinNavGroup, navLinksResult));
 
         if (!linksForAllUseCaseWithinNavGroup.length) {
           /**

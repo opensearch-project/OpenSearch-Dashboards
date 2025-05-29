@@ -43,6 +43,7 @@ export interface FieldSetting {
   category: string[];
   ariaName: string;
   isOverridden: boolean;
+  isPermissionControlled: boolean;
   defVal: unknown;
   isCustom: boolean;
   validation?: StringValidation | ImageValidation;
