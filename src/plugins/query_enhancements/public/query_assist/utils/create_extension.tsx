@@ -23,7 +23,7 @@ import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { QueryAssistContext, QueryAssistState } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
 import { isPPLSupportedType } from './language_support';
-import { ENABLE_DASHBOARD_ASSISTANT_FEATURE } from './constant';
+import { ENABLE_AI_FEATURES } from './constant';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -108,7 +108,7 @@ export const createQueryAssistExtension = (
 
   const assistantEnabled$ = new BehaviorSubject<boolean>(true);
   core.getStartServices().then(([coreStart, depsStart]) => {
-    const enabled = coreStart.uiSettings.get(ENABLE_DASHBOARD_ASSISTANT_FEATURE);
+    const enabled = coreStart.uiSettings.get(ENABLE_AI_FEATURES);
     assistantEnabled$.next(enabled);
   });
 

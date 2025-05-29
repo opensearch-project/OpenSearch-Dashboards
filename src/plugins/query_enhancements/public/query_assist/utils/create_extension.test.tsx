@@ -68,7 +68,7 @@ describe('CreateExtension', () => {
         uiSettings: {
           ...uiSettingsServiceMock.createStartContract(),
           get: jest.fn().mockImplementation((key) => {
-            if (key === 'enableDashboardAssistantFeature') {
+            if (key === 'enableAIFeatures') {
               return true;
             }
           }),

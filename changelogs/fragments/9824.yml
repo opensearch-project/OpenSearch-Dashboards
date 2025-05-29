@@ -1,2 +1,2 @@
 feat:
-- Add a permission controlled admin UI setting for dashboard assistant features ([#9824](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9824))
+  - Add a permission controlled admin UI setting for AI features in OSD ([#9824](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9824))
