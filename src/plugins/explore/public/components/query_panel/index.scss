@@ -50,9 +50,12 @@
       font-family: 'Roboto Mono';
 
       .promptEditorWrapper{
+        position: 'relative';
+
         .promptEditor {
           border: 1px solid #D6D9DD;
           border-radius: 1px;
+
             .monaco-editor .view-overlays .current-line {
               border: none;
             }
@@ -113,89 +116,90 @@
       } 
 
       .queryEditorWrapper{
-      .queryEditor {
-        border: $euiBorderThin;
-        border-top: 0px;
-        font-size: 13px !important;
-        border-radius: 1px;
-        position: relative;
+         position: 'relative';
 
-      
-        .monaco-editor {
-          border-radius: $euiSizeXS $euiSizeXS 0 0;
-          font-size: 13px;
-      
-          .margin {
-            border-radius: $euiSizeXS 0 0 0;
-            background-color: $euiFormBackgroundColor;
-            padding: 0 $euiSizeXS;
-          }
-      
-          .monaco-scrollable-element {
-            border-radius: 0 $euiSizeXS 0 0;
+        .queryEditor {
+          border: $euiBorderThin;
+          border-top: 0px;
+          font-size: 13px !important;
+          border-radius: 1px;
+          position: relative;
+
+        
+          .monaco-editor {
+            border-radius: $euiSizeXS $euiSizeXS 0 0;
+            font-size: 13px;
+        
+            .margin {
+              border-radius: $euiSizeXS 0 0 0;
+              background-color: $euiFormBackgroundColor;
+              padding: 0 $euiSizeXS;
+            }
+        
+            .monaco-scrollable-element {
+              border-radius: 0 $euiSizeXS 0 0;
+            }
+
+            .view-lines{
+              font-size: 13px;
+            }
+
+            .comment-line span {
+              color: rgba(0, 255, 0, 0.1); /* Light green background */
+            }
           }
 
-          .view-lines{
+          // .monaco-editor .view-lines .view-line .mtk1 {
+          //   color: #00c853 !important;
+          // }
+        
+          .monaco-editor,
+          .monaco-editor-background,
+          .monaco-editor .inputarea.ime-input,
+          .monaco-editor .decorationsOverviewRuler {
+            background-color: $euiColorEmptyShade;
             font-size: 13px;
           }
 
-          .comment-line span {
-            color: rgba(0, 255, 0, 0.1); /* Light green background */
-          }
-        }
+          &.queryEditor--readonly {
+            .monaco-editor,
+            .react-monaco-editor-container
+            {
+              background-color: #D6D9DD !important;
+              opacity: 0.5;
+              pointer-events: none;
+            }
+            .monaco-editor .cursor {
+              display: none !important;
+            }
 
-        // .monaco-editor .view-lines .view-line .mtk1 {
-        //   color: #00c853 !important;
-        // }
-      
-        .monaco-editor,
-        .monaco-editor-background,
-        .monaco-editor .inputarea.ime-input,
-        .monaco-editor .decorationsOverviewRuler {
-          background-color: $euiColorEmptyShade;
-          font-size: 13px;
-        }
+            .queryEditor__editOverlay{
+              position: absolute;
+              right: 4px;
+              top: -12px;
+              z-index: 10;
+              box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+        
+                .edit_toolbar{
+                  border-radius: 24px;
+                  border: 1px solid  #A8ADB3;
+                  background:#FCFEFF;
+                  display: flex;
+                  cursor: pointer;
+                  height: 24px;
+                  padding: 4px 8px;
+                  align-items: center;
+                  width: fit-content;
+                  font-weight: 400;
+                  line-height: 18px;
+                  font-size: 12px;
+                  color: #676E75;
+                }
+            }
 
-        &.queryEditor--readonly {
-          .monaco-editor,
-          .react-monaco-editor-container
-          {
-            background-color: #D6D9DD !important;
-            opacity: 0.5;
-            pointer-events: none;
           }
-          .monaco-editor .cursor {
-            display: none !important;
-          }
-
-          .queryEditor__editOverlay{
-            position: absolute;
-            right: 4px;
-            top: -12px;
-            z-index: 10;
-            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-      
-              .edit_toolbar{
-                border-radius: 24px;
-                border: 1px solid  #A8ADB3;
-                background:#FCFEFF;
-                display: flex;
-                cursor: pointer;
-                height: 24px;
-                padding: 4px 8px;
-                align-items: center;
-                width: fit-content;
-                font-weight: 400;
-                line-height: 18px;
-                font-size: 12px;
-                color: #676E75;
-              }
-          }
-
         }
       }
-    }
-
     }
 
     .recentQuery__table {
