@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { SelectOption, SwitchOption } from '../../../../../../charts/public';
 import { getPositions, Positions } from '../utils/collections';
+import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 
 interface BasicVisOptionsProps {
   addTooltip: boolean;
@@ -61,6 +62,13 @@ export const BasicVisOptions = ({
   // Could import and reuse { getConfigCollections } from '../../../../../vis_type_vislib/public';
   // That requires adding vis_type_vislib as a dependency to discover, and somehow that throw errors
   const legendPositions = getPositions();
+
+  // Use debounced value for line width
+  const [localLineWidth, handleLineWidthChange] = useDebouncedNumericValue(
+    lineWidth,
+    onLineWidthChange,
+    { min: 1, max: 10, defaultValue: 2 }
+  );
 
   const lineModeOptions = [
     { value: 'straight', text: 'Straight' },
@@ -114,11 +122,8 @@ export const BasicVisOptions = ({
             })}
           >
             <EuiFieldNumber
-              value={lineWidth}
-              onChange={(e) => {
-                const value = parseInt(e.target.value, 10);
-                onLineWidthChange(isNaN(value) ? 2 : value);
-              }}
+              value={localLineWidth}
+              onChange={(e) => handleLineWidthChange(e.target.value)}
               min={1}
               max={10}
               step={1}
