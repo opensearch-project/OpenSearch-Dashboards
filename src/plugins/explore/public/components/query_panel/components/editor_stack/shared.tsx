@@ -13,7 +13,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
         languageId: 'ppl',
         options: {
           minimap: { enabled: false },
-          // automaticLayout: true,
+          automaticLayout: true,
           scrollBeyondLastLine: false,
           fontSize: 12,
           lineHeight: 20,
@@ -24,7 +24,13 @@ export const getEditorConfig = (languageType: LanguageType) => {
           wrappingIndent: 'same' as const,
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 1,
-
+          // scrollbar: {
+          //   vertical: 'visible' as const,
+          //   horizontalScrollbarSize: 1,
+          // },
+          // overviewRulerLanes: 0,
+          // hideCursorInOverviewRuler: false,
+          cursorStyle: 'line',
           suggest: {
             snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
             filterGraceful: false, // Don't filter suggestions
@@ -63,7 +69,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
             top: 7,
             bottom: 7,
           },
-          // automaticLayout: true,
+          automaticLayout: true,
           scrollBeyondLastLine: false,
           wrappingIndent: 'indent' as const, // No indent since wrapping is off
           glyphMargin: false,
