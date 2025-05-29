@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { cos_sim, pipeline, env } from '@huggingface/transformers';
 import {
   IRouter,
   Logger,
@@ -22,7 +23,6 @@ import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
-import { cos_sim, pipeline } from '@huggingface/transformers';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -377,9 +377,11 @@ export function registerRoutes({
 
         // Load the model only once and reuse it later
         if (!semanticExtractor) {
+          env.allowRemoteModels = false;
+          env.localModelPath = 'src/plugins/workspace/public/models';
           console.log('Model not yet loaded. Initializing pipeline...');
           const startTime = performance.now();
-          semanticExtractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+          semanticExtractor = await pipeline('feature-extraction', 'Xenova/all_mini_lm_l6_v2');
           const endTime = performance.now();
           const loadingTimeMs = endTime - startTime;
 
