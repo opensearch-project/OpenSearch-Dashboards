@@ -1,14 +1,186 @@
-/*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
+// /*
+//  * Copyright OpenSearch Contributors
+//  * SPDX-License-Identifier: Apache-2.0
+//  */
 
-import React, { useCallback, useRef, useState } from 'react';
-import { monaco } from '@osd/monaco';
-import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
+// import React, { useCallback, useRef, useState } from 'react';
+// import { monaco } from '@osd/monaco';
+// import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
+// import { getEditorConfig, LanguageType } from './shared';
+// import { EuiIcon } from '@elastic/eui';
+// import { EditOrClear } from './edit_or_clear';
+
+// interface PromptEditorProps {
+//   languageType: LanguageType;
+//   prompt: string;
+//   onChange: (value: string) => void;
+//   handlePromptRun: (queryString?: string) => void;
+//   isPromptReadOnly: boolean;
+//   handlePromptEdit: () => void;
+//   handleClearEditor: () => void;
+// }
+
+// const PromptEditor: React.FC<PromptEditorProps> = ({
+//   languageType,
+//   onChange,
+//   handlePromptRun,
+//   prompt,
+//   isPromptReadOnly,
+//   handlePromptEdit,
+//   handleClearEditor,
+// }) => {
+//   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+//   const editorConfig = getEditorConfig(languageType);
+//   const langText = languageType !== 'nl' ? 'query' : 'prompt';
+//   const [editorIsFocused, setEditorIsFocused] = useState(false);
+//   const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
+
+//   const handleEditClick = () => {
+//     handlePromptEdit();
+//     editorRef.current?.updateOptions({ readOnly: false });
+//     editorRef.current?.focus();
+//   };
+
+//   const handleEditorDidMount = useCallback(
+//     (editor: monaco.editor.IStandaloneCodeEditor) => {
+//       editorRef.current = editor;
+
+//       editor.onDidFocusEditorText(() => {
+//         setEditorIsFocused(true);
+//       });
+
+//       editor.onDidBlurEditorText(() => {
+//         setEditorIsFocused(false);
+//       });
+//       // Set up Enter key handling
+//       editor.addAction({
+//         id: 'run-prompt-on-enter',
+//         label: 'Run Prompt on Enter',
+//         keybindings: [monaco.KeyCode.Enter],
+//         contextMenuGroupId: 'navigation',
+//         contextMenuOrder: 1.5,
+//         run: () => {
+//           const promptValue = editor.getValue();
+//           handlePromptRun(promptValue);
+//           handlePromptEdit();
+//         },
+//       });
+
+//       editor.addAction({
+//         id: 'insert-new-line-prompt',
+//         label: 'Insert New Line Prompt',
+//         keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+//         run: (ed) => {
+//           if (ed.hasTextFocus()) {
+//             const currentPosition = ed.getPosition();
+//             if (currentPosition) {
+//               ed.executeEdits('', [
+//                 {
+//                   range: new monaco.Range(
+//                     currentPosition.lineNumber,
+//                     currentPosition.column,
+//                     currentPosition.lineNumber,
+//                     currentPosition.column
+//                   ),
+//                   text: '\n',
+//                   forceMoveMarkers: true,
+//                 },
+//               ]);
+//               ed.setPosition({
+//                 lineNumber: currentPosition.lineNumber + 1,
+//                 column: 1,
+//               });
+//             }
+//           }
+//         },
+//       });
+
+//       editor.onDidContentSizeChange(() => {
+//         const contentHeight = editor.getContentHeight();
+//         editor.layout({ width: editor.getLayoutInfo().width, height: contentHeight });
+//       });
+
+//       const focusDisposable = editor.onDidFocusEditorText(() => {
+//         if (blurTimeoutRef.current) {
+//           clearTimeout(blurTimeoutRef.current);
+//         }
+//         setEditorIsFocused(true);
+//       });
+
+//       const blurDisposable = editor.onDidBlurEditorText(() => {
+//         blurTimeoutRef.current = setTimeout(() => {
+//           setEditorIsFocused(false);
+//         }, 300);
+//       });
+
+//       return () => {
+//         focusDisposable.dispose();
+//         blurDisposable.dispose();
+//         if (blurTimeoutRef.current) {
+//           clearTimeout(blurTimeoutRef.current);
+//         }
+//       };
+//     },
+//     [handlePromptRun, languageType, handlePromptEdit]
+//   );
+
+//   return (
+//     <div className={`${langText}EditorWrapper`} style={{ position: 'relative' }}>
+//       <div
+//         className={`${langText}Editor ${isPromptReadOnly ? `${langText}Editor--readonly` : ''}`}
+//         style={editorIsFocused && !isPromptReadOnly ? { borderBottom: '1px solid #006BB4' } : {}}
+//         data-test-subj="osdPromptEditor__multiLine"
+//       >
+//         <CodeEditor
+//           languageId={editorConfig.languageId}
+//           value={prompt}
+//           onChange={onChange}
+//           editorDidMount={handleEditorDidMount}
+//           options={editorConfig.options}
+//           languageConfiguration={editorConfig.languageConfiguration}
+//           triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
+//         />
+
+//         {!prompt && !editorIsFocused && !isPromptReadOnly && (
+//           <div
+//             className="monacoPlaceholder"
+//             style={{
+//               position: 'absolute',
+//               top: 10,
+//               left: 10,
+//               color: '#676E75',
+//               fontSize: 14,
+//               fontWeight: 400,
+//               fontFamily: 'Roboto Mono',
+//               pointerEvents: 'none',
+//               zIndex: 1,
+//             }}
+//           >
+//             Ask a question or search using
+//             <EuiIcon type="editorCodeBlock" /> PPL
+//           </div>
+//         )}
+
+//         {isPromptReadOnly && (
+//           <EditOrClear
+//             className={`promptEditor__editOverlay`}
+//             handleClearEditor={handleClearEditor}
+//             handleEditClick={handleEditClick}
+//             editText="Edit Prompt"
+//             clearText="Clear Editor"
+//           />
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export { PromptEditor };
+
+import React from 'react';
 import { getEditorConfig, LanguageType } from './shared';
+import { ReusableEditor } from './resuable_editor';
 import { EuiIcon } from '@elastic/eui';
-import { EditOrClear } from './edit_or_clear';
 
 interface PromptEditorProps {
   languageType: LanguageType;
@@ -20,7 +192,7 @@ interface PromptEditorProps {
   handleClearEditor: () => void;
 }
 
-const PromptEditor: React.FC<PromptEditorProps> = ({
+export const PromptEditor: React.FC<PromptEditorProps> = ({
   languageType,
   onChange,
   handlePromptRun,
@@ -29,150 +201,26 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
   handlePromptEdit,
   handleClearEditor,
 }) => {
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorConfig = getEditorConfig(languageType);
   const langText = languageType !== 'nl' ? 'query' : 'prompt';
-  const [editorIsFocused, setEditorIsFocused] = useState(false);
-  const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
-
-  const handleEditClick = () => {
-    handlePromptEdit();
-    editorRef.current?.updateOptions({ readOnly: false });
-    editorRef.current?.focus();
-  };
-
-  const handleEditorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor) => {
-      editorRef.current = editor;
-
-      editor.onDidFocusEditorText(() => {
-        setEditorIsFocused(true);
-      });
-
-      editor.onDidBlurEditorText(() => {
-        setEditorIsFocused(false);
-      });
-      // Set up Enter key handling
-      editor.addAction({
-        id: 'run-prompt-on-enter',
-        label: 'Run Prompt on Enter',
-        keybindings: [monaco.KeyCode.Enter],
-        contextMenuGroupId: 'navigation',
-        contextMenuOrder: 1.5,
-        run: () => {
-          const promptValue = editor.getValue();
-          handlePromptRun(promptValue);
-          handlePromptEdit();
-        },
-      });
-
-      editor.addAction({
-        id: 'insert-new-line-prompt',
-        label: 'Insert New Line Prompt',
-        keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
-        run: (ed) => {
-          if (ed.hasTextFocus()) {
-            const currentPosition = ed.getPosition();
-            if (currentPosition) {
-              ed.executeEdits('', [
-                {
-                  range: new monaco.Range(
-                    currentPosition.lineNumber,
-                    currentPosition.column,
-                    currentPosition.lineNumber,
-                    currentPosition.column
-                  ),
-                  text: '\n',
-                  forceMoveMarkers: true,
-                },
-              ]);
-              ed.setPosition({
-                lineNumber: currentPosition.lineNumber + 1,
-                column: 1,
-              });
-            }
-          }
-        },
-      });
-
-      editor.onDidContentSizeChange(() => {
-        const contentHeight = editor.getContentHeight();
-        editor.layout({ width: editor.getLayoutInfo().width, height: contentHeight });
-      });
-
-      const focusDisposable = editor.onDidFocusEditorText(() => {
-        if (blurTimeoutRef.current) {
-          clearTimeout(blurTimeoutRef.current);
-        }
-        setEditorIsFocused(true);
-      });
-
-      const blurDisposable = editor.onDidBlurEditorText(() => {
-        blurTimeoutRef.current = setTimeout(() => {
-          setEditorIsFocused(false);
-        }, 300);
-      });
-
-      return () => {
-        focusDisposable.dispose();
-        blurDisposable.dispose();
-        if (blurTimeoutRef.current) {
-          clearTimeout(blurTimeoutRef.current);
-        }
-      };
-    },
-    [handlePromptRun, languageType, handlePromptEdit]
-  );
-
   return (
-    <div className={`${langText}EditorWrapper`} style={{ position: 'relative' }}>
-      <div
-        className={`${langText}Editor ${isPromptReadOnly ? `${langText}Editor--readonly` : ''}`}
-        style={editorIsFocused && !isPromptReadOnly ? { borderBottom: '1px solid #006BB4' } : {}}
-        data-test-subj="osdPromptEditor__multiLine"
-      >
-        <CodeEditor
-          languageId={editorConfig.languageId}
-          value={prompt}
-          onChange={onChange}
-          editorDidMount={handleEditorDidMount}
-          options={editorConfig.options}
-          languageConfiguration={editorConfig.languageConfiguration}
-          triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
-        />
-
-        {!prompt && !editorIsFocused && !isPromptReadOnly && (
-          <div
-            className="monacoPlaceholder"
-            style={{
-              position: 'absolute',
-              top: 10,
-              left: 10,
-              color: '#676E75',
-              fontSize: 14,
-              fontWeight: 400,
-              fontFamily: 'Roboto Mono',
-              pointerEvents: 'none',
-              zIndex: 1,
-            }}
-          >
-            Ask a question or search using
-            <EuiIcon type="editorCodeBlock" /> PPL
-          </div>
-        )}
-
-        {isPromptReadOnly && (
-          <EditOrClear
-            className={`promptEditor__editOverlay`}
-            handleClearEditor={handleClearEditor}
-            handleEditClick={handleEditClick}
-            editText="Edit Prompt"
-            clearText="Clear Editor"
-          />
-        )}
-      </div>
-    </div>
+    <ReusableEditor
+      value={prompt}
+      onChange={onChange}
+      onRun={handlePromptRun}
+      isReadOnly={isPromptReadOnly}
+      onEdit={handlePromptEdit}
+      onClear={handleClearEditor}
+      editorConfig={editorConfig}
+      placeholder={
+        <>
+          Ask a question or search using <EuiIcon type="editorCodeBlock" /> PPL
+        </>
+      }
+      editText="Edit Prompt"
+      clearText="Clear Editor"
+      height={32}
+      editorType={langText} // This is used for styling and identification
+    />
   );
 };
-
-export { PromptEditor };

@@ -40,6 +40,7 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
   noInput,
   lineCount,
 }) => {
+  console.log(lineCount, 'lineCount');
   return (
     <div className="query-editor-footer">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
@@ -96,14 +97,16 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText
-                size="xs"
-                color="subdued"
-                className="queryEditor__footerItem"
-                data-test-subj="queryEditorFooterLineCount"
-              >
-                {`${lineCount ?? 1} ${lineCount === 1 || !lineCount ? 'line' : 'lines'}`}
-              </EuiText>
+              {typeof lineCount === 'number' && lineCount > 0 && (
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  className="queryEditor__footerItem"
+                  data-test-subj="queryEditorFooterLineCount"
+                >
+                  {`${lineCount} ${lineCount === 1 ? 'line' : 'lines'}`}
+                </EuiText>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
