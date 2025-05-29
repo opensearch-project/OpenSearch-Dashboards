@@ -32,7 +32,7 @@ export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const observabilityMetricsID = 'observability-metrics';
 
-export const EXTERNAL_INDEX_STATE = {
+export const ExternalIndexState = {
   CREATING: 'creating',
   ACTIVE: 'active',
   REFRESHING: 'refreshing',
@@ -69,8 +69,8 @@ export const asProgress = (
       return { in_progress: true, percentage: 75 };
   }
 
-  switch (state ? state.toLowerCase() : null) {
-    case EXTERNAL_INDEX_STATE.ACTIVE:
+  switch (state) {
+    case ExternalIndexState.ACTIVE:
       if (hasLastRefresh) {
         return { in_progress: false };
       } else {
@@ -78,13 +78,13 @@ export const asProgress = (
         // population refresh job hasn't kicked in.
         return { in_progress: true, percentage: 30 };
       }
-    case EXTERNAL_INDEX_STATE.CREATING:
+    case ExternalIndexState.CREATING:
       return { in_progress: true, percentage: 30 };
-    case EXTERNAL_INDEX_STATE.REFRESHING:
+    case ExternalIndexState.REFRESHING:
       return { in_progress: true, percentage: 60 };
-    case EXTERNAL_INDEX_STATE.RECOVERING:
+    case ExternalIndexState.RECOVERING:
       return { in_progress: true, percentage: 60 };
-    case EXTERNAL_INDEX_STATE.CANCELLING:
+    case ExternalIndexState.CANCELLING:
       return { in_progress: true, percentage: 90 };
     default:
       // Null state, or other error states
