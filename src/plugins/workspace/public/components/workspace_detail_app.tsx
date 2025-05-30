@@ -22,6 +22,7 @@ import { DataSourceConnectionType } from '../../common/types';
 import { WorkspaceClient } from '../workspace_client';
 import { getDataSourcesList, mergeDataSourcesWithConnections } from '../utils';
 import { WorkspaceAttributeWithPermission } from '../../../../core/types';
+import { AssociationDataSourceModalMode } from '../../common/constants';
 
 function getFormDataFromWorkspace(
   currentWorkspace: WorkspaceAttributeWithPermission | null | undefined
@@ -83,7 +84,11 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
         setCurrentWorkspaceFormData({
           ...rawFormData,
           // Direct query connections info is not required for all tabs, it can be fetched later
-          selectedDataSourceConnections: mergeDataSourcesWithConnections(dataSources, []),
+          selectedDataSourceConnections: mergeDataSourcesWithConnections(
+            dataSources,
+            [],
+            AssociationDataSourceModalMode.OpenSearchConnections
+          ),
         });
       });
     }
