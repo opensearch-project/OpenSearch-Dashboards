@@ -17,7 +17,7 @@ import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { ExpressionsStart } from 'src/plugins/expressions/public';
+import { ExpressionsPublicPlugin, ExpressionsStart } from 'src/plugins/expressions/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { DataExplorerPluginSetup } from './application/legacy/data_explorer';
 
@@ -42,6 +42,7 @@ export interface ExploreSetupDependencies {
   data: DataPublicPluginSetup;
   dataExplorer: DataExplorerPluginSetup;
   usageCollection: UsageCollectionSetup;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
 }
 
 /**

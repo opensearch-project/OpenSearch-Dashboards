@@ -5,21 +5,21 @@
 
 import { VisualizationType } from './utils/use_visualization_types';
 
-export interface DiscoverVisColumn {
+export interface ExploreVisColumn {
   id: number;
   name: string;
-  schema: DiscoverVisFieldType;
+  schema: ExploreVisFieldType;
   column: string;
 }
 
-export type DiscoverVisFieldType = 'numerical' | 'categorical' | 'date' | 'unknown';
+export type ExploreVisFieldType = 'numerical' | 'categorical' | 'date' | 'unknown';
 
 export interface VisualizationRule {
   name: string;
   matches: (
-    numericalColumns: DiscoverVisColumn[],
-    categoricalColumns: DiscoverVisColumn[],
-    dateColumns: DiscoverVisColumn[]
+    numericalColumns: ExploreVisColumn[],
+    categoricalColumns: ExploreVisColumn[],
+    dateColumns: ExploreVisColumn[]
   ) => boolean;
   createConfig: () => VisualizationType;
 }
