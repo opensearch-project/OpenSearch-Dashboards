@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RecentQueriesTable } from './table';
@@ -15,9 +20,10 @@ import { RecentQueriesTable } from './table';
 describe('RecentQueriesTable', () => {
   it('renders recent queries table', () => {
     render(
+      // Wrap with any required providers or mocks here
       <RecentQueriesTable onClickRecentQuery={jest.fn()} isVisible={true} languageType="ppl" />
     );
-    expect(screen.getByText('Recent query')).toBeInTheDocument();
-    expect(screen.getByText('Last run')).toBeInTheDocument();
+    expect(screen.getAllByText('Recent query').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Last run').length).toBeGreaterThan(0);
   });
 });

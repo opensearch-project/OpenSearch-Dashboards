@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// TODO: Move this to  already configured datetime range picker
 import React, { useState } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
 

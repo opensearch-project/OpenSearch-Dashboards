@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// TODO: Integrate with saved queries service and update with real saved queries in list
 import React, { useState } from 'react';
 import {
   EuiPopover,
@@ -20,7 +21,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiFieldText,
-  EuiTextArea,
   EuiSwitch,
 } from '@elastic/eui';
 
@@ -29,7 +29,6 @@ export const SaveQueryButton: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [queryName, setQueryName] = useState('');
   const [description, setDescription] = useState('');
-  const [includeFilters, setIncludeFilters] = useState(false);
   const [includeTimeFilter, setIncludeTimeFilter] = useState(false);
   const [error, setError] = useState('');
 

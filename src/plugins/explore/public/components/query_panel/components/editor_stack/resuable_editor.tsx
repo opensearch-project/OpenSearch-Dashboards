@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useRef, useState, useCallback } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
@@ -5,17 +10,17 @@ import { EditOrClear } from './edit_or_clear';
 
 interface ReusableEditorProps {
   value: string;
+  editText?: string;
+  clearText?: string;
   onChange: (value: string) => void;
   onRun: (value?: string) => void;
   onEditorDidMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
-  isReadOnly: boolean;
   onEdit: () => void;
   onClear: () => void;
+  isReadOnly: boolean;
   editorConfig: any;
   placeholder?: React.ReactNode;
-  editText?: string;
-  clearText?: string;
-  editorType: 'query' | 'prompt';
+  editorType?: 'query' | 'prompt';
   height?: number;
 }
 
@@ -131,7 +136,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         return editor;
       };
     },
-    [onRun, onEdit, value, editorType]
+    [onRun, onEdit, editorType, onEditorDidMount]
   );
 
   return (
