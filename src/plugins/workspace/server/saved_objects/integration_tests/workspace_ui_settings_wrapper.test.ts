@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IUiSettingsClient, UiSettingScope, WorkspaceAttribute } from 'src/core/server';
+
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 import { httpServerMock } from '../../../../../core/server/mocks';
-import { UiSettingScope, WorkspaceAttribute } from 'opensearch-dashboards/public';
-import { IUiSettingsClient } from 'opensearch-dashboards/server/ui_settings';
 
 describe('workspace ui settings saved object client wrapper', () => {
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
