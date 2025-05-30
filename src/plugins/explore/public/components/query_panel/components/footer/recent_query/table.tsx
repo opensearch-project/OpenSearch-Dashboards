@@ -50,14 +50,8 @@ export function RecentQueriesTable({
     },
   ];
 
-  // dispatch action from redux to get recent queries.
-
-  //   const [recentQueries, setRecentQueries] = useState<RecentQueryItem[]>(mockRecentQueries);
-
-  //   useEffect(() => {
-  //     const done = queryString.changeQueryHistory(setRecentQueries);
-  //     return () => done();
-  //   }, [queryString]);
+  // TODO: dispatch action to get recent queries.
+  // const [recentQueries, setRecentQueries] = useState<RecentQueryItem[]>(mockRecentQueries);
 
   const getRowProps = (item: any) => ({
     'data-test-subj': `row-${item.id}`,
@@ -110,7 +104,6 @@ export function RecentQueriesTable({
 
   const recentQueryItems: RecentQueryTableItem[] = recentQueries
     .filter((item, idx) => idx < MAX_RECENT_QUERY_SIZE)
-    // .filter((item) => item.query.language === languageType && languageType !== 'nl')
     .map((query) => ({
       id: query.id,
       query: query.query.query,

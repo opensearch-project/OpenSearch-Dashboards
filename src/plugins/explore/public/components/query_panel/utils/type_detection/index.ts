@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import { KnownFields } from './constants';
 import { LanguageType } from '../../components/editor_stack/shared';
 
 export interface DetectionResult {

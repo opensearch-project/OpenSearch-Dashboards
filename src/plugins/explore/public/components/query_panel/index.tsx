@@ -4,21 +4,21 @@
  */
 
 import React, { useRef, useState } from 'react';
+import { debounce } from 'lodash';
 import { QueryPanelLayout } from './layout';
 import { EditorStack } from './components/editor_stack';
 import { QueryEditorFooter } from './components/footer/index';
 import { LanguageType } from './components/editor_stack/shared';
-import { debounce } from 'lodash';
-import { QueryTypeDetector } from './utils/typeDetection';
+import { RecentQueriesTable } from './components/footer/recent_query/table';
+import { QueryTypeDetector } from './utils/type_detection';
 import { Query, TimeRange } from './types';
 import './index.scss';
-import { RecentQueriesTable } from './components/footer/recent_query/table';
 
 const intitialQuery = (language: LanguageType, dataset: string) => ({
   query: '',
   prompt: '',
-  language: language,
-  dataset: dataset,
+  language,
+  dataset,
 });
 
 const QueryPanel = () => {
@@ -49,7 +49,7 @@ const QueryPanel = () => {
     const detector = new QueryTypeDetector();
     const result = detector.detect(query);
     languageTypeRef.current = result.type;
-    console.log('language changed:', result.type);
+
     setCurrentQuery((prevQuery) => ({
       ...prevQuery,
       language: result.type,
@@ -57,7 +57,6 @@ const QueryPanel = () => {
   }, 500); // Adjust debounce time as needed
 
   const onPromptChange = (value: string) => {
-    // console.log('Prompt changed:', value);
     detectLanguageType(value);
     onQuerystringChange(value, true);
 
@@ -86,20 +85,13 @@ const QueryPanel = () => {
     queryString?: string | { [key: string]: any },
     timeRange?: TimeRange
   ) => {
-    // console.log('Running queryString when enter:', querystring);
-    // setIsLoading(true); // Set loading to true
-    // await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
-    // // Add logic to run the query
-    // setIsPromptReadOnly(true);
-    // setIsLoading(false);
-    // Add logic to run the query
     onRun();
     setIsPromptReadOnly(true);
   };
 
   const onRun = async () => {
+    // TODO: Implement the actual run logic here
     setIsLoading(true); // Set loading to true
-
     await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
     setIsLoading(false);
   };
@@ -112,23 +104,18 @@ const QueryPanel = () => {
   };
 
   const handlePromptRun = async (queryString?: string | { [key: string]: any }) => {
-    // setIsLoading(true); // Set loading to true
-    // await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
     onRun();
     const detectedLang = languageTypeRef.current;
 
     if (detectedLang === 'nl') {
-      // console.log('Detected NL, calling NL API...');
-
-      // Call NL Api
-      // on successful ppl generated
+      // TODO: Call NL API to generate PPL query
 
       setIsDualEditor(true);
       setCurrentQuery((prevQuery) => ({
         ...prevQuery,
         query: 'source=test\n| where state=CA and year=2023\n| sort=asc',
       }));
-      // update query object with  generated ppl query
+      // Todo: update query object with  generated ppl query
     } else {
       setIsDualEditor(false);
       setCurrentQuery((prevQuery) => ({
@@ -136,7 +123,6 @@ const QueryPanel = () => {
         query: '',
       }));
     }
-    // setIsLoading(false); // Set loading to false after the delay
   };
 
   const handlePromptEdit = () => {
@@ -159,7 +145,6 @@ const QueryPanel = () => {
 
   const handleRecentClick = () => {
     setIsRecentQueryVisible(!isRecentQueryVisible);
-    console.log('Recent queries clicked');
   };
 
   const onClickRecentQuery = (recentQuery: Query, timeRange?: TimeRange) => {

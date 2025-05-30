@@ -24,7 +24,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
           wrappingIndent: 'same' as const,
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 1,
-          // scrollbar: {
+          // scrollbar: { // Todo: Enable scrollbar with max height logic
           //   vertical: 'visible' as const,
           //   horizontalScrollbarSize: 1,
           // },
