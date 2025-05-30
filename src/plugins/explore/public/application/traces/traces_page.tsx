@@ -22,9 +22,9 @@ import { DISCOVER_LOAD_EVENT, NEW_DISCOVER_LOAD_EVENT, trackUiMetric } from '../
 import DiscoverCanvas from '../legacy/discover/application/view_components/canvas';
 import DiscoverContext from '../legacy/discover/application/view_components/context';
 import DiscoverPanel from '../legacy/discover/application/view_components/panel';
-import './logs_page.scss';
+import './traces_page.scss';
 
-export const LogsPage = ({ params }: { params: AppMountParameters }) => {
+export const TracesPage = ({ params }: { params: AppMountParameters }) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
@@ -49,7 +49,7 @@ export const LogsPage = ({ params }: { params: AppMountParameters }) => {
   // Render the application DOM.
   return (
     <div className="mainPage">
-      <div>WIP: this is logs flavor rendered by the new explore plugin</div>
+      <div>WIP: this is traces flavor rendered by the new explore plugin</div>
       {isEnhancementsEnabled && (
         <EuiFlexGroup
           direction="row"
