@@ -242,7 +242,7 @@ export class ExplorePlugin
           coreStart.application.navigateToApp('discover', { replace: true });
         }
 
-        const { renderApp } = await import('./application/legacy/data_explorer/application');
+        const { renderApp } = await import('./application');
         this.currentHistory = params.history;
 
         // make sure the index pattern list is up to date
