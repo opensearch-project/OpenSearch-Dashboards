@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 import * as utils from '../utils';
 import { DataSourceTable } from './data_source_table';
 import { mount, ReactWrapper } from 'enzyme';
@@ -78,6 +79,7 @@ describe('DataSourceTable', () => {
 
   describe('should get datasources successful', () => {
     beforeEach(async () => {
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
       spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
       await act(async () => {
@@ -147,8 +149,9 @@ describe('DataSourceTable', () => {
     });
 
     it('should delete confirm modal confirm button work normally', async () => {
-      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.resolve({}));
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(
+        Promise.reject(new Error('Delete failed'))
+      );
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -167,8 +170,9 @@ describe('DataSourceTable', () => {
     });
 
     it('should delete datasources & fail', async () => {
-      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.reject({}));
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(
+        Promise.reject(new Error('Delete failed'))
+      );
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -182,11 +186,13 @@ describe('DataSourceTable', () => {
         // @ts-ignore
         await component.find(confirmModalIdentifier).props().onConfirm();
       });
-      component.update();
+
       expect(utils.deleteMultipleDataSources).toHaveBeenCalled();
-      expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
       // @ts-ignore
-      expect(component.find(confirmModalIdentifier).exists()).toBe(false);
+      await waitFor(() => {
+        component.update();
+        expect(component.find(confirmModalIdentifier).exists()).toBe(false);
+      });
     });
   });
 
@@ -226,6 +232,7 @@ describe('DataSourceTable', () => {
     beforeEach(() => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
       spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
     });
 
     test('should display set as default action', async () => {
@@ -451,6 +458,7 @@ describe('DataSourceTable', () => {
 
   describe('should handle datasources with empty description correctly', () => {
     beforeEach(async () => {
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       spyOn(utils, 'getDataSources').and.returnValue(
         Promise.resolve(getMappedDataSourcesWithEmptyDescription)
       );
@@ -492,6 +500,7 @@ describe('DataSourceTable', () => {
 
   describe('should handle opensearch remote clusters', () => {
     beforeEach(async () => {
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       spyOn(utils, 'getDataSources').and.returnValue(
         Promise.resolve(getDataSourcesWithCrossClusterConnections)
       );
@@ -529,6 +538,73 @@ describe('DataSourceTable', () => {
 
       // validate that we are now able to see the remote clusters
       expect(component.text()).toContain('connectionAlias1');
+    });
+  });
+
+  describe('fetchDataSources with previousDataSourcesRef', () => {
+    let comp: ReactWrapper;
+    let mountComponent: () => Promise<void>;
+    const mockEmptyDataSources: any[] = [];
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      jest.spyOn(utils, 'getDataSources').mockResolvedValue(mockEmptyDataSources);
+      jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValue(mockEmptyDataSources);
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockResolvedValue({});
+
+      mountComponent = async () => {
+        await act(async () => {
+          comp = mount(
+            wrapWithIntl(
+              <DataSourceTable
+                history={history}
+                location={{} as RouteComponentProps['location']}
+                match={{} as RouteComponentProps['match']}
+              />
+            ),
+            {
+              wrappingComponent: OpenSearchDashboardsContextProvider,
+              wrappingComponentProps: {
+                services: mockedContext,
+              },
+            }
+          );
+        });
+        comp.update();
+      };
+    });
+
+    afterEach(() => {
+      comp?.unmount();
+      jest.clearAllMocks();
+    });
+
+    test('should set first data source as default from 0 to 1+ data sources', async () => {
+      await mountComponent();
+      expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
+
+      (utils.getDataSources as jest.Mock).mockReturnValue(Promise.resolve(getMappedDataSources));
+      (utils.fetchDataSourceConnections as jest.Mock).mockReturnValue(
+        Promise.resolve(getDataSourcesWithCrossClusterConnections)
+      );
+      await act(async () => {
+        comp = mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      comp.update();
+      expect(utils.setFirstDataSourceAsDefault).toHaveBeenCalled();
     });
   });
 });
