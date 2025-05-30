@@ -78,6 +78,7 @@ const defaults = {
   value: 'value',
   description: 'description',
   isOverridden: false,
+  isPermissionControlled: false,
   type: 'string' as UiSettingsType,
   isCustom: false,
   defVal: 'defVal',

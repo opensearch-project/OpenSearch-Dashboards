@@ -156,7 +156,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return await this.selectedApi(scope)
       .getAll()
       .then((response: any) => {
-        const value = response.settings[key].userValue;
+        const value = response.settings[key]?.userValue;
         const type = this.cache[key].type;
         return this.resolveValue(value, type);
       });

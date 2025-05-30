@@ -45,7 +45,15 @@ function invoke({
   name?: string;
   value?: any;
 }) {
-  return toEditableConfig({ def, name, value, isCustom: def === defDefault, isOverridden: true });
+  return toEditableConfig({
+    def,
+    name,
+    value,
+    isCustom: def === defDefault,
+    isOverridden: true,
+    isPermissionControlled: false,
+    userSettingsEnabled: false,
+  });
 }
 
 describe('Settings', function () {

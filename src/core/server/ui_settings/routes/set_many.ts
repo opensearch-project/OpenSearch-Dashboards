@@ -46,6 +46,7 @@ const validate = {
           schema.literal(UiSettingScope.GLOBAL),
           schema.literal(UiSettingScope.USER),
           schema.literal(UiSettingScope.WORKSPACE),
+          schema.literal(UiSettingScope.DASHBOARD_ADMIN),
         ])
       ),
     },
