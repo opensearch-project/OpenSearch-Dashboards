@@ -34,10 +34,36 @@ export const getSuggestions = async ({
   if (!services || !services.appName || !indexPattern) return [];
   try {
     const { lineNumber, column } = position || {};
-    const suggestions = getOpenSearchPplAutoCompleteSuggestions(query, {
-      line: lineNumber || selectionStart,
-      column: column || selectionEnd,
-    });
+
+    // Store original cursor position values
+    const originalLine = lineNumber || selectionStart;
+    const originalColumn = column || selectionEnd;
+
+    // Normalize the query
+    const normalizedQuery = normalizeQuery(query, services);
+
+    // Calculate cursor position adjustment if normalization added a prefix
+    const adjustedCursor: CursorPosition = {
+      line: originalLine,
+      column: originalColumn,
+    };
+
+    // Only adjust if normalization actually changed the query
+    if (normalizedQuery !== query) {
+      // If we're on the first line and the query was normalized by adding a prefix
+      if (originalLine === 1) {
+        // Calculate the length of the added prefix (source = datasetName )
+        const sourceRegex = /^source\s*=\s*[^|\s]+\s*/i;
+        const match = normalizedQuery.match(sourceRegex);
+        const prefixLength = match ? match[0].length : 0;
+
+        // Adjust the column position
+        adjustedCursor.column = originalColumn + prefixLength;
+      }
+    }
+
+    // Use the normalized query and adjusted cursor position
+    const suggestions = getOpenSearchPplAutoCompleteSuggestions(normalizedQuery, adjustedCursor);
 
     const finalSuggestions: QuerySuggestion[] = [];
 
@@ -107,6 +133,39 @@ export const getSuggestions = async ({
   } catch (e) {
     return [];
   }
+};
+
+export const normalizeQuery = (query: string, services?: any): string => {
+  // Leave empty queries or whitespace-only queries unchanged
+  if (!query || query.trim() === '') {
+    return query;
+  }
+
+  // Check if the query already starts with 'source = ' pattern (case-insensitive)
+  const sourceRegex = /^\s*source\s*=\s*[^|\s]+/i;
+  if (sourceRegex.test(query)) {
+    return query; // Query already has source, leave it unchanged
+  }
+
+  // If we need to add a source, get the dataset name from queryStringService
+  let datasetName = ''; // Fallback value
+
+  try {
+    if (services?.queryStringService?.getDatasetName) {
+      datasetName = services.queryStringService.getDatasetName() || datasetName;
+    } else if (services?.data?.query?.queryString?.getDefaultIndex) {
+      // Alternative way to get the dataset if queryStringService is not available
+      datasetName = services.data.query.queryString.getDefaultIndex() || datasetName;
+    }
+  } catch (e) {
+    // If there's any error getting the dataset name, use the fallback
+  }
+
+  // Add the source = datasetName prefix to the query
+  // Maintain any leading whitespace in the original query
+  const trimmedQuery = query.trim();
+
+  return `source = ${datasetName} ${trimmedQuery}`;
 };
 
 export const getOpenSearchPplAutoCompleteSuggestions = (
