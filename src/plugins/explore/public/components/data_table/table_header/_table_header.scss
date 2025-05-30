@@ -1,0 +1,41 @@
+.exploreDocTableHeader {
+  white-space: nowrap;
+  text-align: left;
+
+  // nested for specificity
+  .exploreDocTableHeaderField {
+    padding: $euiSizeS;
+  }
+}
+
+.exploreDocTableHeader button {
+  margin-left: $euiSizeXS;
+}
+
+.exploreDocTableHeader__move,
+.exploreDocTableHeader__sortChange {
+  opacity: 0;
+
+  &:focus,
+  th:hover & {
+    opacity: 1;
+  }
+}
+
+.exploreDocTableHeaderField {
+  &__actionButton {
+    opacity: 0;
+    height: 10px;
+    width: 10px;
+    transition: opacity $euiAnimSpeedFast;
+
+    @include ouiBreakpoint("xs", "s", "m") {
+      opacity: 1;
+    }
+  }
+
+  &:hover &__actionButton,
+  &:focus &__actionButton {
+    opacity: 1;
+  }
+}
