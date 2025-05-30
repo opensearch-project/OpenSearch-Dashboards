@@ -23,6 +23,7 @@ import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dash
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../../../../common/legacy/discover';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import './discover_canvas.scss';
+import { ExploreVisualizationContainer } from '../../components/visualizations/explore_visualization_container';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: ViewProps) {
@@ -159,6 +160,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
               <>
                 <MemoizedDiscoverChartContainer {...fetchState} />
                 {discoverResultsActionBar}
+                <MemoizedExploreVisualizationContainer {...fetchState} />
                 <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
               </>
             ) : (
@@ -186,3 +188,4 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
 
 const MemoizedDiscoverTable = React.memo(DiscoverTable);
 const MemoizedDiscoverChartContainer = React.memo(DiscoverChartContainer);
+const MemoizedExploreVisualizationContainer = React.memo(ExploreVisualizationContainer);
