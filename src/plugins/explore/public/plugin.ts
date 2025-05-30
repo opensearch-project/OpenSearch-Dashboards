@@ -36,7 +36,6 @@ import {
   ExploreSetupDependencies,
   ExploreStartDependencies,
 } from './types';
-import { ViewService } from './application/legacy/data_explorer/services/view_service';
 import { setUsageCollector } from './application/legacy/data_explorer/services';
 import { DataExplorerServices } from './application/legacy/data_explorer';
 import { getPreloadedStore } from './application/legacy/data_explorer/utils/state_management';
@@ -55,7 +54,6 @@ import {
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import {
   discoverSlice,
-  DiscoverState,
   getPreloadedState,
 } from './application/legacy/discover/application/utils/state_management';
 import { buildServices } from './application/legacy/discover/build_services';
@@ -74,7 +72,6 @@ export class ExplorePlugin
   // @ts-ignore
   private config: ConfigSchema;
   /** data_explorer */
-  private viewService = new ViewService();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking?: () => void;
   private currentHistory?: ScopedHistory;
@@ -104,8 +101,6 @@ export class ExplorePlugin
         })
       );
     }
-
-    const viewService = this.viewService;
 
     setUsageCollector(setupDeps.usageCollection);
     this.docViewsRegistry = new DocViewsRegistry();
@@ -259,12 +254,18 @@ export class ExplorePlugin
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           }),
-          viewRegistry: viewService.start(),
         };
 
         // Get start services as specified in opensearch_dashboards.json
         // Render the application
-        const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(services);
+        const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(
+          services,
+          async () => {
+            this.initializeServices?.();
+            return await getPreloadedState(getServices());
+          },
+          discoverSlice
+        );
         services.store = store;
 
         const unmount = renderApp(coreStart, services, params, store);
@@ -315,41 +316,7 @@ export class ExplorePlugin
       registerFeature(setupDeps.home);
     } */
 
-    const viewServiceSetup = this.viewService.setup();
-    viewServiceSetup.registerView<DiscoverState>({
-      id: LOGS_VIEW_ID,
-      title: 'Logs',
-      defaultPath: '#/',
-      appExtentions: {
-        savedObject: {
-          docTypes: ['search'],
-          toListItem: (obj) => ({
-            id: obj.id,
-            label: obj.title,
-          }),
-        },
-      },
-      ui: {
-        defaults: async () => {
-          this.initializeServices?.();
-          const services = getServices();
-          return await getPreloadedState(services);
-        },
-        slice: discoverSlice,
-      },
-      shouldShow: () => true,
-      // ViewComponent
-      Canvas: lazy(
-        () => import('./application/legacy/discover/application/view_components/canvas')
-      ),
-      Panel: lazy(() => import('./application/legacy/discover/application/view_components/panel')),
-      Context: lazy(
-        () => import('./application/legacy/discover/application/view_components/context')
-      ),
-    });
-
     return {
-      ...viewServiceSetup,
       docViews: {
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
       },

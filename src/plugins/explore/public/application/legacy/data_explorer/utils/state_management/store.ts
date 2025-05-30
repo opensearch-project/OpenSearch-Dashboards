@@ -8,6 +8,7 @@ import { isEqual } from 'lodash';
 import { reducer as metadataReducer } from './metadata_slice';
 import { loadReduxState, persistReduxState } from './redux_persistence';
 import { DataExplorerServices } from '../../types';
+import { DefaultViewState } from '../../../../../../../data_explorer/public';
 
 const HYDRATE = 'HYDRATE';
 
@@ -50,17 +51,14 @@ export const configurePreloadedStore = (preloadedState: PreloadedState<RootState
   });
 };
 
-export const getPreloadedStore = async (services: DataExplorerServices) => {
-  // For each view preload the data and register the slice
-  const views = services.viewRegistry.all();
-  views.forEach((view) => {
-    if (!view.ui) return;
+export const getPreloadedStore = async <T = any>(
+  services: DataExplorerServices,
+  defaults: DefaultViewState | (() => DefaultViewState) | (() => Promise<DefaultViewState>),
+  slice: Slice<T>
+) => {
+  registerSlice(slice);
 
-    const { slice } = view.ui;
-    registerSlice(slice);
-  });
-
-  const preloadedState = await loadReduxState(services);
+  const preloadedState = await loadReduxState(services, defaults);
   const store = configurePreloadedStore(preloadedState);
 
   let previousState = store.getState();
@@ -82,7 +80,7 @@ export const getPreloadedStore = async (services: DataExplorerServices) => {
 
   // This is necessary because browser navigation updates URL state that isnt reflected in the redux state
   services.scopedHistory.listen(async (location, action) => {
-    const urlState = await loadReduxState(services);
+    const urlState = await loadReduxState(services, defaults);
     const currentState = store.getState();
 
     // If the url state is different from the current state, then we need to update the store
