@@ -1,290 +1,273 @@
-// /*
-//  * Copyright OpenSearch Contributors
-//  * SPDX-License-Identifier: Apache-2.0
-//  */
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-// import React from 'react';
-// import type { ComponentStory, ComponentMeta } from '@storybook/react';
-// import { DiscoverVisualization } from './discover_visualization';
-// import { Positions } from './utils/collections';
-// import { DiscoverVisColumn } from './types';
-// import { LineChartStyleControls } from './line/line_vis_config';
-// import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-// import { IFieldType } from '../../../opensearch_dashboards_services';
+import React from 'react';
+import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { DiscoverVisualization } from './discover_visualization';
+import { VisualizationTypeResult } from '../../view_components/utils/use_visualization_types';
+import { Positions } from './utils/collections';
+import { LineVisStyleControls } from './line/line_vis_options';
 
-// // Mock the required hooks and services
-// jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
-//   useOpenSearchDashboards: () => ({
-//     services: {
-//       data: {
-//         query: {
-//           filterManager: {
-//             getFilters: () => [],
-//           },
-//           queryString: {
-//             getQuery: () => ({ language: 'kuery', query: '' }),
-//             getLanguageService: () => ({
-//               getLanguage: () => ({
-//                 showVisualization: true,
-//               }),
-//             }),
-//           },
-//           timefilter: {
-//             timefilter: {
-//               getTime: () => ({
-//                 from: 'now-15m',
-//                 to: 'now',
-//               }),
-//             },
-//           },
-//           state$: {
-//             subscribe: () => ({
-//               unsubscribe: () => {},
-//             }),
-//           },
-//         },
-//       },
-//       expressions: {
-//         ReactExpressionRenderer: (props: any) => (
-//           <div data-test-subj="mockExpressionRenderer">
-//             <div>Expression Renderer Mock</div>
-//             <pre>{JSON.stringify(props, null, 2)}</pre>
-//           </div>
-//         ),
-//       },
-//     },
-//   }),
-// }));
+export default {
+  title: 'src/plugins/discover/public/application/components/visualizations/discover_visualization',
+  component: DiscoverVisualization,
+} as ComponentMeta<typeof DiscoverVisualization>;
 
-// jest.mock('../../view_components/context', () => ({
-//   useDiscoverContext: () => ({
-//     indexPattern: {
-//       id: 'mock-index-pattern-id',
-//       title: 'mock-index-pattern',
-//       fields: [
-//         { name: 'timestamp', type: 'date' },
-//         { name: 'category', type: 'string' },
-//         { name: 'count', type: 'number' },
-//         { name: 'price', type: 'number' },
-//       ],
-//     },
-//   }),
-// }));
+// Mock ReactExpressionRenderer component
+const MockReactExpressionRenderer: React.FC<any> = ({ expression }) => {
+  return (
+    <div
+      style={{
+        padding: '20px',
+        backgroundColor: '#fff',
+        height: '400px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ textAlign: 'center' }}>
+        <h3>Visualization Preview</h3>
+        <div
+          style={{
+            marginTop: '20px',
+            padding: '20px',
+            backgroundColor: '#f5f7fa',
+            borderRadius: '4px',
+          }}
+        >
+          <svg width="300" height="200" viewBox="0 0 300 200">
+            {/* Mock line chart */}
+            <line x1="50" y1="150" x2="250" y2="50" stroke="#0079a5" strokeWidth="2" />
+            <circle cx="50" cy="150" r="4" fill="#0079a5" />
+            <circle cx="100" cy="120" r="4" fill="#0079a5" />
+            <circle cx="150" cy="100" r="4" fill="#0079a5" />
+            <circle cx="200" cy="80" r="4" fill="#0079a5" />
+            <circle cx="250" cy="50" r="4" fill="#0079a5" />
+            {/* Axes */}
+            <line x1="50" y1="150" x2="250" y2="150" stroke="#69707D" strokeWidth="1" />
+            <line x1="50" y1="150" x2="50" y2="50" stroke="#69707D" strokeWidth="1" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-// jest.mock('./visualization_registry', () => ({
-//   visualizationRegistry: {
-//     registerRule: jest.fn(),
-//   },
-// }));
+const mockStyleOptions = {
+  // Basic controls
+  addTooltip: true,
+  addLegend: true,
+  legendPosition: Positions.RIGHT,
+  addTimeMarker: false,
+  mode: 'normal',
+  showLine: true,
+  lineMode: 'smooth',
+  lineWidth: 2,
+  showDots: true,
+  // Threshold and grid
+  thresholdLine: {
+    color: '#E7664C',
+    show: false,
+    style: 'full' as const,
+    value: 10,
+    width: 1,
+  },
+  grid: {
+    categoryLines: true,
+    valueLines: true,
+  },
+  // Axes
+  categoryAxes: [
+    {
+      id: 'CategoryAxis-1',
+      type: 'category' as const,
+      position: 'bottom' as const,
+      show: true,
+      style: {},
+      scale: { type: 'linear' as const },
+      labels: {
+        show: true,
+        filter: true,
+        rotate: 0,
+        truncate: 100,
+      },
+      title: { text: 'Time' },
+    },
+  ],
+  valueAxes: [
+    {
+      id: 'ValueAxis-1',
+      name: 'LeftAxis-1',
+      type: 'value' as const,
+      position: 'left' as const,
+      show: true,
+      style: {},
+      scale: {
+        type: 'linear' as const,
+        mode: 'normal' as const,
+        defaultYExtents: false,
+        setYExtents: false,
+      },
+      labels: {
+        show: true,
+        rotate: 0,
+        filter: false,
+        truncate: 100,
+      },
+      title: { text: 'Sales' },
+    },
+  ],
+};
 
-// jest.mock('../../view_components/utils/use_visualization_types', () => ({
-//   getVisualizationType: () => ({
-//     visualizationType: {
-//       ui: {
-//         style: {
-//           defaults: {
-//             // Basic controls
-//             addTooltip: true,
-//             addLegend: true,
-//             legendPosition: Positions.RIGHT,
-//             addTimeMarker: false,
-//             showLine: true,
-//             lineMode: 'smooth',
-//             lineWidth: 2,
-//             showDots: true,
-//             // Threshold and grid
-//             thresholdLine: {
-//               color: '#E7664C',
-//               show: false,
-//               style: 'full',
-//               value: 10,
-//               width: 1,
-//             },
-//             grid: {
-//               categoryLines: true,
-//               valueLines: true,
-//             },
-//             // Category axes
-//             categoryAxes: [
-//               {
-//                 id: 'CategoryAxis-1',
-//                 type: 'category',
-//                 position: 'bottom',
-//                 show: true,
-//                 style: {},
-//                 scale: {
-//                   type: 'linear',
-//                 },
-//                 labels: {
-//                   show: true,
-//                   filter: true,
-//                   rotate: 0,
-//                   truncate: 100,
-//                 },
-//                 title: {
-//                   text: 'Category Axis',
-//                 },
-//               },
-//             ],
-//             // Value axes
-//             valueAxes: [
-//               {
-//                 id: 'ValueAxis-1',
-//                 name: 'LeftAxis-1',
-//                 type: 'value',
-//                 position: 'left',
-//                 show: true,
-//                 style: {},
-//                 scale: {
-//                   type: 'linear',
-//                   mode: 'normal',
-//                   defaultYExtents: false,
-//                   setYExtents: false,
-//                 },
-//                 labels: {
-//                   show: true,
-//                   rotate: 0,
-//                   filter: false,
-//                   truncate: 100,
-//                 },
-//                 title: {
-//                   text: 'Value Axis',
-//                 },
-//               },
-//             ],
-//           },
-//           render: ({
-//             styleOptions,
-//             onStyleChange,
-//           }: {
-//             styleOptions: LineChartStyleControls;
-//             onStyleChange: (newOptions: Partial<LineChartStyleControls>) => void;
-//             numericalColumns: DiscoverVisColumn[];
-//             categoricalColumns: DiscoverVisColumn[];
-//             dateColumns: DiscoverVisColumn[];
-//           }) => (
-//             <div data-test-subj="mockStylePanel">
-//               <div>Style Panel Mock</div>
-//               <button onClick={() => onStyleChange({ showLine: !styleOptions.showLine })}>
-//                 Toggle Line Visibility
-//               </button>
-//               <pre>{JSON.stringify(styleOptions, null, 2)}</pre>
-//             </div>
-//           ),
-//         },
-//       },
-//       toExpression: async () => 'mock expression string',
-//     },
-//     transformedData: [
-//       { timestamp: '2023-01-01', category: 'A', count: 10, price: 100 },
-//       { timestamp: '2023-01-02', category: 'B', count: 20, price: 200 },
-//       { timestamp: '2023-01-03', category: 'A', count: 15, price: 150 },
-//     ],
-//     numericalColumns: [
-//       { id: 1, name: 'count', schema: 'numerical', column: 'count' },
-//       { id: 2, name: 'price', schema: 'numerical', column: 'price' },
-//     ] as DiscoverVisColumn[],
-//     categoricalColumns: [
-//       { id: 3, name: 'category', schema: 'categorical', column: 'category' },
-//     ] as DiscoverVisColumn[],
-//     dateColumns: [
-//       { id: 4, name: 'timestamp', schema: 'date', column: 'timestamp' },
-//     ] as DiscoverVisColumn[],
-//   }),
-// }));
+// Mock the line configuration to avoid importing toExpression
+const mockLineConfig = {
+  name: 'line',
+  type: 'line',
+  toExpression: async () => 'mocked expression',
+  ui: {
+    style: {
+      defaults: mockStyleOptions,
+      render: (props: any) => {
+        return <LineVisStyleControls {...props} />;
+      },
+    },
+  },
+};
 
-// export default {
-//   component: DiscoverVisualization,
-//   title: 'src/plugins/discover/public/application/components/visualizations/discover_visualization',
-//   decorators: [
-//     (Story) => (
-//       <div style={{ maxWidth: '1200px', padding: '16px' }}>
-//         <Story />
-//       </div>
-//     ),
-//   ],
-// } as ComponentMeta<typeof DiscoverVisualization>;
+// Create mock data
+const mockVisualizationData: VisualizationTypeResult = {
+  visualizationType: mockLineConfig,
+  transformedData: [
+    { date: '2024-01-01', value: 100, category: 'A' },
+    { date: '2024-01-02', value: 150, category: 'A' },
+    { date: '2024-01-03', value: 120, category: 'B' },
+    { date: '2024-01-04', value: 180, category: 'B' },
+  ],
+  numericalColumns: [{ id: 1, column: 'value', name: 'Sales Value', schema: 'numerical' }],
+  categoricalColumns: [
+    { id: 2, column: 'category', name: 'Product Category', schema: 'categorical' },
+  ],
+  dateColumns: [{ id: 3, column: 'date', name: 'Date', schema: 'categorical' }],
+};
 
-// // Mock data for the component props
-// const mockRows: OpenSearchSearchHit[] = [
-//   {
-//     _index: 'test-index',
-//     _type: '_doc',
-//     _id: '1',
-//     _score: 1,
-//     _source: { timestamp: '2023-01-01', category: 'A', count: 10, price: 100 },
-//   },
-//   {
-//     _index: 'test-index',
-//     _type: '_doc',
-//     _id: '2',
-//     _score: 1,
-//     _source: { timestamp: '2023-01-02', category: 'B', count: 20, price: 200 },
-//   },
-//   {
-//     _index: 'test-index',
-//     _type: '_doc',
-//     _id: '3',
-//     _score: 1,
-//     _source: { timestamp: '2023-01-03', category: 'A', count: 15, price: 150 },
-//   },
-//   {
-//     _index: 'test-index',
-//     _type: '_doc',
-//     _id: '4',
-//     _score: 1,
-//     _source: { timestamp: '2023-01-04', category: 'C', count: 25, price: 250 },
-//   },
-//   {
-//     _index: 'test-index',
-//     _type: '_doc',
-//     _id: '5',
-//     _score: 1,
-//     _source: { timestamp: '2023-01-05', category: 'B', count: 30, price: 300 },
-//   },
-// ];
+const mockSearchContext = {
+  query: { query: 'stats(sum(value)) by category', language: 'SQL' },
+  filters: [],
+  timeRange: { from: 'now-7d', to: 'now' },
+};
 
-// const mockFieldSchema: Array<Partial<IFieldType>> = [
-//   { name: 'timestamp', type: 'date' },
-//   { name: 'category', type: 'string' },
-//   { name: 'count', type: 'number' },
-//   { name: 'price', type: 'number' },
-// ];
+const Template: ComponentStory<typeof DiscoverVisualization> = (args) => (
+  <DiscoverVisualization {...args} />
+);
 
-// // Template for the story
-// const Template: ComponentStory<typeof DiscoverVisualization> = (args) => (
-//   <DiscoverVisualization {...args} />
-// );
+export const Default = Template.bind({});
+Default.args = {
+  expression: 'opensearchDashboards | opensearch_dashboards_context | vega spec="{...}"',
+  searchContext: mockSearchContext,
+  styleOptions: mockStyleOptions,
+  visualizationData: mockVisualizationData,
+  onStyleChange: () => {},
+  ReactExpressionRenderer: MockReactExpressionRenderer,
+};
 
-// // Primary story
-// export const Primary = Template.bind({});
-// Primary.args = {
-//   rows: mockRows,
-//   fieldSchema: mockFieldSchema,
-// };
+export const WithThresholdLine = Template.bind({});
+WithThresholdLine.args = {
+  ...Default.args,
+  styleOptions: {
+    ...mockStyleOptions,
+    thresholdLine: {
+      ...mockStyleOptions.thresholdLine,
+      show: true,
+      value: 150,
+      color: '#FF0000',
+    },
+  },
+};
 
-// // Story with empty data
-// export const EmptyData = Template.bind({});
-// EmptyData.args = {
-//   rows: [] as OpenSearchSearchHit[],
-//   fieldSchema: mockFieldSchema,
-// };
+export const HiddenLineShowDots = Template.bind({});
+HiddenLineShowDots.args = {
+  ...Default.args,
+  styleOptions: {
+    ...mockStyleOptions,
+    showLine: false,
+    showDots: true,
+  },
+};
 
-// // Story with different field schema
-// export const DifferentSchema = Template.bind({});
-// DifferentSchema.args = {
-//   rows: mockRows,
-//   fieldSchema: [
-//     { name: 'timestamp', type: 'date' },
-//     { name: 'product', type: 'string' },
-//     { name: 'revenue', type: 'number' },
-//     { name: 'quantity', type: 'number' },
-//   ] as Array<Partial<IFieldType>>,
-// };
+export const MultipleAxes = Template.bind({});
+MultipleAxes.args = {
+  ...Default.args,
+  visualizationData: {
+    ...mockVisualizationData,
+    numericalColumns: [
+      { id: 1, column: 'value1', name: 'Revenue', schema: 'numerical' },
+      { id: 2, column: 'value2', name: 'Profit', schema: 'numerical' },
+    ],
+  },
+  styleOptions: {
+    ...mockStyleOptions,
+    valueAxes: [
+      ...mockStyleOptions.valueAxes,
+      {
+        id: 'ValueAxis-2',
+        name: 'RightAxis-1',
+        type: 'value' as const,
+        position: 'right' as const,
+        show: true,
+        style: {},
+        scale: {
+          type: 'linear' as const,
+          mode: 'normal' as const,
+          defaultYExtents: false,
+          setYExtents: false,
+        },
+        labels: {
+          show: true,
+          rotate: 0,
+          filter: false,
+          truncate: 100,
+        },
+        title: { text: 'Profit' },
+      },
+    ],
+  },
+};
 
-// // Story with partial data
-// export const PartialData = Template.bind({});
-// PartialData.args = {
-//   rows: mockRows.slice(0, 2), // Only first two rows
-//   fieldSchema: mockFieldSchema,
-// };
+export const MinimalConfiguration = Template.bind({});
+MinimalConfiguration.args = {
+  ...Default.args,
+  styleOptions: {
+    ...mockStyleOptions,
+    addLegend: false,
+    addTooltip: false,
+    showDots: false,
+    categoryAxes: [
+      {
+        ...mockStyleOptions.categoryAxes[0],
+        labels: {
+          ...mockStyleOptions.categoryAxes[0].labels,
+          show: false,
+        },
+      },
+    ],
+  },
+};
+
+export const CustomColors = Template.bind({});
+CustomColors.args = {
+  ...Default.args,
+  styleOptions: {
+    ...mockStyleOptions,
+    thresholdLine: {
+      show: true,
+      value: 140,
+      color: '#00BFB3',
+      style: 'dashed' as const,
+      width: 3,
+    },
+    addTimeMarker: true,
+  },
+};

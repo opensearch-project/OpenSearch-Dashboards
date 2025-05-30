@@ -16,8 +16,8 @@ import {
   EuiPanel,
   EuiTitle,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
-import { SwitchOption } from '../../../../../../charts/public';
 import { LineChartStyleControls, ThresholdLine } from '../line/line_vis_config';
 
 export interface ThresholdOptionsProps {
@@ -67,14 +67,17 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
 
       <EuiSpacer size="s" />
 
-      <SwitchOption
+      <EuiFormRow
         label={i18n.translate('discover.stylePanel.threshold.show', {
           defaultMessage: 'Show threshold line',
         })}
-        paramName="show"
-        value={thresholdLine.show}
-        setValue={(_, value) => updateThresholdOption('show', value)}
-      />
+      >
+        <EuiSwitch
+          label=""
+          checked={thresholdLine.show}
+          onChange={(e) => updateThresholdOption('show', e.target.checked)}
+        />
+      </EuiFormRow>
 
       {thresholdLine.show && (
         <>
