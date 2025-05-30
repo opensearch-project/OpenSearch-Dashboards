@@ -8,6 +8,7 @@ import {
   ApplicationStart,
   SavedObjectsClientContract,
   ToastsStart,
+  UiSettingScope,
 } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceFilterGroup, SelectedDataSourceOption } from './data_source_filter_group';
@@ -29,6 +30,7 @@ export interface DataSourceMultiSeletableProps {
   onSelectedDataSources: (dataSources: SelectedDataSourceOption[]) => void;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  scope: UiSettingScope;
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
 }
@@ -77,8 +79,8 @@ export class DataSourceMultiSelectable extends React.Component<
   async componentDidMount() {
     this._isMounted = true;
     try {
-      // for data source selectable, get default data source from cache
-      const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
+      const defaultDataSource =
+        (await getDefaultDataSourceId(this.props.uiSettings, this.props.scope)) ?? null;
       let selectedOptions: SelectedDataSourceOption[] = [];
       const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
         'id',

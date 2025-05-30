@@ -18,6 +18,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
+  UiSettingScope,
 } from 'opensearch-dashboards/public';
 import {
   getDataSourcesWithFields,
@@ -48,6 +49,7 @@ interface DataSourceSelectableProps {
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  scope: UiSettingScope;
   application?: ApplicationStart;
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
@@ -213,8 +215,9 @@ export class DataSourceSelectable extends React.Component<
         });
         return;
       }
-      // for data source selectable, get default data source from cache
-      const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
+      // // for data source selectable, get default data source from server
+      const defaultDataSource =
+        (await getDefaultDataSourceId(this.props.uiSettings, this.props.scope)) ?? null;
 
       if (this.props.selectedOption?.length) {
         this.handleSelectedOption(dataSourceOptions, defaultDataSource);
