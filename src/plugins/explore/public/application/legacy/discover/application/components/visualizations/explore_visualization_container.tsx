@@ -5,18 +5,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { useDiscoverContext } from '../../view_components/context';
 
 import { SearchData } from '../../view_components/utils';
-import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { getVisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
+import { IExpressionLoaderParams } from '../../../../../../../../expressions/public';
 import { LineChartStyleControls } from './line/line_vis_config';
 import { visualizationRegistry } from './visualization_registry';
 import { lineChartRule } from './line/line_chart_rules';
-import { DiscoverVisualization } from './discover_visualization';
+import { ExploreVisualization } from './explore_visualization';
+import { getVisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
 
-export const DiscoverVisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
+export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
     data: {
@@ -109,7 +109,7 @@ export const DiscoverVisualizationContainer = ({ rows, fieldSchema }: SearchData
   }
 
   return (
-    <DiscoverVisualization
+    <ExploreVisualization
       expression={expression}
       searchContext={searchContext}
       styleOptions={styleOptions}
