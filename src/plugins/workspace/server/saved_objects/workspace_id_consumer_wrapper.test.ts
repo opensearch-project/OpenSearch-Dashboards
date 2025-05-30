@@ -415,14 +415,26 @@ describe('WorkspaceIdConsumerWrapper', () => {
         type: 'dashboard',
         id: 'dashboard_id',
         attributes: { description: 'description' },
-        references: ['reference_id'],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         workspaces: ['foo'],
       },
       {
         type: 'dashboard',
         id: 'dashboard_error_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         error: {
           statusCode: 404,
           error: 'Not Found',
@@ -433,32 +445,62 @@ describe('WorkspaceIdConsumerWrapper', () => {
         type: 'visualization',
         id: 'visualization_id',
         attributes: { description: 'description' },
-        references: ['reference_id'],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         workspaces: ['bar'],
       },
       {
         type: 'config',
         id: 'config_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
       },
       {
         type: 'workspace',
         id: 'workspace_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
       },
       {
         type: 'data-source',
         id: 'global_data_source_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
       },
       {
         type: 'data-source',
         id: 'data_source_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         workspaces: ['foo'],
       },
     ];
@@ -480,7 +522,11 @@ describe('WorkspaceIdConsumerWrapper', () => {
               },
               "id": "dashboard_id",
               "references": Array [
-                "reference_id",
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
               ],
               "type": "dashboard",
               "workspaces": Array [
@@ -495,7 +541,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
                 "statusCode": 404,
               },
               "id": "dashboard_error_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "dashboard",
             },
             Object {
@@ -512,13 +564,25 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "config_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "config",
             },
             Object {
               "attributes": Object {},
               "id": "workspace_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "workspace",
             },
             Object {
@@ -535,7 +599,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "data_source_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "data-source",
               "workspaces": Array [
                 "foo",
@@ -559,7 +629,11 @@ describe('WorkspaceIdConsumerWrapper', () => {
               },
               "id": "dashboard_id",
               "references": Array [
-                "reference_id",
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
               ],
               "type": "dashboard",
               "workspaces": Array [
@@ -574,7 +648,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
                 "statusCode": 404,
               },
               "id": "dashboard_error_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "dashboard",
             },
             Object {
@@ -591,13 +671,25 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "config_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "config",
             },
             Object {
               "attributes": Object {},
               "id": "workspace_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "workspace",
             },
             Object {
@@ -614,7 +706,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "data_source_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "data-source",
               "workspaces": Array [
                 "foo",
@@ -677,7 +775,11 @@ describe('WorkspaceIdConsumerWrapper', () => {
               },
               "id": "dashboard_id",
               "references": Array [
-                "reference_id",
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
               ],
               "type": "dashboard",
               "workspaces": Array [
@@ -692,7 +794,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
                 "statusCode": 404,
               },
               "id": "dashboard_error_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "dashboard",
             },
             Object {
@@ -709,25 +817,49 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "config_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "config",
             },
             Object {
               "attributes": Object {},
               "id": "workspace_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "workspace",
             },
             Object {
               "attributes": Object {},
               "id": "global_data_source_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "data-source",
             },
             Object {
               "attributes": Object {},
               "id": "data_source_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "data-source",
               "workspaces": Array [
                 "foo",

@@ -163,7 +163,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               );
             }, 1000);
           }
-          return;
+          return { result: true, success: true };
         } else {
           throw new Error(result?.error ? result?.error : 'create workspace failed');
         }
@@ -230,6 +230,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               isSubmitting={isFormSubmitting}
               goToCollaborators={goToCollaborators}
               onGoToCollaboratorsChange={setGoToCollaborators}
+              onAppLeave={() => {}}
             />
           )}
         </EuiPageContent>

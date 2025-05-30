@@ -9,6 +9,7 @@ import { WorkspaceFormSummaryPanel, FieldSummaryItem } from './workspace_form_su
 import { RightSidebarScrollField } from './utils';
 import { applicationServiceMock } from '../../../../../../src/core/public/mocks';
 import { DataSourceConnectionType } from '../../../common/types';
+import { WorkspacePrivacyItemType } from '../workspace_form/constants';
 
 describe('WorkspaceFormSummaryPanel', () => {
   const formData = {
@@ -72,6 +73,7 @@ describe('WorkspaceFormSummaryPanel', () => {
         application={applicationMock}
         isSubmitting={false}
         dataSourceEnabled
+        privacyType={WorkspacePrivacyItemType.PrivateToCollaborators}
       />
     );
 
@@ -101,6 +103,7 @@ describe('WorkspaceFormSummaryPanel', () => {
         application={applicationMock}
         isSubmitting={false}
         dataSourceEnabled
+        privacyType={WorkspacePrivacyItemType.PrivateToCollaborators}
       />
     );
 
@@ -136,6 +139,7 @@ describe('WorkspaceFormSummaryPanel', () => {
         application={applicationMock}
         isSubmitting={false}
         dataSourceEnabled
+        privacyType={WorkspacePrivacyItemType.PrivateToCollaborators}
       />
     );
     expect(screen.getByText('Data Source 1')).toBeInTheDocument();
@@ -160,6 +164,7 @@ describe('WorkspaceFormSummaryPanel', () => {
         application={applicationMock}
         isSubmitting={false}
         dataSourceEnabled={false}
+        privacyType={WorkspacePrivacyItemType.PrivateToCollaborators}
       />
     );
     expect(screen.queryByText('Data sources')).toBeNull();

@@ -141,7 +141,7 @@ describe('Workspace plugin', () => {
     );
     workspaceClientMock.enterWorkspace.mockResolvedValueOnce({
       success: true,
-      error: 'error',
+      result: null,
     });
     const setupMock = coreMock.createSetup();
     let collapsibleNavHeaderImplementation = () => null;
@@ -320,7 +320,7 @@ describe('Workspace plugin', () => {
     );
     workspaceClientMock.enterWorkspace.mockResolvedValue({
       success: true,
-      error: 'error',
+      result: null,
     });
 
     const workspacePlugin = new WorkspacePlugin();
