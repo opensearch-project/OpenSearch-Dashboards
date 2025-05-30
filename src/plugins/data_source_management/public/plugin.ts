@@ -36,6 +36,7 @@ import { createDataSourceMenu } from './components/data_source_menu/create_data_
 import { DataSourceMenuProps } from './components/data_source_menu';
 import {
   setApplication,
+  setWorkspaces,
   setHideLocalCluster,
   setUiSettings,
   setDataSourceSelection,
@@ -249,6 +250,7 @@ export class DataSourceManagementPlugin
     this.core = core;
 
     setApplication(core.application);
+    setWorkspaces(core.workspaces);
     core.http.intercept({
       request: catalogRequestIntercept(),
     });

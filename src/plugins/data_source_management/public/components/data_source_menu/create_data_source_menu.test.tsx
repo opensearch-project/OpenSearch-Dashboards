@@ -20,7 +20,7 @@ import { DataSourceSelectionService } from '../../service/data_source_selection_
 describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
-  const { uiSettings } = coreMock.createSetup();
+  const { uiSettings, workspaces } = coreMock.createSetup();
   const dataSourceSelection = new DataSourceSelectionService();
 
   beforeAll(() => {
@@ -48,6 +48,7 @@ describe('create data source menu', () => {
 
     spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
     spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
+    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
     spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
 
@@ -78,6 +79,7 @@ describe('create data source menu', () => {
     };
     spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
     spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
+    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
     spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
@@ -104,7 +106,7 @@ describe('when setMenuMountPoint is provided', () => {
 
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
-  const { uiSettings } = coreMock.createSetup();
+  const { uiSettings, workspaces } = coreMock.createSetup();
   const dataSourceSelection = new DataSourceSelectionService();
 
   const refresh = () => {
@@ -148,6 +150,7 @@ describe('when setMenuMountPoint is provided', () => {
 
     spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
     spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
+    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
     spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
 
