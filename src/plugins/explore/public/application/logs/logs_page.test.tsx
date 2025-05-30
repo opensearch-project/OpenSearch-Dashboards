@@ -15,14 +15,14 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
 }));
 
 // Mock the trackUiMetric function
-jest.mock('../legacy/data_explorer/ui_metric', () => ({
+jest.mock('../../ui_metric', () => ({
   DISCOVER_LOAD_EVENT: 'discover_load',
   NEW_DISCOVER_LOAD_EVENT: 'new_discover_load',
   trackUiMetric: jest.fn(),
 }));
 
 // Mock the components used by LogsPage
-jest.mock('../legacy/data_explorer/components/sidebar', () => ({
+jest.mock('../../components/sidebar', () => ({
   Sidebar: ({ children }: { children: React.ReactNode }) => (
     <div data-test-subj="sidebar">{children}</div>
   ),

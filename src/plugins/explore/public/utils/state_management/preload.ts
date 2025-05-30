@@ -6,9 +6,9 @@
 import { PreloadedState } from '@reduxjs/toolkit';
 import { getPreloadedState as getPreloadedMetadataState } from './metadata_slice';
 import { RootState } from './store';
+import { DefaultViewState } from '../../../../data_explorer/public';
+import { LOGS_VIEW_ID } from '../../../common';
 import { DataExplorerServices } from '../../types';
-import { DefaultViewState } from '../../../../../../../data_explorer/public';
-import { LOGS_VIEW_ID } from '../../../../../../common';
 
 export const getPreloadedState = async (
   services: DataExplorerServices,

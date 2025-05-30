@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataExplorerServices } from '../../types';
 import { createDataExplorerServicesMock } from '../mocks';
 import { loadReduxState, persistReduxState } from './redux_persistence';
+import { DataExplorerServices } from '../../types';
 
 describe('test redux state persistence', () => {
   let mockServices: jest.Mocked<DataExplorerServices>;

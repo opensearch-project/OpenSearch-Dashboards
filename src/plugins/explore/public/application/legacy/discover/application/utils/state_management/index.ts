@@ -4,13 +4,13 @@
  */
 
 import { TypedUseSelectorHook } from 'react-redux';
+import { DiscoverState } from './discover_slice';
 import {
   RootState,
   setIndexPattern as updateIndexPattern,
   useTypedDispatch,
   useTypedSelector,
-} from '../../../../data_explorer';
-import { DiscoverState } from './discover_slice';
+} from '../../../../../../utils/state_management';
 
 export * from './discover_slice';
 

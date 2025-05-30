@@ -8,7 +8,6 @@ import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import rison from 'rison-node';
 import { stringify } from 'query-string';
-import { lazy } from 'react';
 import { opensearchFilters } from '../../data/public';
 import {
   createOsdUrlStateStorage,
@@ -31,14 +30,14 @@ import {
 import { LOGS_VIEW_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/config';
 import {
+  DataExplorerServices,
   ExplorePluginSetup,
   ExplorePluginStart,
   ExploreSetupDependencies,
   ExploreStartDependencies,
 } from './types';
-import { setUsageCollector } from './application/legacy/data_explorer/services';
-import { DataExplorerServices } from './application/legacy/data_explorer';
-import { getPreloadedStore } from './application/legacy/data_explorer/utils/state_management';
+import { setUsageCollector } from './services';
+import { getPreloadedStore } from './utils/state_management';
 import { ExploreStart, DiscoverStartPlugins } from './application/legacy/discover/types';
 import { DocViewsRegistry } from './application/legacy/discover/application/doc_views/doc_views_registry';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';

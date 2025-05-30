@@ -4,18 +4,19 @@
  */
 
 import React from 'react';
-import { DataExplorerServices, ViewProps } from '../../../../data_explorer';
 import {
   OpenSearchDashboardsContextProvider,
   useOpenSearchDashboards,
 } from '../../../../../../../../opensearch_dashboards_react/public';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { useSearch, SearchContextValue } from '../utils/use_search';
+import { DataExplorerServices } from '../../../../../../types';
+import { AppMountParameters } from '../../../../../../../../../core/public';
 
 const SearchContext = React.createContext<SearchContextValue>({} as SearchContextValue);
 
 // eslint-disable-next-line import/no-default-export
-export default function DiscoverContext({ children }: React.PropsWithChildren<ViewProps>) {
+export default function DiscoverContext({ children }: React.PropsWithChildren<AppMountParameters>) {
   const { services: deServices } = useOpenSearchDashboards<DataExplorerServices>();
   const services = getServices();
   const searchParams = useSearch({

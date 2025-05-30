@@ -16,13 +16,9 @@ import { AppMountParameters } from 'opensearch-dashboards/public';
 import React, { useRef } from 'react';
 import { IDataPluginServices } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../legacy/data_explorer/components/constants';
-import { Sidebar } from '../legacy/data_explorer/components/sidebar';
-import {
-  DISCOVER_LOAD_EVENT,
-  NEW_DISCOVER_LOAD_EVENT,
-  trackUiMetric,
-} from '../legacy/data_explorer/ui_metric';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
+import { Sidebar } from '../../components/sidebar';
+import { DISCOVER_LOAD_EVENT, NEW_DISCOVER_LOAD_EVENT, trackUiMetric } from '../../ui_metric';
 import DiscoverCanvas from '../legacy/discover/application/view_components/canvas';
 import DiscoverContext from '../legacy/discover/application/view_components/context';
 import DiscoverPanel from '../legacy/discover/application/view_components/panel';

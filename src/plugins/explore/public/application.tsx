@@ -9,10 +9,10 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
-import { DataExplorerServices } from './application/legacy/data_explorer/types';
-import { Store } from './application/legacy/data_explorer/utils/state_management';
+import { Store } from './utils/state_management';
 import { LOGS_VIEW_ID } from '../common';
 import { LogsPage } from './application/logs/logs_page';
+import { DataExplorerServices } from './types';
 
 export const renderApp = (
   core: CoreStart,

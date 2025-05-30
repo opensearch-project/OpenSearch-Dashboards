@@ -4,8 +4,8 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DataExplorerServices } from '../../types';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
+import { DataExplorerServices } from '../../types';
 
 export interface MetadataState {
   indexPattern?: string;

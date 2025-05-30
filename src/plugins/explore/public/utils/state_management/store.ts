@@ -7,8 +7,8 @@ import { combineReducers, configureStore, PreloadedState, Reducer, Slice } from 
 import { isEqual } from 'lodash';
 import { reducer as metadataReducer } from './metadata_slice';
 import { loadReduxState, persistReduxState } from './redux_persistence';
+import { DefaultViewState } from '../../../../data_explorer/public';
 import { DataExplorerServices } from '../../types';
-import { DefaultViewState } from '../../../../../../../data_explorer/public';
 
 const HYDRATE = 'HYDRATE';
 

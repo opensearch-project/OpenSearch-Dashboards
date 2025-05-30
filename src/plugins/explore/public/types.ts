@@ -18,8 +18,10 @@ import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwardi
 import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsStart } from 'src/plugins/expressions/public';
+import { CoreStart, ScopedHistory } from 'opensearch-dashboards/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { DataExplorerPluginSetup } from './application/legacy/data_explorer';
+import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
+import { Store } from './utils/state_management';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ExplorePluginSetup {}
@@ -40,7 +42,6 @@ export interface ExploreSetupDependencies {
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
-  dataExplorer: DataExplorerPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -59,4 +60,13 @@ export interface ExploreStartDependencies {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
+}
+
+export interface DataExplorerServices extends CoreStart {
+  store?: Store;
+  expressions: ExpressionsStart;
+  embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
+  scopedHistory: ScopedHistory;
+  osdUrlStateStorage: IOsdUrlStateStorage;
 }

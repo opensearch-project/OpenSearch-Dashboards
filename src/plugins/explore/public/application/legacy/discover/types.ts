@@ -3,29 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { UiActionsSetup, UiActionsStart } from '../../../../../ui_actions/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../../../../embeddable/public';
+import { UiActionsStart } from '../../../../../ui_actions/public';
+import { EmbeddableStart } from '../../../../../embeddable/public';
 import { ChartsPluginStart } from '../../../../../charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../navigation/public';
-import {
-  SharePluginSetup,
-  SharePluginStart,
-  UrlGeneratorContract,
-} from '../../../../../share/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../../../../visualizations/public';
-import {
-  OpenSearchDashboardsLegacySetup,
-  OpenSearchDashboardsLegacyStart,
-} from '../../../../../opensearch_dashboards_legacy/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '../../../../../url_forwarding/public';
-import { HomePublicPluginSetup } from '../../../../../home/public';
+import { SharePluginStart, UrlGeneratorContract } from '../../../../../share/public';
+import { VisualizationsStart } from '../../../../../visualizations/public';
+import { OpenSearchDashboardsLegacyStart } from '../../../../../opensearch_dashboards_legacy/public';
+import { UrlForwardingStart } from '../../../../../url_forwarding/public';
 import { Start as InspectorPublicPluginStart } from '../../../../../inspector/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../../data/public';
+import { DataPublicPluginStart } from '../../../../../data/public';
 import { SavedObjectLoader } from '../../../../../saved_objects/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
-import { DataExplorerPluginSetup } from '../data_explorer';
-import { UsageCollectionSetup } from '../../../../../usage_collection/public';
 
 /**
  * @public
@@ -64,22 +54,6 @@ export interface ExploreStart {
    * ```
    */
   readonly urlGenerator: undefined | UrlGeneratorContract<'EXPLORE_APP_URL_GENERATOR'>;
-}
-
-/**
- * @internal
- */
-export interface DiscoverSetupPlugins {
-  share?: SharePluginSetup;
-  uiActions: UiActionsSetup;
-  embeddable: EmbeddableSetup;
-  opensearchDashboardsLegacy: OpenSearchDashboardsLegacySetup;
-  urlForwarding: UrlForwardingSetup;
-  home?: HomePublicPluginSetup;
-  visualizations: VisualizationsSetup;
-  data: DataPublicPluginSetup;
-  dataExplorer: DataExplorerPluginSetup;
-  usageCollection: UsageCollectionSetup;
 }
 
 /**

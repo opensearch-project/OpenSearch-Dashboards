@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Dataset, DEFAULT_DATA } from '../../../../../../../data/common';
-import { DefaultViewState } from '../../../../../../../data_explorer/public';
+import { Dataset, DEFAULT_DATA } from '../../../../data/common';
+import { DefaultViewState } from '../../../../data_explorer/public';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
-import { DataExplorerServices } from '../../types';
 import { getPreloadedState } from './preload';
 import { RootState } from './store';
+import { DataExplorerServices } from '../../types';
 
 export const loadReduxState = async (
   services: DataExplorerServices,
