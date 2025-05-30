@@ -10,9 +10,9 @@ import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from './application/legacy/data_explorer/types';
-import { DataExplorerApp } from './application/legacy/data_explorer/components/app';
 import { Store } from './application/legacy/data_explorer/utils/state_management';
 import { LOGS_VIEW_ID } from '../common';
+import { LogsPage } from './application/logs/logs_page';
 
 export const renderApp = (
   core: CoreStart,
@@ -31,8 +31,8 @@ export const renderApp = (
               <Route exact path="/">
                 <Redirect to={`${LOGS_VIEW_ID}#/`} />
               </Route>
-              <Route path={[`/:appId`]} exact={false}>
-                <DataExplorerApp params={params} />
+              <Route path={[`/${LOGS_VIEW_ID}`]} exact={false}>
+                <LogsPage params={params} />
               </Route>
             </Switch>
           </services.i18n.Context>
