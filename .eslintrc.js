@@ -118,6 +118,12 @@ module.exports = {
   extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
+    {
+      files: ['**/*.{ts,tsx}'],
+      rules: {
+        'no-bitwise': 'off',
+      },
+    },
     /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */

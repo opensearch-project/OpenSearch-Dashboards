@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { EditOrClear } from './edit_or_clear';

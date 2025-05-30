@@ -1,5 +1,9 @@
-import { LanguageType } from './components/editor_stack/shared';
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { Moment } from 'moment';
+import { LanguageType } from './components/editor_stack/shared';
 
 export interface RefreshInterval {
   pause: boolean;
@@ -12,12 +16,12 @@ export type TimeRange = {
   to: string;
   mode?: 'absolute' | 'relative';
 };
-
 export interface TimeRangeBounds {
   min: Moment | undefined;
   max: Moment | undefined;
 }
 
+// eslint-disable-next-line
 export type Query = {
   query: string | { [key: string]: any };
   language: LanguageType; // The language of the query (e.g., 'ppl', 'natural-language', etc.)
