@@ -88,7 +88,7 @@ export const TableRowUI = ({
           return (
             <td
               key={colName}
-              className="exploreDocTableCell eui-textBreakAll eui-textBreakWord osdDocTableCell__source"
+              className="exploreDocTableCell eui-textBreakAll eui-textBreakWord exploreDocTableCell__source"
               data-test-subj="docTableField"
             >
               <div className="truncate-by-height">
