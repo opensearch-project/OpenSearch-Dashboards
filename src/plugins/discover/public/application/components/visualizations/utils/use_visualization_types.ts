@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { LineChartStyleControls } from '../../components/visualizations/line/line_vis_config';
-import { DiscoverViewServices } from '../../../build_services';
-import { IFieldType, IndexPattern } from '../../../opensearch_dashboards_services';
-import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
-import { LineVisStyleControlsProps } from '../../components/visualizations/line/line_vis_options';
-import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
-import { DiscoverVisColumn } from '../../components/visualizations/types';
-import { visualizationRegistry } from '../../components/visualizations/visualization_registry';
+import { IExpressionLoaderParams } from '../../../../../../expressions/public';
+import { LineChartStyleControls } from '../line/line_vis_config';
+import { DiscoverViewServices } from '../../../../build_services';
+import { IFieldType, IndexPattern } from '../../../../opensearch_dashboards_services';
+import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
+import { LineVisStyleControlsProps } from '../line/line_vis_options';
+import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../../data/common';
+import { DiscoverVisColumn } from '../types';
+import { visualizationRegistry } from '../visualization_registry';
 
 export interface VisualizationType {
   readonly name: string;

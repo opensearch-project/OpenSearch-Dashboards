@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../utils/use_visualization_types';
+import { VisualizationType } from '../../../view_components/utils/use_visualization_types';
 import { Positions } from '../utils/collections';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import { toExpression } from './to_expression';

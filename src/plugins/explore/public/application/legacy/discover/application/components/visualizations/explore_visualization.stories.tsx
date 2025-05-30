@@ -5,15 +5,16 @@
 
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { DiscoverVisualization } from './discover_visualization';
-import { VisualizationTypeResult } from './utils/use_visualization_types';
+import { ExploreVisualization } from './explore_visualization';
 import { Positions } from './utils/collections';
 import { LineVisStyleControls } from './line/line_vis_options';
+import { VisualizationTypeResult } from './utils/use_visualization_types';
 
 export default {
-  title: 'src/plugins/discover/public/application/components/visualizations/discover_visualization',
-  component: DiscoverVisualization,
-} as ComponentMeta<typeof DiscoverVisualization>;
+  title:
+    'src/plugins/explore/public/application/legacy/discover/application/components/visualizations/explore_visualization',
+  component: ExploreVisualization,
+} as ComponentMeta<typeof ExploreVisualization>;
 
 // Mock ReactExpressionRenderer component
 const MockReactExpressionRenderer: React.FC<any> = ({ expression }) => {
@@ -159,8 +160,8 @@ const mockSearchContext = {
   timeRange: { from: 'now-7d', to: 'now' },
 };
 
-const Template: ComponentStory<typeof DiscoverVisualization> = (args) => (
-  <DiscoverVisualization {...args} />
+const Template: ComponentStory<typeof ExploreVisualization> = (args) => (
+  <ExploreVisualization {...args} />
 );
 
 export const Default = Template.bind({});

@@ -5,11 +5,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { IExpressionLoaderParams } from '../../../../../expressions/public';
+import { IExpressionLoaderParams } from '../../../../../../../../expressions/public';
 import { VisualizationTypeResult } from './utils/use_visualization_types';
 import { LineChartStyleControls } from './line/line_vis_config';
 
-export interface DiscoverVisualizationProps {
+export interface ExploreVisualizationProps {
   expression: string;
   searchContext: IExpressionLoaderParams['searchContext'];
   styleOptions: LineChartStyleControls;
@@ -21,7 +21,7 @@ export interface DiscoverVisualizationProps {
   }>;
 }
 
-export const DiscoverVisualization: React.FC<DiscoverVisualizationProps> = ({
+export const ExploreVisualization: React.FC<ExploreVisualizationProps> = ({
   expression,
   searchContext,
   styleOptions,
