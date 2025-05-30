@@ -4,12 +4,13 @@
  */
 
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useEffectOnce } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { c } from 'tar';
+import { UiSettingScope } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
   DataSourceManagementContext,
@@ -53,6 +54,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     notifications: { toasts },
     application,
     navigation,
+    workspaces,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const dataSourceID: string = props.match.params.id.split(':')[0];
   const crossClusterConnectionAlias = props.match.params.id.includes(':')
@@ -63,7 +65,11 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isGetingDefaultDataSource, setIsGetingDefaultDataSource] = useState<boolean>(false);
+  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>(null);
   const useNewUX = uiSettings.get('home:useNewHomePage');
+  const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+  const scope = currentWorkspaceId ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
 
   /* Fetch data source by id*/
   useEffectOnce(() => {
@@ -71,6 +77,23 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
       await fetchDataSourceDetailsByID();
     })();
   });
+
+  const loadDefaultDataSourceId = useCallback(async () => {
+    try {
+      setIsGetingDefaultDataSource(true);
+      const id = await getDefaultDataSourceId(uiSettings, scope);
+      setDefaultDataSourceId(id);
+    } catch (error) {
+      toasts.addWarning(error.message);
+    } finally {
+      setIsGetingDefaultDataSource(false);
+    }
+  }, [uiSettings, scope, toasts]);
+
+  /* fetch current default data source id*/
+  useEffect(() => {
+    loadDefaultDataSourceId();
+  }, [loadDefaultDataSourceId]);
 
   const fetchDataSourceDetailsByID = async () => {
     setIsLoading(true);
@@ -100,10 +123,15 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   };
 
   const handleSetDefault = async () => {
-    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID);
+    // default data source has 2 scopes
+    // if in a workspace, then update workspace level setting
+    // or update global level setting
+    const result = await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID, scope);
+    if (result) {
+      await loadDefaultDataSourceId();
+    }
+    return result;
   };
-
-  const isDefaultDataSource = getDefaultDataSourceId(uiSettings) === dataSourceID;
 
   /* Handle submit - create data source*/
   const handleSubmit = async (attributes: DataSourceAttributes) => {
@@ -130,7 +158,8 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
       // If deleted datasource is the default datasource, then set the first existing
       // datasource as default datasource.
-      setDefaultDataSource();
+      await setDefaultDataSource();
+      await loadDefaultDataSourceId();
       props.history.push('');
     } catch (e) {
       setIsLoading(false);
@@ -145,8 +174,8 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
   const setDefaultDataSource = async () => {
     try {
-      if (getDefaultDataSourceId(uiSettings) === dataSourceID) {
-        await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      if (defaultDataSourceId === dataSourceID) {
+        await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, scope);
       }
     } catch (e) {
       setIsLoading(false);
@@ -169,6 +198,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
   /* Render the edit wizard */
   const renderContent = () => {
+    const isDefaultDataSource = defaultDataSourceId === dataSourceID;
     if (!isLoading && (!dataSource || !dataSource.id)) {
       return <h1 data-test-subj="dataSourceNotFound">Data Source not found!</h1>;
     }
@@ -191,7 +221,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
             crossClusterConnectionAlias={crossClusterConnectionAlias}
           />
         ) : null}
-        {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}
+        {isLoading || isGetingDefaultDataSource || !dataSource?.endpoint ? <LoadingMask /> : null}
       </>
     );
   };

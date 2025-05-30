@@ -77,7 +77,8 @@ export class DataSourceMultiSelectable extends React.Component<
   async componentDidMount() {
     this._isMounted = true;
     try {
-      const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
+      // for data source selectable, get default data source from cache
+      const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
       let selectedOptions: SelectedDataSourceOption[] = [];
       const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
         'id',

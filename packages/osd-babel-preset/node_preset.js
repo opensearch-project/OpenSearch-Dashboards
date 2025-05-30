@@ -66,8 +66,8 @@ module.exports = (_, options = {}) => {
       [
         require.resolve('babel-plugin-module-resolver'),
         {
-          root: [path.resolve(__dirname, '../..')],
-          cwd: path.resolve(__dirname, '../..'),
+          root: options['babel-plugin-module-resolver']?.root ?? [path.resolve(__dirname, '../..')],
+          cwd: options['babel-plugin-module-resolver']?.cwd ?? path.resolve(__dirname, '../..'),
           alias: {
             'opensearch-dashboards/server': './src/core/server',
             'opensearch-dashboards/public': './src/core/public',

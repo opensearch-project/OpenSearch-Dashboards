@@ -16,6 +16,7 @@
     display: grid;
     grid-template-rows: auto 1fr;
     border-right: $euiBorderThin;
+    overflow-y: hidden;
 
     &--empty,
     &--leaf {
@@ -34,6 +35,8 @@
   }
 
   .datasetTable {
+    overflow-y: auto;
+
     &__loadMore {
       text-align: center;
       padding: $euiSizeS;

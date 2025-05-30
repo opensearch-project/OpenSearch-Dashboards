@@ -39,7 +39,9 @@ import { Task, Build } from '../lib';
 
 const asyncPipeline = promisify(pipeline);
 
-const transpileWithBabel = async (srcGlobs: string[], build: Build, presets: string[]) => {
+type Preset = string | [string, Record<string, any>];
+
+const transpileWithBabel = async (srcGlobs: string[], build: Build, presets: Preset[]) => {
   const buildRoot = build.resolvePath();
 
   await asyncPipeline(
@@ -71,7 +73,12 @@ export const TranspileBabel: Task = {
   async run(config, log, build) {
     // Transpile server code
     await transpileWithBabel(['**/*.{js,ts,tsx}', '!**/public/**'], build, [
-      require.resolve('@osd/babel-preset/node_preset'),
+      [
+        require.resolve('@osd/babel-preset/node_preset'),
+        {
+          'babel-plugin-module-resolver': { root: [build.resolvePath()], cwd: build.resolvePath() },
+        },
+      ],
     ]);
 
     // Transpile client code

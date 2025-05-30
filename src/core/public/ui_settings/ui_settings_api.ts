@@ -32,6 +32,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { HttpSetup } from '../http';
 import { UiSettingsState } from './types';
+import { UiSettingScope } from '../../server/ui_settings/types';
 
 export interface UiSettingsApiResponse {
   settings: UiSettingsState;
@@ -55,10 +56,9 @@ const NOOP_CHANGES = {
 export class UiSettingsApi {
   private pendingChanges?: Changes;
   private sendInProgress = false;
-
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(private readonly http: HttpSetup) {}
+  constructor(private readonly http: HttpSetup, private readonly scope?: UiSettingScope) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is
@@ -68,13 +68,11 @@ export class UiSettingsApi {
   public batchSet(key: string, value: any) {
     return new Promise<UiSettingsApiResponse | undefined>((resolve, reject) => {
       const prev = this.pendingChanges || NOOP_CHANGES;
-
       this.pendingChanges = {
         values: {
           ...prev.values,
           [key]: value,
         },
-
         callback(error, resp) {
           prev.callback(error, resp);
 
@@ -88,6 +86,10 @@ export class UiSettingsApi {
 
       this.flushPendingChanges();
     });
+  }
+
+  public async getAll() {
+    return this.sendRequest('GET', '/api/opensearch-dashboards/settings', undefined);
   }
 
   /**
@@ -130,10 +132,8 @@ export class UiSettingsApi {
 
     const changes = this.pendingChanges;
     this.pendingChanges = undefined;
-
     try {
       this.sendInProgress = true;
-
       changes.callback(
         undefined,
         await this.sendRequest('POST', '/api/opensearch-dashboards/settings', {
@@ -151,16 +151,21 @@ export class UiSettingsApi {
   /**
    * Calls window.fetch() with the proper headers and error handling logic.
    */
-  private async sendRequest(method: string, path: string, body: any): Promise<any> {
+  private async sendRequest(method: string, path: string, body?: any): Promise<any> {
+    const query = this.scope
+      ? {
+          scope: this.scope,
+        }
+      : undefined;
     try {
       this.loadingCount$.next(this.loadingCount$.getValue() + 1);
-
       return await this.http.fetch(path, {
         method,
         body: JSON.stringify(body),
         headers: {
           accept: 'application/json',
         },
+        query,
       });
     } catch (err) {
       if (err.response) {

@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getWorkspaceIdFromUrl, formatUrlWithWorkspaceId } from './workspace';
+import {
+  getWorkspaceIdFromUrl,
+  formatUrlWithWorkspaceId,
+  isNavGroupInFeatureConfigs,
+} from './workspace';
 import { httpServiceMock } from '../public/mocks';
 
 describe('#getWorkspaceIdFromUrl', () => {
@@ -36,5 +40,21 @@ describe('#formatUrlWithWorkspaceId', () => {
     expect(
       formatUrlWithWorkspaceId('/w/foo/app/dashboard', '', basePathWithoutClientBasePath)
     ).toEqual('http://localhost/app/dashboard');
+  });
+});
+
+describe('workspace utils: isNavGroupInFeatureConfigs', () => {
+  it('should return false if nav group not in feature configs', () => {
+    expect(
+      isNavGroupInFeatureConfigs('dataAdministration', [
+        'use-case-observability',
+        'use-case-search',
+      ])
+    ).toBe(false);
+  });
+  it('should return true if nav group in feature configs', () => {
+    expect(
+      isNavGroupInFeatureConfigs('observability', ['use-case-observability', 'use-case-search'])
+    ).toBe(true);
   });
 });

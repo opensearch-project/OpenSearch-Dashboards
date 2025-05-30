@@ -1,0 +1,30 @@
+.dscHistogram__header--partial {
+  font-weight: $euiFontWeightRegular;
+  min-width: $euiSize * 12;
+}
+
+// Temporary override to inlined styles provided by ElasticCharts theming
+// Will be unnecessary when we migrate the histogram to a different rendering library:
+// https: //github.com/opensearch-project/OpenSearch-Dashboards/issues/4643
+.dscHistogram .echChartBackground {
+  background-color: inherit !important;
+}
+
+.dscChart__wrapper {
+  border-bottom: 1px solid $euiColorLightShade;
+
+  &--enhancement {
+    padding: 8px;
+    gap: 8px;
+    flex-grow: 0;
+    flex-wrap: nowrap;
+  }
+
+  .dscChart__chartheader {
+    align-items: center;
+  }
+}
+
+.dscChart__TimechartHeader {
+  padding-top: $euiSizeXS;
+}

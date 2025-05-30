@@ -1,0 +1,2 @@
+fix:
+- Content and Card are mistakenly placed under the create visualization dropdown menu ([#9815](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9815))

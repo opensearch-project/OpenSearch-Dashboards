@@ -7,16 +7,18 @@
   "requiredPlugins": [
     "charts",
     "data",
-    "dataExplorer",
     "embeddable",
+    "home",
     "inspector",
-    "opensearchDashboardsLegacy",
-    "urlForwarding",
     "navigation",
+    "opensearchDashboardsLegacy",
+    "savedObjects",
     "uiActions",
-    "visualizations",
-    "usageCollection"
+    "urlForwarding",
+    "usageCollection",
+    "visualizations"
   ],
+  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils"],
   "optionalPlugins": ["home", "share"],
   "configPath": ["explore"]
 }

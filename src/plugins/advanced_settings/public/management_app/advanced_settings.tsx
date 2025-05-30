@@ -172,6 +172,8 @@ export class AdvancedSettingsComponent extends Component<
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     const userSettingsEnabled = config.get('theme:enableUserControl');
+    const isDashboardAdmin = !!this.props.application.capabilities.dashboards?.isDashboardAdmin;
+
     return Object.entries(all)
       .filter(([, setting]) => {
         const scope = setting.scope;
@@ -181,11 +183,13 @@ export class AdvancedSettingsComponent extends Component<
         }
 
         if (typeof scope === 'string') {
-          return scope === UiSettingScope.GLOBAL;
+          return scope === UiSettingScope.GLOBAL || scope === UiSettingScope.DASHBOARD_ADMIN;
         }
 
         if (Array.isArray(scope)) {
-          return scope.includes(UiSettingScope.GLOBAL);
+          return (
+            scope.includes(UiSettingScope.GLOBAL) || scope.includes(UiSettingScope.DASHBOARD_ADMIN)
+          );
         }
 
         return false;
@@ -197,6 +201,8 @@ export class AdvancedSettingsComponent extends Component<
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
           isOverridden: config.isOverridden(setting[0]),
+          isPermissionControlled:
+            all[setting[0]].scope === UiSettingScope.DASHBOARD_ADMIN && !isDashboardAdmin,
           userSettingsEnabled,
         });
       })

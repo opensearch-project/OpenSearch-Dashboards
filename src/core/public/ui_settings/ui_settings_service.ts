@@ -28,14 +28,15 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
-
+import { Subject, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { HttpSetup } from '../http';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 import { IUiSettingsClient } from './types';
+import { UiSettingScope } from '../../server/ui_settings/types';
 
 export interface UiSettingsServiceDeps {
   http: HttpSetup;
@@ -44,19 +45,37 @@ export interface UiSettingsServiceDeps {
 
 /** @internal */
 export class UiSettingsService {
-  private uiSettingsApi?: UiSettingsApi;
+  private uiSettingApis?: {
+    default: UiSettingsApi;
+    [scope: string]: UiSettingsApi;
+  };
   private uiSettingsClient?: UiSettingsClient;
   private done$ = new Subject();
 
   public setup({ http, injectedMetadata }: UiSettingsServiceDeps): IUiSettingsClient {
-    this.uiSettingsApi = new UiSettingsApi(http);
-    http.addLoadingCountSource(this.uiSettingsApi.getLoadingCount$());
+    /**
+     * Currently, we have three scopes: workspace, global, and user.
+     * For workspace and user and global, we instantiate a dedicated API to handle operations specific to that scope.
+     * if the scope is not clarified, it will remains the previous logic, leave the handling to server to decide the destinanted scope
+     */
+    this.uiSettingApis = {
+      default: new UiSettingsApi(http),
+      [UiSettingScope.WORKSPACE]: new UiSettingsApi(http, UiSettingScope.WORKSPACE),
+      [UiSettingScope.USER]: new UiSettingsApi(http, UiSettingScope.USER),
+      [UiSettingScope.GLOBAL]: new UiSettingsApi(http, UiSettingScope.GLOBAL),
+    };
+
+    const combinedLoadingCount$ = combineLatest(
+      Object.values(this.uiSettingApis).map((api) => api.getLoadingCount$())
+    ).pipe(map((counts) => counts.reduce((sum, count) => sum + count, 0)));
+
+    http.addLoadingCountSource(combinedLoadingCount$);
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
     const legacyMetadata = injectedMetadata.getLegacyMetadata();
 
     this.uiSettingsClient = new UiSettingsClient({
-      api: this.uiSettingsApi,
+      uiSettingApis: this.uiSettingApis,
       defaults: legacyMetadata.uiSettings.defaults,
       initialSettings: legacyMetadata.uiSettings.user,
       done$: this.done$,
@@ -72,8 +91,10 @@ export class UiSettingsService {
   public stop() {
     this.done$.complete();
 
-    if (this.uiSettingsApi) {
-      this.uiSettingsApi.stop();
+    if (this.uiSettingApis) {
+      for (const api of Object.values(this.uiSettingApis)) {
+        api.stop();
+      }
     }
   }
 }
