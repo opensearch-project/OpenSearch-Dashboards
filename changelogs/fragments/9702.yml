@@ -1,0 +1,2 @@
+feat:
+- Add default index pattern validation in Discover page ([#9702](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9702))
