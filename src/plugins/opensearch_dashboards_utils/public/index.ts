@@ -71,6 +71,8 @@ export {
   getStatesFromOsdUrl,
   setStateToOsdUrl,
   withNotifyOnErrors,
+  parseUrl,
+  parseUrlHash,
 } from './state_management/url';
 export {
   syncState,
