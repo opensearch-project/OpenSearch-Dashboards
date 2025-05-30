@@ -7,7 +7,7 @@ import { UiStatsMetricType } from '@osd/analytics';
 import { METRIC_TYPE } from '../../../../../../usage_collection/public';
 import { DATASET_METRIC_SUFFIX, LANGUAGE_METRIC_SUFFIX, NEW_DISCOVER_APP_NAME } from './constants';
 import { Query } from '../../../../../../data/public';
-import { getUsageCollector } from '../../data_explorer/services';
+import { getUsageCollector } from '../../../../services';
 
 export const getDatasetTypeMetricEventName = (datasource: string) => {
   return `${datasource}_${DATASET_METRIC_SUFFIX}`;

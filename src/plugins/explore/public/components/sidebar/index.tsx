@@ -11,12 +11,12 @@ import {
   DataSourceGroup,
   DataSourceSelectable,
   UI_SETTINGS,
-} from '../../../../../../../data/public';
-import { DataSourceOption } from '../../../../../../../data/public';
-import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
-import { DataExplorerServices } from '../../types';
+} from '../../../../data/public';
+import { DataSourceOption } from '../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
+import { DataExplorerServices } from '../../types';
 
 interface SidebarProps {
   children: React.ReactNode;

@@ -5,10 +5,11 @@
 
 import { ScopedHistory } from 'opensearch-dashboards/public';
 import { coreMock, scopedHistoryMock } from 'opensearch-dashboards/public/mocks';
-import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { embeddablePluginMock } from '../../../../../../embeddable/public/mocks';
-import { expressionsPluginMock } from '../../../../../../expressions/public/mocks';
-import { createOsdUrlStateStorage } from '../../../../../../opensearch_dashboards_utils/public';
+import { dataPluginMock } from '../../../data/public/mocks';
+import { embeddablePluginMock } from '../../../embeddable/public/mocks';
+import { expressionsPluginMock } from '../../../expressions/public/mocks';
+import { createOsdUrlStateStorage } from '../../../opensearch_dashboards_utils/public';
+
 import { DataExplorerServices } from '../types';
 
 export const createDataExplorerServicesMock = () => {

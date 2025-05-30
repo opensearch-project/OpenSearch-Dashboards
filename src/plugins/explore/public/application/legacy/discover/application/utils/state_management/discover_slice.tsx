@@ -8,7 +8,7 @@ import { matchPath } from 'react-router-dom';
 import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { Filter, Query } from '../../../../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
-import { DefaultViewState } from '../../../../data_explorer';
+import { DefaultViewState } from '../../../../../../../../data_explorer/public';
 import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../../../../saved_explore/types';
