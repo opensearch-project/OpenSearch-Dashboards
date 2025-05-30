@@ -23,7 +23,7 @@ import {
 
 interface TestServices {
   opensearchServer: TestOpenSearchUtils;
-  osd: any;
+  osd: TestOpenSearchDashboardsUtils;
   osdServer: TestOpenSearchDashboardsUtils['osdServer'];
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsRepository: ISavedObjectsRepository;
@@ -134,7 +134,7 @@ export function docPermissionControlledSuite() {
       });
     });
 
-    it('update should be allowed when the user is not dashboard admin', async () => {
+    it('update should be allowed when the user is dashboard admin', async () => {
       const { osdServer, savedObjectsRepository } = services;
 
       await savedObjectsRepository.create(
