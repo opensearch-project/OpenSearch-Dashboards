@@ -13,9 +13,9 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
-import { SelectOption, SwitchOption } from '../../../../../../charts/public';
 import { getPositions, Positions } from '../utils/collections';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 
@@ -53,7 +53,6 @@ export const BasicVisOptions = ({
   onAddLegendChange,
   onLegendPositionChange,
   onAddTimeMarkerChange,
-  onModeChange,
   onShowLineChange,
   onLineModeChange,
   onLineWidthChange,
@@ -89,14 +88,17 @@ export const BasicVisOptions = ({
       <EuiSpacer size="s" />
 
       {/* Show Line Toggle */}
-      <SwitchOption
+      <EuiFormRow
         label={i18n.translate('discover.stylePanel.basic.showLine', {
           defaultMessage: 'Show line',
         })}
-        paramName="showLine"
-        value={showLine}
-        setValue={(_, value) => onShowLineChange(value)}
-      />
+      >
+        <EuiSwitch
+          label=""
+          checked={showLine}
+          onChange={(e) => onShowLineChange(e.target.checked)}
+        />
+      </EuiFormRow>
 
       {/* Line Configuration - Same Row */}
       <EuiSpacer size="s" />
@@ -136,55 +138,69 @@ export const BasicVisOptions = ({
       <EuiSpacer size="s" />
 
       {/* Show Dots Toggle */}
-      <SwitchOption
+      <EuiFormRow
         label={i18n.translate('discover.stylePanel.basic.showDots', {
           defaultMessage: 'Show dots',
         })}
-        paramName="showDots"
-        value={showDots}
-        setValue={(_, value) => onShowDotsChange(value)}
-      />
+      >
+        <EuiSwitch
+          label=""
+          checked={showDots}
+          onChange={(e) => onShowDotsChange(e.target.checked)}
+        />
+      </EuiFormRow>
 
       <EuiSpacer size="s" />
 
-      <SwitchOption
+      <EuiFormRow
         label={i18n.translate('discover.stylePanel.basic.showLegend', {
           defaultMessage: 'Show legend',
         })}
-        paramName="addLegend"
-        value={addLegend}
-        setValue={(_, value) => onAddLegendChange(value)}
-      />
+      >
+        <EuiSwitch
+          label=""
+          checked={addLegend}
+          onChange={(e) => onAddLegendChange(e.target.checked)}
+        />
+      </EuiFormRow>
 
       {addLegend && (
-        <SelectOption
+        <EuiFormRow
           label={i18n.translate('discover.stylePanel.basic.legendPosition', {
             defaultMessage: 'Legend position',
           })}
-          options={legendPositions}
-          paramName="legendPosition"
-          value={legendPosition}
-          setValue={(_, value) => onLegendPositionChange(value as Positions)}
-        />
+        >
+          <EuiSelect
+            options={legendPositions}
+            value={legendPosition}
+            onChange={(e) => onLegendPositionChange(e.target.value as Positions)}
+          />
+        </EuiFormRow>
       )}
 
-      <SwitchOption
+      <EuiFormRow
         label={i18n.translate('discover.stylePanel.basic.showTooltip', {
           defaultMessage: 'Show tooltip',
         })}
-        paramName="addTooltip"
-        value={addTooltip}
-        setValue={(_, value) => onAddTooltipChange(value)}
-      />
+      >
+        <EuiSwitch
+          label=""
+          checked={addTooltip}
+          onChange={(e) => onAddTooltipChange(e.target.checked)}
+        />
+      </EuiFormRow>
 
-      <SwitchOption
+      <EuiFormRow
         label={i18n.translate('discover.stylePanel.basic.showTimeMarker', {
           defaultMessage: 'Show current time marker',
         })}
-        paramName="addTimeMarker"
-        value={addTimeMarker}
-        setValue={(_, value) => onAddTimeMarkerChange(value)}
-      />
+      >
+        <EuiSwitch
+          label=""
+          checked={addTimeMarker}
+          onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
+        />
+      </EuiFormRow>
     </EuiPanel>
   );
 };
