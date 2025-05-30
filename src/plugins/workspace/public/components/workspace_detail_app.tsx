@@ -22,7 +22,6 @@ import { DataSourceConnectionType } from '../../common/types';
 import { WorkspaceClient } from '../workspace_client';
 import { getDataSourcesList, mergeDataSourcesWithConnections } from '../utils';
 import { WorkspaceAttributeWithPermission } from '../../../../core/types';
-import { AssociationDataSourceModalMode } from '../../common/constants';
 
 function getFormDataFromWorkspace(
   currentWorkspace: WorkspaceAttributeWithPermission | null | undefined
