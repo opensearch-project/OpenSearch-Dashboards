@@ -572,3 +572,8 @@ cy.osd.add('verifyResultsCount', (count) => {
     .should('be.visible')
     .should('have.text', count.toLocaleString());
 });
+
+cy.osd.add('verifyResultsError', (error) => {
+  cy.getElementByTestId('queryResultError').click();
+  cy.getElementByTestId('textBreakWord').contains(error);
+});
