@@ -1,0 +1,33 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+
+interface ShowFieldToggleProps {
+  isEnabled: boolean;
+  onToggle: (enabled: boolean) => void;
+}
+
+export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onToggle }) => {
+  const [showField, setShowField] = useState(isEnabled);
+
+  const handleToggle = () => {
+    const newState = !showField;
+    setShowField(newState);
+    onToggle(newState);
+  };
+
+  return (
+    <EuiButtonEmpty
+      onClick={handleToggle}
+      iconType={showField ? 'menuLeft' : 'menuRight'} // Add the folderOpen icon
+      style={{ color: '#0073e6', padding: '0px' }} // Highlighted text style
+      data-test-subj="showFields"
+    >
+      {showField ? 'Hide Fields' : 'Show Fields'}
+    </EuiButtonEmpty>
+  );
+};

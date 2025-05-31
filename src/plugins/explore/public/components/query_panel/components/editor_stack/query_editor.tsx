@@ -1,0 +1,76 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect } from 'react';
+import { monaco } from '@osd/monaco';
+import { getEditorConfig, LanguageType } from './shared';
+import { ReusableEditor } from './resuable_editor';
+
+interface QueryEditorProps {
+  languageType: LanguageType;
+  queryString: string;
+  onChange: (value: string) => void;
+  handleQueryRun: (queryString?: string) => void;
+  isEditorReadOnly: boolean;
+  handleQueryEdit: () => void;
+  handleClearEditor: () => void;
+}
+
+// Todo: Move this dynamic comment once the actual query is loaded
+const FIXED_COMMENT = '// AI Generated PPL at 00.03.33pm';
+const EDITOR_HEIGHT = 100;
+
+export const QueryEditor: React.FC<QueryEditorProps> = ({
+  queryString,
+  languageType,
+  onChange,
+  handleQueryRun,
+  isEditorReadOnly,
+  handleQueryEdit,
+  handleClearEditor,
+}) => {
+  const editorConfig = getEditorConfig(languageType);
+  const [decorated, setDecorated] = useState(false);
+
+  // Inject comment only once when content is loaded
+  useEffect(() => {
+    if (queryString && !queryString.startsWith(FIXED_COMMENT)) {
+      onChange(`${FIXED_COMMENT}\n${queryString}`);
+    }
+  }, [queryString, onChange]);
+
+  const onEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    // Decorate the first line with a comment style if not already decorated
+    if (!decorated) {
+      editor.createDecorationsCollection([
+        {
+          range: new monaco.Range(1, 1, 1, 1),
+          options: {
+            isWholeLine: true,
+            className: 'comment-line',
+          },
+        },
+      ]);
+      setDecorated(true);
+    }
+  };
+
+  return (
+    <ReusableEditor
+      value={queryString}
+      onChange={onChange}
+      onRun={handleQueryRun}
+      isReadOnly={isEditorReadOnly}
+      onEdit={handleQueryEdit}
+      onClear={handleClearEditor}
+      onEditorDidMount={onEditorDidMount}
+      editorConfig={editorConfig}
+      editText="Edit Query"
+      clearText="Clear Editor"
+      height={EDITOR_HEIGHT}
+      editorType="query" // This is used for styling and identification
+    />
+  );
+};
