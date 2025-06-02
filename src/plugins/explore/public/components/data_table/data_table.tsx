@@ -209,7 +209,7 @@ const DataTableUI = ({
   }, [columns, tableElement, indexOfRenderedData, timeFromFirstRow]);
 
   return (
-    <div className="explore-table container">
+    <div className="explore-table-container">
       {showPagination ? (
         <Pagination
           pageCount={pageCount}

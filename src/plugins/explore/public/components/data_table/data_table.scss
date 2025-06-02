@@ -1,7 +1,7 @@
 /**
  * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
  */
-.explore-table.container {
+.explore-table-container {
   doc-table {
     @include euiScrollBar;
 

@@ -14,7 +14,7 @@ import './_table_header.scss';
 import { i18n } from '@osd/i18n';
 import React, { ReactNode } from 'react';
 import { EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
-import { SortOrder } from '../../../../../../saved_explore/types';
+import { SortOrder } from '../../../../../../types/saved_explore_types';
 
 interface Props {
   colLeftIdx: number; // idx of the column to the left, -1 if moving is not possible

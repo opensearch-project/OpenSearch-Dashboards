@@ -4,7 +4,7 @@
  */
 
 import { discoverSlice, DiscoverState } from './discover_slice';
-import { SortOrder } from '../../../../../../saved_explore/types';
+import { SortOrder } from '../../../../../../types/saved_explore_types';
 
 describe('discoverSlice', () => {
   let initialState: DiscoverState;
