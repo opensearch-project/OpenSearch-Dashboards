@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LogsPage should render the logs page component 1`] = `
+<div>
+  <div
+    class="mainPage"
+  >
+    <div>
+      WIP: this is logs flavor rendered by the new explore plugin
+    </div>
+    <div
+      class="euiPage deLayout"
+    >
+      <div>
+        Loading...
+      </div>
+    </div>
+  </div>
+</div>
+`;

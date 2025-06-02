@@ -13,15 +13,12 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import React, { memo, useRef } from 'react';
+import React, { lazy, memo, Suspense, useRef } from 'react';
 import { IDataPluginServices } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
 import { Sidebar } from '../../components/sidebar';
 import { DISCOVER_LOAD_EVENT, NEW_DISCOVER_LOAD_EVENT, trackUiMetric } from '../../ui_metric';
-import DiscoverCanvas from '../legacy/discover/application/view_components/canvas';
-import DiscoverContext from '../legacy/discover/application/view_components/context';
-import DiscoverPanel from '../legacy/discover/application/view_components/panel';
 import './traces_page.scss';
 
 export const TracesPage = ({ params }: { params: AppMountParameters }) => {
@@ -40,6 +37,14 @@ export const TracesPage = ({ params }: { params: AppMountParameters }) => {
   if (isEnhancementsEnabled) {
     trackUiMetric(NEW_DISCOVER_LOAD_EVENT);
   }
+
+  const DiscoverCanvas = lazy(
+    () => import('../legacy/discover/application/view_components/canvas')
+  );
+  const DiscoverPanel = lazy(() => import('../legacy/discover/application/view_components/panel'));
+  const DiscoverContext = lazy(
+    () => import('../legacy/discover/application/view_components/context')
+  );
 
   const MemoizedPanel = memo(DiscoverPanel);
   const MemoizedCanvas = memo(DiscoverCanvas);
@@ -80,31 +85,34 @@ export const TracesPage = ({ params }: { params: AppMountParameters }) => {
         paddingSize="none"
         grow={false}
       >
-        <DiscoverContext {...params}>
-          <EuiResizableContainer direction={isMobile ? 'vertical' : 'horizontal'}>
-            {(EuiResizablePanel, EuiResizableButton) => (
-              <>
-                <EuiResizablePanel
-                  initialSize={20}
-                  minSize="260px"
-                  mode={['collapsible', { position: 'top' }]}
-                  paddingSize="none"
-                >
-                  <Sidebar datasetSelectorRef={datasetSelectorRef}>
-                    <MemoizedPanel {...params} />
-                  </Sidebar>
-                </EuiResizablePanel>
-                <EuiResizableButton />
+        {/* TODO: improve fallback state */}
+        <Suspense fallback={<div>Loading...</div>}>
+          <DiscoverContext {...params}>
+            <EuiResizableContainer direction={isMobile ? 'vertical' : 'horizontal'}>
+              {(EuiResizablePanel, EuiResizableButton) => (
+                <>
+                  <EuiResizablePanel
+                    initialSize={20}
+                    minSize="260px"
+                    mode={['collapsible', { position: 'top' }]}
+                    paddingSize="none"
+                  >
+                    <Sidebar datasetSelectorRef={datasetSelectorRef}>
+                      <MemoizedPanel {...params} />
+                    </Sidebar>
+                  </EuiResizablePanel>
+                  <EuiResizableButton />
 
-                <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
-                  <EuiPageBody className="deLayout__canvas">
-                    <MemoizedCanvas {...params} />
-                  </EuiPageBody>
-                </EuiResizablePanel>
-              </>
-            )}
-          </EuiResizableContainer>
-        </DiscoverContext>
+                  <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
+                    <EuiPageBody className="deLayout__canvas">
+                      <MemoizedCanvas {...params} />
+                    </EuiPageBody>
+                  </EuiResizablePanel>
+                </>
+              )}
+            </EuiResizableContainer>
+          </DiscoverContext>
+        </Suspense>
       </EuiPage>
     </div>
   );
