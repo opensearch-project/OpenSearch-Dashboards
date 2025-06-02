@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import React, { useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import { IDataPluginServices } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
@@ -40,6 +40,9 @@ export const TracesPage = ({ params }: { params: AppMountParameters }) => {
   if (isEnhancementsEnabled) {
     trackUiMetric(NEW_DISCOVER_LOAD_EVENT);
   }
+
+  const MemoizedPanel = memo(DiscoverPanel);
+  const MemoizedCanvas = memo(DiscoverCanvas);
 
   params.optionalRef = {
     topLinkRef,
@@ -88,14 +91,14 @@ export const TracesPage = ({ params }: { params: AppMountParameters }) => {
                   paddingSize="none"
                 >
                   <Sidebar datasetSelectorRef={datasetSelectorRef}>
-                    <DiscoverPanel {...params} />
+                    <MemoizedPanel {...params} />
                   </Sidebar>
                 </EuiResizablePanel>
                 <EuiResizableButton />
 
                 <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
                   <EuiPageBody className="deLayout__canvas">
-                    <DiscoverCanvas {...params} />
+                    <MemoizedCanvas {...params} />
                   </EuiPageBody>
                 </EuiResizablePanel>
               </>
