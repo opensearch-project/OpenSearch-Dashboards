@@ -23,7 +23,7 @@ jest.mock('../../../../framework/hooks/direct_query_hook', () => ({
 
 jest.mock('../../../constants', () => ({
   EMR_STATES: new Map([
-    ['fresh', { ord: 100, terminal: true }],
+    ['initial', { ord: 100, terminal: true }],
     ['success', { ord: 100, terminal: true }],
     ['running', { ord: 70, terminal: false }],
   ]),
@@ -61,7 +61,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
 
     // Default mock for useDirectQuery
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'fresh',
+      loadStatus: 'initial',
       startLoading: jest.fn(),
     });
   });
@@ -161,7 +161,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
       expect(screen.getByTestId('directQuerySyncBar')).toHaveTextContent(
         'Data sync is in progress'
       );
-      expect(screen.getByTestId('directQuerySyncBar')).toHaveClass('direct-query-sync');
+      expect(screen.getByTestId('directQuerySyncBar')).toHaveClass('direct-query-sync-banner');
     });
   });
 
@@ -176,7 +176,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'fresh',
+      loadStatus: 'initial',
       startLoading: mockStartLoading,
     });
 
@@ -214,7 +214,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'fresh',
+      loadStatus: 'initial',
       startLoading: mockStartLoading,
     });
 
@@ -248,7 +248,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'fresh',
+      loadStatus: 'initial',
       startLoading: mockStartLoading,
     });
 
@@ -291,9 +291,9 @@ describe('DashboardDirectQuerySyncBanner', () => {
       />
     );
 
-    // Initially set loadStatus to 'fresh'
+    // Initially set loadStatus to 'initial'
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'fresh',
+      loadStatus: 'initial',
       startLoading: mockStartLoading,
     });
 

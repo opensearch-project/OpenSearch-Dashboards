@@ -31,7 +31,7 @@ export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const observabilityMetricsID = 'observability-metrics';
 
-// Module for handling EMR states for Dashboards Progress Bar. All of these except "fresh" are
+// Module for handling EMR states for Dashboards Progress Bar. All of these except "initial" are
 // directly from the EMR job run states. "ord" is used to approximate progress (eyeballed relative
 // stage times), and "terminal" indicates whether a job is in progress at all.
 export const EMR_STATES = new Map<string, { ord: number; terminal: boolean }>([
@@ -44,8 +44,8 @@ export const EMR_STATES = new Map<string, { ord: number; terminal: boolean }>([
   ['success', { ord: 100, terminal: true }],
   ['failed', { ord: 100, terminal: true }],
   ['canceled', { ord: 100, terminal: true }],
-  // The "null state" for a fresh page load, which components conditionally use on load.
-  ['fresh', { ord: 100, terminal: true }],
+  // The "null state" for a initial page load, which components conditionally use on load.
+  ['initial', { ord: 100, terminal: true }],
 ]);
 
 export const MAX_ORD = 100;

@@ -68,9 +68,9 @@ describe('useDirectQuery', () => {
     }));
   });
 
-  it('should initialize with fresh status', () => {
+  it('should initialize with initial status', () => {
     const { result } = renderHook(() => useDirectQuery(httpMock, notificationsMock));
-    expect(result.current.loadStatus).toBe(DirectQueryLoadingStatus.FRESH);
+    expect(result.current.loadStatus).toBe(DirectQueryLoadingStatus.INITIAL);
   });
 
   it('should handle successful query execution and start polling', async () => {
