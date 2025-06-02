@@ -70,11 +70,6 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => {
   };
 });
 
-jest.mock('../../application/legacy/data_explorer', () => ({
-  useTypedSelector: jest.fn(),
-  useTypedDispatch: jest.fn(),
-}));
-
 describe('Sidebar Component', () => {
   it('renders without crashing', () => {
     const { container, getByTestId } = render(
