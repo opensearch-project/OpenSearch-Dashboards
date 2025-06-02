@@ -16,7 +16,7 @@ import {
   Plugin,
 } from '../../../core/public';
 import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
-import { DashboardDirectQuerySync } from './components/direct_query_data_sources_components/direct_query_sync/direct_query_sync';
+import { DashboardDirectQuerySyncBanner } from './components/direct_query_data_sources_components/direct_query_sync/direct_query_sync_banner';
 import { parseUrlHash } from '../../opensearch_dashboards_utils/public';
 
 import { PLUGIN_NAME } from '../common';
@@ -349,7 +349,7 @@ export class DataSourceManagementPlugin
             if (!this.bannerId) {
               this.bannerId = core.overlays.banners.add(
                 toMountPoint(
-                  React.createElement(DashboardDirectQuerySync, {
+                  React.createElement(DashboardDirectQuerySyncBanner, {
                     dashboardId,
                     http: core.http,
                     notifications: core.notifications,

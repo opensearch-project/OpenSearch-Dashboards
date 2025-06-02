@@ -15,7 +15,7 @@ import {
 import { fetchDirectQuerySyncInfo, DirectQuerySyncInfo } from './direct_query_sync_utils';
 import { EMR_STATES, intervalAsMinutes } from '../../../constants';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
-import './direct_query_sync.scss';
+import './direct_query_sync_banner.scss';
 
 interface DirectQuerySyncProps {
   http: HttpStart;
@@ -25,7 +25,7 @@ interface DirectQuerySyncProps {
   removeBanner: () => void;
 }
 
-export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
+export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
   http,
   notifications,
   savedObjectsClient,
@@ -96,7 +96,7 @@ export const DashboardDirectQuerySync: React.FC<DirectQuerySyncProps> = ({
   const state = EMR_STATES.get(loadStatus)!;
 
   return (
-    <div className="direct-query-sync" data-test-subj="directQuerySyncBar">
+    <div className="direct-query-sync-banner" data-test-subj="directQuerySyncBar">
       {state.terminal ? (
         <EuiText size="s">
           {i18n.translate('dataSourcesManagement.directQuerySync.dataScheduledToSync', {

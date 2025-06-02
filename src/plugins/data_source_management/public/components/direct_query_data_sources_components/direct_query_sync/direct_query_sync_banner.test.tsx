@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { httpServiceMock, notificationServiceMock } from '../../../../../../core/public/mocks';
 import { savedObjectsServiceMock } from '../../../../../../core/public/mocks';
-import { DashboardDirectQuerySync } from './direct_query_sync';
+import { DashboardDirectQuerySyncBanner } from './direct_query_sync_banner';
 import { fetchDirectQuerySyncInfo } from './direct_query_sync_utils';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
 import { intervalAsMinutes } from '../../../constants';
@@ -41,7 +41,7 @@ Object.defineProperty(window, 'location', {
 const mockDateString = '6/30/2021, 5:00:00 PM';
 jest.spyOn(Date.prototype, 'toLocaleString').mockReturnValue(mockDateString);
 
-describe('DashboardDirectQuerySync', () => {
+describe('DashboardDirectQuerySyncBanner', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
   let savedObjectsClient: ReturnType<typeof savedObjectsServiceMock.createStartContract>['client'];
@@ -75,7 +75,7 @@ describe('DashboardDirectQuerySync', () => {
     (fetchDirectQuerySyncInfo as jest.Mock).mockResolvedValue(null);
 
     const { container } = render(
-      <DashboardDirectQuerySync
+      <DashboardDirectQuerySyncBanner
         http={http}
         notifications={notifications}
         savedObjectsClient={savedObjectsClient}
@@ -111,7 +111,7 @@ describe('DashboardDirectQuerySync', () => {
       .mockReturnValueOnce('152331 minutes'); // For last sync time: (1716496560000 - 1625097600000) / 60000
 
     render(
-      <DashboardDirectQuerySync
+      <DashboardDirectQuerySyncBanner
         http={http}
         notifications={notifications}
         savedObjectsClient={savedObjectsClient}
@@ -145,7 +145,7 @@ describe('DashboardDirectQuerySync', () => {
     });
 
     render(
-      <DashboardDirectQuerySync
+      <DashboardDirectQuerySyncBanner
         http={http}
         notifications={notifications}
         savedObjectsClient={savedObjectsClient}
@@ -181,7 +181,7 @@ describe('DashboardDirectQuerySync', () => {
     });
 
     render(
-      <DashboardDirectQuerySync
+      <DashboardDirectQuerySyncBanner
         http={http}
         notifications={notifications}
         savedObjectsClient={savedObjectsClient}
@@ -219,7 +219,7 @@ describe('DashboardDirectQuerySync', () => {
     });
 
     render(
-      <DashboardDirectQuerySync
+      <DashboardDirectQuerySyncBanner
         http={http}
         notifications={notifications}
         savedObjectsClient={savedObjectsClient}
@@ -253,7 +253,7 @@ describe('DashboardDirectQuerySync', () => {
     });
 
     render(
-      <DashboardDirectQuerySync
+      <DashboardDirectQuerySyncBanner
         http={http}
         notifications={notifications}
         savedObjectsClient={savedObjectsClient}
@@ -282,7 +282,7 @@ describe('DashboardDirectQuerySync', () => {
 
     const mockStartLoading = jest.fn();
     const { rerender } = render(
-      <DashboardDirectQuerySync
+      <DashboardDirectQuerySyncBanner
         http={http}
         notifications={notifications}
         savedObjectsClient={savedObjectsClient}
@@ -308,7 +308,7 @@ describe('DashboardDirectQuerySync', () => {
     });
 
     rerender(
-      <DashboardDirectQuerySync
+      <DashboardDirectQuerySyncBanner
         http={http}
         notifications={notifications}
         savedObjectsClient={savedObjectsClient}
