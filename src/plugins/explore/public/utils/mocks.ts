@@ -26,10 +26,6 @@ export const createDataExplorerServicesMock = () => {
     osdUrlStateStorage: osdUrlStateStorageMock,
     embeddable: embeddableMock,
     scopedHistory: (scopedHistoryMock.create() as unknown) as ScopedHistory,
-    viewRegistry: {
-      get: jest.fn(),
-      all: jest.fn(() => []),
-    },
   };
 
   return (dataExplorerServicesMock as unknown) as jest.Mocked<DataExplorerServices>;

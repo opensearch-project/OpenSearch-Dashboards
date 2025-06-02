@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ViewProps } from '../../../../data_explorer';
+import { ViewProps } from 'src/plugins/data_explorer/public';
 import {
   addColumn,
   removeColumn,

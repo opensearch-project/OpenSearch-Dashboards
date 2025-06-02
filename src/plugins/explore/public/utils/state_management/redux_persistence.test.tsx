@@ -6,10 +6,14 @@
 import { createDataExplorerServicesMock } from '../mocks';
 import { loadReduxState, persistReduxState } from './redux_persistence';
 import { DataExplorerServices } from '../../types';
+import { DefaultViewState } from 'src/plugins/data_explorer/public';
 
 describe('test redux state persistence', () => {
   let mockServices: jest.Mocked<DataExplorerServices>;
   let reduxStateParams: any;
+  const defaults: DefaultViewState = {
+    state: {},
+  };
 
   beforeEach(() => {
     mockServices = createDataExplorerServicesMock();
@@ -20,9 +24,10 @@ describe('test redux state persistence', () => {
   });
 
   test('test load default redux state when url is empty', async () => {
-    const returnStates = await loadReduxState(mockServices);
+    const returnStates = await loadReduxState(mockServices, defaults);
     expect(returnStates).toMatchInlineSnapshot(`
       Object {
+        "logs": Object {},
         "metadata": Object {
           "indexPattern": "id",
           "originatingApp": undefined,
@@ -33,7 +38,7 @@ describe('test redux state persistence', () => {
 
   test('test load redux state', async () => {
     mockServices.osdUrlStateStorage.set('_a', reduxStateParams, { replace: true });
-    const returnStates = await loadReduxState(mockServices);
+    const returnStates = await loadReduxState(mockServices, defaults);
     expect(returnStates).toStrictEqual(reduxStateParams);
   });
 
