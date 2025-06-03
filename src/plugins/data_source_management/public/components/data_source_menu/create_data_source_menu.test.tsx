@@ -4,7 +4,7 @@
  */
 
 import { createDataSourceMenu } from './create_data_source_menu';
-import { MountPoint, SavedObjectsClientContract } from '../../../../../core/public';
+import { MountPoint, SavedObjectsClientContract, UiSettingScope } from '../../../../../core/public';
 import {
   applicationServiceMock,
   coreMock,
@@ -20,6 +20,7 @@ import { DataSourceSelectionService } from '../../service/data_source_selection_
 describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
+  const application = applicationServiceMock.createStartContract();
   const { uiSettings, workspaces } = coreMock.createSetup();
   const dataSourceSelection = new DataSourceSelectionService();
 
@@ -44,6 +45,11 @@ describe('create data source menu', () => {
         savedObjects: client,
         notifications,
       },
+      scope: UiSettingScope.WORKSPACE,
+      uiSettings,
+      hideLocalCluster: false,
+      application,
+      onManageDataSource: jest.fn(),
     };
 
     spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
@@ -69,13 +75,17 @@ describe('create data source menu', () => {
     let component;
     const props = {
       componentType: DataSourceComponentType.DataSourceSelectable,
-      hideLocalCluster: true,
       componentConfig: {
         fullWidth: true,
         onSelectedDataSources: jest.fn(),
         savedObjects: client,
         notifications,
       },
+      scope: UiSettingScope.WORKSPACE,
+      uiSettings,
+      hideLocalCluster: false,
+      application,
+      onManageDataSource: jest.fn(),
     };
     spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
     spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
@@ -108,7 +118,7 @@ describe('when setMenuMountPoint is provided', () => {
   const notifications = notificationServiceMock.createStartContract();
   const { uiSettings, workspaces } = coreMock.createSetup();
   const dataSourceSelection = new DataSourceSelectionService();
-
+  const application = applicationServiceMock.createStartContract();
   const refresh = () => {
     new Promise(async (resolve) => {
       if (dom) {
@@ -141,11 +151,15 @@ describe('when setMenuMountPoint is provided', () => {
       componentType: DataSourceComponentType.DataSourceSelectable,
       componentConfig: {
         fullWidth: true,
-        hideLocalCluster: true,
         onSelectedDataSources: jest.fn(),
         savedObjects: client,
         notifications,
       },
+      scope: UiSettingScope.WORKSPACE,
+      uiSettings,
+      hideLocalCluster: false,
+      application,
+      onManageDataSource: jest.fn(),
     };
 
     spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });

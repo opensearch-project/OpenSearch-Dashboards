@@ -35,7 +35,11 @@ import { MountPoint } from 'opensearch-dashboards/public';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TopNavMenu, TopNavMenuItemRenderType } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { applicationServiceMock, uiSettingsServiceMock } from '../../../../core/public/mocks';
+import {
+  applicationServiceMock,
+  uiSettingsServiceMock,
+  coreMock,
+} from '../../../../core/public/mocks';
 import * as testUtils from '../../../data_source_management/public/components/utils';
 import { DataSourceSelectionService } from '../../../data_source_management/public/service/data_source_selection_service';
 
@@ -45,6 +49,7 @@ const dataShim = {
   },
 };
 
+const mockWorkspaces = coreMock.createSetup().workspaces;
 describe('TopNavMenu', () => {
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
   const SEARCH_BAR_SELECTOR = 'SearchBar';
@@ -126,6 +131,7 @@ describe('TopNavMenu', () => {
     spyOn(testUtils, 'getUiSettings').and.returnValue({ id: 'test2' });
     spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
     spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
     const component = shallowWithIntl(
       <TopNavMenu
         appName={'test'}
@@ -150,6 +156,7 @@ describe('TopNavMenu', () => {
     spyOn(testUtils, 'getApplication').and.returnValue({ id: 'test2' });
     spyOn(testUtils, 'getUiSettings').and.returnValue({ id: 'test2' });
     spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
+    spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
     spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
 
     const component = shallowWithIntl(
@@ -231,6 +238,7 @@ describe('TopNavMenu', () => {
       spyOn(testUtils, 'getUiSettings').and.returnValue(
         uiSettingsServiceMock.createStartContract()
       );
+      spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
       spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
       spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
 
@@ -268,6 +276,7 @@ describe('TopNavMenu', () => {
       spyOn(testUtils, 'getUiSettings').and.returnValue(
         uiSettingsServiceMock.createStartContract()
       );
+      spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
       spyOn(testUtils, 'getHideLocalCluster').and.returnValue(false);
       spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
 
@@ -299,6 +308,7 @@ describe('TopNavMenu', () => {
       spyOn(testUtils, 'getUiSettings').and.returnValue(
         uiSettingsServiceMock.createStartContract()
       );
+      spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
       spyOn(testUtils, 'getHideLocalCluster').and.returnValue(false);
       spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
 

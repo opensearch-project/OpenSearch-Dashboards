@@ -54,7 +54,7 @@ interface DataSourceSelectableProps {
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   uiSettings?: IUiSettingsClient;
-  onManageDataSource: () => void;
+  onManageDataSource?: () => void;
 }
 
 interface DataSourceSelectableState extends DataSourceBaseState {
@@ -264,6 +264,7 @@ export class DataSourceSelectable extends React.Component<
       return (
         <NoDataSource
           application={this.props.application}
+          onManageDataSource={this.props.onManageDataSource}
           incompatibleDataSourcesExist={this.state.incompatibleDataSourcesExist}
         />
       );

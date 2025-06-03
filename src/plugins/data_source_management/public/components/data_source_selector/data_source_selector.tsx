@@ -21,7 +21,6 @@ import {
   generateComponentId,
   getDataSourceSelection,
   getDefaultDataSourceId,
-  getWorkspaces,
 } from '../utils';
 import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';

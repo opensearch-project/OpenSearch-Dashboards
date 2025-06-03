@@ -41,7 +41,7 @@ export interface DataSourceMenuProps<T = any> {
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-  onManageDataSource: () => void;
+  onManageDataSource?: () => void;
   scope: UiSettingScope;
 }
 
@@ -84,7 +84,6 @@ export interface DataSourceSelectableConfig extends DataSourceBaseConfig {
   notifications: NotificationsStart;
   activeOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
-  onManageDataSource: () => void;
 }
 
 export interface DataSourceMultiSelectableConfig extends DataSourceBaseConfig {

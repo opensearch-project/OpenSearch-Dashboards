@@ -87,7 +87,9 @@ export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps> | null;
-    getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
+    getDataSourceMenu: <T>() => React.ComponentType<
+      Omit<DataSourceMenuProps<T>, 'uiSettings' | 'hideLocalCluster' | 'application' | 'scope'>
+    >;
   };
   dataSourceSelection: DataSourceSelectionService;
   getDefaultDataSourceId: typeof getDefaultDataSourceId;

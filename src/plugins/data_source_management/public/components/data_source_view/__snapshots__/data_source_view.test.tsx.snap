@@ -37,6 +37,7 @@ exports[`DataSourceView Should render successfully when provided datasource has 
       ],
     }
   }
+  scope="workspace"
   selectedOption={
     Array [
       Object {
@@ -199,6 +200,7 @@ exports[`DataSourceView Should return error when provided datasource has been fi
       ],
     }
   }
+  scope="workspace"
   selectedOption={
     Array [
       Object {
@@ -346,6 +348,7 @@ exports[`DataSourceView When selected option is local cluster and hide local Clu
       ],
     }
   }
+  scope="workspace"
   selectedOption={
     Array [
       Object {
@@ -512,6 +515,7 @@ exports[`DataSourceView should call getDataSourceById when only pass id with no 
       "get": [MockFunction],
     }
   }
+  scope="workspace"
   selectedOption={
     Array [
       Object {
@@ -707,6 +711,7 @@ exports[`DataSourceView should call notification warning when there is data sour
       "get": [MockFunction],
     }
   }
+  scope="workspace"
   selectedOption={
     Array [
       Object {

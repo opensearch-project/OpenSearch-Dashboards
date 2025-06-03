@@ -6,7 +6,7 @@
 import { ShallowWrapper, shallow } from 'enzyme';
 import { DataSourceSelector, LocalCluster } from './data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
-import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { notificationServiceMock, coreMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import {
   getDataSourcesWithFieldsResponse,
@@ -23,6 +23,11 @@ describe('DataSourceSelector', () => {
 
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
+  const getWorkspacesMock = jest.fn().mockReturnValue({
+    currentWorkspaceId$: {
+      getValue: jest.fn().mockReturnValue('workspace-id'),
+    },
+  });
   const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(() => {
@@ -42,6 +47,7 @@ describe('DataSourceSelector', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        getWorkspaces={getWorkspacesMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -63,6 +69,7 @@ describe('DataSourceSelector', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        getWorkspaces={getWorkspacesMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -79,6 +86,11 @@ describe('DataSourceSelector: check dataSource options', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
+  const getWorkspacesMock = jest.fn().mockReturnValue({
+    currentWorkspaceId$: {
+      getValue: jest.fn().mockReturnValue('workspace-id'),
+    },
+  });
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
@@ -103,6 +115,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        getWorkspaces={getWorkspacesMock}
       />
     );
 
@@ -123,6 +136,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         removePrepend={true}
+        getWorkspaces={getWorkspacesMock}
       />
     );
 
@@ -143,6 +157,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         placeholderText={'Make a selection'}
+        getWorkspaces={getWorkspacesMock}
       />
     );
 
@@ -163,6 +178,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        getWorkspaces={getWorkspacesMock}
       />
     );
 
@@ -183,6 +199,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={true}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type === 'random'}
+        getWorkspaces={getWorkspacesMock}
       />
     );
     component.instance().componentDidMount!();
@@ -193,7 +210,7 @@ describe('DataSourceSelector: check dataSource options', () => {
 
   it('should get default datasource if uiSettings exists', async () => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'get').and.returnValue('test1');
+    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -203,13 +220,14 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        getWorkspaces={getWorkspacesMock}
       />
     );
 
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(uiSettings.get).toBeCalledWith('defaultDataSource', null);
+    expect(uiSettings.getUserProvidedWithScope).toBeCalledWith('defaultDataSource', 'workspace');
   });
 
   it('should not render options with default badge when id does not matches defaultDataSource', () => {
@@ -223,6 +241,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        getWorkspaces={getWorkspacesMock}
       />
     );
     expect(component).toMatchSnapshot();
@@ -239,6 +258,11 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
+  const getWorkspacesMock = jest.fn().mockReturnValue({
+    currentWorkspaceId$: {
+      getValue: jest.fn().mockReturnValue('workspace-id'),
+    },
+  });
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
@@ -260,7 +284,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   // When defaultOption is undefined
   it('should render defaultDataSource as the selected option', async () => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'get').and.returnValue('test1');
+    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -270,6 +294,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        getWorkspaces={getWorkspacesMock}
       />
     );
     component.instance().componentDidMount!();
@@ -287,7 +312,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
 
   it('should render Local Cluster as the selected option when hideLocalCluster is false', async () => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'get').and.returnValue(null);
+    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(null);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -297,6 +322,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        getWorkspaces={getWorkspacesMock}
       />
     );
     component.instance().componentDidMount!();
@@ -307,7 +333,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
 
   it('should render random datasource as the selected option if defaultDataSource and Local Cluster are not present', async () => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'get').and.returnValue(null);
+    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(null);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -317,6 +343,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         hideLocalCluster={true}
         fullWidth={false}
         uiSettings={uiSettings}
+        getWorkspaces={getWorkspacesMock}
         dataSourceFilter={(dataSource) => {
           return dataSource.id !== 'test1';
         }}
@@ -337,7 +364,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
 
   it('should return toast', async () => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'get').and.returnValue(null);
+    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(null);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -347,6 +374,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         hideLocalCluster={true}
         fullWidth={false}
         uiSettings={uiSettings}
+        getWorkspaces={getWorkspacesMock}
         dataSourceFilter={(_) => {
           return false;
         }}
@@ -361,7 +389,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
 
   // When defaultOption is []
   it('should render placeholder and all options when Local Cluster is not hidden', async () => {
-    spyOn(uiSettings, 'get').and.returnValue('test1');
+    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
@@ -371,6 +399,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        getWorkspaces={getWorkspacesMock}
         uiSettings={uiSettings}
         defaultOption={[]}
       />
@@ -387,7 +416,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
 
   it('should render placeholder and all options when Local Cluster is hidden', async () => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'get').and.returnValue('test1');
+    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -397,6 +426,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         hideLocalCluster={true}
         fullWidth={false}
         uiSettings={uiSettings}
+        getWorkspaces={getWorkspacesMock}
         defaultOption={[]}
       />
     );
@@ -425,7 +455,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
     },
   ])('should all throw a toast warning when the available dataSources is empty', async ({ id }) => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'get').and.returnValue('test1');
+    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -434,6 +464,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        getWorkspaces={getWorkspacesMock}
         uiSettings={uiSettings}
         dataSourceFilter={(_) => {
           return false;
@@ -463,7 +494,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
       id: 'non-existent-id',
     },
   ])('should all throw a toast warning when the id is filtered out', async ({ id }) => {
-    spyOn(uiSettings, 'get').and.returnValue('test1');
+    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
@@ -472,6 +503,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         onSelectedDataSource={jest.fn()}
         disabled={false}
         hideLocalCluster={true}
+        getWorkspaces={getWorkspacesMock}
         fullWidth={false}
         uiSettings={uiSettings}
         dataSourceFilter={(dataSource) => {
@@ -513,7 +545,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   ])(
     'should handle selectedOption correctly when defaultOption = [{id}]',
     async ({ id, error, selectedOption }) => {
-      spyOn(uiSettings, 'get').and.returnValue('test1');
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
       spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
       component = shallow(
         <DataSourceSelector
@@ -524,6 +556,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
           hideLocalCluster={false}
           fullWidth={false}
           uiSettings={uiSettings}
+          getWorkspaces={getWorkspacesMock}
           dataSourceSelection={dataSourceSelection}
           // @ts-expect-error
           defaultOption={[{ id }]}
