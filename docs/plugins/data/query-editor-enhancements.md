@@ -33,7 +33,7 @@ export interface QueryEditorExtensionConfig {
    * A function that determines if the query editor extension is enabled and should be rendered on UI.
    * @returns whether the extension is enabled.
    */
-  isEnabled$: (dependencies: QueryEditorExtensionDependencies) => Observable<boolean>;
+  isEnabled$: (dependencies: QueryEditorExtensionDependencies) => Promise<Observable<boolean>> | Observable<boolean>;
   /**
    * @returns DataStructureMeta for a given data source id.
    */
@@ -46,14 +46,14 @@ export interface QueryEditorExtensionConfig {
    * @param dependencies - The dependencies required for the extension.
    * @returns The query editor extension component.
    */
-  getComponent?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
+  getComponent?: (dependencies: QueryEditorExtensionDependencies) => Promise<React.ReactElement> | React.ReactElement | null;
   /**
    * A function that returns the query editor extension banner. The banner is a
    * component that will be displayed on top of the search bar.
    * @param dependencies - The dependencies required for the extension.
    * @returns The query editor extension component.
    */
-  getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
+  getBanner?: (dependencies: QueryEditorExtensionDependencies) => Promise<React.ReactElement> | React.ReactElement | null;
   /**
    * A function that returns the action bar buttons. The action bar is a
    * component that will be displayed on top of the results table in the discover page, to the right
@@ -63,7 +63,7 @@ export interface QueryEditorExtensionConfig {
    */
   getActionBarButtons?: (
     dependencies: QueryEditorExtensionDependencies
-  ) => React.ReactElement | null;
+  ) => Promise<React.ReactElement> | React.ReactElement | null;
   /**
    * A function that returns the query control buttons. The query controls is the section to the right
    * of the query editor bar.
@@ -72,13 +72,13 @@ export interface QueryEditorExtensionConfig {
    */
   getQueryControlButtons?: (
     dependencies: QueryEditorExtensionDependencies
-  ) => React.ReactElement | null;
+  ) => Promise<React.ReactElement> | React.ReactElement | null;
   /**
    * Returns the footer element that is rendered at the bottom of the query editor.
    * @param dependencies - The dependencies required for the extension.
    * @returns The query editor extension component.
    */
-  getBottomPanel?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
+  getBottomPanel?: (dependencies: QueryEditorExtensionDependencies) => Promise<React.ReactElement> | React.ReactElement | null;
 }
 ```
 
