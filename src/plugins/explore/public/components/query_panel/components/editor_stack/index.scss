@@ -4,6 +4,7 @@
  */
 
 .editorArea {
+  /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
   flex: 1;
   padding: 0;
   background-color: $euiColorEmptyShade;
@@ -52,7 +53,7 @@
         right: 4px;
         bottom: -7px;
         z-index: 10;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 5%);
 
         .editToolbar {
           border-radius: 24px;
@@ -107,7 +108,7 @@
         }
 
         .comment-line span {
-          color: rgba(0, 255, 0, 0.1); // Light green background (acceptable as it's not a solid color)
+          color: rgba(0, 255, 0, 10%); // Light green background (acceptable as it's not a solid color)
         }
       }
 
@@ -136,7 +137,7 @@
           right: 4px;
           top: -12px;
           z-index: 10;
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 5%);
 
           .editToolbar {
             border-radius: 24px;
