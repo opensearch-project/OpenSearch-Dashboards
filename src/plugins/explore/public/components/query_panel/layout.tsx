@@ -14,9 +14,9 @@ interface QueryPanelLayoutProps {
 
 const QueryPanelLayout: React.FC<QueryPanelLayoutProps> = ({ children, footer }) => {
   return (
-    <div className="query-panel-layout">
-      <div className="editor-area">{children}</div>
-      <div className="footer-panel">{footer}</div>
+    <div className="queryPanelLayout" data-test-subj="query-panel-layout">
+      <div className="editorArea">{children}</div>
+      <div className="footerPanel">{footer}</div>
     </div>
   );
 };

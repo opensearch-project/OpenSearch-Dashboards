@@ -3,15 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
- .query-container{
-  position: relative;
-    .query-panel-layout {
-      // margin: 4px;
+.queryContainer{
+    position: relative;
+    .queryPanelLayout {
       padding: 8px;
       border-radius: 4px;
       border: 1px solid #D7D9DD;
       background-color: white;
-
       display: flex;
       flex-direction: column;
       height: 100%;
@@ -19,21 +17,7 @@
       box-sizing: border-box;
       box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.05), 0px 1px 5px 0px rgba(0, 0, 0, 0.05);
 
-      .query-editor-footer {
-        .show-input-type {
-          color: #98A2B3;
-          font-size: 12px;
-          font-style: normal;
-          font-weight: 400;
-          line-height: 21px; 
-        }
-
-        .euiButtonEmpty .euiButtonEmpty__content {
-          padding: 0px;
-        }
-      }
-
-      .vertical-separator {
+      .verticalSeparator {
         width: 1px;
         height: 16px;
         background: #D9D9D9;
@@ -41,177 +25,28 @@
       }
     }
 
-    .editor-area {
-      flex: 1;
-      padding: 0px;
-      background-color: white;
-      font-family: $euiCodeFontFamily;
-      border-radius: 1px;
-      font-family: 'Roboto Mono';
+    .recentQueriesContainer{
+      position: 'absolute';
+      top: '100%';
+      right: 0;
+      box-shadow: '0 2px 4px rgba(0,0,0,0.1)';
+      z-index: 1000;
 
-      .promptEditorWrapper{
-        position: 'relative';
+      .recentQuery__table {
+        border: $euiBorderThin;
+        border-radius: $euiSizeXS;
+        margin-top: 10px;
+        display: flex;
+        padding: 4px;
+        align-items: center;
+        gap: 8px;
+        flex: 1 0 0;
 
-        .promptEditor {
-          border: 1px solid #D6D9DD;
-          border-radius: 1px;
-
-            .monaco-editor .view-overlays .current-line {
-              border: none;
-            }
-
-            .monaco-editor {
-              .margin {
-                background-color: $euiFormBackgroundColor;
-              }
-            }
-          
-            .monaco-editor,
-            .monaco-editor-background,
-            .monaco-editor .inputarea.ime-input,
-            .monaco-editor .decorationsOverviewRuler {
-              background-color: $euiColorEmptyShade;
-            }
-
-
-            &.promptEditor--readonly {
-              .monaco-editor,
-              .react-monaco-editor-container
-              {
-                background-color: #D6D9DD !important;
-                opacity: 0.5;
-                pointer-events: none;
-              }
-              .monaco-editor .cursor {
-                display: none !important;
-              }
       
-            }
-
-          .promptEditor__editOverlay{
-            position: absolute;
-            right: 4px;
-            bottom: -7px;
-            z-index: 10;
-            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-
-              .edit_toolbar{
-                border-radius: 24px;
-                border: 1px solid  #A8ADB3;
-                background:#FCFEFF;
-                display: flex;
-                cursor: pointer;
-                height: 24px;
-                padding: 4px 8px;
-                align-items: center;
-                width: fit-content;
-                font-weight: 400;
-                line-height: 18px;
-                font-size: 12px;
-                color: #676E75
-              }
-          }
-
-        }
-      } 
-
-      .queryEditorWrapper{
-         position: 'relative';
-
-        .queryEditor {
-          border: $euiBorderThin;
-          border-top: 0px;
-          font-size: 13px !important;
-          border-radius: 1px;
-          position: relative;
-
-        
-          .monaco-editor {
-            border-radius: $euiSizeXS $euiSizeXS 0 0;
-            font-size: 13px;
-        
-            .margin {
-              border-radius: $euiSizeXS 0 0 0;
-              background-color: $euiFormBackgroundColor;
-              padding: 0 $euiSizeXS;
-            }
-        
-            .monaco-scrollable-element {
-              border-radius: 0 $euiSizeXS 0 0;
-            }
-
-            .view-lines{
-              font-size: 13px;
-            }
-
-            .comment-line span {
-              color: rgba(0, 255, 0, 0.1); /* Light green background */
-            }
-          }
-        
-          .monaco-editor,
-          .monaco-editor-background,
-          .monaco-editor .inputarea.ime-input,
-          .monaco-editor .decorationsOverviewRuler {
-            background-color: $euiColorEmptyShade;
-            font-size: 13px;
-          }
-
-          &.queryEditor--readonly {
-            .monaco-editor,
-            .react-monaco-editor-container
-            {
-              background-color: #D6D9DD !important;
-              opacity: 0.5;
-              pointer-events: none;
-            }
-            .monaco-editor .cursor {
-              display: none !important;
-            }
-
-            .queryEditor__editOverlay{
-              position: absolute;
-              right: 4px;
-              top: -12px;
-              z-index: 10;
-              box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-        
-                .edit_toolbar{
-                  border-radius: 24px;
-                  border: 1px solid  #A8ADB3;
-                  background:#FCFEFF;
-                  display: flex;
-                  cursor: pointer;
-                  height: 24px;
-                  padding: 4px 8px;
-                  align-items: center;
-                  width: fit-content;
-                  font-weight: 400;
-                  line-height: 18px;
-                  font-size: 12px;
-                  color: #676E75;
-                }
-            }
-
-          }
+        thead {
+          background-color: $euiColorLightestShade;
         }
       }
     }
 
-    .recentQuery__table {
-      border: $euiBorderThin;
-      border-radius: $euiSizeXS;
-      margin-top: 10px;
-      display: flex;
-      padding: 4px;
-      align-items: center;
-      gap: 8px;
-      flex: 1 0 0;
-
-    
-      thead {
-        background-color: $euiColorLightestShade;
-      }
-    }
-
- }
+}

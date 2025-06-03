@@ -1,7 +1,12 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
 
-interface EditOrClearProps {
+interface EditToobarProps {
   className?: string;
   handleClearEditor: () => void;
   handleEditClick: () => void;
@@ -9,7 +14,7 @@ interface EditOrClearProps {
   clearText: string;
 }
 
-export const EditOrClear: React.FC<EditOrClearProps> = ({
+export const EditToobar: React.FC<EditToobarProps> = ({
   className = 'promptEditor__editOverlay',
   handleClearEditor,
   handleEditClick,
@@ -22,21 +27,21 @@ export const EditOrClear: React.FC<EditOrClearProps> = ({
         direction="row"
         gutterSize="s"
         justifyContent="spaceAround"
-        className="edit_toolbar"
+        className="editToolbar"
       >
         <EuiFlexItem grow={false}>
           <span onClick={handleEditClick}>
-            <EuiIcon type="pencil" style={{ marginRight: '2px' }} />
-            <span style={{ textDecorationLine: 'underline' }}>{editText}</span>
+            <EuiIcon type="pencil" />
+            <span className="editText">{editText}</span>
           </span>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHorizontalRule margin="xs" className="vertical-separator" style={{ margin: '0px' }} />
+          <EuiHorizontalRule margin="xs" className="verticalSeparator" style={{ margin: '0px' }} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <span onClick={handleClearEditor}>
-            <EuiIcon type="crossInCircleEmpty" style={{ marginRight: '3px' }} />
-            <span style={{ textDecorationLine: 'underline' }}>{clearText}</span>
+            <EuiIcon type="crossInCircleEmpty" />
+            <span className="editText">{clearText}</span>
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
