@@ -24,11 +24,13 @@ import { EmptyIcon } from '../custom_database_icon';
 interface DataSourceDropDownHeaderProps {
   incompatibleDataSourcesExist: boolean;
   application?: ApplicationStart;
+  onManageDataSource?: () => void;
 }
 
 export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
   application,
   incompatibleDataSourcesExist,
+  onManageDataSource,
 }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
   const button = (
@@ -103,7 +105,11 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
       anchorPosition="downLeft"
       data-test-subj={'dataSourceEmptyStatePopover'}
     >
-      <DataSourceDropDownHeader totalDataSourceCount={0} application={application} />
+      <DataSourceDropDownHeader
+        totalDataSourceCount={0}
+        application={application}
+        onManageDataSource={onManageDataSource}
+      />
       <EuiPanel
         hasBorder={false}
         hasShadow={false}

@@ -4,7 +4,7 @@
  */
 
 import { ShallowWrapper, shallow } from 'enzyme';
-import { SavedObjectsClientContract } from '../../../../../core/public';
+import { SavedObjectsClientContract, UiSettingScope } from '../../../../../core/public';
 import { applicationServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { DataSourceMenu } from './data_source_menu';
@@ -45,6 +45,7 @@ describe('DataSourceMenu', () => {
           notifications,
         }}
         onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(component).toMatchSnapshot();
@@ -62,6 +63,7 @@ describe('DataSourceMenu', () => {
           notifications,
         }}
         onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(component).toMatchSnapshot();
@@ -77,6 +79,7 @@ describe('DataSourceMenu', () => {
           notifications,
         }}
         onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(component).toMatchSnapshot();
@@ -91,6 +94,7 @@ describe('DataSourceMenu', () => {
           notifications,
         }}
         onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(component).toMatchSnapshot();
@@ -107,6 +111,7 @@ describe('DataSourceMenu', () => {
           activeOption: [{ id: 'test', label: 'test-label' }],
         }}
         onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(component).toMatchSnapshot();
@@ -123,6 +128,7 @@ describe('DataSourceMenu', () => {
           activeOption: [{ id: 'test' }],
         }}
         onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(component).toMatchSnapshot();
@@ -140,6 +146,7 @@ describe('DataSourceMenu', () => {
           displayAllCompatibleDataSources: true,
         }}
         onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(container).toMatchSnapshot();
@@ -155,6 +162,7 @@ describe('DataSourceMenu', () => {
           notifications,
         }}
         onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(container).toMatchSnapshot();
@@ -170,6 +178,7 @@ describe('DataSourceMenu', () => {
           notifications,
         }}
         onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(container).toMatchSnapshot();

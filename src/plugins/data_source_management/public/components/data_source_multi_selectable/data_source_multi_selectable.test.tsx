@@ -10,7 +10,7 @@ import {
   mockResponseForSavedObjectsCalls,
   mockManagementPlugin,
 } from '../../mocks';
-import { ShallowWrapper, mount, shallow } from 'enzyme';
+import { ShallowWrapper, mount, shallow, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { DataSourceMultiSelectable } from './data_source_multi_selectable';
 import React from 'react';
@@ -39,7 +39,7 @@ describe('DataSourceMultiSelectable', () => {
   });
 
   it('should render normally with local cluster not hidden', async () => {
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceMultiSelectable
@@ -64,7 +64,7 @@ describe('DataSourceMultiSelectable', () => {
   });
 
   it('should render normally with local cluster hidden', async () => {
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceMultiSelectable
@@ -140,7 +140,7 @@ describe('DataSourceMultiSelectable', () => {
       .mockResolvedValue('test1');
 
     const onSelectedDataSources = jest.fn();
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceMultiSelectable

@@ -7,7 +7,12 @@ import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { DataSourceAggregatedView } from './data_source_aggregated_view';
-import { IToasts, SavedObject, SavedObjectsClientContract } from '../../../../../core/public';
+import {
+  IToasts,
+  SavedObject,
+  SavedObjectsClientContract,
+  UiSettingScope,
+} from '../../../../../core/public';
 import {
   applicationServiceMock,
   notificationServiceMock,
@@ -44,7 +49,7 @@ describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSourc
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'test1');
     jest.spyOn(utils, 'getApplication').mockReturnValue(application);
     jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
@@ -121,6 +126,7 @@ describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSourc
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
+          scope={UiSettingScope.WORKSPACE}
         />
       );
 
@@ -174,7 +180,7 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'test1');
     jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
@@ -240,6 +246,7 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
           uiSettings={uiSettings}
+          scope={UiSettingScope.WORKSPACE}
         />
       );
       await nextTick();
@@ -297,7 +304,7 @@ describe('DataSourceAggregatedView empty state test with local cluster hiding', 
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', {});
-    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'test1');
     jest.spyOn(utils, 'getApplication').mockReturnValue(application);
     jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
@@ -352,6 +359,7 @@ describe('DataSourceAggregatedView empty state test with local cluster hiding', 
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
+          scope={UiSettingScope.WORKSPACE}
         />
       );
 
@@ -384,7 +392,7 @@ describe('DataSourceAggregatedView empty state test due to filter out with local
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'test1');
     jest.spyOn(utils, 'getApplication').mockReturnValue(application);
     jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
@@ -423,6 +431,7 @@ describe('DataSourceAggregatedView empty state test due to filter out with local
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
+          scope={UiSettingScope.WORKSPACE}
         />
       );
       const noCompatibleDataSourcesMessage =
@@ -457,7 +466,7 @@ describe('DataSourceAggregatedView error state test no matter hide local cluster
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockErrorResponseForSavedObjectsCalls(client, 'find');
-    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'test1');
     jest.spyOn(utils, 'getApplication').mockReturnValue(application);
     jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
@@ -512,6 +521,7 @@ describe('DataSourceAggregatedView error state test no matter hide local cluster
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
+          scope={UiSettingScope.WORKSPACE}
         />
       );
 
@@ -536,7 +546,7 @@ describe('DataSourceAggregatedView warning messages', () => {
 
   beforeEach(() => {
     toasts = notificationServiceMock.createStartContract().toasts;
-    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'test1');
     jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
@@ -575,6 +585,7 @@ describe('DataSourceAggregatedView warning messages', () => {
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={(_) => false}
           uiSettings={uiSettings}
+          scope={UiSettingScope.WORKSPACE}
         />
       );
       await nextTick();
@@ -602,7 +613,7 @@ describe('DataSourceAggregatedView: dataSourceSelection)', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'test1');
     jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     jest.spyOn(utils, 'generateComponentId').mockReturnValue(componentId);
   });
@@ -617,6 +628,7 @@ describe('DataSourceAggregatedView: dataSourceSelection)', () => {
         displayAllCompatibleDataSources={false}
         activeDataSourceIds={activeDataSourceIds}
         uiSettings={uiSettings}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
 

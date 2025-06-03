@@ -23,7 +23,7 @@ export function createDataSourceMenu<T>() {
 
   const hideLocalCluster = getHideLocalCluster().enabled;
   return (
-    props: Omit<DataSourceMenuProps<T>, 'uiSettings' | 'hideLocalCluster' | 'application'>
+    props: Omit<DataSourceMenuProps<T>, 'uiSettings' | 'hideLocalCluster' | 'application' | 'scope'>
   ) => {
     if (props.setMenuMountPoint) {
       return (
@@ -46,6 +46,7 @@ export function createDataSourceMenu<T>() {
         uiSettings={uiSettings}
         hideLocalCluster={hideLocalCluster}
         application={application}
+        scope={scope}
       />
     );
   };

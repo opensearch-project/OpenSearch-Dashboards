@@ -45,7 +45,11 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 
-import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import {
+  DataSourceManagementPluginSetup,
+  DataSourceSelectableConfig,
+  DataSourceOption,
+} from 'src/plugins/data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
@@ -93,7 +97,7 @@ function DevToolsWrapper({
     []
   );
 
-  const onChange = async (e: Array<EuiComboBoxOptionOption<any>>) => {
+  const onChange = async (e: Array<DataSourceOption<any>>) => {
     const dataSourceId = e[0] ? e[0].id : undefined;
     await remount(mountedTool.current!.mountpoint, dataSourceId);
   };
