@@ -43,6 +43,7 @@ export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement,
 // TODO: replace hard-coded values with a registration function, so that apps can control active nav links similar to breadcrumbs
 const aliasedApps: { [key: string]: string[] } = {
   discover: ['data-explorer'],
+  explore: ['data-explorer'],
 };
 
 export const isActiveNavLink = (appId: string | undefined, linkId: string): boolean =>

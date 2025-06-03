@@ -252,6 +252,11 @@ declare namespace Cypress {
        * Verifies the number of rows count
        */
       verifyResultsCount(count: number): Chainable<any>;
+
+      /**
+       * Verifies error message exist
+       */
+      verifyResultsError(error: string): Chainable<any>;
     };
   }
 }

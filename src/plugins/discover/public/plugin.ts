@@ -78,6 +78,7 @@ declare module '../../share/public' {
   }
 }
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { ExplorePluginSetup } from '../../explore/public';
 
 /**
  * @public
@@ -132,6 +133,7 @@ export interface DiscoverSetupPlugins {
   data: DataPublicPluginSetup;
   dataExplorer: DataExplorerPluginSetup;
   usageCollection: UsageCollectionSetup;
+  explore?: ExplorePluginSetup;
 }
 
 /**
@@ -303,13 +305,17 @@ export class DiscoverPlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 300,
-      },
-    ]);
+    // If Explore plugin is enabled, it will register a Discover menu to the
+    // side nav in observability workspaces, we should skip registration here.
+    if (!plugins.explore) {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: PLUGIN_ID,
+          category: undefined,
+          order: 300,
+        },
+      ]);
+    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
