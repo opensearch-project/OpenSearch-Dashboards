@@ -198,7 +198,7 @@ export class DataSourceManagementPlugin
 
     // when the feature flag is disabled, we don't need to register any of the mds components
     if (!this.featureFlagStatus) {
-      return undefined as any;
+      return undefined;
     }
 
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
