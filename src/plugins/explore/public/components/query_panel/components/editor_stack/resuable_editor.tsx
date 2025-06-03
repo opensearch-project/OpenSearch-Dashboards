@@ -8,7 +8,7 @@ import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { EditToobar } from './edit_toolbar';
 
-interface ReusableEditorProps {
+export interface ReusableEditorProps {
   value: string;
   editText?: string;
   clearText?: string;
@@ -95,6 +95,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
       editor.addAction({
         id: `insert-new-line-${editorType}`,
         label: `Insert New Line on ${editorType}`,
+        // eslint-disable-next-line no-bitwise
         keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
         run: (ed) => {
           if (ed.hasTextFocus()) {
