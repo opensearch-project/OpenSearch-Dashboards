@@ -18,12 +18,10 @@ import {
 describe('DirectQuerySyncUtils', () => {
   let http: jest.Mocked<HttpStart>;
   let savedObjectsClient: ReturnType<typeof savedObjectsServiceMock.createStartContract>['client'];
-  let onError: jest.Mock;
 
   beforeEach(() => {
     http = httpServiceMock.createStartContract();
     savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
-    onError = jest.fn();
   });
 
   describe('fetchDirectQuerySyncInfo', () => {
@@ -37,11 +35,9 @@ describe('DirectQuerySyncUtils', () => {
         http,
         savedObjectsClient,
         dashboardId: 'dashboard-1',
-        onError,
       });
 
       expect(result).toBeNull();
-      expect(onError).toHaveBeenCalledWith('Failed to fetch dashboard information');
       expect(http.get).toHaveBeenCalledWith('/api/opensearch-dashboards/dashboards/export', {
         query: { dashboard: 'dashboard-1' },
       });
@@ -79,11 +75,9 @@ describe('DirectQuerySyncUtils', () => {
         http,
         savedObjectsClient,
         dashboardId: 'dashboard-1',
-        onError,
       });
 
       expect(result).toBeNull();
-      expect(onError).not.toHaveBeenCalled();
       expect(http.get).toHaveBeenCalledWith('/api/opensearch-dashboards/dashboards/export', {
         query: { dashboard: 'dashboard-1' },
       });
@@ -112,11 +106,9 @@ describe('DirectQuerySyncUtils', () => {
         http,
         savedObjectsClient,
         dashboardId: 'dashboard-1',
-        onError,
       });
 
       expect(result).toBeNull();
-      expect(onError).not.toHaveBeenCalled();
     });
 
     it('returns sync info for a consistent index pattern', async () => {
@@ -166,7 +158,6 @@ describe('DirectQuerySyncUtils', () => {
         http,
         savedObjectsClient,
         dashboardId: 'dashboard-1',
-        onError,
       });
 
       expect(result).toEqual({
@@ -193,10 +184,9 @@ describe('DirectQuerySyncUtils', () => {
         }
       );
       expect(savedObjectsClient.get).toHaveBeenCalledWith('index-pattern', 'index-1');
-      expect(onError).not.toHaveBeenCalled();
     });
 
-    it('returns null and calls onError if index pattern title is missing', async () => {
+    it('returns null if index pattern title is missing', async () => {
       http.get.mockResolvedValueOnce({
         version: '1.0.0',
         objects: [
@@ -226,11 +216,9 @@ describe('DirectQuerySyncUtils', () => {
         http,
         savedObjectsClient,
         dashboardId: 'dashboard-1',
-        onError,
       });
 
       expect(result).toBeNull();
-      expect(onError).toHaveBeenCalledWith('Failed to fetch dashboard information');
     });
   });
 

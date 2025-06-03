@@ -32,12 +32,10 @@ export async function fetchDirectQuerySyncInfo({
   http,
   savedObjectsClient,
   dashboardId,
-  onError,
 }: {
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   dashboardId: string;
-  onError: (error: string) => void;
 }): Promise<DirectQuerySyncInfo | null> {
   try {
     // Step 1: Fetch dashboard export and check index pattern consistency
@@ -71,7 +69,7 @@ export async function fetchDirectQuerySyncInfo({
     }
 
     const uniqueIndexPatternIds = Array.from(new Set(indexPatternIds));
-    const isConsistent = uniqueIndexPatternIds.length <= 1;
+    const isConsistent = uniqueIndexPatternIds.length === 1;
 
     if (!isConsistent) {
       return null;
@@ -86,13 +84,10 @@ export async function fetchDirectQuerySyncInfo({
       const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
       localMdsId = dataSourceRef?.id; // Can be undefined if no data-source reference
       indexTitle = indexPattern.attributes.title || null;
-    } else if (uniqueIndexPatternIds.length === 0) {
-      localMdsId = undefined;
-      return null;
     }
 
     if (!indexTitle) {
-      throw new Error('Failed to fetch index pattern title');
+      return null;
     }
 
     // Step 3: Resolve the index pattern to a concrete index
@@ -122,7 +117,6 @@ export async function fetchDirectQuerySyncInfo({
 
     return { refreshQuery, refreshInterval, lastRefreshTime, mappingName, mdsId: localMdsId };
   } catch (err) {
-    onError('Failed to fetch dashboard information');
     return null;
   }
 }
