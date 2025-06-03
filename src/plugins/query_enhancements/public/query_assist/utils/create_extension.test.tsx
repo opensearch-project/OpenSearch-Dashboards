@@ -81,7 +81,7 @@ describe('CreateExtension', () => {
       mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
-    const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
+    const isEnabled = await firstValueFrom(await extension.isEnabled$(dependencies));
     expect(isEnabled).toBeTruthy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
       query: { dataSourceId: 'mock-data-source-id' },
@@ -98,7 +98,7 @@ describe('CreateExtension', () => {
       mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
-    const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
+    const isEnabled = await firstValueFrom(await extension.isEnabled$(dependencies));
     expect(isEnabled).toBeFalsy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
       query: { dataSourceId: 'mock-data-source-id' },
@@ -159,7 +159,7 @@ describe('CreateExtension', () => {
       mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
-    const component = extension.getComponent?.(dependencies);
+    const component = await extension.getComponent?.(dependencies);
 
     if (!component) throw new Error('QueryEditorExtensions Component is undefined');
 
@@ -180,7 +180,7 @@ describe('CreateExtension', () => {
       mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
-    const banner = extension.getBanner?.({
+    const banner = await extension.getBanner?.({
       ...dependencies,
       language: 'DQL',
     });
@@ -204,7 +204,7 @@ describe('CreateExtension', () => {
       mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
-    const component = extension.getComponent?.(dependencies);
+    const component = await extension.getComponent?.(dependencies);
 
     if (!component) throw new Error('QueryEditorExtensions Component is undefined');
 
@@ -229,7 +229,7 @@ describe('CreateExtension', () => {
       mockIsSummaryAgentAvailable$,
       mockresultSummaryEnabled$
     );
-    const component = extension.getBottomPanel?.(dependencies);
+    const component = await extension.getBottomPanel?.(dependencies);
 
     if (!component) throw new Error('QueryEditorExtensions Component is undefined');
 
