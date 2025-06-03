@@ -40,13 +40,13 @@ import { MarkdownEditor } from '../markdown_editor';
 import less from 'less/lib/less-browser';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiTabs,
   EuiTab,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
   EuiTitle,
@@ -160,7 +160,7 @@ class MarkdownPanelConfigUi extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true}>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('panelFilter')}
                   label={
                     <FormattedMessage
@@ -180,7 +180,7 @@ class MarkdownPanelConfigUi extends Component {
                     onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
@@ -268,7 +268,7 @@ class MarkdownPanelConfigUi extends Component {
                 </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   id={htmlId('valign')}
                   isClearable={false}
                   options={alignOptions}

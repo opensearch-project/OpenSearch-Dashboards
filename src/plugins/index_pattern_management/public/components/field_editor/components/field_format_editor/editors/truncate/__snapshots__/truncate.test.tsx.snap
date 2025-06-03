@@ -2,9 +2,9 @@
 
 exports[`TruncateFormatEditor should render normally 1`] = `
 <Fragment>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -18,13 +18,13 @@ exports[`TruncateFormatEditor should render normally 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       defaultValue={5}
       isInvalid={false}
       min={1}
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <FormatEditorSamples
     sampleType="text"
     samples={

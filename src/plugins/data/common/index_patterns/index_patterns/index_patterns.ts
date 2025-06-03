@@ -74,6 +74,7 @@ interface IndexPatternsServiceDeps {
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
   onUnsupportedTimePattern: OnUnsupportedTimePattern;
+  canUpdateUiSetting?: boolean;
 }
 
 export class IndexPatternsService {
@@ -96,6 +97,7 @@ export class IndexPatternsService {
     onError,
     onUnsupportedTimePattern,
     onRedirectNoIndexPattern = () => {},
+    canUpdateUiSetting,
   }: IndexPatternsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -106,7 +108,9 @@ export class IndexPatternsService {
     this.onUnsupportedTimePattern = onUnsupportedTimePattern;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
       uiSettings,
-      onRedirectNoIndexPattern
+      onRedirectNoIndexPattern,
+      canUpdateUiSetting,
+      savedObjectsClient
     );
   }
 
@@ -122,6 +126,7 @@ export class IndexPatternsService {
 
     this.savedObjectsCache = await Promise.all(
       this.savedObjectsCache.map(async (obj) => {
+        // TODO: This behaviour will cause the index pattern title to be resolved differently depending on how its fetched since the get method in this service will not append the datasource title
         if (obj.type === 'index-pattern') {
           const result = { ...obj };
           result.attributes.title = await getIndexPatternTitle(
@@ -433,11 +438,13 @@ export class IndexPatternsService {
   /**
    * Get an index pattern by id. Cache optimized
    * @param id
+   * @param onlyCheckCache - Only check cache for index pattern if it doesn't exist it will not error out
    */
 
-  get = async (id: string): Promise<IndexPattern> => {
+  get = async (id: string, onlyCheckCache: boolean = false): Promise<IndexPattern> => {
     const cache = indexPatternCache.get(id);
-    if (cache) {
+
+    if (cache || onlyCheckCache) {
       return cache;
     }
 
@@ -740,6 +747,10 @@ export class IndexPatternsService {
   async delete(indexPatternId: string) {
     indexPatternCache.clear(indexPatternId);
     return this.savedObjectsClient.delete('index-pattern', indexPatternId);
+  }
+
+  isLongNumeralsSupported() {
+    return this.config.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS);
   }
 }
 

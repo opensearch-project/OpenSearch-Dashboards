@@ -3,21 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * A connection handler for Amazon ES.
- *
- * Uses the aws-sdk to make signed requests to an Amazon ES endpoint.
- *
- * @param client {Client} - The Client that this class belongs to
- * @param config {Object} - Configuration options
- * @param [config.protocol=http:] {String} - The HTTP protocol that this connection will use, can be set to https:
- * @class HttpConnector
- */
-import { Config, Credentials } from 'aws-sdk';
-const AWS = require('aws-sdk');
+import { SignatureV4 } from '@aws-sdk/signature-v4';
+import { HttpRequest } from '@aws-sdk/protocol-http';
+import { Sha256 } from '@aws-crypto/sha256-js';
+import { AbortController } from '@aws-sdk/abort-controller';
+import { defaultProvider } from '@aws-sdk/credential-provider-node';
+import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
+
 const HttpConnector = require('elasticsearch/src/lib/connectors/http');
-const HttpClient = require('http-aws-es/src/node');
-const crypto = require('crypto');
 
 class HttpAmazonESConnector extends HttpConnector {
   constructor(host, config) {
@@ -25,109 +18,126 @@ class HttpAmazonESConnector extends HttpConnector {
 
     const protocol = host.protocol;
     const port = host.port;
-    const endpoint = new AWS.Endpoint(host.host);
 
-    if (protocol) endpoint.protocol = protocol.replace(/:?$/, ':');
-    if (port) endpoint.port = port;
+    this.endpoint = {
+      protocol: protocol ? protocol.replace(/:?$/, ':') : 'https:',
+      hostname: host.host,
+      port: port || (protocol === 'https:' ? 443 : 80),
+      path: '/',
+    };
 
-    this.awsConfig = config.awsConfig || AWS.config;
-    this.endpoint = endpoint;
-    this.httpOptions = config.httpOptions || this.awsConfig.httpOptions;
-    this.httpClient = new HttpClient();
+    this.awsConfig = config.awsConfig || {};
+    this.httpOptions = config.httpOptions || {};
+    this.httpClient = new NodeHttpHandler(this.httpOptions);
     this.service = config.service || 'es';
   }
 
-  request(params, cb) {
+  async request(params, cb) {
     const reqParams = this.makeReqParams(params);
-
-    let req;
-    let cancelled;
+    let cancelled = false;
+    const controller = new AbortController();
 
     const cancel = () => {
       cancelled = true;
-      req && req.abort();
+      controller.abort();
     };
 
-    const done = (err, response, status, headers) => {
-      this.log.trace(params.method, reqParams, params.body, response, status);
-      cb(err, response, status, headers);
-    };
+    try {
+      const creds = await this.getAWSCredentials(reqParams);
+      if (cancelled) return;
 
-    // load creds
-    this.getAWSCredentials(reqParams)
-      .catch((e) => {
-        if (e && e.message) e.message = `AWS Credentials error: ${e.message}`;
-        throw e;
-      })
-      .then((creds) => {
-        if (cancelled) {
-          return;
-        }
+      let request = this.createRequest(params, reqParams);
+      request = await this.signRequest(request, creds);
 
-        const request = this.createRequest(params, reqParams);
-        // Sign the request (Sigv4)
-        this.signRequest(request, creds);
+      const { response } = await this.httpClient.handle(request, {
+        abortSignal: controller.signal,
+      });
+      const body = await this.streamToString(response.body);
 
-        request.headers['x-amz-content-sha256'] = crypto
-          .createHash('sha256')
-          .update(request.body || '', 'utf8')
-          .digest('hex');
-
-        req = this.httpClient.handleRequest(request, this.httpOptions, done);
-      })
-      .catch(done);
+      this.log.trace(params.method, reqParams, params.body, body, response.statusCode);
+      cb(null, body, response.statusCode, response.headers);
+    } catch (err) {
+      cb(err);
+    }
 
     return cancel;
   }
 
-  getAWSCredentials(reqParams) {
-    if (reqParams.headers && reqParams.headers.auth) {
-      const awssigv4Cred = reqParams.headers.auth;
-      const accessKeyId = awssigv4Cred.credentials.accessKeyId || null;
-      const secretAccessKey = awssigv4Cred.credentials.secretAccessKey;
-      const sessionToken = awssigv4Cred.credentials.sessionToken;
-      const region = awssigv4Cred.region;
-      this.service = awssigv4Cred.service;
-      delete reqParams.headers.auth;
-
-      this.awsConfig = new Config({
-        region,
-        credentials: sessionToken
-          ? new Credentials({ accessKeyId, secretAccessKey, sessionToken })
-          : new Credentials({ accessKeyId, secretAccessKey }),
-      });
-    }
+  // Helper method to convert readable stream to string
+  streamToString(stream) {
     return new Promise((resolve, reject) => {
-      this.awsConfig.getCredentials((err, creds) => {
-        if (err) return reject(err);
-        return resolve(creds);
-      });
+      const chunks = [];
+      stream.on('data', (chunk) => chunks.push(chunk));
+      stream.on('error', reject);
+      stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
     });
   }
 
+  getAWSCredentials(reqParams) {
+    if (reqParams.headers?.auth) {
+      const awssigv4Cred = reqParams.headers.auth;
+      const { accessKeyId, secretAccessKey, sessionToken } = awssigv4Cred.credentials;
+      this.service = awssigv4Cred.service;
+      delete reqParams.headers.auth;
+
+      return {
+        accessKeyId,
+        secretAccessKey,
+        sessionToken,
+      };
+    }
+
+    // Use default credential provider chain
+    return defaultProvider()();
+  }
+
   createRequest(params, reqParams) {
-    const request = new AWS.HttpRequest(this.endpoint);
+    const [pathname = '/', queryStr = ''] = (reqParams.path || '').split('?', 2);
 
-    // copy across params
-    Object.assign(request, reqParams);
+    const queryParams = {};
+    if (queryStr) {
+      for (const [key, value] of new URLSearchParams(queryStr)) {
+        queryParams[key] = value ?? '';
+      }
+    }
 
-    request.region = this.awsConfig.region;
-    if (!request.headers) request.headers = {};
+    const request = new HttpRequest({
+      ...this.endpoint,
+      method: reqParams.method,
+      headers: reqParams.headers || {},
+      hostname: this.endpoint.hostname,
+      query: queryParams,
+    });
+
+    Object.assign(request, {
+      ...reqParams,
+      path: pathname.replaceAll(
+        /[!'()*]/g,
+        (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`
+      ),
+    });
+
     const body = params.body;
-
     if (body) {
       const contentLength = Buffer.isBuffer(body) ? body.length : Buffer.byteLength(body);
-      request.headers['Content-Length'] = contentLength;
+      request.headers['Content-Length'] = contentLength.toString();
       request.body = body;
     }
-    request.headers.Host = this.endpoint.host;
+
+    request.headers.Host = this.endpoint.hostname;
 
     return request;
   }
 
-  signRequest(request, creds) {
-    const signer = new AWS.Signers.V4(request, this.service);
-    signer.addAuthorization(creds, new Date());
+  async signRequest(request, credentials) {
+    const signer = new SignatureV4({
+      credentials,
+      region: this.awsConfig.region,
+      service: this.service,
+      sha256: Sha256,
+    });
+
+    return signer.sign(request);
   }
 }
 

@@ -42,17 +42,17 @@ import {
   EuiScreenReaderOnly,
   EuiCodeEditor,
   EuiDescribedFormGroup,
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFilePicker,
-  EuiFormRow,
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
+  EuiCompressedFilePicker,
+  EuiCompressedFormRow,
   EuiIconTip,
   EuiImage,
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiSelect,
-  EuiSwitch,
+  EuiCompressedSelect,
+  EuiCompressedSwitch,
   EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
@@ -100,7 +100,7 @@ export const getEditableValue = (
 };
 
 export class Field extends PureComponent<FieldProps> {
-  private changeImageForm = React.createRef<EuiFilePicker>();
+  private changeImageForm = React.createRef<EuiCompressedFilePicker>();
 
   getDisplayedDefaultValue(
     type: UiSettingsType,
@@ -308,6 +308,7 @@ export class Field extends PureComponent<FieldProps> {
       options,
       optionLabels = {},
       isOverridden,
+      isPermissionControlled,
       preferBrowserSetting = false,
       defVal,
       ariaName,
@@ -327,7 +328,7 @@ export class Field extends PureComponent<FieldProps> {
     switch (type) {
       case 'boolean':
         return (
-          <EuiSwitch
+          <EuiCompressedSwitch
             label={
               !!currentValue ? (
                 <FormattedMessage id="advancedSettings.field.onLabel" defaultMessage="On" />
@@ -337,7 +338,13 @@ export class Field extends PureComponent<FieldProps> {
             }
             checked={!!currentValue}
             onChange={this.onFieldChangeSwitch}
-            disabled={loading || isOverridden || preferBrowserSetting || !enableSaving}
+            disabled={
+              loading ||
+              isOverridden ||
+              isPermissionControlled ||
+              preferBrowserSetting ||
+              !enableSaving
+            }
             data-test-subj={`advancedSetting-editField-${name}`}
             {...a11yProps}
           />
@@ -356,7 +363,9 @@ export class Field extends PureComponent<FieldProps> {
               height="auto"
               minLines={6}
               maxLines={30}
-              isReadOnly={isOverridden || preferBrowserSetting || !enableSaving}
+              isReadOnly={
+                isOverridden || isPermissionControlled || preferBrowserSetting || !enableSaving
+              }
               setOptions={{
                 showLineNumbers: false,
                 tabSize: 2,
@@ -374,8 +383,8 @@ export class Field extends PureComponent<FieldProps> {
           return <EuiImage {...a11yProps} allowFullScreen url={value as string} alt={name} />;
         } else {
           return (
-            <EuiFilePicker
-              disabled={loading || isOverridden || !enableSaving}
+            <EuiCompressedFilePicker
+              disabled={loading || isOverridden || isPermissionControlled || !enableSaving}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
               ref={this.changeImageForm}
@@ -387,7 +396,7 @@ export class Field extends PureComponent<FieldProps> {
         }
       case 'select':
         return (
-          <EuiSelect
+          <EuiCompressedSelect
             {...a11yProps}
             value={currentValue}
             options={(options as string[]).map((option) => {
@@ -398,31 +407,49 @@ export class Field extends PureComponent<FieldProps> {
             })}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
-            disabled={loading || isOverridden || preferBrowserSetting || !enableSaving}
+            disabled={
+              loading ||
+              isOverridden ||
+              isPermissionControlled ||
+              preferBrowserSetting ||
+              !enableSaving
+            }
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
       case 'number':
         return (
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             {...a11yProps}
             value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
-            disabled={loading || isOverridden || preferBrowserSetting || !enableSaving}
+            disabled={
+              loading ||
+              isOverridden ||
+              isPermissionControlled ||
+              preferBrowserSetting ||
+              !enableSaving
+            }
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
       default:
         return (
-          <EuiFieldText
+          <EuiCompressedFieldText
             {...a11yProps}
             value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
-            disabled={loading || isOverridden || preferBrowserSetting || !enableSaving}
+            disabled={
+              loading ||
+              isOverridden ||
+              isPermissionControlled ||
+              preferBrowserSetting ||
+              !enableSaving
+            }
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -450,6 +477,15 @@ export class Field extends PureComponent<FieldProps> {
           <FormattedMessage
             id="advancedSettings.field.browserSettingHelpText"
             defaultMessage="This setting is overridden by user or browser preferences."
+          />
+        </EuiText>
+      );
+    } else if (setting.isPermissionControlled) {
+      return (
+        <EuiText size="xs">
+          <FormattedMessage
+            id="advancedSettings.field.permissionControlledHelpText"
+            defaultMessage="This setting is controlled by dashboard admin only."
           />
         </EuiText>
       );
@@ -704,7 +740,7 @@ export class Field extends PureComponent<FieldProps> {
         description={this.renderDescription(setting)}
         fullWidth
       >
-        <EuiFormRow
+        <EuiCompressedFormRow
           isInvalid={isInvalid}
           error={error}
           label={this.renderLabel(setting)}
@@ -727,7 +763,7 @@ export class Field extends PureComponent<FieldProps> {
               </EuiScreenReaderOnly>
             )}
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiDescribedFormGroup>
     );
   }

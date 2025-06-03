@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<DevToolItem /> render DevToolItem 1`] = `
+<div>
+  <div
+    aria-hidden="true"
+    data-test-subj="toolId-dev"
+  >
+    <nav
+      aria-label="breadcrumb"
+      class="euiSimplifiedBreadcrumbs euiSimplifiedBreadcrumbs--truncate"
+    >
+      <div
+        class="euiSimplifiedBreadcrumbWall euiSimplifiedBreadcrumbWall--single"
+      >
+        <span
+          aria-current="page"
+          class="euiSimplifiedBreadcrumb euiSimplifiedBreadcrumb--last"
+          title="Dev tools"
+        >
+          Dev tools
+        </span>
+      </div>
+    </nav>
+  </div>
+</div>
+`;

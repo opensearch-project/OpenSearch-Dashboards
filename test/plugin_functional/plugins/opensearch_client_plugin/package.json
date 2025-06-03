@@ -10,6 +10,6 @@
     "build": "../../../../scripts/use_node ../../../../scripts/remove.js './target' && tsc"
   },
   "devDependencies": {
-    "typescript": "4.0.2"
+    "typescript": "4.5.5"
   }
 }

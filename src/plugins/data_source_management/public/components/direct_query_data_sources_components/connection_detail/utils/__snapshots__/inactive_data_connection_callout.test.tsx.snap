@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`InactiveDataConnectionCallout renders correctly 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="This data source connection is inactive"
+>
+  <p>
+    Associated objects and accelerations are not available while this connection is inactive.
+  </p>
+  <EuiButton
+    color="warning"
+    onClick={[Function]}
+  >
+    Enable connection
+  </EuiButton>
+</EuiCallOut>
+`;

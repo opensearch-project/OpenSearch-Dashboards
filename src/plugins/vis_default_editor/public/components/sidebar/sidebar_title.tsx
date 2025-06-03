@@ -33,7 +33,7 @@ import { EventEmitter } from 'events';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -119,7 +119,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           anchorPosition="downRight"
           button={
             <EuiToolTip content={linkButtonAriaLabel}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 aria-label={linkButtonAriaLabel}
                 data-test-subj="showUnlinkSavedSearchPopover"
                 iconType="link"

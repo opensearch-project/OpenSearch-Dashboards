@@ -66,7 +66,7 @@ export async function SnapshotsProvider({ getService }: FtrProviderContext) {
       const baselinePath = resolve(BASELINE_DIRECTORY, `${name}.json`);
 
       if (updateBaselines) {
-        await writeFileAsync(baselinePath, readFileSync(sessionPath));
+        await writeFileAsync(baselinePath, readFileSync(sessionPath, 'utf8'));
         return 0;
       } else {
         log.debug('comparing');

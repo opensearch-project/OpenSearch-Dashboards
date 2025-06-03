@@ -37,7 +37,7 @@ import {
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiText,
   EuiBadge,
   EuiHeaderAlert,
@@ -100,12 +100,12 @@ export const NewsfeedFlyout = () => {
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              <EuiSmallButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
                 <FormattedMessage
                   id="newsfeed.flyoutList.closeButtonLabel"
                   defaultMessage="Close"
                 />
-              </EuiButtonEmpty>
+              </EuiSmallButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {newsFetchResult ? (

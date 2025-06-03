@@ -128,16 +128,16 @@ exports[`renders ControlsTab 1`] = `
   >
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiFormRow
+        <EuiCompressedFormRow
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           id="selectControlType"
           labelType="label"
         >
-          <EuiSelect
+          <EuiCompressedSelect
             aria-label="Select control type"
             data-test-subj="selectControlType"
             onChange={[Function]}
@@ -155,24 +155,23 @@ exports[`renders ControlsTab 1`] = `
             }
             value="list"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
-        <EuiFormRow
+        <EuiCompressedFormRow
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           id="addControl"
           labelType="label"
         >
-          <EuiButton
+          <EuiSmallButton
             aria-label="Add control"
             data-test-subj="inputControlEditorAddBtn"
-            fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
           >
@@ -181,8 +180,8 @@ exports[`renders ControlsTab 1`] = `
               id="inputControl.editor.controlsTab.addButtonLabel"
               values={Object {}}
             />
-          </EuiButton>
-        </EuiFormRow>
+          </EuiSmallButton>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

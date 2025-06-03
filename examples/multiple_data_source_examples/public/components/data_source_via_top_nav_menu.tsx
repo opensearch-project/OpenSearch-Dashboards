@@ -61,7 +61,7 @@ export const DataSourceViaTopNavMenuExample = ({
       iconType: 'save',
       emphasize: true,
       id: 'save',
-      label: i18n.translate('exampleApp.topNav', {
+      label: i18n.translate('multipleDataSourceExample.topNav', {
         defaultMessage: `Save`,
       }),
       testId: 'mapSaveButton',

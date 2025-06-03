@@ -13,6 +13,7 @@ import {
   TutorialService,
 } from '../services';
 import { telemetryPluginMock } from '../../../telemetry/public/mocks';
+import { contentManagementPluginMocks } from '../../../content_management/public';
 
 export const getMockedServices = () => {
   const coreMocks = coreMock.createStart();
@@ -43,5 +44,6 @@ export const getMockedServices = () => {
     homeConfig: homePlugin.config,
     featureCatalogue: new FeatureCatalogueRegistry(),
     sectionTypes: new SectionTypeService(),
+    contentManagement: contentManagementPluginMocks.createStartContract(),
   };
 };

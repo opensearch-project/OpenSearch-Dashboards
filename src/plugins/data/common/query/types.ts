@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+import { Dataset } from '../types';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -34,4 +36,5 @@ export * from './timefilter/types';
 export type Query = {
   query: string | { [key: string]: any };
   language: string;
+  dataset?: Dataset;
 };

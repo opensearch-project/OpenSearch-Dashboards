@@ -29,7 +29,13 @@
  */
 
 import React, { PureComponent } from 'react';
-import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSwitch, EuiCodeEditor } from '@elastic/eui';
+import {
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
+  EuiCompressedSwitch,
+  EuiCodeEditor,
+} from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { FieldState, FieldType } from '../../types';
 
@@ -47,9 +53,9 @@ export class Field extends PureComponent<FieldProps> {
     const { name } = this.props;
 
     return (
-      <EuiFormRow fullWidth={true} label={name}>
+      <EuiCompressedFormRow fullWidth={true} label={name}>
         {this.renderField()}
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 
@@ -92,7 +98,7 @@ export class Field extends PureComponent<FieldProps> {
     switch (type) {
       case 'number':
         return (
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             name={name}
             id={this.fieldId}
             value={currentValue}
@@ -103,7 +109,7 @@ export class Field extends PureComponent<FieldProps> {
         );
       case 'boolean':
         return (
-          <EuiSwitch
+          <EuiCompressedSwitch
             name={name}
             id={this.fieldId}
             label={
@@ -148,7 +154,7 @@ export class Field extends PureComponent<FieldProps> {
         );
       default:
         return (
-          <EuiFieldText
+          <EuiCompressedFieldText
             id={this.fieldId}
             name={name}
             value={currentValue}

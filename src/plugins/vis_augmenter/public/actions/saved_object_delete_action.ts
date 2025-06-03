@@ -23,8 +23,9 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
   }
 
   public getDisplayName() {
-    return i18n.translate('dashboard.actions.deleteSavedObject.name', {
-      defaultMessage: 'Clean up augment-vis saved objects associated to a deleted vis',
+    return i18n.translate('visAugmenter.actions.deleteSavedObject.name', {
+      defaultMessage:
+        'Clean up all augment-vis saved objects associated to the deleted visualization',
     });
   }
 

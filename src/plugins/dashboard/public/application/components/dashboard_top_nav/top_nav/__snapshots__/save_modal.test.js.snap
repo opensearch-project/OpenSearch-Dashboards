@@ -7,9 +7,9 @@ exports[`renders DashboardSaveModal 1`] = `
   onSave={[Function]}
   options={
     <React.Fragment>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -22,15 +22,15 @@ exports[`renders DashboardSaveModal 1`] = `
         }
         labelType="label"
       >
-        <EuiTextArea
+        <EuiCompressedTextArea
           data-test-subj="dashboardDescription"
           onChange={[Function]}
           value="dash description"
         />
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -43,7 +43,7 @@ exports[`renders DashboardSaveModal 1`] = `
         }
         labelType="label"
       >
-        <EuiSwitch
+        <EuiCompressedSwitch
           checked={true}
           data-test-subj="storeTimeWithDashboard"
           label={
@@ -55,7 +55,7 @@ exports[`renders DashboardSaveModal 1`] = `
           }
           onChange={[Function]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </React.Fragment>
   }
   showCopyOnSave={true}

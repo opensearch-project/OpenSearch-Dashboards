@@ -71,8 +71,8 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     const selectedOption = this.props.selectedOption;
     const option = selectedOption[0];
     const optionId = option.id;
-
-    const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
+    // for data source view, get default data source from cache
+    const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
     if (optionId === '' && !this.props.hideLocalCluster) {
       this.setState({
         selectedOption: [LocalCluster],
@@ -82,11 +82,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       return;
     }
 
-    if (
-      (optionId === '' && this.props.hideLocalCluster) ||
-      (this.props.dataSourceFilter &&
-        this.props.selectedOption.filter(this.props.dataSourceFilter).length === 0)
-    ) {
+    if (optionId === '' && this.props.hideLocalCluster) {
       this.setState({
         selectedOption: [],
       });
@@ -100,6 +96,17 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
           optionId,
           this.props.savedObjectsClient!
         );
+        if (
+          this.props.dataSourceFilter &&
+          [selectedDataSource].filter(this.props.dataSourceFilter).length === 0
+        ) {
+          this.setState({
+            selectedOption: [],
+          });
+          this.onSelectedDataSources([]);
+          return;
+        }
+
         if (!this._isMounted) return;
         this.setState({
           selectedOption: [{ id: optionId, label: selectedDataSource.title }],
@@ -167,6 +174,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
             className={'dataSourceView'}
             label={label}
             onClick={this.onClick.bind(this)}
+            isDisabled
           />
         }
         isOpen={this.state.isPopoverOpen}

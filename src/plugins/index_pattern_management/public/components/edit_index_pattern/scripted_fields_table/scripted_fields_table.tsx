@@ -51,6 +51,7 @@ interface ScriptedFieldsTableProps {
   onRemoveField?: () => void;
   painlessDocLink: string;
   saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  useUpdatedUX: boolean;
 }
 
 interface ScriptedFieldsTableState {
@@ -148,14 +149,14 @@ export class ScriptedFieldsTable extends Component<
   };
 
   render() {
-    const { indexPattern, painlessDocLink } = this.props;
+    const { indexPattern, painlessDocLink, useUpdatedUX } = this.props;
     const { fieldToDelete, deprecatedLangsInUse } = this.state;
 
     const items = this.getFilteredItems();
 
     return (
       <>
-        <Header indexPatternId={indexPattern.id || ''} />
+        <Header indexPatternId={indexPattern.id || ''} useUpdatedUX={useUpdatedUX} />
 
         <CallOuts deprecatedLangsInUse={deprecatedLangsInUse} painlessDocLink={painlessDocLink} />
 

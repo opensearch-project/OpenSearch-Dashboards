@@ -33,7 +33,6 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import {
-  EuiTitle,
   EuiInMemoryTable,
   EuiPage,
   EuiPageBody,
@@ -41,14 +40,17 @@ import {
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiSmallButton,
   EuiSpacer,
   EuiConfirmModal,
   EuiCallOut,
   EuiBasicTableColumn,
+  EuiText,
+  EuiPageProps,
 } from '@elastic/eui';
 import { HttpFetchError, ToastsStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../util';
+import { EditActionDropdown, VisualizationItem } from './edit_action_dropdown';
 
 interface Column {
   name: string;
@@ -56,18 +58,15 @@ interface Column {
   actions?: object[];
 }
 
-interface Item {
-  id?: string;
-}
-
 export interface TableListViewProps {
   createButton?: JSX.Element;
   createItem?(): void;
   deleteItems?(items: object[]): Promise<void>;
   editItem?(item: object): void;
+  visbuilderEditItem?(item: object): void;
   entityName: string;
   entityNamePlural: string;
-  findItems(query: string): Promise<{ total: number; hits: object[] }>;
+  findItems(query: string): Promise<{ total: number; hits: VisualizationItem[] }>;
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
@@ -81,10 +80,13 @@ export interface TableListViewProps {
    * If the table is not empty, this component renders its own h1 element using the same id.
    */
   headingId?: string;
+  restrictWidth?: boolean;
+  paddingSize?: EuiPageProps['paddingSize'];
+  showUpdatedUx?: boolean;
 }
 
 export interface TableListViewState {
-  items: object[];
+  items: VisualizationItem[];
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -115,7 +117,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       pageSizeOptions: uniq([10, 20, 50, props.initialPageSize]).sort(),
     };
     this.state = {
-      items: [],
+      items: [] as VisualizationItem[],
       totalItems: 0,
       hasInitialFetchReturned: false,
       isFetchingItems: false,
@@ -279,13 +281,15 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         confirmButtonText={deleteButton}
         defaultFocusedButton="cancel"
       >
-        <p>
-          <FormattedMessage
-            id="opensearch-dashboards-react.tableListView.listing.deleteConfirmModalDescription"
-            defaultMessage="You can't recover deleted {entityNamePlural}."
-            values={{ entityNamePlural: this.props.entityNamePlural }}
-          />
-        </p>
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="opensearch-dashboards-react.tableListView.listing.deleteConfirmModalDescription"
+              defaultMessage="You can't recover deleted {entityNamePlural}."
+              values={{ entityNamePlural: this.props.entityNamePlural }}
+            />
+          </p>
+        </EuiText>
       </EuiConfirmModal>
     );
   }
@@ -389,7 +393,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     };
 
     return (
-      <EuiButton
+      <EuiSmallButton
         color="danger"
         iconType="trash"
         onClick={onClick}
@@ -404,14 +408,14 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
               selection.length === 1 ? this.props.entityName : this.props.entityNamePlural,
           }}
         />
-      </EuiButton>
+      </EuiSmallButton>
     );
   }
 
   renderTable() {
     const selection = this.props.deleteItems
       ? {
-          onSelectionChange: (obj: Item[]) => {
+          onSelectionChange: (obj: VisualizationItem[]) => {
             this.setState({
               selectedIds: obj
                 .map((item) => item.id)
@@ -438,10 +442,16 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         icon: 'pencil',
         type: 'icon',
         enabled: ({ error }: { error: string }) => !error,
-        onClick: this.props.editItem,
+        'data-test-subj': 'edit-dashboard-action',
+        render: (item: VisualizationItem) => (
+          <EditActionDropdown
+            item={item}
+            editItem={this.props.editItem}
+            visbuilderEditItem={this.props.visbuilderEditItem}
+          />
+        ),
       },
     ];
-
     const search = {
       onChange: this.setFilter.bind(this),
       toolsLeft: this.renderToolsLeft(),
@@ -452,7 +462,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     };
 
     const columns = this.props.tableColumns.slice();
-    if (this.props.editItem) {
+    if (this.props.editItem || this.props.visbuilderEditItem) {
       columns.push({
         name: i18n.translate(
           'opensearch-dashboards-react.tableListView.listing.table.actionTitle',
@@ -473,10 +483,10 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       />
     );
     return (
-      <EuiInMemoryTable
+      <EuiInMemoryTable<VisualizationItem>
         itemId="id"
         items={this.state.items}
-        columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
+        columns={(columns as unknown) as Array<EuiBasicTableColumn<VisualizationItem>>} // EuiBasicTableColumn is stricter than Column
         pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
@@ -499,10 +509,10 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   renderListing() {
     const defaultCreateButton = this.props.createItem ? (
       <EuiFlexItem grow={false}>
-        <EuiButton
+        <EuiSmallButton
           onClick={this.props.createItem}
           data-test-subj="newItemButton"
-          iconType="plusInCircle"
+          iconType="plus"
           fill
         >
           <FormattedMessage
@@ -510,7 +520,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
             defaultMessage="Create {entityName}"
             values={{ entityName: this.props.entityName }}
           />
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
     ) : (
       false
@@ -520,17 +530,19 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <div>
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
+        {!this.props.showUpdatedUx && (
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
+              </EuiText>
+            </EuiFlexItem>
 
-          {this.props.createButton || defaultCreateButton}
-        </EuiFlexGroup>
+            {this.props.createButton || defaultCreateButton}
+          </EuiFlexGroup>
+        )}
 
-        <EuiSpacer size="m" />
+        {!this.props.showUpdatedUx && <EuiSpacer size="m" />}
 
         {this.renderListingLimitWarning()}
         {this.renderFetchError()}
@@ -557,7 +569,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <EuiPage
         data-test-subj={this.props.entityName + 'LandingPage'}
         className="itemListing__page"
-        restrictWidth
+        restrictWidth={this.props.restrictWidth}
+        paddingSize={this.props.paddingSize}
       >
         <EuiPageBody
           component="main"

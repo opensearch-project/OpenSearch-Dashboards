@@ -261,7 +261,7 @@ describe('Table', () => {
     );
 
     // Press the enter key
-    filterNameTableCell.find('EuiFieldText').simulate('keydown', { key: keys.ENTER });
+    filterNameTableCell.find('EuiCompressedFieldText').simulate('keydown', { key: keys.ENTER });
     expect(saveFilter).toBeCalled();
 
     // It should reset
@@ -300,7 +300,7 @@ describe('Table', () => {
     );
 
     // Press the ESCAPE key
-    filterNameTableCell.find('EuiFieldText').simulate('keydown', { key: keys.ESCAPE });
+    filterNameTableCell.find('EuiCompressedFieldText').simulate('keydown', { key: keys.ESCAPE });
     expect(saveFilter).not.toBeCalled();
 
     // It should reset

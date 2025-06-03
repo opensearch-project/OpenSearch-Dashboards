@@ -31,7 +31,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiText,
+  EuiSmallButton,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 
@@ -53,9 +59,9 @@ export function Footer({ url, label }) {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton fill href={url}>
+          <EuiSmallButton fill href={url}>
             {label}
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

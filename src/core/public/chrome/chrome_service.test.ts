@@ -41,14 +41,21 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
-import { overlayServiceMock } from '../mocks';
+import { overlayServiceMock, workspacesServiceMock } from '../mocks';
+import { HeaderVariant } from './constants';
 
 class FakeApp implements App {
   public title: string;
+  public appRoute: string;
   public mount = () => () => {};
 
-  constructor(public id: string, public chromeless?: boolean) {
+  constructor(
+    public id: string,
+    public chromeless?: boolean,
+    public headerVariant?: HeaderVariant
+  ) {
     this.title = `${this.id} App`;
+    this.appRoute = this.id;
   }
 }
 const store = new Map();
@@ -72,12 +79,19 @@ function defaultStartDeps(availableApps?: App[]) {
     notifications: notificationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
+    workspaces: workspacesServiceMock.createStartContract(),
+    updateApplications: (() => {}) as (applications?: App[]) => void,
   };
 
   if (availableApps) {
-    deps.application.applications$ = new Rx.BehaviorSubject<Map<string, PublicAppInfo>>(
+    const applications$ = new Rx.BehaviorSubject<Map<string, PublicAppInfo>>(
       new Map(availableApps.map((app) => [app.id, getAppInfo(app) as PublicAppInfo]))
     );
+    deps.application.applications$ = applications$;
+    deps.updateApplications = (applications?: App[]) =>
+      applications$.next(
+        new Map(applications?.map((app) => [app.id, getAppInfo(app) as PublicAppInfo]))
+      );
   }
 
   return deps;
@@ -89,6 +103,8 @@ async function start({
   startDeps = defaultStartDeps(),
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
   const service = new ChromeService(options);
+
+  service.setup({ uiSettings: startDeps.uiSettings });
 
   if (cspConfigMock) {
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
@@ -119,8 +135,9 @@ describe('setup', () => {
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup();
+    const chromeSetup = chrome.setup({ uiSettings });
     chromeSetup.registerCollapsibleNavHeader(renderMock);
 
     const chromeStart = await chrome.start(defaultStartDeps());
@@ -135,8 +152,9 @@ describe('setup', () => {
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup();
+    const chromeSetup = chrome.setup({ uiSettings });
     // call 1st time
     chromeSetup.registerCollapsibleNavHeader(renderMock);
     // call 2nd time
@@ -145,6 +163,24 @@ describe('setup', () => {
     expect(warnMock).toHaveBeenCalledWith(
       '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
     );
+  });
+
+  it('should register page search', () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const chrome = new ChromeService({ browserSupportsCsp: true });
+
+    const registerSearchCommandSpy = jest.fn();
+    jest.spyOn((chrome as any).globalSearch, 'setup').mockReturnValue({
+      registerSearchCommand: registerSearchCommandSpy,
+    });
+
+    chrome.setup({ uiSettings });
+
+    expect(registerSearchCommandSpy).toHaveBeenCalledWith({
+      id: 'pagesSearch',
+      type: 'PAGES',
+      run: expect.any(Function),
+    });
   });
 });
 
@@ -274,6 +310,92 @@ describe('start', () => {
                         false,
                       ]
                   `);
+    });
+
+    it('should use correct current app id to tell if hidden', async () => {
+      const apps = [new FakeApp('alpha', true), new FakeApp('beta', false)];
+      const startDeps = defaultStartDeps(apps);
+      const { navigateToApp } = startDeps.application;
+      const { chrome } = await start({ startDeps });
+      const visibleChangedArray: boolean[] = [];
+      const visible$ = chrome.getIsVisible$();
+      visible$.subscribe((visible) => visibleChangedArray.push(visible));
+
+      await navigateToApp('alpha');
+
+      await navigateToApp('beta');
+      startDeps.updateApplications(apps);
+
+      expect(visibleChangedArray).toMatchInlineSnapshot(`
+        Array [
+          false,
+          false,
+          true,
+          true,
+        ]
+      `);
+    });
+  });
+
+  describe('header variant', () => {
+    it('emits undefined when no application is mounted', async () => {
+      const { chrome, service } = await start();
+      const promise = chrome.getHeaderVariant$().pipe(toArray()).toPromise();
+
+      chrome.setHeaderVariant(HeaderVariant.PAGE);
+      chrome.setHeaderVariant(HeaderVariant.APPLICATION);
+      chrome.setHeaderVariant(HeaderVariant.PAGE);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`Array []`);
+    });
+
+    it('emits application-wide value until manually overridden', async () => {
+      const startDeps = defaultStartDeps([
+        new FakeApp('alpha', undefined, HeaderVariant.APPLICATION),
+      ]);
+      const { navigateToApp } = startDeps.application;
+      const { chrome, service } = await start({ startDeps });
+
+      const promise = chrome.getHeaderVariant$().pipe(toArray()).toPromise();
+
+      await navigateToApp('alpha');
+
+      chrome.setHeaderVariant(HeaderVariant.PAGE);
+      chrome.setHeaderVariant(HeaderVariant.APPLICATION);
+
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+              Array [
+                "${HeaderVariant.APPLICATION}",
+                "${HeaderVariant.PAGE}",
+                "${HeaderVariant.APPLICATION}",
+              ]
+            `);
+    });
+
+    it('emits application-wide value after override is removed', async () => {
+      const startDeps = defaultStartDeps([new FakeApp('alpha', undefined, HeaderVariant.PAGE)]);
+      const { navigateToApp } = startDeps.application;
+      const { chrome, service } = await start({ startDeps });
+
+      const promise = chrome.getHeaderVariant$().pipe(toArray()).toPromise();
+
+      await navigateToApp('alpha');
+
+      chrome.setHeaderVariant(HeaderVariant.APPLICATION);
+      chrome.setHeaderVariant();
+
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+              Array [
+                "${HeaderVariant.PAGE}",
+                "${HeaderVariant.APPLICATION}",
+                "${HeaderVariant.PAGE}",
+              ]
+            `);
     });
   });
 

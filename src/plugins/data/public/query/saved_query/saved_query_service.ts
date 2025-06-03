@@ -29,27 +29,30 @@
  */
 
 import { isObject } from 'lodash';
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
+import { SavedObjectsClientContract, SavedObjectAttributes, CoreStart } from 'src/core/public';
+import { first } from 'rxjs/operators';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
+import { QueryStringContract } from '../query_string';
+import { getUseNewSavedQueriesUI } from '../../services';
+import { UI_SETTINGS } from '../../../common';
 
-type SerializedSavedQueryAttributes = SavedObjectAttributes &
-  SavedQueryAttributes & {
-    query: {
-      query: string;
-      language: string;
-    };
-  };
+type SerializedSavedQueryAttributes = SavedObjectAttributes & SavedQueryAttributes;
 
 export const createSavedQueryService = (
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  coreStartServices: { application: CoreStart['application']; uiSettings: CoreStart['uiSettings'] },
+  queryStringManager?: QueryStringContract
 ): SavedQueryService => {
+  const { application, uiSettings } = coreStartServices;
+  const queryEnhancementEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+
   const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     if (!attributes.title.length) {
       // title is required extra check against circumventing the front end
       throw new Error('Cannot create saved query without a title');
     }
 
-    const query = {
+    const query: SerializedSavedQueryAttributes['query'] = {
       query:
         typeof attributes.query.query === 'string'
           ? attributes.query.query
@@ -57,7 +60,11 @@ export const createSavedQueryService = (
       language: attributes.query.language,
     };
 
-    const queryObject: SerializedSavedQueryAttributes = {
+    if (queryEnhancementEnabled && attributes.query.dataset) {
+      query.dataset = attributes.query.dataset;
+    }
+
+    const queryObject: SavedQueryAttributes = {
       title: attributes.title.trim(), // trim whitespace before save as an extra precaution against circumventing the front end
       description: attributes.description,
       query,
@@ -69,6 +76,10 @@ export const createSavedQueryService = (
 
     if (attributes.timefilter) {
       queryObject.timefilter = attributes.timefilter;
+    }
+
+    if (getUseNewSavedQueriesUI() && attributes.isTemplate) {
+      queryObject.isTemplate = true;
     }
 
     let rawQueryResponse;
@@ -117,12 +128,28 @@ export const createSavedQueryService = (
       page: activePage,
     });
 
+    let queries = response.savedObjects.map(
+      (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
+        parseSavedQueryObject(savedObject)
+    );
+
+    const currentAppId = (await application?.currentAppId$?.pipe(first()).toPromise()) ?? undefined;
+    const languageService = queryStringManager?.getLanguageService();
+
+    // Filtering saved queries based on language supported by cirrent application
+    if (currentAppId && languageService) {
+      queries = queries.filter((query) => {
+        const languageId = query.attributes.query.language;
+        return (
+          languageService?.getLanguage(languageId)?.supportedAppNames?.includes(currentAppId) ??
+          true
+        );
+      });
+    }
+
     return {
       total: response.total,
-      queries: response.savedObjects.map(
-        (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
-          parseSavedQueryObject(savedObject)
-      ),
+      queries,
     };
   };
 
@@ -138,11 +165,8 @@ export const createSavedQueryService = (
     return await savedObjectsClient.delete('query', id);
   };
 
-  const parseSavedQueryObject = (savedQuery: {
-    id: string;
-    attributes: SerializedSavedQueryAttributes;
-  }) => {
-    const queryString = savedQuery.attributes.query.query;
+  const parseSavedQueryObject = (savedQuery: SavedQuery) => {
+    const queryString = savedQuery.attributes.query.query as string;
     let parsedQuery;
     try {
       parsedQuery = JSON.parse(queryString);
@@ -151,7 +175,7 @@ export const createSavedQueryService = (
       parsedQuery = queryString;
     }
 
-    const savedQueryItems: SavedQueryAttributes = {
+    const savedQueryItem: SavedQueryAttributes = {
       title: savedQuery.attributes.title || '',
       description: savedQuery.attributes.description || '',
       query: {
@@ -160,22 +184,31 @@ export const createSavedQueryService = (
       },
     };
 
+    if (queryEnhancementEnabled) {
+      savedQueryItem.query.dataset = savedQuery.attributes.query.dataset;
+    }
+
+    if (getUseNewSavedQueriesUI()) {
+      savedQueryItem.isTemplate = !!savedQuery.attributes.isTemplate;
+    }
+
     if (savedQuery.attributes.filters) {
-      savedQueryItems.filters = savedQuery.attributes.filters;
+      savedQueryItem.filters = savedQuery.attributes.filters;
     }
     if (savedQuery.attributes.timefilter) {
-      savedQueryItems.timefilter = savedQuery.attributes.timefilter;
+      savedQueryItem.timefilter = savedQuery.attributes.timefilter;
     }
     return {
       id: savedQuery.id,
-      attributes: savedQueryItems,
+      attributes: savedQueryItem,
     };
   };
 
   const getSavedQueryCount = async (): Promise<number> => {
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
-      perPage: 0,
+      // ToDo: Revert this back to `0` when Neo reports the count correctly irrespective of perPage.
+      perPage: 1,
       page: 1,
     });
     return response.total;

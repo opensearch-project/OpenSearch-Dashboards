@@ -379,6 +379,7 @@ module.exports = {
      */
     {
       files: [
+        '**/*.stories.tsx',
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
@@ -749,6 +750,15 @@ module.exports = {
       rules: {
         'import/no-unresolved': 'off',
         'no-undef': 'off',
+      },
+    },
+    {
+      files: [
+        'src/plugins/data/public/antlr/opensearch_sql/.generated/*',
+        'src/plugins/data/public/antlr/opensearch_sql/grammar/**/*',
+      ],
+      rules: {
+        'filenames/match-regex': 'off',
       },
     },
   ],

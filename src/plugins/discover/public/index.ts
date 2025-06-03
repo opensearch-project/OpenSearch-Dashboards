@@ -40,3 +40,12 @@ export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './sav
 
 export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './embeddable';
 export { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from './url_generator';
+export { SearchData, ResultStatus } from './application/view_components';
+
+export {
+  indexPatternMock,
+  indexPatternFieldMock,
+  indexPatternInitialMock,
+  getMockedIndexPatternWithCustomizedFields,
+  getMockedIndexPatternWithTimeField,
+} from './__mock__/index_pattern_mock';

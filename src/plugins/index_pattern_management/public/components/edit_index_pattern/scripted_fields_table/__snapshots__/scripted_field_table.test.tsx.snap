@@ -4,6 +4,7 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
 <Fragment>
   <header
     indexPatternId=""
+    useUpdatedUX={true}
   />
   <call-outs
     deprecatedLangsInUse={
@@ -46,6 +47,7 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
 <Fragment>
   <header
     indexPatternId=""
+    useUpdatedUX={true}
   />
   <call-outs
     deprecatedLangsInUse={Array []}
@@ -79,6 +81,7 @@ exports[`ScriptedFieldsTable should hide the table if there are no scripted fiel
 <Fragment>
   <header
     indexPatternId=""
+    useUpdatedUX={true}
   />
   <call-outs
     deprecatedLangsInUse={Array []}
@@ -104,6 +107,7 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
 <Fragment>
   <header
     indexPatternId=""
+    useUpdatedUX={true}
   />
   <call-outs
     deprecatedLangsInUse={Array []}
@@ -142,6 +146,7 @@ exports[`ScriptedFieldsTable should show a delete modal 1`] = `
 <Fragment>
   <header
     indexPatternId=""
+    useUpdatedUX={true}
   />
   <call-outs
     deprecatedLangsInUse={Array []}

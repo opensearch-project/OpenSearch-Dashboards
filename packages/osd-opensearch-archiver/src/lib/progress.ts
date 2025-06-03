@@ -82,7 +82,8 @@ export class Progress {
       throw new Error('Progress is not active');
     }
 
-    clearInterval(this.loggingInterval);
+    clearInterval((this.loggingInterval as unknown) as NodeJS.Timeout);
+
     this.loggingInterval = undefined;
   }
 

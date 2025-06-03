@@ -38,6 +38,7 @@ describe('useSavedDashboardInstance', () => {
         getFilters: () => dashboardAppStateStub.filters,
         optionsJSON: JSON.stringify(dashboardAppStateStub.options),
         getFullPath: () => `/${dashboardIdFromUrl}`,
+        getOpenSearchType: () => 'dashboard',
       },
     } as unknown) as SavedObjectDashboard;
     dashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));

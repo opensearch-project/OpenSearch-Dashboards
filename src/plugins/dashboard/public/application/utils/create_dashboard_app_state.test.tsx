@@ -17,12 +17,14 @@ import { createDashboardServicesMock } from './mocks';
 import { SavedObjectDashboard } from '../..';
 import { syncQueryStateWithUrl } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
+import { scopedHistoryMock } from '../../../../../core/public/mocks';
 
 const mockStartStateSync = jest.fn();
 const mockStopStateSync = jest.fn();
 const mockStopQueryStateSync = jest.fn();
 
 jest.mock('../../../../opensearch_dashboards_utils/public', () => ({
+  createGetterSetter: jest.fn(() => []),
   createStateContainer: jest.fn(() => 'stateContainer'),
   syncState: jest.fn(() => ({
     start: mockStartStateSync,
@@ -47,7 +49,7 @@ const { createStateContainer, syncState } = jest.requireMock(
 const osdUrlStateStorage = ({
   set: jest.fn(),
   get: jest.fn(() => ({ linked: false })),
-  flush: jest.fn(),
+  flush: jest.fn().mockReturnValue(true),
 } as unknown) as IOsdUrlStateStorage;
 
 describe('createDashboardGlobalAndAppState', () => {
@@ -147,13 +149,47 @@ describe('updateStateUrl', () => {
     ...dashboardAppStateStub,
     viewMode: ViewMode.VIEW,
   };
-  updateStateUrl({ osdUrlStateStorage, state: dashboardAppState, replace: true });
 
   test('update URL to not contain panels', () => {
     const { panels, ...statesWithoutPanels } = dashboardAppState;
+
+    const basePath = '/base';
+    const history = scopedHistoryMock.create({
+      pathname: basePath,
+    });
+
+    updateStateUrl({
+      osdUrlStateStorage,
+      state: dashboardAppState,
+      scopedHistory: history,
+      replace: true,
+    });
+
     expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', statesWithoutPanels, {
       replace: true,
     });
     expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
+  });
+
+  test('preserve Dashboards scoped history state', () => {
+    const basePath = '/base';
+    const someState = { some: 'state' };
+    const history = scopedHistoryMock.create({
+      pathname: basePath,
+      state: someState,
+    });
+    const { location } = history;
+    const replaceSpy = jest.spyOn(history, 'replace');
+
+    const changed = updateStateUrl({
+      osdUrlStateStorage,
+      state: dashboardAppState,
+      scopedHistory: history,
+      replace: true,
+    });
+
+    expect(history.location.state).toEqual(someState);
+    expect(changed).toBe(true);
+    expect(replaceSpy).toHaveBeenCalledWith({ ...location, state: someState });
   });
 });

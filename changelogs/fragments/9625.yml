@@ -1,0 +1,2 @@
+fix:
+- Fix a issue that can cause incorrect query to fire when switch plugin ([#9625](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9625))

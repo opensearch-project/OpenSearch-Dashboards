@@ -30,7 +30,7 @@
 
 import React, { useState, ReactElement } from 'react';
 // @ts-ignore
-import { EuiInMemoryTable, EuiButtonIcon } from '@elastic/eui';
+import { EuiInMemoryTable, EuiSmallButtonIcon } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@osd/i18n';
@@ -74,7 +74,7 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
         );
 
         return (
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             onClick={() => {
               // toggle displaying the expanded view of the given list item
               const map = Object.assign({}, expandMap);

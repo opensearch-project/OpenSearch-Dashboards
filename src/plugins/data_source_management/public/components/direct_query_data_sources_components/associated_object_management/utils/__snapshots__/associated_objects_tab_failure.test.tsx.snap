@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AssociatedObjectsTabFailure renders correctly 1`] = `
+<EuiEmptyPrompt
+  body={
+    <p>
+      Error loading 
+      databases
+    </p>
+  }
+  iconType="alert"
+  title={
+    <h3>
+      Error
+    </h3>
+  }
+/>
+`;

@@ -10,7 +10,7 @@ import {
   useOpenSearchDashboards,
 } from '../../../../../opensearch_dashboards_react/public';
 import { getServices } from '../../../opensearch_dashboards_services';
-import { useSearch, SearchContextValue, ResultStatus } from '../utils/use_search';
+import { useSearch, SearchContextValue } from '../utils/use_search';
 
 const SearchContext = React.createContext<SearchContextValue>({} as SearchContextValue);
 
@@ -21,9 +21,6 @@ export default function DiscoverContext({ children }: React.PropsWithChildren<Vi
   const searchParams = useSearch({
     ...deServices,
     ...services,
-  });
-  searchParams.data$.next({
-    status: ResultStatus.LOADING,
   });
 
   return (

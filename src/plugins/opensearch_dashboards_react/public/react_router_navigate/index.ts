@@ -28,4 +28,8 @@
  * under the License.
  */
 
-export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';
+export {
+  reactRouterNavigate,
+  reactRouterOnClickHandler,
+  getScopedBreadcrumbs,
+} from './react_router_navigate';

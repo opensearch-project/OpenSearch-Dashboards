@@ -1,4 +1,3 @@
-version: '3'
 services:
   opensearch-node:
     image: opensearchproject/opensearch:latest
@@ -32,9 +31,9 @@ services:
     ports:
       - 5601:5601
       - 5603:5603
-    stdin_open: true 
+    stdin_open: true
     tty: true
-    expose: 
+    expose:
       - "5601"
       - "5603"
     environment:
@@ -53,5 +52,5 @@ volumes:
   opensearch-data:
   osd-dev:
 networks:
-  opensearch-net: 
-  
+  opensearch-net:
+

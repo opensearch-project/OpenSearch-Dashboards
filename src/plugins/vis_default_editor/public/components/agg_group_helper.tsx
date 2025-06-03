@@ -39,7 +39,7 @@ const isAggRemovable = (agg: IAggConfig, group: IAggConfig[], schemas: Schema[])
     (count, aggregation: IAggConfig) => (aggregation.schema === agg.schema ? ++count : count),
     0
   );
-  // make sure the the number of these aggs is above the min
+  // make sure the number of these aggs is above the min
   return metricCount > schema.min;
 };
 

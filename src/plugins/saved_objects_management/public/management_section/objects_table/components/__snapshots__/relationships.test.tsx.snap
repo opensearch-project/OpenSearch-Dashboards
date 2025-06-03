@@ -7,14 +7,14 @@ exports[`Relationships from legacy app should render dashboards normally 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MyDashboard
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
@@ -155,14 +155,14 @@ exports[`Relationships from legacy app should render errors 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MyDashboard
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiCallOut
@@ -190,14 +190,14 @@ exports[`Relationships from legacy app should render index patterns normally 1`]
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MyIndexPattern*
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
@@ -343,14 +343,14 @@ exports[`Relationships from legacy app should render searches normally 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MySearch
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
@@ -496,14 +496,14 @@ exports[`Relationships from legacy app should render visualizations normally 1`]
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MyViz
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
@@ -644,14 +644,14 @@ exports[`Relationships should render augment-vis objects normally 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MyAugmentVisObject
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
@@ -778,14 +778,14 @@ exports[`Relationships should render dashboards normally 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MyDashboard
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
@@ -926,14 +926,14 @@ exports[`Relationships should render errors 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MyDashboard
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiCallOut
@@ -961,14 +961,14 @@ exports[`Relationships should render index patterns normally 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MyIndexPattern*
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
@@ -1114,14 +1114,14 @@ exports[`Relationships should render searches normally 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MySearch
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
@@ -1267,14 +1267,14 @@ exports[`Relationships should render visualizations normally 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
+    <EuiText
       className="eui-textBreakWord"
-      size="m"
+      size="s"
     >
       <h2>
         MyViz
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>

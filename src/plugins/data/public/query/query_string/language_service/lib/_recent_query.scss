@@ -1,0 +1,14 @@
+.recentQuery__table {
+  border: $euiBorderThin;
+  border-radius: $euiSizeXS;
+  margin: 0 $euiSizeXS $euiSizeXS;
+
+  thead {
+    background-color: $euiColorLightestShade;
+  }
+}
+
+.editor_footerItem {
+  // Needed so the footer items never have paddings
+  padding: 0 !important;
+}

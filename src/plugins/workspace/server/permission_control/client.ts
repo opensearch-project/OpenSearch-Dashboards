@@ -13,11 +13,14 @@ import {
   Principals,
   SavedObject,
   WORKSPACE_TYPE,
-  Permissions,
   HttpAuth,
 } from '../../../../core/server';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
-import { getPrincipalsFromRequest } from '../utils';
+import {
+  ACLAuditorStateKey,
+  getACLAuditor,
+  getPrincipalsFromRequest,
+} from '../../../../core/server/utils';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
@@ -30,6 +33,8 @@ export class SavedObjectsPermissionControl {
   private readonly logger: Logger;
   private _getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
   private auth?: HttpAuth;
+  private _savedObjectCache: Map<string, { [key: string]: SavedObject }> = new Map();
+  private _shouldCachedSavedObjects: Map<string, string[]> = new Map();
   /**
    * Returns a saved objects client that is able to:
    * 1. Read objects whose type is `workspace` because workspace is a hidden type and the permission control client will need to get the metadata of a specific workspace to do the permission check.
@@ -48,11 +53,49 @@ export class SavedObjectsPermissionControl {
     this.logger = logger;
   }
 
+  private generateSavedObjectKey = ({ type, id }: { type: string; id: string }) => {
+    return `${type}:${id}`;
+  };
+
   private async bulkGetSavedObjects(
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[]
   ) {
-    return (await this.getScopedClient?.(request)?.bulkGet(savedObjects))?.saved_objects || [];
+    const ACLAuditor = getACLAuditor(request);
+    const requestKey = request.uuid;
+    const savedObjectsToGet = savedObjects.filter(
+      (savedObject) =>
+        !this._savedObjectCache.get(requestKey)?.[this.generateSavedObjectKey(savedObject)]
+    );
+    const retrievedSavedObjects =
+      savedObjectsToGet.length > 0
+        ? (await this.getScopedClient?.(request)?.bulkGet(savedObjectsToGet))?.saved_objects || []
+        : [];
+    // System request, -1 * savedObjectsToGet.length for compensation.
+    ACLAuditor?.increment(ACLAuditorStateKey.DATABASE_OPERATION, -1 * savedObjectsToGet.length);
+
+    const retrievedSavedObjectsMap: { [key: string]: SavedObject } = {};
+    retrievedSavedObjects.forEach((savedObject) => {
+      const savedObjectKey = this.generateSavedObjectKey(savedObject);
+      if (this._shouldCachedSavedObjects.get(requestKey)?.includes(savedObjectKey)) {
+        const cachedSavedObjectsMap = this._savedObjectCache.get(requestKey) || {};
+        cachedSavedObjectsMap[savedObjectKey] = savedObject;
+        this._savedObjectCache.set(requestKey, cachedSavedObjectsMap);
+      }
+      retrievedSavedObjectsMap[savedObjectKey] = savedObject;
+    });
+
+    const results: SavedObject[] = [];
+    savedObjects.forEach((savedObject) => {
+      const savedObjectKey = this.generateSavedObjectKey(savedObject);
+      const foundedSavedObject =
+        this._savedObjectCache.get(requestKey)?.[savedObjectKey] ||
+        retrievedSavedObjectsMap[savedObjectKey];
+      if (foundedSavedObject) {
+        results.push(foundedSavedObject);
+      }
+    });
+    return results;
   }
   public async setup(getScopedClient: SavedObjectsServiceStart['getScopedClient'], auth: HttpAuth) {
     this._getScopedClient = getScopedClient;
@@ -148,7 +191,7 @@ export class SavedObjectsPermissionControl {
     if (!savedObjectsGet.length) {
       return {
         success: false,
-        error: i18n.translate('savedObjects.permission.notFound', {
+        error: i18n.translate('workspace.savedObjects.permission.notFound', {
           defaultMessage: 'Can not find target saved objects.',
         }),
       };
@@ -174,5 +217,31 @@ export class SavedObjectsPermissionControl {
       success: true,
       result: hasPermissionToAllObjects,
     };
+  }
+
+  public addToCacheAllowlist(
+    request: OpenSearchDashboardsRequest,
+    savedObjects: Array<Pick<SavedObjectsBulkGetObject, 'type' | 'id'>>
+  ) {
+    const requestKey = request.uuid;
+    this._shouldCachedSavedObjects.set(
+      requestKey,
+      Array.from(
+        new Set([
+          ...(this._shouldCachedSavedObjects.get(requestKey) ?? []),
+          ...savedObjects.map(this.generateSavedObjectKey),
+        ])
+      )
+    );
+  }
+
+  public clearSavedObjectsCache(request: OpenSearchDashboardsRequest) {
+    const requestKey = request.uuid;
+    if (this._shouldCachedSavedObjects.has(requestKey)) {
+      this._shouldCachedSavedObjects.delete(requestKey);
+    }
+    if (this._savedObjectCache.has(requestKey)) {
+      this._savedObjectCache.delete(requestKey);
+    }
   }
 }

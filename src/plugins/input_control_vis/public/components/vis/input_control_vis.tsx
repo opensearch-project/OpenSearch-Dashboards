@@ -29,7 +29,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSmallButton, EuiSmallButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { CONTROL_TYPES } from '../../editor_utils';
 import { ListControl } from '../../control/list_control_factory';
@@ -129,8 +129,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
     return (
       <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
+          <EuiSmallButton
             onClick={this.handleSubmit}
             disabled={!this.props.hasChanges()}
             data-test-subj="inputControlSubmitBtn"
@@ -139,10 +138,10 @@ export class InputControlVis extends Component<InputControlVisProps> {
               id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
               defaultMessage="Apply changes"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             onClick={this.handleReset}
             disabled={!this.props.hasChanges()}
             data-test-subj="inputControlCancelBtn"
@@ -151,10 +150,10 @@ export class InputControlVis extends Component<InputControlVisProps> {
               id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
               defaultMessage="Cancel changes"
             />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             onClick={this.handleClearAll}
             disabled={!this.props.hasValues()}
             data-test-subj="inputControlClearBtn"
@@ -163,7 +162,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
               id="inputControl.vis.inputControlVis.clearFormButtonLabel"
               defaultMessage="Clear form"
             />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

@@ -38,8 +38,8 @@ import React from 'react';
 import {
   // @ts-ignore
   EuiCard,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { getServices } from '../../opensearch_dashboards_services';
@@ -72,16 +72,16 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
       }
       footer={
         <footer>
-          <EuiButton fill className="homWelcome__footerAction" onClick={onConfirm}>
+          <EuiSmallButton fill className="homWelcome__footerAction" onClick={onConfirm}>
             <FormattedMessage id="home.tryButtonLabel" defaultMessage="Add data" />
-          </EuiButton>
-          <EuiButtonEmpty
+          </EuiSmallButton>
+          <EuiSmallButtonEmpty
             className="homWelcome__footerAction"
             onClick={onDecline}
             data-test-subj="skipWelcomeScreen"
           >
             <FormattedMessage id="home.exploreButtonLabel" defaultMessage="Explore on my own" />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </footer>
       }
     />

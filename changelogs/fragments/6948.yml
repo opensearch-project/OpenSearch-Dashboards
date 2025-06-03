@@ -1,2 +1,0 @@
-fix:
-- Fix web log sample visualization & vis-builder not rendering with data source issue ([#6948](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6948))

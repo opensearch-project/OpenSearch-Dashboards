@@ -36,7 +36,14 @@ export type SortOrder = [string, SortDirection];
 export interface SavedSearch
   extends Pick<
     SavedObject,
-    'id' | 'title' | 'copyOnSave' | 'destroy' | 'lastSavedTitle' | 'save' | 'getFullPath'
+    | 'id'
+    | 'title'
+    | 'copyOnSave'
+    | 'destroy'
+    | 'lastSavedTitle'
+    | 'save'
+    | 'getFullPath'
+    | 'getOpenSearchType'
   > {
   searchSource: ISearchSource; // This is optional in SavedObject, but required for SavedSearch
   description?: string;

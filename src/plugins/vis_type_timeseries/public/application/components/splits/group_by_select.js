@@ -30,7 +30,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiCompressedComboBox } from '@elastic/eui';
 import { injectI18n } from '@osd/i18n/react';
 import { isGroupByFieldsEnabled } from '../../lib/check_ui_restrictions';
 
@@ -76,7 +76,7 @@ function GroupBySelectUi(props) {
   });
 
   return (
-    <EuiComboBox
+    <EuiCompressedComboBox
       id={props.id}
       isClearable={false}
       options={modeOptions}

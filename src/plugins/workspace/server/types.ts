@@ -4,33 +4,23 @@
  */
 
 import {
-  Logger,
   OpenSearchDashboardsRequest,
-  RequestHandlerContext,
   SavedObjectsFindResponse,
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
   Permissions,
+  UiSettingsServiceStart,
+  WorkspaceFindOptions,
 } from '../../../core/server';
-
+import { PermissionModeId } from '../../../core/server';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
-}
-
-export interface WorkspaceFindOptions {
-  page?: number;
-  perPage?: number;
-  search?: string;
-  searchFields?: string[];
-  sortField?: string;
-  sortOrder?: string;
+  permissionMode?: PermissionModeId;
 }
 
 export interface IRequestDetail {
   request: OpenSearchDashboardsRequest;
-  context: RequestHandlerContext;
-  logger: Logger;
 }
 
 export interface IWorkspaceClientImpl {
@@ -49,15 +39,23 @@ export interface IWorkspaceClientImpl {
    */
   setSavedObjects(savedObjects: SavedObjectsServiceStart): void;
   /**
+   * Set ui settings client that will be used inside the workspace client.
+   * @param uiSettings {@link UiSettingsServiceStart}
+   * @returns void
+   * @public
+   */
+  setUiSettings(uiSettings: UiSettingsServiceStart): void;
+  /**
    * Create a workspace
    * @param requestDetail {@link IRequestDetail}
-   * @param payload {@link WorkspaceAttribute}
-   * @returns a Promise with a new-created id for the workspace
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of string.
    * @public
    */
   create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      dataSources?: string[];
+    }
   ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
   /**
    * List workspaces
@@ -72,7 +70,7 @@ export interface IWorkspaceClientImpl {
   ): Promise<
     IResponse<
       {
-        workspaces: WorkspaceAttribute[];
+        workspaces: WorkspaceAttributeWithPermission[];
       } & Pick<SavedObjectsFindResponse, 'page' | 'per_page' | 'total'>
     >
   >;
@@ -88,14 +86,16 @@ export interface IWorkspaceClientImpl {
    * Update the detail of a given workspace
    * @param requestDetail {@link IRequestDetail}
    * @param id workspace id
-   * @param payload {@link WorkspaceAttribute}
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of string.
    * @returns a Promise with a boolean result indicating if the update operation successed.
    * @public
    */
   update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>> & {
+      dataSources?: string[];
+    }
   ): Promise<IResponse<boolean>>;
   /**
    * Delete a given workspace
@@ -111,6 +111,46 @@ export interface IWorkspaceClientImpl {
    * @public
    */
   destroy(): Promise<IResponse<boolean>>;
+
+  /**
+   * Associates a list of objects with the given workspace ID.
+   *
+   * This method takes a workspace ID and an array of objects, where each object contains
+   * an `id` and `type`. It attempts to associate each object with the specified workspace.
+   * If the association succeeds, the object is included in the result without an error.
+   * If there is an issue associating an object, an error message is returned for that object.
+   *
+   * @returns A promise that resolves to a response object containing an array of results for each object.
+   *          Each result will include the object's `id` and, if there was an error during association, an `error` field
+   *          with the error message.
+   *
+   * @public
+   */
+  associate(
+    requestDetail: IRequestDetail,
+    workspaceId: string,
+    objects: Array<{ id: string; type: string }>
+  ): Promise<IResponse<Array<{ id: string; error?: string }>>>;
+
+  /**
+   * Dissociates a list of objects from the given workspace ID.
+   *
+   * This method takes a workspace ID and an array of objects, where each object contains
+   * an `id` and `type`. It attempts to dissociate each object from the specified workspace.
+   * If the dissociation succeeds, the object is included in the result without an error.
+   * If there is an issue dissociating an object, an error message is returned for that object.
+   *
+   * @returns A promise that resolves to a response object containing an array of results for each object.
+   *          Each result will include the object's `id` and, if there was an error during dissociation, an `error` field
+   *          with the error message.
+   *
+   * @public
+   */
+  dissociate(
+    requestDetail: IRequestDetail,
+    workspaceId: string,
+    objects: Array<{ id: string; type: string }>
+  ): Promise<IResponse<Array<{ id: string; error?: string }>>>;
 }
 
 export type IResponse<T> =
@@ -122,11 +162,6 @@ export type IResponse<T> =
       success: false;
       error?: string;
     };
-
-export interface AuthInfo {
-  backend_roles?: string[];
-  user_name?: string;
-}
 
 export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;

@@ -2,9 +2,9 @@
 
 exports[`DurationFormatEditor should render human readable output normally 1`] = `
 <Fragment>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -18,7 +18,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       isInvalid={false}
       onChange={[Function]}
       options={
@@ -31,10 +31,10 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
       }
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -48,7 +48,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       isInvalid={false}
       onChange={[Function]}
       options={
@@ -65,7 +65,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
       }
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <FormatEditorSamples
     sampleType="text"
     samples={
@@ -114,9 +114,9 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
 
 exports[`DurationFormatEditor should render non-human readable output normally 1`] = `
 <Fragment>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -130,7 +130,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       isInvalid={false}
       onChange={[Function]}
       options={
@@ -143,10 +143,10 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       }
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -160,7 +160,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       isInvalid={false}
       onChange={[Function]}
       options={
@@ -177,10 +177,10 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       }
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     error={null}
     fullWidth={false}
     hasChildLabel={true}
@@ -195,23 +195,23 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     }
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       isInvalid={false}
       max={20}
       min={0}
       onChange={[Function]}
       value={2}
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={false}
       label={
         <FormattedMessage
@@ -222,7 +222,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <FormatEditorSamples
     sampleType="text"
     samples={

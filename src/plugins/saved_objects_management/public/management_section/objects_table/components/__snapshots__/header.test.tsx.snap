@@ -1,5 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Header - workspace enabled should render \`Import\` button inside a workspace 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="baseline"
+    justifyContent="spaceBetween"
+  >
+    <HeaderControl
+      controls={
+        Array [
+          Object {
+            "controlType": "button",
+            "iconType": "exportAction",
+            "label": "Export all assets",
+            "run": [Function],
+            "testId": "exportAllObjects",
+          },
+          Object {
+            "controlType": "button",
+            "iconType": "importAction",
+            "label": "Import",
+            "run": [Function],
+            "testId": "importObjects",
+          },
+        ]
+      }
+      setMountPoint={[MockFunction]}
+    />
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="l"
+  />
+  <HeaderControl
+    controls={
+      Array [
+        Object {
+          "description": "Manage and share your assets.",
+        },
+      ]
+    }
+    setMountPoint={[MockFunction]}
+  />
+</Fragment>
+`;
+
 exports[`Header should render normally 1`] = `
 <Fragment>
   <EuiFlexGroup
@@ -9,7 +53,9 @@ exports[`Header should render normally 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiTitle>
+      <EuiText
+        size="s"
+      >
         <h1>
           <FormattedMessage
             defaultMessage="Saved Objects"
@@ -17,7 +63,7 @@ exports[`Header should render normally 1`] = `
             values={Object {}}
           />
         </h1>
-      </EuiTitle>
+      </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
@@ -37,13 +83,9 @@ exports[`Header should render normally 1`] = `
             size="s"
           >
             <FormattedMessage
-              defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
+              defaultMessage="Export all objects"
               id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-              values={
-                Object {
-                  "filteredCount": 2,
-                }
-              }
+              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -101,6 +143,161 @@ exports[`Header should render normally 1`] = `
   </EuiText>
   <EuiSpacer
     size="m"
+  />
+</Fragment>
+`;
+
+exports[`Header should render normally when showDuplicateAll is undefined 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="baseline"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiText
+        size="s"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Saved Objects"
+            id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="baseline"
+        gutterSize="m"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            data-test-subj="exportAllObjects"
+            iconType="exportAction"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Export all objects"
+              id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            data-test-subj="importObjects"
+            iconType="importAction"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Import"
+              id="savedObjectsManagement.objectsTable.header.importButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            iconType="refresh"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Refresh"
+              id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiText
+    size="s"
+  >
+    <p>
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="Manage and share your saved objects. To edit the underlying data of an object, go to its associated application."
+          id="savedObjectsManagement.objectsTable.howToDeleteSavedObjectsDescription"
+          values={Object {}}
+        />
+      </EuiTextColor>
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;
+
+exports[`Header should render normally when useUpdatedUX is true 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="baseline"
+    justifyContent="spaceBetween"
+  >
+    <HeaderControl
+      controls={
+        Array [
+          Object {
+            "controlType": "button",
+            "iconType": "copy",
+            "isDisabled": false,
+            "label": "Copy all assets to...",
+            "run": [Function],
+            "testId": "duplicateObjects",
+          },
+          Object {
+            "controlType": "button",
+            "iconType": "exportAction",
+            "label": "Export all assets",
+            "run": [Function],
+            "testId": "exportAllObjects",
+          },
+          Object {
+            "controlType": "button",
+            "iconType": "importAction",
+            "label": "Import",
+            "run": [Function],
+            "testId": "importObjects",
+          },
+        ]
+      }
+      setMountPoint={[MockFunction]}
+    />
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="l"
+  />
+  <HeaderControl
+    controls={
+      Array [
+        Object {
+          "description": "Manage and share your assets.",
+        },
+      ]
+    }
+    setMountPoint={[MockFunction]}
   />
 </Fragment>
 `;

@@ -315,7 +315,7 @@ export const getEuiContextMapping = () => {
     ),
     'euiFilterButton.filterBadge': ({ count, hasActiveFilters }: EuiValues) =>
       i18n.translate('core.euiFilterButton.filterBadge', {
-        defaultMessage: '${count} ${filterCountLabel} filters',
+        defaultMessage: '{count} {filterCountLabel} filters',
         values: { count, filterCountLabel: hasActiveFilters ? 'active' : 'available' },
       }),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {

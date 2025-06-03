@@ -12,6 +12,11 @@
     - [User_stories](multi-datasource/user_stories.md)
   - [Openapi](openapi/README.md)
   - Plugins
+    - data
+      - [Query editor enhancements](plugins/data/query-editor-enhancements.md)
+    - discover
+      - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
+      - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
@@ -30,15 +35,18 @@
         - public
           - application
             - [Hooks](../src/plugins/console/public/application/hooks/README.md)
+      - [Content_management](../src/plugins/content_management/README.md)
       - [Csp_handler](../src/plugins/csp_handler/README.md)
       - [Dashboard](../src/plugins/dashboard/README.md)
       - [Data](../src/plugins/data/README.md)
       - [Data_explorer](../src/plugins/data_explorer/README.md)
+      - [Data_importer](../src/plugins/data_importer/README.md)
       - [Data_source](../src/plugins/data_source/README.md)
       - [Data_source_management](../src/plugins/data_source_management/README.md)
       - [Dev_tools](../src/plugins/dev_tools/README.md)
       - [Discover](../src/plugins/discover/README.md)
       - [Embeddable](../src/plugins/embeddable/README.md)
+      - [Explore](../src/plugins/explore/README.md)
       - [Expressions](../src/plugins/expressions/README.md)
       - [Home](../src/plugins/home/README.md)
       - index_pattern_management
@@ -61,6 +69,7 @@
           - forms
             - [Form_wizard](../src/plugins/opensearch_ui_shared/public/forms/form_wizard/README.md)
             - [Multi_content](../src/plugins/opensearch_ui_shared/public/forms/multi_content/README.md)
+      - [Query_enhancements](../src/plugins/query_enhancements/README.md)
       - [Saved_objects](../src/plugins/saved_objects/README.md)
       - [Saved_objects_management](../src/plugins/saved_objects_management/README.md)
       - [Share](../src/plugins/share/README.md)
@@ -95,6 +104,7 @@
     - [Multiple_data_source_examples](../examples/multiple_data_source_examples/README.md)
     - [Routing_example](../examples/routing_example/README.md)
     - [Search_examples](../examples/search_examples/README.md)
+    - [State_management_example](../examples/state_management_example/README.md)
     - [Ui_action_examples](../examples/ui_action_examples/README.md)
     - [Ui_actions_explorer](../examples/ui_actions_explorer/README.md)
     - [Url_generators_examples](../examples/url_generators_examples/README.md)
@@ -123,6 +133,7 @@
     - [Osd pm](../packages/osd-pm/README.md)
     - [Osd spec to console](../packages/osd-spec-to-console/README.md)
     - [Osd std](../packages/osd-std/README.md)
+    - [Osd storybook](../packages/osd-storybook/README.md)
     - [Osd stylelint config](../packages/osd-stylelint-config/README.md)
     - [Osd stylelint plugin stylelint](../packages/osd-stylelint-plugin-stylelint/README.md)
     - [Osd telemetry tools](../packages/osd-telemetry-tools/README.md)
@@ -147,7 +158,9 @@
     - [Opensearch dashboards.release notes 1.3.14](../release-notes/opensearch-dashboards.release-notes-1.3.14.md)
     - [Opensearch dashboards.release notes 1.3.15](../release-notes/opensearch-dashboards.release-notes-1.3.15.md)
     - [Opensearch dashboards.release notes 1.3.17](../release-notes/opensearch-dashboards.release-notes-1.3.17.md)
+    - [Opensearch dashboards.release notes 1.3.19](../release-notes/opensearch-dashboards.release-notes-1.3.19.md)
     - [Opensearch dashboards.release notes 1.3.2](../release-notes/opensearch-dashboards.release-notes-1.3.2.md)
+    - [Opensearch dashboards.release notes 1.3.20](../release-notes/opensearch-dashboards.release-notes-1.3.20.md)
     - [Opensearch dashboards.release notes 1.3.3](../release-notes/opensearch-dashboards.release-notes-1.3.3.md)
     - [Opensearch dashboards.release notes 1.3.5](../release-notes/opensearch-dashboards.release-notes-1.3.5.md)
     - [Opensearch dashboards.release notes 1.3.6](../release-notes/opensearch-dashboards.release-notes-1.3.6.md)
@@ -165,6 +178,11 @@
     - [Opensearch dashboards.release notes 2.13.0](../release-notes/opensearch-dashboards.release-notes-2.13.0.md)
     - [Opensearch dashboards.release notes 2.14.0](../release-notes/opensearch-dashboards.release-notes-2.14.0.md)
     - [Opensearch dashboards.release notes 2.15.0](../release-notes/opensearch-dashboards.release-notes-2.15.0.md)
+    - [Opensearch dashboards.release notes 2.16.0](../release-notes/opensearch-dashboards.release-notes-2.16.0.md)
+    - [Opensearch dashboards.release notes 2.17.0](../release-notes/opensearch-dashboards.release-notes-2.17.0.md)
+    - [Opensearch dashboards.release notes 2.17.1](../release-notes/opensearch-dashboards.release-notes-2.17.1.md)
+    - [Opensearch dashboards.release notes 2.18.0](../release-notes/opensearch-dashboards.release-notes-2.18.0.md)
+    - [Opensearch dashboards.release notes 2.19.0](../release-notes/opensearch-dashboards.release-notes-2.19.0.md)
     - [Opensearch dashboards.release notes 2.2.0](../release-notes/opensearch-dashboards.release-notes-2.2.0.md)
     - [Opensearch dashboards.release notes 2.2.1](../release-notes/opensearch-dashboards.release-notes-2.2.1.md)
     - [Opensearch dashboards.release notes 2.3.0](../release-notes/opensearch-dashboards.release-notes-2.3.0.md)
@@ -175,6 +193,9 @@
     - [Opensearch dashboards.release notes 2.7.0](../release-notes/opensearch-dashboards.release-notes-2.7.0.md)
     - [Opensearch dashboards.release notes 2.8.0](../release-notes/opensearch-dashboards.release-notes-2.8.0.md)
     - [Opensearch dashboards.release notes 2.9.0](../release-notes/opensearch-dashboards.release-notes-2.9.0.md)
+    - [Opensearch dashboards.release notes 3.0.0 alpha1](../release-notes/opensearch-dashboards.release-notes-3.0.0-alpha1.md)
+    - [Opensearch dashboards.release notes 3.0.0 beta1](../release-notes/opensearch-dashboards.release-notes-3.0.0-beta1.md)
+    - [Opensearch dashboards.release notes 3.0.0](../release-notes/opensearch-dashboards.release-notes-3.0.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
@@ -189,4 +210,5 @@
   - [RELEASING](../RELEASING.md)
   - [SECURITY](../SECURITY.md)
   - [TESTING](../TESTING.md)
+  - [TRIAGING](../TRIAGING.md)
   - [TYPESCRIPT](../TYPESCRIPT.md)

@@ -1,2 +1,0 @@
-feat:
-- Remove endpoint validation for create data source saved object API ([#6899](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6899))

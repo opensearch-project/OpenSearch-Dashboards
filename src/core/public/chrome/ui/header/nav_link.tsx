@@ -35,6 +35,7 @@ import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../
 import { HttpStart } from '../../../http';
 import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
+import { formatUrlWithWorkspaceId } from '../../../utils';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
@@ -42,6 +43,7 @@ export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement,
 // TODO: replace hard-coded values with a registration function, so that apps can control active nav links similar to breadcrumbs
 const aliasedApps: { [key: string]: string[] } = {
   discover: ['data-explorer'],
+  explore: ['data-explorer'],
 };
 
 export const isActiveNavLink = (appId: string | undefined, linkId: string): boolean =>
@@ -52,7 +54,7 @@ interface Props {
   appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
-  onClick?: Function;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   navigateToApp: CoreStart['application']['navigateToApp'];
   externalLink?: boolean;
 }
@@ -78,7 +80,7 @@ export function createEuiListItem({
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       if (!isModifiedOrPrevented(event)) {
-        onClick();
+        onClick(event);
       }
 
       if (
@@ -124,10 +126,18 @@ export function createRecentNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
   basePath: HttpStart['basePath'],
-  navigateToUrl: InternalApplicationStart['navigateToUrl']
+  navigateToUrl: InternalApplicationStart['navigateToUrl'],
+  workspaceEnabled: boolean = false
 ): RecentNavLink {
-  const { link, label } = recentLink;
-  const href = relativeToAbsolute(basePath.prepend(link));
+  const { link, label, workspaceId } = recentLink;
+  const href = relativeToAbsolute(
+    basePath.prepend(
+      workspaceEnabled ? formatUrlWithWorkspaceId(link, workspaceId || '', basePath) : link,
+      {
+        withoutClientBasePath: true,
+      }
+    )
+  );
   const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
   let titleAndAriaLabel = label;
 

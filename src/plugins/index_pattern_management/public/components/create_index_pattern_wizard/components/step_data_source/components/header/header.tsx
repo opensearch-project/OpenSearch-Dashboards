@@ -6,7 +6,7 @@
 import React, { Fragment, useState } from 'react';
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiRadio,
@@ -29,9 +29,15 @@ import { getDataSources } from '../../../../../../components/utils';
 import { DataSourceTableItem, StepInfo } from '../../../../types';
 import { LoadingState } from '../../../loading_state';
 import * as pluginManifest from '../../../../../../../opensearch_dashboards.json';
+import { populateRemoteClusterConnectionForDatasources } from '../../../../lib/get_remote_connections';
 
 interface HeaderProps {
-  onDataSourceSelected: (id: string, type: string, title: string) => void;
+  onDataSourceSelected: (
+    id: string,
+    type: string,
+    title: string,
+    relatedConnections?: DataSourceTableItem[]
+  ) => void;
   dataSourceRef: DataSourceRef;
   goToNextStep: (dataSourceRef: DataSourceRef) => void;
   isNextStepDisabled: boolean;
@@ -58,6 +64,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
   const {
     savedObjects,
     notifications: { toasts },
+    http,
   } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
 
   useEffectOnce(() => {
@@ -67,16 +74,36 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
   const fetchDataSources = () => {
     setIsLoading(true);
     getDataSources(savedObjects.client)
-      .then((fetchedDataSources: DataSourceTableItem[]) => {
+      .then(async (fetchedDataSources: DataSourceTableItem[]) => {
         setIsLoading(false);
+
         if (fetchedDataSources?.length) {
-          fetchedDataSources = fetchedDataSources.filter((dataSource) =>
-            semver.satisfies(
-              dataSource.datasourceversion,
-              pluginManifest.supportedOSDataSourceVersions
-            )
+          // filter out data sources which does NOT have the required backend plugins installed
+          if (pluginManifest.hasOwnProperty('requiredOSDataSourcePlugins')) {
+            fetchedDataSources = fetchedDataSources.filter((dataSource) =>
+              pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
+                dataSource.installedplugins.includes(plugin)
+              )
+            );
+          }
+
+          // filter out data sources which is NOT in the support range of plugin
+          if (pluginManifest.hasOwnProperty('supportedOSDataSourceVersions')) {
+            fetchedDataSources = fetchedDataSources.filter((dataSource) =>
+              semver.satisfies(
+                dataSource.datasourceversion,
+                pluginManifest.supportedOSDataSourceVersions
+              )
+            );
+          }
+
+          // enrich the fetched datasource with remote connections
+          const enrichedfetchedDataSources = await populateRemoteClusterConnectionForDatasources(
+            fetchedDataSources,
+            http
           );
-          setDataSources(fetchedDataSources);
+
+          setDataSources(enrichedfetchedDataSources);
         }
       })
       .catch(() => {
@@ -93,11 +120,33 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
 
   const onSelectedDataSource = (options: DataSourceTableItem[]) => {
     const selectedDataSource = options.find(({ checked }) => checked);
-    setDataSources(options);
+
+    // remove any previous selected sub data source and add the newly selected one
+    const newOptions = [];
+
+    for (const option of options) {
+      if (!option.disabled) {
+        // Add the main option to the list
+        newOptions.push({ ...option });
+
+        // If the option is the selected data source, add its related connections just below it
+        if (
+          option.id === selectedDataSource?.id &&
+          selectedDataSource?.relatedDataSourceConnection
+        ) {
+          selectedDataSource.relatedDataSourceConnection.forEach((connection) => {
+            newOptions.push({ ...connection });
+          });
+        }
+      }
+    }
+
+    setDataSources(newOptions);
     onDataSourceSelected(
       selectedDataSource!.id,
       selectedDataSource!.type,
-      selectedDataSource!.title
+      selectedDataSource!.title,
+      selectedDataSource?.relatedDataSourceConnection
     );
   };
 
@@ -199,7 +248,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               data-test-subj="createIndexPatternStepDataSourceNextStepButton"
               fill
               iconSide="right"
@@ -211,7 +260,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
                 id="indexPatternManagement.createIndexPattern.step.nextStepButton"
                 defaultMessage="Next step"
               />
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>

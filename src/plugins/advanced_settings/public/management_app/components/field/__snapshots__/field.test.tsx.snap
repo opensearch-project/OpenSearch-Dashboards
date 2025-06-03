@@ -28,10 +28,10 @@ exports[`Field for array setting should render as read only if saving is disable
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -39,7 +39,7 @@ exports[`Field for array setting should render as read only if saving is disable
     label="array:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={true}
@@ -47,7 +47,7 @@ exports[`Field for array setting should render as read only if saving is disable
       onChange={[Function]}
       value="default_value"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -101,10 +101,10 @@ exports[`Field for array setting should render as read only with help text if ov
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -122,7 +122,7 @@ exports[`Field for array setting should render as read only with help text if ov
     label="array:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={true}
@@ -130,7 +130,90 @@ exports[`Field for array setting should render as read only with help text if ov
       onChange={[Function]}
       value="user, value"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for array setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Array test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    default_value
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="array:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Array test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="array:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      aria-label="array test setting"
+      data-test-subj="advancedSetting-editField-array:test:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      value="user, value"
+    />
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -173,10 +256,10 @@ exports[`Field for array setting should render custom setting icon if it is cust
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -184,7 +267,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
     label="array:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={false}
@@ -192,7 +275,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
       onChange={[Function]}
       value="default_value"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -224,10 +307,10 @@ exports[`Field for array setting should render default value if there is no user
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -235,7 +318,7 @@ exports[`Field for array setting should render default value if there is no user
     label="array:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={false}
@@ -243,7 +326,7 @@ exports[`Field for array setting should render default value if there is no user
       onChange={[Function]}
       value="default_value"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -292,10 +375,10 @@ exports[`Field for array setting should render unsaved value if there are unsave
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -303,7 +386,7 @@ exports[`Field for array setting should render unsaved value if there are unsave
     label="array:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-describedby="array:test:setting-group array:test:setting-unsaved"
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
@@ -323,7 +406,7 @@ exports[`Field for array setting should render unsaved value if there are unsave
         Setting is currently not saved.
       </p>
     </EuiScreenReaderOnly>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -377,10 +460,10 @@ exports[`Field for array setting should render user value if there is user value
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -405,7 +488,7 @@ exports[`Field for array setting should render user value if there is user value
     label="array:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
       disabled={false}
@@ -413,7 +496,7 @@ exports[`Field for array setting should render user value if there is user value
       onChange={[Function]}
       value="user, value"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -445,10 +528,10 @@ exports[`Field for boolean setting should render as read only if saving is disab
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={false}
     hasEmptyLabelSpace={false}
@@ -456,7 +539,7 @@ exports[`Field for boolean setting should render as read only if saving is disab
     label="boolean:test:setting"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       aria-label="boolean test setting"
       checked={true}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -470,7 +553,7 @@ exports[`Field for boolean setting should render as read only if saving is disab
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -524,10 +607,10 @@ exports[`Field for boolean setting should render as read only with help text if 
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={false}
     hasEmptyLabelSpace={false}
@@ -545,7 +628,7 @@ exports[`Field for boolean setting should render as read only with help text if 
     label="boolean:test:setting"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       aria-label="boolean test setting"
       checked={false}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -559,7 +642,96 @@ exports[`Field for boolean setting should render as read only with help text if 
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for boolean setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Boolean test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    true
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="boolean:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Boolean test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="boolean:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedSwitch
+      aria-label="boolean test setting"
+      checked={false}
+      data-test-subj="advancedSetting-editField-boolean:test:setting"
+      disabled={true}
+      label={
+        <FormattedMessage
+          defaultMessage="Off"
+          id="advancedSettings.field.offLabel"
+          values={Object {}}
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -602,10 +774,10 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={false}
     hasEmptyLabelSpace={false}
@@ -613,7 +785,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     label="boolean:test:setting"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       aria-label="boolean test setting"
       checked={true}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -627,7 +799,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -659,10 +831,10 @@ exports[`Field for boolean setting should render default value if there is no us
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={false}
     hasEmptyLabelSpace={false}
@@ -670,7 +842,7 @@ exports[`Field for boolean setting should render default value if there is no us
     label="boolean:test:setting"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       aria-label="boolean test setting"
       checked={true}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -684,7 +856,7 @@ exports[`Field for boolean setting should render default value if there is no us
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -733,10 +905,10 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={false}
     hasEmptyLabelSpace={false}
@@ -744,7 +916,7 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
     label="boolean:test:setting"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       aria-describedby="boolean:test:setting-group boolean:test:setting-unsaved"
       aria-label="boolean test setting"
       checked={false}
@@ -766,7 +938,7 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
         Setting is currently not saved.
       </p>
     </EuiScreenReaderOnly>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -820,10 +992,10 @@ exports[`Field for boolean setting should render user value if there is user val
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={false}
     hasEmptyLabelSpace={false}
@@ -848,7 +1020,7 @@ exports[`Field for boolean setting should render user value if there is user val
     label="boolean:test:setting"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       aria-label="boolean test setting"
       checked={false}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
@@ -862,7 +1034,7 @@ exports[`Field for boolean setting should render user value if there is user val
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -894,10 +1066,10 @@ exports[`Field for image setting should render as read only if saving is disable
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -905,10 +1077,10 @@ exports[`Field for image setting should render as read only if saving is disable
     label="image:test:setting"
     labelType="label"
   >
-    <EuiFilePicker
+    <EuiCompressedFilePicker
       accept=".jpg,.jpeg,.png"
       aria-label="image:test:setting"
-      compressed={false}
+      compressed={true}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={true}
       display="large"
@@ -916,7 +1088,7 @@ exports[`Field for image setting should render as read only if saving is disable
       initialPromptText="Select or drag and drop a file"
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -970,10 +1142,10 @@ exports[`Field for image setting should render as read only with help text if ov
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -997,7 +1169,88 @@ exports[`Field for image setting should render as read only with help text if ov
       aria-label="image test setting"
       url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for image setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Image test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="image:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Image test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="image:test:setting"
+    labelType="label"
+  >
+    <EuiImage
+      allowFullScreen={true}
+      alt="image:test:setting"
+      aria-label="image test setting"
+      url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+    />
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1040,10 +1293,10 @@ exports[`Field for image setting should render custom setting icon if it is cust
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1051,10 +1304,10 @@ exports[`Field for image setting should render custom setting icon if it is cust
     label="image:test:setting"
     labelType="label"
   >
-    <EuiFilePicker
+    <EuiCompressedFilePicker
       accept=".jpg,.jpeg,.png"
       aria-label="image:test:setting"
-      compressed={false}
+      compressed={true}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={false}
       display="large"
@@ -1062,7 +1315,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
       initialPromptText="Select or drag and drop a file"
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1094,10 +1347,10 @@ exports[`Field for image setting should render default value if there is no user
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1105,10 +1358,10 @@ exports[`Field for image setting should render default value if there is no user
     label="image:test:setting"
     labelType="label"
   >
-    <EuiFilePicker
+    <EuiCompressedFilePicker
       accept=".jpg,.jpeg,.png"
       aria-label="image:test:setting"
-      compressed={false}
+      compressed={true}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={false}
       display="large"
@@ -1116,7 +1369,7 @@ exports[`Field for image setting should render default value if there is no user
       initialPromptText="Select or drag and drop a file"
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1165,10 +1418,10 @@ exports[`Field for image setting should render unsaved value if there are unsave
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1176,10 +1429,10 @@ exports[`Field for image setting should render unsaved value if there are unsave
     label="image:test:setting"
     labelType="label"
   >
-    <EuiFilePicker
+    <EuiCompressedFilePicker
       accept=".jpg,.jpeg,.png"
       aria-label="image:test:setting"
-      compressed={false}
+      compressed={true}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={false}
       display="large"
@@ -1194,7 +1447,7 @@ exports[`Field for image setting should render unsaved value if there are unsave
         Setting is currently not saved.
       </p>
     </EuiScreenReaderOnly>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1248,10 +1501,10 @@ exports[`Field for image setting should render user value if there is user value
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1295,7 +1548,7 @@ exports[`Field for image setting should render user value if there is user value
       aria-label="image test setting"
       url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1352,10 +1605,10 @@ exports[`Field for json setting should render as read only if saving is disabled
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1391,7 +1644,7 @@ exports[`Field for json setting should render as read only if saving is disabled
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1448,10 +1701,10 @@ exports[`Field for json setting should render as read only with help text if ove
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1497,7 +1750,113 @@ exports[`Field for json setting should render as read only with help text if ove
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for json setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Json test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueTypeJsonText"
+              values={
+                Object {
+                  "value": <EuiCodeBlock
+                    language="json"
+                    paddingSize="s"
+                  >
+                    {}
+                  </EuiCodeBlock>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="json:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Json test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="json:test:setting"
+    labelType="label"
+  >
+    <div
+      data-test-subj="advancedSetting-editField-json:test:setting"
+    >
+      <EuiCodeEditor
+        aria-label="json test setting"
+        editorProps={
+          Object {
+            "$blockScrolling": Infinity,
+          }
+        }
+        height="auto"
+        isReadOnly={true}
+        maxLines={30}
+        minLines={6}
+        mode="json"
+        onChange={[Function]}
+        setOptions={
+          Object {
+            "showLineNumbers": false,
+            "tabSize": 2,
+          }
+        }
+        showGutter={false}
+        theme="textmate"
+        value="{\\"hello\\": \\"world\\"}"
+        width="100%"
+      />
+    </div>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1540,10 +1899,10 @@ exports[`Field for json setting should render custom setting icon if it is custo
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1579,7 +1938,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1636,10 +1995,10 @@ exports[`Field for json setting should render default value if there is no user 
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1692,7 +2051,7 @@ exports[`Field for json setting should render default value if there is no user 
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1741,10 +2100,10 @@ exports[`Field for json setting should render unsaved value if there are unsaved
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1792,7 +2151,7 @@ exports[`Field for json setting should render unsaved value if there are unsaved
         Setting is currently not saved.
       </p>
     </EuiScreenReaderOnly>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1849,10 +2208,10 @@ exports[`Field for json setting should render user value if there is user value 
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1905,7 +2264,7 @@ exports[`Field for json setting should render user value if there is user value 
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -1937,10 +2296,10 @@ exports[`Field for markdown setting should render as read only if saving is disa
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -1976,7 +2335,7 @@ exports[`Field for markdown setting should render as read only if saving is disa
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2030,10 +2389,10 @@ exports[`Field for markdown setting should render as read only with help text if
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2079,7 +2438,110 @@ exports[`Field for markdown setting should render as read only with help text if
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for markdown setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Markdown test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="markdown:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Markdown test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="markdown:test:setting"
+    labelType="label"
+  >
+    <div
+      data-test-subj="advancedSetting-editField-markdown:test:setting"
+    >
+      <EuiCodeEditor
+        aria-label="markdown test setting"
+        editorProps={
+          Object {
+            "$blockScrolling": Infinity,
+          }
+        }
+        height="auto"
+        isReadOnly={true}
+        maxLines={30}
+        minLines={6}
+        mode="markdown"
+        onChange={[Function]}
+        setOptions={
+          Object {
+            "showLineNumbers": false,
+            "tabSize": 2,
+          }
+        }
+        showGutter={false}
+        theme="textmate"
+        value="**bold**"
+        width="100%"
+      />
+    </div>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2122,10 +2584,10 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2161,7 +2623,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2193,10 +2655,10 @@ exports[`Field for markdown setting should render default value if there is no u
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2232,7 +2694,7 @@ exports[`Field for markdown setting should render default value if there is no u
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2281,10 +2743,10 @@ exports[`Field for markdown setting should render unsaved value if there are uns
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2328,7 +2790,7 @@ exports[`Field for markdown setting should render unsaved value if there are uns
         Setting is currently not saved.
       </p>
     </EuiScreenReaderOnly>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2382,10 +2844,10 @@ exports[`Field for markdown setting should render user value if there is user va
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2438,7 +2900,7 @@ exports[`Field for markdown setting should render user value if there is user va
         width="100%"
       />
     </div>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2470,10 +2932,10 @@ exports[`Field for number setting should render as read only if saving is disabl
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2481,7 +2943,7 @@ exports[`Field for number setting should render as read only if saving is disabl
     label="number:test:setting"
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={true}
@@ -2489,7 +2951,7 @@ exports[`Field for number setting should render as read only if saving is disabl
       onChange={[Function]}
       value={5}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2543,10 +3005,10 @@ exports[`Field for number setting should render as read only with help text if o
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2564,7 +3026,7 @@ exports[`Field for number setting should render as read only with help text if o
     label="number:test:setting"
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={true}
@@ -2572,7 +3034,90 @@ exports[`Field for number setting should render as read only with help text if o
       onChange={[Function]}
       value={10}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for number setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Number test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    5
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="number:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Number test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="number:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedFieldNumber
+      aria-label="number test setting"
+      data-test-subj="advancedSetting-editField-number:test:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      value={10}
+    />
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2615,10 +3160,10 @@ exports[`Field for number setting should render custom setting icon if it is cus
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2626,7 +3171,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
     label="number:test:setting"
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={false}
@@ -2634,7 +3179,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
       onChange={[Function]}
       value={5}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2666,10 +3211,10 @@ exports[`Field for number setting should render default value if there is no use
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2677,7 +3222,7 @@ exports[`Field for number setting should render default value if there is no use
     label="number:test:setting"
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={false}
@@ -2685,7 +3230,7 @@ exports[`Field for number setting should render default value if there is no use
       onChange={[Function]}
       value={5}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2734,10 +3279,10 @@ exports[`Field for number setting should render unsaved value if there are unsav
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2745,7 +3290,7 @@ exports[`Field for number setting should render unsaved value if there are unsav
     label="number:test:setting"
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       aria-describedby="number:test:setting-group number:test:setting-unsaved"
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
@@ -2761,7 +3306,7 @@ exports[`Field for number setting should render unsaved value if there are unsav
         Setting is currently not saved.
       </p>
     </EuiScreenReaderOnly>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2815,10 +3360,10 @@ exports[`Field for number setting should render user value if there is user valu
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2843,7 +3388,7 @@ exports[`Field for number setting should render user value if there is user valu
     label="number:test:setting"
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
       disabled={false}
@@ -2851,7 +3396,7 @@ exports[`Field for number setting should render user value if there is user valu
       onChange={[Function]}
       value={10}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2883,10 +3428,10 @@ exports[`Field for select setting should render as read only if saving is disabl
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2894,7 +3439,7 @@ exports[`Field for select setting should render as read only if saving is disabl
     label="select:test:setting"
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={true}
@@ -2918,7 +3463,7 @@ exports[`Field for select setting should render as read only if saving is disabl
       }
       value="orange"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -2972,10 +3517,10 @@ exports[`Field for select setting should render as read only with help text if o
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -2993,7 +3538,7 @@ exports[`Field for select setting should render as read only with help text if o
     label="select:test:setting"
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={true}
@@ -3017,7 +3562,106 @@ exports[`Field for select setting should render as read only with help text if o
       }
       value="banana"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for select setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Select test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    Orange
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="select:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Select test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="select:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      aria-label="select test setting"
+      data-test-subj="advancedSetting-editField-select:test:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Apple",
+            "value": "apple",
+          },
+          Object {
+            "text": "Orange",
+            "value": "orange",
+          },
+          Object {
+            "text": "banana",
+            "value": "banana",
+          },
+        ]
+      }
+      value="banana"
+    />
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3060,10 +3704,10 @@ exports[`Field for select setting should render custom setting icon if it is cus
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3071,7 +3715,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
     label="select:test:setting"
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={false}
@@ -3095,7 +3739,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
       }
       value="orange"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3127,10 +3771,10 @@ exports[`Field for select setting should render default value if there is no use
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3138,7 +3782,7 @@ exports[`Field for select setting should render default value if there is no use
     label="select:test:setting"
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={false}
@@ -3162,7 +3806,7 @@ exports[`Field for select setting should render default value if there is no use
       }
       value="orange"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3211,10 +3855,10 @@ exports[`Field for select setting should render unsaved value if there are unsav
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3222,7 +3866,7 @@ exports[`Field for select setting should render unsaved value if there are unsav
     label="select:test:setting"
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       aria-describedby="select:test:setting-group select:test:setting-unsaved"
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
@@ -3254,7 +3898,7 @@ exports[`Field for select setting should render unsaved value if there are unsav
         Setting is currently not saved.
       </p>
     </EuiScreenReaderOnly>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3308,10 +3952,10 @@ exports[`Field for select setting should render user value if there is user valu
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3336,7 +3980,7 @@ exports[`Field for select setting should render user value if there is user valu
     label="select:test:setting"
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
       disabled={false}
@@ -3360,7 +4004,7 @@ exports[`Field for select setting should render user value if there is user valu
       }
       value="banana"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3392,10 +4036,10 @@ exports[`Field for string setting should render as read only if saving is disabl
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3403,7 +4047,7 @@ exports[`Field for string setting should render as read only if saving is disabl
     label="string:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={true}
@@ -3411,7 +4055,7 @@ exports[`Field for string setting should render as read only if saving is disabl
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3465,10 +4109,10 @@ exports[`Field for string setting should render as read only with help text if o
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3486,7 +4130,7 @@ exports[`Field for string setting should render as read only with help text if o
     label="string:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={true}
@@ -3494,7 +4138,90 @@ exports[`Field for string setting should render as read only with help text if o
       onChange={[Function]}
       value="foo"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for string setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for String test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="string:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="string:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      aria-label="string test setting"
+      data-test-subj="advancedSetting-editField-string:test:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      value="foo"
+    />
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3537,10 +4264,10 @@ exports[`Field for string setting should render custom setting icon if it is cus
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3548,7 +4275,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
     label="string:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={false}
@@ -3556,7 +4283,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3588,10 +4315,10 @@ exports[`Field for string setting should render default value if there is no use
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3599,7 +4326,7 @@ exports[`Field for string setting should render default value if there is no use
     label="string:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={false}
@@ -3607,7 +4334,7 @@ exports[`Field for string setting should render default value if there is no use
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3656,10 +4383,10 @@ exports[`Field for string setting should render unsaved value if there are unsav
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3667,7 +4394,7 @@ exports[`Field for string setting should render unsaved value if there are unsav
     label="string:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-describedby="string:test:setting-group string:test:setting-unsaved"
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
@@ -3683,7 +4410,7 @@ exports[`Field for string setting should render unsaved value if there are unsav
         Setting is currently not saved.
       </p>
     </EuiScreenReaderOnly>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3737,10 +4464,10 @@ exports[`Field for string setting should render user value if there is user valu
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3765,7 +4492,7 @@ exports[`Field for string setting should render user value if there is user valu
     label="string:test:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
       disabled={false}
@@ -3773,7 +4500,7 @@ exports[`Field for string setting should render user value if there is user valu
       onChange={[Function]}
       value="foo"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3805,10 +4532,10 @@ exports[`Field for stringWithValidation setting should render as read only if sa
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3816,7 +4543,7 @@ exports[`Field for stringWithValidation setting should render as read only if sa
     label="string:test-validation:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={true}
@@ -3824,7 +4551,7 @@ exports[`Field for stringWithValidation setting should render as read only if sa
       onChange={[Function]}
       value="foo-default"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3878,10 +4605,10 @@ exports[`Field for stringWithValidation setting should render as read only with 
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3899,7 +4626,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
     label="string:test-validation:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={true}
@@ -3907,7 +4634,90 @@ exports[`Field for stringWithValidation setting should render as read only with 
       onChange={[Function]}
       value="fooUserValue"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for String test validation setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    foo-default
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="string:test-validation:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test validation setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="string:test-validation:setting"
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      aria-label="string test validation setting"
+      data-test-subj="advancedSetting-editField-string:test-validation:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      value="fooUserValue"
+    />
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -3950,10 +4760,10 @@ exports[`Field for stringWithValidation setting should render custom setting ico
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -3961,7 +4771,7 @@ exports[`Field for stringWithValidation setting should render custom setting ico
     label="string:test-validation:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={false}
@@ -3969,7 +4779,7 @@ exports[`Field for stringWithValidation setting should render custom setting ico
       onChange={[Function]}
       value="foo-default"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -4001,10 +4811,10 @@ exports[`Field for stringWithValidation setting should render default value if t
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -4012,7 +4822,7 @@ exports[`Field for stringWithValidation setting should render default value if t
     label="string:test-validation:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={false}
@@ -4020,7 +4830,7 @@ exports[`Field for stringWithValidation setting should render default value if t
       onChange={[Function]}
       value="foo-default"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -4069,10 +4879,10 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -4080,7 +4890,7 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
     label="string:test-validation:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-describedby="string:test-validation:setting-group string:test-validation:setting-unsaved"
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
@@ -4096,7 +4906,7 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
         Setting is currently not saved.
       </p>
     </EuiScreenReaderOnly>
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;
 
@@ -4150,10 +4960,10 @@ exports[`Field for stringWithValidation setting should render user value if ther
     </h3>
   }
 >
-  <EuiFormRow
+  <EuiCompressedFormRow
     className="mgtAdvancedSettings__fieldRow"
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -4178,7 +4988,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
     label="string:test-validation:setting"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
       disabled={false}
@@ -4186,6 +4996,6 @@ exports[`Field for stringWithValidation setting should render user value if ther
       onChange={[Function]}
       value="fooUserValue"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiDescribedFormGroup>
 `;

@@ -33,7 +33,7 @@ import classNames from 'classnames';
 import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@osd/i18n';
-import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
+import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator, EuiToolTip } from '@elastic/eui';
 
 import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
@@ -259,28 +259,35 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   render() {
     const { open } = this.state;
     const anchorPosition = this.getAnchorPosition();
+    const label = i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonTitle', {
+      defaultMessage: 'Toggle legend',
+    });
 
     return (
       <div className="visLegend">
-        <button
-          type="button"
-          onClick={this.toggleLegend}
-          className={classNames('visLegend__toggle osd-resetFocusState', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            'visLegend__toggle--isOpen': open,
-          })}
-          aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {
-            defaultMessage: 'Toggle legend',
-          })}
-          aria-expanded={Boolean(open)}
-          aria-controls={this.legendId}
-          data-test-subj="vislibToggleLegend"
-          title={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonTitle', {
-            defaultMessage: 'Toggle legend',
-          })}
+        <EuiToolTip
+          anchorClassName="visLegend__toggleTooltipAnchor"
+          content={label}
+          delay="long"
+          position="bottom"
         >
-          <EuiIcon color="text" type="list" />
-        </button>
+          <button
+            type="button"
+            onClick={this.toggleLegend}
+            className={classNames('visLegend__toggle osd-resetFocusState', {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              'visLegend__toggle--isOpen': open,
+            })}
+            aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {
+              defaultMessage: 'Toggle legend',
+            })}
+            aria-expanded={Boolean(open)}
+            aria-controls={this.legendId}
+            data-test-subj="vislibToggleLegend"
+          >
+            <EuiIcon color="text" type="list" />
+          </button>
+        </EuiToolTip>
         {open && this.renderLegend(anchorPosition)}
       </div>
     );

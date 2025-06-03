@@ -2,7 +2,7 @@
 
 exports[`AdvancedOptions should hide if not showing 1`] = `
 <div>
-  <EuiButtonEmpty
+  <EuiSmallButtonEmpty
     iconType="arrowRight"
     onClick={[Function]}
   >
@@ -11,7 +11,7 @@ exports[`AdvancedOptions should hide if not showing 1`] = `
       id="indexPatternManagement.createIndexPattern.stepTime.options.showButton"
       values={Object {}}
     />
-  </EuiButtonEmpty>
+  </EuiSmallButtonEmpty>
   <EuiSpacer
     size="xs"
   />
@@ -20,7 +20,7 @@ exports[`AdvancedOptions should hide if not showing 1`] = `
 
 exports[`AdvancedOptions should render normally 1`] = `
 <div>
-  <EuiButtonEmpty
+  <EuiSmallButtonEmpty
     iconType="arrowDown"
     onClick={[Function]}
   >
@@ -29,14 +29,14 @@ exports[`AdvancedOptions should render normally 1`] = `
       id="indexPatternManagement.createIndexPattern.stepTime.options.hideButton"
       values={Object {}}
     />
-  </EuiButtonEmpty>
+  </EuiSmallButtonEmpty>
   <EuiSpacer
     size="xs"
   />
   <EuiForm>
-    <EuiFormRow
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -56,14 +56,14 @@ exports[`AdvancedOptions should render normally 1`] = `
       }
       labelType="label"
     >
-      <EuiFieldText
+      <EuiCompressedFieldText
         data-test-subj="createIndexPatternIdInput"
         name="indexPatternId"
         onChange={[Function]}
         placeholder="custom-index-pattern-id"
         value="foobar"
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   </EuiForm>
 </div>
 `;

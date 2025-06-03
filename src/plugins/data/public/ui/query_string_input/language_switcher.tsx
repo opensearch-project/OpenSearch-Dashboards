@@ -32,12 +32,12 @@ import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
@@ -91,6 +91,7 @@ export function QueryLanguageSwitcher(props: Props) {
       button={button}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="s"
       repositionOnScroll
     >
       <EuiPopoverTitle>
@@ -100,10 +101,10 @@ export function QueryLanguageSwitcher(props: Props) {
         />
       </EuiPopoverTitle>
       <div style={{ width: '350px' }}>
-        <EuiText>
+        <EuiText size="s">
           <p>
             <FormattedMessage
-              id="data.query.queryBar.syntaxOptionsDescription"
+              id="data.query.queryBar.syntaxOptionsLongDescription"
               defaultMessage="The {docsLink} (DQL) offers a simplified query
               syntax and support for scripted fields. If you turn off DQL,
               OpenSearch Dashboards uses Lucene."
@@ -121,8 +122,8 @@ export function QueryLanguageSwitcher(props: Props) {
         <EuiSpacer size="m" />
 
         <EuiForm>
-          <EuiFormRow label={dqlFullName}>
-            <EuiSwitch
+          <EuiCompressedFormRow label={dqlFullName}>
+            <EuiCompressedSwitch
               id="queryEnhancementOptIn"
               name="popswitch"
               label={
@@ -139,7 +140,7 @@ export function QueryLanguageSwitcher(props: Props) {
               }}
               data-test-subj="languageToggle"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiForm>
       </div>
     </EuiPopover>

@@ -34,7 +34,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -113,7 +113,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('field')}
             label={
               <FormattedMessage
@@ -130,7 +130,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
               value={model.field}
               onChange={handleSelectChange('field')}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

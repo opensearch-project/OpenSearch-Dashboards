@@ -41,7 +41,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -77,7 +77,7 @@ export function CumulativeSumAgg(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('metric')}
             label={
               <FormattedMessage
@@ -92,7 +92,7 @@ export function CumulativeSumAgg(props) {
               metric={model}
               value={model.field}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

@@ -41,10 +41,10 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiComboBox,
-  EuiFieldText,
+  EuiCompressedFormRow,
+  EuiCompressedFieldNumber,
+  EuiCompressedComboBox,
+  EuiCompressedFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { FIELD_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/field_types';
@@ -115,7 +115,7 @@ export const SplitByTermsUI = ({
     <div>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('group')}
             label={
               <FormattedMessage
@@ -129,10 +129,10 @@ export const SplitByTermsUI = ({
               onChange={handleSelectChange('split_mode')}
               uiRestrictions={uiRestrictions}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('by')}
             label={
               <FormattedMessage
@@ -151,14 +151,14 @@ export const SplitByTermsUI = ({
               uiRestrictions={uiRestrictions}
               type={'terms'}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       {selectedFieldType === FIELD_TYPES.STRING && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('include')}
               label={
                 <FormattedMessage
@@ -167,14 +167,14 @@ export const SplitByTermsUI = ({
                 />
               }
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 value={model.terms_include}
                 onChange={handleTextChange('terms_include')}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('exclude')}
               label={
                 <FormattedMessage
@@ -183,24 +183,24 @@ export const SplitByTermsUI = ({
                 />
               }
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 value={model.terms_exclude}
                 onChange={handleTextChange('terms_exclude')}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
 
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('top')}
             label={
               <FormattedMessage id="visTypeTimeseries.splits.terms.topLabel" defaultMessage="Top" />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               placeholder={intl.formatMessage({
                 id: 'visTypeTimeseries.splits.terms.sizePlaceholder',
                 defaultMessage: 'Size',
@@ -208,10 +208,10 @@ export const SplitByTermsUI = ({
               value={Number(model.terms_size)}
               onChange={handleTextChange('terms_size')}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('order')}
             label={
               <FormattedMessage
@@ -228,10 +228,10 @@ export const SplitByTermsUI = ({
               restrict="basic"
               value={model.terms_order_by}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('direction')}
             label={
               <FormattedMessage
@@ -240,14 +240,14 @@ export const SplitByTermsUI = ({
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={dirOptions}
               selectedOptions={selectedDirectionOption ? [selectedDirectionOption] : []}
               onChange={handleSelectChange('terms_direction')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

@@ -28,11 +28,11 @@
  * under the License.
  */
 
-import { IRouter } from 'src/core/server';
 import { schema } from '@osd/config-schema';
+import { IRouter } from 'src/core/server';
 import { getWorkspaceState } from '../../../../../../core/server/utils';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
+import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 
 const NOT_INSTALLED = 'not_installed';
 const INSTALLED = 'installed';
@@ -61,16 +61,17 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
           hasNewThemeImages: sampleDataset.hasNewThemeImages,
-          overviewDashboard: sampleDataset.getDataSourceIntegratedDashboard(
-            dataSourceId,
-            workspaceId
-          ),
+          overviewDashboard: sampleDataset.overviewDashboard
+            ? sampleDataset.getDataSourceIntegratedDashboard(dataSourceId, workspaceId)
+            : '',
           appLinks: sampleDataset.appLinks,
-          defaultIndex: sampleDataset.getDataSourceIntegratedDefaultIndex(
-            dataSourceId,
-            workspaceId
-          ),
-          dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
+          defaultIndex: sampleDataset.defaultIndex
+            ? sampleDataset.getDataSourceIntegratedDefaultIndex(dataSourceId, workspaceId)
+            : '',
+          dataIndices: sampleDataset.dataIndices.map(({ id, indexName }) => ({
+            id,
+            indexName,
+          })),
           status: sampleDataset.status,
           statusMsg: sampleDataset.statusMsg,
         };
@@ -82,7 +83,8 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
 
         for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
           const dataIndexConfig = sampleDataset.dataIndices[i];
-          const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+          const index =
+            dataIndexConfig.indexName ?? createIndexName(sampleDataset.id, dataIndexConfig.id);
           try {
             const indexExists = await caller('indices.exists', { index });
 
@@ -105,19 +107,25 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
             return;
           }
         }
-        try {
-          await context.core.savedObjects.client.get('dashboard', sampleDataset.overviewDashboard);
-        } catch (err) {
-          if (context.core.savedObjects.client.errors.isNotFoundError(err)) {
-            sampleDataset.status = NOT_INSTALLED;
+
+        // check dashboards only if a default dashboard is set
+        if (sampleDataset.overviewDashboard) {
+          try {
+            await context.core.savedObjects.client.get(
+              'dashboard',
+              sampleDataset.overviewDashboard
+            );
+          } catch (err) {
+            if (context.core.savedObjects.client.errors.isNotFoundError(err)) {
+              sampleDataset.status = NOT_INSTALLED;
+              return;
+            }
+
+            sampleDataset.status = UNKNOWN;
+            sampleDataset.statusMsg = err.message;
             return;
           }
-
-          sampleDataset.status = UNKNOWN;
-          sampleDataset.statusMsg = err.message;
-          return;
         }
-
         sampleDataset.status = INSTALLED;
       });
 

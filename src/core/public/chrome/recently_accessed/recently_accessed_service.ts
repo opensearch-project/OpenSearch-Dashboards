@@ -29,46 +29,71 @@
  */
 
 import { Observable } from 'rxjs';
-
+import { map } from 'rxjs/operators';
 import { PersistedLog } from './persisted_log';
 import { createLogKey } from './create_log_key';
 import { HttpSetup } from '../../http';
+import { WorkspacesStart } from '../../workspace';
+import { InternalApplicationStart } from '../../application';
 
 /** @public */
 export interface ChromeRecentlyAccessedHistoryItem {
   link: string;
   label: string;
   id: string;
+  workspaceId?: string;
+  meta?: {
+    type?: string;
+    lastAccessedTime?: number;
+  };
 }
 
 interface StartDeps {
   http: HttpSetup;
+  workspaces: WorkspacesStart;
+  application: InternalApplicationStart;
 }
 
 /** @internal */
 export class RecentlyAccessedService {
-  async start({ http }: StartDeps): Promise<ChromeRecentlyAccessed> {
-    const logKey = await createLogKey('recentlyAccessed', http.basePath.get());
+  async start({ http, workspaces, application }: StartDeps): Promise<ChromeRecentlyAccessed> {
+    const logKey = await createLogKey('recentlyAccessed', http.basePath.getBasePath());
     const history = new PersistedLog<ChromeRecentlyAccessedHistoryItem>(logKey, {
       maxLength: 20,
       isEqual: (oldItem, newItem) => oldItem.id === newItem.id,
     });
+    const workspaceEnabled = application.capabilities.workspaces.enabled;
 
     return {
       /** Adds a new item to the history. */
-      add: (link: string, label: string, id: string) => {
+      add: (
+        link: string,
+        label: string,
+        id: string,
+        meta?: ChromeRecentlyAccessedHistoryItem['meta']
+      ) => {
+        const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+
         history.add({
           link,
           label,
           id,
+          ...(currentWorkspaceId && { workspaceId: currentWorkspaceId }),
+          ...(meta && { meta: { lastAccessedTime: Date.now(), ...meta } }),
         });
       },
 
       /** Gets the current array of history items. */
-      get: () => history.get(),
+      get: () => history.get().filter((item) => (workspaceEnabled ? !!item.workspaceId : true)),
 
       /** Gets an observable of the current array of history items. */
-      get$: () => history.get$(),
+      get$: () => {
+        return history.get$().pipe(
+          map((items) => {
+            return items.filter((item) => (workspaceEnabled ? !!item.workspaceId : true));
+          })
+        );
+      },
     };
   }
 }
@@ -90,7 +115,12 @@ export interface ChromeRecentlyAccessed {
    * @param label the label to display in the UI
    * @param id a unique string used to de-duplicate the recently accessed list.
    */
-  add(link: string, label: string, id: string): void;
+  add(
+    link: string,
+    label: string,
+    id: string,
+    meta?: ChromeRecentlyAccessedHistoryItem['meta']
+  ): void;
 
   /**
    * Gets an Array of the current recently accessed history.

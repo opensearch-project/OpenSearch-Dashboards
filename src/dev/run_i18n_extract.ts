@@ -35,6 +35,7 @@ import { resolve } from 'path';
 import { createFailError, run } from '@osd/dev-utils';
 import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
 import { extractDefaultMessages, mergeConfigs, ListrContext } from './i18n/tasks';
+import { DEFAULT_DIRS_WITH_RC_FILES } from './i18n/constants';
 
 run(
   async ({
@@ -57,7 +58,7 @@ run(
         `${chalk.white.bgRed(' I18N ERROR ')} --path and --include-config require a value`
       );
     }
-    const srcPaths = Array().concat(path || ['./src', './packages']);
+    const srcPaths = Array().concat(path || DEFAULT_DIRS_WITH_RC_FILES);
 
     const list = new Listr<ListrContext>([
       {

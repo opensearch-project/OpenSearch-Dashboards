@@ -30,7 +30,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiCompressedComboBox } from '@elastic/eui';
 import { injectI18n } from '@osd/i18n/react';
 import { isFieldEnabled } from '../../lib/check_ui_restrictions';
 import { i18n } from '@osd/i18n';
@@ -89,7 +89,7 @@ function FieldSelectUi({
   }
 
   return (
-    <EuiComboBox
+    <EuiCompressedComboBox
       placeholder={placeholder}
       isDisabled={disabled}
       options={options}

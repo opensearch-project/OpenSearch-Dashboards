@@ -53,6 +53,7 @@ export function EventVisItemIcon(props: Props) {
             button={dangerButton}
             isOpen={isErrorPopoverOpen}
             closePopover={closeErrorPopover}
+            panelPaddingSize="s"
           >
             <div>{errorMsg}</div>
           </EuiPopover>

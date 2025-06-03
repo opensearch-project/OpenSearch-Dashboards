@@ -20,7 +20,7 @@ export const BasicVisOptions = ({ styleState, setOption }: Props) => {
   return (
     <>
       <SelectOption
-        label={i18n.translate('charts.controls.vislibBasicOptions.legendPositionLabel', {
+        label={i18n.translate('visBuilder.controls.vislibBasicOptions.legendPositionLabel', {
           defaultMessage: 'Legend position',
         })}
         options={legendPositions}
@@ -33,7 +33,7 @@ export const BasicVisOptions = ({ styleState, setOption }: Props) => {
         }
       />
       <SwitchOption
-        label={i18n.translate('charts.controls.vislibBasicOptions.showTooltipLabel', {
+        label={i18n.translate('visBuilder.controls.vislibBasicOptions.showTooltipLabel', {
           defaultMessage: 'Show tooltip',
         })}
         paramName="addTooltip"

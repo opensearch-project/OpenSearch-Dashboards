@@ -33,7 +33,7 @@ export type ValueBasedConfig = Record<
  */
 export const getRulesFromConfig = (configPath: string) => {
   const filePath = path.resolve(__dirname, configPath);
-  return JSON.parse(readFileSync(filePath, 'utf-8'));
+  return JSON.parse(readFileSync(filePath, 'utf8'));
 };
 
 /**

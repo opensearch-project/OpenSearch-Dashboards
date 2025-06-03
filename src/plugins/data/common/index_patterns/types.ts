@@ -28,12 +28,12 @@
  * under the License.
  */
 
-import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
+import { ErrorToastOptions, ToastInputFields } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
-import { IFieldType } from './fields';
+import { FieldFormat, IndexPatternField, OSD_FIELD_TYPES } from '..';
 import { SerializedFieldFormat } from '../../../expressions/common';
-import { OSD_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
+import { IFieldType } from './fields';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -201,6 +201,7 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   dataSourceRef?: SavedObjectReference;
+  fieldsLoading?: boolean;
 }
 
 export interface SourceFilter {

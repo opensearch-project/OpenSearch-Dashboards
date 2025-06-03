@@ -4,29 +4,29 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { AppCategory } from '../../../core/types';
+import {
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+} from '../../data_source/common';
 
 export const WORKSPACE_FATAL_ERROR_APP_ID = 'workspace_fatal_error';
 export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
 export const WORKSPACE_LIST_APP_ID = 'workspace_list';
-export const WORKSPACE_UPDATE_APP_ID = 'workspace_update';
-export const WORKSPACE_OVERVIEW_APP_ID = 'workspace_overview';
-/**
- * Since every workspace always have overview and update page, these features will be selected by default
- * and can't be changed in the workspace form feature selector
- */
-export const DEFAULT_SELECTED_FEATURES_IDS = [WORKSPACE_UPDATE_APP_ID, WORKSPACE_OVERVIEW_APP_ID];
+export const WORKSPACE_DETAIL_APP_ID = 'workspace_detail';
+export const WORKSPACE_INITIAL_APP_ID = 'workspace_initial';
+export const WORKSPACE_NAVIGATION_APP_ID = 'workspace_navigation';
+export const WORKSPACE_COLLABORATORS_APP_ID = 'workspace_collaborators';
+
 export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';
 export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
-
-export enum WorkspacePermissionMode {
-  Read = 'read',
-  Write = 'write',
-  LibraryRead = 'library_read',
-  LibraryWrite = 'library_write',
-}
+/**
+ * UI setting for user default workspace
+ */
+export const DEFAULT_WORKSPACE = 'defaultWorkspace';
+export const ESSENTIAL_WORKSPACE_DISMISS_GET_STARTED = 'essentialWorkspace:dismissGetStarted';
+export const ANALYTICS_WORKSPACE_DISMISS_GET_STARTED = 'analyticsWorkspace:dismissGetStarted';
 
 export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';
 
@@ -41,44 +41,12 @@ export const PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER = -2;
 export const PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER = -1;
 export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;
 
-export const WORKSPACE_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
-  // below categories are for workspace
-  getStarted: {
-    id: 'getStarted',
-    label: i18n.translate('core.ui.getStarted.label', {
-      defaultMessage: 'Get started',
-    }),
-    order: 10000,
-  },
-  dashboardAndReport: {
-    id: 'dashboardReport',
-    label: i18n.translate('core.ui.dashboardReport.label', {
-      defaultMessage: 'Dashboard and report',
-    }),
-    order: 11000,
-  },
-  investigate: {
-    id: 'investigate',
-    label: i18n.translate('core.ui.investigate.label', {
-      defaultMessage: 'Investigate',
-    }),
-    order: 12000,
-  },
-  detect: {
-    id: 'detect',
-    label: i18n.translate('core.ui.detect.label', {
-      defaultMessage: 'Detect',
-    }),
-    order: 13000,
-  },
-  searchSolution: {
-    id: 'searchSolution',
-    label: i18n.translate('core.ui.searchSolution.label', {
-      defaultMessage: 'Build search solution',
-    }),
-    order: 14000,
-  },
-});
+/**
+ * The repository wrapper should be the wrapper closest to the repository client,
+ * so we give a large number to the wrapper
+ */
+export const PRIORITY_FOR_REPOSITORY_WRAPPER = Number.MAX_VALUE;
+
 /**
  *
  * This is a temp solution to store relationships between use cases  and features.
@@ -87,6 +55,7 @@ export const WORKSPACE_APP_CATEGORIES: Record<string, AppCategory> = Object.free
  * store a static map in workspace.
  *
  */
+
 export const WORKSPACE_USE_CASES = Object.freeze({
   observability: {
     id: 'observability',
@@ -94,9 +63,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Observability',
     }),
     description: i18n.translate('workspace.usecase.observability.description', {
-      defaultMessage:
-        'Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.',
+      defaultMessage: 'Gain visibility into your application and infrastructure',
     }),
+    icon: 'wsObservability',
     features: [
       'discover',
       'dashboards',
@@ -120,9 +89,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Security Analytics',
     }),
     description: i18n.translate('workspace.usecase.analytics.description', {
-      defaultMessage:
-        'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
+      defaultMessage: 'Enhance your security posture with advanced analytics',
     }),
+    icon: 'wsSecurityAnalytics',
     features: [
       'discover',
       'dashboards',
@@ -138,15 +107,15 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'management',
     ] as string[],
   },
-  analytics: {
-    id: 'analytics',
-    title: i18n.translate('workspace.usecase.analytics.title', {
-      defaultMessage: 'Analytics',
+  essentials: {
+    id: 'essentials',
+    title: i18n.translate('workspace.usecase.essentials.title', {
+      defaultMessage: 'Essentials',
     }),
-    description: i18n.translate('workspace.usecase.analytics.description', {
-      defaultMessage:
-        'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
+    description: i18n.translate('workspace.usecase.essentials.description', {
+      defaultMessage: 'Get start with just the basics',
     }),
+    icon: 'wsEssentials',
     features: [
       'discover',
       'dashboards',
@@ -167,9 +136,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Search',
     }),
     description: i18n.translate('workspace.usecase.search.description', {
-      defaultMessage:
-        "Quickly find and explore relevant information across your organization's data sources.",
+      defaultMessage: 'Discover and query your data with ease',
     }),
+    icon: 'wsSearch',
     features: [
       'discover',
       'dashboards',
@@ -182,3 +151,26 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     ] as string[],
   },
 });
+
+export const MAX_WORKSPACE_PICKER_NUM = 3;
+export const RECENT_WORKSPACES_KEY = 'recentWorkspaces';
+export const CURRENT_USER_PLACEHOLDER = '%me%';
+
+export const MAX_WORKSPACE_NAME_LENGTH = 40;
+export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;
+
+export enum AssociationDataSourceModalMode {
+  OpenSearchConnections = 'opensearch-connections',
+  DirectQueryConnections = 'direction-query-connections',
+}
+export const OPENSEARCHDASHBOARDS_CONFIG_PATH = 'opensearchDashboards';
+
+// Workspace will handle both data source and data connection type saved object.
+export const WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES = [
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+];
+
+export const USE_CASE_CARD_GRADIENT_PREFIX = 'workspace-initial-use-case-card';
+
+export const OSD_ADMIN_WILDCARD_MATCH_ALL = '*';

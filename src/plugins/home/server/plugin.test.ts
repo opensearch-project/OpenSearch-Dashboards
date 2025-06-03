@@ -31,6 +31,7 @@
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
 import { HomeServerPlugin } from './plugin';
 import { coreMock, httpServiceMock } from '../../../core/server/mocks';
+import { SEARCH_WORKSPACE_DISMISS_GET_STARTED } from '../common/constants';
 
 describe('HomeServerPlugin', () => {
   beforeEach(() => {
@@ -79,6 +80,11 @@ describe('HomeServerPlugin', () => {
         }),
         expect.any(Function)
       );
+    });
+
+    test('register ui settings', () => {
+      new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+      expect(mockCoreSetup.uiSettings.register).toHaveBeenCalledTimes(2);
     });
   });
 

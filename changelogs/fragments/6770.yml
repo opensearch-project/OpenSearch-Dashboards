@@ -1,2 +1,0 @@
-security:
-- [CVE-2024-33883] Bump ejs from `3.1.7` to `3.1.10` ([#6770](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6770))

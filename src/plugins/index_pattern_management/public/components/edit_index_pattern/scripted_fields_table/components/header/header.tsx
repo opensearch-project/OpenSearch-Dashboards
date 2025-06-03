@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSmallButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { ScopedHistory } from 'opensearch-dashboards/public';
@@ -40,9 +40,10 @@ import { reactRouterNavigate } from '../../../../../../../opensearch_dashboards_
 interface HeaderProps extends RouteComponentProps {
   indexPatternId: string;
   history: ScopedHistory;
+  useUpdatedUX: boolean;
 }
 
-export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
+export const Header = withRouter(({ indexPatternId, history, useUpdatedUX }: HeaderProps) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiTitle size="s">
@@ -53,7 +54,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
           />
         </h3>
       </EuiTitle>
-      <EuiText>
+      <EuiText size="s">
         <p>
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.scriptedLabel"
@@ -65,7 +66,8 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiButton
+      <EuiSmallButton
+        {...(useUpdatedUX ? { iconType: 'plusInCircle' } : {})}
         data-test-subj="addScriptedFieldLink"
         {...reactRouterNavigate(history, `patterns/${indexPatternId}/create-field/`)}
       >
@@ -73,7 +75,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
           id="indexPatternManagement.editIndexPattern.scripted.addFieldButton"
           defaultMessage="Add scripted field"
         />
-      </EuiButton>
+      </EuiSmallButton>
     </EuiFlexItem>
   </EuiFlexGroup>
 ));

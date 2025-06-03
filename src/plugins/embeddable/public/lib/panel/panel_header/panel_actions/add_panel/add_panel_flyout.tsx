@@ -33,7 +33,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React, { ReactElement } from 'react';
 import { CoreSetup } from 'src/core/public';
 
-import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiText } from '@elastic/eui';
 
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
@@ -163,11 +163,11 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     return (
       <>
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
+          <EuiText size="s">
             <h2>
               <FormattedMessage id="embeddableApi.addPanel.Title" defaultMessage="Add panels" />
             </h2>
-          </EuiTitle>
+          </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{savedObjectsFinder}</EuiFlyoutBody>
       </>

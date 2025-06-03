@@ -44,9 +44,28 @@ export {
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
 } from './ui/header/header_help_menu';
-export { NavType, RightNavigationButton, RightNavigationButtonProps } from './ui';
+export {
+  NavType,
+  RightNavigationButton,
+  RightNavigationButtonProps,
+  createRecentNavLink,
+} from './ui';
 export { ChromeNavLink, ChromeNavLinks, ChromeNavLinkUpdateableFields } from './nav_links';
-export { ChromeRecentlyAccessed, ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
+export {
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
+  PersistedLog,
+} from './recently_accessed';
 export { ChromeNavControl, ChromeNavControls } from './nav_controls';
 export { ChromeDocTitle } from './doc_title';
-export { RightNavigationOrder } from './constants';
+export { RightNavigationOrder, HeaderVariant } from './constants';
+export { ChromeRegistrationNavLink, ChromeNavGroupUpdater, NavGroupItemInMap } from './nav_group';
+export {
+  fulfillRegistrationLinksToChromeNavLinks,
+  LinkItemType,
+  getSortedNavLinks,
+  searchNavigationLinks,
+} from './utils';
+export { SearchCommandKeyTypes, GlobalSearchCommand } from './global_search';
+export { GlobalSearchPageItem } from './ui/global_search/page_item';
+export { renderNavGroupElement } from './ui/nav_group_element';

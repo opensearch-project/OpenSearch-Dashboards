@@ -111,8 +111,6 @@ To support multiple data source in OpenSearch Dashboards, we will add “data so
 
 With this new “data source” reference in index pattern, OpenSearch Dashboards users will need to first create data sources in OpenSearch Dashboards, then select a data source when creating index patterns. Then the visualization and dashboard creation experience will remain the same. Also for any other save object types, if they reference index-pattern, or reference any save object that references index-pattern. Retrieving data from data source will be supported out of the box.
 
-- For OpenSearch Dashboards multiple data source user experience, refer to [OpenSearch Dashboards Multiple OpenSearch Data Source Support User Stories](https://quip-amazon.com/VXQ0AhpPs3gU)
-
 - The OpenSearch Dashboards visualization rendering flow will look like following with multi-datasource support: ![image](./img/hld_vis_flow.png)
 
 ### Backward Compatibility

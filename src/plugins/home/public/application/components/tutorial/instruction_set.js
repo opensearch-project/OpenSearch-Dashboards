@@ -41,9 +41,9 @@ import {
   EuiSteps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiSmallButton,
   EuiCallOut,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiTitle,
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
@@ -159,7 +159,7 @@ class InstructionSetUi extends React.Component {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               onClick={onStatusCheck}
               isLoading={statusCheckState === StatusCheckStates.FETCHING}
             >
@@ -169,7 +169,7 @@ class InstructionSetUi extends React.Component {
                   defaultMessage="Check status"
                 />
               )}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -232,7 +232,7 @@ class InstructionSetUi extends React.Component {
         defaultMessage: 'toggle command parameters visibility',
       });
       paramsVisibilityToggle = (
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           iconType={this.state.isParamFormVisible ? 'arrowDown' : 'arrowRight'}
           aria-label={ariaLabel}
           onClick={this.handleToggleVisibility}
@@ -241,7 +241,7 @@ class InstructionSetUi extends React.Component {
             id="home.tutorial.instructionSet.customizeLabel"
             defaultMessage="Customize your code snippets"
           />
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       );
     }
 

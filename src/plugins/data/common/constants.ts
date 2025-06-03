@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+import { DATA_STRUCTURE_META_TYPES, DataStructure } from './types';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -28,7 +30,47 @@
  * under the License.
  */
 
+export const DEFAULT_DATA = {
+  STRUCTURES: {
+    ROOT: {
+      id: 'ROOT',
+      title: 'Data',
+      type: 'ROOT',
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: { type: 'folderOpen' },
+        tooltip: 'Root Data Structure',
+      },
+    } as DataStructure,
+    LOCAL_DATASOURCE: {
+      id: '',
+      title: 'Default Cluster',
+      type: 'DATA_SOURCE',
+    },
+  },
+
+  SET_TYPES: {
+    INDEX_PATTERN: 'INDEX_PATTERN',
+    INDEX: 'INDEXES',
+  },
+
+  SOURCE_TYPES: {
+    OPENSEARCH: 'OpenSearch',
+    LEGACY: 'LEGACY',
+  },
+};
+
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
+
+export const DEFAULT_QUERY = {
+  LANGUAGE: DEFAULT_QUERY_LANGUAGE,
+  DATASET: {
+    TYPE: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    DATASOURCE: {
+      TYPE: DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+    },
+  },
+};
 
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',
@@ -44,6 +86,8 @@ export const UI_SETTINGS = {
   COURIER_BATCH_SEARCHES: 'courier:batchSearches',
   SEARCH_INCLUDE_FROZEN: 'search:includeFrozen',
   SEARCH_TIMEOUT: 'search:timeout',
+  SEARCH_INCLUDE_ALL_FIELDS: 'search:includeAllFields',
+  SEARCH_MAX_RECENT_DATASETS: 'search:maxRecentDatasets',
   HISTOGRAM_BAR_TARGET: 'histogram:barTarget',
   HISTOGRAM_MAX_BARS: 'histogram:maxBars',
   HISTORY_LIMIT: 'history:limit',
@@ -61,7 +105,12 @@ export const UI_SETTINGS = {
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
+  QUERY_ENHANCEMENTS_SUGGEST_VALUES: 'query:enhancements:suggestValues',
+  QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT: 'query:enhancements:suggestValuesLimit',
   QUERY_DATAFRAME_HYDRATION_STRATEGY: 'query:dataframe:hydrationStrategy',
-  QUERY_DATA_SOURCE_READONLY: 'query:dataSource:readOnly',
   SEARCH_QUERY_LANGUAGE_BLOCKLIST: 'search:queryLanguageBlocklist',
+  NEW_HOME_PAGE: 'home:useNewHomePage',
+  DATA_WITH_LONG_NUMERALS: 'data:withLongNumerals',
+  DATE_FORMAT: 'dateFormat',
+  DATE_FORMAT_TIMEZONE: 'dateFormat:tz',
 } as const;

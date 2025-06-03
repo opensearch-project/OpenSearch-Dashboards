@@ -32,7 +32,7 @@ import React, { PureComponent } from 'react';
 import _ from 'lodash';
 
 import { injectI18n, InjectedIntlProps } from '@osd/i18n/react';
-import { EuiFieldText, EuiComboBox } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiCompressedComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormRow } from './form_row';
 
@@ -123,7 +123,7 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
 
     if (this.props.disableMsg) {
       return (
-        <EuiFieldText
+        <EuiCompressedFieldText
           aria-label={intl.formatMessage({
             id: 'inputControl.vis.listControl.selectTextPlaceholder',
             defaultMessage: 'Select...',
@@ -157,7 +157,7 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
     });
 
     return (
-      <EuiComboBox
+      <EuiCompressedComboBox
         placeholder={intl.formatMessage({
           id: 'inputControl.vis.listControl.selectPlaceholder',
           defaultMessage: 'Select...',

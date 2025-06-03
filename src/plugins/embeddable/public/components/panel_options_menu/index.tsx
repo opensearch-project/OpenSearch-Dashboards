@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import React, { useState, useEffect } from 'react';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiPopover,
@@ -76,7 +76,7 @@ export const PanelOptionsMenu: React.FC<PanelOptionsMenuProps> = ({
   );
 
   const button = (
-    <EuiButtonIcon
+    <EuiSmallButtonIcon
       iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
       color="text"
       className="embPanel__optionsMenuButton"

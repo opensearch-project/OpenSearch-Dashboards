@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Covering index builder components renders covering index builder  with different options 1`] = `
+Array [
+  <div
+    className="euiText euiText--medium"
+    data-test-subj="covering-index-builder"
+  >
+    <h3>
+      Covering index definition
+    </h3>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiExpression euiExpression-isUppercase euiExpression--success"
+      >
+        <span
+          className="euiExpression__description"
+        >
+          CREATE INDEX
+        </span>
+         
+        <span
+          className="euiExpression__value"
+        >
+          skipping
+        </span>
+      </span>
+    </div>
+    <div
+      className="euiFlexItem"
+    >
+      <span
+        className="euiExpression euiExpression-isUppercase euiExpression--accent"
+      >
+        <span
+          className="euiExpression__description"
+        >
+          ON
+        </span>
+         
+        <span
+          className="euiExpression__value"
+        >
+          ..
+        </span>
+      </span>
+      <div
+        className="euiPopover euiPopover--anchorDownLeft"
+        id="coveringIndexFieldsPopOver"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+            onClick={[Function]}
+          >
+            <span
+              className="euiExpression__description"
+            />
+             
+            <span
+              className="euiExpression__value"
+            >
+              (add fields here)
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`Covering index builder components renders covering index builder with default options 1`] = `
+Array [
+  <div
+    className="euiText euiText--medium"
+    data-test-subj="covering-index-builder"
+  >
+    <h3>
+      Covering index definition
+    </h3>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiExpression euiExpression-isUppercase euiExpression--success"
+      >
+        <span
+          className="euiExpression__description"
+        >
+          CREATE INDEX
+        </span>
+         
+        <span
+          className="euiExpression__value"
+        >
+          skipping
+        </span>
+      </span>
+    </div>
+    <div
+      className="euiFlexItem"
+    >
+      <span
+        className="euiExpression euiExpression-isUppercase euiExpression--accent"
+      >
+        <span
+          className="euiExpression__description"
+        >
+          ON
+        </span>
+         
+        <span
+          className="euiExpression__value"
+        >
+          ..
+        </span>
+      </span>
+      <div
+        className="euiPopover euiPopover--anchorDownLeft"
+        id="coveringIndexFieldsPopOver"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+            onClick={[Function]}
+          >
+            <span
+              className="euiExpression__description"
+            />
+             
+            <span
+              className="euiExpression__value"
+            >
+              (add fields here)
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;

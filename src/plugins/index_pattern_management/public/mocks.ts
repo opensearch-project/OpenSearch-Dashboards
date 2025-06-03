@@ -126,6 +126,9 @@ const createIndexPatternManagmentContext = () => {
     data,
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
+    navigationUI: {
+      HeaderControl: () => null,
+    },
   };
 };
 

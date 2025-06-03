@@ -42,7 +42,7 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
   EuiTitle,
@@ -118,7 +118,7 @@ export class MetricPanelConfig extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true}>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('panelFilter')}
                   label={
                     <FormattedMessage
@@ -136,7 +136,7 @@ export class MetricPanelConfig extends Component {
                     onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>

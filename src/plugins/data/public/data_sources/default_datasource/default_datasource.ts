@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getDataSourceReference } from '../../../common/index_patterns/utils';
 import { SavedObject } from '../../../../../core/public';
 import {
   IndexPatternSavedObjectAttrs,
@@ -54,6 +55,7 @@ export class DefaultDslDataSource extends DataSource<
         return {
           id: savedObject.id,
           title: savedObject.attributes.title,
+          dataSourceId: getDataSourceReference(savedObject.references)?.id,
         };
       }),
     };

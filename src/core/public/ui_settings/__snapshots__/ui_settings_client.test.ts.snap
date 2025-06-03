@@ -20,6 +20,19 @@ You can use \`IUiSettingsClient.get(\\"throwableProperty\\", defaultValue)\`, wh
 \`defaultValue\` when the key is unrecognized."
 `;
 
+exports[`#getDefault converts json default values 1`] = `
+Object {
+  "a": 1,
+}
+`;
+
+exports[`#getDefault fetches correct uiSettings defaults 1`] = `"Browser"`;
+
+exports[`#getDefault throws on unknown properties that don't have a value yet. 1`] = `
+"Unexpected \`IUiSettingsClient.getDefaultValue(\\"unknownProperty\\")\` call on unrecognized configuration setting \\"unknownProperty\\".
+Please check that the setting for \\"unknownProperty\\" exists."
+`;
+
 exports[`#getUpdate$ sends { key, newValue, oldValue } notifications when client changes 1`] = `
 Array [
   Array [
@@ -43,6 +56,8 @@ Array [
   ],
 ]
 `;
+
+exports[`#getUserProvidedWithScope throws an error if the setting does not align the scope passed in 1`] = `"Unable to process \\"defaultDatasource\\" with invalid scope: \\"global\\""`;
 
 exports[`#overrideLocalDefault key has no user value calls subscriber with new and previous value: single subscriber call 1`] = `
 Array [
@@ -69,6 +84,17 @@ Object {
   "dateFormat": Object {
     "value": "bar",
   },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
+    "value": "Browser-ds",
+  },
 }
 `;
 
@@ -80,6 +106,17 @@ Object {
   },
   "dateFormat": Object {
     "value": "Browser",
+  },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
+    "value": "Browser-ds",
   },
 }
 `;
@@ -98,6 +135,17 @@ Object {
     "userValue": "foo",
     "value": "bar",
   },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
+    "value": "Browser-ds",
+  },
 }
 `;
 
@@ -110,6 +158,17 @@ Object {
   "dateFormat": Object {
     "userValue": "foo",
     "value": "Browser",
+  },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
+    "value": "Browser-ds",
   },
 }
 `;
@@ -127,6 +186,17 @@ Object {
   "dateFormat": Object {
     "value": "bar",
   },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
+    "value": "Browser-ds",
+  },
 }
 `;
 
@@ -140,9 +210,24 @@ Object {
     "userValue": "foo",
     "value": "bar",
   },
+  "defaultDatasource": Object {
+    "scope": "workspace",
+    "value": "Browser-ds",
+  },
+  "defaultIndex": Object {
+    "scope": Array [
+      "workspace",
+      "user",
+    ],
+    "value": "Browser-ds",
+  },
 }
 `;
 
+exports[`#remove should validate scope first 1`] = `"Unable to process \\"defaultDatasource\\" with invalid scope: \\"user\\""`;
+
 exports[`#remove throws an error if key is overridden 1`] = `"Unable to update \\"bar\\" because its value is overridden by the OpenSearch Dashboards server"`;
+
+exports[`#set should validate scope first 1`] = `"Unable to process \\"defaultDatasource\\" with invalid scope: \\"user\\""`;
 
 exports[`#set throws an error if key is overridden 1`] = `"Unable to update \\"foo\\" because its value is overridden by the OpenSearch Dashboards server"`;

@@ -32,7 +32,7 @@ import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
@@ -46,7 +46,7 @@ export const SplitByFilter = (props) => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={htmlId('group')}
           label={
             <FormattedMessage
@@ -60,10 +60,10 @@ export const SplitByFilter = (props) => {
             onChange={handleSelectChange('split_mode')}
             uiRestrictions={uiRestrictions}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={htmlId('query')}
           label={
             <FormattedMessage
@@ -80,7 +80,7 @@ export const SplitByFilter = (props) => {
             onChange={(filter) => onChange({ filter })}
             indexPatterns={[indexPattern]}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

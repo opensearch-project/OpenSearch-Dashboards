@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ExtendedBoundsParamEditor should be rendered with default set of props 1`] = `
-<EuiFormRow
+<EuiCompressedFormRow
   describedByIds={Array []}
-  display="row"
+  display="rowCompressed"
   error="Min should be less than or equal to Max."
   fullWidth={true}
   hasChildLabel={true}
@@ -38,5 +38,5 @@ exports[`ExtendedBoundsParamEditor should be rendered with default set of props 
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiFormRow>
+</EuiCompressedFormRow>
 `;

@@ -40,12 +40,18 @@ import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
 import { validateTimeRange } from '../timefilter';
 
+export interface ISyncConfig {
+  filters: FilterStateStore;
+  query: boolean;
+  dataset?: boolean;
+}
+
 /**
  * Helper function to sync up filter and query services in data plugin
  * with a URL state storage so plugins can persist the app filter and query
  * values across refresh
- * @param QueryService: either setup or start
- * @param  OsdUrlStateStorage to use for syncing and store data
+ * @param queryService: either setup or start
+ * @param osdUrlStateStorage to use for syncing and store data
  * @param syncConfig app filter and query
  */
 export const connectStorageToQueryState = (
@@ -54,11 +60,8 @@ export const connectStorageToQueryState = (
     queryString,
     state$,
   }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
-  OsdUrlStateStorage: IOsdUrlStateStorage,
-  syncConfig: {
-    filters: FilterStateStore;
-    query: boolean;
-  }
+  osdUrlStateStorage: IOsdUrlStateStorage,
+  syncConfig: ISyncConfig
 ) => {
   try {
     const syncKeys: Array<keyof QueryStateChange> = [];
@@ -69,16 +72,18 @@ export const connectStorageToQueryState = (
       syncKeys.push('appFilters');
     }
 
-    const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
+    const initialStateFromURL: QueryState = osdUrlStateStorage.get('_q') ?? {
       query: queryString.getDefaultQuery(),
       filters: filterManager.getAppFilters(),
     };
 
-    // set up initial '_q' flag in the URL to sync query and filter changes
-    if (!OsdUrlStateStorage.get('_q')) {
-      OsdUrlStateStorage.set('_q', initialStateFromURL, {
+    if (!osdUrlStateStorage.get('_q')) {
+      // set up initial '_q' flag in the URL to sync query and filter changes
+      osdUrlStateStorage.set('_q', initialStateFromURL, {
         replace: true,
       });
+      // clear existing query and apply default query
+      queryString.clearQuery();
     }
 
     if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
@@ -123,7 +128,7 @@ export const connectStorageToQueryState = (
             })
           )
           .subscribe((newState) => {
-            OsdUrlStateStorage.set('_q', newState, {
+            osdUrlStateStorage.set('_q', newState, {
               replace: true,
             });
           }),
@@ -156,6 +161,7 @@ export const connectToQueryState = <S extends QueryState>(
     refreshInterval?: boolean;
     filters?: FilterStateStore | boolean;
     query?: boolean;
+    dataSet?: boolean;
   }
 ) => {
   const syncKeys: Array<keyof QueryStateChange> = [];
@@ -278,7 +284,7 @@ export const connectToQueryState = <S extends QueryState>(
       .subscribe((newState) => {
         stateContainer.set({ ...stateContainer.get(), ...newState });
       }),
-    stateContainer.state$.subscribe((state) => {
+    stateContainer.state$.subscribe(async (state) => {
       updateInProgress = true;
 
       // cloneDeep is required because services are mutating passed objects

@@ -33,7 +33,7 @@ import { GroupBySelect } from './group_by_select';
 import { FilterItems } from './filter_items';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 export const SplitByFilters = (props) => {
@@ -44,7 +44,7 @@ export const SplitByFilters = (props) => {
     <div>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('group')}
             label={
               <FormattedMessage
@@ -58,7 +58,7 @@ export const SplitByFilters = (props) => {
               onChange={handleSelectChange('split_mode')}
               uiRestrictions={uiRestrictions}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 

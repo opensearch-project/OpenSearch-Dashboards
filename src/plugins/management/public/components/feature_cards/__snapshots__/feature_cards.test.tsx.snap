@@ -1,0 +1,302 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<FeatureCards /> render with complex navLinks 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiPageContent"
+    role="main"
+  >
+    <div>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_1"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title1
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_2"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title2
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_3"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title3
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_4"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title4
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_5"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title5
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+    </div>
+    <div>
+      <h3
+        class="euiTitle euiTitle--medium"
+      >
+        Dashboard
+      </h3>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_category-1"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title1
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_category-2"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title2
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_category-3"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title3
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_category-4"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title4
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+            data-test-subj="landingPageFeature_category-5"
+            style="width: 240px;"
+          >
+            <div
+              class="euiCard__content"
+            >
+              <span
+                class="euiTitle euiTitle--xsmall euiCard__title"
+                id="generated-idTitle"
+              >
+                <button
+                  aria-describedby=" "
+                  class="euiCard__titleButton"
+                >
+                  title5
+                </button>
+              </span>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`<FeatureCards /> render with empty navLinks 1`] = `<div />`;

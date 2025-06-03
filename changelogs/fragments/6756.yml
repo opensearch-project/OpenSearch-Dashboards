@@ -1,2 +1,0 @@
-fix:
-- Show error toast when fail to delete saved objects ([#6756](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6756))

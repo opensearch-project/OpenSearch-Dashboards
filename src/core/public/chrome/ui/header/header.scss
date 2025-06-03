@@ -1,0 +1,151 @@
+/*
+* Copyright OpenSearch Contributors
+* SPDX-License-Identifier: Apache-2.0
+*/
+
+.newTopNavHeader {
+  z-index: 1000;
+  padding: 0 $euiSize $euiSizeS;
+  box-shadow: none;
+  border-bottom: none;
+  background: none;
+  height: auto;
+  gap: $euiSizeS;
+
+  &.primaryHeader {
+    padding-top: $euiSizeM;
+  }
+
+  &.primaryApplicationHeader {
+    padding-top: $euiSizeM - $euiSizeXS;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .headerAppActionMenu {
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    & > .euiFlexGroup {
+      gap: $euiSizeS;
+    }
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    & > .euiHeaderLinks > .euiHeaderLinks__list {
+      gap: $euiSizeS;
+
+      & > * {
+        margin: 0;
+      }
+    }
+  }
+
+  &:has(.headerDescriptionControl, .headerBottomControl) {
+    height: auto;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > .euiHeaderSection {
+    gap: $euiSizeS;
+
+    &:only-child {
+      width: 100%;
+    }
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    & > .euiHeaderSectionItem:empty {
+      display: none;
+    }
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  &:not(:has(>:not(:empty))),
+  .euiHeaderSectionItem:not(:has(>:not(:empty))) {
+    display: none;
+  }
+}
+
+.headerGlobalNav:has(.newTopNavHeader:not(.primaryApplicationHeader)) {
+  margin-bottom: -1 * $euiSizeS;
+}
+
+.newTopNavHeaderTitle {
+  line-height: $euiButtonHeightSmall; // match button size so title is centered
+  font-size: 2rem;
+}
+
+.primaryApplicationHeader {
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiHeaderSection > .euiHeaderSectionItem {
+    align-items: stretch;
+  }
+
+  .headerAppActionMenuSection {
+    flex-grow: 1;
+  }
+
+  .headerAppActionMenu {
+    width: 100%;
+  }
+}
+
+.navToggleInLargeScreen {
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.navToggleInSmallScreen {
+  // Make the toggle button align with content
+  min-width: unset;
+
+  // Make the icon align with recent icon
+  height: $euiSizeXL;
+}
+
+.stretchedActionMenu {
+  width: 100%;
+}
+
+#globalHeaderBars:has(.primaryApplicationHeader) {
+  border-bottom: 1px solid $euiColorLightShade;
+}
+
+/* Control flex items to wrap when the viewport is less than the medium size */
+@include euiBreakpoint("s", "xs") {
+  .secondaryPageHeaderFlexGroup {
+    display: flex;
+    flex-direction: column;
+
+    // Override eui responsive spacing for header elements
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .euiHeaderSection--left,
+    .euiHeaderSection--right {
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      .euiFlexGroup--responsive > .euiFlexItem {
+        margin: $euiSizeXS 0 !important; // set as !important in eui
+      }
+    }
+  }
+
+  // Add bottom margin to left group to counter-act negative margins from gutters
+  .leftSecondaryPageHeaderFlexGroup {
+    margin-bottom: $euiSizeXS;
+  }
+}
+
+// Make sure there's space betweeen left and right header content on non-mobile screens
+@include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
+  .leftSecondaryPageHeaderFlexGroup {
+    margin-right: $euiSizeM;
+  }
+}
+
+// Make badges/health statuses line-height match buttons so its vertically centered
+.leftSecondaryPageHeaderFlexGroup {
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiBadge,
+  .euiHealth {
+    line-height: $euiButtonHeightSmall !important;
+  }
+}

@@ -30,14 +30,14 @@
 
 import {
   EuiForm,
-  EuiFormRow,
-  EuiFieldText,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
-  EuiButton,
+  EuiSmallButton,
   EuiModalFooter,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
@@ -65,20 +65,20 @@ export class GetMessageModal extends Component<Props, State> {
 
         <EuiModalBody>
           <EuiForm>
-            <EuiFormRow label="Message">
-              <EuiFieldText
+            <EuiCompressedFormRow label="Message">
+              <EuiCompressedFieldText
                 name="popfirst"
                 value={this.state.message}
                 onChange={(e) => this.setState({ message: e.target.value })}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={this.props.onCancel}>Cancel</EuiButtonEmpty>
+          <EuiSmallButtonEmpty onClick={this.props.onCancel}>Cancel</EuiSmallButtonEmpty>
 
-          <EuiButton
+          <EuiSmallButton
             isDisabled={!this.state.message}
             onClick={() => {
               if (this.state.message) {
@@ -88,7 +88,7 @@ export class GetMessageModal extends Component<Props, State> {
             fill
           >
             Done
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </React.Fragment>
     );

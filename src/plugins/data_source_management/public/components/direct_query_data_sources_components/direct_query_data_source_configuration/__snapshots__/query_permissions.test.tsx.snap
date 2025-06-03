@@ -1,0 +1,222 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QueryPermissionsConfiguration renders correctly 1`] = `
+<TestComponent>
+  <QueryPermissionsConfiguration
+    hasSecurityAccess={true}
+    layout="vertical"
+    roles={
+      Array [
+        Object {
+          "label": "Admin",
+          "value": "admin",
+        },
+        Object {
+          "label": "User",
+          "value": "user",
+        },
+      ]
+    }
+    selectedRoles={Array []}
+    setSelectedRoles={[Function]}
+  >
+    <EuiFlexItem>
+      <div
+        className="euiFlexItem"
+      >
+        <EuiFlexGroup
+          direction="column"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          >
+            <EuiFlexItem>
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    <h2>
+                      Query permissions
+                    </h2>
+                  </div>
+                </EuiText>
+                <EuiText
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    <p>
+                      Control which OpenSearch roles have permission to query and index data from this data source.
+                    </p>
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <div
+                className="euiFlexItem"
+              >
+                <EuiCompressedRadioGroup
+                  idSelected="query-all"
+                  legend={
+                    Object {
+                      "children": <span>
+                        Query access level
+                      </span>,
+                      "compressed": true,
+                    }
+                  }
+                  name="query-radio-group"
+                  onChange={[Function]}
+                  options={
+                    Array [
+                      Object {
+                        "disabled": false,
+                        "id": "query-restricted",
+                        "label": "Restricted - accessible by users with specific OpenSearch roles",
+                      },
+                      Object {
+                        "disabled": false,
+                        "id": "query-all",
+                        "label": "Admin only - only accessible by the admin",
+                      },
+                    ]
+                  }
+                >
+                  <EuiRadioGroup
+                    compressed={true}
+                    idSelected="query-all"
+                    legend={
+                      Object {
+                        "children": <span>
+                          Query access level
+                        </span>,
+                        "compressed": true,
+                      }
+                    }
+                    name="query-radio-group"
+                    onChange={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "disabled": false,
+                          "id": "query-restricted",
+                          "label": "Restricted - accessible by users with specific OpenSearch roles",
+                        },
+                        Object {
+                          "disabled": false,
+                          "id": "query-all",
+                          "label": "Admin only - only accessible by the admin",
+                        },
+                      ]
+                    }
+                  >
+                    <EuiFormFieldset
+                      legend={
+                        Object {
+                          "children": <span>
+                            Query access level
+                          </span>,
+                          "compressed": true,
+                        }
+                      }
+                    >
+                      <fieldset>
+                        <EuiFormLegend
+                          compressed={true}
+                        >
+                          <legend
+                            className="euiFormLegend euiFormLegend--compressed"
+                          >
+                            <span>
+                              Query access level
+                            </span>
+                          </legend>
+                        </EuiFormLegend>
+                        <EuiRadio
+                          checked={false}
+                          className="euiRadioGroup__item"
+                          compressed={true}
+                          disabled={false}
+                          id="query-restricted"
+                          key="0"
+                          label="Restricted - accessible by users with specific OpenSearch roles"
+                          name="query-radio-group"
+                          onChange={[Function]}
+                        >
+                          <div
+                            className="euiRadio euiRadio--compressed euiRadioGroup__item"
+                          >
+                            <input
+                              checked={false}
+                              className="euiRadio__input"
+                              disabled={false}
+                              id="query-restricted"
+                              name="query-radio-group"
+                              onChange={[Function]}
+                              type="radio"
+                            />
+                            <div
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="query-restricted"
+                            >
+                              Restricted - accessible by users with specific OpenSearch roles
+                            </label>
+                          </div>
+                        </EuiRadio>
+                        <EuiRadio
+                          checked={true}
+                          className="euiRadioGroup__item"
+                          compressed={true}
+                          disabled={false}
+                          id="query-all"
+                          key="1"
+                          label="Admin only - only accessible by the admin"
+                          name="query-radio-group"
+                          onChange={[Function]}
+                        >
+                          <div
+                            className="euiRadio euiRadio--compressed euiRadioGroup__item"
+                          >
+                            <input
+                              checked={true}
+                              className="euiRadio__input"
+                              disabled={false}
+                              id="query-all"
+                              name="query-radio-group"
+                              onChange={[Function]}
+                              type="radio"
+                            />
+                            <div
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="query-all"
+                            >
+                              Admin only - only accessible by the admin
+                            </label>
+                          </div>
+                        </EuiRadio>
+                      </fieldset>
+                    </EuiFormFieldset>
+                  </EuiRadioGroup>
+                </EuiCompressedRadioGroup>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </div>
+    </EuiFlexItem>
+  </QueryPermissionsConfiguration>
+</TestComponent>
+`;

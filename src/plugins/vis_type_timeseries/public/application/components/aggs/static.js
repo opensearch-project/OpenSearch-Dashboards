@@ -40,8 +40,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFieldNumber,
-  EuiFormRow,
+  EuiCompressedFieldNumber,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -88,7 +88,7 @@ export const Static = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('staticValue')}
             label={
               <FormattedMessage
@@ -97,12 +97,12 @@ export const Static = (props) => {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               onChange={handleTextChange('value')}
               value={model.value === '' ? '' : Number(model.value)}
               step={0.1}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

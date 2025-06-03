@@ -1,2 +1,0 @@
-fix:
-- [MDS] Add data source engine type to data source saved object ([#7026](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7026))

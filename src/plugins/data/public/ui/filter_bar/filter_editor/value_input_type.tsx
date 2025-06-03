@@ -28,7 +28,11 @@
  * under the License.
  */
 
-import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
+import {
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
+  EuiCompressedSelect,
+} from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
@@ -53,7 +57,7 @@ class ValueInputTypeUI extends Component<Props> {
     switch (this.props.type) {
       case 'string':
         inputElement = (
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -65,7 +69,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'number':
         inputElement = (
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={
@@ -75,7 +79,7 @@ class ValueInputTypeUI extends Component<Props> {
                 ? (value as BigInt).toString()
                 : value
             }
-            onChange={this.onChange}
+            onChange={this.onNumberChange}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -83,7 +87,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'date':
         inputElement = (
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -97,7 +101,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'ip':
         inputElement = (
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -110,7 +114,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'boolean':
         inputElement = (
-          <EuiSelect
+          <EuiCompressedSelect
             fullWidth={this.props.fullWidth}
             options={[
               { value: undefined, text: this.props.placeholder },
@@ -145,6 +149,17 @@ class ValueInputTypeUI extends Component<Props> {
   private onBoolChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const boolValue = event.target.value === 'true';
     this.props.onChange(boolValue);
+  };
+
+  private onNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const params = event.target.value;
+    let numValue;
+    if (typeof params === 'string') {
+      numValue = parseFloat(params);
+    } else if (typeof params === 'bigint') {
+      numValue = (params as BigInt).toString();
+    }
+    this.props.onChange(numValue ?? params);
   };
 
   private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {

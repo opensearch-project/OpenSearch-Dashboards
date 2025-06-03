@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AssociatedObjectsTabLoading renders correctly 1`] = `
+<EuiEmptyPrompt
+  body={
+    <React.Fragment>
+      <p>
+        Loading 
+        databases
+      </p>
+      <React.Fragment />
+    </React.Fragment>
+  }
+  icon={
+    <EuiLoadingSpinner
+      size="xl"
+    />
+  }
+/>
+`;

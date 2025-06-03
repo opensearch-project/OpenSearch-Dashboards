@@ -41,7 +41,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiSpacer,
-  EuiFormRow,
+  EuiCompressedFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { OSD_FIELD_TYPES } from '../../../../../../plugins/data/public';
@@ -112,7 +112,7 @@ export const FilterRatioAgg = (props) => {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('numerator')}
             label={
               <FormattedMessage
@@ -126,11 +126,11 @@ export const FilterRatioAgg = (props) => {
               onChange={handleNumeratorQueryChange}
               indexPatterns={[indexPattern]}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('denominator')}
             label={
               <FormattedMessage
@@ -144,7 +144,7 @@ export const FilterRatioAgg = (props) => {
               onChange={handleDenominatorQueryChange}
               indexPatterns={[indexPattern]}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -172,7 +172,7 @@ export const FilterRatioAgg = (props) => {
 
         {model.metric_agg !== 'count' ? (
           <EuiFlexItem>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('aggField')}
               label={
                 <FormattedMessage
@@ -189,7 +189,7 @@ export const FilterRatioAgg = (props) => {
                 value={model.field}
                 onChange={handleSelectChange('field')}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

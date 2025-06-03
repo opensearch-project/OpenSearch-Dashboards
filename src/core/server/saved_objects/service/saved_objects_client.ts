@@ -105,7 +105,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references' | 'permissions'> {
+  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references' | 'permissions' | 'workspaces'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -189,6 +189,7 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   refresh?: MutatingOperationRefreshSetting;
   /** permission control describe by ACL object */
   permissions?: Permissions;
+  workspaces?: string[];
 }
 
 /**
@@ -461,6 +462,65 @@ export class SavedObjectsClient {
     options: SavedObjectsDeleteByWorkspaceOptions = {}
   ): Promise<any> => {
     return await this._repository.deleteByWorkspace(workspace, options);
+  };
+
+  /**
+   * Remove a saved object from workspaces
+   * @param type
+   * @param id
+   * @param targetWorkspaces
+   * @param options
+   */
+  deleteFromWorkspaces = async <T = unknown>(
+    type: string,
+    id: string,
+    targetWorkspaces: string[],
+    options: SavedObjectsBaseOptions = {}
+  ) => {
+    if (!targetWorkspaces || targetWorkspaces.length === 0) {
+      throw new TypeError(`Workspaces is required.`);
+    }
+    if ('workspaces' in options && options.workspaces) {
+      throw new TypeError('Invalid options, options.workspaces should not exist.');
+    }
+    const object = await this.get<T>(type, id, options);
+    const existingWorkspaces = object.workspaces ?? [];
+    const newWorkspaces = existingWorkspaces.filter((item) => {
+      return targetWorkspaces.indexOf(item) === -1;
+    });
+    return await this.update<T>(type, id, object.attributes, {
+      ...options,
+      workspaces: newWorkspaces,
+      version: object.version,
+    });
+  };
+
+  /**
+   * Add a saved object to workspaces
+   * @param type
+   * @param id
+   * @param targetWorkspaces
+   * @param options
+   */
+  addToWorkspaces = async <T = unknown>(
+    type: string,
+    id: string,
+    targetWorkspaces: string[],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<any> => {
+    if (!targetWorkspaces || targetWorkspaces.length === 0) {
+      throw new TypeError(`Workspaces is required.`);
+    }
+    const object = await this.get<T>(type, id, options);
+    const existingWorkspaces = object.workspaces ?? [];
+    const mergedWorkspaces = existingWorkspaces.concat(targetWorkspaces);
+    const nonDuplicatedWorkspaces = Array.from(new Set(mergedWorkspaces));
+
+    return await this.update<T>(type, id, object.attributes, {
+      ...options,
+      workspaces: nonDuplicatedWorkspaces,
+      version: object.version,
+    });
   };
 
   /**

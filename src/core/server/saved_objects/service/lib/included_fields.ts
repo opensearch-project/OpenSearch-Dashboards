@@ -54,5 +54,7 @@ export function includedFields(type: string | string[] = '*', fields?: string[] 
     .concat('migrationVersion')
     .concat('updated_at')
     .concat('originId')
+    .concat('workspaces')
+    .concat('permissions')
     .concat(fields); // v5 compatibility
 }

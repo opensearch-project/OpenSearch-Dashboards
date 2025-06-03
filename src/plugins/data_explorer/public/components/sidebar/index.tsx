@@ -3,62 +3,47 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
+import React, { FC, useCallback, useEffect, useState } from 'react';
+import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
+import {
+  DataSource,
+  DataSourceGroup,
+  DataSourceSelectable,
+  UI_SETTINGS,
+} from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
 
-export const Sidebar: FC = ({ children }) => {
+interface SidebarProps {
+  children: React.ReactNode;
+  datasetSelectorRef: React.RefObject<HTMLDivElement>;
+}
+
+export const Sidebar: FC<SidebarProps> = ({ children, datasetSelectorRef }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
   const dispatch = useTypedDispatch();
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
-  const [isEnhancementsEnabled, setIsEnhancementsEnabled] = useState<boolean>(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const {
     services: {
-      data: { indexPatterns, dataSources, ui },
+      data: { indexPatterns, dataSources },
       notifications: { toasts },
       application,
+      uiSettings,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
-  useEffect(() => {
-    const subscriptions = ui.Settings.getEnabledQueryEnhancementsUpdated$().subscribe(
-      (enabledQueryEnhancements) => {
-        setIsEnhancementsEnabled(enabledQueryEnhancements);
-      }
-    );
-
-    return () => {
-      subscriptions.unsubscribe();
-    };
-  }, [ui.Settings]);
-
-  const setContainerRef = useCallback((uiContainerRef) => {
-    uiContainerRef.appendChild(containerRef.current);
-  }, []);
+  const [isEnhancementEnabled, setIsEnhancementEnabled] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!isEnhancementsEnabled) return;
-    const subscriptions = ui.container$.subscribe((container) => {
-      if (container === null) return;
-      if (containerRef.current) {
-        setContainerRef(container);
-      }
-    });
-
-    return () => {
-      subscriptions.unsubscribe();
-    };
-  }, [ui.container$, containerRef, setContainerRef, isEnhancementsEnabled]);
+    setIsEnhancementEnabled(uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED));
+  }, [uiSettings]);
 
   useEffect(() => {
     let isMounted = true;
@@ -134,46 +119,30 @@ export const Sidebar: FC = ({ children }) => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
-  const dataSourceSelector = (
-    <DataSourceSelectable
-      dataSources={activeDataSources}
-      dataSourceOptionList={dataSourceOptionList}
-      setDataSourceOptionList={setDataSourceOptionList}
-      onDataSourceSelect={handleSourceSelection}
-      selectedSources={selectedSources}
-      onGetDataSetError={handleGetDataSetError}
-      onRefresh={memorizedReload}
-      fullWidth
-    />
-  );
-
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer
         className="eui-yScroll deSidebar_panel"
         hasBorder={true}
-        borderRadius="none"
-        color="transparent"
+        borderRadius="l"
+        data-test-subj="sidebarPanel"
       >
-        {isEnhancementsEnabled && (
-          <EuiPortal
-            portalRef={(node) => {
-              containerRef.current = node;
-            }}
-          >
-            {dataSourceSelector}
-          </EuiPortal>
-        )}
-        {!isEnhancementsEnabled && (
-          <EuiSplitPanel.Inner
-            paddingSize="s"
-            grow={false}
-            color="transparent"
-            className="deSidebar_dataSource"
-          >
-            {dataSourceSelector}
-          </EuiSplitPanel.Inner>
-        )}
+        <EuiSplitPanel.Inner paddingSize="s" grow={false} className="deSidebar_dataSource">
+          {isEnhancementEnabled && <div ref={datasetSelectorRef} />}
+          {!isEnhancementEnabled && (
+            <DataSourceSelectable
+              dataSources={activeDataSources}
+              dataSourceOptionList={dataSourceOptionList}
+              setDataSourceOptionList={setDataSourceOptionList}
+              onDataSourceSelect={handleSourceSelection}
+              selectedSources={selectedSources}
+              onGetDataSetError={handleGetDataSetError}
+              onRefresh={memorizedReload}
+              fullWidth
+            />
+          )}
+        </EuiSplitPanel.Inner>
+
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>

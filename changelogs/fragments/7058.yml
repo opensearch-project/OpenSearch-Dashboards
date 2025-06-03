@@ -1,2 +1,0 @@
-fix:
-- [Discover] Allow the last column of a table wider than the window to show up properly ([#7058](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7058))

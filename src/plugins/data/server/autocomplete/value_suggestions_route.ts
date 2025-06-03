@@ -57,6 +57,7 @@ export function registerValueSuggestionsRoute(
             field: schema.string(),
             query: schema.string(),
             boolFilter: schema.maybe(schema.any()),
+            dataSourceId: schema.maybe(schema.string({ defaultValue: '' })),
           },
           { unknowns: 'allow' }
         ),
@@ -64,7 +65,7 @@ export function registerValueSuggestionsRoute(
     },
     async (context, request, response) => {
       const config = await config$.pipe(first()).toPromise();
-      const { field: fieldName, query, boolFilter } = request.body;
+      const { field: fieldName, query, boolFilter, dataSourceId } = request.body;
       const { index } = request.params;
       const { client } = context.core.opensearch.legacy;
       const signal = getRequestAbortedSignal(request.events.aborted$);
@@ -80,8 +81,15 @@ export function registerValueSuggestionsRoute(
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, boolFilter);
 
       try {
-        const result = await client.callAsCurrentUser('search', { index, body }, { signal });
-
+        let result;
+        if (dataSourceId) {
+          const dataSourceClient = await context.dataSource.opensearch.legacy.getClient(
+            dataSourceId
+          );
+          result = await dataSourceClient.callAPI('search', { index, body }, { signal });
+        } else {
+          result = await client.callAsCurrentUser('search', { index, body }, { signal });
+        }
         const buckets: any[] =
           get(result, 'aggregations.suggestions.buckets') ||
           get(result, 'aggregations.nestedSuggestions.suggestions.buckets');

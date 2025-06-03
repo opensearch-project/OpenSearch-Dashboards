@@ -36,12 +36,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiButton,
+  EuiSmallButton,
   EuiForm,
-  EuiFormRow,
-  EuiFieldText,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
   EuiSwitchEvent,
-  EuiSwitch,
+  EuiCompressedSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -120,8 +120,8 @@ export const Header: React.FC<HeaderProps> = ({
                   onQueryChanged
                 )}
             {showSystemIndices ? (
-              <EuiFormRow>
-                <EuiSwitch
+              <EuiCompressedFormRow>
+                <EuiCompressedSwitch
                   label={
                     <FormattedMessage
                       id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
@@ -133,13 +133,13 @@ export const Header: React.FC<HeaderProps> = ({
                   onChange={onChangeIncludingSystemIndices}
                   data-test-subj="showSystemAndHiddenIndices"
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             ) : null}
           </EuiForm>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiButton
+          <EuiCompressedFormRow hasEmptyLabelSpace>
+            <EuiSmallButton
               fill
               iconSide="right"
               iconType="arrowRight"
@@ -151,8 +151,8 @@ export const Header: React.FC<HeaderProps> = ({
                 id="indexPatternManagement.createIndexPattern.step.nextStepButton"
                 defaultMessage="Next step"
               />
-            </EuiButton>
-          </EuiFormRow>
+            </EuiSmallButton>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -167,7 +167,7 @@ const renderIndexPatternInput = (
   onQueryChanged: (e: React.ChangeEvent<HTMLInputElement>) => void
 ) => {
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       fullWidth
       label={
         <FormattedMessage
@@ -192,7 +192,7 @@ const renderIndexPatternInput = (
         </>
       }
     >
-      <EuiFieldText
+      <EuiCompressedFieldText
         name="indexPattern"
         placeholder={i18n.translate(
           'indexPatternManagement.createIndexPattern.step.indexPatternPlaceholder',
@@ -206,7 +206,7 @@ const renderIndexPatternInput = (
         data-test-subj="createIndexPatternNameInput"
         fullWidth
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };
 
@@ -221,7 +221,7 @@ const renderDataSourceAndIndexPatternInput = (
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={2}>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.step.dataSourceLabel"
@@ -231,7 +231,7 @@ const renderDataSourceAndIndexPatternInput = (
           isInvalid={isInputInvalid}
           error={errors}
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             name="dataSource"
             placeholder={i18n.translate(
               'indexPatternManagement.createIndexPattern.step.dataSourcePlaceholder',
@@ -244,7 +244,7 @@ const renderDataSourceAndIndexPatternInput = (
             disabled={true}
             data-test-subj="createIndexPatternDataSourceName"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
       <div className="dataSourceIndexPatternDot"> {`.`} </div>
       <EuiFlexItem grow={7}>

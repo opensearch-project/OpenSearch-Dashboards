@@ -5,7 +5,7 @@
 
 import React, { ComponentProps } from 'react';
 
-const Fallback = () => <div />;
+const Fallback = () => null;
 
 const LazyQueryEditorExtensions = React.lazy(() => import('./query_editor_extensions'));
 export const QueryEditorExtensions = (props: ComponentProps<typeof LazyQueryEditorExtensions>) => (
@@ -14,4 +14,8 @@ export const QueryEditorExtensions = (props: ComponentProps<typeof LazyQueryEdit
   </React.Suspense>
 );
 
-export { QueryEditorExtensionConfig } from './query_editor_extension';
+export {
+  ACTION_BAR_BUTTONS_CONTAINER_ID,
+  QueryEditorExtensionDependencies,
+  QueryEditorExtensionConfig,
+} from './query_editor_extension';

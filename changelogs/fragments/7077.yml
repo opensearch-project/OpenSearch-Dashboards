@@ -1,2 +1,0 @@
-fix:
-- Fix object empty check and minor perf issue in query editor extensions ([#7077](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7077))

@@ -28,13 +28,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { TopNavMenuExtensionsRegistry, createTopNav, createTopNavControl } from './top_nav_menu';
 import {
+  NavigationPluginStartDependencies,
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
-  NavigationPluginStartDependencies,
 } from './types';
-import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 
 export class NavigationPublicPlugin
   implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart> {
@@ -51,14 +51,15 @@ export class NavigationPublicPlugin
   }
 
   public start(
-    { i18n }: CoreStart,
+    { i18n, chrome }: CoreStart,
     { data }: NavigationPluginStartDependencies
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
     return {
       ui: {
-        TopNavMenu: createTopNav(data, extensions, i18n),
+        TopNavMenu: createTopNav(data, extensions, i18n, chrome.navGroup.getNavGroupEnabled()),
+        HeaderControl: createTopNavControl(i18n),
       },
     };
   }

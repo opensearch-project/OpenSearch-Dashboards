@@ -95,10 +95,16 @@ export class DataSourceAggregatedView extends React.Component<
     this.setState({ ...this.state, isPopoverOpen: false });
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this._isMounted = true;
-    getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
-      .then((fetchedDataSources) => {
+    getDataSourcesWithFields(this.props.savedObjectsClient, [
+      'id',
+      'title',
+      'auth.type',
+      'dataSourceVersion',
+      'installedPlugins',
+    ])
+      .then(async (fetchedDataSources) => {
         const allDataSourcesIdToTitleMap = new Map();
 
         if (fetchedDataSources?.length) {
@@ -129,11 +135,11 @@ export class DataSourceAggregatedView extends React.Component<
           });
           return;
         }
-
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
-          defaultDataSource: getDefaultDataSourceId(this.props.uiSettings) ?? null,
+          // for data source aggregated view, get default data source from cache
+          defaultDataSource: (await getDefaultDataSourceId(this.props.uiSettings)) ?? null,
           showEmptyState: allDataSourcesIdToTitleMap.size === 0,
         });
       })
@@ -218,6 +224,7 @@ export class DataSourceAggregatedView extends React.Component<
             <DataSourceMenuPopoverButton
               className={'dataSourceAggregatedView'}
               onClick={this.onDataSourcesClick.bind(this)}
+              isDisabled
             />
           }
           isOpen={this.state.isPopoverOpen}

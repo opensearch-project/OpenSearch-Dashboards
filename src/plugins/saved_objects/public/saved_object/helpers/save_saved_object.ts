@@ -123,7 +123,10 @@ export async function saveSavedObject(
       chrome.recentlyAccessed.add(
         savedObject.getFullPath(),
         savedObject.title,
-        String(savedObject.id)
+        String(savedObject.id),
+        {
+          type: savedObject.getOpenSearchType(),
+        }
       );
     }
     savedObject.isSaving = false;

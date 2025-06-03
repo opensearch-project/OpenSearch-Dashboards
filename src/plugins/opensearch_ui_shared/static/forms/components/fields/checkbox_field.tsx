@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedCheckbox } from '@elastic/eui';
 import uuid from 'uuid';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
@@ -45,7 +45,7 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
@@ -53,7 +53,7 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiCheckbox
+      <EuiCompressedCheckbox
         label={field.label}
         checked={field.value as boolean}
         onChange={field.onChange}
@@ -61,6 +61,6 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
         data-test-subj="input"
         {...euiFieldProps}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

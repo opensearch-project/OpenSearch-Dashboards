@@ -1,0 +1,34 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.draggableAccordion__title {
+  display: inline-block;
+}
+
+.draggableAccordion__button {
+  padding: $euiSizeS $euiSizeS $euiSizeS 0;
+
+  &:hover {
+    text-decoration: none;
+
+    .draggableAccordion__title {
+      text-decoration: underline;
+    }
+  }
+}
+
+.draggableAccordion__badge {
+  justify-content: center;
+  align-items: center;
+}
+
+.draggableAccordion {
+  border-top: $euiBorderThin;
+  border-bottom: $euiBorderThin;
+
+  & + .draggableAccordion {
+    border-top: none;
+  }
+}

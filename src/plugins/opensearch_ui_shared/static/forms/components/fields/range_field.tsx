@@ -29,7 +29,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiRange } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -55,7 +55,7 @@ export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   );
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={field.label}
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
@@ -75,6 +75,6 @@ export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
         data-test-subj="range"
         {...euiFieldProps}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

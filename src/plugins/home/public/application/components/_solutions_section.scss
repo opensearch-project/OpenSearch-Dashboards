@@ -45,7 +45,7 @@
     max-width: calc(75% - #{$euiSizeM * 2});
   }
 
-  @include euiBreakpoint("xl") {
+  @include euiBreakpoint("xl", "xxl", "xxxl") {
     max-width: calc(50% - #{$euiSizeM * 2});
   }
 }

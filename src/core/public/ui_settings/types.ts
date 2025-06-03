@@ -29,7 +29,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { PublicUiSettingsParams, UserProvidedValues } from 'src/core/server/types';
+import { PublicUiSettingsParams, UserProvidedValues, UiSettingScope } from 'src/core/server/types';
 
 /** @public */
 export interface UiSettingsState {
@@ -55,6 +55,11 @@ export interface IUiSettingsClient {
   get: <T = any>(key: string, defaultOverride?: T) => T;
 
   /**
+   * Gets the value for a specific uiSetting and scope and sent to the server
+   */
+  getUserProvidedWithScope: <T = any>(key: string, scope: UiSettingScope) => Promise<T>;
+
+  /**
    * Gets an observable of the current value for a config key, and all updates to that config
    * key in the future. Providing a `defaultOverride` argument behaves the same as it does in #get()
    */
@@ -67,13 +72,20 @@ export interface IUiSettingsClient {
   getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
 
   /**
+   * Gets the default value for a specific uiSetting. If the parameter is not defined and the key is
+   * not registered by any plugin then an error is thrown, otherwise reads the default value defined by
+   * a plugin.
+   */
+  getDefault: <T = any>(key: string) => T;
+
+  /**
    * Sets the value for a uiSetting. If the setting is not registered by any plugin
    * it will be stored as a custom setting. The new value will be synchronously available via
    * the `get()` method and sent to the server in the background. If the request to the
    * server fails then a updateErrors$ will be notified and the setting will be
    * reverted to its value before `set()` was called.
    */
-  set: (key: string, value: any) => Promise<boolean>;
+  set: (key: string, value: any, scope?: UiSettingScope) => Promise<boolean>;
 
   /**
    * Overrides the default value for a setting in this specific browser tab. If the page
@@ -86,7 +98,7 @@ export interface IUiSettingsClient {
    * method behaves the same as calling `set(key, null)`, including the synchronization, custom
    * setting, and error behavior of that method.
    */
-  remove: (key: string) => Promise<boolean>;
+  remove: (key: string, scope?: UiSettingScope) => Promise<boolean>;
 
   /**
    * Returns true if the key is a "known" uiSetting, meaning it is either registered

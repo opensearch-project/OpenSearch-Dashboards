@@ -32,7 +32,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { AggSelect } from './agg_select';
 import { METRIC, SERIES } from '../../../test_utils';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiCompressedComboBox } from '@elastic/eui';
 
 describe('TSVB AggSelect', () => {
   const setup = (panelType: string, value: string) => {
@@ -59,7 +59,7 @@ describe('TSVB AggSelect', () => {
 
   it('should only display filter ratio compattible aggs', () => {
     const wrapper = setup('filter_ratio', 'avg');
-    expect(wrapper.find(EuiComboBox).props().options).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiCompressedComboBox).props().options).toMatchInlineSnapshot(`
       Array [
         Object {
           "label": "Average",
@@ -99,7 +99,7 @@ describe('TSVB AggSelect', () => {
 
   it('should only display histogram compattible aggs', () => {
     const wrapper = setup('histogram', 'avg');
-    expect(wrapper.find(EuiComboBox).props().options).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiCompressedComboBox).props().options).toMatchInlineSnapshot(`
       Array [
         Object {
           "label": "Average",
@@ -123,7 +123,7 @@ describe('TSVB AggSelect', () => {
 
   it('should only display metrics compattible aggs', () => {
     const wrapper = setup('metrics', 'avg');
-    expect(wrapper.find(EuiComboBox).props().options).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiCompressedComboBox).props().options).toMatchInlineSnapshot(`
       Array [
         Object {
           "label": "Average",

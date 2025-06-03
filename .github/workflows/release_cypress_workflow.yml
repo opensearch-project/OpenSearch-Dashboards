@@ -72,17 +72,17 @@ jobs:
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
       TERM: xterm
-    name: Run cypress tests (osd:ciGroup${{ matrix.spec_group }}) ${{ inputs.UNIQUE_ID}} 
+    name: Run cypress tests (osd:ciGroup${{ matrix.spec_group }}) ${{ inputs.UNIQUE_ID}}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: ./${{ env.OSD_PATH }}
           repository: ${{ env.TEST_REPO }}
           ref: '${{ env.TEST_BRANCH }}'
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: './${{ env.OSD_PATH }}/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -90,7 +90,7 @@ jobs:
       - name: Setup Yarn
         run: |
           npm uninstall -g yarn
-          npm i -g yarn@1.22.10
+          npm i -g yarn@^1.22.10
           yarn config set network-timeout 1000000 -g
 
       - name: Setup spec files
@@ -130,7 +130,7 @@ jobs:
           mkdir -p $CWD/${{ env.OPENSEARCH_DIR }}
           source ${{ env.OSD_PATH }}/scripts/common/utils.sh
           open_artifact $CWD/${{ env.OPENSEARCH_DIR }} ${{ env.OPENSEARCH }}
-      
+
       - name: Download and extract OpenSearch Dashboards artifacts
         run: |
           CWD=$(pwd)
@@ -138,22 +138,24 @@ jobs:
           source ${{ env.OSD_PATH }}/scripts/common/utils.sh
           open_artifact $CWD/${{ env.DASHBOARDS_DIR }} ${{ env.DASHBOARDS }}
 
-      - name: Run Cypress tests 
+      - name: Run Cypress tests
         run: |
           chown -R 1000:1000 `pwd`
           su `id -un 1000` -c "source ${{ env.OSD_PATH }}/scripts/cypress_tests.sh && run_dashboards_cypress_tests"
 
       # Screenshots are only captured on failures
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: release-osd-cypress-screenshots
+          name: release-osd-cypress-screenshots-${{ matrix.spec_group }}
           path: ${{ env.OSD_PATH }}/cypress/screenshots
           retention-days: 1
-      
-      - uses: actions/upload-artifact@v3
-        if: always()
+          overwrite: true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
         with:
-          name: release-osd-cypress-videos
+          name: release-osd-cypress-videos-${{ matrix.spec_group }}
           path: ${{ env.OSD_PATH }}/cypress/videos
           retention-days: 1
+          overwrite: true

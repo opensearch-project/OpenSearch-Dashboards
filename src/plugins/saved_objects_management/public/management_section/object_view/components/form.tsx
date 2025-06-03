@@ -33,8 +33,8 @@ import {
   EuiForm,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
 import { set } from '@elastic/safer-lodash-set';
@@ -102,7 +102,7 @@ export class Form extends Component<FormProps, FormState> {
         <EuiFlexGroup responsive={false} gutterSize={'m'}>
           {editionEnabled && (
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiSmallButton
                 fill={true}
                 aria-label={i18n.translate('savedObjectsManagement.view.saveButtonAriaLabel', {
                   defaultMessage: 'Save { title } object',
@@ -119,12 +119,12 @@ export class Form extends Component<FormProps, FormState> {
                   defaultMessage="Save { title } object"
                   values={{ title: service.type }}
                 />
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
           )}
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               aria-label={i18n.translate('savedObjectsManagement.view.cancelButtonAriaLabel', {
                 defaultMessage: 'Cancel',
               })}
@@ -135,7 +135,7 @@ export class Form extends Component<FormProps, FormState> {
                 id="savedObjectsManagement.view.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>

@@ -133,7 +133,9 @@ export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
       defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
       maxWidth="500px"
     >
-      <p>{bodyText}</p>
+      <EuiText size="s">
+        <p>{bodyText}</p>
+      </EuiText>
       {selectControl}
     </EuiConfirmModal>
   );

@@ -57,12 +57,27 @@ export interface DeprecationSettings {
 }
 
 /**
+ * UiSettings scope options.
+ * @experimental
+ */
+export enum UiSettingScope {
+  GLOBAL = 'global',
+  USER = 'user',
+  WORKSPACE = 'workspace',
+  DASHBOARD_ADMIN = 'dashboard_admin',
+}
+
+/**
  * UiSettings parameters defined by the plugins.
  * @public
  * */
 export interface UiSettingsParams<T = unknown> {
   /** title in the UI */
   name?: string;
+  /**
+   * scope of the setting item
+   */
+  scope?: UiSettingScope | UiSettingScope[];
   /** default value to fall back to if a user doesn't provide any */
   value?: T;
   /** description provided to a user in UI */
@@ -142,5 +157,8 @@ export interface ImageValidation {
  * */
 export interface UserProvidedValues<T = any> {
   userValue?: T;
+  /** Use for disable the setting when it has been overridden by server config */
   isOverridden?: boolean;
+  /** Use for disable the setting when it has been controlled by saved object permissions */
+  isPermissionControlled?: boolean;
 }

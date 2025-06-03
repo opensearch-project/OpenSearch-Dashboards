@@ -24,7 +24,7 @@ exports[`props exportedFieldsUrl 1`] = `
     />
     <div>
       <EuiSpacer />
-      <EuiButton
+      <EuiSmallButton
         href="exported_fields_url"
         rel="noopener noreferrer"
         target="_blank"
@@ -34,7 +34,7 @@ exports[`props exportedFieldsUrl 1`] = `
           id="home.tutorial.introduction.viewButtonLabel"
           values={Object {}}
         />
-      </EuiButton>
+      </EuiSmallButton>
     </div>
   </EuiFlexItem>
   <EuiFlexItem

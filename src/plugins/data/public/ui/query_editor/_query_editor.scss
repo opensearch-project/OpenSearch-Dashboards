@@ -3,37 +3,92 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.osdQueryEditor__wrap {
-  height: 200px;
-  width: 500px;
+.osdQueryEditor__wrapper {
+  display: flex;
+}
+
+.osdQueryEditor__editorAndSelectorWrapper {
+  z-index: $euiZContentMenu;
+  max-width: 1200px;
 }
 
 .osdQueryEditorHeader {
   max-height: 400px;
-
-  // TODO fix styling: with "overflow: auto" the scroll bar appears although the content is below max-height
-  // overflow: auto;
 }
 
-.osdQueryEditor__languageWrapper {
-  :first-child {
-    box-shadow: none !important;
+.osdQueryEditorFooter-isHidden {
+  display: none;
+}
+
+.osdQueryEditorFooter {
+  color: $euiTextSubduedColor; // Apply the subdued color to all text in this class
+  max-height: 25px;
+
+  * {
+    color: inherit;
+    font-size: $euiFontSizeXS;
+    align-items: center;
     height: 100%;
-    border-radius: 0;
   }
 }
 
+.osdQueryEditor__filterBarWrapper {
+  margin-top: -10px;
+}
+
+.osdQueryEditor__collapseWrapper {
+  max-width: 32px;
+  box-shadow: 1px 0 0 0 $euiColorLightShade;
+}
+
+.osdQueryEditor__languageWrapper {
+  align-items: center;
+  justify-content: center;
+  max-height: 40px;
+  border: $euiBorderThin;
+}
+
 .osdQueryEditor__dataSourceWrapper {
-  .dataExplorerDSSelect {
+  .dataSourceSelect {
     border-bottom: $euiBorderThin !important;
+
+    :first-child {
+      box-shadow: none !important;
+      height: 100%;
+      border-radius: 0;
+    }
 
     div:is([class$="--group"]) {
       padding: 0 !important;
     }
+  }
+}
 
-    .sourceRefreshText {
-      max-height: 40px;
-    }
+// TODO: ths is a temporary fix to make sure the height is set to auto
+// Can remove this once, height issue is fixed for combo box append in Oui
+.dataExplorerDSSelect .euiFormControlLayout.euiFormControlLayout--group > .euiToolTipAnchor {
+  height: auto;
+}
+
+.osdQueryEditor__prependWrapper {
+  box-shadow: -1px 0 0 0 $euiColorLightShade;
+  max-width: 32px;
+}
+
+.osdQueryEditor__prependWrapper-isCollapsed {
+  box-shadow: none;
+  max-width: 32px;
+}
+
+.osdQueryEditor--updateButtonWrapper {
+  :first-child {
+    min-width: 0 !important;
+  }
+}
+
+.osdQueryEditor__datasetSelectorWrapper {
+  :first-child {
+    border-bottom: $euiBorderThin !important;
   }
 }
 
@@ -51,7 +106,7 @@
 }
 
 // IE specific fix for the datepicker to not collapse
-@include euiBreakpoint("m", "l", "xl") {
+@include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
   .osdQueryEditor__datePickerWrapper {
     max-width: 40vw;
     flex-grow: 0 !important;
@@ -63,4 +118,143 @@
       max-width: 0;
     }
   }
+}
+
+// ------------
+
+.osdQueryEditor {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: -3px; // TODO: Hack to handle the renderSharingMetaFields adding a new empty div to the UI
+
+  &.expanded.emptyExpanded {
+    .osdQueryEditor__dataSetPicker {
+      width: auto;
+    }
+  }
+}
+
+.osdQueryEditor__header {
+  display: flex;
+  align-items: center;
+  padding: 0 $euiSizeXS;
+}
+
+.osdQueryEditor__topBar {
+  display: flex;
+  align-items: center;
+
+  > * {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .osdQueryEditor__querycontrols {
+    .osdQueryEditor__extensionQueryControls {
+      display: flex;
+      padding: 0 $euiSizeS 0 $euiSizeXS;
+      border-right: $euiBorderThin;
+    }
+  }
+
+  .osdQueryEditor__dataSetPicker {
+    width: 155px;
+    padding-left: 4px;
+
+    // To prevent overflow due to Oui styles
+    .euiToolTipAnchor {
+      display: block;
+    }
+  }
+
+  .osdQueryEditor__input {
+    flex-grow: 1;
+  }
+
+  #savedQueryPopover {
+    padding-left: $euiSizeXS;
+    border-left: $euiBorderThin;
+  }
+}
+
+// TODO: improve how this is styled. Styling just for the DQL editor.
+.osdQueryEditor__body {
+  margin-top: $euiSizeS;
+
+  .globalFilterGroup__wrapper {
+    margin-top: -$euiSizeS;
+  }
+}
+
+.osdQuerEditor__singleLine {
+  padding: calc($euiSizeXS + 1px);
+  overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
+  min-width: 0;
+
+  .monaco-editor .view-overlays .current-line {
+    border: none;
+  }
+
+  &,
+  & .monaco-editor,
+  & .monaco-editor .inputarea.ime-input,
+  & .monaco-editor-background {
+    background-color: $euiFormBackgroundColor;
+  }
+}
+
+/* Ensure consistent width for Monaco Editor suggestion widget components */
+.monaco-editor .suggest-widget {
+  /* We don't override the width here to maintain Monaco's default behavior */
+
+  /* Target the suggestion list to ensure it has the same width as the widget */
+  .monaco-list {
+    width: 100%;
+  }
+
+  /* Target the list rows to ensure they have the same width */
+  .monaco-list-row {
+    width: 100%;
+  }
+}
+
+.queryEditor__progress {
+  position: relative;
+}
+
+.queryEditor__footer {
+  display: flex;
+  gap: 4px;
+  background: $euiColorLightestShade;
+  padding: 2px 4px;
+  margin-top: 5px;
+  margin-left: -5px;
+  margin-right: -5px;
+  z-index: 1;
+  position: relative;
+  align-items: center;
+}
+
+.queryEditor__footerSpacer {
+  flex-grow: 1;
+}
+
+.queryEditor__footerItem {
+  // Needed so the footer items never have paddings
+  padding: 0 !important;
+}
+
+// TODO: Temporary workaround to disable padding for single line editor footer
+.euiFormControlLayout--group.euiFormControlLayout--compressed .osdQuerEditor__singleLine .euiText {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiText {
+  background-color: unset !important;
+  line-height: 21px !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiButtonEmpty {
+  border-right: 0;
 }

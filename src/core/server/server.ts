@@ -64,17 +64,21 @@ import { config as opensearchDashboardsConfig } from './opensearch_dashboards_co
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
+import { config as dynamicConfigServiceConfig } from './config';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
+import { DynamicConfigService } from './config/dynamic_config_service';
+import { WorkspaceService } from './workspace/workspace_service';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
 
 export class Server {
   public readonly configService: ConfigService;
+  public readonly dynamicConfigService: DynamicConfigService;
   private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly opensearch: OpenSearchService;
@@ -85,6 +89,7 @@ export class Server {
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
+  private readonly workspace: WorkspaceService;
   private readonly environment: EnvironmentService;
   private readonly metrics: MetricsService;
   private readonly httpResources: HttpResourcesService;
@@ -110,8 +115,15 @@ export class Server {
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);
+    this.dynamicConfigService = new DynamicConfigService(this.configService, env, this.logger);
 
-    const core = { coreId, configService: this.configService, env, logger: this.logger };
+    const core = {
+      coreId,
+      configService: this.configService,
+      dynamicConfigService: this.dynamicConfigService,
+      env,
+      logger: this.logger,
+    };
     this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
@@ -120,6 +132,7 @@ export class Server {
     this.opensearch = new OpenSearchService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
+    this.workspace = new WorkspaceService(core);
     this.capabilities = new CapabilitiesService(core);
     this.environment = new EnvironmentService(core);
     this.metrics = new MetricsService(core);
@@ -151,6 +164,9 @@ export class Server {
     await this.configService.validate();
     await ensureValidConfiguration(this.configService, legacyConfigSetup);
 
+    // Once the configs have been validated, setup the dynamic config as schemas have also been verified
+    const dynamicConfigServiceSetup = await this.dynamicConfigService.setup();
+
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
       // 1) Can access context from any KP plugin
@@ -168,6 +184,9 @@ export class Server {
       context: contextServiceSetup,
     });
 
+    // Once http is setup, register routes and async local storage
+    await this.dynamicConfigService.registerRoutesAndHandlers({ http: httpSetup });
+
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
     const opensearchServiceSetup = await this.opensearch.setup({
@@ -183,6 +202,7 @@ export class Server {
       http: httpSetup,
       savedObjects: savedObjectsSetup,
     });
+    const workspaceSetup = await this.workspace.setup();
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
@@ -199,6 +219,7 @@ export class Server {
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
+      dynamicConfig: dynamicConfigServiceSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -229,6 +250,8 @@ export class Server {
       logging: loggingSetup,
       metrics: metricsSetup,
       security: securitySetup,
+      dynamicConfig: dynamicConfigServiceSetup,
+      workspace: workspaceSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -256,6 +279,9 @@ export class Server {
     const opensearchStart = await this.opensearch.start({
       auditTrail: auditTrailStart,
     });
+    const dynamicConfigServiceStart = await this.dynamicConfigService.start({
+      opensearch: opensearchStart,
+    });
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       opensearch: opensearchStart,
@@ -264,6 +290,7 @@ export class Server {
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
+    const workspaceStart = await this.workspace.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
     const coreUsageDataStart = this.coreUsageData.start({
@@ -286,6 +313,8 @@ export class Server {
       auditTrail: auditTrailStart,
       coreUsageData: coreUsageDataStart,
       crossCompatibility: crossCompatibilityServiceStart,
+      dynamicConfig: dynamicConfigServiceStart,
+      workspace: workspaceStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -298,7 +327,7 @@ export class Server {
       plugins: mapToObject(pluginsStart.contracts),
     });
 
-    await this.http.start();
+    await this.http.start({ dynamicConfigService: dynamicConfigServiceStart });
 
     await this.security.start();
 
@@ -349,6 +378,7 @@ export class Server {
       opsConfig,
       statusConfig,
       pidConfig,
+      dynamicConfigServiceConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
@@ -357,6 +387,7 @@ export class Server {
         this.configService.addDeprecationProvider(descriptor.path, descriptor.deprecations);
       }
       await this.configService.setSchema(descriptor.path, descriptor.schema);
+      this.dynamicConfigService.setSchema(descriptor.path, descriptor.schema);
     }
   }
 }

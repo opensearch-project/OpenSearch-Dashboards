@@ -1,0 +1,21 @@
+.workspace-initial__create-workspace-text-border {
+  border: 1px dashed;
+  border-radius: 8px;
+  max-height: 160px;
+  width: 210px;
+  padding: 10px;
+  border-color: $ouiColorDarkShade;
+}
+
+.workspace-initial__fixed-left-bottom-icon {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+}
+
+.workspace-initial__flex-group-responsive {
+  margin: auto;
+  padding-left: 48px;
+  padding-right: 48px;
+  width: 100%;
+}

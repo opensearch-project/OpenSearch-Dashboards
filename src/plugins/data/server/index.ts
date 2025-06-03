@@ -147,7 +147,6 @@ export {
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
-  decideClient,
 } from './index_patterns';
 
 export {
@@ -307,6 +306,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     enhancements: true,
     autocomplete: true,
     search: true,
+    savedQueriesNewUI: true,
   },
   schema: configSchema,
 };

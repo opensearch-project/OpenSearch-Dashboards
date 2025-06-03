@@ -45,7 +45,7 @@ export function OpenSearchProvider({ getService }: FtrProviderContext) {
   } else {
     return new Client({
       ssl: {
-        ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
+        ca: fs.readFileSync(CA_CERT_PATH, 'utf8'),
       },
       nodes: [config.get('servers.opensearch.serverUrl')],
       requestTimeout: config.get('timeouts.opensearchRequestTimeout'),

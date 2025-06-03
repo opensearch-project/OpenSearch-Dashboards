@@ -201,7 +201,7 @@ export async function validateDependencies(
           cachedManifests.set(
             project.path,
             // If there are errors reading or parsing the lockfiles, don't catch and let them fall through
-            parseLockFile(readFileSync(path.join(project.path, 'yarn.lock'), 'utf-8'))
+            parseLockFile(readFileSync(path.join(project.path, 'yarn.lock'), 'utf8'))
           );
         const { object: deps } = cachedManifests.get(project.path);
         if (deps?.[`${depName}@${range}`]?.version) {

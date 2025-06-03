@@ -1,0 +1,142 @@
+.context-nav-wrapper {
+  border: none !important;
+  border-top-right-radius: $euiSizeL;
+  background-color: $euiSideNavBackgroundColor;
+  overflow: hidden;
+  box-shadow: 1px 0 0 $euiBorderColor !important;
+
+  .nav-link-item {
+    padding: $euiSizeS;
+    border-radius: $euiSizeS;
+    box-shadow: none;
+    margin-bottom: 0;
+    margin-top: 0;
+
+    .nav-link-item-btn {
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  .nav-link-parent-item {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: $euiSizeS;
+
+    > .nav-link-item-btn {
+      padding: $euiSizeS;
+      margin-bottom: $euiSizeXS;
+    }
+
+    // Hide the expand / collapse button as we will use + / -
+    svg {
+      display: none;
+    }
+
+    // Show the customized icon
+    .leftNavCustomizedAccordionIcon {
+      display: inline-block;
+    }
+  }
+
+  .nav-link-item-category-button {
+    margin-bottom: $euiSizeXS;
+
+    // Use a smaller vertical padding so that category title looks more grouped to the items
+    .nav-link-item {
+      padding: $euiSizeXS $euiSizeS;
+    }
+  }
+
+  .nav-link-item-category-item {
+    margin-top: $euiSizeL;
+  }
+
+  .nav-link-fake-item {
+    margin-top: 0;
+  }
+
+  .nav-link-fake-item-button {
+    display: none;
+  }
+
+  .nav-nested-item {
+    padding: $euiSizeS 0;
+
+    &::after,
+    .nav-link-item-btn::after {
+      background-color: $euiColorDarkShade;
+    }
+
+    // The height is used to comply with the extra padding
+    &:last-of-type::after {
+      height: 20px;
+    }
+  }
+
+  .left-navigation-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .flex-1-container {
+    flex: 1;
+  }
+
+  .bottom-container {
+    padding: 0 $euiSize;
+    display: flex;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+
+    &.bottom-container-collapsed {
+      flex-direction: column;
+      align-items: center;
+      gap: $euiSize;
+      padding-top: $euiSizeS;
+      padding-bottom: $euiSizeS;
+
+      > * {
+        justify-content: center;
+      }
+    }
+
+    &.bottom-container-expanded {
+      gap: 16px;
+      padding-top: $euiSizeM;
+      padding-bottom: $euiSizeM;
+      border-top: $euiBorderThin;
+      border-color: $euiColorMediumShade;
+    }
+  }
+
+  .navGroupEnabledNavTopWrapper {
+    padding: 0 $euiSizeS;
+    padding-left: $euiSizeS;
+
+    .navGroupEnabledHomeIcon {
+      margin-left: $euiSizeS;
+    }
+  }
+
+  .searchBar-wrapper {
+    padding: $euiSize;
+    padding-top: $euiSizeS;
+    background-color: transparent;
+    flex-grow: 0;
+
+    .searchInput {
+      background-color: transparentize($euiFormBackgroundColor, 0.5);
+    }
+
+    .searchInput:focus {
+      background-color: $euiFormBackgroundColor;
+    }
+  }
+
+  .searchBarIcon {
+    position: relative;
+    top: $ouiHeaderChildSize;
+    left: 0;
+  }
+}

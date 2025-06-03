@@ -71,6 +71,16 @@ import {
   RightNavigationOrder,
   RightNavigationButton,
   RightNavigationButtonProps,
+  ChromeRegistrationNavLink,
+  ChromeNavGroupUpdater,
+  PersistedLog,
+  NavGroupItemInMap,
+  fulfillRegistrationLinksToChromeNavLinks,
+  createRecentNavLink,
+  HeaderVariant,
+  LinkItemType,
+  getSortedNavLinks,
+  SearchCommandKeyTypes,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -100,9 +110,16 @@ export { CoreContext, CoreSystem } from './core_system';
 export {
   DEFAULT_APP_CATEGORIES,
   WORKSPACE_TYPE,
+  WORKSPACE_USE_CASE_PREFIX,
   cleanWorkspaceId,
-  PUBLIC_WORKSPACE_ID,
-  PUBLIC_WORKSPACE_NAME,
+  isNavGroupInFeatureConfigs,
+  getUseCaseFeatureConfig,
+  DEFAULT_NAV_GROUPS,
+  ALL_USE_CASE_ID,
+  SEARCH_USE_CASE_ID,
+  ESSENTIAL_USE_CASE_ID,
+  OBSERVABILITY_USE_CASE_ID,
+  SECURITY_ANALYTICS_USE_CASE_ID,
 } from '../utils';
 export {
   AppCategory,
@@ -114,6 +131,14 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
   WorkspaceAttribute,
+  ChromeNavGroup,
+  NavGroupType,
+  NavGroupStatus,
+  WorkspaceAttributeWithPermission,
+  UiSettingScope,
+  PermissionModeId,
+  WorkspacePermissionMode,
+  WorkspaceFindOptions,
 } from '../types';
 
 export {
@@ -366,10 +391,30 @@ export {
   RightNavigationOrder,
   RightNavigationButton,
   RightNavigationButtonProps,
+  ChromeRegistrationNavLink,
+  ChromeNavGroupUpdater,
+  PersistedLog,
+  NavGroupItemInMap,
+  fulfillRegistrationLinksToChromeNavLinks,
+  createRecentNavLink,
+  HeaderVariant,
+  LinkItemType,
+  getSortedNavLinks,
+  SearchCommandKeyTypes,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspacesStart, WorkspacesSetup, WorkspacesService, WorkspaceObject } from './workspace';
+export {
+  WorkspacesStart,
+  WorkspacesSetup,
+  WorkspacesService,
+  WorkspaceError,
+  WorkspaceObject,
+  IWorkspaceClient,
+  IWorkspaceResponse,
+} from './workspace';
 
 export { debounce } from './utils';
+
+export { searchNavigationLinks, GlobalSearchPageItem, renderNavGroupElement } from './chrome';

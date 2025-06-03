@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
@@ -49,7 +49,7 @@ function SwitchParamEditor({
   disabled,
 }: SwitchParamEditorProps) {
   return (
-    <EuiFormRow fullWidth={true}>
+    <EuiCompressedFormRow fullWidth={true}>
       <EuiToolTip content={displayToolTip} delay="long" position="right">
         <EuiSwitch
           compressed={true}
@@ -60,7 +60,7 @@ function SwitchParamEditor({
           onChange={(ev) => setValue(ev.target.checked)}
         />
       </EuiToolTip>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 }
 

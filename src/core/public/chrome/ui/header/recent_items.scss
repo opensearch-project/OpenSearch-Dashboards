@@ -1,0 +1,19 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.headerRecentItemsButton {
+  .primaryApplicationHeader & {
+    margin-top: $euiSizeXS;
+  }
+
+  // Make the spinner the same size as an xs icon button
+  &.headerRecentItemsButton--loadingIndicator {
+    width: $euiButtonHeightXSmall;
+
+    & > span {
+      padding: 0;
+    }
+  }
+}

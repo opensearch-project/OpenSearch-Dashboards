@@ -43,6 +43,12 @@ describe('AppContainer', () => {
   const setAppLeaveHandler = jest.fn();
   const setAppActionMenu = jest.fn();
   const setIsMounting = jest.fn();
+  const setAppLeftControls = jest.fn();
+  const setAppRightControls = jest.fn();
+  const setAppCenterControls = jest.fn();
+  const setAppBadgeControls = jest.fn();
+  const setAppDescriptionControls = jest.fn();
+  const setAppBottomControls = jest.fn();
 
   beforeEach(() => {
     setAppLeaveHandler.mockClear();
@@ -89,6 +95,12 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
+        setAppLeftControls={setAppLeftControls}
+        setAppCenterControls={setAppCenterControls}
+        setAppRightControls={setAppRightControls}
+        setAppBadgeControls={setAppBadgeControls}
+        setAppDescriptionControls={setAppDescriptionControls}
+        setAppBottomControls={setAppBottomControls}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -130,6 +142,12 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
+        setAppLeftControls={setAppLeftControls}
+        setAppCenterControls={setAppCenterControls}
+        setAppRightControls={setAppRightControls}
+        setAppBadgeControls={setAppBadgeControls}
+        setAppDescriptionControls={setAppDescriptionControls}
+        setAppBottomControls={setAppBottomControls}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -172,6 +190,12 @@ describe('AppContainer', () => {
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
         setAppActionMenu={setAppActionMenu}
+        setAppLeftControls={setAppLeftControls}
+        setAppCenterControls={setAppCenterControls}
+        setAppRightControls={setAppRightControls}
+        setAppBadgeControls={setAppBadgeControls}
+        setAppDescriptionControls={setAppDescriptionControls}
+        setAppBottomControls={setAppBottomControls}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location

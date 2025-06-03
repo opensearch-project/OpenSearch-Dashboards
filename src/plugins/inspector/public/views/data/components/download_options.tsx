@@ -167,7 +167,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         panelPaddingSize="none"
         repositionOnScroll
       >
-        <EuiContextMenuPanel className="eui-textNoWrap" items={items} />
+        <EuiContextMenuPanel className="eui-textNoWrap" items={items} size="s" />
       </EuiPopover>
     );
   }

@@ -12,7 +12,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/open
 
 const defaultProps: DeleteWorkspaceModalProps = {
   onClose: jest.fn(),
-  selectedWorkspace: null,
+  selectedWorkspaces: [],
   onDeleteSuccess: jest.fn(),
 };
 
@@ -63,10 +63,12 @@ describe('DeleteWorkspaceModal', () => {
     const onDeleteSuccessFn = jest.fn();
     const newProps = {
       ...defaultProps,
-      selectedWorkspace: {
-        id: 'test',
-        name: 'test',
-      },
+      selectedWorkspaces: [
+        {
+          id: 'test',
+          name: 'test',
+        },
+      ],
       onClose: onCloseFn,
       onDeleteSuccess: onDeleteSuccessFn,
     };
@@ -99,10 +101,10 @@ describe('DeleteWorkspaceModal', () => {
     });
   });
 
-  it('should not call deleteWorkspace if passed selectedWorkspace is null', async () => {
+  it('should not call deleteWorkspace modal if passed selectedWorkspace is null', async () => {
     const newProps = {
       ...defaultProps,
-      selectedWorkspace: null,
+      selectedWorkspace: [],
     };
     const deleteFn = jest.fn().mockReturnValue({
       success: true,
@@ -114,26 +116,20 @@ describe('DeleteWorkspaceModal', () => {
         delete: deleteFn,
       },
     };
-    const { getByTestId, findByTestId } = render(
-      getWrapWorkspaceDeleteModalInContext(newProps, newServices)
-    );
-    await findByTestId('delete-workspace-modal-input');
-    const input = getByTestId('delete-workspace-modal-input');
-    fireEvent.change(input, {
-      target: { value: 'delete' },
-    });
-    const confirmButton = getByTestId('delete-workspace-modal-confirm');
-    fireEvent.click(confirmButton);
-    expect(deleteFn).not.toHaveBeenCalled();
+    const { queryByTestId } = render(getWrapWorkspaceDeleteModalInContext(newProps, newServices));
+    const input = queryByTestId('delete-workspace-modal-input');
+    expect(input).not.toBeInTheDocument();
   });
 
-  it('should add danger is returned data is unsuccess', async () => {
+  it('should add danger if returned data is unsuccess', async () => {
     const newProps = {
       ...defaultProps,
-      selectedWorkspace: {
-        id: 'test',
-        name: 'test',
-      },
+      selectedWorkspaces: [
+        {
+          id: 'test',
+          name: 'test',
+        },
+      ],
     };
     const deleteFn = jest.fn().mockReturnValue({
       success: false,
@@ -165,10 +161,12 @@ describe('DeleteWorkspaceModal', () => {
   it('confirm button should be disabled if not input delete', async () => {
     const newProps = {
       ...defaultProps,
-      selectedWorkspace: {
-        id: 'test',
-        name: 'test',
-      },
+      selectedWorkspaces: [
+        {
+          id: 'test',
+          name: 'test',
+        },
+      ],
     };
     const deleteFn = jest.fn().mockReturnValue({
       success: false,
@@ -186,7 +184,7 @@ describe('DeleteWorkspaceModal', () => {
     await findByTestId('delete-workspace-modal-input');
     const input = getByTestId('delete-workspace-modal-input');
     fireEvent.change(input, {
-      target: { value: 'delet' },
+      target: { value: 'delete' },
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
     expect(confirmButton.hasAttribute('disabled'));
@@ -196,10 +194,12 @@ describe('DeleteWorkspaceModal', () => {
     const onCloseFn = jest.fn();
     const newProps = {
       ...defaultProps,
-      selectedWorkspace: {
-        id: 'test',
-        name: 'test',
-      },
+      selectedWorkspaces: [
+        {
+          id: 'test',
+          name: 'test',
+        },
+      ],
       onclose: onCloseFn,
     };
     const deleteFn = jest.fn().mockImplementation(() => {

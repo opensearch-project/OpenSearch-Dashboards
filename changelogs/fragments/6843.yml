@@ -1,2 +1,0 @@
-refactor:
-- Unify getDefaultDataSourceId and export ([#6843](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6843))

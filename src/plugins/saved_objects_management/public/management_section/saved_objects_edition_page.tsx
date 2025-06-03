@@ -36,6 +36,7 @@ import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { SavedObjectEdition } from './object_view';
+import { NavigationPublicPluginStart } from '../../../navigation/public';
 
 const SavedObjectsEditionPage = ({
   coreStart,
@@ -43,15 +44,18 @@ const SavedObjectsEditionPage = ({
   serviceRegistry,
   setBreadcrumbs,
   history,
+  useUpdatedUX,
+  navigation,
 }: {
   coreStart: CoreStart;
   uiActionsStart: UiActionsStart;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
+  useUpdatedUX: boolean;
+  navigation: NavigationPublicPluginStart;
 }) => {
   const { service: serviceName, id } = useParams<{ service: string; id: string }>();
-  const capabilities = coreStart.application.capabilities;
 
   const { search } = useLocation();
   const query = parse(search);
@@ -60,9 +64,13 @@ const SavedObjectsEditionPage = ({
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
-          defaultMessage: 'Saved objects',
-        }),
+        text: useUpdatedUX
+          ? i18n.translate('savedObjectsManagement.breadcrumb.updatedUX.index', {
+              defaultMessage: 'Assets',
+            })
+          : i18n.translate('savedObjectsManagement.breadcrumb.index', {
+              defaultMessage: 'Saved objects',
+            }),
         href: '/',
       },
       {
@@ -72,7 +80,7 @@ const SavedObjectsEditionPage = ({
         }),
       },
     ]);
-  }, [setBreadcrumbs, service]);
+  }, [setBreadcrumbs, service, useUpdatedUX]);
 
   return (
     <SavedObjectEdition
@@ -83,9 +91,11 @@ const SavedObjectsEditionPage = ({
       overlays={coreStart.overlays}
       notifications={coreStart.notifications}
       uiActions={uiActionsStart}
-      capabilities={capabilities}
       notFoundType={query.notFound as string}
       history={history}
+      useUpdatedUX={useUpdatedUX}
+      navigationUI={navigation.ui}
+      application={coreStart.application}
     />
   );
 };

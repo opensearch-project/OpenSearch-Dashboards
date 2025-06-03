@@ -34,7 +34,7 @@ import { orderBy } from 'lodash';
 import React, { ChangeEvent } from 'react';
 
 import {
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiKeyPadMenu,
@@ -43,6 +43,7 @@ import {
   EuiModalHeaderTitle,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -96,10 +97,14 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       <React.Fragment>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="visualizations.newVisWizard.title"
-              defaultMessage="New Visualization"
-            />
+            <EuiText size="s">
+              <h2>
+                <FormattedMessage
+                  id="visualizations.newVisWizard.title"
+                  defaultMessage="New Visualization"
+                />
+              </h2>
+            </EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <div className="visNewVisDialog__body">
@@ -112,7 +117,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                 responsive={false}
               >
                 <EuiFlexItem grow={false} className="visNewVisDialog__searchWrapper">
-                  <EuiFieldSearch
+                  <EuiCompressedFieldSearch
                     placeholder="Filter"
                     value={query}
                     onChange={this.onQueryChange}

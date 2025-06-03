@@ -1,0 +1,275 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Builder components in materialized view renders builder components in materialized view with default options 1`] = `
+Array [
+  <div
+    className="euiText euiText--medium"
+    data-test-subj="covering-index-builder"
+  >
+    <h3>
+      Materialized view definition
+    </h3>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <span
+    className="euiExpression euiExpression-isUppercase euiExpression--success"
+  >
+    <span
+      className="euiExpression__description"
+    >
+      CREATE MATERIALIZED VIEW
+    </span>
+     
+    <span
+      className="euiExpression__value"
+    >
+      ..skipping
+    </span>
+  </span>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiExpression euiExpression-isUppercase euiExpression--accent"
+      >
+        <span
+          className="euiExpression__description"
+        >
+          AS SELECT
+        </span>
+         
+      </span>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            aria-label="add column"
+            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                className="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="plusInCircle"
+                size="s"
+              />
+              <span
+                className="euiButtonEmpty__text"
+              >
+                Add Column
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
+  />,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <span
+    className="euiExpression euiExpression-isUppercase euiExpression--success"
+  >
+    <span
+      className="euiExpression__description"
+    >
+      FROM
+    </span>
+     
+    <span
+      className="euiExpression__value"
+    >
+      ..
+    </span>
+  </span>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <div
+      className="euiPopover euiPopover--anchorDownLeft"
+      id="groupByTumblePopOver"
+    >
+      <div
+        className="euiPopover__anchor"
+      >
+        <button
+          className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+          onClick={[Function]}
+        >
+          <span
+            className="euiExpression__description"
+          >
+            GROUP BY
+          </span>
+           
+          <span
+            className="euiExpression__value"
+          >
+            TUMBLE(, '1 minute')
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`Builder components in materialized view renders builder components in materialized view with different options 1`] = `
+Array [
+  <div
+    className="euiText euiText--medium"
+    data-test-subj="covering-index-builder"
+  >
+    <h3>
+      Materialized view definition
+    </h3>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <span
+    className="euiExpression euiExpression-isUppercase euiExpression--success"
+  >
+    <span
+      className="euiExpression__description"
+    >
+      CREATE MATERIALIZED VIEW
+    </span>
+     
+    <span
+      className="euiExpression__value"
+    >
+      ..skipping
+    </span>
+  </span>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiExpression euiExpression-isUppercase euiExpression--accent"
+      >
+        <span
+          className="euiExpression__description"
+        >
+          AS SELECT
+        </span>
+         
+      </span>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            aria-label="add column"
+            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                className="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="plusInCircle"
+                size="s"
+              />
+              <span
+                className="euiButtonEmpty__text"
+              >
+                Add Column
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
+  />,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <span
+    className="euiExpression euiExpression-isUppercase euiExpression--success"
+  >
+    <span
+      className="euiExpression__description"
+    >
+      FROM
+    </span>
+     
+    <span
+      className="euiExpression__value"
+    >
+      ..
+    </span>
+  </span>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <div
+      className="euiPopover euiPopover--anchorDownLeft"
+      id="groupByTumblePopOver"
+    >
+      <div
+        className="euiPopover__anchor"
+      >
+        <button
+          className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+          onClick={[Function]}
+        >
+          <span
+            className="euiExpression__description"
+          >
+            GROUP BY
+          </span>
+           
+          <span
+            className="euiExpression__value"
+          >
+            TUMBLE(, '1 minute')
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+]
+`;

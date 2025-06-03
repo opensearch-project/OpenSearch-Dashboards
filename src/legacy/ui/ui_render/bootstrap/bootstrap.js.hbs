@@ -11,35 +11,25 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
   }
 
+  var themeCssDistFilenames = {{THEME_CSS_DIST_FILENAMES}};
+  var kuiCssDistFilenames = {{KUI_CSS_DIST_FILENAMES}};
+
   var isDarkMode = window.__osdThemeTag__.endsWith('dark');
-  var themeVersion = window.__osdThemeTag__.startsWith('v7') ? 'v7' : 'v8';
+  var themeMode = isDarkMode ? 'dark' : 'light';
+  var themeVersion = window.__osdThemeTag__.replace(/(light|dark)$/, '');
+  if (!themeCssDistFilenames[themeVersion]) {
+    themeVersion = 'v8'; // this default should only be needed by tests
+  }
 
   var loadingMessage = document.getElementById('osd_loading_message');
   loadingMessage.style.display = 'flex';
 
   var styleSheetPaths = [
-    '{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.baseCssDistFilename}}'
+    '{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.baseCssDistFilename}}',
+    '{{regularBundlePath}}/osd-ui-shared-deps/' + themeCssDistFilenames[themeVersion][themeMode],
+    '{{basePath}}/node_modules/@osd/ui-framework/dist/' + kuiCssDistFilenames[themeVersion][themeMode],
+    '{{basePath}}/ui/legacy_' + themeMode + '_theme.css',
   ];
-
-  if (isDarkMode) {
-    if (themeVersion === 'v7') {
-      styleSheetPaths.push('{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.darkCssDistFilename}}');
-      styleSheetPaths.push('{{basePath}}/node_modules/@osd/ui-framework/dist/kui_dark.css')
-    } else {
-      styleSheetPaths.push('{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.darkV8CssDistFilename}}');
-      styleSheetPaths.push('{{basePath}}/node_modules/@osd/ui-framework/dist/kui_next_dark.css')
-    }
-    styleSheetPaths.push('{{basePath}}/ui/legacy_dark_theme.css');
-  } else {
-    if (themeVersion === 'v7') {
-      styleSheetPaths.push('{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.lightCssDistFilename}}');
-      styleSheetPaths.push('{{basePath}}/node_modules/@osd/ui-framework/dist/kui_light.css')
-    } else {
-      styleSheetPaths.push('{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.lightV8CssDistFilename}}');
-      styleSheetPaths.push('{{basePath}}/node_modules/@osd/ui-framework/dist/kui_next_light.css')
-    }
-    styleSheetPaths.push('{{basePath}}/ui/legacy_light_theme.css');
-  }
 
   window.onload = function () {
     function failure() {

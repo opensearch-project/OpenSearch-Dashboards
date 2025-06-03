@@ -143,4 +143,48 @@ describe('RecentlyAccessed#start()', () => {
       ]);
     });
   });
+
+  describe('expanded left bottom controls', () => {
+    it('allows registration', async () => {
+      const navControls = getStart();
+      const nc = { mount: jest.fn() };
+      navControls.registerLeftBottom(nc);
+      expect(await navControls.getLeftBottom$().pipe(take(1)).toPromise()).toEqual([nc]);
+    });
+
+    it('sorts controls by order property', async () => {
+      const navControls = getStart();
+      const nc1 = { mount: jest.fn(), order: 10 };
+      const nc2 = { mount: jest.fn(), order: 0 };
+      const nc3 = { mount: jest.fn(), order: 20 };
+      navControls.registerLeftBottom(nc1);
+      navControls.registerLeftBottom(nc2);
+      navControls.registerLeftBottom(nc3);
+      expect(await navControls.getLeftBottom$().pipe(take(1)).toPromise()).toEqual([nc2, nc1, nc3]);
+    });
+  });
+
+  describe('new primary header right controls', () => {
+    it('allows registration', async () => {
+      const navControls = getStart();
+      const nc = { mount: jest.fn() };
+      navControls.registerPrimaryHeaderRight(nc);
+      expect(await navControls.getPrimaryHeaderRight$().pipe(take(1)).toPromise()).toEqual([nc]);
+    });
+
+    it('sorts controls by order property', async () => {
+      const navControls = getStart();
+      const nc1 = { mount: jest.fn(), order: 10 };
+      const nc2 = { mount: jest.fn(), order: 0 };
+      const nc3 = { mount: jest.fn(), order: 20 };
+      navControls.registerPrimaryHeaderRight(nc1);
+      navControls.registerPrimaryHeaderRight(nc2);
+      navControls.registerPrimaryHeaderRight(nc3);
+      expect(await navControls.getPrimaryHeaderRight$().pipe(take(1)).toPromise()).toEqual([
+        nc2,
+        nc1,
+        nc3,
+      ]);
+    });
+  });
 });

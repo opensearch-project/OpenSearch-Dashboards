@@ -12,6 +12,7 @@ import { DataSource } from './datasource';
 export interface IndexPatternOption {
   title: string;
   id: string;
+  dataSourceId?: string;
 }
 
 export interface IDataSourceGroup {

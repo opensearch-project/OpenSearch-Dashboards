@@ -32,7 +32,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
@@ -89,7 +89,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                   />
                 }
               >
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   iconType="plusInCircle"
                   color="text"
                   aria-label={i18n.translate('inspector.data.filterForValueButtonAriaLabel', {
@@ -113,7 +113,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                     />
                   }
                 >
-                  <EuiButtonIcon
+                  <EuiSmallButtonIcon
                     iconType="minusInCircle"
                     color="text"
                     aria-label={i18n.translate('inspector.data.filterOutValueButtonAriaLabel', {

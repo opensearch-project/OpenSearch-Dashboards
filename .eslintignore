@@ -12,6 +12,7 @@
 /test/fixtures/scenarios
 node_modules
 target
+cypress/fixtures
 
 !/.eslintrc.js
 
@@ -30,3 +31,7 @@ target
 /packages/osd-test/src/functional_test_runner/lib/config/__tests__/fixtures/
 /packages/osd-ui-framework/dist
 /packages/osd-ui-shared-deps/flot_charts
+
+# antlr overrides
+/src/plugins/data/public/antlr/opensearch_sql/.generated/*
+/src/plugins/data/public/antlr/opensearch_sql/grammar/**/*

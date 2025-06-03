@@ -1,0 +1,35 @@
+.datasetSelector {
+  &__icon {
+    margin-right: 4px;
+  }
+
+  &__advancedButton {
+    width: 100%;
+  }
+
+  &__selectable {
+    width: 365px;
+    padding: $euiSizeXS;
+  }
+
+  &__footer {
+    padding: $euiSizeXS;
+  }
+
+  &__advancedModal {
+    width: 1200px;
+    height: 800px;
+
+    // euiOverlayMask pushes the modal up due to having padding-bottom: 10vh
+    max-height: calc(90vh - $euiSizeL);
+
+    .euiModal__flex {
+      max-height: none;
+    }
+  }
+
+  &__checkbox {
+    flex: 1;
+    align-self: center;
+  }
+}

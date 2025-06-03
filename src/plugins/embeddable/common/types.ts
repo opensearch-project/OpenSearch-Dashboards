@@ -48,6 +48,7 @@ export type EmbeddableInput = {
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
+  hidePanelActions?: boolean;
 
   /**
    * Reserved key for enhancements added by other plugins.

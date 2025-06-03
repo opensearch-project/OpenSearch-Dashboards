@@ -32,6 +32,7 @@ import { registryMock, environmentMock, tutorialMock, sectionTypeMock } from './
 import { HomePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
+import { contentManagementPluginMocks } from 'src/plugins/content_management/public';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
 
@@ -50,6 +51,7 @@ describe('HomePublicPlugin', () => {
         coreMock.createSetup() as any,
         {
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
+          contentManagement: contentManagementPluginMocks.createSetupContract(),
         }
       );
       expect(setup).toHaveProperty('featureCatalogue');
@@ -69,6 +71,7 @@ describe('HomePublicPlugin', () => {
         coreMock.createSetup() as any,
         {
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
+          contentManagement: contentManagementPluginMocks.createSetupContract(),
         }
       );
       expect(setup).toHaveProperty('featureCatalogue');
@@ -80,6 +83,7 @@ describe('HomePublicPlugin', () => {
         coreMock.createSetup() as any,
         {
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
+          contentManagement: contentManagementPluginMocks.createSetupContract(),
         }
       );
       expect(setup).toHaveProperty('environment');
@@ -91,6 +95,7 @@ describe('HomePublicPlugin', () => {
         coreMock.createSetup() as any,
         {
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
+          contentManagement: contentManagementPluginMocks.createSetupContract(),
         }
       );
       expect(setup).toHaveProperty('tutorials');
@@ -101,8 +106,19 @@ describe('HomePublicPlugin', () => {
       const coreMocks = coreMock.createSetup();
       await new HomePublicPlugin(mockInitializerContext).setup(coreMocks, {
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        contentManagement: contentManagementPluginMocks.createSetupContract(),
       });
       expect(coreMocks.application.register).toBeCalledTimes(2);
+    });
+
+    test('wires up and call addNavLinksToGroup if new navigation is enabled and workspace not enabled', async () => {
+      const coreMocks = coreMock.createSetup();
+      coreMocks.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+      await new HomePublicPlugin(mockInitializerContext).setup(coreMocks, {
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        contentManagement: contentManagementPluginMocks.createSetupContract(),
+      });
+      expect(coreMocks.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(3);
     });
   });
 });

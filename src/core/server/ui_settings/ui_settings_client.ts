@@ -34,8 +34,14 @@ import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
-import { IUiSettingsClient, UiSettingsParams, PublicUiSettingsParams } from './types';
+import {
+  IUiSettingsClient,
+  UiSettingsParams,
+  PublicUiSettingsParams,
+  UiSettingScope,
+} from './types';
 import { CannotOverrideError } from './ui_settings_errors';
+import { buildDocIdWithScope } from './utils';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -50,6 +56,8 @@ export interface UiSettingsServiceOptions {
 interface ReadOptions {
   ignore401Errors?: boolean;
   autoCreateOrUpgradeIfMissing?: boolean;
+  scope?: UiSettingScope;
+  ignore404Errors?: boolean;
 }
 
 interface UserProvidedValue<T = unknown> {
@@ -62,6 +70,38 @@ type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
+/**
+ * default scope read options, order matters
+ * for user setting, we don't want to create the record when user visit the dashboard that's get,
+ * that will have too much records without any actual setting in it, instead do create when write at first time
+ */
+const UiSettingScopeReadOptions = [
+  {
+    scope: UiSettingScope.GLOBAL,
+    ignore401Errors: false,
+    autoCreateOrUpgradeIfMissing: true,
+    ignore404Errors: false,
+  },
+  {
+    scope: UiSettingScope.WORKSPACE,
+    ignore401Errors: true,
+    autoCreateOrUpgradeIfMissing: false,
+    ignore404Errors: true,
+  },
+  {
+    scope: UiSettingScope.USER,
+    ignore401Errors: true,
+    autoCreateOrUpgradeIfMissing: false,
+    ignore404Errors: true,
+  },
+  {
+    scope: UiSettingScope.DASHBOARD_ADMIN,
+    ignore401Errors: false,
+    autoCreateOrUpgradeIfMissing: false,
+    ignore404Errors: true,
+  },
+] as ReadOptions[];
+
 export class UiSettingsClient implements IUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
   private readonly id: UiSettingsServiceOptions['id'];
@@ -70,6 +110,10 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
   private readonly defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
   private readonly log: Logger;
+  private readonly userLevelSettingsKeys: string[] = [];
+  private readonly workspaceLevelSettingsKeys: string[] = [];
+  private readonly globalLevelSettingsKeys: string[] = [];
+  private readonly adminUiSettingsKeys: string[] = [];
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
@@ -81,6 +125,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.defaults = defaults;
     this.overrides = overrides;
     this.log = log;
+    this.groupSettingsKeys(this.defaults);
   }
 
   getRegistered() {
@@ -91,17 +136,22 @@ export class UiSettingsClient implements IUiSettingsClient {
     return copiedDefaults;
   }
 
-  getOverrideOrDefault(key: string): unknown {
-    return this.isOverridden(key) ? this.overrides[key].value : this.defaults[key]?.value;
+  getOverrideOrDefault<T = unknown>(key: string): T {
+    // Note: this.overrides is an object with simple values, whereas this.defaults contains UiSettingsParams as the value for each key.
+    return this.isOverridden(key) ? this.overrides[key] : this.defaults[key]?.value;
   }
 
-  async get<T = any>(key: string): Promise<T> {
-    const all = await this.getAll();
+  getDefault(key: string): unknown {
+    return this.defaults[key]?.value;
+  }
+
+  async get<T = any>(key: string, scope?: UiSettingScope): Promise<T> {
+    const all = await this.getAll(scope);
     return all[key];
   }
 
-  async getAll<T = any>() {
-    const raw = await this.getRaw();
+  async getAll<T = any>(scope?: UiSettingScope) {
+    const raw = await this.getRaw(scope);
 
     return Object.keys(raw).reduce((all, key) => {
       const item = raw[key];
@@ -110,8 +160,18 @@ export class UiSettingsClient implements IUiSettingsClient {
     }, {} as Record<string, T>);
   }
 
-  async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    const userProvided: UserProvided<T> = this.onReadHook<T>(await this.read());
+  async getUserProvided<T = unknown>(scope?: UiSettingScope): Promise<UserProvided<T>> {
+    let userProvided: UserProvided<T> = {};
+    if (scope) {
+      const readOptions = UiSettingScopeReadOptions.find((option) => option.scope === scope);
+      userProvided = this.onReadHook<T>(await this.read(readOptions));
+    } else {
+      // default will get from all scope and merge
+      // loop UiSettingScopeReadOptions
+      for (const readOptions of UiSettingScopeReadOptions) {
+        userProvided = { ...userProvided, ...this.onReadHook<T>(await this.read(readOptions)) };
+      }
+    }
 
     // write all overridden keys, dropping the userValue is override is null and
     // adding keys for overrides that are not in saved object
@@ -123,25 +183,43 @@ export class UiSettingsClient implements IUiSettingsClient {
     return userProvided;
   }
 
-  async setMany(changes: Record<string, any>) {
-    this.onWriteHook(changes);
-    await this.write({ changes });
+  async setMany(changes: Record<string, any>, scope?: UiSettingScope) {
+    this.onWriteHook(changes, scope);
+
+    if (scope) {
+      await this.write({ changes, scope });
+    } else {
+      // group changes into different scope
+      const [global, personal, workspace, admin] = this.groupChanges(changes);
+      if (global && Object.keys(global).length > 0) {
+        await this.write({ changes: global });
+      }
+      if (personal && Object.keys(personal).length > 0) {
+        await this.write({ changes: personal, scope: UiSettingScope.USER });
+      }
+      if (workspace && Object.keys(workspace).length > 0) {
+        await this.write({ changes: workspace, scope: UiSettingScope.WORKSPACE });
+      }
+      if (admin && Object.keys(admin).length > 0) {
+        await this.write({ changes: admin, scope: UiSettingScope.DASHBOARD_ADMIN });
+      }
+    }
   }
 
-  async set(key: string, value: any) {
-    await this.setMany({ [key]: value });
+  async set(key: string, value: any, scope?: UiSettingScope) {
+    await this.setMany({ [key]: value }, scope);
   }
 
-  async remove(key: string) {
-    await this.set(key, null);
+  async remove(key: string, scope?: UiSettingScope) {
+    await this.set(key, null, scope);
   }
 
-  async removeMany(keys: string[]) {
+  async removeMany(keys: string[], scope?: UiSettingScope) {
     const changes: Record<string, null> = {};
     keys.forEach((key) => {
       changes[key] = null;
     });
-    await this.setMany(changes);
+    await this.setMany(changes, scope);
   }
 
   isOverridden(key: string) {
@@ -154,8 +232,8 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private async getRaw(): Promise<UiSettingsRaw> {
-    const userProvided = await this.getUserProvided();
+  private async getRaw(scope?: UiSettingScope): Promise<UiSettingsRaw> {
+    const userProvided = await this.getUserProvided(scope);
     return defaultsDeep(userProvided, this.defaults);
   }
 
@@ -167,13 +245,30 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private onWriteHook(changes: Record<string, unknown>) {
+  private validateScope(key: string, value: unknown, scope?: UiSettingScope) {
+    const definition = this.defaults[key];
+    if (value === null || definition === undefined) return;
+    const validScopes = Array.isArray(definition.scope)
+      ? definition.scope
+      : [definition.scope || UiSettingScope.GLOBAL];
+    if (scope && !validScopes.includes(scope)) {
+      throw new Error(
+        `Unable to update "${key}" with "${scope}" because the valid scopes are "${validScopes}"`
+      );
+    }
+  }
+
+  private onWriteHook(changes: Record<string, unknown>, scope?: UiSettingScope) {
     for (const key of Object.keys(changes)) {
       this.assertUpdateAllowed(key);
     }
 
     for (const [key, value] of Object.entries(changes)) {
       this.validateKey(key, value);
+    }
+
+    for (const [key, value] of Object.entries(changes)) {
+      this.validateScope(key, value, scope);
     }
   }
 
@@ -196,16 +291,77 @@ export class UiSettingsClient implements IUiSettingsClient {
     return filteredValues;
   }
 
+  private groupSettingsKeys(defaults: NonNullable<UiSettingsServiceOptions['defaults']>) {
+    Object.entries(defaults).forEach(([key, value]) => {
+      if (
+        value.scope === UiSettingScope.USER ||
+        (Array.isArray(value.scope) && value.scope.includes(UiSettingScope.USER))
+      ) {
+        this.userLevelSettingsKeys.push(key);
+      }
+      if (
+        value.scope === UiSettingScope.WORKSPACE ||
+        (Array.isArray(value.scope) && value.scope.includes(UiSettingScope.WORKSPACE))
+      ) {
+        this.workspaceLevelSettingsKeys.push(key);
+      }
+      if (
+        value.scope === UiSettingScope.GLOBAL ||
+        (Array.isArray(value.scope) && value.scope.includes(UiSettingScope.GLOBAL))
+      ) {
+        this.globalLevelSettingsKeys.push(key);
+      }
+      if (
+        value.scope === UiSettingScope.DASHBOARD_ADMIN ||
+        (Array.isArray(value.scope) && value.scope.includes(UiSettingScope.DASHBOARD_ADMIN))
+      ) {
+        this.adminUiSettingsKeys.push(key);
+      }
+    });
+  }
+
+  /**
+   * group change into different scopes
+   * @param changes ui setting changes
+   * @returns [global, user, workspace]
+   */
+  private groupChanges(changes: Record<string, any>) {
+    const userChanges = {} as Record<string, any>;
+    const globalChanges = {} as Record<string, any>;
+    const adminSettingChanges = {} as Record<string, any>;
+    const workspaceChanges = {} as Record<string, any>;
+
+    Object.entries(changes).forEach(([key, val]) => {
+      if (Array.isArray(this.defaults[key]?.scope) && (this.defaults[key].scope?.length ?? 0) > 1) {
+        // if this setting has more than one scope, we should not update this setting without specifying scope
+        throw new Error(`Unable to update "${key}", because it has multiple scopes`);
+      } else if (this.userLevelSettingsKeys.includes(key)) {
+        userChanges[key] = val;
+      } else if (this.adminUiSettingsKeys.includes(key)) {
+        adminSettingChanges[key] = val;
+      } else if (this.workspaceLevelSettingsKeys.includes(key)) {
+        workspaceChanges[key] = val;
+      } else {
+        globalChanges[key] = val;
+      }
+    });
+
+    return [globalChanges, userChanges, workspaceChanges, adminSettingChanges];
+  }
+
   private async write({
     changes,
     autoCreateOrUpgradeIfMissing = true,
+    scope,
   }: {
     changes: Record<string, any>;
     autoCreateOrUpgradeIfMissing?: boolean;
+    scope?: UiSettingScope;
   }) {
     changes = this.translateChanges(changes, 'timeline', 'timelion');
     try {
-      await this.savedObjectsClient.update(this.type, this.id, changes);
+      const docId = buildDocIdWithScope(this.id, scope);
+      await this.savedObjectsClient.update(this.type, docId, changes);
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
         throw error;
@@ -217,11 +373,13 @@ export class UiSettingsClient implements IUiSettingsClient {
         buildNum: this.buildNum,
         log: this.log,
         handleWriteErrors: false,
+        scope,
       });
 
       await this.write({
         changes,
         autoCreateOrUpgradeIfMissing: false,
+        scope,
       });
     }
   }
@@ -229,9 +387,12 @@ export class UiSettingsClient implements IUiSettingsClient {
   private async read({
     ignore401Errors = false,
     autoCreateOrUpgradeIfMissing = true,
+    ignore404Errors = false,
+    scope,
   }: ReadOptions = {}): Promise<Record<string, any>> {
     try {
-      const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
+      const docId = buildDocIdWithScope(this.id, scope);
+      const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, docId);
       return this.translateChanges(resp.attributes, 'timelion', 'timeline');
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
@@ -241,16 +402,23 @@ export class UiSettingsClient implements IUiSettingsClient {
           buildNum: this.buildNum,
           log: this.log,
           handleWriteErrors: true,
+          scope,
         });
 
         if (!failedUpgradeAttributes) {
           return await this.read({
             ignore401Errors,
             autoCreateOrUpgradeIfMissing: false,
+            scope,
           });
         }
 
         return failedUpgradeAttributes;
+      }
+
+      // ignore 404 and return an empty object
+      if (ignore404Errors && SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return {};
       }
 
       if (this.isIgnorableError(error, ignore401Errors)) {

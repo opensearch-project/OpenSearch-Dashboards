@@ -458,7 +458,7 @@ describe('Fetch', () => {
 
     it('should make requests for NDJSON content', async () => {
       const content = readFileSync(join(__dirname, '_import_objects.ndjson'), {
-        encoding: 'utf-8',
+        encoding: 'utf8',
       });
       const body = new FormData();
 
@@ -480,6 +480,37 @@ describe('Fetch', () => {
       const ndjson = await new Response(data).text();
 
       expect(ndjson).toEqual(content);
+    });
+
+    it('should make requests for text/event-stream content', async () => {
+      const body = 'data: ';
+      fetchMock.post('*', () => ({
+        body,
+        headers: { 'Content-Type': 'text/event-stream' },
+      }));
+
+      const data = await fetchInstance.post('/my/path', {
+        body,
+        asResponse: true,
+      });
+
+      expect(await data.response?.text()).toEqual(body);
+      expect(data.body === data.response?.body).toEqual(true);
+    });
+
+    it('should return pure body for text/event-stream;charset=UTF-8 content', async () => {
+      const body = 'data: ';
+      fetchMock.post('*', () => ({
+        body,
+        headers: { 'Content-Type': 'text/event-stream;charset=UTF-8' },
+      }));
+
+      const data = await fetchInstance.post('/my/path', {
+        body,
+        asResponse: true,
+      });
+
+      expect(data.body === data.response?.body).toEqual(true);
     });
   });
 

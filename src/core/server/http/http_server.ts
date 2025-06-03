@@ -55,6 +55,7 @@ import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_st
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { HttpServiceSetup, HttpServerInfo } from './types';
+import { InternalDynamicConfigServiceStart } from '../config';
 
 /** @internal */
 export interface HttpServerSetup {
@@ -127,7 +128,7 @@ export class HttpServer {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
-    await this.server.register([HapiStaticFiles]);
+    await this.server.register([HapiStaticFiles as any]);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);
@@ -165,7 +166,7 @@ export class HttpServer {
     };
   }
 
-  public async start() {
+  public async start(dynamicConfigService: InternalDynamicConfigServiceStart) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
@@ -439,6 +440,8 @@ export class HttpServer {
       path,
       method: 'GET',
       handler: {
+        // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+        // @ts-ignore: directory handler comes from @hapi/inert plugin
         directory: {
           path: dirPath,
           listing: false,

@@ -176,7 +176,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
     // code + styles + style/css-loader runtimes + public path updater
-    25
+    33
   );
 
   expect(bar.cache.getReferencedFiles()?.map(absolutePathSerializer.serialize).sort())
@@ -195,6 +195,8 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7light.scss",
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8dark.scss",
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8light.scss",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v9dark.scss",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v9light.scss",
       "<absolute path>/packages/osd-optimizer/target/worker/entry_point_creator.js",
       "<absolute path>/packages/osd-ui-shared-deps/public_path_module_creator.js",
     ]
@@ -258,14 +260,14 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
   expect(raw).toMatchSnapshot(snapshotLabel);
 
   // Verify the brotli variant matches
-  expect(
-    Zlib.brotliDecompressSync(
-      Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
-    ).toString()
-  ).toEqual(raw);
+  const brotliCompressedData = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`));
+  const brotliDecompressedData = Zlib.brotliDecompressSync(
+    new Uint8Array(brotliCompressedData)
+  ).toString('utf8');
+  expect(brotliDecompressedData).toEqual(raw);
 
   // Verify the gzip variant matches
-  expect(
-    Zlib.gunzipSync(Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.gz`))).toString()
-  ).toEqual(raw);
+  const gzipCompressedData = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.gz`));
+  const gzipDecompressedData = Zlib.gunzipSync(new Uint8Array(gzipCompressedData)).toString('utf8');
+  expect(gzipDecompressedData).toEqual(raw);
 };

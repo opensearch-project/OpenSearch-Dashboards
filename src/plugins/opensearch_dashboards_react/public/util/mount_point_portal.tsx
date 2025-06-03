@@ -32,6 +32,7 @@ import { i18n } from '@osd/i18n';
 import React, { useRef, useEffect, useState, Component } from 'react';
 import ReactDOM from 'react-dom';
 import { MountPoint } from 'opensearch-dashboards/public';
+import { EuiText } from '@elastic/eui';
 import { useIfMounted } from './utils';
 
 interface MountPointPortalProps {
@@ -98,11 +99,13 @@ class MountPointPortalErrorBoundary extends Component<{}, { error?: any }> {
   render() {
     if (this.state.error) {
       return (
-        <p>
-          {i18n.translate('opensearch-dashboards-react.mountPointPortal.errorMessage', {
-            defaultMessage: 'Error rendering portal content',
-          })}
-        </p>
+        <EuiText size="s">
+          <p>
+            {i18n.translate('opensearch-dashboards-react.mountPointPortal.errorMessage', {
+              defaultMessage: 'Error rendering portal content',
+            })}
+          </p>
+        </EuiText>
       );
     }
     return this.props.children;

@@ -34,6 +34,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={mockFn}
             isDefault={false}
+            canManageDataSource={true}
           />
         ),
         {
@@ -87,6 +88,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={mockFn}
             isDefault={false}
+            canManageDataSource={true}
           />
         ),
         {
@@ -116,6 +118,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={onClickSetDefault}
             isDefault={isDefaultDataSourceState}
+            canManageDataSource={true}
           />
         ),
         {
@@ -129,6 +132,27 @@ describe('Datasource Management: Edit Datasource Header', () => {
 
     test('should render normally', () => {
       expect(component.find(setDefaultButtonIdentifier).exists()).toBe(true);
+    });
+    test('should not change to default if onClickSetDefault returns false', async () => {
+      onClickSetDefault.mockReturnValue(false);
+      expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
+      component.find(setDefaultButtonIdentifier).first().simulate('click');
+      expect(onClickSetDefault).toHaveBeenCalled();
+      component.update();
+      expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
+    });
+
+    test('should update isDefaultDataSourceState to true if onClickSetDefault returns true', async () => {
+      onClickSetDefault.mockReturnValue(true);
+      expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
+
+      await act(async () => {
+        component.find(setDefaultButtonIdentifier).first().simulate('click');
+      });
+
+      expect(onClickSetDefault).toHaveBeenCalled();
+      component.update();
+      expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Default');
     });
     test('default button should show as "Set as default" and should be clickable', () => {
       expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
@@ -152,6 +176,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={onClickSetDefault}
             isDefault={isDefaultDataSourceState}
+            canManageDataSource={true}
           />
         ),
         {
@@ -172,6 +197,34 @@ describe('Datasource Management: Edit Datasource Header', () => {
       expect(component.find(setDefaultButtonIdentifier).first().prop('iconType')).toBe(
         'starFilled'
       );
+    });
+  });
+  describe('should not manage data source', () => {
+    beforeEach(() => {
+      component = mount(
+        wrapWithIntl(
+          <Header
+            isFormValid={true}
+            showDeleteIcon={true}
+            onClickDeleteIcon={mockFn}
+            onClickTestConnection={mockFn}
+            dataSourceName={dataSourceName}
+            onClickSetDefault={mockFn}
+            isDefault={false}
+            canManageDataSource={false}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+    });
+    test('should not show delete', () => {
+      expect(component.find(headerTitleIdentifier).last().text()).toBe(dataSourceName);
+      expect(component.find(deleteIconIdentifier).exists()).toBe(false);
     });
   });
 });

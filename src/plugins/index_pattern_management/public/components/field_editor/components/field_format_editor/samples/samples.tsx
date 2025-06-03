@@ -32,7 +32,7 @@ import './samples.scss';
 
 import React, { PureComponent } from 'react';
 
-import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
+import { EuiBasicTable, EuiCompressedFormRow } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -83,7 +83,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
     ];
 
     return samples.length ? (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={
           <FormattedMessage id="indexPatternManagement.samplesHeader" defaultMessage="Samples" />
         }
@@ -94,7 +94,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
           items={samples}
           columns={columns}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     ) : null;
   }
 }

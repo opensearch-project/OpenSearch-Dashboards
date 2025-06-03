@@ -173,7 +173,7 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
     >
       <Component />
     </EuiCopy>
-    <EuiButton
+    <EuiSmallButton
       data-test-sub="closeShardFailureModal"
       fill={true}
       onClick={[Function]}
@@ -184,7 +184,7 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
         id="data.search.searchSource.fetch.shardsFailedModal.close"
         values={Object {}}
       />
-    </EuiButton>
+    </EuiSmallButton>
   </EuiModalFooter>
 </Fragment>
 `;

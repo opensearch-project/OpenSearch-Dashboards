@@ -16,9 +16,9 @@ exports[`renders dynamic options should display disabled dynamic options with to
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -33,7 +33,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
     key="multiselect"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={true}
       data-test-subj="listControlMultiselectInput"
       label={
@@ -45,10 +45,10 @@ exports[`renders dynamic options should display disabled dynamic options with to
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -63,7 +63,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
     key="dynamicOptions"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={true}
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={true}
@@ -76,10 +76,10 @@ exports[`renders dynamic options should display disabled dynamic options with to
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -101,13 +101,13 @@ exports[`renders dynamic options should display disabled dynamic options with to
     }
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       data-test-subj="listControlSizeInput"
       min={1}
       onChange={[Function]}
       value={5}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </Fragment>
 `;
 
@@ -127,9 +127,9 @@ exports[`renders dynamic options should display dynamic options for string field
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -144,7 +144,7 @@ exports[`renders dynamic options should display dynamic options for string field
     key="multiselect"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={true}
       data-test-subj="listControlMultiselectInput"
       label={
@@ -156,10 +156,10 @@ exports[`renders dynamic options should display dynamic options for string field
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -174,7 +174,7 @@ exports[`renders dynamic options should display dynamic options for string field
     key="dynamicOptions"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={true}
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={false}
@@ -187,7 +187,7 @@ exports[`renders dynamic options should display dynamic options for string field
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </Fragment>
 `;
 
@@ -207,9 +207,9 @@ exports[`renders dynamic options should display size field when dynamic options 
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -224,7 +224,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     key="multiselect"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={true}
       data-test-subj="listControlMultiselectInput"
       label={
@@ -236,10 +236,10 @@ exports[`renders dynamic options should display size field when dynamic options 
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -254,7 +254,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     key="dynamicOptions"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={false}
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={false}
@@ -267,10 +267,10 @@ exports[`renders dynamic options should display size field when dynamic options 
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -292,13 +292,13 @@ exports[`renders dynamic options should display size field when dynamic options 
     }
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       data-test-subj="listControlSizeInput"
       min={1}
       onChange={[Function]}
       value={5}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </Fragment>
 `;
 
@@ -318,9 +318,9 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     indexPatternId="indexPattern1"
     onChange={[Function]}
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -342,7 +342,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       onChange={[Function]}
       options={
         Array [
@@ -362,10 +362,10 @@ exports[`renders should display chaining input when parents are provided 1`] = `
       }
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -380,7 +380,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     key="multiselect"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={true}
       data-test-subj="listControlMultiselectInput"
       label={
@@ -392,10 +392,10 @@ exports[`renders should display chaining input when parents are provided 1`] = `
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -410,7 +410,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     key="dynamicOptions"
     labelType="label"
   >
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={false}
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={false}
@@ -423,10 +423,10 @@ exports[`renders should display chaining input when parents are provided 1`] = `
       }
       onChange={[Function]}
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -448,13 +448,13 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       data-test-subj="listControlSizeInput"
       min={1}
       onChange={[Function]}
       value={10}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </Fragment>
 `;
 

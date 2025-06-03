@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiFormRow } from '@elastic/eui';
+import { EuiCompressedFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { uniq } from 'lodash';
 import React from 'react';
@@ -48,7 +48,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
     const { values, intl, onChange } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         fullWidth={true}
         label={intl.formatMessage({
           id: 'data.filter.filterEditor.valuesSelectLabel',
@@ -71,7 +71,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
           delimiter=","
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 }

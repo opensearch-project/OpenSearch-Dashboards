@@ -1,2 +1,0 @@
-fix:
-- Add test for data_source_error_menu, data_source_item, data_source_multi_selectable ([#6752](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6752))

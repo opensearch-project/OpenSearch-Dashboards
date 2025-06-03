@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Column popover components in materialized view renders column popover components in materialized view with default options 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter"
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      aria-label="add column"
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      disabled={false}
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonContent euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="plusInCircle"
+          size="s"
+        />
+        <span
+          className="euiButtonEmpty__text"
+        >
+          Add Column
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Column popover components in materialized view renders column popover components in materialized view with different options 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter"
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      aria-label="add column"
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      disabled={false}
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonContent euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="plusInCircle"
+          size="s"
+        />
+        <span
+          className="euiButtonEmpty__text"
+        >
+          Add Column
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

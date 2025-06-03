@@ -39,8 +39,8 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
-  EuiFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiCode,
   EuiHorizontalRule,
   EuiFormLabel,
@@ -67,7 +67,7 @@ export const SeriesConfig = (props) => {
 
       <EuiHorizontalRule margin="s" />
 
-      <EuiFormRow
+      <EuiCompressedFormRow
         id={htmlId('series_filter')}
         label={
           <FormattedMessage
@@ -88,13 +88,13 @@ export const SeriesConfig = (props) => {
           onChange={(filter) => props.onChange({ filter })}
           indexPatterns={[seriesIndexPattern]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
 
       <EuiHorizontalRule margin="s" />
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('template')}
             label={
               <FormattedMessage
@@ -113,15 +113,15 @@ export const SeriesConfig = (props) => {
             }
             fullWidth
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
               fullWidth
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('offsetSeries')}
             label={
               <FormattedMessage
@@ -131,12 +131,12 @@ export const SeriesConfig = (props) => {
               />
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="offsetTimeSeries"
               onChange={handleTextChange('offset_time')}
               value={model.offset_time}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 

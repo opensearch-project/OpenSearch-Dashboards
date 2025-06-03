@@ -33,7 +33,8 @@ import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { url } from '../../opensearch_dashboards_utils/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../core/public';
+import { WorkspaceAvailability } from '../../../../src/core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { generateDocViewsUrl } from './application/components/doc_views/generate_doc_views_url';
@@ -51,6 +52,7 @@ import {
   setScopedHistory,
   syncHistoryLocations,
   getServices,
+  setUsageCollector,
 } from './opensearch_dashboards_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { buildServices } from './build_services';
@@ -75,6 +77,8 @@ declare module '../../share/public' {
     [DISCOVER_APP_URL_GENERATOR]: UrlGeneratorState<DiscoverUrlGeneratorState>;
   }
 }
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { ExplorePluginSetup } from '../../explore/public';
 
 /**
  * @public
@@ -128,6 +132,8 @@ export interface DiscoverSetupPlugins {
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
   dataExplorer: DataExplorerPluginSetup;
+  usageCollection: UsageCollectionSetup;
+  explore?: ExplorePluginSetup;
 }
 
 /**
@@ -174,6 +180,7 @@ export class DiscoverPlugin
       );
     }
 
+    setUsageCollector(plugins.usageCollection);
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
@@ -202,7 +209,10 @@ export class DiscoverPlugin
       generateCb: (renderProps: any) => {
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
-        const showDocLinks = getServices().data.ui.Settings.getUiOverrides().showDocLinks;
+        const queryString = getServices().data.query.queryString;
+        const showDocLinks =
+          queryString.getLanguageService().getLanguage(queryString.getQuery().language)
+            ?.showDocLinks ?? undefined;
 
         const hash = stringify(
           url.encodeQuery({
@@ -236,7 +246,10 @@ export class DiscoverPlugin
         defaultMessage: 'View single document',
       }),
       generateCb: (renderProps) => {
-        const showDocLinks = getServices().data.ui.Settings.getUiOverrides().showDocLinks;
+        const queryString = getServices().data.query.queryString;
+        const showDocLinks =
+          queryString.getLanguageService().getLanguage(queryString.getQuery().language)
+            ?.showDocLinks ?? undefined;
 
         const docUrl = `#/doc/${renderProps.indexPattern.id}/${
           renderProps.hit._index
@@ -255,6 +268,7 @@ export class DiscoverPlugin
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
@@ -290,6 +304,50 @@ export class DiscoverPlugin
         return () => {};
       },
     });
+
+    // If Explore plugin is enabled, it will register a Discover menu to the
+    // side nav in observability workspaces, we should skip registration here.
+    if (!plugins.explore) {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: PLUGIN_ID,
+          category: undefined,
+          order: 300,
+        },
+      ]);
+    }
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 300,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 200,
+      },
+    ]);
 
     plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
       return `#${path}`;

@@ -47,55 +47,13 @@ exports[`DeleteWorkspaceModal should render normally 1`] = `
           >
             <div
               class="euiModalBody__overflow"
-            >
-              <div
-                style="line-height: 1.5;"
-              >
-                <p>
-                  The following workspace will be permanently deleted. This action cannot be undone.
-                </p>
-                <ul
-                  style="list-style-type: disc; list-style-position: inside;"
-                />
-                <div
-                  class="euiSpacer euiSpacer--l"
-                />
-                <div
-                  class="euiText euiText--medium"
-                >
-                  <div
-                    class="euiTextColor euiTextColor--subdued"
-                  >
-                    To confirm your action, type 
-                    <b>
-                      delete
-                    </b>
-                    .
-                  </div>
-                </div>
-                <div
-                  class="euiFormControlLayout euiFormControlLayout--fullWidth"
-                >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper"
-                  >
-                    <input
-                      class="euiFieldText euiFieldText--fullWidth"
-                      data-test-subj="delete-workspace-modal-input"
-                      placeholder="delete"
-                      type="text"
-                      value=""
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+            />
           </div>
           <div
             class="euiModalFooter"
           >
             <button
-              class="euiButtonEmpty euiButtonEmpty--primary"
+              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
               data-test-subj="delete-workspace-modal-cancel-button"
               type="button"
             >
@@ -110,7 +68,7 @@ exports[`DeleteWorkspaceModal should render normally 1`] = `
               </span>
             </button>
             <button
-              class="euiButton euiButton--danger euiButton--fill euiButton-isDisabled"
+              class="euiButton euiButton--danger euiButton--small euiButton--fill euiButton-isDisabled"
               data-test-subj="delete-workspace-modal-confirm"
               disabled=""
               type="button"

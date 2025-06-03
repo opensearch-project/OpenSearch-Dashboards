@@ -245,7 +245,7 @@ export const SearchExamplesApp = ({
                         <IndexPatternSelect
                           savedObjectsClient={savedObjectsClient}
                           placeholder={i18n.translate(
-                            'backgroundSessionExample.selectIndexPatternPlaceholder',
+                            'searchExamples.selectIndexPatternPlaceholder',
                             {
                               defaultMessage: 'Select index pattern',
                             }

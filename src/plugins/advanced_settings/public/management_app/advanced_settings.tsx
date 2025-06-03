@@ -37,12 +37,19 @@ import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
-import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
+import {
+  IUiSettingsClient,
+  DocLinksStart,
+  ToastsStart,
+  ApplicationStart,
+} from '../../../../core/public/';
 import { ComponentRegistry } from '../';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
+import { NavigationPublicPluginStart } from '../../../../plugins/navigation/public';
+import { UiSettingScope } from '../../../../core/public';
 
 interface AdvancedSettingsProps {
   enableSaving: boolean;
@@ -50,6 +57,9 @@ interface AdvancedSettingsProps {
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   componentRegistry: ComponentRegistry['start'];
+  useUpdatedUX: boolean;
+  navigationUI: NavigationPublicPluginStart['ui'];
+  application: ApplicationStart;
 }
 
 interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
@@ -162,7 +172,28 @@ export class AdvancedSettingsComponent extends Component<
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     const userSettingsEnabled = config.get('theme:enableUserControl');
+    const isDashboardAdmin = !!this.props.application.capabilities.dashboards?.isDashboardAdmin;
+
     return Object.entries(all)
+      .filter(([, setting]) => {
+        const scope = setting.scope;
+        // if scope is not defined, then it's a global ui setting
+        if (!scope) {
+          return true;
+        }
+
+        if (typeof scope === 'string') {
+          return scope === UiSettingScope.GLOBAL || scope === UiSettingScope.DASHBOARD_ADMIN;
+        }
+
+        if (Array.isArray(scope)) {
+          return (
+            scope.includes(UiSettingScope.GLOBAL) || scope.includes(UiSettingScope.DASHBOARD_ADMIN)
+          );
+        }
+
+        return false;
+      })
       .map((setting) => {
         return toEditableConfig({
           def: setting[1],
@@ -170,6 +201,8 @@ export class AdvancedSettingsComponent extends Component<
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
           isOverridden: config.isOverridden(setting[0]),
+          isPermissionControlled:
+            all[setting[0]].scope === UiSettingScope.DASHBOARD_ADMIN && !isDashboardAdmin,
           userSettingsEnabled,
         });
       })
@@ -226,21 +259,50 @@ export class AdvancedSettingsComponent extends Component<
     );
     const PageFooter = componentRegistry.get(componentRegistry.componentType.PAGE_FOOTER_COMPONENT);
 
+    const renderHeader = () => {
+      if (!this.props.useUpdatedUX) {
+        return (
+          <>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem>
+                <PageTitle />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Search
+                  query={query}
+                  categories={this.categories}
+                  onQueryChange={this.onQueryChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <PageSubtitle />
+            <EuiSpacer size="m" />
+            <CallOuts />
+            <EuiSpacer size="m" />
+          </>
+        );
+      } else {
+        const { HeaderControl } = this.props.navigationUI;
+        return (
+          <>
+            <HeaderControl
+              setMountPoint={this.props.application.setAppBottomControls}
+              controls={[
+                {
+                  renderComponent: <CallOuts />,
+                },
+              ]}
+            />
+            <Search query={query} categories={this.categories} onQueryChange={this.onQueryChange} />
+            <EuiSpacer size="s" />
+          </>
+        );
+      }
+    };
+
     return (
       <div>
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem>
-            <PageTitle />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Search query={query} categories={this.categories} onQueryChange={this.onQueryChange} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <PageSubtitle />
-        <EuiSpacer size="m" />
-        <CallOuts />
-        <EuiSpacer size="m" />
-
+        {renderHeader()}
         <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
 
         <Form
@@ -276,6 +338,9 @@ export const AdvancedSettings = (props: AdvancedSettingsProps) => {
       dockLinks={props.dockLinks}
       toasts={props.toasts}
       componentRegistry={props.componentRegistry}
+      useUpdatedUX={props.useUpdatedUX}
+      navigationUI={props.navigationUI}
+      application={props.application}
     />
   );
 };

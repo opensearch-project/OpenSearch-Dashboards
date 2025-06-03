@@ -30,7 +30,7 @@
 
 import React, { ReactElement } from 'react';
 
-import { EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
 
 export interface FormRowProps {
   label: string;
@@ -63,8 +63,12 @@ export function FormRow(props: FormRowProps) {
   );
 
   return (
-    <EuiFormRow label={label} id={props.id} data-test-subj={'inputControl' + props.controlIndex}>
+    <EuiCompressedFormRow
+      label={label}
+      id={props.id}
+      data-test-subj={'inputControl' + props.controlIndex}
+    >
       {control}
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 }

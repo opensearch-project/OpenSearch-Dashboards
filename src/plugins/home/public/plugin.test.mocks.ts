@@ -32,6 +32,7 @@ import { featureCatalogueRegistryMock } from './services/feature_catalogue/featu
 import { environmentServiceMock } from './services/environment/environment.mock';
 import { tutorialServiceMock } from './services/tutorials/tutorial_service.mock';
 import { sectionTypeServiceMock } from './services/section_type/section_type.mock';
+import { FeatureCatalogueCategory } from './services/feature_catalogue';
 
 export const registryMock = featureCatalogueRegistryMock.create();
 export const environmentMock = environmentServiceMock.create();
@@ -42,4 +43,5 @@ jest.doMock('./services', () => ({
   EnvironmentService: jest.fn(() => environmentMock),
   TutorialService: jest.fn(() => tutorialMock),
   SectionTypeService: jest.fn(() => sectionTypeMock),
+  FeatureCatalogueCategory,
 }));

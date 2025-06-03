@@ -44,6 +44,16 @@ const EN_LOCALE = 'en';
 const translationsForLocale: Record<string, Translation> = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
+/* A locale code is made of several components:
+ *    * lang: The two- and three-letter lower-case language code follows the ISO 639-1 and ISO 639-2/3 standards, respectively.
+ *    * script: The optional four-letter title-case code follows the ISO 15924 standard for representing writing systems.
+ *    * region: The two-letter upper-case region code follows the ISO 3166-1 alpha-2 standard.
+ *
+ * Ref: https://www.rfc-editor.org/rfc/rfc5646.txt
+ * Note: While case carries no distinction with locale codes, proper formatting is recommended.
+ */
+const localeParser = /^(?<lang>[a-z]{2,3})(?:-(?<script>[a-z]{4}))?(?:-(?<region>[a-z]{2}|[0-9]{3}))?(?:[_@\-].*)?$/i;
+
 let defaultLocale = EN_LOCALE;
 let currentLocale = EN_LOCALE;
 let formats = EN_FORMATS;
@@ -64,8 +74,16 @@ function getMessageById(id: string): string | undefined {
  * Normalizes locale to make it consistent with IntlMessageFormat locales
  * @param locale
  */
-function normalizeLocale(locale: string) {
-  return locale.toLowerCase();
+export function normalizeLocale(locale: string) {
+  const { lang, script, region } = localeParser.exec(locale)?.groups || {};
+  // If parsing failed or the language code was not extracted, return the locale
+  if (!lang) return locale;
+
+  const parts = [lang.toLowerCase()];
+  if (script) parts.push(script[0].toUpperCase() + script.slice(1).toLowerCase());
+  if (region) parts.push(region.toUpperCase());
+
+  return parts.join('-');
 }
 
 /**
@@ -261,5 +279,12 @@ export async function load(translationsUrl: string) {
     throw new Error(`Translations request failed with status code: ${response.status}`);
   }
 
-  init(await response.json());
+  const data = await response.json();
+
+  if (data.warning) {
+    // Store the warning to be displayed after core system setup
+    (window as any).__i18nWarning = data.warning;
+  }
+
+  init(data.translations);
 }

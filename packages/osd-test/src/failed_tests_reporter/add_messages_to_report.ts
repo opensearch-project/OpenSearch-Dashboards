@@ -85,7 +85,7 @@ export async function addMessagesToReport(options: {
 
   const builder = new xml2js.Builder({
     cdata: true,
-    xmldec: { version: '1.0', encoding: 'utf-8' },
+    xmldec: { version: '1.0', encoding: 'utf8' },
   });
 
   const xml = builder

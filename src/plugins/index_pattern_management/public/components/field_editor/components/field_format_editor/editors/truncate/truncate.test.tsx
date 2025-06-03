@@ -30,7 +30,7 @@
 
 import React, { ChangeEvent } from 'react';
 import { shallow } from 'enzyme';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiCompressedFieldNumber } from '@elastic/eui';
 import { FieldFormat } from 'src/plugins/data/public';
 
 import { TruncateFormatEditor } from './truncate';
@@ -81,7 +81,7 @@ describe('TruncateFormatEditor', () => {
         onError={onError}
       />
     );
-    const input = component.find(EuiFieldNumber);
+    const input = component.find(EuiCompressedFieldNumber);
 
     const changeEvent = {
       target: {
@@ -107,7 +107,7 @@ describe('TruncateFormatEditor', () => {
         onError={onError}
       />
     );
-    const input = component.find(EuiFieldNumber);
+    const input = component.find(EuiCompressedFieldNumber);
 
     const changeEvent = {
       target: {

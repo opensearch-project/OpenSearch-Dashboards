@@ -37,6 +37,8 @@ it('returns default tags when passed undefined', () => {
       "v7light",
       "v8dark",
       "v8light",
+      "v9dark",
+      "v9light",
     ]
   `);
 });
@@ -48,6 +50,8 @@ it('returns all tags when passed *', () => {
       "v7light",
       "v8dark",
       "v8light",
+      "v9dark",
+      "v9light",
     ]
   `);
 });
@@ -81,13 +85,13 @@ it('returns specific tags when passed an array', () => {
 
 it('throws when an invalid tag is in the array', () => {
   expect(() => parseThemeTags(['v8light', 'v7light', 'bar'])).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid theme tags [bar], options: [v7dark, v7light, v8dark, v8light]"`
+    `"Invalid theme tags [bar], options: [v7dark, v7light, v8dark, v8light, v9dark, v9light]"`
   );
 });
 
 it('throws when an invalid tags in comma separated list', () => {
   expect(() => parseThemeTags('v8light ,v7light,bar,box ')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid theme tags [bar, box], options: [v7dark, v7light, v8dark, v8light]"`
+    `"Invalid theme tags [bar, box], options: [v7dark, v7light, v8dark, v8light, v9dark, v9light]"`
   );
 });
 

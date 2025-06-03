@@ -30,14 +30,14 @@
 
 import {
   EuiForm,
-  EuiFormRow,
-  EuiFieldText,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
-  EuiButton,
+  EuiSmallButton,
   EuiModalFooter,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
@@ -66,29 +66,29 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
 
         <EuiModalBody>
           <EuiForm>
-            <EuiFormRow label="First name">
-              <EuiFieldText
+            <EuiCompressedFormRow label="First name">
+              <EuiCompressedFieldText
                 name="popfirst"
                 value={this.state.firstName}
                 onChange={(e) => this.setState({ firstName: e.target.value })}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
-            <EuiFormRow label="Last name">
-              <EuiFieldText
+            <EuiCompressedFormRow label="Last name">
+              <EuiCompressedFieldText
                 name="popfirst"
                 value={this.state.lastName}
                 placeholder="optional"
                 onChange={(e) => this.setState({ lastName: e.target.value })}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={this.props.onCancel}>Cancel</EuiButtonEmpty>
+          <EuiSmallButtonEmpty onClick={this.props.onCancel}>Cancel</EuiSmallButtonEmpty>
 
-          <EuiButton
+          <EuiSmallButton
             isDisabled={!this.state.firstName}
             onClick={() => {
               if (this.state.firstName) {
@@ -101,7 +101,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
             fill
           >
             Create
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </div>
     );

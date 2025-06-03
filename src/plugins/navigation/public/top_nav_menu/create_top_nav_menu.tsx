@@ -28,16 +28,18 @@
  * under the License.
  */
 
-import React from 'react';
 import { I18nStart } from 'opensearch-dashboards/public';
+import React from 'react';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
+import { TopNavControls, TopNavControlsProps } from './top_nav_controls';
+import { TopNavMenu, TopNavMenuProps } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export function createTopNav(
   data: DataPublicPluginStart,
   extraConfig: RegisteredTopNavMenuData[],
-  i18n: I18nStart
+  i18n: I18nStart,
+  groupActions?: boolean
 ) {
   return (props: TopNavMenuProps) => {
     const relevantConfig = extraConfig.filter(
@@ -47,7 +49,17 @@ export function createTopNav(
 
     return (
       <i18n.Context>
-        <TopNavMenu {...props} data={data} config={config} />
+        <TopNavMenu {...props} data={data} groupActions={groupActions} config={config} />
+      </i18n.Context>
+    );
+  };
+}
+
+export function createTopNavControl(i18n: I18nStart) {
+  return (props: TopNavControlsProps) => {
+    return (
+      <i18n.Context>
+        <TopNavControls {...props} />
       </i18n.Context>
     );
   };

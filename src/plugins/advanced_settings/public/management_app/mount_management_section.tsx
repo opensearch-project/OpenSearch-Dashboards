@@ -34,18 +34,18 @@ import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import { StartServicesAccessor } from 'src/core/public';
+import { AppMountParameters, CoreStart, StartServicesAccessor } from 'src/core/public';
 
+import { EuiPageContent } from '@elastic/eui';
+import { ContentManagementPluginStart } from '../../../content_management/public';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
+import { NavigationPublicPluginStart } from '../../../navigation/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 
 import './index.scss';
-
-const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
-  defaultMessage: 'Advanced settings',
-});
-const crumb = [{ text: title }];
+import { UserSettingsApp } from './user_settings';
 
 const readOnlyBadge = {
   text: i18n.translate('advancedSettings.badge.readOnly.text', {
@@ -58,12 +58,16 @@ const readOnlyBadge = {
 };
 
 export async function mountManagementSection(
-  getStartServices: StartServicesAccessor,
-  params: ManagementAppMountParams,
+  getStartServices: StartServicesAccessor<{
+    navigation: NavigationPublicPluginStart;
+  }>,
+  params: ManagementAppMountParams & { wrapInPage?: boolean },
   componentRegistry: ComponentRegistry['start']
 ) {
-  params.setBreadcrumbs(crumb);
-  const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
+  const [
+    { uiSettings, notifications, docLinks, application, chrome },
+    { navigation },
+  ] = await getStartServices();
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
 
@@ -71,21 +75,58 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
+  const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
+    defaultMessage: 'Advanced settings',
+  });
+  const newUXTitle = i18n.translate('advancedSettings.newHeader.pageTitle', {
+    defaultMessage: 'Application settings',
+  });
+
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+  // If new navigation is off, this will be rendered as breadcrumb. If is on, this will be rendered as title.
+  const crumb = [{ text: useUpdatedUX ? newUXTitle : title }];
+  params.setBreadcrumbs(crumb);
+
+  const content = (
+    <Router history={params.history}>
+      <Switch>
+        <Route path={['/:query', '/']}>
+          <AdvancedSettings
+            enableSaving={canSave}
+            toasts={notifications.toasts}
+            dockLinks={docLinks.links}
+            uiSettings={uiSettings}
+            componentRegistry={componentRegistry}
+            useUpdatedUX={useUpdatedUX}
+            navigationUI={navigation.ui}
+            application={application}
+          />
+        </Route>
+      </Switch>
+    </Router>
+  );
+
+  const pagePaddingSize = useUpdatedUX
+    ? // When useUpdatedUX is enabled, page should align with header vertically.
+      {
+        paddingSize: 'm' as const,
+      }
+    : {};
+
   ReactDOM.render(
     <I18nProvider>
-      <Router history={params.history}>
-        <Switch>
-          <Route path={['/:query', '/']}>
-            <AdvancedSettings
-              enableSaving={canSave}
-              toasts={notifications.toasts}
-              dockLinks={docLinks.links}
-              uiSettings={uiSettings}
-              componentRegistry={componentRegistry}
-            />
-          </Route>
-        </Switch>
-      </Router>
+      {params.wrapInPage ? (
+        <EuiPageContent
+          hasShadow={false}
+          hasBorder={false}
+          color="transparent"
+          {...pagePaddingSize}
+        >
+          {content}
+        </EuiPageContent>
+      ) : (
+        content
+      )}
     </I18nProvider>,
     params.element
   );
@@ -93,3 +134,22 @@ export async function mountManagementSection(
     ReactDOM.unmountComponentAtNode(params.element);
   };
 }
+
+export const renderUserSettingsApp = async (
+  { element }: AppMountParameters,
+  services: CoreStart & {
+    contentManagement: ContentManagementPluginStart;
+    navigation: NavigationPublicPluginStart;
+  }
+) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <UserSettingsApp />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};

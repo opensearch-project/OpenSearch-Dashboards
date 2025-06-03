@@ -6,7 +6,7 @@
 import { EuiPageContent } from '@elastic/eui';
 import React, { useState } from 'react';
 import { DataSourceRef } from 'src/plugins/index_pattern_management/public/types';
-import { StepInfo } from '../../types';
+import { DataSourceTableItem, StepInfo } from '../../types';
 
 import { Header } from './components/header';
 
@@ -22,8 +22,13 @@ export const StepDataSource = (props: StepDataSourceProps) => {
   const [selectedDataSource, setSelectedDataSource] = useState<DataSourceRef>();
   const [isNextStepDisabled, setIsNextStepDisabled] = useState(true);
 
-  const onDataSourceSelected = (id: string, selectedType: string, title: string) => {
-    const selected = { id, type: selectedType, title };
+  const onDataSourceSelected = (
+    id: string,
+    selectedType: string,
+    title: string,
+    relatedConnections?: DataSourceTableItem[]
+  ) => {
+    const selected = { id, type: selectedType, title, relatedConnections };
 
     setSelectedDataSource(selected);
     setIsNextStepDisabled(false);

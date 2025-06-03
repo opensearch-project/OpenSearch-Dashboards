@@ -41,7 +41,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFormRow,
+  EuiCompressedFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { OSD_FIELD_TYPES } from '../../../../../../plugins/data/public';
@@ -95,7 +95,7 @@ export function PercentileAgg(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('field')}
             label={
               <FormattedMessage
@@ -112,7 +112,7 @@ export function PercentileAgg(props) {
               value={model.field}
               onChange={handleSelectChange('field')}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 

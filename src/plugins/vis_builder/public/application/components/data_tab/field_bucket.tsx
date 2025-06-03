@@ -6,11 +6,12 @@
 import React from 'react';
 import {
   EuiText,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiProgress,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -35,11 +36,20 @@ export function FieldBucket({ bucket, field }: FieldBucketProps) {
     // We need this to communicate to users when a top value is actually an empty string
     defaultMessage: 'Empty string',
   });
+  const addText = i18n.translate('visBuilder.fieldSelector.detailsView.filterValueButtonToolTip', {
+    defaultMessage: 'Filter for value',
+  });
   const addLabel = i18n.translate(
     'visBuilder.fieldSelector.detailsView.filterValueButtonAriaLabel',
     {
       defaultMessage: 'Filter for {fieldName}: "{value}"',
       values: { fieldName, value },
+    }
+  );
+  const removeText = i18n.translate(
+    'visBuilder.fieldSelector.detailsView.filterOutValueButtonToolTip',
+    {
+      defaultMessage: 'Filter out value',
     }
   );
   const removeLabel = i18n.translate(
@@ -84,22 +94,26 @@ export function FieldBucket({ bucket, field }: FieldBucketProps) {
         {isFilterableField && (
           <EuiFlexItem grow={false}>
             <div>
-              <EuiButtonIcon
-                className="vbFieldDetails__filterButton"
-                iconSize="s"
-                iconType="plusInCircle"
-                onClick={() => onAddFilter(field, value, '+')}
-                aria-label={addLabel}
-                data-test-subj={`plus-${fieldName}-${value}`}
-              />
-              <EuiButtonIcon
-                className="vbFieldDetails__filterButton"
-                iconSize="s"
-                iconType="minusInCircle"
-                onClick={() => onAddFilter(field, value, '-')}
-                aria-label={removeLabel}
-                data-test-subj={`minus-${fieldName}-${value}`}
-              />
+              <EuiToolTip content={addText} delay="long" position="bottom">
+                <EuiSmallButtonIcon
+                  className="vbFieldDetails__filterButton"
+                  iconSize="s"
+                  iconType="plusInCircle"
+                  onClick={() => onAddFilter(field, value, '+')}
+                  aria-label={addLabel}
+                  data-test-subj={`plus-${fieldName}-${value}`}
+                />
+              </EuiToolTip>
+              <EuiToolTip content={removeText} delay="long" position="bottom">
+                <EuiSmallButtonIcon
+                  className="vbFieldDetails__filterButton"
+                  iconSize="s"
+                  iconType="minusInCircle"
+                  onClick={() => onAddFilter(field, value, '-')}
+                  aria-label={removeLabel}
+                  data-test-subj={`minus-${fieldName}-${value}`}
+                />
+              </EuiToolTip>
             </div>
           </EuiFlexItem>
         )}

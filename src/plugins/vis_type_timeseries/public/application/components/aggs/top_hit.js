@@ -41,9 +41,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiSpacer,
-  EuiFormRow,
+  EuiCompressedFormRow,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { OSD_FIELD_TYPES } from '../../../../../../plugins/data/public';
@@ -178,7 +179,7 @@ const TopHitAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('field')}
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.fieldLabel" defaultMessage="Field" />
@@ -192,7 +193,7 @@ const TopHitAggUi = (props) => {
               value={model.field}
               onChange={handleSelectChange('field')}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -200,25 +201,27 @@ const TopHitAggUi = (props) => {
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('size')}
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.sizeLabel" defaultMessage="Size" />
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              Should it be text or number?
-            */}
-            <input
-              className="tvbAgg__input"
-              value={model.size}
-              onChange={handleTextChange('size')}
-            />
-          </EuiFormRow>
+            <EuiFormControlLayout compressed={true}>
+              {/*
+                EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                Should it be text or number?
+              */}
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                value={model.size}
+                onChange={handleTextChange('size')}
+              />
+            </EuiFormControlLayout>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('agg_with')}
             label={
               <FormattedMessage
@@ -227,7 +230,7 @@ const TopHitAggUi = (props) => {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               placeholder={i18n.translate(
                 'visTypeTimeseries.topHit.aggregateWith.selectPlaceholder',
@@ -240,10 +243,10 @@ const TopHitAggUi = (props) => {
               onChange={handleSelectChange('agg_with')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('order_by')}
             label={
               <FormattedMessage
@@ -259,16 +262,16 @@ const TopHitAggUi = (props) => {
               indexPattern={indexPattern}
               fields={fields}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('order')}
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.orderLabel" defaultMessage="Order" />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               placeholder={i18n.translate('visTypeTimeseries.topHit.order.selectPlaceholder', {
                 defaultMessage: 'Select...',
@@ -278,7 +281,7 @@ const TopHitAggUi = (props) => {
               onChange={handleSelectChange('order')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

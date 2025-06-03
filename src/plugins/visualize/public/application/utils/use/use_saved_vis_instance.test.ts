@@ -52,6 +52,8 @@ const mockSavedVisInstance = {
     id: savedVisId,
     title: 'Test Vis',
     destroy: mockSavedVisDestroy,
+    getOpenSearchType: () => 'visualization',
+    getFullPath: () => '/',
   },
   vis: {
     type: {},

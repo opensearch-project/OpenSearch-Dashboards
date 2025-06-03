@@ -6,7 +6,7 @@
 
 Themes are defined in OUI via https://github.com/opensearch-project/oui/blob/main/src/themes/themes.ts. When Building OUI, there are several theming artifacts generated (beyond the react components) for each mode (light/dark) of each theme:
 
-1. Theme compiled stylesheets (e.g. `@elastic/eui/dist/eui_theme_dark.css`). Consumed as entry files in [/packages/osd-ui-shared-deps/webpack.config.js](/packages/osd-ui-shared-deps/webpack.config.js) and republished by `osd-ui-shared-deps` (e.g. [UiSharedDeps.darkCssDistFilename](/packages/osd-ui-shared-deps/index.js)).
+1. Theme compiled stylesheets (e.g. `@elastic/eui/dist/eui_theme_dark.css`). Consumed as entry files in [/packages/osd-ui-shared-deps/webpack.config.js](/packages/osd-ui-shared-deps/webpack.config.js) and republished by `osd-ui-shared-deps` (e.g. [UiSharedDeps.themeCssDistFilenames](/packages/osd-ui-shared-deps/index.js)).
 2. Theme compiled and minified stylesheets (e.g. `@elastic/eui/dist/eui_theme_dark.min.css`). These appear unused by OpenSearch Dashboards
 3. Theme computed SASS variables as JSON (e.g. `@elastic/eui/dist/eui_theme_dark.json`). Consumed by [/packages/osd-ui-shared-deps/theme.ts](/packages/osd-ui-shared-deps/theme.ts) and made available to other components via the mode and theme aware `euiThemeVars`. In general, these should not be consumed by any other component directly.
 4. Theme type definition file for SASS variables as JSON (e.g. `@elastic/eui/dist/eui_theme_dark.json.d.ts`)
@@ -129,3 +129,34 @@ Component styles are not loaded as stylesheets.
 4. Used by `src/core/server/rendering/views/theme.ts` to inject values into `src/core/server/rendering/views/styles.tsx`
 5. Used (incorrectly) to style a badge color in `src/plugins/index_pattern_management/public/components/create_button/create_button.tsx`
 6. Used by `src/plugins/opensearch_dashboards_react/public/code_editor/editor_theme.ts` to create Monaco theme styles
+
+## Theme Management
+
+### Change default theme
+
+Update `DEFAULT_THEME_VERSION` in `src/core/server/ui_settings/ui_settings_config.ts` to point to the desired theme version.
+
+### Adding a new theme
+
+1. Add a [a new theme to OUI](https://github.com/opensearch-project/oui/blob/main/wiki/theming.md) and publish new OUI version
+2. Update OSD to consume new OUI version
+3. Make the following changes in OSD:
+    1. Load your theme by creating sass files in `src/core/public/core_app/styles`
+    2. Update [webpack config](packages/osd-ui-shared-deps/webpack.config.js) to create css files for your theme
+    2. Add kui css files:
+        1. Create kui sass files for your theme in `packages/osd-ui-framework/src/`
+        2. Update `packages/osd-ui-framework/Gruntfile.js` to build these files
+        3. Generate the files by running `npx grunt compileCss` from this package root
+    3. Add fonts to OSD:
+        1. Make sure your theme fonts are in [/src/core/server/core_app/assets/fonts](/src/core/server/core_app/assets/fonts/readme.md)
+        2. Update `src/core/server/rendering/views/fonts.tsx` to reference those files
+        3. Update src/core/server/core_app/assets/fonts/readme.md to reference the fonts
+    4. Update `packages/osd-ui-shared-deps/theme_config.js`:
+        1. Add version and label for version to `THEME_VERSION_LABEL_MAP`
+        2. Update `kuiCssDistFilenames` map for new theme
+        3. Update `ThemeTag` type in corresponding definition file (`theme_config.d.ts`)
+    5. Load variables for new theme in `packages/osd-ui-shared-deps/theme.ts'`
+    6. Update `src/legacy/ui/ui_render/ui_render_mixin.js':
+        1. Load variables for your theme in `THEME_SOURCES`
+        2. Define the text font for your theme in `fontText`
+        3. Define the code font for your theme in `fontCode`

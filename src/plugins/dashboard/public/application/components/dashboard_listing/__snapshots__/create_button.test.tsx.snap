@@ -245,7 +245,7 @@ exports[`create button with props renders button dropdown menu when two provider
       <EuiPopover
         anchorPosition="downRight"
         button={
-          <EuiButton
+          <EuiSmallButton
             data-test-subj="createMenuDropdown"
             fill={true}
             iconSide="right"
@@ -257,7 +257,7 @@ exports[`create button with props renders button dropdown menu when two provider
               id="dashboard.listing.createButtonText"
               values={Object {}}
             />
-          </EuiButton>
+          </EuiSmallButton>
         }
         closePopover={[Function]}
         display="inlineBlock"
@@ -274,79 +274,90 @@ exports[`create button with props renders button dropdown menu when two provider
           <div
             className="euiPopover__anchor"
           >
-            <EuiButton
+            <EuiSmallButton
               data-test-subj="createMenuDropdown"
               fill={true}
               iconSide="right"
               iconType="arrowDown"
               onClick={[Function]}
             >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
+              <EuiButton
                 data-test-subj="createMenuDropdown"
-                disabled={false}
-                element="button"
                 fill={true}
                 iconSide="right"
                 iconType="arrowDown"
-                isDisabled={false}
                 onClick={[Function]}
-                type="button"
+                size="s"
               >
-                <button
-                  className="euiButton euiButton--primary euiButton--fill"
+                <EuiButtonDisplay
+                  baseClassName="euiButton"
                   data-test-subj="createMenuDropdown"
                   disabled={false}
+                  element="button"
+                  fill={true}
+                  iconSide="right"
+                  iconType="arrowDown"
+                  isDisabled={false}
                   onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
+                  size="s"
                   type="button"
                 >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconSide="right"
-                    iconType="arrowDown"
-                    textProps={
+                  <button
+                    className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                    data-test-subj="createMenuDropdown"
+                    disabled={false}
+                    onClick={[Function]}
+                    style={
                       Object {
-                        "className": "euiButton__text",
+                        "minWidth": undefined,
                       }
                     }
+                    type="button"
                   >
-                    <span
-                      className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                    <EuiButtonContent
+                      className="euiButton__content"
+                      iconGap="m"
+                      iconSide="right"
+                      iconType="arrowDown"
+                      textProps={
+                        Object {
+                          "className": "euiButton__text",
+                        }
+                      }
                     >
-                      <EuiIcon
-                        className="euiButtonContent__icon"
-                        color="inherit"
-                        size="m"
-                        type="arrowDown"
+                      <span
+                        className="euiButtonContent euiButtonContent--iconRight euiButton__content"
                       >
-                        <span
+                        <EuiIcon
                           className="euiButtonContent__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
                           size="m"
-                        />
-                      </EuiIcon>
-                      <span
-                        className="euiButton__text"
-                      >
-                        <FormattedMessage
-                          defaultMessage="Create"
-                          id="dashboard.listing.createButtonText"
-                          values={Object {}}
+                          type="arrowDown"
                         >
-                          Create
-                        </FormattedMessage>
+                          <span
+                            className="euiButtonContent__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowDown"
+                            size="m"
+                          />
+                        </EuiIcon>
+                        <span
+                          className="euiButton__text"
+                        >
+                          <FormattedMessage
+                            defaultMessage="Create"
+                            id="dashboard.listing.createButtonText"
+                            values={Object {}}
+                          >
+                            Create
+                          </FormattedMessage>
+                        </span>
                       </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
+                    </EuiButtonContent>
+                  </button>
+                </EuiButtonDisplay>
+              </EuiButton>
+            </EuiSmallButton>
           </div>
         </div>
       </EuiPopover>
@@ -480,78 +491,88 @@ exports[`create button with props renders single button when one provider given 
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <EuiButton
+      <EuiSmallButton
         data-test-subj="newItemButton"
         fill={true}
         href="createUrl"
-        iconType="plusInCircle"
+        iconType="plus"
       >
-        <EuiButtonDisplay
-          baseClassName="euiButton"
+        <EuiButton
           data-test-subj="newItemButton"
-          element="a"
           fill={true}
           href="createUrl"
-          iconType="plusInCircle"
-          isDisabled={false}
-          rel="noreferrer"
+          iconType="plus"
+          size="s"
         >
-          <a
-            className="euiButton euiButton--primary euiButton--fill"
+          <EuiButtonDisplay
+            baseClassName="euiButton"
             data-test-subj="newItemButton"
-            disabled={false}
+            element="a"
+            fill={true}
             href="createUrl"
+            iconType="plus"
+            isDisabled={false}
             rel="noreferrer"
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
+            size="s"
           >
-            <EuiButtonContent
-              className="euiButton__content"
-              iconSide="left"
-              iconType="plusInCircle"
-              textProps={
+            <a
+              className="euiButton euiButton--primary euiButton--small euiButton--fill"
+              data-test-subj="newItemButton"
+              disabled={false}
+              href="createUrl"
+              rel="noreferrer"
+              style={
                 Object {
-                  "className": "euiButton__text",
+                  "minWidth": undefined,
                 }
               }
             >
-              <span
-                className="euiButtonContent euiButton__content"
+              <EuiButtonContent
+                className="euiButton__content"
+                iconGap="m"
+                iconSide="left"
+                iconType="plus"
+                textProps={
+                  Object {
+                    "className": "euiButton__text",
+                  }
+                }
               >
-                <EuiIcon
-                  className="euiButtonContent__icon"
-                  color="inherit"
-                  size="m"
-                  type="plusInCircle"
+                <span
+                  className="euiButtonContent euiButton__content"
                 >
-                  <span
+                  <EuiIcon
                     className="euiButtonContent__icon"
                     color="inherit"
-                    data-euiicon-type="plusInCircle"
                     size="m"
-                  />
-                </EuiIcon>
-                <span
-                  className="euiButton__text"
-                >
-                  <FormattedMessage
-                    defaultMessage="Create"
-                    id="dashboard.listing.createButtonText"
-                    values={Object {}}
+                    type="plus"
                   >
-                    Create
-                  </FormattedMessage>
-                   
-                  TestModule
+                    <span
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="plus"
+                      size="m"
+                    />
+                  </EuiIcon>
+                  <span
+                    className="euiButton__text"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Create"
+                      id="dashboard.listing.createButtonText"
+                      values={Object {}}
+                    >
+                      Create
+                    </FormattedMessage>
+                     
+                    TestModule
+                  </span>
                 </span>
-              </span>
-            </EuiButtonContent>
-          </a>
-        </EuiButtonDisplay>
-      </EuiButton>
+              </EuiButtonContent>
+            </a>
+          </EuiButtonDisplay>
+        </EuiButton>
+      </EuiSmallButton>
     </div>
   </EuiFlexItem>
 </CreateButton>

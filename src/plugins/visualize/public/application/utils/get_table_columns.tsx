@@ -30,7 +30,15 @@
 
 import React from 'react';
 import { History } from 'history';
-import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiBadge } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiSmallButton,
+  EuiEmptyPrompt,
+  EuiIcon,
+  EuiLink,
+  EuiBadge,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
@@ -167,33 +175,37 @@ export const getNoItemsMessage = (createItem: () => void) => (
   <EuiEmptyPrompt
     iconType="visualizeApp"
     title={
-      <h1 id="visualizeListingHeading">
-        <FormattedMessage
-          id="visualize.listing.createNew.title"
-          defaultMessage="Create your first visualization"
-        />
-      </h1>
+      <EuiText size="s">
+        <h1 id="visualizeListingHeading">
+          <FormattedMessage
+            id="visualize.listing.createNew.title"
+            defaultMessage="Create your first visualization"
+          />
+        </h1>
+      </EuiText>
     }
     body={
-      <p>
-        <FormattedMessage
-          id="visualize.listing.createNew.description"
-          defaultMessage="You can create different visualizations based on your data."
-        />
-      </p>
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="visualize.listing.createNew.description"
+            defaultMessage="You can create different visualizations based on your data."
+          />
+        </p>
+      </EuiText>
     }
     actions={
-      <EuiButton
+      <EuiSmallButton
         onClick={createItem}
         fill
-        iconType="plusInCircle"
+        iconType="plus"
         data-test-subj="createVisualizationPromptButton"
       >
         <FormattedMessage
           id="visualize.listing.createNew.createButtonLabel"
           defaultMessage="Create new visualization"
         />
-      </EuiButton>
+      </EuiSmallButton>
     }
   />
 );

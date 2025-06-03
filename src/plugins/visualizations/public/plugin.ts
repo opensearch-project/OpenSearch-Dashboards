@@ -64,6 +64,7 @@ import {
   setEmbeddable,
   setNotifications,
   setDocLinks,
+  setDataStart,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -192,6 +193,7 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
+    setDataStart(data);
     setSavedAugmentVisLoader(savedAugmentVisLoader);
     setI18n(core.i18n);
     setTypes(types);

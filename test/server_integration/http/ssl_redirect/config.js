@@ -35,7 +35,7 @@ import { createOpenSearchDashboardsSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
-  const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
+  const certificateAuthorities = [readFileSync(CA_CERT_PATH, 'utf8')];
 
   const redirectPort = httpConfig.get('servers.opensearchDashboards.port') + 1234;
   const opensearchDashboardsUrl = new URL(httpConfig.get('servers.opensearchDashboards.fullURL'));

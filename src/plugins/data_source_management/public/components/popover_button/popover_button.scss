@@ -1,0 +1,80 @@
+.dataSourceMenuPopoverButton {
+  position: relative;
+  background-color: $euiHeaderBackgroundColor;
+  border: 1px solid $euiColorMediumShade;
+  border-radius: 4px;
+
+  &::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -0.2rem;
+    left: $euiSizeS;
+    font-size: 0.4rem;
+    line-height: 0.4rem;
+    padding: 0 $euiSizeXS;
+
+    /* Trying to hide the button's border:
+     * The background should start 1px (for the border) higher than at the edge of the button.
+     * When the top is 0.2rem, the gradient should start at 0.2rem - 1.
+     * The value is rounded down to the nearest pixel to avoid partial coverage of the border
+     * we are trying to hide.
+     */
+    --dsm-popover-label-start: round(down, calc(0.2rem - 1px), 1px);
+
+    background:
+      linear-gradient(
+        to bottom,
+        transparent var(--dsm-popover-label-start),
+        $euiHeaderBackgroundColor var(--dsm-popover-label-start)
+      );
+    color: $euiTextColor;
+    z-index: 0;
+    text-transform: uppercase;
+  }
+
+  &[class*="isDisabled"] {
+    border-style: dashed;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    > .euiButton-isDisabled {
+      color: $euiTextColor;
+      font-style: italic;
+    }
+  }
+}
+
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.euiButton.dataSourceMenuPopoverButtonLabel {
+  /* The inner element of the button has a right padding of $euiSize - $euiSizeXS wich appears
+   * to the left of the following icon. This icon has a width of $euiSizeM. We need to push
+   * the right boundary of the button to hold the width of the icon and space equal to the
+   * space on its left:
+   */
+
+  $rightIconWidth: $euiSizeM;
+  $rightIconSpace: $euiSize - $euiSizeXS;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: auto;
+  max-width: 32ch;
+  font-size: $euiFontSizeXS !important;
+  border: 0;
+  margin: -1px;
+  position: relative;
+  z-index: 1;
+  min-width: auto;
+
+  .dataSourceMenuPopoverButton:not([class*="isDisabled"]) > & {
+    padding-right: $rightIconWidth + $rightIconSpace;
+    max-width: calc(32ch + $rightIconWidth + $rightIconSpace);
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  + .euiIcon {
+    pointer-events: none;
+    margin-left: -1 * ($rightIconWidth + $rightIconSpace);
+    margin-right: $rightIconSpace;
+  }
+}

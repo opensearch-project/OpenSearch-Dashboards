@@ -76,7 +76,7 @@ function useFallbackMetric(
 }
 
 /**
- * this makes an array of available options in appropriate format for EuiSelect,
+ * this makes an array of available options in appropriate format for EuiCompressedSelect,
  * calculates if an option is disabled
  */
 function useAvailableOptions(

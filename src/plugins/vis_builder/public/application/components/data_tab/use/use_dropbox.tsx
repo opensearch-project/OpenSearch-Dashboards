@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import { BucketAggType, IndexPatternField, propFilter } from '../../../../../../data/common';
 import { Schema } from '../../../../../../vis_default_editor/public';
 import { COUNT_FIELD, FieldDragDataType } from '../../../utils/drag_drop/types';
 import { useTypedDispatch } from '../../../utils/state_management';
@@ -18,19 +17,32 @@ import {
 } from '../../../utils/state_management/visualization_slice';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { VisBuilderServices } from '../../../../types';
-import { useAggs } from '../../../utils/use';
-
-const filterByName = propFilter('name');
-const filterByType = propFilter('type');
+import { getValidAggTypes } from '../utils/get_valid_aggregations';
+import { AggProps } from '../config_panel';
+import { SchemaDisplayStates } from '..';
 
 export interface UseDropboxProps extends Pick<DropboxProps, 'id' | 'label'> {
   schema: Schema;
+  aggProps: AggProps;
+  activeSchemaFields: SchemaDisplayStates;
+  setActiveSchemaFields: React.Dispatch<React.SetStateAction<SchemaDisplayStates>>;
+  isDragging: boolean;
 }
 
 export const useDropbox = (props: UseDropboxProps): DropboxProps => {
-  const { id: dropboxId, label, schema } = props;
+  const {
+    id: dropboxId,
+    label,
+    schema,
+    aggProps,
+    activeSchemaFields,
+    setActiveSchemaFields,
+    isDragging,
+  } = props;
   const [validAggTypes, setValidAggTypes] = useState<string[]>([]);
-  const { aggConfigs, indexPattern, aggs, timeRange } = useAggs();
+  const { aggConfigs, indexPattern, aggs, timeRange } = aggProps;
+  const fields = activeSchemaFields[schema.name];
+
   const dispatch = useTypedDispatch();
   const {
     services: {
@@ -59,6 +71,16 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
       ) ?? [],
     [dropboxAggs, timeRange]
   );
+
+  useEffect(() => {
+    if (displayFields && JSON.stringify(fields) !== JSON.stringify(displayFields)) {
+      const newDisplayState = { ...activeSchemaFields };
+      newDisplayState[schema.name] = displayFields;
+      setActiveSchemaFields(newDisplayState);
+    }
+    // useEffect runs whenever disaplyFields changes and this in turn updates the activeSchema fields passed by parent hence disabling eslint that asks activeSchema to be included in dependecy list
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayFields]);
 
   // Event handlers for each dropbox action type
   const onAddField = useCallback(() => {
@@ -105,7 +127,6 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   const onDeleteField = useCallback(
     (aggId: string) => {
       const newAggs = aggConfigs?.aggs.filter((agg) => agg.id !== aggId);
-
       if (newAggs) {
         dispatch(updateAggConfigParams(newAggs.map((agg) => agg.serialize())));
       }
@@ -156,43 +177,25 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   );
 
   useEffect(() => {
-    const getValidAggTypes = () => {
-      if (!dragData || schema.group === 'none') return [];
-      const isCountField = dragData === COUNT_FIELD;
+    const fieldName = typeof dragData === typeof COUNT_FIELD ? '' : (dragData as string);
+    const sourceGroup = typeof dragData === typeof COUNT_FIELD ? 'preDefinedCountMetric' : '';
 
-      const indexField = isCountField
-        ? { type: 'count' }
-        : getIndexPatternField(dragData, indexPattern?.fields ?? []);
-
-      if (!indexField) return [];
-
-      // Get all aggTypes allowed by the schema and get a list of all the aggTypes that the dragged index field can use
-      const aggTypes = aggService.types.getAll();
-      // `types` can be either a Bucket or Metric aggType, but both types have the name property.
-      const allowedAggTypes = filterByName(
-        aggTypes[schema.group] as BucketAggType[],
-        schema.aggFilter
-      );
-
-      return (
-        allowedAggTypes
-          .filter((aggType) => {
-            const allowedFieldTypes = aggType.paramByName('field')?.filterFieldTypes;
-            return filterByType([indexField], allowedFieldTypes).length !== 0;
-          })
-          .filter((aggType) => (isCountField ? true : aggType.name !== 'count'))
-          // `types` can be either a Bucket or Metric aggType, but both types have the name property.
-          .map((aggType) => (aggType as BucketAggType).name)
-      );
-    };
-
-    setValidAggTypes(getValidAggTypes());
+    setValidAggTypes(
+      getValidAggTypes({
+        fieldName,
+        sourceGroup,
+        destinationSchema: schema,
+        aggProps,
+        aggService,
+        sourceAgg: null,
+      })
+    );
 
     return () => {
       setValidAggTypes([]);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aggService.types, dragData, indexPattern?.fields, schema.aggFilter, schema.group]);
-
   const canDrop = validAggTypes.length > 0 && schema.max > dropboxAggs.length;
 
   return {
@@ -208,8 +211,6 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     dragData,
     isValidDropTarget: canDrop,
     dropProps,
+    isDragging,
   };
 };
-
-const getIndexPatternField = (indexFieldName: string, availableFields: IndexPatternField[]) =>
-  availableFields.find(({ name }) => name === indexFieldName);

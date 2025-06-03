@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import moment from 'moment-timezone';
 import { unitOfTime } from 'moment';
 import React, { Component } from 'react';
@@ -198,6 +198,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           <EuiFlexGroup
             alignItems="center"
             className="dscHistogram__header--partial"
+            data-test-subj="dscHistogramHeader"
             responsive={false}
             gutterSize="xs"
           >
@@ -207,7 +208,9 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
             <EuiFlexItem>{partialDataText}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
-          <p>{formattedValue}</p>
+          <EuiText size="s">
+            <p>{formattedValue}</p>
+          </EuiText>
         </React.Fragment>
       );
     }
@@ -313,6 +316,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     chartsTheme.axes!.axisTitle = {
       fill: euiThemeVars.euiTextColor,
     };
+    chartsTheme.colors = chartsTheme.colors ?? {};
+    chartsTheme.colors.vizColors = [euiThemeVars.euiColorVis1_behindText];
 
     return (
       <Chart size="100%">

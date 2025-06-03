@@ -12,7 +12,7 @@
     "osd:watch": "../../scripts/use_node scripts/build --watch"
   },
   "dependencies": {
-    "@opensearch-project/opensearch": "^2.9.0",
+    "@opensearch-project/opensearch": "^2.13.0",
     "@osd/dev-utils": "1.0.0",
     "abort-controller": "^3.0.0",
     "chalk": "^4.1.0",
@@ -23,7 +23,7 @@
     "glob": "^7.1.7",
     "node-fetch": "^2.6.7",
     "simple-git": "^3.16.0",
-    "tar-fs": "^2.1.0",
+    "tar-fs": "^2.1.2",
     "tree-kill": "^1.2.2",
     "yauzl": "^2.10.0"
   },

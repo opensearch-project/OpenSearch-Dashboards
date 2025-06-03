@@ -26,9 +26,9 @@ exports[`Header should mark the input as invalid 1`] = `
       <EuiForm
         isInvalid={true}
       >
-        <EuiFormRow
+        <EuiCompressedFormRow
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           error={
             Array [
               "Input is invalid",
@@ -74,7 +74,7 @@ exports[`Header should mark the input as invalid 1`] = `
           }
           labelType="label"
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="createIndexPatternNameInput"
             fullWidth={true}
             isInvalid={true}
@@ -83,21 +83,21 @@ exports[`Header should mark the input as invalid 1`] = `
             placeholder="index-name-*"
             value="%"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={true}
         labelType="label"
       >
-        <EuiButton
+        <EuiSmallButton
           data-test-subj="createIndexPatternGoToStep2Button"
           fill={true}
           iconSide="right"
@@ -110,8 +110,8 @@ exports[`Header should mark the input as invalid 1`] = `
             id="indexPatternManagement.createIndexPattern.step.nextStepButton"
             values={Object {}}
           />
-        </EuiButton>
-      </EuiFormRow>
+        </EuiSmallButton>
+      </EuiCompressedFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>
@@ -143,9 +143,9 @@ exports[`Header should render normally 1`] = `
       <EuiForm
         isInvalid={false}
       >
-        <EuiFormRow
+        <EuiCompressedFormRow
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           error={Array []}
           fullWidth={true}
           hasChildLabel={true}
@@ -187,7 +187,7 @@ exports[`Header should render normally 1`] = `
           }
           labelType="label"
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="createIndexPatternNameInput"
             fullWidth={true}
             isInvalid={false}
@@ -196,21 +196,21 @@ exports[`Header should render normally 1`] = `
             placeholder="index-name-*"
             value="k"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={true}
         labelType="label"
       >
-        <EuiButton
+        <EuiSmallButton
           data-test-subj="createIndexPatternGoToStep2Button"
           fill={true}
           iconSide="right"
@@ -223,8 +223,8 @@ exports[`Header should render normally 1`] = `
             id="indexPatternManagement.createIndexPattern.step.nextStepButton"
             values={Object {}}
           />
-        </EuiButton>
-      </EuiFormRow>
+        </EuiSmallButton>
+      </EuiCompressedFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>

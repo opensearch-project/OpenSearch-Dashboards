@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { CoreStart } from '../../..';
 import { isModifiedOrPrevented } from './nav_link';
@@ -58,13 +58,15 @@ export const RightNavigationButton = ({
   };
 
   return (
-    <EuiHeaderSectionItemButton
-      data-test-subj="rightNavigationButton"
-      aria-label={title}
-      onClick={navigateToApp}
-      href={targetUrl}
-    >
-      <EuiIcon type={iconType} size="m" title={title} color="text" />
-    </EuiHeaderSectionItemButton>
+    <EuiToolTip content={title} delay="long" position="bottom">
+      <EuiHeaderSectionItemButton
+        data-test-subj="rightNavigationButton"
+        aria-label={title}
+        onClick={navigateToApp}
+        href={targetUrl}
+      >
+        <EuiIcon type={iconType} size="m" color="text" />
+      </EuiHeaderSectionItemButton>
+    </EuiToolTip>
   );
 };

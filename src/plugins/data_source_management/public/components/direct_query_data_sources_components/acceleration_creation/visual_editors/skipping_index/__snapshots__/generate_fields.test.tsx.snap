@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Generate fields in skipping index Generate fields in skipping index with default options 1`] = `
+Array [
+  <button
+    className="euiButton euiButton--primary"
+    disabled={false}
+    onClick={[Function]}
+    style={
+      Object {
+        "minWidth": undefined,
+      }
+    }
+    type="button"
+  >
+    <span
+      className="euiButtonContent euiButton__content"
+    >
+      <span
+        className="euiButton__text"
+      >
+        Generate
+      </span>
+    </span>
+  </button>,
+  "",
+]
+`;

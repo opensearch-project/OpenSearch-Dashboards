@@ -43,6 +43,7 @@ import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
 import { PROCESS_WORKING_DIR, standardize } from '@osd/cross-platform';
+import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
 
 const Plugins = {
   invalid: () => ({
@@ -117,12 +118,14 @@ describe('plugins discovery system', () => {
       logger
     );
     await configService.setSchema(config.path, config.schema);
+    const dynamicConfigService = dynamicConfigServiceMock.create();
 
     coreContext = {
       coreId: Symbol(),
       configService,
       env,
       logger,
+      dynamicConfigService,
     };
 
     pluginConfig = await configService
@@ -191,7 +194,7 @@ describe('plugins discovery system', () => {
 
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${manifestPath(
+        `Error: Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${manifestPath(
           'plugin_a'
         )})`,
         `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
@@ -236,12 +239,7 @@ describe('plugins discovery system', () => {
     const srcPluginsPath = resolve(PROCESS_WORKING_DIR, 'src', 'plugins');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${standardize(
-          srcPluginsPath,
-          false,
-          false,
-          true
-        )}' (invalid-search-path, ${srcPluginsPath})`,
+        expect.stringContaining(`Error: EACCES, permission denied '${standardize(srcPluginsPath)}`),
       ])
     );
   });
@@ -276,12 +274,7 @@ describe('plugins discovery system', () => {
     const errorPath = manifestPath('plugin_a');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${standardize(
-          errorPath,
-          false,
-          false,
-          true
-        )}' (missing-manifest, ${errorPath})`,
+        expect.stringContaining(`Error: EACCES, permission denied '${standardize(errorPath)}`),
       ])
     );
   });
@@ -408,6 +401,7 @@ describe('plugins discovery system', () => {
         cliArgs: { dev: false, envName: 'development' },
       })
     );
+    const dynamicConfigService = dynamicConfigServiceMock.create();
 
     discover(
       new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
@@ -416,6 +410,7 @@ describe('plugins discovery system', () => {
         configService,
         env,
         logger,
+        dynamicConfigService,
       },
       instanceInfo
     );
@@ -436,6 +431,7 @@ describe('plugins discovery system', () => {
         cliArgs: { dev: false, envName: 'production' },
       })
     );
+    const dynamicConfigService = dynamicConfigServiceMock.create();
 
     discover(
       new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
@@ -444,6 +440,7 @@ describe('plugins discovery system', () => {
         configService,
         env,
         logger,
+        dynamicConfigService,
       },
       instanceInfo
     );

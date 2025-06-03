@@ -35,7 +35,7 @@ describe('osd_bootstrap', () => {
   beforeAll(() => {
     const metadata = {
       branding: { darkMode: 'true' },
-      i18n: { translationsUrl: 'http://localhost' },
+      i18n: { translationsUrl: 'http://localhost/translations/en.json' },
       vars: { apmConfig: null },
     };
     // eslint-disable-next-line no-unsanitized/property

@@ -1,4 +1,3 @@
-version: '2'
 services:
   opensearch_dashboards_docs:
     container_name: $OPENSEARCH_DASHBOARDS_DOCS_CONTAINER_NAME

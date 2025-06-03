@@ -25,7 +25,7 @@ cacheDir="$HOME/.opensearch_dashboards"
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
-export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
+export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096 --max-semi-space-size=64"
 
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY

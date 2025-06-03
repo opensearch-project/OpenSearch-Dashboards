@@ -6,9 +6,9 @@ exports[`share url panel content render 1`] = `
     className="osdShareContextMenu__finalPanel"
     data-test-subj="shareUrlForm"
   >
-    <EuiFormRow
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -32,7 +32,7 @@ exports[`share url panel content render 1`] = `
       }
       labelType="label"
     >
-      <EuiRadioGroup
+      <EuiCompressedRadioGroup
         idSelected="snapshot"
         onChange={[Function]}
         options={
@@ -113,11 +113,11 @@ exports[`share url panel content render 1`] = `
           ]
         }
       />
-    </EuiFormRow>
-    <EuiFormRow
+    </EuiCompressedFormRow>
+    <EuiCompressedFormRow
       data-test-subj="createShortUrl"
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -130,7 +130,7 @@ exports[`share url panel content render 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiSwitch
+          <EuiCompressedSwitch
             checked={false}
             data-test-subj="useShortUrl"
             label={
@@ -158,7 +158,7 @@ exports[`share url panel content render 1`] = `
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
     <EuiSpacer
       size="m"
     />
@@ -179,9 +179,9 @@ exports[`share url panel content should enable saved object export option when o
     className="osdShareContextMenu__finalPanel"
     data-test-subj="shareUrlForm"
   >
-    <EuiFormRow
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -194,7 +194,7 @@ exports[`share url panel content should enable saved object export option when o
       }
       labelType="label"
     >
-      <EuiRadioGroup
+      <EuiCompressedRadioGroup
         idSelected="snapshot"
         onChange={[Function]}
         options={
@@ -275,11 +275,11 @@ exports[`share url panel content should enable saved object export option when o
           ]
         }
       />
-    </EuiFormRow>
-    <EuiFormRow
+    </EuiCompressedFormRow>
+    <EuiCompressedFormRow
       data-test-subj="createShortUrl"
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -292,7 +292,7 @@ exports[`share url panel content should enable saved object export option when o
         <EuiFlexItem
           grow={false}
         >
-          <EuiSwitch
+          <EuiCompressedSwitch
             checked={false}
             data-test-subj="useShortUrl"
             label={
@@ -320,7 +320,7 @@ exports[`share url panel content should enable saved object export option when o
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
     <EuiSpacer
       size="m"
     />
@@ -341,9 +341,9 @@ exports[`share url panel content should hide short url section when allowShortUr
     className="osdShareContextMenu__finalPanel"
     data-test-subj="shareUrlForm"
   >
-    <EuiFormRow
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -356,7 +356,7 @@ exports[`share url panel content should hide short url section when allowShortUr
       }
       labelType="label"
     >
-      <EuiRadioGroup
+      <EuiCompressedRadioGroup
         idSelected="snapshot"
         onChange={[Function]}
         options={
@@ -437,7 +437,7 @@ exports[`share url panel content should hide short url section when allowShortUr
           ]
         }
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
     <EuiSpacer
       size="m"
     />
@@ -458,9 +458,9 @@ exports[`should show url param extensions 1`] = `
     className="osdShareContextMenu__finalPanel"
     data-test-subj="shareUrlForm"
   >
-    <EuiFormRow
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -473,7 +473,7 @@ exports[`should show url param extensions 1`] = `
       }
       labelType="label"
     >
-      <EuiRadioGroup
+      <EuiCompressedRadioGroup
         idSelected="snapshot"
         onChange={[Function]}
         options={
@@ -554,10 +554,10 @@ exports[`should show url param extensions 1`] = `
           ]
         }
       />
-    </EuiFormRow>
-    <EuiFormRow
+    </EuiCompressedFormRow>
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -567,11 +567,11 @@ exports[`should show url param extensions 1`] = `
       <TestExtension
         setParamValue={[Function]}
       />
-    </EuiFormRow>
-    <EuiFormRow
+    </EuiCompressedFormRow>
+    <EuiCompressedFormRow
       data-test-subj="createShortUrl"
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -584,7 +584,7 @@ exports[`should show url param extensions 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiSwitch
+          <EuiCompressedSwitch
             checked={false}
             data-test-subj="useShortUrl"
             label={
@@ -612,7 +612,7 @@ exports[`should show url param extensions 1`] = `
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
     <EuiSpacer
       size="m"
     />

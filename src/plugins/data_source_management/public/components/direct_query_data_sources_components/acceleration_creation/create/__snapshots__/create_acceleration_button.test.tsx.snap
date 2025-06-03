@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateAccelerationButton renders correctly 1`] = `
+<EuiButton
+  fill={true}
+  isLoading={false}
+  onClick={[Function]}
+>
+  Create acceleration
+</EuiButton>
+`;

@@ -29,7 +29,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiSmallButtonIcon,
+  EuiFieldText,
+  EuiCompressedFormRow,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 import {
@@ -83,7 +90,7 @@ function FilterRow({
 
   const FilterControl = (
     <div>
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         iconType="tag"
         aria-label={i18n.translate(
           'visDefaultEditor.controls.filters.toggleFilterButtonAriaLabel',
@@ -95,7 +102,7 @@ function FilterRow({
         aria-controls={`visEditorFilterLabel${arrayIndex}`}
         onClick={() => setShowCustomLabel(!showCustomLabel)}
       />
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         iconType="trash"
         color="danger"
         disabled={disableRemove}
@@ -112,7 +119,7 @@ function FilterRow({
 
   return (
     <EuiForm>
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={`${filterLabel}${customLabel ? ` - ${customLabel}` : ''}`}
         labelAppend={FilterControl}
         fullWidth={true}
@@ -128,7 +135,7 @@ function FilterRow({
           languageSwitcherPopoverAnchorPosition="leftDown"
           size="s"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       {showCustomLabel ? (
         <EuiFormRow
           id={`visEditorFilterLabel${arrayIndex}`}

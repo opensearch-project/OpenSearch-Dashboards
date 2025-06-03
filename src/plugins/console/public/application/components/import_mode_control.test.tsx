@@ -10,7 +10,7 @@ import { nextTick, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ImportModeControl } from './import_mode_control';
 import { EuiFormLegendProps, EuiRadioGroupProps } from '@elastic/eui';
 
-const radioGroupIdentifier = 'EuiRadioGroup';
+const radioGroupIdentifier = 'EuiCompressedRadioGroup';
 
 describe('ImportModeControl Component', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;

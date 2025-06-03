@@ -361,7 +361,7 @@ export function FilterItem(props: Props) {
       anchorPosition="downLeft"
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+      <EuiContextMenu initialPanelId={0} panels={getPanels()} size="s" />
     </EuiPopover>
   );
 }

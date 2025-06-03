@@ -32,7 +32,6 @@ import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
   enhancements: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
     supportedAppNames: schema.arrayOf(schema.string(), {
       defaultValue: ['discover'],
     }),
@@ -57,6 +56,9 @@ export const configSchema = schema.object({
     usageTelemetry: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
+  }),
+  savedQueriesNewUI: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
 });
 

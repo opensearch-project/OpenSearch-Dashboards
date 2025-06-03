@@ -58,6 +58,7 @@ describe('toNavLink', () => {
         title: 'title',
         order: 12,
         tooltip: 'tooltip',
+        description: 'some-description',
         euiIconType: 'my-icon' as EuiIconType,
       }),
       basePath
@@ -69,6 +70,7 @@ describe('toNavLink', () => {
         order: 12,
         tooltip: 'tooltip',
         euiIconType: 'my-icon',
+        description: 'some-description',
       })
     );
   });

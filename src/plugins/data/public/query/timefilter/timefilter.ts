@@ -45,7 +45,7 @@ export class Timefilter {
   private enabledUpdated$ = new BehaviorSubject(false);
   // Fired when a user changes the timerange
   private timeUpdate$ = new Subject();
-  // Fired when a user changes the the autorefresh settings
+  // Fired when a user changes the autorefresh settings
   private refreshIntervalUpdate$ = new Subject();
   // Used when an auto refresh is triggered
   private autoRefreshFetch$ = new Subject();
@@ -164,7 +164,7 @@ export class Timefilter {
     }
 
     // Clear the previous auto refresh interval and start a new one (if not paused)
-    clearInterval(this._autoRefreshIntervalId);
+    clearInterval((this._autoRefreshIntervalId as unknown) as NodeJS.Timeout);
     if (!newRefreshInterval.pause) {
       this._autoRefreshIntervalId = window.setInterval(
         () => this.autoRefreshFetch$.next(),

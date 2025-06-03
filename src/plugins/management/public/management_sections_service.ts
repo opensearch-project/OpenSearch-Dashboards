@@ -51,6 +51,22 @@ const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] = createG
   ManagementSectionsStartPrivate
 >('SectionsServiceStartPrivate');
 
+/**
+ * The management capabilities has `opensearchDashboards` as the key
+ * While when registering the opensearchDashboards section, the section id is `opensearch-dashboards`
+ * as defined in {@link ManagementSectionId.OpenSearchDashboards} and section id is used as the capability
+ * id. Here we have a mapping so that the section id opensearch-dashboards can mapping correctly back to the
+ * capability id: opensearchDashboards
+ *
+ * Why not directly change the capability id to opensearch-dashboards?
+ * The issue was introduced in https://github.com/opensearch-project/OpenSearch-Dashboards/pull/260
+ * Since then, the capability id `opensearchDashboards` has been used by plugins, having a mapping here
+ * is for backward compatibility
+ */
+const MANAGEMENT_ID_TO_CAPABILITIES: Record<string, string> = {
+  'opensearch-dashboards': 'opensearchDashboards',
+};
+
 export { getSectionsServiceStartPrivate };
 
 export class ManagementSectionsService {
@@ -94,8 +110,9 @@ export class ManagementSectionsService {
 
   start({ capabilities }: SectionsServiceStartDeps) {
     this.getAllSections().forEach((section) => {
-      if (capabilities.management.hasOwnProperty(section.id)) {
-        const sectionCapabilities = capabilities.management[section.id];
+      const capabilityId = MANAGEMENT_ID_TO_CAPABILITIES[section.id] || section.id;
+      if (capabilities.management.hasOwnProperty(capabilityId)) {
+        const sectionCapabilities = capabilities.management[capabilityId];
         section.apps.forEach((app) => {
           if (sectionCapabilities.hasOwnProperty(app.id) && sectionCapabilities[app.id] !== true) {
             app.disable();

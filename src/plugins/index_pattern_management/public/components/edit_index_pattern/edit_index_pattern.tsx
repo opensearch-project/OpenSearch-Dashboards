@@ -50,6 +50,7 @@ import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
+import { TopNavControlDescriptionData } from '../../../../navigation/public';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
@@ -101,6 +102,8 @@ export const EditIndexPattern = withRouter(
       chrome,
       data,
       docLinks,
+      navigationUI: { HeaderControl },
+      application,
     } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
@@ -125,9 +128,11 @@ export const EditIndexPattern = withRouter(
       setTags(indexPatternTags);
     }, [defaultIndex, indexPattern, indexPatternManagementStart.list]);
 
-    const setDefaultPattern = useCallback(() => {
-      uiSettings.set('defaultIndex', indexPattern.id);
-      setDefaultIndex(indexPattern.id || '');
+    const setDefaultPattern = useCallback(async () => {
+      const isSuccess = await uiSettings.set('defaultIndex', indexPattern.id);
+      if (isSuccess) {
+        setDefaultIndex(indexPattern.id || '');
+      }
     }, [uiSettings, indexPattern.id]);
 
     const refreshFields = () => {
@@ -159,6 +164,8 @@ export const EditIndexPattern = withRouter(
         }
         if (indexPattern.id) {
           Promise.resolve(data.indexPatterns.delete(indexPattern.id)).then(function () {
+            const datasetService = data.query.queryString.getDatasetService();
+            datasetService.removeFromRecentDatasets(indexPattern.id);
             history.push('');
           });
         }
@@ -196,7 +203,108 @@ export const EditIndexPattern = withRouter(
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
 
-    return (
+    const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+
+    const renderDescription = () => {
+      const descriptionText = (
+        <FormattedMessage
+          id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
+          defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by OpenSearch. To change a field type, use the OpenSearch"
+          values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
+        />
+      );
+
+      return useUpdatedUX ? (
+        <HeaderControl
+          controls={[
+            {
+              description: (descriptionText as unknown) as string,
+              links: [
+                {
+                  href: docLinks.links.opensearch.indexTemplates.base,
+                  controlType: 'link',
+                  target: '_blank',
+                  flush: 'both',
+                  label: mappingAPILink,
+                },
+              ],
+            } as TopNavControlDescriptionData,
+          ]}
+          setMountPoint={application.setAppDescriptionControls}
+        />
+      ) : (
+        <EuiText size="s">
+          <p>
+            {descriptionText}{' '}
+            <EuiLink href={docLinks.links.opensearch.indexTemplates.base} target="_blank" external>
+              {mappingAPILink}
+            </EuiLink>
+          </p>
+        </EuiText>
+      );
+    };
+
+    const renderBadges = () => {
+      if (useUpdatedUX) {
+        const components = [
+          ...(Boolean(indexPattern.timeFieldName)
+            ? [<EuiBadge color="warning">{timeFilterHeader}</EuiBadge>]
+            : []),
+          ...tags.map((tag: any) => <EuiBadge color="hollow">{tag.name}</EuiBadge>),
+        ];
+        const controls = components.map((component) => ({
+          renderComponent: component,
+        }));
+
+        return (
+          <HeaderControl controls={[...controls]} setMountPoint={application.setAppBadgeControls} />
+        );
+      } else {
+        return (
+          <EuiFlexGroup wrap>
+            {Boolean(indexPattern.timeFieldName) && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
+              </EuiFlexItem>
+            )}
+            {tags.map((tag: any) => (
+              <EuiFlexItem grow={false} key={tag.key}>
+                <EuiBadge color="hollow">{tag.name}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
+      }
+    };
+
+    return useUpdatedUX ? (
+      <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
+        <IndexHeader
+          indexPattern={indexPattern}
+          setDefault={setDefaultPattern}
+          refreshFields={refreshFields}
+          deleteIndexPatternClick={removePattern}
+          defaultIndex={defaultIndex}
+        />
+        {showTagsSection && renderBadges()}
+        {renderDescription()}
+        {conflictedFields.length > 0 && (
+          <>
+            <EuiSpacer />
+            <EuiCallOut title={mappingConflictHeader} color="warning" iconType="alert">
+              <p>{mappingConflictLabel}</p>
+            </EuiCallOut>
+          </>
+        )}
+        <Tabs
+          indexPattern={indexPattern}
+          saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
+          fields={fields}
+          history={history}
+          location={location}
+        />
+      </div>
+    ) : (
       <EuiPanel paddingSize={'l'}>
         <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
           <IndexHeader
@@ -207,37 +315,9 @@ export const EditIndexPattern = withRouter(
             defaultIndex={defaultIndex}
           />
           <EuiSpacer size="s" />
-          {showTagsSection && (
-            <EuiFlexGroup wrap>
-              {Boolean(indexPattern.timeFieldName) && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
-                </EuiFlexItem>
-              )}
-              {tags.map((tag: any) => (
-                <EuiFlexItem grow={false} key={tag.key}>
-                  <EuiBadge color="hollow">{tag.name}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          )}
+          {showTagsSection && renderBadges()}
           <EuiSpacer size="m" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-                defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by OpenSearch. To change a field type, use the OpenSearch"
-                values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
-              />{' '}
-              <EuiLink
-                href={docLinks.links.opensearch.indexTemplates.base}
-                target="_blank"
-                external
-              >
-                {mappingAPILink}
-              </EuiLink>
-            </p>
-          </EuiText>
+          {renderDescription()}
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />

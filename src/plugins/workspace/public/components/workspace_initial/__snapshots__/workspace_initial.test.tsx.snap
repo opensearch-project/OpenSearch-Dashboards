@@ -1,0 +1,1322 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkspaceInitial render workspace initial page normally when user is OSD admin 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+    style="min-height: 100vh;"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <span
+        data-euiicon-type="logoOpenSearch"
+        style="position: fixed;"
+      />
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive workspace-initial__flex-group-responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+          style="max-width: 1264px; width: 100%;"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <h1
+                class="euiTitle euiTitle--large"
+              >
+                Welcome to OpenSearch
+              </h1>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--l"
+            />
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    style="display: flex; align-items: center;"
+                  >
+                    <span
+                      data-euiicon-type="wsSelector"
+                    />
+                     
+                    <h2
+                      class="euiTitle euiTitle--medium"
+                    >
+                      My workspaces
+                    </h2>
+                  </div>
+                  <div
+                    class="euiText euiText--small"
+                  >
+                    Collaborate on use-case based projects with workspaces. 
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiPopover euiPopover--anchorDownCenter"
+                  >
+                    <div
+                      class="euiPopover__anchor"
+                    >
+                      <button
+                        class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                        data-test-subj="workspace-initial-card-createWorkspace-button"
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            class="euiButtonContent__icon"
+                            color="inherit"
+                            data-euiicon-type="plus"
+                          />
+                          <span
+                            class="euiButton__text"
+                          >
+                            Create Workspace
+                              
+                            <span
+                              data-euiicon-type="arrowDown"
+                            />
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScroll"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
+                    style="height: 416px; min-width: 240px;"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__observability"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
+                      >
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <span
+                            data-euiicon-type="wsObservability"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                            style="display: flex; align-items: center;"
+                          >
+                            Observability
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Learn more"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-observability-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              Gain visibility into your application and infrastructure
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      style="display: grid; place-items: center;"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                          >
+                            No workspaces
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              <div
+                                class="euiTextColor euiTextColor--subdued"
+                              >
+                                Create a workspace or request a workspace owner to add you as a collaborator.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <button
+                            class="euiButton euiButton--primary euiButton--small"
+                            data-test-subj="workspace-initial-useCaseCard-observability-button-createWorkspace"
+                            type="button"
+                          >
+                            <span
+                              class="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                class="euiButtonContent__icon"
+                                color="inherit"
+                                data-euiicon-type="plus"
+                              />
+                              <span
+                                class="euiButton__text"
+                              >
+                                Create workspace
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
+                    style="height: 416px; min-width: 240px;"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__security-analytics"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
+                      >
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <span
+                            data-euiicon-type="wsSecurityAnalytics"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                            style="display: flex; align-items: center;"
+                          >
+                            Security Analytics
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Learn more"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-security-analytics-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              Enhance your security posture with advanced analytics
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      style="display: grid; place-items: center;"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                          >
+                            No workspaces
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              <div
+                                class="euiTextColor euiTextColor--subdued"
+                              >
+                                Create a workspace or request a workspace owner to add you as a collaborator.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <button
+                            class="euiButton euiButton--primary euiButton--small"
+                            data-test-subj="workspace-initial-useCaseCard-security-analytics-button-createWorkspace"
+                            type="button"
+                          >
+                            <span
+                              class="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                class="euiButtonContent__icon"
+                                color="inherit"
+                                data-euiicon-type="plus"
+                              />
+                              <span
+                                class="euiButton__text"
+                              >
+                                Create workspace
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
+                    style="height: 416px; min-width: 240px;"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__essentials"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
+                      >
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <span
+                            data-euiicon-type="wsEssentials"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                            style="display: flex; align-items: center;"
+                          >
+                            Essentials
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Learn more"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-essentials-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              Get start with just the basics
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      style="display: grid; place-items: center;"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                          >
+                            No workspaces
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              <div
+                                class="euiTextColor euiTextColor--subdued"
+                              >
+                                Create a workspace or request a workspace owner to add you as a collaborator.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <button
+                            class="euiButton euiButton--primary euiButton--small"
+                            data-test-subj="workspace-initial-useCaseCard-essentials-button-createWorkspace"
+                            type="button"
+                          >
+                            <span
+                              class="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                class="euiButtonContent__icon"
+                                color="inherit"
+                                data-euiicon-type="plus"
+                              />
+                              <span
+                                class="euiButton__text"
+                              >
+                                Create workspace
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
+                    style="height: 416px; min-width: 240px;"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__search"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
+                      >
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <span
+                            data-euiicon-type="wsSearch"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                            style="display: flex; align-items: center;"
+                          >
+                            Search
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Learn more"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-search-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              Discover and query your data with ease
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      style="display: grid; place-items: center;"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                          >
+                            No workspaces
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              <div
+                                class="euiTextColor euiTextColor--subdued"
+                              >
+                                Create a workspace or request a workspace owner to add you as a collaborator.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <button
+                            class="euiButton euiButton--primary euiButton--small"
+                            data-test-subj="workspace-initial-useCaseCard-search-button-createWorkspace"
+                            type="button"
+                          >
+                            <span
+                              class="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                class="euiButtonContent__icon"
+                                color="inherit"
+                                data-euiicon-type="plus"
+                              />
+                              <span
+                                class="euiButton__text"
+                              >
+                                Create workspace
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiText euiText--small"
+                    style="display: flex; align-items: center;"
+                  >
+                    <span
+                      color="primary"
+                      data-euiicon-type="reporter"
+                    />
+                     
+                    <a
+                      class="euiLink euiLink--primary"
+                      href="https://opensearch.org/docs/mocked-test-branch/opensearch/index/"
+                      rel="noopener noreferrer"
+                      style="font-weight: normal;"
+                      target="_blank"
+                    >
+                      Learn more from documentation
+                      <span
+                        aria-label="External link"
+                        class="euiLink__externalIcon"
+                        data-euiicon-type="popout"
+                      />
+                      <span
+                        class="euiScreenReaderOnly"
+                      >
+                        (opens in a new tab or window)
+                      </span>
+                    </a>
+                    <span
+                      color="primary"
+                      data-euiicon-type="dashboardApp"
+                      style="margin-left: 16px;"
+                    />
+                     
+                    <a
+                      class="euiLink euiLink--primary"
+                      href="https://playground.opensearch.org/"
+                      rel="noopener noreferrer"
+                      style="font-weight: normal;"
+                      target="_blank"
+                    >
+                      Explore live demo environment at playground.opensearch.org
+                      <span
+                        aria-label="External link"
+                        class="euiLink__externalIcon"
+                        data-euiicon-type="popout"
+                      />
+                      <span
+                        class="euiScreenReaderOnly"
+                      >
+                        (opens in a new tab or window)
+                      </span>
+                    </a>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiText euiText--small"
+                  >
+                    <button
+                      class="euiLink euiLink--primary"
+                      style="font-weight: normal;"
+                      type="button"
+                    >
+                      View all workspaces
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="workspace-initial__fixed-left-bottom-icon"
+      >
+        <div />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WorkspaceInitial render workspace initial page normally when user is non OSD admin 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+    style="min-height: 100vh;"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <span
+        data-euiicon-type="logoOpenSearch"
+        style="position: fixed;"
+      />
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive workspace-initial__flex-group-responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+          style="max-width: 1264px; width: 100%;"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <h1
+                class="euiTitle euiTitle--large"
+              >
+                Welcome to OpenSearch
+              </h1>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--l"
+            />
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    style="display: flex; align-items: center;"
+                  >
+                    <span
+                      data-euiicon-type="wsSelector"
+                    />
+                     
+                    <h2
+                      class="euiTitle euiTitle--medium"
+                    >
+                      My workspaces
+                    </h2>
+                  </div>
+                  <div
+                    class="euiText euiText--small"
+                  >
+                    Collaborate on use-case based projects with workspaces. 
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScroll"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
+                    style="height: 416px; min-width: 240px;"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__observability"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
+                      >
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <span
+                            data-euiicon-type="wsObservability"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                            style="display: flex; align-items: center;"
+                          >
+                            Observability
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Learn more"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-observability-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              Gain visibility into your application and infrastructure
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      style="display: grid; place-items: center;"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                          >
+                            No workspaces
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              <div
+                                class="euiTextColor euiTextColor--subdued"
+                              >
+                                Request a workspace owner to add you as a collaborator.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
+                    style="height: 416px; min-width: 240px;"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__security-analytics"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
+                      >
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <span
+                            data-euiicon-type="wsSecurityAnalytics"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                            style="display: flex; align-items: center;"
+                          >
+                            Security Analytics
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Learn more"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-security-analytics-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              Enhance your security posture with advanced analytics
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      style="display: grid; place-items: center;"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                          >
+                            No workspaces
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              <div
+                                class="euiTextColor euiTextColor--subdued"
+                              >
+                                Request a workspace owner to add you as a collaborator.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
+                    style="height: 416px; min-width: 240px;"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__essentials"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
+                      >
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <span
+                            data-euiicon-type="wsEssentials"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                            style="display: flex; align-items: center;"
+                          >
+                            Essentials
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Learn more"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-essentials-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              Get start with just the basics
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      style="display: grid; place-items: center;"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                          >
+                            No workspaces
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              <div
+                                class="euiTextColor euiTextColor--subdued"
+                              >
+                                Request a workspace owner to add you as a collaborator.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
+                    style="height: 416px; min-width: 240px;"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__search"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
+                      >
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <span
+                            data-euiicon-type="wsSearch"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                            style="display: flex; align-items: center;"
+                          >
+                            Search
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Learn more"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-search-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              Discover and query your data with ease
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      class="euiHorizontalRule euiHorizontalRule--full"
+                    />
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      style="display: grid; place-items: center;"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <h4
+                            class="euiTitle euiTitle--xsmall"
+                          >
+                            No workspaces
+                          </h4>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextAlign euiTextAlign--center"
+                            >
+                              <div
+                                class="euiTextColor euiTextColor--subdued"
+                              >
+                                Request a workspace owner to add you as a collaborator.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiText euiText--small"
+                    style="display: flex; align-items: center;"
+                  >
+                    <span
+                      color="primary"
+                      data-euiicon-type="reporter"
+                    />
+                     
+                    <a
+                      class="euiLink euiLink--primary"
+                      href="https://opensearch.org/docs/mocked-test-branch/opensearch/index/"
+                      rel="noopener noreferrer"
+                      style="font-weight: normal;"
+                      target="_blank"
+                    >
+                      Learn more from documentation
+                      <span
+                        aria-label="External link"
+                        class="euiLink__externalIcon"
+                        data-euiicon-type="popout"
+                      />
+                      <span
+                        class="euiScreenReaderOnly"
+                      >
+                        (opens in a new tab or window)
+                      </span>
+                    </a>
+                    <span
+                      color="primary"
+                      data-euiicon-type="dashboardApp"
+                      style="margin-left: 16px;"
+                    />
+                     
+                    <a
+                      class="euiLink euiLink--primary"
+                      href="https://playground.opensearch.org/"
+                      rel="noopener noreferrer"
+                      style="font-weight: normal;"
+                      target="_blank"
+                    >
+                      Explore live demo environment at playground.opensearch.org
+                      <span
+                        aria-label="External link"
+                        class="euiLink__externalIcon"
+                        data-euiicon-type="popout"
+                      />
+                      <span
+                        class="euiScreenReaderOnly"
+                      >
+                        (opens in a new tab or window)
+                      </span>
+                    </a>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiText euiText--small"
+                  >
+                    <button
+                      class="euiLink euiLink--primary"
+                      style="font-weight: normal;"
+                      type="button"
+                    >
+                      View all workspaces
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="workspace-initial__fixed-left-bottom-icon"
+      >
+        <div />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div />
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -29,9 +29,8 @@
  */
 
 import _ from 'lodash';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
@@ -39,16 +38,13 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
-import { Filter, Query, TimeRange } from '../../../common';
+import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { Settings } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
-  storage: IStorageWrapper;
-  settings: Settings;
-  setContainerRef: (ref: HTMLDivElement | null) => void;
+  storage: DataStorage;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -133,13 +129,7 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({
-  core,
-  storage,
-  data,
-  settings,
-  setContainerRef,
-}: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -155,8 +145,7 @@ export function createSearchBar({
       filterManager: data.query.filterManager,
     });
     const { query } = useQueryStringManager({
-      query: props.query,
-      queryStringManager: data.query.queryString,
+      queryString: data.query.queryString,
     });
 
     const { timeRange, refreshInterval } = useTimefilter({
@@ -173,12 +162,6 @@ export function createSearchBar({
       savedQueryId: props.savedQueryId,
       notifications: core.notifications,
     });
-
-    const containerRef = useCallback((node) => {
-      if (node) {
-        setContainerRef(node);
-      }
-    }, []);
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
@@ -208,9 +191,9 @@ export function createSearchBar({
           showQueryBar={props.showQueryBar}
           showQueryInput={props.showQueryInput}
           showSaveQuery={props.showSaveQuery}
+          queryStatus={props.queryStatus}
           screenTitle={props.screenTitle}
           indexPatterns={props.indexPatterns}
-          dataSource={props.dataSource}
           indicateNoData={props.indicateNoData}
           timeHistory={data.query.timefilter.history}
           dateRangeFrom={timeRange.from}
@@ -219,8 +202,6 @@ export function createSearchBar({
           isRefreshPaused={refreshInterval.pause}
           filters={filters}
           query={query}
-          settings={settings}
-          containerRef={containerRef}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
@@ -228,6 +209,9 @@ export function createSearchBar({
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+          datasetSelectorRef={props.datasetSelectorRef}
+          datePickerRef={props.datePickerRef}
+          isFilterBarPortable={props.isFilterBarPortable}
           {...overrideDefaultBehaviors(props)}
         />
       </OpenSearchDashboardsContextProvider>

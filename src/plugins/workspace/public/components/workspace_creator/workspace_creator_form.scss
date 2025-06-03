@@ -1,0 +1,31 @@
+$workspaceCreateRightSideBarTopOffset: $euiSizeL;
+$workspaceCreateRightSideBarBottomOffset: 100px;
+
+.workspaceCreateRightSidebar {
+  position: sticky;
+  top: $workspaceCreateRightSideBarTopOffset;
+  max-height: calc(100vh - $workspaceCreateRightSideBarTopOffset - $workspaceCreateRightSideBarBottomOffset);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+
+  @include ouiBreakpoint("xs","s") {
+    position: static;
+    width: 100%;
+  }
+}
+
+.workspaceCreateRightSideBarContentWrapper {
+  overflow-y: scroll;
+
+  @include ouiBreakpoint("xs","s") {
+    overflow: visible;
+  }
+}
+
+.workspaceCreateRightSideBarActionsWrapper {
+  padding: $ouiSizeM;
+  border-radius: $ouiSizeM;
+  background: $ouiColorEmptyShade;
+}

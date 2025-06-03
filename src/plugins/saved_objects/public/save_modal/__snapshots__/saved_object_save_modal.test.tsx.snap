@@ -8,15 +8,21 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
-        defaultMessage="Save {objectType}"
-        id="savedObjects.saveModal.saveTitle"
-        values={
-          Object {
-            "objectType": "visualization",
-          }
-        }
-      />
+      <EuiText
+        size="s"
+      >
+        <h2>
+          <FormattedMessage
+            defaultMessage="Save {objectType}"
+            id="savedObjects.saveModal.saveTitle"
+            values={
+              Object {
+                "objectType": "visualization",
+              }
+            }
+          />
+        </h2>
+      </EuiText>
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
@@ -26,9 +32,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       onSubmit={[Function]}
     >
       <EuiSpacer />
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -41,7 +47,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         }
         labelType="label"
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           autoFocus={true}
           data-test-subj="savedObjectTitle"
           fullWidth={true}
@@ -49,10 +55,10 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           onChange={[Function]}
           value="Saved Object title"
         />
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -65,16 +71,16 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         }
         labelType="label"
       >
-        <EuiTextArea
+        <EuiCompressedTextArea
           data-test-subj="viewDescription"
           onChange={[Function]}
           value=""
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiForm>
   </EuiModalBody>
   <EuiModalFooter>
-    <EuiButtonEmpty
+    <EuiSmallButtonEmpty
       data-test-subj="saveCancelButton"
       onClick={[Function]}
     >
@@ -83,8 +89,8 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         id="savedObjects.saveModal.cancelButtonLabel"
         values={Object {}}
       />
-    </EuiButtonEmpty>
-    <EuiButton
+    </EuiSmallButtonEmpty>
+    <EuiSmallButton
       data-test-subj="confirmSaveSavedObjectButton"
       fill={true}
       form="savedObjectSaveModalForm"
@@ -93,7 +99,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       type="submit"
     >
       Save
-    </EuiButton>
+    </EuiSmallButton>
   </EuiModalFooter>
 </EuiModal>
 `;

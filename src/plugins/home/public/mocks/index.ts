@@ -32,12 +32,14 @@ import { featureCatalogueRegistryMock } from '../services/feature_catalogue/feat
 import { environmentServiceMock } from '../services/environment/environment.mock';
 import { configSchema } from '../../config';
 import { tutorialServiceMock } from '../services/tutorials/tutorial_service.mock';
+import { sectionTypeMock } from '../plugin.test.mocks';
 
 const createSetupContract = () => ({
   featureCatalogue: featureCatalogueRegistryMock.createSetup(),
   environment: environmentServiceMock.createSetup(),
   tutorials: tutorialServiceMock.createSetup(),
   config: configSchema.validate({}),
+  sectionTypes: sectionTypeMock.setup(),
 });
 
 export const homePluginMock = {

@@ -119,7 +119,7 @@ const App = ({ navigation, data, history, osdUrlStateStorage }: StateDemoAppDeps
                 <EuiTitle size="l">
                   <h1>
                     <FormattedMessage
-                      id="stateDemo.helloWorldText"
+                      id="stateContainerExamples.helloWorldText"
                       defaultMessage="{name}!"
                       values={{ name: PLUGIN_NAME }}
                     />

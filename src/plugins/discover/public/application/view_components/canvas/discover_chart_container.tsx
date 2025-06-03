@@ -10,17 +10,19 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { useDiscoverContext } from '../context';
 import { SearchData } from '../utils/use_search';
 import { DiscoverChart } from '../../components/chart/chart';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 
 export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { uiSettings, data, core } = services;
-  const { indexPattern, savedSearch } = useDiscoverContext();
+  const { uiSettings, data } = services;
+  const { indexPattern } = useDiscoverContext();
+  const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
 
   const isTimeBased = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
     indexPattern,
   ]);
 
-  if (!hits) return null;
+  if (!hits || !isTimeBased) return null;
 
   return (
     <DiscoverChart
@@ -28,13 +30,8 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
       chartData={chartData}
       config={uiSettings}
       data={data}
-      hits={hits}
-      resetQuery={() => {
-        core.application.navigateToApp('discover', { path: `#/view/${savedSearch?.id}` });
-      }}
       services={services}
-      showResetButton={!!savedSearch && !!savedSearch.id}
-      isTimeBased={isTimeBased}
+      isEnhancementsEnabled={isEnhancementsEnabled}
     />
   );
 };

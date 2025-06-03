@@ -33,7 +33,7 @@ import { schema } from '@osd/config-schema';
 import { IRouter } from 'src/core/server';
 import { SearchRouteDependencies } from '../search_service';
 
-import { getCallMsearch } from './call_msearch';
+import { getCallMsearchWithOpenSearchClient } from './call_msearch';
 
 /**
  * The msearch route takes in an array of searches, each consisting of header
@@ -67,16 +67,23 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
             })
           ),
         }),
+        query: schema.object({
+          data_source_id: schema.maybe(schema.string()),
+        }),
       },
     },
     async (context, request, res) => {
-      const callMsearch = getCallMsearch({
-        opensearchClient: context.core.opensearch.client,
-        globalConfig$: deps.globalConfig$,
-        uiSettings: context.core.uiSettings.client,
-      });
+      const { data_source_id: dataSourceId } = request.query;
 
       try {
+        const callMsearch = getCallMsearchWithOpenSearchClient({
+          opensearchClient:
+            dataSourceId && context.dataSource
+              ? await context.dataSource.opensearch.getClient(dataSourceId)
+              : context.core.opensearch.client.asCurrentUser,
+          globalConfig$: deps.globalConfig$,
+          uiSettings: context.core.uiSettings.client,
+        });
         const response = await callMsearch({ body: request.body });
         return res.ok(response);
       } catch (err) {

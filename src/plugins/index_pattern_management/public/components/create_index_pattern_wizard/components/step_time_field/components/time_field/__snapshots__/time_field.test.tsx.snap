@@ -12,9 +12,9 @@ exports[`TimeField should render a loading state 1`] = `
     </p>
   </EuiText>
   <EuiSpacer />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -32,7 +32,7 @@ exports[`TimeField should render a loading state 1`] = `
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={true}
       name="timeField"
@@ -45,7 +45,7 @@ exports[`TimeField should render a loading state 1`] = `
         ]
       }
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiForm>
 `;
 
@@ -61,9 +61,9 @@ exports[`TimeField should render a selected time field 1`] = `
     </p>
   </EuiText>
   <EuiSpacer />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -91,7 +91,7 @@ exports[`TimeField should render a selected time field 1`] = `
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={false}
       isLoading={false}
@@ -107,7 +107,7 @@ exports[`TimeField should render a selected time field 1`] = `
       }
       value="@timestamp"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiForm>
 `;
 
@@ -123,9 +123,9 @@ exports[`TimeField should render normally 1`] = `
     </p>
   </EuiText>
   <EuiSpacer />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -153,7 +153,7 @@ exports[`TimeField should render normally 1`] = `
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={false}
       isLoading={false}
@@ -169,7 +169,7 @@ exports[`TimeField should render normally 1`] = `
       }
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </EuiForm>
 `;
 

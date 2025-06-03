@@ -36,7 +36,7 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiCode,
   EuiTitle,
 } from '@elastic/eui';
@@ -50,7 +50,7 @@ export const SplitUnsupported = (props) => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={htmlId('group')}
           label={
             <FormattedMessage
@@ -64,7 +64,7 @@ export const SplitUnsupported = (props) => {
             onChange={handleSelectChange('split_mode')}
             uiRestrictions={uiRestrictions}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle className="tvbAggRow__unavailable" size="xxxs">

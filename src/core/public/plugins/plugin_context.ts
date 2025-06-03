@@ -154,6 +154,12 @@ export function createPluginStartContext<
       navigateToApp: deps.application.navigateToApp,
       navigateToUrl: deps.application.navigateToUrl,
       getUrlForApp: deps.application.getUrlForApp,
+      setAppLeftControls: deps.application.setAppLeftControls,
+      setAppCenterControls: deps.application.setAppCenterControls,
+      setAppRightControls: deps.application.setAppRightControls,
+      setAppBadgeControls: deps.application.setAppBadgeControls,
+      setAppDescriptionControls: deps.application.setAppDescriptionControls,
+      setAppBottomControls: deps.application.setAppBottomControls,
       registerMountContext: (contextName, provider) =>
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },

@@ -75,7 +75,7 @@ test('return error when manifest content is not a valid JSON', async () => {
   mockReadFilePromise.mockResolvedValue(Buffer.from('not-json'));
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Unexpected token o in JSON at position 1 (invalid-manifest, ${pluginManifestPath})`,
+    message: `Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -354,6 +354,8 @@ describe('requiredEnginePlugins', () => {
       requiredBundles: [],
       server: true,
       ui: false,
+      supportedOSDataSourceVersions: '',
+      requiredOSDataSourcePlugins: [],
     });
   });
 });
@@ -416,7 +418,8 @@ test('set defaults for all missing optional fields', async () => {
     requiredBundles: [],
     server: true,
     ui: false,
-    supportedOSDataSourceVersions: undefined,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });
 
@@ -436,6 +439,10 @@ test('return all set optional fields as they are in manifest', async () => {
         },
         ui: true,
         supportedOSDataSourceVersions: '>=1.0.0',
+        requiredOSDataSourcePlugins: [
+          'some-required-data-source-plugin-1',
+          'some-required-data-source-plugin-2',
+        ],
       })
     )
   );
@@ -455,6 +462,10 @@ test('return all set optional fields as they are in manifest', async () => {
     server: false,
     ui: true,
     supportedOSDataSourceVersions: '>=1.0.0',
+    requiredOSDataSourcePlugins: [
+      'some-required-data-source-plugin-1',
+      'some-required-data-source-plugin-2',
+    ],
   });
 });
 
@@ -484,6 +495,8 @@ test('return manifest when plugin expected OpenSearch Dashboards version matches
     requiredBundles: [],
     server: true,
     ui: false,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });
 
@@ -512,5 +525,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version is `ope
     requiredBundles: [],
     server: true,
     ui: true,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });

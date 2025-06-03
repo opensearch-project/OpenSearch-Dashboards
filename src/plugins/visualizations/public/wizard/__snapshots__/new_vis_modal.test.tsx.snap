@@ -175,7 +175,13 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                     <div
                       class="euiModalHeader__title"
                     >
-                      New Visualization
+                      <div
+                        class="euiText euiText--small"
+                      >
+                        <h2>
+                          New Visualization
+                        </h2>
+                      </div>
                     </div>
                   </div>
                   <div
@@ -194,14 +200,14 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                             class="euiFlexItem euiFlexItem--flexGrowZero visNewVisDialog__searchWrapper"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                              class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
                                   aria-label="Filter for a visualization type"
-                                  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+                                  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiFieldSearch-isClearable"
                                   data-test-subj="filterVisType"
                                   placeholder="Filter"
                                   type="search"
@@ -225,7 +231,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 >
                                   <button
                                     aria-label="Clear input"
-                                    class="euiFormControlLayoutClearButton"
+                                    class="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
                                     type="button"
                                   >
                                     <span
@@ -391,7 +397,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                           class="euiSpacer euiSpacer--m"
                         />
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <p>
                             Start creating your visualization by selecting a type for that visualization.
@@ -498,13 +504,23 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         <div
                           className="euiModalHeader__title"
                         >
-                          <FormattedMessage
-                            defaultMessage="New Visualization"
-                            id="visualizations.newVisWizard.title"
-                            values={Object {}}
+                          <EuiText
+                            size="s"
                           >
-                            New Visualization
-                          </FormattedMessage>
+                            <div
+                              className="euiText euiText--small"
+                            >
+                              <h2>
+                                <FormattedMessage
+                                  defaultMessage="New Visualization"
+                                  id="visualizations.newVisWizard.title"
+                                  values={Object {}}
+                                >
+                                  New Visualization
+                                </FormattedMessage>
+                              </h2>
+                            </div>
+                          </EuiText>
                         </div>
                       </EuiModalHeaderTitle>
                     </div>
@@ -538,9 +554,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <div
                                     className="euiFlexItem euiFlexItem--flexGrowZero visNewVisDialog__searchWrapper"
                                   >
-                                    <EuiFieldSearch
+                                    <EuiCompressedFieldSearch
                                       aria-label="Filter for a visualization type"
-                                      compressed={false}
+                                      compressed={true}
                                       data-test-subj="filterVisType"
                                       fullWidth={true}
                                       incremental={false}
@@ -556,13 +572,13 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             "onClick": [Function],
                                           }
                                         }
-                                        compressed={false}
+                                        compressed={true}
                                         fullWidth={true}
                                         icon="search"
                                         isLoading={false}
                                       >
                                         <div
-                                          className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                                          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                                         >
                                           <div
                                             className="euiFormControlLayout__childrenWrapper"
@@ -570,7 +586,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             <EuiValidatableControl>
                                               <input
                                                 aria-label="Filter for a visualization type"
-                                                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+                                                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiFieldSearch-isClearable"
                                                 data-test-subj="filterVisType"
                                                 onChange={[Function]}
                                                 onKeyUp={[Function]}
@@ -585,7 +601,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                   "onClick": [Function],
                                                 }
                                               }
-                                              compressed={false}
+                                              compressed={true}
                                               icon="search"
                                               isLoading={false}
                                             >
@@ -593,7 +609,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 className="euiFormControlLayoutIcons"
                                               >
                                                 <EuiFormControlLayoutCustomIcon
-                                                  size="m"
+                                                  size="s"
                                                   type="search"
                                                 >
                                                   <span
@@ -602,14 +618,14 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                     <EuiIcon
                                                       aria-hidden="true"
                                                       className="euiFormControlLayoutCustomIcon__icon"
-                                                      size="m"
+                                                      size="s"
                                                       type="search"
                                                     >
                                                       <span
                                                         aria-hidden="true"
                                                         className="euiFormControlLayoutCustomIcon__icon"
                                                         data-euiicon-type="search"
-                                                        size="m"
+                                                        size="s"
                                                       />
                                                     </EuiIcon>
                                                   </span>
@@ -620,7 +636,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               >
                                                 <EuiFormControlLayoutClearButton
                                                   onClick={[Function]}
-                                                  size="m"
+                                                  size="s"
                                                 >
                                                   <EuiI18n
                                                     default="Clear input"
@@ -628,7 +644,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                   >
                                                     <button
                                                       aria-label="Clear input"
-                                                      className="euiFormControlLayoutClearButton"
+                                                      className="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
                                                       onClick={[Function]}
                                                       type="button"
                                                     >
@@ -649,7 +665,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           </div>
                                         </div>
                                       </EuiFormControlLayout>
-                                    </EuiFieldSearch>
+                                    </EuiCompressedFieldSearch>
                                   </div>
                                 </EuiFlexItem>
                                 <EuiFlexItem
@@ -1016,9 +1032,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 ]
                               }
                             >
-                              <EuiText>
+                              <EuiText
+                                size="s"
+                              >
                                 <div
-                                  className="euiText euiText--medium"
+                                  className="euiText euiText--small"
                                 >
                                   <p>
                                     <FormattedMessage
@@ -1066,6 +1084,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       >
                                         <EuiButtonContent
                                           className="euiButton__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconType="popout"
                                           textProps={
@@ -1294,7 +1313,13 @@ exports[`NewVisModal should render as expected 1`] = `
                     <div
                       class="euiModalHeader__title"
                     >
-                      New Visualization
+                      <div
+                        class="euiText euiText--small"
+                      >
+                        <h2>
+                          New Visualization
+                        </h2>
+                      </div>
                     </div>
                   </div>
                   <div
@@ -1313,14 +1338,14 @@ exports[`NewVisModal should render as expected 1`] = `
                             class="euiFlexItem euiFlexItem--flexGrowZero visNewVisDialog__searchWrapper"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                              class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <input
                                   aria-label="Filter for a visualization type"
-                                  class="euiFieldSearch euiFieldSearch--fullWidth"
+                                  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                                   data-test-subj="filterVisType"
                                   placeholder="Filter"
                                   type="search"
@@ -1493,7 +1518,7 @@ exports[`NewVisModal should render as expected 1`] = `
                           class="euiSpacer euiSpacer--m"
                         />
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <p>
                             Start creating your visualization by selecting a type for that visualization.
@@ -1600,13 +1625,23 @@ exports[`NewVisModal should render as expected 1`] = `
                         <div
                           className="euiModalHeader__title"
                         >
-                          <FormattedMessage
-                            defaultMessage="New Visualization"
-                            id="visualizations.newVisWizard.title"
-                            values={Object {}}
+                          <EuiText
+                            size="s"
                           >
-                            New Visualization
-                          </FormattedMessage>
+                            <div
+                              className="euiText euiText--small"
+                            >
+                              <h2>
+                                <FormattedMessage
+                                  defaultMessage="New Visualization"
+                                  id="visualizations.newVisWizard.title"
+                                  values={Object {}}
+                                >
+                                  New Visualization
+                                </FormattedMessage>
+                              </h2>
+                            </div>
+                          </EuiText>
                         </div>
                       </EuiModalHeaderTitle>
                     </div>
@@ -1640,9 +1675,9 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <div
                                     className="euiFlexItem euiFlexItem--flexGrowZero visNewVisDialog__searchWrapper"
                                   >
-                                    <EuiFieldSearch
+                                    <EuiCompressedFieldSearch
                                       aria-label="Filter for a visualization type"
-                                      compressed={false}
+                                      compressed={true}
                                       data-test-subj="filterVisType"
                                       fullWidth={true}
                                       incremental={false}
@@ -1653,13 +1688,13 @@ exports[`NewVisModal should render as expected 1`] = `
                                       value=""
                                     >
                                       <EuiFormControlLayout
-                                        compressed={false}
+                                        compressed={true}
                                         fullWidth={true}
                                         icon="search"
                                         isLoading={false}
                                       >
                                         <div
-                                          className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                                          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                                         >
                                           <div
                                             className="euiFormControlLayout__childrenWrapper"
@@ -1667,7 +1702,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             <EuiValidatableControl>
                                               <input
                                                 aria-label="Filter for a visualization type"
-                                                className="euiFieldSearch euiFieldSearch--fullWidth"
+                                                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                                                 data-test-subj="filterVisType"
                                                 onChange={[Function]}
                                                 onKeyUp={[Function]}
@@ -1677,7 +1712,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               />
                                             </EuiValidatableControl>
                                             <EuiFormControlLayoutIcons
-                                              compressed={false}
+                                              compressed={true}
                                               icon="search"
                                               isLoading={false}
                                             >
@@ -1685,7 +1720,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 className="euiFormControlLayoutIcons"
                                               >
                                                 <EuiFormControlLayoutCustomIcon
-                                                  size="m"
+                                                  size="s"
                                                   type="search"
                                                 >
                                                   <span
@@ -1694,14 +1729,14 @@ exports[`NewVisModal should render as expected 1`] = `
                                                     <EuiIcon
                                                       aria-hidden="true"
                                                       className="euiFormControlLayoutCustomIcon__icon"
-                                                      size="m"
+                                                      size="s"
                                                       type="search"
                                                     >
                                                       <span
                                                         aria-hidden="true"
                                                         className="euiFormControlLayoutCustomIcon__icon"
                                                         data-euiicon-type="search"
-                                                        size="m"
+                                                        size="s"
                                                       />
                                                     </EuiIcon>
                                                   </span>
@@ -1711,7 +1746,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                           </div>
                                         </div>
                                       </EuiFormControlLayout>
-                                    </EuiFieldSearch>
+                                    </EuiCompressedFieldSearch>
                                   </div>
                                 </EuiFlexItem>
                                 <EuiFlexItem
@@ -2066,9 +2101,11 @@ exports[`NewVisModal should render as expected 1`] = `
                                 ]
                               }
                             >
-                              <EuiText>
+                              <EuiText
+                                size="s"
+                              >
                                 <div
-                                  className="euiText euiText--medium"
+                                  className="euiText euiText--small"
                                 >
                                   <p>
                                     <FormattedMessage
@@ -2116,6 +2153,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButton__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconType="popout"
                                           textProps={

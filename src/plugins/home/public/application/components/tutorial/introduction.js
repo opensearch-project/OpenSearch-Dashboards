@@ -37,7 +37,7 @@ import {
   EuiFlexGroup,
   EuiSpacer,
   EuiImage,
-  EuiButton,
+  EuiSmallButton,
   EuiIcon,
   EuiBetaBadge,
 } from '@elastic/eui';
@@ -74,12 +74,12 @@ function IntroductionUI({
     exportedFields = (
       <div>
         <EuiSpacer />
-        <EuiButton href={exportedFieldsUrl} target="_blank" rel="noopener noreferrer">
+        <EuiSmallButton href={exportedFieldsUrl} target="_blank" rel="noopener noreferrer">
           <FormattedMessage
             id="home.tutorial.introduction.viewButtonLabel"
             defaultMessage="View exported fields"
           />
-        </EuiButton>
+        </EuiSmallButton>
       </div>
     );
   }

@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
+<div>
+  <div
+    data-eui="EuiFlyout"
+    data-test-subj="collapsibleNav"
+    role="dialog"
+  >
+    <div
+      class="eui-fullHeight left-navigation-wrapper"
+    >
+      <div
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder"
+        style="flex-grow: 0;"
+      >
+        <button
+          data-test-subj="back"
+        >
+          go back
+        </button>
+      </div>
+      <div
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
+      />
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        style="padding-top: 0px;"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <nav
+            class="euiSideNav euiSideNav-isOpenMobile"
+          >
+            <div
+              class="euiSideNav__content"
+              id="euiSideNavContent_generated-id"
+            >
+              <div
+                class="euiSideNavItem euiSideNavItem--root nav-link-item "
+              >
+                <button
+                  aria-label="link-in-all"
+                  class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                  data-test-subj="collapsibleNavAppLink-link-in-all"
+                  type="button"
+                >
+                  <span
+                    class="euiSideNavItemButton__content"
+                  >
+                    <span
+                      class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                      title="link-in-all"
+                    >
+                      <div
+                        class="euiText euiText--medium"
+                      >
+                        link-in-all
+                      </div>
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div
+        class="bottom-container eui-xScroll bottom-container-expanded"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
+<div>
+  <div
+    data-eui="EuiFlyout"
+    data-test-subj="collapsibleNav"
+    role="dialog"
+  >
+    <div
+      class="eui-fullHeight left-navigation-wrapper"
+    >
+      <div
+        class="searchBarIcon euiHeaderSectionItemButton"
+      />
+      <div
+        class="flex-1-container"
+      />
+      <div
+        class="bottom-container bottom-container-collapsed"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current nav group is valid 1`] = `
+<div>
+  <div
+    data-eui="EuiFlyout"
+    data-test-subj="collapsibleNav"
+    role="dialog"
+  >
+    <div
+      class="eui-fullHeight left-navigation-wrapper"
+    >
+      <div
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder"
+        style="flex-grow: 0;"
+      >
+        <button
+          data-test-subj="back"
+        >
+          go back
+        </button>
+      </div>
+      <div
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
+      />
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        style="padding-top: 0px;"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <nav
+            class="euiSideNav euiSideNav-isOpenMobile"
+          >
+            <div
+              class="euiSideNav__content"
+              id="euiSideNavContent_generated-id"
+            >
+              <div
+                class="euiSideNavItem euiSideNavItem--root nav-link-item "
+              >
+                <button
+                  aria-label="link-in-all"
+                  class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                  data-test-subj="collapsibleNavAppLink-link-in-all"
+                  type="button"
+                >
+                  <span
+                    class="euiSideNavItemButton__content"
+                  >
+                    <span
+                      class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                      title="link-in-all"
+                    >
+                      <div
+                        class="euiText euiText--medium"
+                      >
+                        link-in-all
+                      </div>
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div
+        class="bottom-container eui-xScroll bottom-container-expanded"
+      />
+    </div>
+  </div>
+</div>
+`;

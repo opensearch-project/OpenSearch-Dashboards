@@ -29,8 +29,6 @@
  */
 
 import { share } from 'rxjs/operators';
-import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';
@@ -40,22 +38,17 @@ import { QueryStringManager, QueryStringContract } from './query_string';
 import { buildOpenSearchQuery, getOpenSearchQueryConfig } from '../../common';
 import { getUiSettings } from '../services';
 import { IndexPattern } from '..';
+import {
+  IQuerySetup,
+  IQueryStart,
+  QueryServiceSetupDependencies,
+  QueryServiceStartDependencies,
+} from './types';
 
 /**
  * Query Service
  * @internal
  */
-
-interface QueryServiceSetupDependencies {
-  storage: IStorageWrapper;
-  uiSettings: IUiSettingsClient;
-}
-
-interface QueryServiceStartDependencies {
-  savedObjectsClient: SavedObjectsClientContract;
-  storage: IStorageWrapper;
-  uiSettings: IUiSettingsClient;
-}
 
 export class QueryService {
   filterManager!: FilterManager;
@@ -64,7 +57,13 @@ export class QueryService {
 
   state$!: ReturnType<typeof createQueryStateObservable>;
 
-  public setup({ storage, uiSettings }: QueryServiceSetupDependencies) {
+  public setup({
+    uiSettings,
+    storage,
+    sessionStorage,
+    defaultSearchInterceptor,
+    notifications,
+  }: QueryServiceSetupDependencies): IQuerySetup {
     this.filterManager = new FilterManager(uiSettings);
 
     const timefilterService = new TimefilterService();
@@ -73,7 +72,13 @@ export class QueryService {
       storage,
     });
 
-    this.queryStringManager = new QueryStringManager(storage, uiSettings);
+    this.queryStringManager = new QueryStringManager(
+      storage,
+      sessionStorage,
+      uiSettings,
+      defaultSearchInterceptor,
+      notifications
+    );
 
     this.state$ = createQueryStateObservable({
       filterManager: this.filterManager,
@@ -89,7 +94,14 @@ export class QueryService {
     };
   }
 
-  public start({ savedObjectsClient, storage, uiSettings }: QueryServiceStartDependencies) {
+  public start({
+    savedObjectsClient,
+    storage,
+    uiSettings,
+    indexPatterns,
+    application,
+  }: QueryServiceStartDependencies): IQueryStart {
+    this.queryStringManager.getDatasetService().init(indexPatterns);
     return {
       addToQueryLog: createAddToQueryLog({
         storage,
@@ -97,7 +109,11 @@ export class QueryService {
       }),
       filterManager: this.filterManager,
       queryString: this.queryStringManager,
-      savedQueries: createSavedQueryService(savedObjectsClient),
+      savedQueries: createSavedQueryService(
+        savedObjectsClient,
+        { application, uiSettings },
+        this.queryStringManager
+      ),
       state$: this.state$,
       timefilter: this.timefilter,
       getOpenSearchQuery: (indexPattern: IndexPattern) => {

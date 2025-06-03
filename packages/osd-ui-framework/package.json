@@ -12,7 +12,7 @@
     }
   },
   "dependencies": {
-    "classnames": "2.3.1",
+    "classnames": "^2.3.1",
     "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
@@ -23,7 +23,7 @@
     "enzyme-adapter-react-16": "^1.9.1"
   },
   "devDependencies": {
-    "@elastic/eui": "npm:@opensearch-project/oui@1.5.1",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.19.0",
     "@osd/babel-preset": "1.0.0",
     "@osd/optimizer": "1.0.0",
     "comment-stripper": "^0.0.4",
@@ -33,7 +33,7 @@
     "grunt-contrib-copy": "^1.0.0",
     "sass-embedded": "1.66.1",
     "sass-loader": "npm:@amoo-miki/sass-loader@10.4.1-node-sass-9.0.0-libsass-3.6.5-with-sass-embedded.rc1",
-    "postcss": "^8.4.5",
+    "postcss": "^8.4.31",
     "sinon": "^7.4.2"
   }
 }

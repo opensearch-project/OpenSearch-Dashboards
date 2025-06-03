@@ -1,0 +1,215 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Home loader displays a EuiToolTip 1`] = `
+<EuiToolTip
+  content="Go to home page"
+  delay="long"
+  position="top"
+>
+  <EuiHeaderSectionItemButton
+    aria-label="Go to home page"
+    className="header__homeLoaderNavButton"
+    data-test-subj="homeLoader"
+    href="/"
+    onClick={[Function]}
+  >
+    <div
+      className="homeIconContainer"
+    >
+      <HomeIcon
+        branding={Object {}}
+        logos={
+          Object {
+            "AnimatedMark": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_spinner_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_spinner_on_light.svg",
+            },
+            "Application": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+            },
+            "CenterMark": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+            },
+            "Mark": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_mark_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_mark_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_mark_on_light.svg",
+            },
+            "OpenSearch": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_on_light.svg",
+            },
+            "colorScheme": "light",
+          }
+        }
+      />
+    </div>
+    <div
+      className="loaderContainer"
+    >
+      <LoadingIndicator
+        loadingCount$={
+          BehaviorSubject {
+            "_isScalar": false,
+            "_value": 0,
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          }
+        }
+        showAsBar={false}
+      />
+    </div>
+  </EuiHeaderSectionItemButton>
+</EuiToolTip>
+`;
+
+exports[`Home loader shows the loading indicator if loading count > 0 1`] = `
+<EuiToolTip
+  content="Go to home page"
+  delay="long"
+  position="top"
+>
+  <EuiHeaderSectionItemButton
+    aria-label="Go to home page"
+    className="header__homeLoaderNavButton"
+    data-test-subj="homeLoader"
+    href="/"
+    onClick={[Function]}
+  >
+    <div
+      className="homeIconContainer"
+    >
+      <HomeIcon
+        branding={Object {}}
+        logos={
+          Object {
+            "AnimatedMark": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_spinner_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_spinner_on_light.svg",
+            },
+            "Application": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+            },
+            "CenterMark": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+            },
+            "Mark": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_mark_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_mark_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_mark_on_light.svg",
+            },
+            "OpenSearch": Object {
+              "dark": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_on_dark.svg",
+              },
+              "light": Object {
+                "type": "default",
+                "url": "/ui/logos/opensearch_on_light.svg",
+              },
+              "type": "default",
+              "url": "/ui/logos/opensearch_on_light.svg",
+            },
+            "colorScheme": "light",
+          }
+        }
+      />
+    </div>
+    <div
+      className="loaderContainer"
+    >
+      <LoadingIndicator
+        loadingCount$={
+          BehaviorSubject {
+            "_isScalar": false,
+            "_value": 1,
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          }
+        }
+        showAsBar={false}
+      />
+    </div>
+  </EuiHeaderSectionItemButton>
+</EuiToolTip>
+`;

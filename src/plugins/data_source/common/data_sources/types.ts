@@ -47,6 +47,7 @@ export enum AuthType {
   SigV4 = 'sigv4',
 }
 
+// src/plugins/workspace/public/utils.ts Workspace plugin depends on this to do use case limitation.
 export enum SigV4ServiceName {
   OpenSearch = 'es',
   OpenSearchServerless = 'aoss',
@@ -59,4 +60,5 @@ export enum DataSourceEngineType {
   OpenSearchServerless = 'OpenSearch Serverless',
   Elasticsearch = 'Elasticsearch',
   NA = 'No Engine Type Available',
+  OpenSearchCrossCluster = 'OpenSearch(Cross-cluster search)',
 }

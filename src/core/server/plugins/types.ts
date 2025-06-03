@@ -206,6 +206,12 @@ export interface PluginManifest {
    * Value will be following semver as a range for example ">= 1.3.0"
    */
   readonly supportedOSDataSourceVersions?: string;
+
+  /**
+   * Specifies the required backend plugins that **must be** installed and enabled on the data source for this plugin to function properly
+   * when adding OpenSearch cluster as data sources.
+   */
+  readonly requiredOSDataSourcePlugins?: readonly PluginName[];
 }
 
 /**

@@ -40,8 +40,8 @@ import {
   EuiTab,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
-  EuiButtonIcon,
+  EuiCompressedFieldText,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
@@ -150,7 +150,7 @@ function MetricSeriesUi(props) {
     <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
@@ -165,7 +165,7 @@ function MetricSeriesUi(props) {
         {colorPicker}
 
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth
             onChange={handleChange('label')}
             placeholder={intl.formatMessage({

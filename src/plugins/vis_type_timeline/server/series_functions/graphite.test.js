@@ -32,11 +32,9 @@ const expect = require('chai').expect;
 
 import fn from './graphite';
 
-const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file.
-You can always enable the default allowlist configuration.`;
+const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file. You can always enable the default allowlist configuration.`;
 
-const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid.
-Please update your config from OpenSearch Dashboards's Advanced Setting.`;
+const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. Please update your config from OpenSearch Dashboards' Advanced Settings.`;
 
 jest.mock('node-fetch', () => (url) => {
   if (url.includes('redirect')) {

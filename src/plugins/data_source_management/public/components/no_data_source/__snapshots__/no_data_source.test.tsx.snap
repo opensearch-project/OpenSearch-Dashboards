@@ -43,7 +43,7 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
         >
           <FormattedMessage
             defaultMessage="No data sources connected yet."
-            id="dataSourcesManagement.dataSourceEmptyMenu.noData"
+            id="dataSourcesManagement.dataSourceEmptyMenu.noConnectedDataSource"
             values={Object {}}
           />
         </EuiText>
@@ -126,7 +126,7 @@ exports[`NoDataSource should render normally when incompatibleDataSourcesExist i
         >
           <FormattedMessage
             defaultMessage="No data sources connected yet."
-            id="dataSourcesManagement.dataSourceEmptyMenu.noData"
+            id="dataSourcesManagement.dataSourceEmptyMenu.noConnectedDataSource"
             values={Object {}}
           />
         </EuiText>
@@ -209,7 +209,7 @@ exports[`NoDataSource should render normally when incompatibleDataSourcesExist i
         >
           <FormattedMessage
             defaultMessage="No data sources connected yet."
-            id="dataSourcesManagement.dataSourceEmptyMenu.noData"
+            id="dataSourcesManagement.dataSourceEmptyMenu.noConnectedDataSource"
             values={Object {}}
           />
         </EuiText>

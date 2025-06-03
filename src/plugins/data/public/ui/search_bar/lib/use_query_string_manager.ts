@@ -28,35 +28,50 @@
  * under the License.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Subscription } from 'rxjs';
 import { Query } from '../../..';
 import { QueryStringContract } from '../../../query/query_string';
 
 interface UseQueryStringProps {
   query?: Query;
-  queryStringManager: QueryStringContract;
+  queryString: QueryStringContract;
 }
 
 export const useQueryStringManager = (props: UseQueryStringProps) => {
   // Filters should be either what's passed in the initial state or the current state of the filter manager
-  const [query, setQuery] = useState<Query>(props.query || props.queryStringManager.getQuery());
+  const [query, setQuery] = useState(() => props.query || props.queryString.getQuery());
+
   useEffect(() => {
     const subscriptions = new Subscription();
-
     subscriptions.add(
-      props.queryStringManager.getUpdates$().subscribe({
+      props.queryString.getUpdates$().subscribe({
         next: () => {
-          const newQuery = props.queryStringManager.getQuery();
-          setQuery(newQuery);
+          setQuery((prevQuery) => {
+            const newQuery = props.queryString.getQuery();
+            // Only update if the query has actually changed
+            return JSON.stringify(prevQuery) !== JSON.stringify(newQuery) ? newQuery : prevQuery;
+          });
         },
       })
     );
-
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [props.queryStringManager]);
+  }, [props.queryString]);
 
-  return { query };
+  // Use callback to memoize the function
+  const updateQuery = useCallback(
+    (newQueryPartial: Partial<Query>) => {
+      const updatedQuery = { ...query, ...newQueryPartial };
+      props.queryString.setQuery(updatedQuery);
+      setQuery(updatedQuery);
+    },
+    [query, props.queryString]
+  );
+
+  return {
+    query,
+    updateQuery,
+  };
 };

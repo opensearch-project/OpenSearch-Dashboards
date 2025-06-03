@@ -62,12 +62,20 @@ export interface ChromeNavControls {
   registerRight(navControl: ChromeNavControl): void;
   /** Register a nav control to be presented on the top-center side of the chrome header. */
   registerCenter(navControl: ChromeNavControl): void;
+  /** Register a nav control to be presented on the left-bottom side of the left navigation. */
+  registerLeftBottom(navControl: ChromeNavControl): void;
+  /** Register a nav control to be presented on the right side of the primary chrome header. */
+  registerPrimaryHeaderRight(navControl: ChromeNavControl): void;
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
   /** @internal */
   getRight$(): Observable<ChromeNavControl[]>;
   /** @internal */
   getCenter$(): Observable<ChromeNavControl[]>;
+  /** @internal */
+  getLeftBottom$(): Observable<ChromeNavControl[]>;
+  /** @internal */
+  getPrimaryHeaderRight$(): Observable<ChromeNavControl[]>;
 }
 
 /** @internal */
@@ -80,6 +88,10 @@ export class NavControlsService {
     const navControlsCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsExpandedRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsExpandedCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(
+      new Set()
+    );
+    const navControlsLeftBottom$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
+    const navControlsPrimaryHeaderRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(
       new Set()
     );
 
@@ -105,6 +117,16 @@ export class NavControlsService {
           new Set([...navControlsExpandedCenter$.value.values(), navControl])
         ),
 
+      registerLeftBottom: (navControl: ChromeNavControl) =>
+        navControlsLeftBottom$.next(
+          new Set([...navControlsLeftBottom$.value.values(), navControl])
+        ),
+
+      registerPrimaryHeaderRight: (navControl: ChromeNavControl) =>
+        navControlsPrimaryHeaderRight$.next(
+          new Set([...navControlsPrimaryHeaderRight$.value.values(), navControl])
+        ),
+
       getLeft$: () =>
         navControlsLeft$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
@@ -127,6 +149,16 @@ export class NavControlsService {
         ),
       getExpandedCenter$: () =>
         navControlsExpandedCenter$.pipe(
+          map((controls) => sortBy([...controls.values()], 'order')),
+          takeUntil(this.stop$)
+        ),
+      getLeftBottom$: () =>
+        navControlsLeftBottom$.pipe(
+          map((controls) => sortBy([...controls.values()], 'order')),
+          takeUntil(this.stop$)
+        ),
+      getPrimaryHeaderRight$: () =>
+        navControlsPrimaryHeaderRight$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),

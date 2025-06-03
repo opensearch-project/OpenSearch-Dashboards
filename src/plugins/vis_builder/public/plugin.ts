@@ -56,6 +56,8 @@ import {
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
 import { opensearchFilters } from '../../data/public';
+import { createRawDataVisFn } from './visualizations/vega/utils/expression_helper';
+import { VISBUILDER_ENABLE_VEGA_SETTING } from '../common/constants';
 
 export class VisBuilderPlugin
   implements
@@ -74,7 +76,7 @@ export class VisBuilderPlugin
 
   public setup(
     core: CoreSetup<VisBuilderPluginStartDependencies, VisBuilderStart>,
-    { embeddable, visualizations, data }: VisBuilderPluginSetupDependencies
+    { embeddable, visualizations, data, expressions: exp }: VisBuilderPluginSetupDependencies
   ) {
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
@@ -106,7 +108,8 @@ export class VisBuilderPlugin
 
     // Register Default Visualizations
     const typeService = this.typeService;
-    registerDefaultTypes(typeService.setup());
+    registerDefaultTypes(typeService.setup(), core.uiSettings.get(VISBUILDER_ENABLE_VEGA_SETTING));
+    exp.registerFunction(createRawDataVisFn());
 
     // Register the plugin to core
     core.application.register({

@@ -37,6 +37,8 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 // @ts-ignore
 import { Signal } from 'vega';
+
+import { HttpSetup } from 'opensearch-dashboards/public';
 import { vega, vegaLite } from '../lib/vega';
 import { OpenSearchQueryParser } from './opensearch_query_parser';
 import { Utils } from './utils';
@@ -59,6 +61,7 @@ import {
   ControlsDirection,
   OpenSearchDashboards,
 } from './types';
+import { PPLQueryParser } from './ppl_parser';
 
 // Set default single color to match other OpenSearch Dashboards visualizations
 const defaultColor: string = euiPaletteColorBlind()[0];
@@ -653,6 +656,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         opensearch: new OpenSearchQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
+        ppl: new PPLQueryParser(this.timeCache, this.searchAPI),
       };
     }
     const pending: PendingType = {};

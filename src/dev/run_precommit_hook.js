@@ -36,6 +36,7 @@ import {
   getUnstagedFiles,
   checkFileCasing,
   checkDevDocs,
+  checkI18n,
 } from './precommit_hook';
 
 run(
@@ -53,6 +54,13 @@ run(
 
     try {
       await checkFileCasing(log, files);
+    } catch (error) {
+      errors.push(error);
+    }
+
+    try {
+      const result = await checkI18n(log, files);
+      if (Array.isArray(result)) errors.push(...result);
     } catch (error) {
       errors.push(error);
     }

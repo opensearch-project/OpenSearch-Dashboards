@@ -108,10 +108,22 @@ export class Search extends PureComponent<SearchProps> {
       );
     }
 
+    /* The `onChange` and `query` attributes below throw type errors for `_AST` and `Query` because
+     * OSD imports the types from the `eui` aliases which makes typescript believe that they are
+     * different.
+     */
+
     return (
       <Fragment>
-        {/* @ts-ignore The Query types that typescript complains about here are identical and is a false flag. Once OUI migration is complete, this ignore can be removed */}
-        <EuiSearchBar box={box} filters={filters} onChange={this.onChange} query={query} />
+        <EuiSearchBar
+          compressed
+          box={box}
+          filters={filters}
+          // @ts-expect-error
+          onChange={this.onChange}
+          // @ts-expect-error
+          query={query}
+        />
         {queryParseError}
       </Fragment>
     );

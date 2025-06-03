@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
@@ -12,7 +13,6 @@ import {
   addColumn,
   moveColumn,
   removeColumn,
-  setColumns,
   setSort,
   useDispatch,
   useSelector,
@@ -23,6 +23,7 @@ import { SortOrder } from '../../../saved_searches/types';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';
+import { filterColumns } from '../utils/filter_columns';
 
 interface Props {
   rows?: OpenSearchSearchHit[];
@@ -32,6 +33,7 @@ interface Props {
 export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
+    uiSettings,
     data: {
       query: { filterManager },
     },
@@ -47,6 +49,14 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
       columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
     };
   });
+  const filteredColumns = useMemo(() => {
+    return filterColumns(
+      columns,
+      indexPattern,
+      uiSettings.get(DEFAULT_COLUMNS_SETTING),
+      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
+    );
+  }, [columns, indexPattern, uiSettings]);
   const { sort } = useSelector((state) => {
     const stateSort = state.discover.sort;
     // check if state sort is not undefined, otherwise assign an empty array
@@ -77,7 +87,6 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
     dispatch(moveColumn({ columnName: col, destination }));
   };
 
-  const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
     dispatch(setSort(s));
     refetch$.next();
@@ -110,13 +119,12 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
 
   return (
     <DataGridTable
-      columns={columns}
+      columns={filteredColumns}
       indexPattern={indexPattern}
       onAddColumn={onAddColumn}
       onFilter={onAddFilter as DocViewFilterFn}
       onMoveColumn={onMoveColumn}
       onRemoveColumn={onRemoveColumn}
-      onSetColumns={onSetColumns}
       onSort={onSetSort}
       sort={sort}
       rows={rows}

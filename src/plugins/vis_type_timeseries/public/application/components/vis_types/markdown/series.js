@@ -39,8 +39,8 @@ import {
   EuiTab,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
-  EuiButtonIcon,
+  EuiCompressedFieldText,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { Aggs } from '../../aggs/aggs';
@@ -135,7 +135,7 @@ function MarkdownSeriesUi(props) {
     <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
@@ -148,7 +148,7 @@ function MarkdownSeriesUi(props) {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth
             onChange={handleChange('label')}
             placeholder={intl.formatMessage({
@@ -160,7 +160,7 @@ function MarkdownSeriesUi(props) {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth
             onChange={handleChange('var_name')}
             placeholder={intl.formatMessage({

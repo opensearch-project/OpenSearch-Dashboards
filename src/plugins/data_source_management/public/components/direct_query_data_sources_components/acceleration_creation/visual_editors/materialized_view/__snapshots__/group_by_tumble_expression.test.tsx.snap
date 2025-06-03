@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Group by components in materialized view renders group by components in materialized view with default options 1`] = `
+<div
+  className="euiFlexItem euiFlexItem--flexGrowZero"
+>
+  <div
+    className="euiPopover euiPopover--anchorDownLeft"
+    id="groupByTumblePopOver"
+  >
+    <div
+      className="euiPopover__anchor"
+    >
+      <button
+        className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+        onClick={[Function]}
+      >
+        <span
+          className="euiExpression__description"
+        >
+          GROUP BY
+        </span>
+         
+        <span
+          className="euiExpression__value"
+        >
+          TUMBLE(, '1 minute')
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Group by components in materialized view renders group by components in materialized view with different options 1`] = `
+<div
+  className="euiFlexItem euiFlexItem--flexGrowZero"
+>
+  <div
+    className="euiPopover euiPopover--anchorDownLeft"
+    id="groupByTumblePopOver"
+  >
+    <div
+      className="euiPopover__anchor"
+    >
+      <button
+        className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+        onClick={[Function]}
+      >
+        <span
+          className="euiExpression__description"
+        >
+          GROUP BY
+        </span>
+         
+        <span
+          className="euiExpression__value"
+        >
+          TUMBLE(, '1 minute')
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

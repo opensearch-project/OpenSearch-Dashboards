@@ -42,6 +42,7 @@ export interface SourceFiltersTableProps {
   fieldWildcardMatcher: Function;
   onAddOrRemoveFilter?: Function;
   saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  useUpdatedUX: boolean;
 }
 
 export interface SourceFiltersTableState {
@@ -180,7 +181,7 @@ export class SourceFiltersTable extends Component<
     return (
       <>
         <Header />
-        <AddFilter onAddFilter={this.onAddFilter} />
+        <AddFilter useUpdatedUX={this.props.useUpdatedUX} onAddFilter={this.onAddFilter} />
         <EuiSpacer size="l" />
         <Table
           isSaving={isSaving}

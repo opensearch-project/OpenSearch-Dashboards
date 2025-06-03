@@ -38,13 +38,14 @@ import {
   EuiText,
   EuiBadgeGroup,
   EuiPageContent,
-  EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
-import { useEffectOnce, useMount } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
+import { of } from 'rxjs';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -99,13 +100,16 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     uiSettings,
     indexPatternManagementStart,
     chrome,
+    navigationUI: { HeaderControl },
     docLinks,
     application,
     http,
     getMlCardState,
     data,
     dataSourceEnabled,
+    workspaces,
   } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
+
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
   const [sources, setSources] = useState<MatchedItem[]>([]);
@@ -114,11 +118,13 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [isColumnDataLoaded, setIsColumnDataLoaded] = useState(false);
 
+  const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const { columns: columnRegistry } = indexPatternManagementStart;
 
-  useMount(() => {
-    setBreadcrumbs(getListBreadcrumbs());
-  });
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+  useEffect(() => {
+    setBreadcrumbs(getListBreadcrumbs(useUpdatedUX ? currentWorkspace?.name : undefined));
+  }, [chrome, currentWorkspace, setBreadcrumbs, useUpdatedUX]);
 
   useEffect(() => {
     (async function () {
@@ -194,7 +200,11 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+          <EuiButtonEmpty
+            size="xs"
+            {...reactRouterNavigate(history, `patterns/${index.id}`)}
+            {...(useUpdatedUX ? { textProps: { style: { fontWeight: 600 } } } : {})}
+          >
             {name}
           </EuiButtonEmpty>
           &emsp;
@@ -218,15 +228,58 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     }),
   ];
 
-  const createButton = canSave ? (
-    <CreateButton options={creationOptions}>
-      <FormattedMessage
-        id="indexPatternManagement.indexPatternTable.createBtn"
-        defaultMessage="Create index pattern"
+  const createButton = (() => {
+    if (!canSave) return null;
+
+    const button = (
+      <CreateButton options={creationOptions}>
+        <FormattedMessage
+          id="indexPatternManagement.indexPatternTable.createBtn"
+          defaultMessage="Create index pattern"
+        />
+      </CreateButton>
+    );
+
+    return useUpdatedUX ? (
+      <HeaderControl
+        controls={[{ renderComponent: button }]}
+        setMountPoint={application.setAppRightControls}
       />
-    </CreateButton>
+    ) : (
+      <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+    );
+  })();
+
+  const description = currentWorkspace
+    ? i18n.translate(
+        'indexPatternManagement.indexPatternTable.indexPatternExplanationWithWorkspace',
+        {
+          defaultMessage:
+            'Create and manage the index patterns that help you retrieve your data from OpenSearch for {name} workspace.',
+          values: {
+            name: currentWorkspace.name,
+          },
+        }
+      )
+    : i18n.translate('indexPatternManagement.indexPatternTable.indexPatternExplanation', {
+        defaultMessage:
+          'Create and manage the index patterns that help you retrieve your data from OpenSearch.',
+      });
+  const pageTitleAndDescription = useUpdatedUX ? (
+    <HeaderControl
+      controls={[{ description }]}
+      setMountPoint={application.setAppDescriptionControls}
+    />
   ) : (
-    <></>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        <h1>{title}</h1>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <p>{description}</p>
+      </EuiText>
+    </EuiFlexItem>
   );
 
   if (isLoadingSources || isLoadingIndexPatterns) {
@@ -254,7 +307,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           canSave={canSave}
           creationOptions={creationOptions}
           docLinksIndexPatternIntro={docLinks.links.noDocumentation.indexPatterns.introduction}
-          setBreadcrumbs={setBreadcrumbs}
         />
       );
     }
@@ -262,23 +314,15 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
 
   return (
     <>
-      <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
+      <EuiPageContent
+        data-test-subj="indexPatternTable"
+        role="region"
+        aria-label={ariaRegion}
+        {...(useUpdatedUX ? { paddingSize: 'm' } : {})}
+      >
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2>{title}</h2>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-                  defaultMessage="Create and manage the index patterns that help you retrieve your data from OpenSearch."
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
+          {pageTitleAndDescription}
+          {createButton}
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiInMemoryTable

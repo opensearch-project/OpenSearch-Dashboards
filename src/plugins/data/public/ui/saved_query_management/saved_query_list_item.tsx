@@ -34,6 +34,7 @@ import React, { Fragment, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@osd/i18n';
 import { SavedQuery } from '../..';
+import { DeleteSavedQueryConfirmationModal } from './delete_saved_query_confirmation_modal';
 
 interface Props {
   savedQuery: SavedQuery;
@@ -75,7 +76,7 @@ export const SavedQueryListItem = ({
   });
 
   const label = (
-    <span className="osdSavedQueryListItem__label">
+    <span className="osdSavedQueryListItem__label" data-test-subj="osdSavedQueryListItemLabel">
       <span className="osdSavedQueryListItem__labelText">{savedQuery.attributes.title}</span>{' '}
       {savedQuery.attributes.description && (
         <EuiIconTip
@@ -96,6 +97,7 @@ export const SavedQueryListItem = ({
   return (
     <Fragment>
       <EuiListGroupItem
+        size="s"
         className={classes}
         key={savedQuery.id}
         data-test-subj={`saved-query-list-item ${selectButtonDataTestSubj} ${
@@ -136,30 +138,12 @@ export const SavedQueryListItem = ({
       />
 
       {showDeletionConfirmationModal && (
-        <EuiConfirmModal
-          title={i18n.translate('data.search.searchBar.savedQueryPopoverConfirmDeletionTitle', {
-            defaultMessage: 'Delete "{savedQueryName}"?',
-            values: {
-              savedQueryName: savedQuery.attributes.title,
-            },
-          })}
-          confirmButtonText={i18n.translate(
-            'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
-            {
-              defaultMessage: 'Delete',
-            }
-          )}
-          cancelButtonText={i18n.translate(
-            'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
+        <DeleteSavedQueryConfirmationModal
+          savedQuery={savedQuery}
           onConfirm={() => {
             onDelete(savedQuery);
             setShowDeletionConfirmationModal(false);
           }}
-          buttonColor="danger"
           onCancel={() => {
             setShowDeletionConfirmationModal(false);
           }}

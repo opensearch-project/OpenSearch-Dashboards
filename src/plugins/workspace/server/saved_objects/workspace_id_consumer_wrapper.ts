@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { i18n } from '@osd/i18n';
 
 import { getWorkspaceState } from '../../../../core/server/utils';
 import {
@@ -12,11 +13,27 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
-  PUBLIC_WORKSPACE_ID,
-  WORKSPACE_TYPE,
+  SavedObjectsErrorHelpers,
+  SavedObjectsClientWrapperOptions,
+  SavedObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
 } from '../../../../core/server';
+import { IWorkspaceClientImpl } from '../types';
+import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
+
+const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
+
+const generateSavedObjectsForbiddenError = () =>
+  SavedObjectsErrorHelpers.decorateForbiddenError(
+    new Error(
+      i18n.translate('workspace.id_consumer.saved_objects.forbidden', {
+        defaultMessage: 'Saved object does not belong to the workspace',
+      })
+    )
+  );
 
 export class WorkspaceIdConsumerWrapper {
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
@@ -29,6 +46,7 @@ export class WorkspaceIdConsumerWrapper {
     const workspaceIdsInUserOptions = options?.workspaces;
     let finalWorkspaces: string[] = [];
     if (options?.hasOwnProperty('workspaces')) {
+      // In order to get all data sources in workspace
       finalWorkspaces = workspaceIdsInUserOptions || [];
     } else if (workspaceIdParsedFromRequest) {
       finalWorkspaces = [workspaceIdParsedFromRequest];
@@ -40,31 +58,104 @@ export class WorkspaceIdConsumerWrapper {
     };
   }
 
-  private isWorkspaceType(type: SavedObjectsFindOptions['type']): boolean {
-    if (Array.isArray(type)) {
-      return type.every((item) => item === WORKSPACE_TYPE);
-    }
+  private isConfigType(type: string): boolean {
+    return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
+  }
 
-    return type === WORKSPACE_TYPE;
+  private async checkWorkspacesExist(
+    workspaces: SavedObject['workspaces'] | null,
+    wrapperOptions: SavedObjectsClientWrapperOptions
+  ) {
+    if (workspaces?.length) {
+      let invalidWorkspaces: string[] = [];
+      // If only has one workspace, we should use get to optimize performance
+      if (workspaces.length === 1) {
+        const workspaceGet = await this.workspaceClient.get(
+          { request: wrapperOptions.request },
+          workspaces[0]
+        );
+        if (!workspaceGet.success) {
+          invalidWorkspaces = [workspaces[0]];
+        }
+      } else {
+        const workspaceList = await this.workspaceClient.list(
+          {
+            request: wrapperOptions.request,
+          },
+          {
+            perPage: 9999,
+          }
+        );
+        if (workspaceList.success) {
+          const workspaceIdsSet = new Set(
+            workspaceList.result.workspaces.map((workspace) => workspace.id)
+          );
+          invalidWorkspaces = workspaces.filter(
+            (targetWorkspace) => !workspaceIdsSet.has(targetWorkspace)
+          );
+        }
+      }
+
+      if (invalidWorkspaces.length > 0) {
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(
+          new Error(
+            i18n.translate('workspace.id_consumer.invalid', {
+              defaultMessage: 'Exist invalid workspaces',
+            })
+          )
+        );
+      }
+    }
+  }
+
+  private validateObjectInAWorkspace<T>(
+    object: SavedObject<T>,
+    workspace: string,
+    request: OpenSearchDashboardsRequest
+  ) {
+    // Keep the original object error
+    if (!!object?.error) {
+      return true;
+    }
+    // Data source is a workspace level object, validate if the request has access to the data source within the requested workspace.
+    if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
+      if (!!getWorkspaceState(request).isDataSourceAdmin) {
+        return true;
+      }
+      // Deny access if the object is a global data source (no workspaces assigned)
+      if (!object.workspaces || object.workspaces.length === 0) {
+        return false;
+      }
+    }
+    /*
+     * Allow access if the requested workspace matches one of the object's assigned workspaces
+     * This ensures that the user can only access data sources within their current workspace
+     */
+    if (object.workspaces && object.workspaces.length > 0) {
+      return object.workspaces.includes(workspace);
+    }
+    // Allow access if the object is a global object (object.workspaces is null/[])
+    return true;
   }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     return {
       ...wrapperOptions.client,
-      create: <T>(type: string, attributes: T, options: SavedObjectsCreateOptions = {}) =>
-        wrapperOptions.client.create(
-          type,
-          attributes,
-          this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        ),
-      bulkCreate: <T = unknown>(
+      create: async <T>(type: string, attributes: T, options: SavedObjectsCreateOptions = {}) => {
+        const finalOptions = this.isConfigType(type)
+          ? options
+          : this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        await this.checkWorkspacesExist(finalOptions?.workspaces, wrapperOptions);
+        return wrapperOptions.client.create(type, attributes, finalOptions);
+      },
+      bulkCreate: async <T = unknown>(
         objects: Array<SavedObjectsBulkCreateObject<T>>,
         options: SavedObjectsCreateOptions = {}
-      ) =>
-        wrapperOptions.client.bulkCreate(
-          objects,
-          this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        ),
+      ) => {
+        const finalOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        await this.checkWorkspacesExist(finalOptions?.workspaces, wrapperOptions);
+        return wrapperOptions.client.bulkCreate(objects, finalOptions);
+      },
       checkConflicts: (
         objects: SavedObjectsCheckConflictsObject[] = [],
         options: SavedObjectsBaseOptions = {}
@@ -74,36 +165,72 @@ export class WorkspaceIdConsumerWrapper {
           this.formatWorkspaceIdParams(wrapperOptions.request, options)
         ),
       delete: wrapperOptions.client.delete,
-      find: (options: SavedObjectsFindOptions) => {
-        const findOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        if (this.isWorkspaceType(findOptions.type)) {
-          return wrapperOptions.client.find(findOptions);
-        }
-
-        // if workspace is enabled, we always find by workspace
-        if (!findOptions.workspaces || findOptions.workspaces.length === 0) {
-          findOptions.workspaces = [PUBLIC_WORKSPACE_ID];
-        }
-
-        // `PUBLIC_WORKSPACE_ID` includes both saved objects without any workspace and with `PUBLIC_WORKSPACE_ID` workspace
-        const index = findOptions.workspaces
-          ? findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID)
-          : -1;
-        if (!findOptions.workspacesSearchOperator && findOptions.workspaces && index !== -1) {
-          findOptions.workspacesSearchOperator = 'OR';
-          // remove this deletion logic when public workspace becomes to real
-          if (this.isPermissionControlEnabled) {
-            // remove public workspace to make sure we can pass permission control validation, more details in `WorkspaceSavedObjectsClientWrapper`
-            findOptions.workspaces.splice(index, 1);
-          }
-        }
-        if (findOptions.workspaces && findOptions.workspaces.length === 0) {
-          delete findOptions.workspaces;
-        }
-        return wrapperOptions.client.find(findOptions);
+      find: async (options: SavedObjectsFindOptions) => {
+        // Based on https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/ui_settings/create_or_upgrade_saved_config/get_upgradeable_config.ts#L49
+        // we need to make sure the find call for upgrade config should be able to find all the global configs as it was before.
+        // It is a workaround for 2.17, should be optimized in the upcoming 2.18 release.
+        const finalOptions =
+          this.isConfigType(options.type as string) && options.sortField === 'buildNum'
+            ? options
+            : this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        await this.checkWorkspacesExist(finalOptions?.workspaces, wrapperOptions);
+        return wrapperOptions.client.find(finalOptions);
       },
-      bulkGet: wrapperOptions.client.bulkGet,
-      get: wrapperOptions.client.get,
+      bulkGet: async <T = unknown>(
+        objects: SavedObjectsBulkGetObject[] = [],
+        options: SavedObjectsBaseOptions = {}
+      ): Promise<SavedObjectsBulkResponse<T>> => {
+        const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        if (!!workspaces && workspaces.length > 1) {
+          // Version 2.18 does not support the passing of multiple workspaces.
+          throw SavedObjectsErrorHelpers.createBadRequestError('Multiple workspace parameters');
+        }
+
+        const objectToBulkGet = await wrapperOptions.client.bulkGet<T>(objects, options);
+
+        if (workspaces?.length === 1) {
+          return {
+            ...objectToBulkGet,
+            saved_objects: objectToBulkGet.saved_objects.map((object) => {
+              return this.validateObjectInAWorkspace(object, workspaces[0], wrapperOptions.request)
+                ? object
+                : {
+                    id: object.id,
+                    type: object.type,
+                    attributes: {} as T,
+                    references: [],
+                    error: {
+                      ...generateSavedObjectsForbiddenError().output.payload,
+                    },
+                  };
+            }),
+          };
+        }
+
+        return objectToBulkGet;
+      },
+      get: async <T = unknown>(
+        type: string,
+        id: string,
+        options: SavedObjectsBaseOptions = {}
+      ): Promise<SavedObject<T>> => {
+        const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        if (!!workspaces && workspaces.length > 1) {
+          // Version 2.18 does not support the passing of multiple workspaces.
+          throw SavedObjectsErrorHelpers.createBadRequestError('Multiple workspace parameters');
+        }
+
+        const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
+        if (
+          workspaces?.length === 1 &&
+          !this.validateObjectInAWorkspace(objectToGet, workspaces[0], wrapperOptions.request)
+        ) {
+          throw generateSavedObjectsForbiddenError();
+        }
+
+        // Allow access if no specific workspace is requested.
+        return objectToGet;
+      },
       update: wrapperOptions.client.update,
       bulkUpdate: wrapperOptions.client.bulkUpdate,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
@@ -112,5 +239,5 @@ export class WorkspaceIdConsumerWrapper {
     };
   };
 
-  constructor(private isPermissionControlEnabled?: boolean) {}
+  constructor(private readonly workspaceClient: IWorkspaceClientImpl) {}
 }

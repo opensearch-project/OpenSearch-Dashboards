@@ -1435,7 +1435,7 @@ export const getSavedObjects = (): SavedObject[] => [
   },
   {
     attributes: {
-      description: '',
+      description: 'View and compare different chart and visualization types',
       hits: 0,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
@@ -1447,7 +1447,7 @@ export const getSavedObjects = (): SavedObject[] => [
       timeFrom: 'now-7d',
       timeRestore: true,
       timeTo: 'now',
-      title: 'Visual Consistency Dashboard',
+      title: '[Logs] Chart and Visualization demo',
       version: 1,
     },
     id: 'c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',

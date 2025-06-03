@@ -1,0 +1,12 @@
+{
+  "paths": {
+    "embeddableExamples": "embeddable_examples",
+    "expressionsExample": "expressions_example",
+    "multipleDataSourceExample": "multiple_data_source_examples",
+    "searchExamples": "search_examples",
+    "stateContainerExamples": "state_containers_examples",
+    "uiActionsExamples": "ui_action_examples",
+    "uiActionsExplorer": "ui_actions_explorer"
+  },
+  "translations": []
+}

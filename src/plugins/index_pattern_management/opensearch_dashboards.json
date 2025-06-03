@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "optionalPlugins": ["dataSource"],
-  "requiredPlugins": ["management", "data", "urlForwarding"],
+  "requiredPlugins": ["management", "navigation", "data", "urlForwarding"],
   "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils"],
   "supportedOSDataSourceVersions": ">=1.0.0"
 }

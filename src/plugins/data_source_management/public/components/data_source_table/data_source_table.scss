@@ -1,0 +1,24 @@
+// Hide the table header for the expanded table
+.data-source-expanded-table thead {
+  display: none;
+}
+
+// Remove padding for the first cell in expanded rows
+.data-source-table [id^="row"][id$="expansion"] > td:first-child > div:first-child {
+  padding: 0;
+}
+
+// Remove top border for the first expanded row
+.data-source-table-expanded-row:first-child > td {
+  border-top: 0;
+}
+
+// Remove bottom border for the last expanded row
+.data-source-table-expanded-row:last-child > td {
+  border-bottom: 0;
+}
+
+// Add left margin to the title in expanded rows
+.data-source-table-expanded-row_title {
+  margin-left: 20px;
+}

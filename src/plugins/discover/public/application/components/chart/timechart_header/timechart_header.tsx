@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import './timechart_header.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlexGroup,
@@ -79,6 +80,10 @@ export interface TimechartHeaderProps {
    * selected interval
    */
   stateInterval: string;
+  /**
+   * is query enhancement enabled
+   */
+  isEnhancementsEnabled: boolean;
 }
 
 export function TimechartHeader({
@@ -88,6 +93,7 @@ export function TimechartHeader({
   options,
   onChangeInterval,
   stateInterval,
+  isEnhancementsEnabled,
 }: TimechartHeaderProps) {
   const [interval, setInterval] = useState(stateInterval);
   const toMoment = useCallback(
@@ -118,7 +124,7 @@ export function TimechartHeader({
 
   return (
     <I18nProvider>
-      <EuiFlexGroup gutterSize="s" responsive justifyContent="center" alignItems="center">
+      <EuiFlexGroup gutterSize="s" responsive alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('discover.howToChangeTheTimeTooltip', {
@@ -126,7 +132,11 @@ export function TimechartHeader({
             })}
             delay="long"
           >
-            <EuiText data-test-subj="discoverIntervalDateRange" size="s">
+            <EuiText
+              data-test-subj="discoverIntervalDateRange"
+              size="s"
+              className={isEnhancementsEnabled ? '' : 'discoverIntervalDateRange'}
+            >
               {`${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${
                 interval !== 'auto'
                   ? i18n.translate('discover.timechartHeader.timeIntervalSelect.per', {

@@ -30,7 +30,7 @@
 
 import { SavedObjectMigrationFn } from 'opensearch-dashboards/server';
 import { get } from 'lodash';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
+import { DEFAULT_QUERY } from '../../../data/common';
 
 /**
  * This migration script is related to:
@@ -61,7 +61,7 @@ export const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
               ...searchSource,
               query: {
                 query: '',
-                language: DEFAULT_QUERY_LANGUAGE,
+                language: DEFAULT_QUERY.LANGUAGE,
               },
             }),
           },

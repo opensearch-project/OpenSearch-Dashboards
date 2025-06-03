@@ -13,9 +13,10 @@
     "urlForwarding",
     "navigation",
     "uiActions",
-    "visualizations"
+    "visualizations",
+    "usageCollection"
   ],
-  "optionalPlugins": ["home", "share"],
+  "optionalPlugins": ["home", "share", "explore"],
   "requiredBundles": [
     "home",
     "opensearchDashboardsUtils",

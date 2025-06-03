@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { SearchTimeoutError, TIMEOUT_MESSAGE } from './timeout_error';
+import { SearchTimeoutError } from './timeout_error';
 
 import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
@@ -45,6 +45,8 @@ describe('SearchTimeoutError', () => {
   it('Should create timeout message', () => {
     const e = new SearchTimeoutError(new AbortError());
     const component = mount(e.getErrorMessage(startMock.application));
-    expect(component.html()).toEqual(TIMEOUT_MESSAGE);
+    expect(component.html()).toEqual(
+      'Your query has timed out. Contact your system administrator to review your index strategy or increase the run time.'
+    );
   });
 });

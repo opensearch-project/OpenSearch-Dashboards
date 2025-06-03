@@ -56,7 +56,7 @@ describe('create data source menu', () => {
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type'],
+      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
       perPage: 10000,
       type: 'data-source',
     });
@@ -86,7 +86,7 @@ describe('create data source menu', () => {
 
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type'],
+      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
       perPage: 10000,
       type: 'data-source',
     });
@@ -158,7 +158,7 @@ describe('when setMenuMountPoint is provided', () => {
     await refresh();
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type'],
+      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
       perPage: 10000,
       type: 'data-source',
     });

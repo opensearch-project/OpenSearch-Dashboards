@@ -32,7 +32,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 
 import { Required } from '@osd/utility-types';
-import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import { EuiCompressedComboBox, EuiComboBoxProps } from '@elastic/eui';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 import { getTitle } from '../../../common/index_patterns/lib';
@@ -270,7 +270,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
     } = this.props;
 
     return (
-      <EuiComboBox
+      <EuiCompressedComboBox
         {...rest}
         placeholder={placeholder}
         singleSelection={true}

@@ -38,18 +38,22 @@ import {
   DocLinksStart,
   HttpSetup,
   SavedObjectReference,
+  WorkspacesStart,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
+import { DataSourceTableItem } from './components/create_index_pattern_wizard/types';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
   application: ApplicationStart;
   savedObjects: SavedObjectsStart;
   uiSettings: IUiSettingsClient;
+  navigationUI: NavigationPublicPluginStart['ui'];
   notifications: NotificationsStart;
   overlays: OverlayStart;
   http: HttpSetup;
@@ -60,6 +64,7 @@ export interface IndexPatternManagmentContext {
   getMlCardState: () => MlCardState;
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
+  workspaces: WorkspacesStart;
 }
 
 export type IndexPatternManagmentContextValue = OpenSearchDashboardsReactContextValue<
@@ -72,7 +77,10 @@ export enum MlCardState {
   ENABLED,
 }
 
-export type DataSourceRef = { title: string } & Pick<SavedObjectReference, 'type' | 'id'>;
+export type DataSourceRef = { title: string; relatedConnections?: DataSourceTableItem[] } & Pick<
+  SavedObjectReference,
+  'type' | 'id'
+>;
 
 export interface IndexPatternTableRecord {
   type: string;

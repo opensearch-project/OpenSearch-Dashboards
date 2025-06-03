@@ -55,6 +55,7 @@ export class SearchEmbeddableFactory
     }),
     type: 'search',
     getIconForSavedObject: () => 'search',
+    includeFields: ['kibanaSavedObjectMeta'],
   };
 
   constructor(private getStartServices: () => Promise<StartServices>) {}

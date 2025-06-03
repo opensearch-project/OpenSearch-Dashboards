@@ -39,4 +39,5 @@ export {
   ISidecarConfig,
   getOsdSidecarPaddingStyle,
   SIDECAR_DOCKED_MODE,
+  getSidecarLeftNavStyle,
 } from './sidecar';

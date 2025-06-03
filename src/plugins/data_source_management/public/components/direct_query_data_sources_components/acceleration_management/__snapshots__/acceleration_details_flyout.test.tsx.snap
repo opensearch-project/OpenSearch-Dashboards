@@ -1,0 +1,433 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccelerationDetailsFlyout renders AccelerationDetailsFlyout component with default options 1`] = `
+Array [
+  <div
+    className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem"
+      >
+        <div
+          className="euiText euiText--medium"
+        >
+          <h2
+            className="panel-title"
+          >
+            actual_index
+          </h2>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButtonEmpty euiButtonEmpty--primary"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonEmpty__text"
+            >
+              <span
+                data-euiicon-type="inputOutput"
+                size="m"
+              />
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButtonEmpty euiButtonEmpty--primary"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonEmpty__text"
+            >
+              <span
+                data-euiicon-type="discoverApp"
+                size="m"
+              />
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButtonEmpty euiButtonEmpty--primary"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonEmpty__text"
+            >
+              <span
+                data-euiicon-type="trash"
+                size="m"
+              />
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <div
+      className="euiTabs euiTabs--small"
+      role="tablist"
+      style={
+        Object {
+          "marginBottom": "-25px",
+        }
+      }
+    >
+      <button
+        aria-selected={true}
+        className="euiTab euiTab-isSelected"
+        disabled={false}
+        onClick={[Function]}
+        role="tab"
+        type="button"
+      >
+        <span
+          className="euiTab__content"
+        >
+          Details
+        </span>
+      </button>
+      <button
+        aria-selected={false}
+        className="euiTab"
+        disabled={false}
+        onClick={[Function]}
+        role="tab"
+        type="button"
+      >
+        <span
+          className="euiTab__content"
+        >
+          Schema
+        </span>
+      </button>
+    </div>
+  </div>,
+  <div
+    className="euiFlyoutBody"
+  >
+    <div
+      className="euiFlyoutBody__overflow"
+      tabIndex={0}
+    >
+      <div
+        className="euiFlyoutBody__overflowContent"
+      >
+        Array [
+          <div
+            className="euiSpacer euiSpacer--l"
+          />,
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Status
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <div
+                    className="euiHealth euiHealth--textSizeS"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          color="success"
+                          data-euiicon-type="dot"
+                        />
+                      </div>
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        Active
+                      </div>
+                    </div>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Acceleration Type
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                />
+              </dl>
+            </div>
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Creation Date
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  Invalid Date
+                </dd>
+              </dl>
+            </div>
+          </div>,
+          <div
+            className="euiSpacer euiSpacer--l"
+          />,
+          Array [
+            <h4
+              className="euiTitle euiTitle--small"
+            >
+              Data source details
+            </h4>,
+            <hr
+              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            />,
+          ],
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Data source connection
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <button
+                    className="euiLink euiLink--primary"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    test_source
+                  </button>
+                </dd>
+              </dl>
+            </div>
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Database
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  default
+                </dd>
+              </dl>
+            </div>
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Table
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  test_table
+                </dd>
+              </dl>
+            </div>
+          </div>,
+          <div
+            className="euiSpacer euiSpacer--l"
+          />,
+          Array [
+            <h4
+              className="euiTitle euiTitle--small"
+            >
+              Index details
+            </h4>,
+            <hr
+              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            />,
+          ],
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Index name
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                />
+              </dl>
+            </div>
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Health
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <div
+                    className="euiHealth euiHealth--textSizeS"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          color="danger"
+                          data-euiicon-type="dot"
+                        />
+                      </div>
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        Invalid
+                      </div>
+                    </div>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>,
+          <div
+            className="euiSpacer euiSpacer--l"
+          />,
+          Array [
+            <h4
+              className="euiTitle euiTitle--small"
+            >
+              Refresh Details
+            </h4>,
+            <hr
+              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            />,
+          ],
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Refresh type
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  Manual
+                </dd>
+              </dl>
+            </div>
+            <div
+              className="euiFlexItem"
+            >
+              <dl
+                className="euiDescriptionList euiDescriptionList--row"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Refresh time
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  -
+                </dd>
+              </dl>
+            </div>
+          </div>,
+        ]
+      </div>
+    </div>
+  </div>,
+]
+`;

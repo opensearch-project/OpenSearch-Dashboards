@@ -30,7 +30,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiSmallButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { getServices } from '../opensearch_dashboards_services';
@@ -38,6 +38,8 @@ import { createAppNavigationHandler } from './app_navigation_handler';
 
 export class SampleDataViewDataButton extends React.Component {
   addBasePath = getServices().addBasePath;
+  isDataSourceEnabled = !!getServices().dataSource;
+  chrome = getServices().chrome;
 
   state = {
     isPopoverOpen: false,
@@ -71,51 +73,65 @@ export class SampleDataViewDataButton extends React.Component {
     const dashboardPath = `/app/dashboards#/view/${this.props.overviewDashboard}`;
     const prefixedDashboardPath = this.addBasePath(dashboardPath);
 
-    if (this.props.appLinks.length === 0) {
+    if (this.props.appLinks.length === 0 && this.props.overviewDashboard !== '') {
       return (
-        <EuiButton
+        <EuiSmallButton
           onClick={createAppNavigationHandler(dashboardPath)}
           data-test-subj={`launchSampleDataSet${this.props.id}`}
           aria-label={viewDataButtonAriaLabel}
         >
           {viewDataButtonLabel}
-        </EuiButton>
+        </EuiSmallButton>
       );
     }
 
-    const additionalItems = this.props.appLinks.map(({ path, label, icon }) => {
-      return {
-        name: label,
-        icon: <EuiIcon type={icon} size="m" />,
-        href: this.addBasePath(path),
-        onClick: createAppNavigationHandler(path),
-      };
-    });
+    const additionalItems = this.props.appLinks.map(
+      ({ path, label, icon, newPath, appendDatasourceToPath }) => {
+        // switch paths if new nav is enabled
+        let appPath = this.chrome.navGroup.getNavGroupEnabled()
+          ? this.addBasePath(newPath)
+          : this.addBasePath(path);
+        // append datasourceId to app path
+        if (this.isDataSourceEnabled && appendDatasourceToPath) {
+          appPath = `${appPath}?datasourceId=${this.props.dataSourceId}`;
+        }
+        return {
+          name: label,
+          icon: <EuiIcon type={icon} size="m" />,
+          href: appPath,
+          onClick: createAppNavigationHandler(appPath),
+        };
+      }
+    );
     const panels = [
       {
         id: 0,
         items: [
-          {
-            name: i18n.translate('home.sampleDataSetCard.dashboardLinkLabel', {
-              defaultMessage: 'Dashboard',
-            }),
-            icon: <EuiIcon type="dashboardApp" size="m" />,
-            href: prefixedDashboardPath,
-            onClick: createAppNavigationHandler(dashboardPath),
-          },
+          ...(this.props.overviewDashboard !== ''
+            ? [
+                {
+                  name: i18n.translate('home.sampleDataSetCard.dashboardLinkLabel', {
+                    defaultMessage: 'Dashboard',
+                  }),
+                  icon: <EuiIcon type="dashboardApp" size="m" />,
+                  href: prefixedDashboardPath,
+                  onClick: createAppNavigationHandler(dashboardPath),
+                },
+              ]
+            : []),
           ...additionalItems,
         ],
       },
     ];
     const popoverButton = (
-      <EuiButton
+      <EuiSmallButton
         aria-label={viewDataButtonAriaLabel}
         onClick={this.togglePopoverVisibility}
         iconType="arrowDown"
         iconSide="right"
       >
         {viewDataButtonLabel}
-      </EuiButton>
+      </EuiSmallButton>
     );
     return (
       <EuiPopover
@@ -127,7 +143,7 @@ export class SampleDataViewDataButton extends React.Component {
         anchorPosition="downCenter"
         data-test-subj={`launchSampleDataSet${this.props.id}`}
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
       </EuiPopover>
     );
   }

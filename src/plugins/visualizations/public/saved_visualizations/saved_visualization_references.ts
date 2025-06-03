@@ -97,7 +97,7 @@ export function extractReferences({
 export function injectReferences(savedObject: VisSavedObject, references: SavedObjectReference[]) {
   if (savedObject.searchSourceFields) {
     savedObject.searchSourceFields = injectSearchSourceReferences(
-      savedObject.searchSourceFields as any,
+      savedObject.searchSourceFields,
       references
     );
   }

@@ -11,7 +11,7 @@ import {
   EuiText,
   EuiIcon,
   prettyDuration,
-  EuiButton,
+  EuiSmallButton,
 } from '@elastic/eui';
 import { TimeRange } from '../../../../data/common';
 import { DATE_RANGE_FORMAT } from './view_events_flyout';
@@ -42,7 +42,7 @@ export function DateRangeItem(props: Props) {
         <EuiText data-test-subj="durationText">{durationText}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
+        <EuiSmallButton
           iconType={'refresh'}
           isDisabled={false}
           onClick={() => {
@@ -52,7 +52,7 @@ export function DateRangeItem(props: Props) {
           data-test-subj="refreshButton"
         >
           Refresh
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false} data-test-subj="refreshDescriptionText">
         <EuiText size="s" color="subdued" style={{ whiteSpace: 'pre-line' }}>

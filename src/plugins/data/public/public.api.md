@@ -1251,7 +1251,7 @@ export interface ISearchOptions {
 export interface ISearchSetup {
     // Warning: (ae-forgotten-export) The symbol "SearchEnhancements" needs to be exported by the entry point index.d.ts
     //
-    // @internal (undocumented)
+    // @experimental (undocumented)
     __enhance: (enhancements: SearchEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AggsSetup" needs to be exported by the entry point index.d.ts
     //

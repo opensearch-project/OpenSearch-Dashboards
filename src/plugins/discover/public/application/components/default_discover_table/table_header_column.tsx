@@ -13,7 +13,7 @@ import './_table_header.scss';
 
 import { i18n } from '@osd/i18n';
 import React, { ReactNode } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from '../../../saved_searches/types';
 
 interface Props {
@@ -173,7 +173,8 @@ export function TableHeaderColumn({
       className="docTableHeaderField"
       role="columnheader"
       aria-label={i18n.translate('discover.defaultTable.docTableHeaderLabel', {
-        defaultMessage: `Discover table column: ${name}`,
+        defaultMessage: 'Discover table column: {name}',
+        values: { name },
       })}
     >
       <span data-test-subj={`docTableHeader-${name}`}>
@@ -186,7 +187,7 @@ export function TableHeaderColumn({
               content={button.tooltip}
               key={`button-${idx}`}
             >
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 iconType={`${button.iconType}`}
                 aria-label={button.ariaLabel}
                 className="docTableHeaderField__actionButton"

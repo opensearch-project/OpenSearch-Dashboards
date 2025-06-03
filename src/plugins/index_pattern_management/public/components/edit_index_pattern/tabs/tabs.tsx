@@ -36,9 +36,10 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiSpacer,
-  EuiFieldSearch,
-  EuiSelect,
+  EuiCompressedFieldSearch,
+  EuiCompressedSelect,
   EuiSelectOption,
+  EuiPageContent,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { fieldWildcardMatcher } from '../../../../../opensearch_dashboards_utils/public';
@@ -125,12 +126,14 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     [uiSettings]
   );
 
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+
   const getFilterSection = useCallback(
     (type: string) => {
       return (
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
-            <EuiFieldSearch
+            <EuiCompressedFieldSearch
               fullWidth
               placeholder={filterPlaceholder}
               value={fieldFilter}
@@ -141,7 +144,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           </EuiFlexItem>
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiSelect
+              <EuiCompressedSelect
                 options={indexedFieldTypes}
                 value={indexedFieldTypeFilter}
                 onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
@@ -152,7 +155,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           )}
           {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiSelect
+              <EuiCompressedSelect
                 options={scriptedFieldLanguages}
                 value={scriptedFieldLanguageFilter}
                 onChange={(e) => setScriptedFieldLanguageFilter(e.target.value)}
@@ -174,63 +177,75 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
 
   const getContent = useCallback(
     (type: string) => {
+      const Wrapper = useUpdatedUX ? EuiPageContent : Fragment;
       switch (type) {
         case TAB_INDEXED_FIELDS:
           return (
-            <Fragment>
-              <EuiSpacer size="m" />
-              {getFilterSection(type)}
-              <EuiSpacer size="m" />
-              <IndexedFieldsTable
-                fields={fields}
-                indexPattern={indexPattern}
-                fieldFilter={fieldFilter}
-                fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-                indexedFieldTypeFilter={indexedFieldTypeFilter}
-                helpers={{
-                  redirectToRoute: (field: IndexPatternField) => {
-                    history.push(getPath(field, indexPattern));
-                  },
-                  getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
-                }}
-              />
-            </Fragment>
+            <>
+              {useUpdatedUX && <EuiSpacer size="m" />}
+              <Wrapper {...(useUpdatedUX ? { paddingSize: 'm' } : {})}>
+                <EuiSpacer size="m" />
+                {getFilterSection(type)}
+                <EuiSpacer size="m" />
+                <IndexedFieldsTable
+                  fields={fields}
+                  indexPattern={indexPattern}
+                  fieldFilter={fieldFilter}
+                  fieldWildcardMatcher={fieldWildcardMatcherDecorated}
+                  indexedFieldTypeFilter={indexedFieldTypeFilter}
+                  helpers={{
+                    redirectToRoute: (field: IndexPatternField) => {
+                      history.push(getPath(field, indexPattern));
+                    },
+                    getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
+                  }}
+                />
+              </Wrapper>
+            </>
           );
         case TAB_SCRIPTED_FIELDS:
           return (
-            <Fragment>
-              <EuiSpacer size="m" />
-              {getFilterSection(type)}
-              <EuiSpacer size="m" />
-              <ScriptedFieldsTable
-                indexPattern={indexPattern}
-                saveIndexPattern={saveIndexPattern}
-                fieldFilter={fieldFilter}
-                scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
-                helpers={{
-                  redirectToRoute: (field: IndexPatternField) => {
-                    history.push(getPath(field, indexPattern));
-                  },
-                }}
-                onRemoveField={refreshFilters}
-                painlessDocLink={docLinks.links.noDocumentation.scriptedFields.painless}
-              />
-            </Fragment>
+            <>
+              {useUpdatedUX && <EuiSpacer size="m" />}
+              <Wrapper {...(useUpdatedUX ? { paddingSize: 'm' } : {})}>
+                <EuiSpacer size="m" />
+                {getFilterSection(type)}
+                <EuiSpacer size="m" />
+                <ScriptedFieldsTable
+                  indexPattern={indexPattern}
+                  saveIndexPattern={saveIndexPattern}
+                  fieldFilter={fieldFilter}
+                  scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
+                  helpers={{
+                    redirectToRoute: (field: IndexPatternField) => {
+                      history.push(getPath(field, indexPattern));
+                    },
+                  }}
+                  onRemoveField={refreshFilters}
+                  painlessDocLink={docLinks.links.noDocumentation.scriptedFields.painless}
+                  useUpdatedUX={useUpdatedUX}
+                />
+              </Wrapper>
+            </>
           );
         case TAB_SOURCE_FILTERS:
           return (
-            <Fragment>
-              <EuiSpacer size="m" />
-              {getFilterSection(type)}
-              <EuiSpacer size="m" />
-              <SourceFiltersTable
-                saveIndexPattern={saveIndexPattern}
-                indexPattern={indexPattern}
-                filterFilter={fieldFilter}
-                fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-                onAddOrRemoveFilter={refreshFilters}
-              />
-            </Fragment>
+            <>
+              {useUpdatedUX && <EuiSpacer size="m" />}
+              <Wrapper {...(useUpdatedUX ? { paddingSize: 'm' } : {})}>
+                <EuiSpacer size="m" />
+                {getFilterSection(type)}
+                <EuiSpacer size="m" />
+                <SourceFiltersTable
+                  useUpdatedUX={useUpdatedUX}
+                  saveIndexPattern={saveIndexPattern}
+                  indexPattern={indexPattern}
+                  filterFilter={fieldFilter}
+                  fieldWildcardMatcher={fieldWildcardMatcherDecorated}
+                  onAddOrRemoveFilter={refreshFilters}
+                />
+              </Wrapper>
+            </>
           );
       }
     },
@@ -247,6 +262,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
+      useUpdatedUX,
     ]
   );
 
@@ -296,6 +312,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
         setSelectedTabId(tab.id);
         syncingStateFunc.setCurrentTab(tab.id);
       }}
+      size="s"
     />
   );
 }

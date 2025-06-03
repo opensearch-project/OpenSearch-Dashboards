@@ -1,0 +1,24 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.usecaseOverviewGettingStartedCard {
+  // Hide titles as they take up space even when empty
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiCard__title {
+    display: none;
+  }
+
+  // Remove margins from description as titles are hidden and icons as they're at the top
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiCard__description,
+  .euiCard__icon {
+    margin-top: 0;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiCard__footer {
+    margin-top: $euiSizeS;
+  }
+}

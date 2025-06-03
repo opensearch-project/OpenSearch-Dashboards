@@ -35,7 +35,7 @@ import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@osd/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
@@ -98,7 +98,7 @@ class FilterItemsUi extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiCompressedFieldText
             placeholder={intl.formatMessage({
               id: 'visTypeTimeseries.splits.filterItems.labelPlaceholder',
               defaultMessage: 'Label',

@@ -41,8 +41,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -87,7 +88,7 @@ export const SerialDiffAgg = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('metric')}
             label={
               <FormattedMessage
@@ -102,10 +103,10 @@ export const SerialDiffAgg = (props) => {
               metric={model}
               value={model.field}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('lag')}
             label={
               <FormattedMessage
@@ -117,17 +118,19 @@ export const SerialDiffAgg = (props) => {
               />
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              Should it be text or number?
-            */}
-            <input
-              className="tvbAgg__input"
-              onChange={handleNumberChange('lag')}
-              value={model.lag}
-              type="text"
-            />
-          </EuiFormRow>
+            <EuiFormControlLayout compressed={true}>
+              {/*
+                EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                Should it be text or number?
+              */}
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                onChange={handleNumberChange('lag')}
+                value={model.lag}
+                type="text"
+              />
+            </EuiFormControlLayout>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

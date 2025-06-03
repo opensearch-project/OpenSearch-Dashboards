@@ -34,6 +34,9 @@ import { filter, map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { isEmpty } from 'lodash';
+import { createHashHistory } from 'history';
 import {
   App,
   AppMountParameters,
@@ -43,11 +46,9 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsClientContract,
+  WorkspaceAvailability,
   ScopedHistory,
-} from 'src/core/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { isEmpty } from 'lodash';
-import { createHashHistory } from 'history';
+} from '../../../../src/core/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -84,7 +85,7 @@ import {
   OpenSearchDashboardsLegacyStart,
 } from '../../opensearch_dashboards_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../core/public';
 
 import {
   ACTION_CLONE_PANEL,
@@ -367,6 +368,7 @@ export class DashboardPlugin
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboards',
       order: 2500,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
@@ -452,6 +454,43 @@ export class DashboardPlugin
     };
 
     core.application.register(app);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: app.id,
+        order: 400,
+        category: undefined,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: app.id,
+        order: 400,
+        category: undefined,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
+      {
+        id: app.id,
+        order: 300,
+        category: undefined,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: app.id,
+        order: 300,
+        category: undefined,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: app.id,
+        order: 300,
+        category: undefined,
+      },
+    ]);
+
     urlForwarding.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
       DashboardConstants.DASHBOARDS_ID,
@@ -530,7 +569,12 @@ export class DashboardPlugin
       embeddable,
     } = plugins;
 
-    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
+    const SavedObjectFinder = getSavedObjectFinder(
+      core.savedObjects,
+      core.uiSettings,
+      plugins.data,
+      core.application
+    );
 
     const changeViewAction = new ReplacePanelAction(
       core,

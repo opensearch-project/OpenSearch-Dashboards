@@ -11,8 +11,12 @@ exports[`OverwriteModal Component should render correclty 1`] = `
   onConfirm={[MockFunction]}
   title="Confirm Overwrite"
 >
-  <p>
-    Are you sure you want to overwrite the existing queries? This action cannot be undone. All existing queries will be deleted and replaced with the imported queries. If you are unsure, please choose the "Merge with existing queries" option instead
-  </p>
+  <EuiText
+    size="s"
+  >
+    <p>
+      Are you sure you want to overwrite the existing queries? This action cannot be undone. All existing queries will be deleted and replaced with the imported queries. If you are unsure, please choose the "Merge with existing queries" option instead
+    </p>
+  </EuiText>
 </EuiConfirmModal>
 `;

@@ -246,6 +246,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
               plugin.configPath,
               configDescriptor.schema
             );
+            await this.coreContext.dynamicConfigService.setSchema(
+              plugin.configPath,
+              configDescriptor.schema
+            );
           }
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 

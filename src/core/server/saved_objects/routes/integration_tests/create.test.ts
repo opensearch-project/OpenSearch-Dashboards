@@ -33,6 +33,7 @@ import { UnwrapPromise } from '@osd/utility-types';
 import { registerCreateRoute } from '../create';
 import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
 import { setupServer } from '../test_utils';
+import { dynamicConfigServiceMock } from '../../../config/dynamic_config_service.mock';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -59,7 +60,8 @@ describe('POST /api/saved_objects/{type}', () => {
     const router = httpSetup.createRouter('/api/saved_objects/');
     registerCreateRoute(router);
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start({ dynamicConfigService });
   });
 
   afterEach(async () => {

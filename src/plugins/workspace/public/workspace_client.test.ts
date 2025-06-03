@@ -178,6 +178,8 @@ describe('#WorkspaceClient', () => {
     expect(workspaceMock.workspaceList$.getValue()).toEqual([
       {
         id: 'foo',
+        owner: true,
+        readonly: false,
       },
     ]);
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
@@ -207,6 +209,48 @@ describe('#WorkspaceClient', () => {
     await workspaceClient.update('foo', {
       name: 'foo',
     });
+    expect(workspaceMock.workspaceList$.getValue()).toEqual([]);
+  });
+
+  it('#copy', async () => {
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    httpSetupMock.fetch.mockResolvedValue({
+      success: true,
+      successCount: 1,
+    });
+    const body = JSON.stringify({
+      objects: [{ id: 'url_id', type: 'url' }],
+      targetWorkspace: 'workspace-1',
+      includeReferencesDeep: false,
+    });
+    await workspaceClient.copy([{ id: 'url_id', type: 'url' }], 'workspace-1', false);
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_duplicate_saved_objects', {
+      body,
+      method: 'POST',
+    });
+  });
+
+  it('#init with resultWithWritePermission is not success ', async () => {
+    const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
+    httpSetupMock.fetch
+      .mockResolvedValueOnce({
+        success: true,
+        result: {
+          workspaces: [
+            {
+              id: 'foo',
+              name: 'foo',
+            },
+          ],
+          total: 1,
+          per_page: 999,
+          page: 1,
+        },
+      })
+      .mockResolvedValueOnce({
+        success: false,
+      });
+    await workspaceClient.init();
     expect(workspaceMock.workspaceList$.getValue()).toEqual([]);
   });
 });

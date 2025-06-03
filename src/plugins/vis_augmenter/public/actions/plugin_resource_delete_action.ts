@@ -23,7 +23,7 @@ export class PluginResourceDeleteAction implements Action<PluginResourceDeleteCo
   }
 
   public getDisplayName() {
-    return i18n.translate('dashboard.actions.deleteSavedObject.name', {
+    return i18n.translate('visAugmenter.actions.deleteSavedObject.name', {
       defaultMessage:
         'Clean up all augment-vis saved objects associated to the deleted visualization',
     });

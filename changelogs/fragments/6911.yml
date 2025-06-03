@@ -1,2 +1,0 @@
-security:
-- [CVE-2024-4067][CVE-2024-4068] Bump packages dependent on `braces` versions lower than 3.0.3 ([#6911](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6911))

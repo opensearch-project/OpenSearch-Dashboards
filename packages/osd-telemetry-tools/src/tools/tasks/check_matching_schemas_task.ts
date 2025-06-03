@@ -37,7 +37,7 @@ export function checkMatchingSchemasTask({ roots }: TaskContext, throwOnDiff: bo
   return roots.map((root) => ({
     task: async () => {
       const fullPath = path.resolve(process.cwd(), root.config.output);
-      const opensearchMappingString = await readFileAsync(fullPath, 'utf-8');
+      const opensearchMappingString = await readFileAsync(fullPath, 'utf8');
       const opensearchMapping = JSON.parse(opensearchMappingString);
 
       if (root.parsedCollections) {

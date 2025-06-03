@@ -5,6 +5,7 @@
 
 import { CoreSetup, RequestHandlerContext } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../../../../core/server/mocks';
+import { SavedObjectsErrorHelpers } from '../../../../../../core/server';
 import { updateWorkspaceState } from '../../../../../../core/server/utils';
 import { flightsSpecProvider } from '../data_sets';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
@@ -220,6 +221,121 @@ describe('sample data install route', () => {
         opensearchIndicesCreated: { opensearch_dashboards_sample_data_flights: 13059 },
         opensearchDashboardsSavedObjectsLoaded: 20,
       },
+    });
+  });
+
+  it('handler response forbidden error when bulkCreate forbidden inside workspace', async () => {
+    const mockWorkspaceId = 'workspace';
+
+    const mockClient = jest.fn().mockResolvedValue(true);
+
+    const mockSOClientGetResponse = {
+      saved_objects: [
+        {
+          type: 'dashboard',
+          id: '12345',
+          namespaces: ['default'],
+          attributes: { title: 'dashboard' },
+        },
+      ],
+    };
+    const mockSOClient = {
+      bulkCreate: jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.decorateForbiddenError(new Error('Invalid workspace permission'))
+        ),
+      get: jest.fn().mockResolvedValue(mockSOClientGetResponse),
+    };
+
+    const mockContext = {
+      core: {
+        opensearch: {
+          legacy: {
+            client: { callAsCurrentUser: mockClient },
+          },
+        },
+        savedObjects: { client: mockSOClient },
+      },
+    };
+    const mockBody = { id: 'flights' };
+    const mockQuery = {};
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+      params: mockBody,
+      query: mockQuery,
+    });
+    updateWorkspaceState(mockRequest, { requestWorkspaceId: mockWorkspaceId });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    createInstallRoute(
+      mockCoreSetup.http.createRouter(),
+      sampleDatasets,
+      mockLogger,
+      mockUsageTracker
+    );
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.post.mock.calls[0][1];
+
+    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+
+    expect(mockResponse.forbidden).toBeCalled();
+    expect(mockResponse.forbidden.mock.calls[0][0]).toMatchObject({
+      body: expect.stringContaining('Invalid workspace permission'),
+    });
+  });
+
+  it('handler response internal error when bulkCreate throw error', async () => {
+    const mockClient = jest.fn().mockResolvedValue(true);
+
+    const mockSOClientGetResponse = {
+      saved_objects: [
+        {
+          type: 'dashboard',
+          id: '12345',
+          namespaces: ['default'],
+          attributes: { title: 'dashboard' },
+        },
+      ],
+    };
+    const mockSOClient = {
+      bulkCreate: jest.fn().mockRejectedValue(new Error('Unknown error')),
+      get: jest.fn().mockResolvedValue(mockSOClientGetResponse),
+    };
+
+    const mockContext = {
+      core: {
+        opensearch: {
+          legacy: {
+            client: { callAsCurrentUser: mockClient },
+          },
+        },
+        savedObjects: { client: mockSOClient },
+      },
+    };
+    const mockBody = { id: 'flights' };
+    const mockQuery = {};
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+      params: mockBody,
+      query: mockQuery,
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    createInstallRoute(
+      mockCoreSetup.http.createRouter(),
+      sampleDatasets,
+      mockLogger,
+      mockUsageTracker
+    );
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.post.mock.calls[0][1];
+
+    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+
+    expect(mockResponse.internalError).toBeCalled();
+    expect(mockResponse.internalError.mock.calls[0][0]).toMatchObject({
+      body: expect.stringContaining('Unknown error'),
     });
   });
 });

@@ -30,21 +30,42 @@
 
 import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.test.mocks';
 
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';
 import { relativeToRepoRoot, standardize } from '@osd/cross-platform';
 
-const currentDir = relativeToRepoRoot(__dirname);
-const localePath = resolve(currentDir, '__fixtures__', 'integrate_locale_files', 'fr.json');
+const currentDir = relativeToRepoRoot(__dirname)!;
+const testPath = resolve(currentDir, '__fixtures__', 'integrate_locale_files');
 
-const mockDefaultMessagesMap = new Map([
+const localePathA = join(testPath, 'fr.json');
+
+const localePathB = join(testPath, 'tr.json');
+const targetPathB = join(testPath, 'destination', 'tr.json');
+
+const missingMessagesPath = join(testPath, 'missing_messages.json');
+// Non-existing path
+const missingMessagesTargetPath = join(testPath, 'destination', 'missing_messages.json');
+
+const missingFormatsPath = join(testPath, 'missing_formats.json');
+// Non-existing path
+const missingFormatsTargetPath = join(testPath, 'destination', 'missing_formats.json');
+
+const mockDefaultMessagesMapA = new Map([
   ['plugin-1.message-id-1', { message: 'Message text 1' }],
   ['plugin-1.message-id-2', { message: 'Message text 2' }],
   ['plugin-2.message-id', { message: 'Message text' }],
 ]);
+const mockDefaultMessagesMapB = new Map([
+  ['plugin-1.message-id-1', { message: 'Message text 1' }],
+  ['plugin-1.message-id-2', { message: 'Message text 2' }],
+  ['plugin-2.message-id-1', { message: 'Message text 1' }],
+  ['plugin-2.message-id-2', { message: 'Message text 2' }],
+  ['plugin-3.message-id-1', { message: 'Message text 1' }],
+  ['plugin-4.message-id-1', { message: 'Message text 1' }],
+]);
 
 const defaultIntegrateOptions = {
-  sourceFileName: localePath,
+  sourceFileName: localePathA,
   dryRun: false,
   ignoreIncompatible: false,
   ignoreMalformed: false,
@@ -54,6 +75,8 @@ const defaultIntegrateOptions = {
     paths: {
       'plugin-1': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1'],
       'plugin-2': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2'],
+      'plugin-3': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_3'],
+      'plugin-4': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_4'],
     },
     exclude: [],
     translations: [],
@@ -71,7 +94,7 @@ describe('dev/i18n/integrate_locale_files', () => {
       ]);
 
       expect(() =>
-        verifyMessages(localizedMessagesMap, mockDefaultMessagesMap, defaultIntegrateOptions)
+        verifyMessages(localizedMessagesMap, mockDefaultMessagesMapA, defaultIntegrateOptions)
       ).not.toThrow();
     });
 
@@ -103,28 +126,28 @@ describe('dev/i18n/integrate_locale_files', () => {
       expect(() =>
         verifyMessages(
           localizedMessagesMapWithMissingMessage,
-          mockDefaultMessagesMap,
+          mockDefaultMessagesMapA,
           defaultIntegrateOptions
         )
       ).toThrowErrorMatchingSnapshot();
       expect(() =>
         verifyMessages(
           localizedMessagesMapWithUnusedMessage,
-          mockDefaultMessagesMap,
+          mockDefaultMessagesMapA,
           defaultIntegrateOptions
         )
       ).toThrowErrorMatchingSnapshot();
       expect(() =>
         verifyMessages(
           localizedMessagesMapWithIdTypo,
-          mockDefaultMessagesMap,
+          mockDefaultMessagesMapA,
           defaultIntegrateOptions
         )
       ).toThrowErrorMatchingSnapshot();
       expect(() =>
         verifyMessages(
           localizedMessagesMapWithUnknownValues,
-          mockDefaultMessagesMap,
+          mockDefaultMessagesMapA,
           defaultIntegrateOptions
         )
       ).toThrowErrorMatchingSnapshot();
@@ -139,7 +162,7 @@ describe('dev/i18n/integrate_locale_files', () => {
         ['plugin-2.message', 'Some old translated text'],
       ]);
 
-      verifyMessages(localizedMessagesMapWithUnusedMessage, mockDefaultMessagesMap, {
+      verifyMessages(localizedMessagesMapWithUnusedMessage, mockDefaultMessagesMapA, {
         ...defaultIntegrateOptions,
         ignoreUnused: true,
       });
@@ -160,7 +183,7 @@ Map {
         ['plugin-2.message-id', 'Translated text'],
       ]);
 
-      verifyMessages(localizedMessagesMapWithIncompatibleMessage, mockDefaultMessagesMap, {
+      verifyMessages(localizedMessagesMapWithIncompatibleMessage, mockDefaultMessagesMapA, {
         ...defaultIntegrateOptions,
         ignoreIncompatible: true,
       });
@@ -175,18 +198,88 @@ Map {
   });
 
   describe('integrateLocaleFiles', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     test('splits locale file by plugins and writes them into the right folders', async () => {
-      await integrateLocaleFiles(mockDefaultMessagesMap, defaultIntegrateOptions);
+      await integrateLocaleFiles(mockDefaultMessagesMapA, defaultIntegrateOptions);
 
       const [[path1, json1], [path2, json2]] = mockWriteFileAsync.mock.calls;
       const [[dirPath1], [dirPath2]] = mockMakeDirAsync.mock.calls;
 
-      expect([standardize(relativeToRepoRoot(path1)), json1]).toMatchSnapshot();
-      expect([standardize(relativeToRepoRoot(path2)), json2]).toMatchSnapshot();
+      expect([standardize(relativeToRepoRoot(path1)!), json1]).toMatchSnapshot();
+      expect([standardize(relativeToRepoRoot(path2)!), json2]).toMatchSnapshot();
       expect([
-        standardize(relativeToRepoRoot(dirPath1)),
-        standardize(relativeToRepoRoot(dirPath2)),
+        standardize(relativeToRepoRoot(dirPath1)!),
+        standardize(relativeToRepoRoot(dirPath2)!),
       ]).toMatchSnapshot();
+    });
+
+    test('updates existing translations', async () => {
+      await integrateLocaleFiles(mockDefaultMessagesMapB, {
+        ...defaultIntegrateOptions,
+        sourceFileName: localePathB,
+        targetFileName: targetPathB,
+        update: true,
+        ignoreUnused: true,
+        ignoreMissing: true,
+      });
+
+      const [[path1, json1]] = mockWriteFileAsync.mock.calls;
+
+      expect([standardize(relativeToRepoRoot(path1)!), json1]).toMatchSnapshot();
+      expect(mockMakeDirAsync).not.toHaveBeenCalled();
+    });
+
+    test('fails on locale files missing formats object', async () => {
+      const action = async () => {
+        await integrateLocaleFiles(mockDefaultMessagesMapB, {
+          ...defaultIntegrateOptions,
+          sourceFileName: missingFormatsPath,
+          targetFileName: missingFormatsTargetPath,
+          ignoreUnused: true,
+          ignoreMissing: true,
+        });
+      };
+
+      expect(mockWriteFileAsync).not.toHaveBeenCalled();
+      expect(mockMakeDirAsync).not.toHaveBeenCalled();
+      await expect(action()).rejects.toThrowError('Locale file should contain a "formats" object.');
+    });
+
+    test('adds translations despite missing formats object', async () => {
+      await integrateLocaleFiles(mockDefaultMessagesMapB, {
+        ...defaultIntegrateOptions,
+        sourceFileName: missingFormatsPath,
+        targetFileName: missingFormatsTargetPath,
+        ignoreUnused: true,
+        ignoreMissing: true,
+        ignoreMissingFormats: true,
+      });
+
+      const [[path1, json1]] = mockWriteFileAsync.mock.calls;
+
+      expect([standardize(relativeToRepoRoot(path1)!), json1]).toMatchSnapshot();
+      expect(mockMakeDirAsync).not.toHaveBeenCalled();
+    });
+
+    test('fails on locale files missing messages object', async () => {
+      const action = async () => {
+        await integrateLocaleFiles(mockDefaultMessagesMapB, {
+          ...defaultIntegrateOptions,
+          sourceFileName: missingMessagesPath,
+          targetFileName: missingMessagesTargetPath,
+          ignoreUnused: true,
+          ignoreMissing: true,
+        });
+      };
+
+      expect(mockWriteFileAsync).not.toHaveBeenCalled();
+      expect(mockMakeDirAsync).not.toHaveBeenCalled();
+      await expect(action()).rejects.toThrowError(
+        'Locale file should contain a "messages" object.'
+      );
     });
   });
 });

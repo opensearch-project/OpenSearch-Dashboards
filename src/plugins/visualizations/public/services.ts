@@ -119,3 +119,5 @@ export const [getSavedAugmentVisLoader, setSavedAugmentVisLoader] = createGetter
 >('savedAugmentVisLoader');
 
 export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('docLinks');
+
+export const [getDataStart, setDataStart] = createGetterSetter<DataPublicPluginStart>('DataStart');

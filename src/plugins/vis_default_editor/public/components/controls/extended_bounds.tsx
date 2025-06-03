@@ -30,7 +30,7 @@
 
 import React, { ChangeEvent } from 'react';
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { isUndefined } from 'lodash';
 
@@ -84,7 +84,11 @@ function ExtendedBoundsParamEditor({
   };
 
   return (
-    <EuiFormRow fullWidth={true} isInvalid={showValidation ? !isValid : false} error={error}>
+    <EuiCompressedFormRow
+      fullWidth={true}
+      isInvalid={showValidation ? !isValid : false}
+      error={error}
+    >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber
@@ -111,7 +115,7 @@ function ExtendedBoundsParamEditor({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 }
 

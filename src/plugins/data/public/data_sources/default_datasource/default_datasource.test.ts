@@ -48,8 +48,8 @@ describe('DefaultDslDataSource', () => {
 
   it('should return a populated dataset if getCache returns non-empty array', async () => {
     const mockSavedObjects = [
-      { id: '1', attributes: { title: 'Index1' } },
-      { id: '2', attributes: { title: 'Index2' } },
+      { id: '1', attributes: { title: 'Index1' }, references: [] },
+      { id: '2', attributes: { title: 'Index2' }, references: [] },
     ];
     indexPatternsMock.getCache.mockResolvedValue(mockSavedObjects);
     const dataSource = new DefaultDslDataSource({

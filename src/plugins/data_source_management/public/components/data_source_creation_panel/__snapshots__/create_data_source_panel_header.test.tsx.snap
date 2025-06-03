@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateDataSourcePanelHeader renders correctly 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  justifyContent="spaceBetween"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiText
+      size="s"
+    >
+      <h1>
+        <FormattedMessage
+          defaultMessage="Create Data Source"
+          id="dataSourcesManagement.createDataSourcePanel.title"
+          values={Object {}}
+        />
+      </h1>
+    </EuiText>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiText
+      size="s"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="Select a data source type to get started."
+          id="dataSourcesManagement.createDataSourcePanel.description"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -36,21 +36,21 @@ describe('AddDeleteButtons', () => {
   it('calls onAdd={handleAdd}', () => {
     const handleAdd = jest.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onAdd={handleAdd} />);
-    wrapper.find('EuiButtonIcon').at(0).simulate('click');
+    wrapper.find('EuiSmallButtonIcon').at(0).simulate('click');
     expect(handleAdd).toHaveBeenCalled();
   });
 
   it('calls onDelete={handleDelete}', () => {
     const handleDelete = jest.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onDelete={handleDelete} />);
-    wrapper.find('EuiButtonIcon').at(1).simulate('click');
+    wrapper.find('EuiSmallButtonIcon').at(1).simulate('click');
     expect(handleDelete).toHaveBeenCalled();
   });
 
   it('calls onClone={handleClone}', () => {
     const handleClone = jest.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onClone={handleClone} />);
-    wrapper.find('EuiButtonIcon').at(0).simulate('click');
+    wrapper.find('EuiSmallButtonIcon').at(0).simulate('click');
     expect(handleClone).toHaveBeenCalled();
   });
 

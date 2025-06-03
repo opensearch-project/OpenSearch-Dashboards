@@ -29,7 +29,7 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiSmallButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { isBoolean } from 'lodash';
 
@@ -59,7 +59,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip content={props.deleteTooltip}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             data-test-subj={`${testSubj}DeleteBtn`}
             aria-label={props.deleteTooltip}
             color="danger"
@@ -77,7 +77,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip content={props.addTooltip}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             data-test-subj={`${testSubj}AddBtn`}
             aria-label={props.addTooltip}
             iconType="plusInCircle"
@@ -95,7 +95,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
       cloneBtn = (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={props.cloneTooltip}>
-            <EuiButtonIcon
+            <EuiSmallButtonIcon
               data-test-subj={`${testSubj}CloneBtn`}
               aria-label={props.cloneTooltip}
               iconType="copy"
@@ -121,7 +121,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
       activatePanelBtn = (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={tooltip}>
-            <EuiButtonIcon
+            <EuiSmallButtonIcon
               data-test-subj={`${testSubj}ActivatePanelBtn`}
               aria-label={tooltip}
               iconType={iconType}

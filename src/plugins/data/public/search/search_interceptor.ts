@@ -276,8 +276,17 @@ export class SearchInterceptor {
 
     this.deps.toasts.addError(e, {
       title: 'Search Error',
+      id: simpleHash(e.message),
     });
   }
 }
+
+// To be used as a unique identifier for each error
+const simpleHash = (str: string) =>
+  str
+    .split('')
+    // eslint-disable-next-line no-bitwise
+    .reduce((hash: number, char) => (hash << 5) + hash + char.charCodeAt(0), 5381)
+    .toString();
 
 export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;

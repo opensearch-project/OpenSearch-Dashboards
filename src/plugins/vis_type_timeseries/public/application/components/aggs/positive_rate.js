@@ -40,11 +40,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiComboBox,
+  EuiCompressedComboBox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -121,7 +121,7 @@ export const PositiveRateAgg = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('field')}
             label={
               <FormattedMessage
@@ -141,10 +141,10 @@ export const PositiveRateAgg = (props) => {
               uiRestrictions={props.uiRestrictions}
               fullWidth
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('units')}
             label={
               <FormattedMessage
@@ -154,7 +154,7 @@ export const PositiveRateAgg = (props) => {
             }
             fullWidth
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               placeholder={i18n.translate('visTypeTimeseries.positiveRate.unitSelectPlaceholder', {
                 defaultMessage: 'Select scale...',
               })}
@@ -163,7 +163,7 @@ export const PositiveRateAgg = (props) => {
               singleSelection={{ asPlainText: true }}
               selectedOptions={selectedUnitOptions}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

@@ -1,0 +1,2 @@
+fix:
+- Initial result summary generated with the wrong data ([#9611](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9611))

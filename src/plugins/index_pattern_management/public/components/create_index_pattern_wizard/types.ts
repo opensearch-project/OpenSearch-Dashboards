@@ -93,4 +93,11 @@ export interface DataSourceTableItem {
   checked?: 'on' | 'off';
   label: string;
   datasourceversion: string;
+  installedplugins: string[];
+  engine: string;
+  relatedDataSourceConnection?: DataSourceTableItem[];
+  append?: any;
+  prepend?: any;
+  parentId?: string;
+  disabled?: boolean;
 }

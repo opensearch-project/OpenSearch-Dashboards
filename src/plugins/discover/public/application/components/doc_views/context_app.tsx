@@ -88,7 +88,7 @@ export function ContextApp({
         onChangeCount={onChangeCount}
         type={SurrDocType.PREDECESSORS}
       />
-      <div className="dscDocsGrid">
+      <div className="dscDocsGrid" data-test-subj="dscDocsGrid">
         <DataGridTable
           aria-label={'ContextTable'}
           columns={columns}
@@ -97,12 +97,9 @@ export function ContextApp({
           onFilter={onAddFilter}
           onMoveColumn={() => {}}
           onRemoveColumn={() => {}}
-          onSetColumns={() => {}}
           onSort={() => {}}
           sort={sort}
           rows={rows}
-          isToolbarVisible={false}
-          isContextView={true}
         />
       </div>
       <ActionBar

@@ -179,10 +179,7 @@ describe('QueryStringInput', () => {
     );
 
     component.find(QueryLanguageSwitcher).props().onSelectLanguage('lucene');
-    expect(mockStorage.set).toHaveBeenCalledWith(
-      'opensearchDashboards.userQueryLanguage',
-      'lucene'
-    );
+    expect(mockStorage.set).toHaveBeenCalledWith('userQueryLanguage', 'lucene');
     expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
   });
 

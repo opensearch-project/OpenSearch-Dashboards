@@ -62,7 +62,7 @@ export function registerSearchRoute(
       try {
         const { withLongNumeralsSupport, ...response } = await selfStart.search.search(
           context,
-          { ...searchRequest, id },
+          { ...searchRequest, id, rawRequest: request },
           {
             abortSignal,
             strategy,

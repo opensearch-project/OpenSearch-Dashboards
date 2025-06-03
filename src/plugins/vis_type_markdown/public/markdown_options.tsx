@@ -34,7 +34,7 @@ import {
   EuiTitle,
   EuiLink,
   EuiIcon,
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -80,7 +80,7 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiTextArea
+          <EuiCompressedTextArea
             id="markdownVisInput"
             className="eui-fullHeight"
             value={stateParams.markdown}

@@ -28,7 +28,11 @@
  * under the License.
  */
 
-import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
+import {
+  TopNavMenuProps,
+  TopNavMenuExtensionsRegistrySetup,
+  TopNavControlsProps,
+} from './top_nav_menu';
 import { DataPublicPluginStart } from '../../data/public';
 
 export interface NavigationPublicPluginSetup {
@@ -38,6 +42,7 @@ export interface NavigationPublicPluginSetup {
 export interface NavigationPublicPluginStart {
   ui: {
     TopNavMenu: React.ComponentType<TopNavMenuProps>;
+    HeaderControl: React.ComponentType<TopNavControlsProps>;
   };
 }
 

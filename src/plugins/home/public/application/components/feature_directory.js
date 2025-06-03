@@ -149,7 +149,9 @@ export class FeatureDirectory extends React.Component {
             </h1>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiTabs className="homeDirectoryTabs">{this.renderTabs()}</EuiTabs>
+          <EuiTabs size="s" className="homeDirectoryTabs">
+            {this.renderTabs()}
+          </EuiTabs>
           <EuiSpacer />
           <EuiFlexGrid columns={4}>{this.renderDirectories()}</EuiFlexGrid>
         </EuiPageBody>

@@ -11,6 +11,10 @@
 
 .consoleContainer {
   padding: $euiSizeS;
+
+  &.useUpdatedUX-true {
+    padding: $euiSizeS 0;
+  }
 }
 
 .conApp {

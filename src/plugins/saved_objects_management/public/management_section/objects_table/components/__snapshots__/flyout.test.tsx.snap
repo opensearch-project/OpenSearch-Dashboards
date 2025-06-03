@@ -8,17 +8,21 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
-      size="m"
+    <EuiText
+      size="s"
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Import saved objects"
+          defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiSpacer
@@ -38,7 +42,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
           values={
             Object {
@@ -51,6 +55,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
                   values={Object {}}
                 />
               </EuiLink>,
+              "useUpdatedUX": undefined,
             }
           }
         />
@@ -272,17 +277,21 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
-      size="m"
+    <EuiText
+      size="s"
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Import saved objects"
+          defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiSpacer
@@ -328,7 +337,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
           values={
             Object {
@@ -341,6 +350,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
                   values={Object {}}
                 />
               </EuiLink>,
+              "useUpdatedUX": undefined,
             }
           }
         />
@@ -491,7 +501,7 @@ Array [
   >
     <p>
       <FormattedMessage
-        defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+        defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
         id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {
@@ -504,6 +514,7 @@ Array [
                 values={Object {}}
               />
             </EuiLink>,
+            "useUpdatedUX": undefined,
           }
         }
       />
@@ -536,23 +547,27 @@ exports[`Flyout should render cluster selector and import options when datasourc
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
-      size="m"
+    <EuiText
+      size="s"
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Import saved objects"
+          defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiForm>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -565,9 +580,9 @@ exports[`Flyout should render cluster selector and import options when datasourc
         }
         labelType="label"
       >
-        <EuiFilePicker
+        <EuiCompressedFilePicker
           accept=".ndjson, .json"
-          compressed={false}
+          compressed={true}
           display="large"
           fullWidth={true}
           initialPromptText={
@@ -579,7 +594,7 @@ exports[`Flyout should render cluster selector and import options when datasourc
           }
           onChange={[Function]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       <div
         className="savedObjectImportControlForDataSource"
       >
@@ -598,6 +613,7 @@ exports[`Flyout should render cluster selector and import options when datasourc
           }
         >
           <DataSourceSelector
+            compressed={true}
             disabled={false}
             fullWidth={true}
             isClearable={false}
@@ -617,9 +633,9 @@ exports[`Flyout should render cluster selector and import options when datasourc
           />
         </EuiFormFieldset>
         <EuiSpacer />
-        <EuiFormRow
+        <EuiCompressedFormRow
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={true}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
@@ -636,7 +652,7 @@ exports[`Flyout should render cluster selector and import options when datasourc
             optionLabel="Conflict management"
             updateSelection={[Function]}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </div>
     </EuiForm>
   </EuiFlyoutBody>
@@ -691,23 +707,27 @@ exports[`Flyout should render import step 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
-      size="m"
+    <EuiText
+      size="s"
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Import saved objects"
+          defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiForm>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -720,9 +740,9 @@ exports[`Flyout should render import step 1`] = `
         }
         labelType="label"
       >
-        <EuiFilePicker
+        <EuiCompressedFilePicker
           accept=".ndjson, .json"
-          compressed={false}
+          compressed={true}
           display="large"
           fullWidth={true}
           initialPromptText={
@@ -734,10 +754,10 @@ exports[`Flyout should render import step 1`] = `
           }
           onChange={[Function]}
         />
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -754,7 +774,7 @@ exports[`Flyout should render import step 1`] = `
           optionLabel="Import options"
           updateSelection={[Function]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiForm>
   </EuiFlyoutBody>
   <EuiFlyoutFooter>

@@ -8,6 +8,14 @@ Array [
 ]
 `;
 
+exports[`FlyoutService closeFlyout() can be called multiple times 1`] = `
+Array [
+  Array [
+    <div />,
+  ],
+]
+`;
+
 exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
 Array [
   Array [

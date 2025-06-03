@@ -36,22 +36,22 @@ import { queryStringManagerMock } from './query_string/query_string_manager.mock
 
 type QueryServiceClientContract = PublicMethodsOf<QueryService>;
 
-const createSetupContractMock = () => {
+const createSetupContractMock = (isEnhancementsEnabled: boolean = false) => {
   const setupContract: jest.Mocked<QuerySetup> = {
     filterManager: createFilterManagerMock(),
     timefilter: timefilterServiceMock.createSetupContract(),
-    queryString: queryStringManagerMock.createSetupContract(),
+    queryString: queryStringManagerMock.createSetupContract(isEnhancementsEnabled),
     state$: new Observable(),
   };
 
   return setupContract;
 };
 
-const createStartContractMock = () => {
+const createStartContractMock = (isEnhancementsEnabled: boolean = false) => {
   const startContract: jest.Mocked<QueryStart> = {
     addToQueryLog: jest.fn(),
     filterManager: createFilterManagerMock(),
-    queryString: queryStringManagerMock.createStartContract(),
+    queryString: queryStringManagerMock.createStartContract(isEnhancementsEnabled),
     savedQueries: jest.fn() as any,
     state$: new Observable(),
     timefilter: timefilterServiceMock.createStartContract(),

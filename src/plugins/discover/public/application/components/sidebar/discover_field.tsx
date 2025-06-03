@@ -133,13 +133,14 @@ export const DiscoverField = ({
   }
 
   const fieldName = (
-    <span
-      data-test-subj={`field-${field.name}`}
-      title={field.name}
-      className="dscSidebarField__name eui-textBreakWord"
-    >
-      {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
-    </span>
+    <EuiToolTip delay="long" content={field.name}>
+      <span
+        data-test-subj={`field-${field.name}`}
+        className="dscSidebarField__name eui-textBreakWord"
+      >
+        {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+      </span>
+    </EuiToolTip>
   );
 
   let actionButton;
@@ -161,6 +162,7 @@ export const DiscoverField = ({
             ev.stopPropagation();
             toggleDisplay(field);
           }}
+          size="xs"
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={addLabelAria}
           className="dscSidebarField__actionButton"
@@ -186,6 +188,7 @@ export const DiscoverField = ({
             ev.stopPropagation();
             toggleDisplay(field);
           }}
+          size="xs"
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={removeLabelAria}
           className="dscSidebarField__actionButton"
@@ -195,7 +198,13 @@ export const DiscoverField = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} className="dscSidebarField">
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      className="dscSidebarField"
+      data-test-subj="dscSidebarField"
+    >
       <EuiFlexItem grow={false}>
         <FieldIcon
           type={field.type}
@@ -214,6 +223,7 @@ export const DiscoverField = ({
             isOpen={infoIsOpen}
             closePopover={() => setOpen(false)}
             anchorPosition="rightUp"
+            panelPaddingSize="s"
             button={
               <EuiButtonIcon
                 iconType="inspect"
@@ -226,7 +236,7 @@ export const DiscoverField = ({
             }
             panelClassName="dscSidebarItem__fieldPopoverPanel"
           >
-            <EuiPopoverTitle>
+            <EuiPopoverTitle tabIndex={0}>
               {' '}
               {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
                 defaultMessage: 'Top 5 values',

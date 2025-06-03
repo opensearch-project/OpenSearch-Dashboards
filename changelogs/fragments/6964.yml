@@ -1,2 +1,0 @@
-fix:
-- Update z-index of sidecar container to make it more than mask, from 1000 to 1001. ([#6964](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6964))

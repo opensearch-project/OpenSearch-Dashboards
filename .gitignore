@@ -26,6 +26,9 @@ target
 /test/*/screenshots/failure
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
+cypress/videos/*
+cypress/screenshots/*
+cypress/downloads/*
 /html_docs
 .eslintcache
 /data
@@ -52,6 +55,7 @@ npm-debug.log*
 .ci/runbld
 .ci/bash_standard_lib.sh
 .gradle
+packages/osd-optimizer/limits_delta.yml
 
 # apm plugin
 apm.tsconfig.json
@@ -68,3 +72,10 @@ snapshots.js
 
 # Yarn local mirror content
 .yarn-local-mirror
+
+# Ignore the generated antlr files
+/src/plugins/data/public/antlr/**/grammar/.antlr/
+
+# Ignore the lighthousereport generatated
+.lighthouserc.js
+.lhci_output.json

@@ -61,7 +61,6 @@ export const CopySource: Task = {
         'config/opensearch_dashboards.yml',
         'config/node.options',
         'tsconfig*.json',
-        '.i18nrc.json',
         'opensearch_dashboards.d.ts',
       ],
     });

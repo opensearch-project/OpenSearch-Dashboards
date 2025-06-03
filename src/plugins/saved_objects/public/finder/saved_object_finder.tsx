@@ -36,8 +36,8 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
-  EuiFieldSearch,
-  EuiFilterButton,
+  EuiCompressedFieldSearch,
+  EuiSmallFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -58,9 +58,12 @@ import {
   CoreStart,
   IUiSettingsClient,
   SavedObjectsStart,
+  ApplicationStart,
 } from 'src/core/public';
 
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
+import { DataPublicPluginStart, LanguageServiceContract } from 'src/plugins/data/public';
+import { first } from 'rxjs/operators';
 import { getIndexPatternTitle } from '../../../data/common/index_patterns/utils';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
@@ -76,6 +79,7 @@ export interface SavedObjectMetaData<T = unknown> {
 interface FinderAttributes {
   title?: string;
   type: string;
+  kibanaSavedObjectMeta?: string;
 }
 
 interface SavedObjectFinderState {
@@ -122,6 +126,8 @@ export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFin
 export type SavedObjectFinderUiProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
+  data?: DataPublicPluginStart;
+  application?: CoreStart['application'];
 } & SavedObjectFinderProps;
 
 class SavedObjectFinderUi extends React.Component<
@@ -137,7 +143,39 @@ class SavedObjectFinderUi extends React.Component<
     showFilter: PropTypes.bool,
   };
 
+  public async getCurrentAppId() {
+    return (
+      (await this.props?.application?.currentAppId$?.pipe(first()).toPromise()) ??
+      Promise.resolve(undefined)
+    );
+  }
+
+  readonly languageService = this.props.data?.query?.queryString?.getLanguageService();
   private isComponentMounted: boolean = false;
+
+  private isSavedSearchLanguageSupported(
+    languageId?: string,
+    currentAppId?: string,
+    languageService?: LanguageServiceContract
+  ) {
+    if (!languageId || !currentAppId || !languageService) {
+      return true;
+    }
+    const supportedInApp = languageService
+      ?.getLanguage(languageId)
+      ?.supportedAppNames?.includes(currentAppId);
+    // If the current app id is explore, although explore app might not support
+    // a language, it still supports all saved searches that are supported by
+    // discover by redirecting to discover for backward compatibility.
+    if (currentAppId === 'explore') {
+      return (
+        (supportedInApp ||
+          languageService?.getLanguage(languageId)?.supportedAppNames?.includes('discover')) ??
+        true
+      );
+    }
+    return supportedInApp ?? true;
+  }
 
   private debouncedFetch = _.debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
@@ -162,6 +200,8 @@ class SavedObjectFinderUi extends React.Component<
       return await client.get<DataSourceAttributes>('data-source', id);
     };
 
+    const currentAppId = await this.getCurrentAppId();
+
     const savedObjects = await Promise.all(
       resp.savedObjects.map(async (obj) => {
         if (obj.type === 'index-pattern') {
@@ -172,6 +212,14 @@ class SavedObjectFinderUi extends React.Component<
             getDataSource
           );
           return result;
+        } else if (obj.type === 'search') {
+          const sourceObject = JSON.parse(
+            obj.attributes?.kibanaSavedObjectMeta?.searchSourceJSON ?? null
+          );
+          const languageId = sourceObject?.query?.language;
+          if (this.isSavedSearchLanguageSupported(languageId, currentAppId, this.languageService)) {
+            return obj;
+          }
         } else {
           return obj;
         }
@@ -179,6 +227,9 @@ class SavedObjectFinderUi extends React.Component<
     );
 
     resp.savedObjects = savedObjects.filter((savedObject) => {
+      if (!savedObject) {
+        return false;
+      }
       const metaData = metaDataMap[savedObject.type];
       if (metaData.showSavedObject) {
         return metaData.showSavedObject(savedObject);
@@ -376,7 +427,7 @@ class SavedObjectFinderUi extends React.Component<
     return (
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={true}>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
@@ -406,7 +457,7 @@ class SavedObjectFinderUi extends React.Component<
               isOpen={this.state.sortOpen}
               closePopover={() => this.setState({ sortOpen: false })}
               button={
-                <EuiFilterButton
+                <EuiSmallFilterButton
                   onClick={() =>
                     this.setState(({ sortOpen }) => ({
                       sortOpen: !sortOpen,
@@ -419,12 +470,13 @@ class SavedObjectFinderUi extends React.Component<
                   {i18n.translate('savedObjects.finder.sortButtonLabel', {
                     defaultMessage: 'Sort',
                   })}
-                </EuiFilterButton>
+                </EuiSmallFilterButton>
               }
             >
               <EuiContextMenuPanel
                 watchedItemProps={['icon', 'disabled']}
                 items={this.getSortOptions()}
+                size="s"
               />
             </EuiPopover>
             {this.props.showFilter && (
@@ -435,7 +487,7 @@ class SavedObjectFinderUi extends React.Component<
                 isOpen={this.state.filterOpen}
                 closePopover={() => this.setState({ filterOpen: false })}
                 button={
-                  <EuiFilterButton
+                  <EuiSmallFilterButton
                     onClick={() =>
                       this.setState(({ filterOpen }) => ({
                         filterOpen: !filterOpen,
@@ -451,11 +503,12 @@ class SavedObjectFinderUi extends React.Component<
                     {i18n.translate('savedObjects.finder.filterButtonLabel', {
                       defaultMessage: 'Types',
                     })}
-                  </EuiFilterButton>
+                  </EuiSmallFilterButton>
                 }
               >
                 <EuiContextMenuPanel
                   watchedItemProps={['icon', 'disabled']}
+                  size="s"
                   items={this.props.savedObjectMetaData.map((metaData) => (
                     <EuiContextMenuItem
                       key={metaData.type}
@@ -515,6 +568,7 @@ class SavedObjectFinderUi extends React.Component<
               ).getIconForSavedObject(item.savedObject);
               return (
                 <EuiListGroupItem
+                  size="s"
                   key={item.id}
                   iconType={iconType}
                   label={item.title}
@@ -568,9 +622,20 @@ class SavedObjectFinderUi extends React.Component<
   }
 }
 
-const getSavedObjectFinder = (savedObject: SavedObjectsStart, uiSettings: IUiSettingsClient) => {
+const getSavedObjectFinder = (
+  savedObject: SavedObjectsStart,
+  uiSettings: IUiSettingsClient,
+  data?: DataPublicPluginStart,
+  application?: ApplicationStart
+) => {
   return (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi {...props} savedObjects={savedObject} uiSettings={uiSettings} />
+    <SavedObjectFinderUi
+      {...props}
+      savedObjects={savedObject}
+      uiSettings={uiSettings}
+      data={data}
+      application={application}
+    />
   );
 };
 

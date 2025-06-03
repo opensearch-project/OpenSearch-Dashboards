@@ -1,2 +1,0 @@
-security:
-- [GHSA-x565-32qp-m3vf] Bump `jimp` to remove phin dependency ([#6977](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6977))

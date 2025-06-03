@@ -1,0 +1,564 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkspaceDetail render workspace detail page normally 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--column euiPage--grow"
+  >
+    <div
+      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+      role="main"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <h4>
+              Use case
+            </h4>
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span
+                  color="#54B399"
+                  data-euiicon-type="wsObservability"
+                />
+              </div>
+              <div
+                class="euiFlexItem"
+              >
+                Observability
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <h4>
+              Last updated
+            </h4>
+            <p>
+              1000-01-01T00:00:00-04:56
+            </p>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <h4>
+              ID
+            </h4>
+            <p>
+              foo_id
+              <span
+                class="euiToolTipAnchor"
+              >
+                <button
+                  aria-label="copy"
+                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall eui-alignTop"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="copy"
+                  />
+                </button>
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m"
+    />
+    <div
+      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+      role="main"
+    >
+      <form
+        class="euiForm"
+        id="generated-id"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <h2
+              class="euiTitle euiTitle--medium"
+            >
+              Details
+            </h2>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton--small"
+              data-test-subj="workspaceForm-workspaceDetails-edit"
+              style="min-width: 30px;"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Edit
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+        <hr
+          class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+        />
+        <div
+          class="euiDescribedFormGroup"
+          role="group"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <h3
+                class="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+              >
+                Name
+              </h3>
+            </div>
+            <div
+              class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+            >
+              <div
+                class="euiFormRow euiFormRow--compressed"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    aria-invalid="false"
+                    class="euiFormLabel euiFormRow__label"
+                    for="generated-id"
+                  >
+                    Name
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--readOnly"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper"
+                    >
+                      <input
+                        aria-describedby="generated-id-help-0"
+                        class="euiFieldText euiFieldText--compressed"
+                        data-test-subj="workspaceForm-workspaceDetails-nameInputText"
+                        id="generated-id"
+                        placeholder="Enter a name"
+                        readonly=""
+                        type="text"
+                        value="foo"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="euiFormHelpText euiFormRow__text"
+                    id="generated-id-help-0"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued"
+                    >
+                      37 characters left.
+                    </span>
+                    <br />
+                    Use a unique name for the workspace. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiDescribedFormGroup"
+          role="group"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <h3
+                class="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+              >
+                Description - 
+                <i>
+                  optional
+                </i>
+              </h3>
+              <div
+                class="euiText euiText--small euiDescribedFormGroup__description"
+              >
+                <div
+                  class="euiTextColor euiTextColor--subdued"
+                >
+                  Describe the workspace.
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+            >
+              <div
+                class="euiFormRow euiFormRow--compressed"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    aria-invalid="false"
+                    class="euiFormLabel euiFormRow__label"
+                    for="generated-id"
+                  >
+                    Description - 
+                    <i>
+                      optional
+                    </i>
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <textarea
+                    aria-describedby="generated-id-help-0"
+                    class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
+                    data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
+                    id="generated-id"
+                    placeholder="Describe the workspace"
+                    readonly=""
+                    rows="4"
+                  >
+                    this is my foo workspace description
+                  </textarea>
+                  <div
+                    class="euiFormHelpText euiFormRow__text"
+                    id="generated-id-help-0"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued"
+                    >
+                      164 characters left.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiDescribedFormGroup"
+          role="group"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <h3
+                class="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+              >
+                Use case
+              </h3>
+            </div>
+            <div
+              class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+            >
+              <div
+                class="euiFormRow euiFormRow--compressed"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    aria-invalid="false"
+                    class="euiFormLabel euiFormRow__label"
+                    for="generated-id"
+                  >
+                    Use case
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+                  >
+                    <div
+                      class="euiPopover__anchor"
+                    >
+                      <div>
+                        <input
+                          id="generated-id"
+                          type="hidden"
+                          value="observability"
+                        />
+                        <div
+                          class="euiFormControlLayout euiFormControlLayout--compressed"
+                        >
+                          <div
+                            class="euiFormControlLayout__childrenWrapper"
+                          >
+                            <span
+                              class="euiScreenReaderOnly"
+                              id="generated-id"
+                            >
+                              Select an option: Observability, is selected
+                            </span>
+                            <button
+                              aria-describedby="generated-id-help-0"
+                              aria-haspopup="true"
+                              aria-labelledby="generated-id generated-id"
+                              class="euiSuperSelectControl euiSuperSelectControl--compressed"
+                              disabled=""
+                              readonly=""
+                              type="button"
+                            >
+                              Observability
+                            </button>
+                            <div
+                              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                            >
+                              <span
+                                class="euiFormControlLayoutCustomIcon"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiFormControlLayoutCustomIcon__icon"
+                                  data-euiicon-type="arrowDown"
+                                />
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFormHelpText euiFormRow__text"
+                    id="generated-id-help-0"
+                  >
+                    You can only choose use cases with more features than the current use case.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiDescribedFormGroup"
+          role="group"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <h3
+                class="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+              >
+                Workspace icon color
+              </h3>
+              <div
+                class="euiText euiText--small euiDescribedFormGroup__description"
+              >
+                <div
+                  class="euiTextColor euiTextColor--subdued"
+                >
+                  The background color of the icon that represents the workspace.
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+            >
+              <div
+                class="euiFormRow euiFormRow--compressed"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    aria-invalid="false"
+                    class="euiFormLabel euiFormRow__label"
+                    for="generated-id"
+                  >
+                    Workspace icon color
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiColorPicker__popoverAnchor"
+                  >
+                    <div
+                      class="euiPopover__anchor"
+                    >
+                      <div
+                        class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--readOnly"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper"
+                        >
+                          <div
+                            style="color: rgb(84, 179, 153);"
+                          >
+                            <div
+                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--readOnly"
+                            >
+                              <div
+                                class="euiFormControlLayout__childrenWrapper"
+                              >
+                                <input
+                                  aria-label="Press the down key to open a popover containing color options"
+                                  autocomplete="off"
+                                  class="euiFieldText euiColorPicker__input euiFieldText--withIcon euiFieldText--compressed"
+                                  data-test-subj="euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker"
+                                  id="generated-id"
+                                  readonly=""
+                                  type="text"
+                                  value="#54B399"
+                                />
+                                <div
+                                  class="euiFormControlLayoutIcons"
+                                >
+                                  <span
+                                    class="euiFormControlLayoutCustomIcon"
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      class="euiFormControlLayoutCustomIcon__icon"
+                                      data-euiicon-type="swatchInput"
+                                    />
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiDescribedFormGroup"
+          role="group"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <h3
+                class="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+              >
+                Workspace privacy
+              </h3>
+              <div
+                class="euiText euiText--small euiDescribedFormGroup__description"
+              >
+                <div
+                  class="euiTextColor euiTextColor--subdued"
+                >
+                  <span>
+                    Manage who can view or edit workspace and assign workspace administrators on the 
+                    <button
+                      class="euiLink euiLink--primary"
+                      type="button"
+                    >
+                      <span>
+                        Collaborators
+                      </span>
+                    </button>
+                     page.
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+            >
+              <div
+                class="euiFormRow euiFormRow--compressed"
+                id="generated-id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    class="euiFormLabel euiFormRow__label"
+                    for="generated-id"
+                  >
+                    Private to collaborators
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiText euiText--extraSmall"
+                    id="generated-id"
+                  >
+                    <div
+                      class="euiTextColor euiTextColor--subdued"
+                    >
+                      Only collaborators can access the workspace.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+`;

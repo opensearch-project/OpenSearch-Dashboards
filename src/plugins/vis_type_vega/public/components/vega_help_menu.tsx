@@ -29,7 +29,12 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiSmallButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+} from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
@@ -43,7 +48,7 @@ function VegaHelpMenu() {
   const vegaHelpDoc = useOpenSearchDashboards().services.docLinks?.links.noDocumentation.vega;
 
   const button = (
-    <EuiButtonIcon
+    <EuiSmallButtonIcon
       iconType="questionInCircle"
       onClick={onButtonClick}
       aria-label={i18n.translate('visTypeVega.editor.vegaHelpButtonAriaLabel', {
@@ -92,7 +97,7 @@ function VegaHelpMenu() {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel items={items} />
+      <EuiContextMenuPanel items={items} size="s" />
     </EuiPopover>
   );
 }

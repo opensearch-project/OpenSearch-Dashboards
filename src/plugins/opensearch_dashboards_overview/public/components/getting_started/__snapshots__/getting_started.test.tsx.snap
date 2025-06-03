@@ -169,7 +169,7 @@ exports[`GettingStarted dark mode on 1`] = `
           size="xl"
         />
         <RedirectAppLinks>
-          <EuiButton
+          <EuiSmallButton
             fill={true}
             href="/app/management/opensearch-dashboards/indexPatterns"
             iconType="indexOpen"
@@ -179,7 +179,7 @@ exports[`GettingStarted dark mode on 1`] = `
               id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
               values={Object {}}
             />
-          </EuiButton>
+          </EuiSmallButton>
         </RedirectAppLinks>
       </div>
     </EuiFlexItem>
@@ -364,7 +364,7 @@ exports[`GettingStarted render 1`] = `
           size="xl"
         />
         <RedirectAppLinks>
-          <EuiButton
+          <EuiSmallButton
             fill={true}
             href="/app/management/opensearch-dashboards/indexPatterns"
             iconType="indexOpen"
@@ -374,7 +374,7 @@ exports[`GettingStarted render 1`] = `
               id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
               values={Object {}}
             />
-          </EuiButton>
+          </EuiSmallButton>
         </RedirectAppLinks>
       </div>
     </EuiFlexItem>

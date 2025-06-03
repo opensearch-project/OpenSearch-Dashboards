@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`EuiSimplifiedBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `
+<nav
+  aria-label="breadcrumb"
+  className="euiSimplifiedBreadcrumbs euiSimplifiedBreadcrumbs--truncate"
+  data-test-subj="breadcrumbs"
+/>
+`;
+
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `
 <span
   aria-current="page"
@@ -33,3 +41,9 @@ Array [
 `;
 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 3`] = `null`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable with updated header 1`] = `null`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable with updated header 2`] = `null`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable with updated header 3`] = `null`;

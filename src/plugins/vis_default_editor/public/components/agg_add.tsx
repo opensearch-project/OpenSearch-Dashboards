@@ -99,7 +99,7 @@ function DefaultEditorAggAdd({
           repositionOnScroll={true}
           closePopover={() => setIsPopoverOpen(false)}
         >
-          <EuiPopoverTitle>
+          <EuiPopoverTitle paddingSize="s">
             {(groupName !== AggGroupNames.Buckets || !stats.count) && (
               <FormattedMessage
                 id="visDefaultEditor.aggAdd.addGroupButtonLabel"
@@ -116,6 +116,7 @@ function DefaultEditorAggAdd({
             )}
           </EuiPopoverTitle>
           <EuiContextMenuPanel
+            size="s"
             items={schemas.map((schema) => (
               <EuiContextMenuItem
                 key={`${schema.name}_${schema.title}`}

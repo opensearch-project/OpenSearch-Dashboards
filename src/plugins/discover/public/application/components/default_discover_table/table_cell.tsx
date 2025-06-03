@@ -34,18 +34,23 @@ const TableCellUI = ({
 }: TableCellProps) => {
   const content = (
     <>
-      {/* eslint-disable-next-line react/no-danger */}
-      <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
-      <span className="osdDocTableCell__filter">
+      <span
+        className="osdDocTableCell__dataField"
+        data-test-subj="osdDocTableCellDataField"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
+      />
+      <span className="osdDocTableCell__filter" data-test-subj="osdDocTableCellFilter">
         <EuiToolTip
           content={i18n.translate('discover.filterForValue', {
             defaultMessage: 'Filter for value',
           })}
         >
           <EuiButtonIcon
+            size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '+')}
             iconType="plusInCircle"
-            aria-label={i18n.translate('discover.filterForValueLabel', {
+            aria-label={i18n.translate('discover.filterForValue', {
               defaultMessage: 'Filter for value',
             })}
             data-test-subj="filterForValue"
@@ -58,9 +63,10 @@ const TableCellUI = ({
           })}
         >
           <EuiButtonIcon
+            size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '-')}
             iconType="minusInCircle"
-            aria-label={i18n.translate('discover.filterOutValueLabel', {
+            aria-label={i18n.translate('discover.filterOutValue', {
               defaultMessage: 'Filter out value',
             })}
             data-test-subj="filterOutValue"
@@ -80,7 +86,7 @@ const TableCellUI = ({
       data-test-subj="docTableField"
       className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
     >
-      <div className="osdDocTable__limitedHeight">{content}</div>
+      <div className="truncate-by-height">{content}</div>
     </td>
   );
 };

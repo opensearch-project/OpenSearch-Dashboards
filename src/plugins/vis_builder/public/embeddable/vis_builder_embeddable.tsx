@@ -34,11 +34,13 @@ import {
   getIndexPatterns,
   getTypeService,
   getUIActions,
+  getUISettings,
 } from '../plugin_services';
 import { PersistedState, prepareJson } from '../../../visualizations/public';
 import { VisBuilderSavedVis } from '../saved_visualizations/transforms';
 import { handleVisEvent } from '../application/utils/handle_vis_event';
 import { VisBuilderEmbeddableFactoryDeps } from './vis_builder_embeddable_factory';
+import { VISBUILDER_ENABLE_VEGA_SETTING } from '../../common/constants';
 
 // Apparently this needs to match the saved object type for the clone and replace panel actions to work
 export const VISBUILDER_EMBEDDABLE = VISBUILDER_SAVED_OBJECT;
@@ -150,11 +152,16 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
 
       if (!valid && errorMsg) throw new Error(errorMsg);
 
-      const exp = await toExpression(renderState, {
-        filters: this.filters,
-        query: this.query,
-        timeRange: this.timeRange,
-      });
+      const useVega = getUISettings().get(VISBUILDER_ENABLE_VEGA_SETTING);
+      const exp = await toExpression(
+        renderState,
+        {
+          filters: this.filters,
+          query: this.query,
+          timeRange: this.timeRange,
+        },
+        useVega
+      );
       return exp;
     } catch (error) {
       this.onContainerError(error as Error);

@@ -88,10 +88,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       // no parse rules for a few known large packages which have no require() statements
       // or which have require() statements that should be ignored because the file is
       // already bundled with all its necessary depedencies
-      noParse: [
-        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/,
-      ],
+      noParse: [/[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/],
 
       rules: [
         {
@@ -221,10 +218,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             /* vega-lite and some of its dependencies don't have es5 builds
              * so we need to build from source and transpile for webpack v4
              */
-            /[\/\\]node_modules[\/\\](?!vega-(lite|label|functions)[\/\\])/,
+            /[\/\\]node_modules[\/\\](?!vega(-lite|-label|-functions|-scenegraph)?[\/\\])/,
 
             // Don't attempt to look into release artifacts of the plugins
             /[\/\\]plugins[\/\\][^\/\\]+[\/\\]build[\/\\]/,
+
+            // exclude stories
+            /\.stories\.(js|jsx|ts|tsx)$/,
           ],
           use: {
             loader: 'babel-loader',
@@ -256,6 +256,16 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             loader: 'raw-loader',
           },
         },
+        {
+          test: /\.cjs$/,
+          include: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: [BABEL_PRESET_PATH],
+            },
+          },
+        },
       ],
     },
 
@@ -264,6 +274,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+        'opensearch-dashboards/public': Path.resolve(worker.repoRoot, 'src/core/public'),
       },
     },
 

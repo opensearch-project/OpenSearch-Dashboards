@@ -34,7 +34,7 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { EuiHeaderSectionItemButton } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiToolTip } from '@elastic/eui';
 import { ChromeNavLink } from '../..';
 import { ChromeBranding } from '../../chrome_service';
 import { LoadingIndicator } from '../loading_indicator';
@@ -120,24 +120,25 @@ export function HomeLoader({ href, navigateToApp, branding, logos, ...observable
   });
 
   return (
-    <EuiHeaderSectionItemButton
-      className="header__homeLoaderNavButton"
-      data-test-subj="homeLoader"
-      onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
-        onClick(e, forceNavigation, navLinks, navigateToApp)
-      }
-      href={href}
-      aria-label={label}
-      title={label}
-    >
-      {!(loadingCount > 0) && (
-        <div className="homeIconContainer">
-          <HomeIcon branding={branding} logos={logos} />
+    <EuiToolTip content={label} delay="long">
+      <EuiHeaderSectionItemButton
+        className="header__homeLoaderNavButton"
+        data-test-subj="homeLoader"
+        onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
+          onClick(e, forceNavigation, navLinks, navigateToApp)
+        }
+        href={href}
+        aria-label={label}
+      >
+        {!(loadingCount > 0) && (
+          <div className="homeIconContainer">
+            <HomeIcon branding={branding} logos={logos} />
+          </div>
+        )}
+        <div className="loaderContainer">
+          <LoadingIndicator loadingCount$={observables.loadingCount$} />
         </div>
-      )}
-      <div className="loaderContainer">
-        <LoadingIndicator loadingCount$={observables.loadingCount$} />
-      </div>
-    </EuiHeaderSectionItemButton>
+      </EuiHeaderSectionItemButton>
+    </EuiToolTip>
   );
 }

@@ -33,7 +33,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow, EuiCompressedSelect } from '@elastic/eui';
 
 export const CronWeekly = ({
   minute,
@@ -45,7 +45,7 @@ export const CronWeekly = ({
   onChange,
 }) => (
   <Fragment>
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={
         <FormattedMessage
           id="opensearchUi.cronEditor.cronWeekly.fieldDateLabel"
@@ -55,7 +55,7 @@ export const CronWeekly = ({
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
     >
-      <EuiSelect
+      <EuiCompressedSelect
         options={dayOptions}
         value={day}
         onChange={(e) => onChange({ day: e.target.value })}
@@ -65,9 +65,9 @@ export const CronWeekly = ({
         })}
         data-test-subj="cronFrequencyWeeklyDaySelect"
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
 
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={
         <FormattedMessage
           id="opensearchUi.cronEditor.cronWeekly.fieldTimeLabel"
@@ -79,7 +79,7 @@ export const CronWeekly = ({
     >
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiSelect
+          <EuiCompressedSelect
             options={hourOptions}
             value={hour}
             aria-label={i18n.translate('opensearchUi.cronEditor.cronWeekly.hourSelectLabel', {
@@ -95,7 +95,7 @@ export const CronWeekly = ({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiSelect
+          <EuiCompressedSelect
             options={minuteOptions}
             value={minute}
             onChange={(e) => onChange({ minute: e.target.value })}
@@ -108,7 +108,7 @@ export const CronWeekly = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   </Fragment>
 );
 

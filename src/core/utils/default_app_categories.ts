@@ -73,4 +73,68 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 5000,
     euiIconType: 'managementApp',
   },
+  investigate: {
+    id: 'investigate',
+    label: i18n.translate('core.ui.investigate.label', {
+      defaultMessage: 'Investigate',
+    }),
+    order: 2000,
+  },
+  // TODO remove this default category
+  dashboardAndReport: {
+    id: 'visualizeAndReport',
+    label: i18n.translate('core.ui.visualizeAndReport.label', {
+      defaultMessage: 'Visualize and report',
+    }),
+    order: 2000,
+  },
+  visualizeAndReport: {
+    id: 'visualizeAndReport',
+    label: i18n.translate('core.ui.visualizeAndReport.label', {
+      defaultMessage: 'Visualize and report',
+    }),
+    order: 1000,
+  },
+  analyzeSearch: {
+    id: 'analyzeSearch',
+    label: i18n.translate('core.ui.analyzeSearch.label', {
+      defaultMessage: 'Analyze search',
+    }),
+    order: 4000,
+  },
+  detect: {
+    id: 'detect',
+    label: i18n.translate('core.ui.detect.label', {
+      defaultMessage: 'Detect',
+    }),
+    order: 8000,
+  },
+  configure: {
+    id: 'configure',
+    label: i18n.translate('core.ui.configure.label', {
+      defaultMessage: 'Configure',
+    }),
+    order: 3000,
+  },
+  manage: {
+    id: 'manage',
+    label: i18n.translate('core.ui.manageNav.label', {
+      defaultMessage: 'Manage',
+    }),
+    order: 8000,
+  },
+  manageData: {
+    id: 'manageData',
+    label: i18n.translate('core.ui.manageDataNav.label', {
+      defaultMessage: 'Manage data',
+    }),
+    order: 1000,
+  },
+  manageWorkspace: {
+    id: 'manageWorkspace',
+    label: i18n.translate('core.ui.manageWorkspaceNav.label', {
+      defaultMessage: 'Manage workspace',
+    }),
+    order: 9000,
+  },
 });

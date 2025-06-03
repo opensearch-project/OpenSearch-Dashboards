@@ -39,6 +39,7 @@ import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_managem
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
+import { DataSourcePluginSetup } from '../../data_source/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -59,6 +60,10 @@ export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 export const [getChartsSetup, setChartsSetup] = createGetterSetter<ChartsPluginSetup>(
   'ChartsPluginSetup'
 );
+
+export const [getDataSourceSetup, setDataSourceSetup] = createGetterSetter<{
+  dataSource: DataSourcePluginSetup | undefined;
+}>('DataSourceSetup');
 
 export const [getDataSourceManagementSetup, setDataSourceManagementSetup] = createGetterSetter<{
   dataSourceManagement: DataSourceManagementPluginSetup | undefined;

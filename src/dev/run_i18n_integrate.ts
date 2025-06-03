@@ -34,6 +34,7 @@ import Listr from 'listr';
 import { createFailError, run } from '@osd/dev-utils';
 import { ErrorReporter, integrateLocaleFiles } from './i18n';
 import { extractDefaultMessages, mergeConfigs, ListrContext } from './i18n/tasks';
+import { DEFAULT_DIRS_WITH_RC_FILES } from './i18n/constants';
 
 run(
   async ({
@@ -44,6 +45,7 @@ run(
       'ignore-unused': ignoreUnused = false,
       'ignore-malformed': ignoreMalformed = false,
       'include-config': includeConfig,
+      update: update = false,
       path,
       source,
       target,
@@ -79,16 +81,24 @@ run(
       typeof ignoreUnused !== 'boolean' ||
       typeof ignoreMissing !== 'boolean' ||
       typeof ignoreMalformed !== 'boolean' ||
+      typeof update !== 'boolean' ||
       typeof dryRun !== 'boolean'
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} --ignore-incompatible, --ignore-unused, --ignore-malformed, --ignore-missing, and --dry-run can't have values`
+        )} --ignore-incompatible, --ignore-unused, --ignore-malformed, --ignore-missing, --update, and --dry-run can't have values`
       );
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages']);
+    // ToDo: allow updating existing translations spread across folders
+    if (update && !target) {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} --update cannot be used without a --target`
+      );
+    }
+
+    const srcPaths = Array().concat(path || DEFAULT_DIRS_WITH_RC_FILES);
 
     const list = new Listr<ListrContext>([
       {
@@ -114,6 +124,7 @@ run(
               ignoreUnused,
               ignoreMissing,
               ignoreMalformed,
+              update,
               config,
               log,
             });

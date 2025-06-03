@@ -1,217 +1,983 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
-<EuiConfirmModal
-  buttonColor="danger"
-  cancelButtonText={
-    <FormattedMessage
-      defaultMessage="Cancel"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-      values={Object {}}
-    />
-  }
-  confirmButtonText={
-    <FormattedMessage
-      defaultMessage="Delete"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-      values={Object {}}
-    />
-  }
-  defaultFocusedButton="confirm"
-  onCancel={[Function]}
-  onConfirm={[Function]}
-  title={
-    <FormattedMessage
-      defaultMessage="Delete saved objects"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-      values={Object {}}
-    />
-  }
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 1`] = `
+<EuiModal
+  maxWidth="50vw"
+  onClose={[Function]}
 >
-  <p>
-    <FormattedMessage
-      defaultMessage="This action will delete the following saved objects:"
-      id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-      values={Object {}}
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
+      <FormattedMessage
+        defaultMessage="Delete assets"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
+        values={Object {}}
+      />
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiText
+      size="s"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="This action will delete the following assets:"
+          id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "type",
+            "name": "Type",
+            "render": [Function],
+            "width": "50px",
+          },
+          Object {
+            "field": "meta.title",
+            "name": "Title",
+          },
+          Object {
+            "field": "id",
+            "name": "ID",
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "meta": Object {
+              "icon": "configApp",
+            },
+            "type": "config",
+          },
+          Object {
+            "id": "3",
+            "meta": Object {
+              "icon": "dashboardApp",
+            },
+            "type": "dashboard",
+          },
+        ]
+      }
+      pagination={true}
+      responsive={true}
+      sorting={false}
+      tableLayout="fixed"
     />
-  </p>
-  <EuiInMemoryTable
-    columns={
-      Array [
-        Object {
-          "field": "type",
-          "name": "Type",
-          "render": [Function],
-          "width": "50px",
-        },
-        Object {
-          "field": "id",
-          "name": "Id",
-        },
-        Object {
-          "field": "meta.title",
-          "name": "Title",
-        },
-      ]
-    }
-    items={
-      Array [
-        Object {
-          "id": "1",
-          "type": "index-pattern",
-        },
-        Object {
-          "id": "3",
-          "type": "dashboard",
-        },
-      ]
-    }
-    pagination={true}
-    responsive={true}
-    sorting={false}
-    tableLayout="fixed"
-  />
-</EuiConfirmModal>
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiButtonEmpty
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Cancel"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+    <EuiButton
+      color="danger"
+      data-test-subj="confirmModalConfirmButton"
+      disabled={false}
+      fill={true}
+      onClick={[Function]}
+      type="submit"
+    >
+      <FormattedMessage
+        defaultMessage="Delete"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiModalFooter>
+</EuiModal>
 `;
 
-exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 1`] = `
-<EuiConfirmModal
-  buttonColor="danger"
-  cancelButtonText={
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 2`] = `
+<EuiModalHeader>
+  <EuiModalHeaderTitle>
+    <FormattedMessage
+      defaultMessage="Delete assets"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
+      values={Object {}}
+    />
+  </EuiModalHeaderTitle>
+</EuiModalHeader>
+`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 3`] = `
+<EuiModalFooter>
+  <EuiButtonEmpty
+    onClick={[Function]}
+  >
     <FormattedMessage
       defaultMessage="Cancel"
       id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
       values={Object {}}
     />
-  }
-  confirmButtonText={
+  </EuiButtonEmpty>
+  <EuiButton
+    color="danger"
+    data-test-subj="confirmModalConfirmButton"
+    disabled={false}
+    fill={true}
+    onClick={[Function]}
+    type="submit"
+  >
     <FormattedMessage
       defaultMessage="Delete"
       id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
       values={Object {}}
     />
-  }
-  defaultFocusedButton="confirm"
-  onCancel={[Function]}
-  onConfirm={[Function]}
-  title={
-    <FormattedMessage
-      defaultMessage="Delete saved objects"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-      values={Object {}}
-    />
-  }
+  </EuiButton>
+</EuiModalFooter>
+`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 4`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 5`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 6`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 7`] = `null`;
+
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 8`] = `null`;
+
+exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 1`] = `
+<EuiModal
+  maxWidth="50vw"
+  onClose={[Function]}
 >
-  <p>
-    <FormattedMessage
-      defaultMessage="This action will delete the following saved objects:"
-      id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-      values={Object {}}
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
+      <FormattedMessage
+        defaultMessage="Delete assets"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
+        values={Object {}}
+      />
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiText
+      size="s"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="This action will delete the following assets:"
+          id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "type",
+            "name": "Type",
+            "render": [Function],
+            "width": "50px",
+          },
+          Object {
+            "field": "meta.title",
+            "name": "Title",
+          },
+          Object {
+            "field": "id",
+            "name": "ID",
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "type": "index-pattern",
+          },
+        ]
+      }
+      pagination={true}
+      responsive={true}
+      sorting={false}
+      tableLayout="fixed"
     />
-  </p>
-  <EuiInMemoryTable
-    columns={
-      Array [
-        Object {
-          "field": "type",
-          "name": "Type",
-          "render": [Function],
-          "width": "50px",
-        },
-        Object {
-          "field": "id",
-          "name": "Id",
-        },
-        Object {
-          "field": "meta.title",
-          "name": "Title",
-        },
-      ]
-    }
-    items={
-      Array [
-        Object {
-          "id": "1",
-          "type": "index-pattern",
-        },
-      ]
-    }
-    pagination={true}
-    responsive={true}
-    sorting={false}
-    tableLayout="fixed"
-  />
-</EuiConfirmModal>
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiButtonEmpty
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Cancel"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+    <EuiButton
+      color="danger"
+      data-test-subj="confirmModalConfirmButton"
+      disabled={false}
+      fill={true}
+      onClick={[Function]}
+      type="submit"
+    >
+      <FormattedMessage
+        defaultMessage="Delete"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiModalFooter>
+</EuiModal>
 `;
 
 exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 2`] = `
-<EuiConfirmModal
-  buttonColor="danger"
-  cancelButtonText={
-    <FormattedMessage
-      defaultMessage="Cancel"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-      values={Object {}}
-    />
-  }
-  confirmButtonText={
-    <FormattedMessage
-      defaultMessage="Delete"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-      values={Object {}}
-    />
-  }
-  defaultFocusedButton="confirm"
-  onCancel={[Function]}
-  onConfirm={[Function]}
-  title={
-    <FormattedMessage
-      defaultMessage="Delete saved objects"
-      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-      values={Object {}}
-    />
-  }
+<EuiModal
+  maxWidth="50vw"
+  onClose={[Function]}
 >
-  <p>
-    <FormattedMessage
-      defaultMessage="This action will delete the following saved objects:"
-      id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-      values={Object {}}
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
+      <FormattedMessage
+        defaultMessage="Delete assets"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
+        values={Object {}}
+      />
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiText
+      size="s"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="This action will delete the following assets:"
+          id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "type",
+            "name": "Type",
+            "render": [Function],
+            "width": "50px",
+          },
+          Object {
+            "field": "meta.title",
+            "name": "Title",
+          },
+          Object {
+            "field": "id",
+            "name": "ID",
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "type": "index-pattern",
+          },
+        ]
+      }
+      pagination={true}
+      responsive={true}
+      sorting={false}
+      tableLayout="fixed"
     />
-  </p>
-  <EuiInMemoryTable
-    columns={
-      Array [
-        Object {
-          "field": "type",
-          "name": "Type",
-          "render": [Function],
-          "width": "50px",
-        },
-        Object {
-          "field": "id",
-          "name": "Id",
-        },
-        Object {
-          "field": "meta.title",
-          "name": "Title",
-        },
-      ]
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiButtonEmpty
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Cancel"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+    <EuiButton
+      color="danger"
+      data-test-subj="confirmModalConfirmButton"
+      disabled={false}
+      fill={true}
+      onClick={[Function]}
+      type="submit"
+    >
+      <FormattedMessage
+        defaultMessage="Delete"
+        id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiModalFooter>
+</EuiModal>
+`;
+
+exports[`SavedObjectsTable duplicate should allow the user to choose on header when duplicating all 1`] = `
+<SavedObjectsDuplicateModal
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
     }
-    items={
+  }
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  onClose={[Function]}
+  onDuplicate={[Function]}
+  selectedSavedObjects={
+    Array [
+      Object {
+        "id": "1",
+        "meta": Object {
+          "editUrl": "#/management/opensearch-dashboards/indexPatterns/patterns/1",
+          "icon": "indexPatternApp",
+          "inAppUrl": Object {
+            "path": "/management/opensearch-dashboards/indexPatterns/patterns/1",
+            "uiCapabilitiesPath": "management.opensearchDashboards.indexPatterns",
+          },
+          "title": "MyIndexPattern*",
+        },
+        "type": "index-pattern",
+        "workspaces": undefined,
+      },
+      Object {
+        "id": "2",
+        "meta": Object {
+          "editUrl": "/management/opensearch-dashboards/objects/savedSearches/2",
+          "icon": "search",
+          "inAppUrl": Object {
+            "path": "/discover/2",
+            "uiCapabilitiesPath": "discover.show",
+          },
+          "title": "MySearch",
+        },
+        "type": "search",
+        "workspaces": undefined,
+      },
+      Object {
+        "id": "3",
+        "meta": Object {
+          "editUrl": "/management/opensearch-dashboards/objects/savedDashboards/3",
+          "icon": "dashboardApp",
+          "inAppUrl": Object {
+            "path": "/dashboard/3",
+            "uiCapabilitiesPath": "dashboard.show",
+          },
+          "title": "MyDashboard",
+        },
+        "type": "dashboard",
+        "workspaces": undefined,
+      },
+      Object {
+        "id": "4",
+        "meta": Object {
+          "editUrl": "/management/opensearch-dashboards/objects/savedVisualizations/4",
+          "icon": "visualizeApp",
+          "inAppUrl": Object {
+            "path": "/edit/4",
+            "uiCapabilitiesPath": "visualize.show",
+          },
+          "title": "MyViz",
+        },
+        "type": "visualization",
+        "workspaces": undefined,
+      },
+    ]
+  }
+  workspaces={
+    Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Object {
+          "id": "workspace1",
+          "name": "foo",
+        },
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "workspace1",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "initialized$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceError$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [
+          Object {
+            "id": "workspace1",
+            "name": "foo",
+          },
+          Object {
+            "id": "workspace2",
+            "name": "bar",
+          },
+        ],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+    }
+  }
+/>
+`;
+
+exports[`SavedObjectsTable duplicate should allow the user to choose on table when duplicating all 1`] = `
+<SavedObjectsDuplicateModal
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  onClose={[Function]}
+  onDuplicate={[Function]}
+  selectedSavedObjects={Array []}
+  workspaces={
+    Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Object {
+          "id": "workspace1",
+          "name": "foo",
+        },
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "workspace1",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "initialized$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceError$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [
+          Object {
+            "id": "workspace1",
+            "name": "foo",
+          },
+          Object {
+            "id": "workspace2",
+            "name": "bar",
+          },
+        ],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+    }
+  }
+/>
+`;
+
+exports[`SavedObjectsTable duplicate should allow the user to choose on table when duplicating single 1`] = `
+<SavedObjectsDuplicateModal
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  onClose={[Function]}
+  onDuplicate={[Function]}
+  selectedSavedObjects={
+    Array [
       Array [
         Object {
           "id": "1",
-          "type": "index-pattern",
+          "type": "dashboard",
+          "workspaces": Array [
+            "workspace1",
+          ],
         },
-      ]
+      ],
+    ]
+  }
+  workspaces={
+    Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentWorkspace$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Object {
+          "id": "workspace1",
+          "name": "foo",
+        },
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "workspace1",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "initialized$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceError$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "workspaceList$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Array [
+          Object {
+            "id": "workspace1",
+            "name": "foo",
+          },
+          Object {
+            "id": "workspace2",
+            "name": "bar",
+          },
+        ],
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
     }
-    pagination={true}
-    responsive={true}
-    sorting={false}
-    tableLayout="fixed"
-  />
-</EuiConfirmModal>
+  }
+/>
 `;
 
 exports[`SavedObjectsTable export should allow the user to choose when exporting all 1`] = `
@@ -220,21 +986,28 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
-        defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
-        values={
-          Object {
-            "filteredItemCount": 4,
-          }
-        }
-      />
+      <EuiText
+        size="s"
+      >
+        <h2>
+          <FormattedMessage
+            defaultMessage="Export {useUpdatedUX, select, true {{filteredItemCount, plural, one{# asset} other {# assets}}} other {{filteredItemCount, plural, one{# object} other {# objects}}}}"
+            id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
+            values={
+              Object {
+                "filteredItemCount": 4,
+                "useUpdatedUX": undefined,
+              }
+            }
+          />
+        </h2>
+      </EuiText>
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
-    <EuiFormRow
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -247,7 +1020,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
       }
       labelType="legend"
     >
-      <EuiCheckboxGroup
+      <EuiCompressedCheckboxGroup
         idToSelectedMap={
           Object {
             "dashboard": true,
@@ -278,17 +1051,21 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
           ]
         }
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
     <EuiSpacer
       size="m"
     />
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={true}
       label={
         <FormattedMessage
-          defaultMessage="Include related objects"
+          defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
           id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       }
       name="includeReferencesDeep"
@@ -306,7 +1083,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
           <EuiFlexItem
             grow={false}
           >
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               onClick={[Function]}
             >
               <FormattedMessage
@@ -314,12 +1091,12 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
                 values={Object {}}
               />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem
             grow={false}
           >
-            <EuiButton
+            <EuiSmallButton
               fill={true}
               onClick={[Function]}
             >
@@ -328,7 +1105,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
                 values={Object {}}
               />
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -342,10 +1119,57 @@ exports[`SavedObjectsTable should render normally 1`] = `
   horizontalPosition="center"
 >
   <Header
-    filteredCount={4}
+    applications={
+      Object {
+        "applications$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+          "savedObjectsManagement": Object {
+            "delete": false,
+            "edit": false,
+            "read": true,
+          },
+          "workspaces": Object {},
+        },
+        "currentAppId$": Observable {
+          "_isScalar": false,
+          "source": Subject {
+            "_isScalar": false,
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+        "registerMountContext": [MockFunction],
+        "setAppBadgeControls": [MockFunction],
+        "setAppBottomControls": [MockFunction],
+        "setAppCenterControls": [MockFunction],
+        "setAppDescriptionControls": [MockFunction],
+        "setAppLeftControls": [MockFunction],
+        "setAppRightControls": [MockFunction],
+      }
+    }
+    objectCount={4}
+    onDuplicate={[Function]}
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
+    showImportButton={true}
   />
   <EuiSpacer
     size="xs"
@@ -388,6 +1212,12 @@ exports[`SavedObjectsTable should render normally 1`] = `
         "navigateToApp": [MockFunction],
         "navigateToUrl": [MockFunction],
         "registerMountContext": [MockFunction],
+        "setAppBadgeControls": [MockFunction],
+        "setAppBottomControls": [MockFunction],
+        "setAppCenterControls": [MockFunction],
+        "setAppDescriptionControls": [MockFunction],
+        "setAppLeftControls": [MockFunction],
+        "setAppRightControls": [MockFunction],
       }
     }
   >
@@ -418,7 +1248,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
-      currentWorkspaceId=""
       filters={
         Array [
           Object {
@@ -447,6 +1276,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
                 "view": "search (0)",
               },
             ],
+            "searchThreshold": 1,
             "type": "field_value_selection",
           },
         ]
@@ -512,8 +1342,11 @@ exports[`SavedObjectsTable should render normally 1`] = `
       }
       onActionRefresh={[Function]}
       onDelete={[Function]}
+      onDuplicate={[Function]}
+      onDuplicateSingle={[Function]}
       onExport={[Function]}
       onQueryChange={[Function]}
+      onRefresh={[Function]}
       onShowRelationships={[Function]}
       onTableChange={[Function]}
       pageIndex={0}
@@ -529,3 +1362,5 @@ exports[`SavedObjectsTable should render normally 1`] = `
   </RedirectAppLinks>
 </EuiPageContent>
 `;
+
+exports[`SavedObjectsTable should unmount normally 1`] = `""`;

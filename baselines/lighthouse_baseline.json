@@ -1,0 +1,18 @@
+{
+  "/app/home": {
+    "first-contentful-paint": 2800,
+    "speed-index": 20000
+  },
+  "/app/data-explorer/discover": {
+    "first-contentful-paint": 2200,
+    "speed-index": 26000
+  },
+  "/app/dashboards": {
+    "first-contentful-paint": 2200,
+    "speed-index": 28000
+  },
+  "/app/visualize": {
+    "first-contentful-paint": 2200,
+    "speed-index": 22000
+  }
+}

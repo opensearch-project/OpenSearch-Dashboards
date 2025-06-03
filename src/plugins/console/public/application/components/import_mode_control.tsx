@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFormFieldset, EuiTitle, EuiRadioGroup } from '@elastic/eui';
+import { EuiFormFieldset, EuiTitle, EuiCompressedRadioGroup } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export interface ImportModeControlProps {
@@ -43,7 +43,7 @@ export const ImportModeControl = ({ initialValues, updateSelection }: ImportMode
   };
 
   const overwriteRadio = (
-    <EuiRadioGroup
+    <EuiCompressedRadioGroup
       options={[overwriteDisabled, overwriteEnabled]}
       idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
       onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}

@@ -10,8 +10,18 @@
  */
 
 .osdQueryBar__wrap {
-  max-width: 100%;
-  z-index: $euiZContentMenu;
+  .euiToolTipAnchor {
+    height: 100%;
+  }
+
+  &.euiFormControlLayout--group.euiFormControlLayout--compressed {
+    overflow: initial;
+  }
+
+  @include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
+    max-width: 100%;
+    z-index: $euiZContentMenu;
+  }
 }
 
 // Uses the append style, but no bordering
@@ -29,12 +39,12 @@
 .osdQueryBar__textarea {
   z-index: $euiZContentMenu;
   resize: none !important; // When in the group, it will autosize
-  height: $euiFormControlHeight;
+  height: $euiFormControlLayoutGroupInputCompressedHeight;
 
   // Unlike most inputs within layout control groups, the text area still needs a border.
   // These adjusts help it sit above the control groups shadow to line up correctly.
-  padding: ($euiSizeS + 2px) $euiSizeS $euiSizeS;
-  transform: translateY(-2px) translateX(-1px);
+  padding: $euiSizeXS $euiSizeS $euiSizeXS;
+  transform: translateY(-1px) translateX(-1px);
 
   &:not(:focus):not(:invalid) {
     @include euiYScrollWithShadows;
@@ -68,7 +78,7 @@
 }
 
 // IE specific fix for the datepicker to not collapse
-@include euiBreakpoint("m", "l", "xl") {
+@include euiBreakpoint("m", "l", "xl", "xxl", "xxl") {
   .osdQueryBar__datePickerWrapper {
     max-width: 40vw;
     flex-grow: 0 !important;
@@ -80,4 +90,8 @@
       max-width: 0;
     }
   }
+}
+
+.osdQueryBar--hideEmpty:empty {
+  display: none;
 }

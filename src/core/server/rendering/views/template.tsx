@@ -79,8 +79,6 @@ export const Template: FunctionComponent<Props> = ({
          * ToDo: Custom branded favicons will not work correctly across all browsers with
          * these `link` elements and single type. Try to guess the image and use only one.
          *
-         * Favicons (generated from https://realfavicongenerator.net/)
-         *
          * For user customized favicon using yml file:
          * If user inputs a valid URL, we guarantee basic favicon customization, such as
          * browser favicon(Chrome, Firefox, Safari, and Edge), apple touch icon, safari
@@ -172,11 +170,14 @@ export const Template: FunctionComponent<Props> = ({
             <div
               className="osdWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
-                defaultMessage: `${applicationTitle} did not load properly. Check the server output for more information.`,
+                defaultMessage:
+                  '{applicationTitle} did not load properly. Check the server output for more information.',
+                values: { applicationTitle },
               })}
             >
               {i18n('core.ui.welcomeMessage', {
-                defaultMessage: `Loading ${applicationTitle}`,
+                defaultMessage: 'Loading {applicationTitle}',
+                values: { applicationTitle },
               })}
             </div>
             {/* Show a progress bar if a static custom branded logo is used */}

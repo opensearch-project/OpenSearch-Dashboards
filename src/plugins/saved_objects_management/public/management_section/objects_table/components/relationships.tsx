@@ -30,7 +30,6 @@
 
 import React, { Component } from 'react';
 import {
-  EuiTitle,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -57,6 +56,7 @@ export interface RelationshipsProps {
   close: () => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  useUpdatedUX?: boolean;
 }
 
 export interface RelationshipsState {
@@ -206,6 +206,10 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
         render: (title: string, object: SavedObjectWithMetadata) => {
           const { path = '' } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
+          let finalPath = path;
+          if (this.props.useUpdatedUX && finalPath) {
+            finalPath = finalPath.replace(/^\/app\/management\/opensearch-dashboards/, '/app');
+          }
           if (!canGoInApp) {
             return (
               <EuiText size="s" data-test-subj="relationshipsTitle">
@@ -214,7 +218,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
             );
           }
           return (
-            <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
+            <EuiLink href={basePath.prepend(finalPath)} data-test-subj="relationshipsTitle">
               {title || getDefaultTitle(object)}
             </EuiLink>
           );
@@ -336,9 +340,9 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     return (
       <EuiFlyout onClose={close}>
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m" className="eui-textBreakWord">
+          <EuiText size="s" className="eui-textBreakWord">
             <h2>{savedObject.meta.title || getDefaultTitle(savedObject)}</h2>
-          </EuiTitle>
+          </EuiText>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>{this.renderRelationships()}</EuiFlyoutBody>

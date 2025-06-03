@@ -134,3 +134,4 @@ export {
   UnmappedTypeStrings,
   ExpressionValueRender as Render,
 } from '../common';
+export { getExpressionsService } from './services';

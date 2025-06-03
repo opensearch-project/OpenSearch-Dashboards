@@ -26,6 +26,7 @@ import {
   getDefaultDataSourceId$,
 } from './utils';
 import { coreMock, notificationServiceMock } from '../../../../core/public/mocks';
+import { UiSettingScope } from '../../../../core/public';
 import {
   getDataSourceByIdWithCredential,
   getDataSourceByIdWithoutCredential,
@@ -48,16 +49,9 @@ import {
   usernamePasswordAuthMethod,
 } from '../types';
 import { HttpStart, IToasts, SavedObject } from 'opensearch-dashboards/public';
-import { i18n } from '@osd/i18n';
 import { AuthenticationMethod, AuthenticationMethodRegistry } from '../auth_registry';
 import { deepEqual } from 'assert';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
-import {
-  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
-  CONNECT_DATASOURCES_MESSAGE,
-  NO_COMPATIBLE_DATASOURCES_MESSAGE,
-  NO_DATASOURCES_CONNECTED_MESSAGE,
-} from './constants';
 import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
@@ -102,8 +96,10 @@ describe('DataSourceManagement: Utils.ts', () => {
 
   describe('Handle no available data source error', () => {
     let toasts: IToasts;
-    const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
-    const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
+    const noDataSourcesConnectedMessage =
+      'No data sources connected yet. Connect your data sources to get started.';
+    const noCompatibleDataSourcesMessage =
+      'No compatible data sources are available. Add a compatible data source.';
 
     beforeEach(() => {
       toasts = notificationServiceMock.createStartContract().toasts;
@@ -128,11 +124,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           incompatibleDataSourcesExist,
         });
         expect(toasts.add).toBeCalledTimes(1);
-        expect(toasts.add).toBeCalledWith(
-          expect.objectContaining({
-            title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
-          })
-        );
+        expect(toasts.add).toBeCalledWith(expect.objectContaining({ title: defaultMessage }));
       }
     );
   });
@@ -381,47 +373,68 @@ describe('DataSourceManagement: Utils.ts', () => {
       jest.clearAllMocks(); // Reset all mock calls before each test
     });
     test('should set default datasource when it does not have default datasource ', async () => {
-      mockUiSettingsCalls(uiSettings, 'get', null);
+      mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', null);
+
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
-      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings, UiSettingScope.GLOBAL);
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should set default datasource when returned default datasource id is empty string', async () => {
-      mockUiSettingsCalls(uiSettings, 'get', '');
+      mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', '');
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
-      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings, UiSettingScope.GLOBAL);
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should not set default datasource when it has default datasouce', async () => {
-      mockUiSettingsCalls(uiSettings, 'get', 'test');
+      mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'test');
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
-      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings, UiSettingScope.GLOBAL);
       expect(uiSettings.set).not.toHaveBeenCalled();
     });
   });
-  describe('set first aataSource as default', () => {
+  describe('set first dataSource as default', () => {
     beforeEach(() => {
       jest.clearAllMocks(); // Reset all mock calls before each test
     });
     test('should set defaultDataSource if more than one data source exists', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      await setFirstDataSourceAsDefault(
+        savedObjects.client,
+        uiSettings,
+        true,
+        UiSettingScope.GLOBAL
+      );
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should set defaultDataSource if only one data source exists', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getSingleDataSourceResponse);
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      await setFirstDataSourceAsDefault(
+        savedObjects.client,
+        uiSettings,
+        true,
+        UiSettingScope.GLOBAL
+      );
       expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should not set defaultDataSource if no data source exists', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      await setFirstDataSourceAsDefault(
+        savedObjects.client,
+        uiSettings,
+        true,
+        UiSettingScope.GLOBAL
+      );
       expect(uiSettings.remove).toHaveBeenCalled();
       expect(uiSettings.set).not.toHaveBeenCalled();
     });
     test('should not set defaultDataSource if no data source exists and no default datasouce', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
-      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, false);
+      await setFirstDataSourceAsDefault(
+        savedObjects.client,
+        uiSettings,
+        false,
+        UiSettingScope.GLOBAL
+      );
       expect(uiSettings.remove).not.toHaveBeenCalled();
       expect(uiSettings.set).not.toHaveBeenCalled();
     });
@@ -666,7 +679,7 @@ describe('DataSourceManagement: Utils.ts', () => {
 
     it('should return the first data source if no default option, hideLocalCluster is ture and no default datasource', () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
-      const result = getDefaultDataSource(getDataSourceOptions, LocalCluster, uiSettings, true);
+      const result = getDefaultDataSource(getDataSourceOptions, LocalCluster, '', true);
       expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
     });
   });
@@ -685,16 +698,22 @@ describe('DataSourceManagement: Utils.ts', () => {
     });
   });
   describe('getDefaultDataSourceId', () => {
-    it('should return null if uiSettings is not passed', () => {
+    it('should return null if uiSettings is not passed', async () => {
       mockUiSettingsCalls(uiSettings, 'get', 'id-1');
-      const result = getDefaultDataSourceId();
+      const result = await getDefaultDataSourceId();
       expect(result).toEqual(null);
     });
 
-    it('should return string value normally', () => {
+    it('should return string value normally', async () => {
       mockUiSettingsCalls(uiSettings, 'get', 'id-1');
-      const result = getDefaultDataSourceId(uiSettings);
+      const result = await getDefaultDataSourceId(uiSettings);
       expect(result).toEqual('id-1');
+    });
+
+    it('should call getUserProvidedWithScope if a scope is passed', async () => {
+      mockUiSettingsCalls(uiSettings, 'getUserProvidedWithScope', 'id-global');
+      const result = await getDefaultDataSourceId(uiSettings, UiSettingScope.GLOBAL);
+      expect(result).toEqual('id-global');
     });
   });
 

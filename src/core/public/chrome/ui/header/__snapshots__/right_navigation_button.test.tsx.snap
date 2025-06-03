@@ -3,30 +3,33 @@
 exports[`Right navigation button should render base element normally 1`] = `
 <body>
   <div>
-    <button
-      aria-label="title"
-      class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-      data-test-subj="rightNavigationButton"
-      type="button"
+    <span
+      class="euiToolTipAnchor"
     >
-      <span
-        class="euiButtonContent euiButtonEmpty__content"
+      <button
+        aria-label="title"
+        class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+        data-test-subj="rightNavigationButton"
+        type="button"
       >
         <span
-          class="euiButtonEmpty__text"
+          class="euiButtonContent euiButtonEmpty__content"
         >
           <span
-            class="euiHeaderSectionItemButton__content"
+            class="euiButtonEmpty__text"
           >
             <span
-              color="text"
-              data-euiicon-type="mock_icon"
-              title="title"
-            />
+              class="euiHeaderSectionItemButton__content"
+            >
+              <span
+                color="text"
+                data-euiicon-type="mock_icon"
+              />
+            </span>
           </span>
         </span>
-      </span>
-    </button>
+      </button>
+    </span>
   </div>
 </body>
 `;

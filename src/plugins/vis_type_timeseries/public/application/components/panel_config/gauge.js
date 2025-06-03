@@ -40,18 +40,19 @@ import uuid from 'uuid';
 import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiTabs,
   EuiTab,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiTitle,
   EuiHorizontalRule,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { QueryBarWrapper } from '../query_bar_wrapper';
@@ -154,7 +155,7 @@ class GaugePanelConfigUi extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true}>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('panelFilter')}
                   label={
                     <FormattedMessage
@@ -172,7 +173,7 @@ class GaugePanelConfigUi extends Component {
                     onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
@@ -206,7 +207,7 @@ class GaugePanelConfigUi extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true}>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('gaugeMax')}
                   label={
                     <FormattedMessage
@@ -215,21 +216,23 @@ class GaugePanelConfigUi extends Component {
                     />
                   }
                 >
-                  {/*
-                    EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-                    It accepts a null value, but is passed a empty string.
-                  */}
-                  <input
-                    id={htmlId('gaugeMax')}
-                    className="tvbAgg__input"
-                    type="number"
-                    onChange={handleTextChange('gauge_max')}
-                    value={model.gauge_max}
-                  />
-                </EuiFormRow>
+                  <EuiFormControlLayout compressed={true}>
+                    {/*
+                      EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                      It accepts a null value, but is passed a empty string.
+                    */}
+                    <input
+                      id={htmlId('gaugeMax')}
+                      className="euiFieldText euiFieldText--compressed"
+                      type="number"
+                      onChange={handleTextChange('gauge_max')}
+                      value={model.gauge_max}
+                    />
+                  </EuiFormControlLayout>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('gaugeStyle')}
                   label={
                     <FormattedMessage
@@ -238,17 +241,17 @@ class GaugePanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiComboBox
+                  <EuiCompressedComboBox
                     isClearable={false}
                     options={styleOptions}
                     selectedOptions={selectedGaugeStyleOption ? [selectedGaugeStyleOption] : []}
                     onChange={handleSelectChange('gauge_style')}
                     singleSelection={{ asPlainText: true }}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('innerLine')}
                   label={
                     <FormattedMessage
@@ -257,14 +260,14 @@ class GaugePanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiFieldNumber
+                  <EuiCompressedFieldNumber
                     onChange={handleTextChange('gauge_inner_width')}
                     value={Number(model.gauge_inner_width)}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('gaugeLine')}
                   label={
                     <FormattedMessage
@@ -273,11 +276,11 @@ class GaugePanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiFieldNumber
+                  <EuiCompressedFieldNumber
                     onChange={handleTextChange('gauge_width')}
                     value={Number(model.gauge_width)}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
 

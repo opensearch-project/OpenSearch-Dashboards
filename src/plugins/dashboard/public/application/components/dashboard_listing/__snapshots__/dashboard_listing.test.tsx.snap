@@ -143,6 +143,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -214,10 +215,18 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
+              },
+              "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -254,6 +263,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -823,6 +833,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -953,6 +964,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -1038,6 +1050,15 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -1091,15 +1112,19 @@ exports[`dashboard listing hideWriteControls 1`] = `
               <EuiEmptyPrompt
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Looks like you don't have any dashboards."
-                      id="dashboard.listing.noItemsMessage"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Looks like you don't have any dashboards."
+                        id="dashboard.listing.noItemsMessage"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -1317,6 +1342,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -1388,10 +1414,18 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
+              },
+              "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1428,6 +1462,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -1997,6 +2032,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -2127,6 +2163,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -2212,6 +2249,15 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -2281,10 +2327,10 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -2292,7 +2338,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -2326,15 +2372,19 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -2552,6 +2602,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -2623,10 +2674,18 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
+              },
+              "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2663,6 +2722,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -3232,6 +3292,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -3362,6 +3423,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -3447,6 +3509,15 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -3516,10 +3587,10 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -3527,7 +3598,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -3561,15 +3632,19 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -3787,6 +3862,7 @@ exports[`dashboard listing renders table rows 1`] = `
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -3858,10 +3934,18 @@ exports[`dashboard listing renders table rows 1`] = `
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
+              },
+              "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3898,6 +3982,7 @@ exports[`dashboard listing renders table rows 1`] = `
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -4467,6 +4552,7 @@ exports[`dashboard listing renders table rows 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -4597,6 +4683,7 @@ exports[`dashboard listing renders table rows 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -4682,6 +4769,15 @@ exports[`dashboard listing renders table rows 1`] = `
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -4751,10 +4847,10 @@ exports[`dashboard listing renders table rows 1`] = `
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -4762,7 +4858,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -4796,15 +4892,19 @@ exports[`dashboard listing renders table rows 1`] = `
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -5022,6 +5122,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -5093,10 +5194,18 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
+              },
+              "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -5133,6 +5242,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -5702,6 +5812,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -5832,6 +5943,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -5917,6 +6029,15 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -5986,10 +6107,10 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -5997,7 +6118,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -6031,15 +6152,19 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }

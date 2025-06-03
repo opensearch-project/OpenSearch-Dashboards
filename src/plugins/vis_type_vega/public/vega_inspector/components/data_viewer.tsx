@@ -31,7 +31,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFlexGroup,
   EuiComboBoxProps,
   EuiFlexItem,
@@ -102,7 +102,7 @@ export const DataViewer = ({ vegaAdapter, ...rest }: DataViewerProps) => {
     <EuiFlexGroup direction="column" gutterSize="s" wrap={false} responsive={false} {...rest}>
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
-        <EuiComboBox
+        <EuiCompressedComboBox
           fullWidth
           options={inspectDataSets.map((item: any) => ({
             label: item.id,

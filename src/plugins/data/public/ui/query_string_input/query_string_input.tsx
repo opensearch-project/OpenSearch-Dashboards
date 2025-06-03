@@ -30,10 +30,9 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@osd/i18n';
-
 import classNames from 'classnames';
 import {
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiOutsideClickDetector,
   PopoverAnchorPosition,
   EuiFlexGroup,
@@ -42,12 +41,13 @@ import {
   EuiLink,
   htmlIdGenerator,
   EuiPortal,
+  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, Query } from '../..';
+import { IDataPluginServices, IIndexPattern, IndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import {
@@ -184,13 +184,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
       const suggestions =
         (await this.services.data.autocomplete.getQuerySuggestions({
           language,
-          indexPatterns,
+          indexPattern: indexPatterns[0] as IndexPattern,
           query: queryString,
           selectionStart,
           selectionEnd,
           signal: this.abortController.signal,
         })) || [];
-
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
@@ -382,13 +381,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
       'field' in suggestion &&
       suggestion.field.subType &&
       suggestion.field.subType.nested &&
-      !this.services.storage.get('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut')
+      !this.services.storage.get('DQLNestedQuerySyntaxInfoOptOut')
     ) {
       const { notifications, docLinks } = this.services;
 
       const onDQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
         if (!this.services.storage) return;
-        this.services.storage.set('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut', true);
+        this.services.storage.set('DQLNestedQuerySyntaxInfoOptOut', true);
         notifications!.toasts.remove(toast);
       };
 
@@ -399,24 +398,29 @@ export default class QueryStringInputUI extends Component<Props, State> {
           }),
           text: toMountPoint(
             <div>
-              <p>
-                <FormattedMessage
-                  id="data.query.queryBar.DQLNestedQuerySyntaxInfoText"
-                  defaultMessage="It looks like you're querying on a nested field.
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="data.query.queryBar.DQLNestedQuerySyntaxInfoText"
+                    defaultMessage="It looks like you're querying on a nested field.
                   You can construct DQL syntax for nested queries in different ways, depending on the results you want.
                   Learn more in our {link}."
-                  values={{
-                    link: (
-                      <EuiLink href={docLinks.links.opensearchDashboards.dql.base} target="_blank">
-                        <FormattedMessage
-                          id="data.query.queryBar.DQLNestedQuerySyntaxInfoDocLinkText"
-                          defaultMessage="docs"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={docLinks.links.opensearchDashboards.dql.base}
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="data.query.queryBar.DQLNestedQuerySyntaxInfoDocLinkText"
+                            defaultMessage="docs"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButton size="s" onClick={() => onDQLNestedQuerySyntaxInfoOptOut(toast)}>
@@ -465,7 +469,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
+    // Update local storage
+    this.services.storage.set('userQueryLanguage', language);
+    this.services.data.query.queryString.getInitialQueryByLanguage(language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -612,7 +618,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
     const className = classNames(
-      'euiFormControlLayout euiFormControlLayout--group osdQueryBar__wrap',
+      'euiFormControlLayout euiFormControlLayout--group euiFormControlLayout--compressed osdQueryBar__wrap',
       this.props.className
     );
 
@@ -634,9 +640,10 @@ export default class QueryStringInputUI extends Component<Props, State> {
             <div
               role="search"
               className="euiFormControlLayout__childrenWrapper osdQueryBar__textareaWrap"
+              data-test-subj="queryBarInputContainer"
               ref={this.queryBarInputDivRefInstance}
             >
-              <EuiTextArea
+              <EuiCompressedTextArea
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('data.query.queryBar.searchInputPlaceholder', {
@@ -680,7 +687,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 isInvalid={this.props.isInvalid}
               >
                 {this.getQueryString()}
-              </EuiTextArea>
+              </EuiCompressedTextArea>
             </div>
             <EuiPortal>
               <SuggestionsComponent

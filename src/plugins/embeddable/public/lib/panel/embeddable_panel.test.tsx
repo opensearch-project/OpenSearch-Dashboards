@@ -407,6 +407,59 @@ test('Updates when hidePanelTitles is toggled', async () => {
   expect(title.length).toBe(1);
 });
 
+test('Updates when hidePanelActions is toggled', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelActions: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Rob',
+    lastName: 'Stark',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
+        notifications={{} as any}
+        overlays={{} as any}
+        application={applicationMock}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+      />
+    </I18nProvider>
+  );
+
+  let actionButton = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
+  expect(actionButton.length).toBe(1);
+
+  container.updateInput({ hidePanelActions: true });
+
+  await nextTick();
+  component.update();
+
+  actionButton = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
+  expect(actionButton.length).toBe(0);
+
+  container.updateInput({ hidePanelActions: false });
+
+  await nextTick();
+  component.update();
+
+  actionButton = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
+  expect(actionButton.length).toBe(1);
+});
+
 test('Check when hide header option is false', async () => {
   const inspector = inspectorPluginMock.createStartContract();
 

@@ -1,7 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MetricVisComponent should render correct structure for multi-value metrics 1`] = `
-Array [
+<VisualizationContainer
+  className="mtrVis"
+  showNoResult={false}
+>
   <MetricVisValue
     key="0"
     metric={
@@ -15,7 +18,7 @@ Array [
       }
     }
     showLabel={true}
-  />,
+  />
   <MetricVisValue
     key="1"
     metric={
@@ -29,23 +32,28 @@ Array [
       }
     }
     showLabel={true}
-  />,
-]
+  />
+</VisualizationContainer>
 `;
 
 exports[`MetricVisComponent should render correct structure for single metric 1`] = `
-<MetricVisValue
-  key="0"
-  metric={
-    Object {
-      "bgColor": undefined,
-      "color": undefined,
-      "label": "Count",
-      "lightText": false,
-      "rowIndex": 0,
-      "value": 4301021,
+<VisualizationContainer
+  className="mtrVis"
+  showNoResult={false}
+>
+  <MetricVisValue
+    key="0"
+    metric={
+      Object {
+        "bgColor": undefined,
+        "color": undefined,
+        "label": "Count",
+        "lightText": false,
+        "rowIndex": 0,
+        "value": 4301021,
+      }
     }
-  }
-  showLabel={true}
-/>
+    showLabel={true}
+  />
+</VisualizationContainer>
 `;

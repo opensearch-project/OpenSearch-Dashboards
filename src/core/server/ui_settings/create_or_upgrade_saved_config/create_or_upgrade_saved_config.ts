@@ -35,6 +35,8 @@ import { SavedObjectsErrorHelpers } from '../../saved_objects/';
 import { Logger } from '../../logging';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
+import { UiSettingScope } from '../types';
+import { buildDocIdWithScope } from '../utils';
 
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
@@ -42,18 +44,24 @@ interface Options {
   buildNum: number;
   log: Logger;
   handleWriteErrors: boolean;
+  scope?: UiSettingScope;
 }
 
 export async function createOrUpgradeSavedConfig(
   options: Options
 ): Promise<Record<string, any> | undefined> {
-  const { savedObjectsClient, version, buildNum, log, handleWriteErrors } = options;
+  const { savedObjectsClient, version, buildNum, log, handleWriteErrors, scope } = options;
 
   // try to find an older config we can upgrade
-  const upgradeableConfig = await getUpgradeableConfig({
-    savedObjectsClient,
-    version,
-  });
+  let upgradeableConfig;
+  if (scope === UiSettingScope.USER) {
+    upgradeableConfig = undefined;
+  } else {
+    upgradeableConfig = await getUpgradeableConfig({
+      savedObjectsClient,
+      version,
+    });
+  }
 
   // default to the attributes of the upgradeableConfig if available
   const attributes = defaults(
@@ -62,8 +70,9 @@ export async function createOrUpgradeSavedConfig(
   );
 
   try {
+    const docId = buildDocIdWithScope(version, scope);
     // create the new SavedConfig
-    await savedObjectsClient.create('config', attributes, { id: version });
+    await savedObjectsClient.create('config', attributes, { id: docId });
   } catch (error) {
     if (handleWriteErrors) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
@@ -85,6 +94,7 @@ export async function createOrUpgradeSavedConfig(
     log.debug(`Upgrade config from ${upgradeableConfig.id} to ${version}`, {
       prevVersion: upgradeableConfig.id,
       newVersion: version,
+      scope,
     });
   }
 }

@@ -29,19 +29,23 @@
  */
 import { resolve, join } from 'path';
 import { ListrContext } from '.';
-import { I18N_RC } from '../constants';
+import { DEFAULT_DIRS_WITH_RC_FILES, I18N_RC } from '../constants';
 import { checkConfigNamespacePrefix, arrayify } from '..';
 
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
+  const defaultRCs = DEFAULT_DIRS_WITH_RC_FILES.map((value) => resolve(root, value, I18N_RC));
+
+  // For backward compatibility
+  // ToDo: Remove for next major release
   const opensearchDashboardsRC = resolve(root, I18N_RC);
 
-  const configPaths = [opensearchDashboardsRC, ...arrayify(additionalConfigPaths)];
+  const configPaths = [opensearchDashboardsRC, ...defaultRCs, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
     task: async (context: ListrContext) => {
       try {
-        await checkConfigNamespacePrefix(configPath);
+        await checkConfigNamespacePrefix(configPath, false);
       } catch (err) {
         const { reporter } = context;
         const reporterWithContext = reporter.withContext({ name: configPath });

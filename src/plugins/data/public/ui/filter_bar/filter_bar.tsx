@@ -35,28 +35,20 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiResizeObserver,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { stringify } from '@osd/std';
 
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
-import { FilterOptions } from './filter_options';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IIndexPattern } from '../..';
-import {
-  buildEmptyFilter,
-  Filter,
-  enableFilter,
-  disableFilter,
-  pinFilter,
-  toggleFilterDisabled,
-  toggleFilterNegated,
-  unpinFilter,
-  UI_SETTINGS,
-} from '../../../common';
+import { buildEmptyFilter, Filter, UI_SETTINGS } from '../../../common';
+import { FilterOptions } from './filter_options';
 
 interface Props {
   filters: Filter[];
@@ -64,6 +56,7 @@ interface Props {
   className: string;
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
+  isFilterBarPortable?: boolean;
 }
 
 const maxFilterWidth = 600;
@@ -74,6 +67,7 @@ function FilterBarUI(props: Props) {
   const [filterWidth, setFilterWidth] = useState(maxFilterWidth);
 
   const uiSettings = opensearchDashboards.services.uiSettings;
+  const useNewHeader = Boolean(uiSettings!.get(UI_SETTINGS.NEW_HOME_PAGE));
   if (!uiSettings) return null;
 
   function onFiltersUpdated(filters: Filter[]) {
@@ -84,7 +78,12 @@ function FilterBarUI(props: Props) {
 
   function renderItems() {
     return props.filters.map((filter, i) => (
-      <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
+      <EuiFlexItem
+        key={i}
+        grow={false}
+        className="globalFilterBar__flexItem"
+        data-test-subj="globalFilterBar"
+      >
         <FilterItem
           id={`${i}`}
           intl={props.intl}
@@ -110,15 +109,15 @@ function FilterBarUI(props: Props) {
 
     const button = (
       <EuiButtonEmpty
-        size="xs"
+        size="s"
         onClick={() => setIsAddFilterPopoverOpen(true)}
         data-test-subj="addFilter"
         aria-label={i18n.translate('data.filter.filterBar.addFilterButtonLabel', {
           defaultMessage: 'Add filter',
         })}
         className="globalFilterBar__addButton"
+        iconType="plusInCircle"
       >
-        +{' '}
         <FormattedMessage
           id="data.filter.filterBar.addFilterButtonLabel"
           defaultMessage="Add filter"
@@ -177,62 +176,44 @@ function FilterBarUI(props: Props) {
     onFiltersUpdated(filters);
   }
 
-  function onEnableAll() {
-    const filters = props.filters.map(enableFilter);
-    onFiltersUpdated(filters);
-  }
-
-  function onDisableAll() {
-    const filters = props.filters.map(disableFilter);
-    onFiltersUpdated(filters);
-  }
-
-  function onPinAll() {
-    const filters = props.filters.map(pinFilter);
-    onFiltersUpdated(filters);
-  }
-
-  function onUnpinAll() {
-    const filters = props.filters.map(unpinFilter);
-    onFiltersUpdated(filters);
-  }
-
-  function onToggleAllNegated() {
-    const filters = props.filters.map(toggleFilterNegated);
-    onFiltersUpdated(filters);
-  }
-
-  function onToggleAllDisabled() {
-    const filters = props.filters.map(toggleFilterDisabled);
-    onFiltersUpdated(filters);
-  }
-
-  function onRemoveAll() {
-    onFiltersUpdated([]);
-  }
-
   const classes = classNames('globalFilterBar', props.className);
+  const filterBarPrefixText = i18n.translate('data.search.filterBar.filterBarPrefixText', {
+    defaultMessage: 'Filters',
+  });
+  const filterGroupClassName = classNames('globalFilterGroup', {
+    'globalFilterGroup--compressed': useNewHeader && props.isFilterBarPortable,
+  });
 
-  return (
+  const filterBar = (
     <EuiFlexGroup
-      className="globalFilterGroup"
+      className={filterGroupClassName}
       gutterSize="none"
       alignItems="flexStart"
       responsive={false}
+      data-test-subj="globalFilterGroup"
     >
       <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
-        <FilterOptions
-          onEnableAll={onEnableAll}
-          onDisableAll={onDisableAll}
-          onPinAll={onPinAll}
-          onUnpinAll={onUnpinAll}
-          onToggleAllNegated={onToggleAllNegated}
-          onToggleAllDisabled={onToggleAllDisabled}
-          onRemoveAll={onRemoveAll}
-        />
+        {useNewHeader ? (
+          <EuiText
+            size="s"
+            className="globalFilterGroup__filterPrefix"
+            data-test-subj="globalFilterGroupFilterPrefix"
+          >
+            {filterBarPrefixText}:
+          </EuiText>
+        ) : (
+          <FilterOptions
+            filters={props.filters!}
+            onFiltersUpdated={props.onFiltersUpdated}
+            intl={props.intl}
+            indexPatterns={props.indexPatterns}
+          />
+        )}
       </EuiFlexItem>
-
-      <EuiFlexItem className="globalFilterGroup__filterFlexItem">
+      <EuiFlexItem
+        className="globalFilterGroup__filterFlexItem"
+        data-test-subj="globalFilterGroupFilterFlexItem"
+      >
         <EuiFlexGroup
           className={classes}
           wrap={true}
@@ -246,6 +227,9 @@ function FilterBarUI(props: Props) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+  return useNewHeader && props.isFilterBarPortable
+    ? createPortal(filterBar, document.getElementById('applicationHeaderFilterBar')!)
+    : filterBar;
 }
 
 export const FilterBar = injectI18n(FilterBarUI);

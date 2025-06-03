@@ -6,8 +6,8 @@
 import { ReactElement, useEffect, useState } from 'react';
 import React from 'react';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { i18n } from '@osd/i18n';
+import { DataStorage } from 'src/plugins/data/common';
 
 const NO_DATA_POPOVER_STORAGE_KEY = 'data.noDataPopover';
 
@@ -17,7 +17,7 @@ export function NoDataPopover({
   children,
 }: {
   showNoDataPopover?: boolean;
-  storage: IStorageWrapper;
+  storage: DataStorage;
   children: ReactElement;
 }) {
   const [noDataPopoverDismissed, setNoDataPopoverDismissed] = useState(() =>

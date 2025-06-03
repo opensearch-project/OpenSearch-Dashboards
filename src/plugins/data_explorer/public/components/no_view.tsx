@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiPageTemplate, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageTemplate, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 export const NoView = () => {
@@ -27,12 +27,14 @@ export const NoView = () => {
           </h2>
         }
         body={
-          <p>
-            <FormattedMessage
-              id="dataExplorer.noView.body"
-              defaultMessage="The view you are trying to access does not exist. Please check the URL and try again."
-            />
-          </p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="dataExplorer.noView.body"
+                defaultMessage="The view you are trying to access does not exist. Please check the URL and try again."
+              />
+            </p>
+          </EuiText>
         }
       />
     </EuiPageTemplate>

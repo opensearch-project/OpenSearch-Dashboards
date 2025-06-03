@@ -36,5 +36,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { getConfigCollections } from './utils/collections';
+export {
+  vislibSeriesResponseHandler,
+  vislibSlicesResponseHandler,
+} from './vislib/response_handler';
 
 export * from './types';

@@ -10,7 +10,7 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '../../../../core/server/mocks';
-import * as utilsExports from '../utils';
+import * as utilsExports from '../../../../core/server/utils/auth_info';
 
 describe('PermissionControl', () => {
   jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({
@@ -102,7 +102,16 @@ describe('PermissionControl', () => {
     });
     const batchValidateResult = await permissionControlClient.batchValidate(
       httpServerMock.createOpenSearchDashboardsRequest(),
-      [],
+      [
+        {
+          id: 'foo',
+          type: 'dashboard',
+        },
+        {
+          id: 'bar',
+          type: 'dashboard',
+        },
+      ],
       ['read']
     );
     expect(batchValidateResult.success).toEqual(true);
@@ -142,7 +151,16 @@ describe('PermissionControl', () => {
     });
     const batchValidateResult = await permissionControlClient.batchValidate(
       httpServerMock.createOpenSearchDashboardsRequest(),
-      [],
+      [
+        {
+          id: 'foo',
+          type: 'dashboard',
+        },
+        {
+          id: 'bar',
+          type: 'dashboard',
+        },
+      ],
       ['read']
     );
     expect(batchValidateResult.success).toEqual(true);
@@ -195,6 +213,125 @@ describe('PermissionControl', () => {
           /Authorization failed, principals:.*has no.*permissions on the requested saved object:.*foo/
         )
       );
+    });
+  });
+
+  describe('saved objects cache', () => {
+    it('should not call bulk get again if saved objects cached', async () => {
+      const permissionControlClient = new SavedObjectsPermissionControl(loggerMock.create());
+      const getScopedClient = jest.fn();
+      const clientMock = savedObjectsClientMock.create();
+      const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
+      getScopedClient.mockImplementation((request) => {
+        return clientMock;
+      });
+      permissionControlClient.setup(getScopedClient, mockAuth);
+      permissionControlClient.addToCacheAllowlist(requestMock, [
+        {
+          type: 'workspace',
+          id: 'foo',
+        },
+      ]);
+      clientMock.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'workspace',
+            id: 'foo',
+            attributes: {},
+            references: [],
+          },
+        ],
+      });
+
+      await permissionControlClient.validate(requestMock, { id: 'foo', type: 'workspace' }, [
+        'read',
+      ]);
+      expect(clientMock.bulkGet).toHaveBeenCalledTimes(1);
+
+      await permissionControlClient.validate(requestMock, { id: 'foo', type: 'workspace' }, [
+        'read',
+      ]);
+      expect(clientMock.bulkGet).toHaveBeenCalledTimes(1);
+    });
+    it('should call bulk get again for different requests', async () => {
+      const permissionControlClient = new SavedObjectsPermissionControl(loggerMock.create());
+      const getScopedClient = jest.fn();
+      const clientMock = savedObjectsClientMock.create();
+      const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
+      getScopedClient.mockImplementation((request) => {
+        return clientMock;
+      });
+      permissionControlClient.setup(getScopedClient, mockAuth);
+      permissionControlClient.addToCacheAllowlist(requestMock, [
+        {
+          type: 'workspace',
+          id: 'foo',
+        },
+      ]);
+      clientMock.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'workspace',
+            id: 'foo',
+            attributes: {},
+            references: [],
+          },
+        ],
+      });
+
+      await permissionControlClient.validate(requestMock, { id: 'foo', type: 'workspace' }, [
+        'read',
+      ]);
+      expect(clientMock.bulkGet).toHaveBeenCalledTimes(1);
+
+      await permissionControlClient.validate(
+        httpServerMock.createOpenSearchDashboardsRequest({
+          opensearchDashboardsRequestState: {
+            requestId: '123',
+            requestUuid: 'another-uuid',
+          },
+        }),
+        { id: 'foo', type: 'workspace' },
+        ['read']
+      );
+      expect(clientMock.bulkGet).toHaveBeenCalledTimes(2);
+    });
+    it('should call bulk get again after cache been cleared', async () => {
+      const permissionControlClient = new SavedObjectsPermissionControl(loggerMock.create());
+      const getScopedClient = jest.fn();
+      const clientMock = savedObjectsClientMock.create();
+      const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
+      getScopedClient.mockImplementation((request) => {
+        return clientMock;
+      });
+      permissionControlClient.setup(getScopedClient, mockAuth);
+      permissionControlClient.addToCacheAllowlist(requestMock, [
+        {
+          type: 'workspace',
+          id: 'foo',
+        },
+      ]);
+      clientMock.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'workspace',
+            id: 'foo',
+            attributes: {},
+            references: [],
+          },
+        ],
+      });
+
+      await permissionControlClient.validate(requestMock, { id: 'foo', type: 'workspace' }, [
+        'read',
+      ]);
+      expect(clientMock.bulkGet).toHaveBeenCalledTimes(1);
+      permissionControlClient.clearSavedObjectsCache(requestMock);
+
+      await permissionControlClient.validate(requestMock, { id: 'foo', type: 'workspace' }, [
+        'read',
+      ]);
+      expect(clientMock.bulkGet).toHaveBeenCalledTimes(2);
     });
   });
 });

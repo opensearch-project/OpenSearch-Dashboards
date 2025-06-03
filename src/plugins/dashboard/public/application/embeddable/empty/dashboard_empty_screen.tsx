@@ -69,7 +69,7 @@ export function DashboardEmptyScreen({
       <EuiButton
         iconSide="left"
         size="s"
-        iconType="plusInCircle"
+        iconType="plus"
         onClick={onVisualizeClick}
         data-test-subj="addVisualizationButton"
         aria-label={constants.createNewVisualizationButtonAriaLabel}
@@ -86,7 +86,7 @@ export function DashboardEmptyScreen({
     dataTestSubj?: string
   ) => {
     return (
-      <EuiText size="m" color="subdued">
+      <EuiText size="s" color="subdued">
         <p>
           {description1}
           {description1 && <span>&nbsp;</span>}
@@ -122,11 +122,11 @@ export function DashboardEmptyScreen({
             className="dshStartScreen__pageContent"
           >
             <EuiImage url={http.basePath.prepend(emptyStateGraphicURL)} alt="" />
-            <EuiText size="m">
+            <EuiText size="s">
               <p style={{ fontWeight: 'bold' }}>{mainText}</p>
             </EuiText>
             {additionalText ? (
-              <EuiText size="m" color="subdued">
+              <EuiText size="s" color="subdued">
                 {additionalText}
               </EuiText>
             ) : null}

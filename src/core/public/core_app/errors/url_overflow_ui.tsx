@@ -38,7 +38,7 @@ import { IS_IE } from './url_overflow';
 
 export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) => {
   return (
-    <EuiText textAlign="left">
+    <EuiText size="s" textAlign="left">
       <p>
         <FormattedMessage
           id="core.ui.errorUrlOverflow.optionsToFixErrorDescription"

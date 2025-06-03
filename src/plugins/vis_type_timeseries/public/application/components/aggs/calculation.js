@@ -44,8 +44,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiTextArea,
-  EuiFormRow,
+  EuiCompressedTextArea,
+  EuiCompressedFormRow,
   EuiCode,
   EuiSpacer,
 } from '@elastic/eui';
@@ -114,7 +114,7 @@ export function CalculationAgg(props) {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('painless')}
             label={
               <FormattedMessage
@@ -138,8 +138,12 @@ export function CalculationAgg(props) {
               </div>
             }
           >
-            <EuiTextArea onChange={handleTextChange('script')} value={model.script} fullWidth />
-          </EuiFormRow>
+            <EuiCompressedTextArea
+              onChange={handleTextChange('script')}
+              value={model.script}
+              fullWidth
+            />
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

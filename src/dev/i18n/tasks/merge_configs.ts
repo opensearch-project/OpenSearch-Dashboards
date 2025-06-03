@@ -30,17 +30,22 @@
 import { resolve, join } from 'path';
 import { ListrContext } from '.';
 import { assignConfigFromPath, arrayify } from '..';
+import { DEFAULT_DIRS_WITH_RC_FILES, I18N_RC } from '../constants';
 
 export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
-  const opensearchDashboardsRC = resolve(root, '.i18nrc.json');
+  const defaultRCs = DEFAULT_DIRS_WITH_RC_FILES.map((value) => resolve(root, value, I18N_RC));
 
-  const configPaths = [opensearchDashboardsRC, ...arrayify(additionalConfigPaths)];
+  // For backward compatibility
+  // ToDo: Remove for next major release
+  const opensearchDashboardsRC = resolve(root, I18N_RC);
+
+  const configPaths = [opensearchDashboardsRC, ...defaultRCs, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
     task: async (context: ListrContext) => {
       try {
-        context.config = await assignConfigFromPath(context.config, configPath);
+        context.config = await assignConfigFromPath(context.config, configPath, false);
       } catch (err) {
         const { reporter } = context;
         const reporterWithContext = reporter.withContext({ name: configPath });

@@ -32,10 +32,10 @@ import React from 'react';
 
 import {
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiLink,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
@@ -72,7 +72,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
@@ -95,7 +95,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
           }
         >
           {isLoading ? (
-            <EuiSelect
+            <EuiCompressedSelect
               name="timeField"
               data-test-subj="createIndexPatternTimeFieldSelect"
               options={[
@@ -112,7 +112,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
               disabled={true}
             />
           ) : (
-            <EuiSelect
+            <EuiCompressedSelect
               name="timeField"
               data-test-subj="createIndexPatternTimeFieldSelect"
               options={timeFieldOptions}
@@ -122,7 +122,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
               onChange={onTimeFieldChanged}
             />
           )}
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </>
     ) : (
       <EuiText>

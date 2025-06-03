@@ -117,3 +117,9 @@ export const mockAuditTrailService = auditTrailServiceMock.create();
 jest.doMock('./audit_trail/audit_trail_service', () => ({
   AuditTrailService: jest.fn(() => mockAuditTrailService),
 }));
+
+import { dynamicConfigServiceMock } from './config/dynamic_config_service.mock';
+export const mockDynamicConfigService = dynamicConfigServiceMock.create();
+jest.doMock('./config/dynamic_config_service', () => ({
+  DynamicConfigService: jest.fn(() => mockDynamicConfigService),
+}));

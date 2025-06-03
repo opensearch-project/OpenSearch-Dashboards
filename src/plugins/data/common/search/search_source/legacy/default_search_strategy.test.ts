@@ -72,6 +72,7 @@ describe('defaultSearchStrategy', () => {
                   },
                 ],
               },
+              "dataSourceId": undefined,
               "signal": AbortSignal {},
             },
           ],

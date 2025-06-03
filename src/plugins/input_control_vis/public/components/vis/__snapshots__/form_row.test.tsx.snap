@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders control with warning 1`] = `
-<EuiFormRow
+<EuiCompressedFormRow
   data-test-subj="inputControl0"
   describedByIds={Array []}
-  display="row"
+  display="rowCompressed"
   fullWidth={false}
   hasChildLabel={true}
   hasEmptyLabelSpace={false}
@@ -28,14 +28,14 @@ exports[`renders control with warning 1`] = `
   <div>
     My Control
   </div>
-</EuiFormRow>
+</EuiCompressedFormRow>
 `;
 
 exports[`renders disabled control with tooltip 1`] = `
-<EuiFormRow
+<EuiCompressedFormRow
   data-test-subj="inputControl0"
   describedByIds={Array []}
-  display="row"
+  display="rowCompressed"
   fullWidth={false}
   hasChildLabel={true}
   hasEmptyLabelSpace={false}
@@ -53,14 +53,14 @@ exports[`renders disabled control with tooltip 1`] = `
       My Control
     </div>
   </EuiToolTip>
-</EuiFormRow>
+</EuiCompressedFormRow>
 `;
 
 exports[`renders enabled control 1`] = `
-<EuiFormRow
+<EuiCompressedFormRow
   data-test-subj="inputControl0"
   describedByIds={Array []}
-  display="row"
+  display="rowCompressed"
   fullWidth={false}
   hasChildLabel={true}
   hasEmptyLabelSpace={false}
@@ -71,5 +71,5 @@ exports[`renders enabled control 1`] = `
   <div>
     My Control
   </div>
-</EuiFormRow>
+</EuiCompressedFormRow>
 `;

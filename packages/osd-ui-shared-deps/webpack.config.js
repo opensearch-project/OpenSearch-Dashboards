@@ -47,6 +47,8 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     'osd-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
     'osd-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_next_dark.css'],
     'osd-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_next_light.css'],
+    'osd-ui-shared-deps.v9.dark': ['@elastic/eui/dist/eui_theme_v9_dark.css'],
+    'osd-ui-shared-deps.v9.light': ['@elastic/eui/dist/eui_theme_v9_light.css'],
   },
   context: __dirname,
   devtool: dev ? '#cheap-source-map' : false,
@@ -83,6 +85,26 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
             loader: 'comment-stripper',
             options: {
               language: 'css',
+            },
+          },
+        ],
+        // Exclude Monaco's codicon CSS which is binary and can't be processed by the standard CSS loader
+        exclude: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*codicon.*\.css$/,
+      },
+      // Special handling for Monaco's codicon CSS
+      {
+        test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*codicon.*\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
+      // Handle Monaco's codicon font files
+      {
+        test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*\.ttf$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'fonts/',
             },
           },
         ],
@@ -139,6 +161,23 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           options: {
             babelrc: false,
             presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+          },
+        },
+      },
+      // Add special handling for monaco-editor files to transpile newer JavaScript syntax
+      {
+        test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*\.js$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+            plugins: [
+              require.resolve('@babel/plugin-transform-class-static-block'),
+              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
+              require.resolve('@babel/plugin-transform-optional-chaining'),
+              require.resolve('@babel/plugin-transform-numeric-separator'),
+            ],
           },
         },
       },

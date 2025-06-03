@@ -608,7 +608,7 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
     }),
     textPre: i18n.translate('apmOss.tutorial.dotNetClient.download.textPre', {
       defaultMessage:
-        'Add the the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
+        'Add the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
       NuGet packages available for different use cases. \n\nFor an ASP.NET Core application with Entity Framework \
       Core download the [Elastic.Apm.NetCoreAll]({netCoreAllApmPackageLink}) package. This package will automatically add every \
       agent component to your application. \n\n In case you would like to to minimize the dependencies, you can use the \

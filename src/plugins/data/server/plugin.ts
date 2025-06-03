@@ -106,7 +106,7 @@ export class DataServerPlugin
     this.autocompleteService.setup(core);
     this.dqlTelemetryService.setup(core, { usageCollection });
 
-    core.uiSettings.register(getUiSettings());
+    core.uiSettings.register(getUiSettings(core.workspace.isWorkspaceEnabled()));
 
     const searchSetup = await this.searchService.setup(core, {
       registerFunction: expressions.registerFunction,

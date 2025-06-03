@@ -43,7 +43,9 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   EuiHorizontalRule,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { ExclusiveUnion } from '@elastic/eui';
@@ -97,7 +99,7 @@ export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
 /** @public */
 export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
   /**
-   * Extend EuiButtonEmpty to provide extra functionality
+   * Extend EuiSmallButtonEmpty to provide extra functionality
    */
   linkType: 'custom';
   /**
@@ -123,6 +125,7 @@ interface Props {
   useDefaultContent?: boolean;
   opensearchDashboardsDocLink: string;
   surveyLink?: string;
+  useUpdatedAppearance?: boolean;
 }
 
 interface State {
@@ -200,6 +203,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       useDefaultContent,
       opensearchDashboardsDocLink,
       surveyLink,
+      useUpdatedAppearance,
     } = this.props;
     const { helpExtension, helpSupportUrl } = this.state;
 
@@ -320,30 +324,52 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       );
     }
 
-    const button = (
-      <EuiHeaderSectionItemButton
-        aria-expanded={this.state.isOpen}
-        aria-haspopup="true"
-        aria-label={intl.formatMessage({
-          id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
-          defaultMessage: 'Help menu',
+    const button = useUpdatedAppearance ? (
+      <EuiToolTip
+        content={intl.formatMessage({
+          id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonTitle',
+          defaultMessage: 'Help',
         })}
-        onClick={this.onMenuButtonClick}
       >
-        <EuiIcon
-          type="questionInCircle"
-          size="m"
-          title={intl.formatMessage({
-            id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonTitle',
-            defaultMessage: 'Help',
+        <EuiButtonIcon
+          iconType="iInCircle"
+          color="text"
+          size="xs"
+          aria-expanded={this.state.isOpen}
+          aria-haspopup="true"
+          aria-label={intl.formatMessage({
+            id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
+            defaultMessage: 'Help menu',
           })}
+          onClick={this.onMenuButtonClick}
         />
-      </EuiHeaderSectionItemButton>
+      </EuiToolTip>
+    ) : (
+      <EuiToolTip
+        content={intl.formatMessage({
+          id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonTitle',
+          defaultMessage: 'Help',
+        })}
+        delay="long"
+        position="bottom"
+      >
+        <EuiHeaderSectionItemButton
+          aria-expanded={this.state.isOpen}
+          aria-haspopup="true"
+          aria-label={intl.formatMessage({
+            id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
+            defaultMessage: 'Help menu',
+          })}
+          onClick={this.onMenuButtonClick}
+        >
+          <EuiIcon type="questionInCircle" size="m" />
+        </EuiHeaderSectionItemButton>
+      </EuiToolTip>
     );
 
     return (
       <EuiPopover
-        anchorPosition="downRight"
+        anchorPosition={useUpdatedAppearance ? 'rightDown' : 'downRight'}
         button={button}
         closePopover={this.closeMenu}
         data-test-subj="helpMenuButton"
@@ -351,6 +377,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         isOpen={this.state.isOpen}
         ownFocus
         repositionOnScroll
+        panelPaddingSize="s"
       >
         <EuiPopoverTitle>
           <EuiFlexGroup responsive={false}>

@@ -1,2 +1,0 @@
-fix:
-- Error message is not formatted in vis_type_vega url parser. ([#6777](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6777))

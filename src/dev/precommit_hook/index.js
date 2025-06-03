@@ -31,3 +31,4 @@
 export { checkFileCasing } from './check_file_casing';
 export { getFilesForCommit, getUnstagedFiles } from './get_files_for_commit';
 export { checkDevDocs } from './check_dev_docs';
+export { checkI18n } from './check_i18n';

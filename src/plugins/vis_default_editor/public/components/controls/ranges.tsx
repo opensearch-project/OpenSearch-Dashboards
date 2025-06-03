@@ -31,7 +31,7 @@
 import React, { Fragment, useCallback, useState, useEffect } from 'react';
 import {
   htmlIdGenerator,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
@@ -244,7 +244,7 @@ function RangesParamEditor({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
+                  <EuiSmallButtonIcon
                     title={deleteBtnTitle}
                     aria-label={deleteBtnTitle}
                     disabled={value.length === 1}

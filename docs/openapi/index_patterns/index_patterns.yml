@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  version: v1
+  title: OpenSearch Dashboards Index Patterns API
+  contact:
+    name: OpenSearch Dashboards Team
+  description: |-
+    OpenAPI schema for OpenSearch Dashboards Index Patterns API
+tags:
+  - name: index patterns
+paths:
+  /api/index_patterns/_fields_for_wildcard:
+    get:
+      tags:
+        - index patterns
+      summary: 
+      parameters:
+        - in: query
+          name: pattern
+          description: The index pattern used to retrieve fields.
+          required: true
+          schema:
+            type: string
+          example: my-index*
+        - in: query
+          name: meta_fields
+          description: The list of metadata fields which will be included in the response, it usually contains "_source", "_id", "_type", "_index" and "_score".
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+            default: []
+          example: _source
+        - in: query
+          name: data_source
+          description: The data source of index patterns and indices.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Fetching fields for index pattern is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fields: 
+                    type: array
+                    description: Retrieved fields based on wildcard pattern.
+                    items:
+                      type: object 
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  schemas:
+    400_bad_request:
+      title: Bad request
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+          enum:
+            - Bad Request
+        message:
+          type: string
+        statusCode:
+          type: integer
+          enum:
+            - 400
