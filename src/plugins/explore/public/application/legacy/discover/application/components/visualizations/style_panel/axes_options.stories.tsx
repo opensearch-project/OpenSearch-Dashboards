@@ -7,8 +7,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { AxesOptions } from './axes_options';
-import { CategoryAxis, ValueAxis } from '../line/line_vis_config';
-import { ExploreVisColumn } from '../types';
+import { CategoryAxis, ExploreVisColumn, ValueAxis } from '../types';
 
 export default {
   component: AxesOptions,
@@ -38,10 +37,6 @@ const mockCategoryAxes: CategoryAxis[] = [
     type: 'category',
     position: 'bottom',
     show: true,
-    style: {},
-    scale: {
-      type: 'linear',
-    },
     labels: {
       show: true,
       filter: true,
@@ -61,13 +56,6 @@ const mockValueAxes: ValueAxis[] = [
     type: 'value',
     position: 'left',
     show: true,
-    style: {},
-    scale: {
-      type: 'linear',
-      mode: 'normal',
-      defaultYExtents: false,
-      setYExtents: false,
-    },
     labels: {
       show: true,
       rotate: 0,
@@ -127,13 +115,6 @@ MultipleValueAxes.args = {
       type: 'value',
       position: 'right',
       show: true,
-      style: {},
-      scale: {
-        type: 'linear',
-        mode: 'normal',
-        defaultYExtents: false,
-        setYExtents: false,
-      },
       labels: {
         show: true,
         rotate: 0,
@@ -147,6 +128,52 @@ MultipleValueAxes.args = {
   ],
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
+  dateColumns: mockDateColumns,
+};
+
+// Story for Rule 2 scenario (2 metrics, 1 date, 0 categories) with left and right axes
+export const Rule2Scenario = Template.bind({});
+Rule2Scenario.args = {
+  categoryAxes: mockCategoryAxes,
+  valueAxes: [
+    {
+      id: 'ValueAxis-1',
+      name: 'LeftAxis-1',
+      type: 'value',
+      position: 'left',
+      show: true,
+      labels: {
+        show: true,
+        rotate: 0,
+        truncate: 100,
+        filter: false,
+      },
+      title: {
+        text: 'Bar Chart Metric',
+      },
+    },
+    {
+      id: 'ValueAxis-2',
+      name: 'RightAxis-1',
+      type: 'value',
+      position: 'right',
+      show: true,
+      labels: {
+        show: true,
+        rotate: 0,
+        truncate: 100,
+        filter: false,
+      },
+      title: {
+        text: 'Line Chart Metric',
+      },
+    },
+  ],
+  numericalColumns: [
+    { id: 1, name: 'Bar Chart Metric', schema: 'numerical', column: 'count' },
+    { id: 2, name: 'Line Chart Metric', schema: 'numerical', column: 'price' },
+  ],
+  categoricalColumns: [],
   dateColumns: mockDateColumns,
 };
 

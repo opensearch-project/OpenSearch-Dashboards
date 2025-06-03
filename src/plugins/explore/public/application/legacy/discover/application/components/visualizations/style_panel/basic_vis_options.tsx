@@ -24,7 +24,6 @@ interface BasicVisOptionsProps {
   addLegend: boolean;
   legendPosition: string;
   addTimeMarker: boolean;
-  mode: string;
   showLine: boolean;
   lineMode: string;
   lineWidth: number;
@@ -33,7 +32,6 @@ interface BasicVisOptionsProps {
   onAddLegendChange: (addLegend: boolean) => void;
   onLegendPositionChange: (legendPosition: Positions) => void;
   onAddTimeMarkerChange: (addTimeMarker: boolean) => void;
-  onModeChange: (mode: string) => void;
   onShowLineChange: (showLine: boolean) => void;
   onLineModeChange: (lineMode: string) => void;
   onLineWidthChange: (lineWidth: number) => void;
@@ -87,7 +85,6 @@ export const BasicVisOptions = ({
 
       <EuiSpacer size="s" />
 
-      {/* Show Line Toggle */}
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.showLine', {
           defaultMessage: 'Show line',
@@ -100,7 +97,6 @@ export const BasicVisOptions = ({
         />
       </EuiFormRow>
 
-      {/* Line Configuration - Same Row */}
       <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -137,7 +133,6 @@ export const BasicVisOptions = ({
 
       <EuiSpacer size="s" />
 
-      {/* Show Dots Toggle */}
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.showDots', {
           defaultMessage: 'Show dots',

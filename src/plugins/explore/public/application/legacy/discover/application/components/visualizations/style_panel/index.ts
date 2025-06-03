@@ -6,4 +6,4 @@
 export { Option } from './option';
 export { BasicVisOptions } from './basic_vis_options';
 export { ThresholdOptions } from './threshold_options';
-export { GridOptions } from './grid_options';
+export { GridOptionsPanel } from './grid_options';

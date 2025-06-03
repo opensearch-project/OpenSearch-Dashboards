@@ -9,22 +9,20 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiFormRow,
-  EuiSelect,
   EuiSwitch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { GridOptions as GridConfig } from '../line/line_vis_config';
+import { GridOptions } from '../types';
 
 interface GridOptionsProps {
-  grid: GridConfig;
-  onGridChange: (grid: GridConfig) => void;
+  grid: GridOptions;
+  onGridChange: (grid: GridOptions) => void;
 }
 
-export const GridOptions: React.FC<GridOptionsProps> = ({ grid, onGridChange }) => {
-  const updateGridOption = <K extends keyof GridConfig>(key: K, value: GridConfig[K]) => {
+export const GridOptionsPanel: React.FC<GridOptionsProps> = ({ grid, onGridChange }) => {
+  const updateGridOption = <K extends keyof GridOptions>(key: K, value: GridOptions[K]) => {
     onGridChange({
       ...grid,
       [key]: value,
@@ -33,7 +31,6 @@ export const GridOptions: React.FC<GridOptionsProps> = ({ grid, onGridChange }) 
 
   return (
     <EuiPanel paddingSize="s">
-      {/* Grid Options */}
       <EuiTitle size="xs">
         <h4>
           {i18n.translate('explore.vis.gridOptions.gridSettings', {

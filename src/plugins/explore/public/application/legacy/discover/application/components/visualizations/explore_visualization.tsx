@@ -31,24 +31,28 @@ export const ExploreVisualization: React.FC<ExploreVisualizationProps> = ({
 }) => {
   return (
     <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={3}>
-        <EuiPanel data-test-subj="visualizationLoader">
-          <ReactExpressionRenderer
-            key={JSON.stringify(searchContext) + expression}
-            expression={expression}
-            searchContext={searchContext}
-          />
+      <EuiFlexItem className="visualizationContainer">
+        <EuiPanel data-test-subj="visualizationLoader" className="visualizationPanel">
+          <div className="visualizationPanel__inner">
+            <ReactExpressionRenderer
+              key={JSON.stringify(searchContext) + expression}
+              expression={expression}
+              searchContext={searchContext}
+            />
+          </div>
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
+      <EuiFlexItem grow={false} style={{ width: '300px' }}>
         <EuiPanel className="stylePanel" data-test-subj="stylePanel">
-          {visualizationData.visualizationType?.ui.style.render({
-            styleOptions,
-            onStyleChange,
-            numericalColumns: visualizationData.numericalColumns,
-            categoricalColumns: visualizationData.categoricalColumns,
-            dateColumns: visualizationData.dateColumns,
-          })}
+          <div className="stylePanel__inner">
+            {visualizationData.visualizationType?.ui.style.render({
+              styleOptions,
+              onStyleChange,
+              numericalColumns: visualizationData.numericalColumns,
+              categoricalColumns: visualizationData.categoricalColumns,
+              dateColumns: visualizationData.dateColumns,
+            })}
+          </div>
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

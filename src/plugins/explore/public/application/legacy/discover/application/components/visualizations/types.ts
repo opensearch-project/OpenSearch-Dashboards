@@ -23,3 +23,52 @@ export interface VisualizationRule {
   ) => boolean;
   createConfig: () => VisualizationType;
 }
+
+// Styling: Threshold line configuration
+export interface ThresholdLine {
+  color: string;
+  show: boolean;
+  style: 'full' | 'dashed' | 'dot-dashed';
+  value: number;
+  width: number;
+}
+
+// Styling: Grid configuration
+export interface GridOptions {
+  categoryLines: boolean;
+  valueLines: boolean;
+}
+
+// Styling: Axis label configuration
+export interface AxisLabels {
+  show: boolean;
+  filter: boolean;
+  rotate: number;
+  truncate: number;
+}
+
+// Styling: Axis title configuration
+export interface AxisTitle {
+  text?: string;
+}
+
+// Styling: Category axis configuration
+export interface CategoryAxis {
+  id: string;
+  type: 'category';
+  position: 'top' | 'bottom';
+  show: boolean;
+  labels: AxisLabels;
+  title: AxisTitle;
+}
+
+// Styling: Value axis configuration
+export interface ValueAxis {
+  id: string;
+  name: string;
+  type: 'value';
+  position: 'left' | 'right';
+  show: boolean;
+  labels: AxisLabels;
+  title: AxisTitle;
+}

@@ -33,7 +33,7 @@ export class VisualizationRegistry {
       }
     }
 
-    // Todo: Handle the case where no rule matches
+    // Todo: Handle the case where no rule matches, render empty state or default table visualization
     console.log('No matching visualization type found');
     return;
   }
