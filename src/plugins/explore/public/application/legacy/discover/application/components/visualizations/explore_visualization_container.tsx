@@ -28,7 +28,7 @@ export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData)
   } = services;
   const { indexPattern } = useDiscoverContext();
 
-  // Register all rules
+  // Register all rules, first one have the highest priority, start with this/add more notes
   visualizationRegistry.registerRule(lineChartRule);
 
   const [visualizationData, setVisualizationData] = useState<VisualizationTypeResult | undefined>(
@@ -42,6 +42,9 @@ export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData)
     filters: filterManager.getFilters(),
     timeRange: timefilter.timefilter.getTime(),
   });
+
+  // Currently only PPL has enabled visualization
+  // This can be removed once we only support PPL in discover and the vis is always enabled
   const [enableViz, setEnableViz] = useState(
     queryString.getLanguageService().getLanguage(queryString.getQuery()!.language)!
       .showVisualization
