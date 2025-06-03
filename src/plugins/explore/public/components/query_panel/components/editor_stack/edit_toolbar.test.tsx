@@ -11,8 +11,8 @@ describe('EditToobar', () => {
   it('renders edit and clear buttons', () => {
     render(
       <EditToobar
-        handleClearEditor={jest.fn()}
-        handleEditClick={jest.fn()}
+        onClearEditor={jest.fn()}
+        onEditClick={jest.fn()}
         editText="Edit"
         clearText="Clear"
       />
@@ -25,8 +25,8 @@ describe('EditToobar', () => {
     const handleEditClick = jest.fn();
     render(
       <EditToobar
-        handleClearEditor={jest.fn()}
-        handleEditClick={handleEditClick}
+        onClearEditor={jest.fn()}
+        onEditClick={handleEditClick}
         editText="Edit"
         clearText="Clear"
       />
@@ -39,8 +39,8 @@ describe('EditToobar', () => {
     const handleClearEditor = jest.fn();
     render(
       <EditToobar
-        handleClearEditor={handleClearEditor}
-        handleEditClick={jest.fn()}
+        onClearEditor={handleClearEditor}
+        onEditClick={jest.fn()}
         editText="Edit"
         clearText="Clear"
       />

@@ -1,18 +1,23 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
 
 interface EditToobarProps {
   className?: string;
-  handleClearEditor: () => void;
-  handleEditClick: () => void;
+  onClearEditor: () => void;
+  onEditClick: () => void;
   editText: string;
   clearText: string;
 }
 
 export const EditToobar: React.FC<EditToobarProps> = ({
   className = 'promptEditor__editOverlay',
-  handleClearEditor,
-  handleEditClick,
+  onClearEditor,
+  onEditClick,
   editText,
   clearText,
 }) => {
@@ -25,19 +30,29 @@ export const EditToobar: React.FC<EditToobarProps> = ({
         className="editToolbar"
       >
         <EuiFlexItem grow={false}>
-          <span onClick={handleEditClick}>
+          <button
+            type="button"
+            className="editToolbar__button"
+            onClick={onEditClick}
+            aria-label={editText}
+          >
             <EuiIcon type="pencil" />
             <span className="editText">{editText}</span>
-          </span>
+          </button>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHorizontalRule margin="xs" className="verticalSeparator" style={{ margin: '0px' }} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <span onClick={handleClearEditor}>
+          <button
+            type="button"
+            className="editToolbar__button"
+            onClick={onClearEditor}
+            aria-label={clearText}
+          >
             <EuiIcon type="crossInCircleEmpty" />
             <span className="editText">{clearText}</span>
-          </span>
+          </button>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
