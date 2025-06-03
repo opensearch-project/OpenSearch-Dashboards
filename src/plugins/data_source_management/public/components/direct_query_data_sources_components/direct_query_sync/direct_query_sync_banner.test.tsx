@@ -11,6 +11,7 @@ import { DashboardDirectQuerySyncBanner } from './direct_query_sync_banner';
 import { fetchDirectQuerySyncInfo } from './direct_query_sync_utils';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
 import { intervalAsMinutes } from '../../../constants';
+import { DirectQueryLoadingStatus } from 'src/plugins/data_source_management/framework/types';
 
 // Mock dependencies
 jest.mock('./direct_query_sync_utils', () => ({
@@ -61,7 +62,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
 
     // Default mock for useDirectQuery
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'initial',
+      loadStatus: DirectQueryLoadingStatus.INITIAL,
       startLoading: jest.fn(),
     });
   });
@@ -124,8 +125,39 @@ describe('DashboardDirectQuerySyncBanner', () => {
       expect(screen.getByTestId('directQuerySyncBar')).toBeInTheDocument();
       expect(screen.getByText(/Data scheduled to sync every 5 minutes\./)).toBeInTheDocument();
       expect(
-        screen.getByText(new RegExp(`Last sync: ${mockDateString} \\(152331 minutes ago\\)`))
+        screen.getByText(new RegExp(`Last sync: ${mockDateString}, 152331 minutes ago.`))
       ).toBeInTheDocument();
+      expect(screen.getByText('Sync data')).toBeInTheDocument();
+    });
+  });
+
+  it('renders sync schedule with -- when last refresh time is missing', async () => {
+    (fetchDirectQuerySyncInfo as jest.Mock).mockResolvedValue({
+      refreshQuery: 'REFRESH MATERIALIZED VIEW `test_datasource`.`test_database`.`test_index`',
+      refreshInterval: 300, // 5 minutes in seconds
+      lastRefreshTime: null, // No last refresh time
+      mappingName: 'test_datasource.test_database.test_index',
+      mdsId: 'mds-1',
+    });
+
+    // Mock intervalAsMinutes for interval
+    (intervalAsMinutes as jest.Mock).mockReturnValueOnce('5 minutes'); // For interval: 1000 * 300 / 60000
+
+    render(
+      <DashboardDirectQuerySyncBanner
+        http={http}
+        notifications={notifications}
+        savedObjectsClient={savedObjectsClient}
+        dashboardId="dashboard-1"
+        removeBanner={removeBanner}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('directQuerySyncBar')).toBeInTheDocument();
+      expect(screen.getByText(/Data scheduled to sync every 5 minutes\./)).toBeInTheDocument();
+      expect(screen.getByText(/Last sync: --\./)).toBeInTheDocument();
+      expect(screen.queryByText(/ago/)).not.toBeInTheDocument();
       expect(screen.getByText('Sync data')).toBeInTheDocument();
     });
   });
@@ -140,7 +172,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'running',
+      loadStatus: DirectQueryLoadingStatus.RUNNING,
       startLoading: jest.fn(),
     });
 
@@ -176,7 +208,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'initial',
+      loadStatus: DirectQueryLoadingStatus.INITIAL,
       startLoading: mockStartLoading,
     });
 
@@ -214,7 +246,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'initial',
+      loadStatus: DirectQueryLoadingStatus.INITIAL,
       startLoading: mockStartLoading,
     });
 
@@ -248,7 +280,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'initial',
+      loadStatus: DirectQueryLoadingStatus.INITIAL,
       startLoading: mockStartLoading,
     });
 
@@ -293,7 +325,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
 
     // Initially set loadStatus to 'initial'
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'initial',
+      loadStatus: DirectQueryLoadingStatus.INITIAL,
       startLoading: mockStartLoading,
     });
 
@@ -303,7 +335,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
 
     // Update loadStatus to 'success'
     (useDirectQuery as jest.Mock).mockReturnValue({
-      loadStatus: 'success',
+      loadStatus: DirectQueryLoadingStatus.SUCCESS,
       startLoading: mockStartLoading,
     });
 
