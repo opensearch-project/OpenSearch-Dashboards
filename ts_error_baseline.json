@@ -6806,14 +6806,14 @@
     },
     {
       "file": "src/plugins/explore/public/application/logs/logs_page.test.tsx",
-      "line": 53,
+      "line": 28,
       "column": 9,
       "code": "TS2740",
       "message": "Type '{ element: HTMLDivElement; history: any; onAppLeave: Mock<any, any>; setHeaderActionMenu: Mock<any, any>; appBasePath: string; }' is missing the following properties from type 'AppMountParameters<unknown>': setHeaderLeftControls, setHeaderCenterControls, setHeaderRightControls, setHeaderBadgeControls, and 2 more."
     },
     {
       "file": "src/plugins/explore/public/application/traces/traces_page.test.tsx",
-      "line": 53,
+      "line": 28,
       "column": 9,
       "code": "TS2740",
       "message": "Type '{ element: HTMLDivElement; history: any; onAppLeave: Mock<any, any>; setHeaderActionMenu: Mock<any, any>; appBasePath: string; }' is missing the following properties from type 'AppMountParameters<unknown>': setHeaderLeftControls, setHeaderCenterControls, setHeaderRightControls, setHeaderBadgeControls, and 2 more."
@@ -6838,13 +6838,6 @@
       "column": 12,
       "code": "TS2739",
       "message": "Type '{}' is missing the following properties from type 'SidebarProps': children, datasetSelectorRef"
-    },
-    {
-      "file": "src/plugins/explore/public/utils/use/index.ts",
-      "line": 6,
-      "column": 15,
-      "code": "TS2307",
-      "message": "Cannot find module './use_view' or its corresponding type declarations."
     },
     {
       "file": "src/plugins/explore/public/utils/use/shallow_equal.test.ts",
@@ -10697,6 +10690,6 @@
       "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
     }
   ],
-  "updatedAt": "2025-06-02T17:15:58.284Z",
+  "updatedAt": "2025-06-03T16:52:39.881Z",
   "tsconfig": "/home/ubuntu/OpenSearch-Dashboards/tsconfig.check.json"
 }
