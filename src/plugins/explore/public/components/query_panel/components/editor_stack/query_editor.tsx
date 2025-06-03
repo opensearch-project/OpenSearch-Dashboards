@@ -11,11 +11,11 @@ import { ReusableEditor } from './resuable_editor';
 interface QueryEditorProps {
   languageType: LanguageType;
   queryString: string;
-  onChange: (value: string) => void;
-  handleQueryRun: (queryString?: string) => void;
   isEditorReadOnly: boolean;
-  handleQueryEdit: () => void;
-  handleClearEditor: () => void;
+  onChange: (value: string) => void;
+  onQueryRun: (queryString?: string) => void;
+  onQueryEdit: () => void;
+  onClearEditor: () => void;
 }
 
 // Todo: Move this dynamic comment once the actual query is loaded
@@ -25,11 +25,11 @@ const EDITOR_HEIGHT = 100;
 export const QueryEditor: React.FC<QueryEditorProps> = ({
   queryString,
   languageType,
-  onChange,
-  handleQueryRun,
   isEditorReadOnly,
-  handleQueryEdit,
-  handleClearEditor,
+  onChange,
+  onQueryRun,
+  onQueryEdit,
+  onClearEditor,
 }) => {
   const editorConfig = getEditorConfig(languageType);
   const [decorated, setDecorated] = useState(false);
@@ -60,17 +60,17 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   return (
     <ReusableEditor
       value={queryString}
-      onChange={onChange}
-      onRun={handleQueryRun}
       isReadOnly={isEditorReadOnly}
-      onEdit={handleQueryEdit}
-      onClear={handleClearEditor}
-      onEditorDidMount={onEditorDidMount}
       editorConfig={editorConfig}
       editText="Edit Query"
       clearText="Clear Editor"
       height={EDITOR_HEIGHT}
       editorType="query" // This is used for styling and identification
+      onChange={onChange}
+      onRun={onQueryRun}
+      onEdit={onQueryEdit}
+      onClear={onClearEditor}
+      onEditorDidMount={onEditorDidMount}
     />
   );
 };

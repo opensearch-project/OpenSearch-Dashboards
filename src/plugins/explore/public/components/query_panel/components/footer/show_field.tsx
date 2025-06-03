@@ -24,8 +24,8 @@ export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onT
     <EuiButtonEmpty
       onClick={handleToggle}
       iconType={showField ? 'menuLeft' : 'menuRight'} // Add the folderOpen icon
-      style={{ color: '#0073e6', padding: '0px' }} // Highlighted text style
       data-test-subj="showFields"
+      className="showFieldsToggle"
     >
       {showField ? 'Hide Fields' : 'Show Fields'}
     </EuiButtonEmpty>

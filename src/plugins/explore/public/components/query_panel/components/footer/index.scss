@@ -3,14 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
- .query-editor-footer {
-    .vertical-separator {
-        width: 1px;
-        height: 16px;
-        background: #D9D9D9;
+.queryEditorFooter {
+    .showInputType {
+        color: #98A2B3;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 21px; 
     }
 
     .euiButtonEmpty .euiButtonEmpty__content {
         padding: 0px;
+    }
+
+    .showFieldsToggle {
+        color: '#0073e6';
+        padding: '0px';
     }
 }

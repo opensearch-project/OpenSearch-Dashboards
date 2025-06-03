@@ -7,19 +7,20 @@ import React from 'react';
 import { PromptEditor } from './prompt_editor';
 import { QueryEditor } from './query_editor';
 import { LanguageType } from './shared';
+import './index.scss';
 
 interface EditorStackProps {
   onPromptChange: (value: string) => void;
   onQueryChange: (value: string) => void;
   languageType: LanguageType;
-  isDualEditor: Boolean;
+  isDualEditor: boolean;
   isPromptReadOnly: boolean;
   isEditorReadOnly: boolean;
-  handleQueryEdit: () => void;
-  handlePromptEdit: () => void;
-  handleQueryRun: (query?: string) => void;
-  handlePromptRun: (prompt?: string) => void;
-  handleClearEditor: () => void;
+  onQueryEdit: () => void;
+  onPromptEdit: () => void;
+  onQueryRun: (query?: string) => void;
+  onPromptRun: (prompt?: string) => void;
+  onClearEditor: () => void;
   queryString: string;
   prompt: string;
 }
@@ -28,37 +29,37 @@ const EditorStack: React.FC<EditorStackProps> = ({
   isDualEditor,
   isPromptReadOnly,
   isEditorReadOnly,
-  onPromptChange,
-  onQueryChange,
   languageType,
-  handleQueryEdit,
-  handlePromptEdit,
-  handleQueryRun,
-  handlePromptRun,
-  handleClearEditor,
   queryString,
   prompt,
+  onPromptChange,
+  onQueryChange,
+  onQueryEdit,
+  onPromptEdit,
+  onQueryRun,
+  onPromptRun,
+  onClearEditor,
 }) => {
   return (
-    <div className="editor-stack">
+    <div className="editorStack" data-test-subj="editor-stack">
       <PromptEditor
         onChange={onPromptChange}
         languageType={languageType}
-        handlePromptRun={handlePromptRun}
         prompt={prompt}
         isPromptReadOnly={isPromptReadOnly}
-        handlePromptEdit={handlePromptEdit}
-        handleClearEditor={handleClearEditor}
+        onPromptRun={onPromptRun}
+        onPromptEdit={onPromptEdit}
+        onClearEditor={onClearEditor}
       />
       {isDualEditor && (
         <QueryEditor
           onChange={onQueryChange}
           languageType="ppl"
-          handleQueryRun={handleQueryRun}
           queryString={queryString}
           isEditorReadOnly={isEditorReadOnly}
-          handleQueryEdit={handleQueryEdit}
-          handleClearEditor={handleClearEditor}
+          onQueryRun={onQueryRun}
+          onQueryEdit={onQueryEdit}
+          onClearEditor={onClearEditor}
         />
       )}
     </div>

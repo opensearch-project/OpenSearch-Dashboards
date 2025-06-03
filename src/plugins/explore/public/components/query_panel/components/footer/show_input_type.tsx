@@ -8,7 +8,7 @@ import { LanguageType } from '../editor_stack/shared';
 
 interface ShowInputTypeProps {
   languageType: LanguageType; // Added the missing property
-  isDualEditor: Boolean;
+  isDualEditor: boolean;
   noInput: boolean;
 }
 
@@ -19,7 +19,6 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
 }) => {
   // Memoized function to determine the display text
   const getDisplayText = useMemo(() => {
-    console.log(noInput, noInput);
     if (noInput) return '';
     if (languageType === 'nl') {
       return isDualEditor ? 'Natural Language | PPL' : 'Natural Language';
@@ -27,5 +26,5 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
     return 'PPL'; // Default to empty for other language types
   }, [languageType, isDualEditor, noInput]);
 
-  return getDisplayText ? <span className="show-input-type">{getDisplayText} </span> : null;
+  return getDisplayText ? <span className="showInputType">{getDisplayText} </span> : null;
 };

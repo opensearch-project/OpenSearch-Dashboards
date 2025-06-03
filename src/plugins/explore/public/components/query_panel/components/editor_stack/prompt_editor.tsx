@@ -11,21 +11,21 @@ import { ReusableEditor } from './resuable_editor';
 interface PromptEditorProps {
   languageType: LanguageType;
   prompt: string;
-  onChange: (value: string) => void;
-  handlePromptRun: (queryString?: string) => void;
   isPromptReadOnly: boolean;
-  handlePromptEdit: () => void;
-  handleClearEditor: () => void;
+  onChange: (value: string) => void;
+  onPromptRun: (queryString?: string) => void;
+  onPromptEdit: () => void;
+  onClearEditor: () => void;
 }
 
 export const PromptEditor: React.FC<PromptEditorProps> = ({
   languageType,
-  onChange,
-  handlePromptRun,
   prompt,
   isPromptReadOnly,
-  handlePromptEdit,
-  handleClearEditor,
+  onChange,
+  onPromptRun,
+  onPromptEdit,
+  onClearEditor,
 }) => {
   const editorConfig = getEditorConfig(languageType);
   const langText = languageType !== 'nl' ? 'query' : 'prompt';
@@ -33,10 +33,10 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
     <ReusableEditor
       value={prompt}
       onChange={onChange}
-      onRun={handlePromptRun}
+      onRun={onPromptRun}
       isReadOnly={isPromptReadOnly}
-      onEdit={handlePromptEdit}
-      onClear={handleClearEditor}
+      onEdit={onPromptEdit}
+      onClear={onClearEditor}
       editorConfig={editorConfig}
       placeholder={
         <>

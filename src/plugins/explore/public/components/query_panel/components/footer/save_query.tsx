@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// TODO: Integrate with saved queries service and update with real saved queries in list
+// TODO: Integrate with saved queries service and update with real saved queries in list and  modify ui too.
 import React, { useState } from 'react';
 import {
   EuiPopover,
@@ -77,7 +77,7 @@ export const SaveQueryButton: React.FC = () => {
         <div style={{ padding: '10px' }} data-test-subj="saveQueryPopoverBody">
           <EuiText size="s" style={{ color: '#676E75', maxWidth: '500px' }}>
             <p>
-              There are no saved queries.Save query text and filters that you want to use again.
+              There are no saved queries. Save query text and filters that you want to use again.
             </p>
           </EuiText>
         </div>
