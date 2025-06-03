@@ -32,6 +32,7 @@ export const INDEX_PATTERN_WITH_TIME = 'data_logs_small_time_*';
 export const INDEX_PATTERN_WITH_NO_TIME = 'data_logs_small_no_time_*';
 export const INDEX_PATTERN_WITH_TIME_1 = 'data_logs_small_time_1*';
 export const INDEX_PATTERN_WITH_NO_TIME_1 = 'data_logs_small_no_time_1*';
+export const INVALID_INDEX = 'index_that_does_not_exist';
 
 /**
  * The dataset type in discover
