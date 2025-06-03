@@ -3,21 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 .queryEditorFooter {
-    .showInputType {
-        color: #98A2B3;
-        font-size: 12px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 21px; 
-    }
+  .showInputType {
+    color: $euiColorDarkShade; // Use closest match from OUI
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 21px;
+  }
 
-    .euiButtonEmpty .euiButtonEmpty__content {
-        padding: 0px;
-    }
+  // Avoid modifying global selectors — override with a class instead
+  .customEuiButtonContent {
+    padding: 0;
+  }
 
-    .showFieldsToggle {
-        color: '#0073e6';
-        padding: '0px';
-    }
+  .showFieldsToggle {
+    color: $euiColorPrimary; // '#0073e6' → $euiColorPrimary
+    padding: 0;
+  }
 }
