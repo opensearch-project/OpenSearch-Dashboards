@@ -31,14 +31,14 @@ export const queryBarActionsRegistry = {
       label: 'Set up an alert from query',
       iconType: 'bell', // Icon for alert
       onClick: () => {
-        console.log('Set up an alert from query clicked');
+        // console.log('Set up an alert from query clicked');
       },
     },
     {
       label: 'Suggest anomaly detection',
       iconType: 'anomalyDetection', // Icon for anomaly detection
       onClick: () => {
-        console.log('Suggest anomaly detection clicked');
+        // console.log('Suggest anomaly detection clicked');
       },
     },
   ],
