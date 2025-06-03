@@ -20,11 +20,12 @@ import { ShowInputType } from './show_input_type';
 import { LanguageType } from '../editor_stack/shared';
 import { QueryError } from './query_error';
 import { ResultStatus } from '../../types';
+import './index.scss';
 
 interface QueryEditorFooterProps {
   languageType: LanguageType;
-  handleRunClick: () => void;
-  handleRecentClick: () => void;
+  onRunClick: () => void;
+  onRecentClick: () => void;
   isDualEditor: boolean;
   isLoading: boolean;
   noInput: boolean;
@@ -33,16 +34,15 @@ interface QueryEditorFooterProps {
 
 export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
   languageType,
-  handleRunClick,
-  handleRecentClick,
+  onRunClick,
+  onRecentClick,
   isDualEditor,
   isLoading,
   noInput,
   lineCount,
 }) => {
-  console.log(lineCount, 'lineCount');
   return (
-    <div className="query-editor-footer">
+    <div className="queryEditorFooter">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
         {/* Left Section */}
         <EuiFlexItem grow={false}>
@@ -56,11 +56,11 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="xs" className="vertical-separator" />
+              <EuiHorizontalRule margin="xs" className="verticalSeparator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={handleRecentClick}
+                onClick={onRecentClick}
                 iconType="clock"
                 style={{ padding: '0px' }}
                 data-test-subj="recentQueriesButton"
@@ -69,13 +69,13 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="xs" className="vertical-separator" />
+              <EuiHorizontalRule margin="xs" className="verticalSeparator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SaveQueryButton />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="xs" className="vertical-separator" />
+              <EuiHorizontalRule margin="xs" className="verticalSeparator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <QueryError
@@ -121,7 +121,7 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               <DateTimeRangePicker />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RunQueryButton onClick={handleRunClick} isDisabled={noInput} isLoading={isLoading} />
+              <RunQueryButton onClick={onRunClick} isDisabled={noInput} isLoading={isLoading} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

@@ -100,7 +100,8 @@ const QueryPanel = () => {
     setIsDualEditor(false);
     setIsEditorReadOnly(false);
     setIsPromptReadOnly(false);
-    setCurrentQuery(intitialQuery('nl', 'test'));
+    setLineCount(undefined);
+    setCurrentQuery(intitialQuery('nl', 'test')); // TODO: Pass dataset name dynamically
   };
 
   const handlePromptRun = async (queryString?: string | { [key: string]: any }) => {
@@ -115,7 +116,7 @@ const QueryPanel = () => {
         ...prevQuery,
         query: 'source=test\n| where state=CA and year=2023\n| sort=asc',
       }));
-      // Todo: update query object with  generated ppl query
+      // TODO: Update query object with  generated ppl query
     } else {
       setIsDualEditor(false);
       setCurrentQuery((prevQuery) => ({
@@ -151,7 +152,6 @@ const QueryPanel = () => {
     setIsRecentQueryVisible(false);
     setCurrentQuery(recentQuery);
     setIsDualEditor(true);
-
     handleQueryRun(recentQuery.query, timeRange);
   };
 
@@ -161,15 +161,15 @@ const QueryPanel = () => {
   );
 
   return (
-    <div className="query-container">
+    <div className="queryContainer">
       <QueryPanelLayout
         footer={
           <QueryEditorFooter
             isDualEditor={isDualEditor}
             isLoading={isLoading}
             languageType={currentQuery.language}
-            handleRunClick={handleRunClick}
-            handleRecentClick={handleRecentClick}
+            onRunClick={handleRunClick}
+            onRecentClick={handleRecentClick}
             noInput={noInput}
             lineCount={lineCount}
           />
@@ -184,23 +184,15 @@ const QueryPanel = () => {
           prompt={currentQuery.prompt || ''}
           onPromptChange={onPromptChange}
           onQueryChange={onQueryChange}
-          handlePromptEdit={handlePromptEdit}
-          handleQueryEdit={handleQueryEdit}
-          handleQueryRun={handleQueryRun}
-          handlePromptRun={handlePromptRun}
-          handleClearEditor={handleClearEditor}
+          onPromptEdit={handlePromptEdit}
+          onQueryEdit={handleQueryEdit}
+          onQueryRun={handleQueryRun}
+          onPromptRun={handlePromptRun}
+          onClearEditor={handleClearEditor}
         />
       </QueryPanelLayout>
       {isRecentQueryVisible && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            zIndex: 1000,
-          }}
-        >
+        <div className="recentQueriesContainer">
           <RecentQueriesTable
             isVisible={isRecentQueryVisible}
             onClickRecentQuery={onClickRecentQuery}
