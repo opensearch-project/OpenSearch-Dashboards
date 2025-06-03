@@ -6,8 +6,7 @@
 import { schema } from '@osd/config-schema';
 import { i18n } from '@osd/i18n';
 import { UiSettingScope, UiSettingsParams } from '../types';
-
-const ENABLE_AI_FEATURES = 'enableAIFeatures';
+import { ENABLE_AI_FEATURES } from '../../../../core/utils/constants';
 
 export const getAIFeaturesSetting = (): Record<string, UiSettingsParams> => {
   return {

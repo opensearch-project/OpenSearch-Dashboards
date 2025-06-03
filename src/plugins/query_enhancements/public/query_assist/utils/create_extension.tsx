@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { HttpSetup } from 'opensearch-dashboards/public';
+import { ENABLE_AI_FEATURES, HttpSetup } from 'opensearch-dashboards/public';
 import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { useObservable } from 'react-use';
@@ -23,7 +23,6 @@ import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { QueryAssistContext, QueryAssistState } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
 import { isPPLSupportedType } from './language_support';
-import { ENABLE_AI_FEATURES } from './constant';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
