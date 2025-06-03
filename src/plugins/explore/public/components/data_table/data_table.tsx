@@ -3,38 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './_doc_table.scss';
+import './data_table.scss';
 
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EuiSmallButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { TableHeader } from './table_header';
-import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import { TableRow } from './table_row';
-import { getServices, IndexPattern } from '../../../opensearch_dashboards_services';
-import { Pagination } from './pagination';
-import { getLegacyDisplayedColumns } from './helper';
-import { SortDirection, SortOrder } from '../../../../../../types/saved_explore_types';
+import { IndexPattern } from 'src/plugins/data/public';
+import { TableHeader } from './table_header/table_header';
 import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SAMPLE_SIZE_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../../../../common/legacy/discover';
-import { UI_SETTINGS } from '../../../../../../../../data/common';
+  DocViewFilterFn,
+  DocViewsRegistry,
+  OpenSearchSearchHit,
+} from '../../types/doc_views_types';
+import { TableRow } from './table_row/table_row';
+import { LegacyDisplayedColumn } from '../../helpers/data_table_helper';
+import { Pagination } from './pagination/pagination';
 
-export interface DefaultDiscoverTableProps {
-  columns: string[];
+export interface DataTableProps {
+  columns: LegacyDisplayedColumn[];
   hits?: number;
-  rows: OpenSearchSearchHit[];
+  rows: Array<OpenSearchSearchHit<Record<string, any>>>;
   indexPattern: IndexPattern;
-  sort: SortOrder[];
-  onSort: (s: SortOrder[]) => void;
+  sampleSize: number;
+  isShortDots: boolean;
+  showPagination?: boolean;
+  docViewsRegistry: DocViewsRegistry;
   onRemoveColumn: (column: string) => void;
-  onMoveColumn: (colName: string, destination: number) => void;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onClose?: () => void;
-  showPagination?: boolean;
   scrollToTop?: () => void;
 }
 
@@ -44,38 +41,22 @@ const INFINITE_SCROLLED_PAGE_SIZE = 10;
 // How far to queue unrendered rows ahead of time during infinite scrolling
 const DESIRED_ROWS_LOOKAHEAD = 5 * INFINITE_SCROLLED_PAGE_SIZE;
 
-const DefaultDiscoverTableUI = ({
+const DataTableUI = ({
   columns,
   hits,
   rows,
   indexPattern,
-  sort,
-  onSort,
+  sampleSize,
+  isShortDots,
+  docViewsRegistry,
+  showPagination,
   onRemoveColumn,
-  onMoveColumn,
   onAddColumn,
   onFilter,
   onClose,
-  showPagination,
   scrollToTop,
-}: DefaultDiscoverTableProps) => {
-  const services = getServices();
-  const [sampleSize, isShortDots, hideTimeColumn, defaultSortOrder] = useMemo(() => {
-    return [
-      services.uiSettings.get(SAMPLE_SIZE_SETTING),
-      services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
-      services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
-      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc') as SortDirection,
-    ];
-  }, [services.uiSettings]);
-
-  const displayedColumns = getLegacyDisplayedColumns(
-    columns,
-    indexPattern,
-    hideTimeColumn,
-    isShortDots
-  );
-  const displayedColumnNames = displayedColumns.map((column) => column.name);
+}: DataTableProps) => {
+  const columnNames = columns.map((column) => column.name);
 
   /* INFINITE_SCROLLED_PAGE_SIZE:
    * Infinitely scrolling, a page of 10 rows is shown and then 4 pages are lazy-loaded for a total of 5 pages.
@@ -228,96 +209,84 @@ const DefaultDiscoverTableUI = ({
   }, [columns, tableElement, indexOfRenderedData, timeFromFirstRow]);
 
   return (
-    indexPattern && (
-      <>
-        {showPagination ? (
-          <Pagination
-            pageCount={pageCount}
-            activePage={activePage}
-            goToPage={goToPage}
-            startItem={currentRowCounts.startRow + 1}
-            endItem={currentRowCounts.endRow}
-            totalItems={hits}
-            sampleSize={sampleSize}
+    <div className="explore-table-container">
+      {showPagination ? (
+        <Pagination
+          pageCount={pageCount}
+          activePage={activePage}
+          goToPage={goToPage}
+          startItem={currentRowCounts.startRow + 1}
+          endItem={currentRowCounts.endRow}
+          totalItems={hits}
+          sampleSize={sampleSize}
+        />
+      ) : null}
+      <table data-test-subj="docTable" className="explore-table table" ref={tableRef}>
+        <thead>
+          <TableHeader displayedColumns={columns} onRemoveColumn={onRemoveColumn} />
+        </thead>
+        <tbody>
+          {(showPagination ? displayedRows : rows.slice(0, renderedRowCount)).map(
+            (row, index: number) => {
+              return (
+                <TableRow
+                  key={row._id}
+                  row={row}
+                  columns={columnNames}
+                  indexPattern={indexPattern}
+                  onAddColumn={onAddColumn}
+                  onRemoveColumn={onRemoveColumn}
+                  onFilter={onFilter}
+                  onClose={onClose}
+                  isShortDots={isShortDots}
+                  docViewsRegistry={docViewsRegistry}
+                />
+              );
+            }
+          )}
+        </tbody>
+      </table>
+      {!showPagination && renderedRowCount < rows.length && (
+        <div ref={sentinelRef}>
+          <EuiProgress
+            size="xs"
+            color="accent"
+            data-test-subj="discoverRenderedRowsProgress"
+            style={{
+              // Add a little margin if we aren't rendering the truncation callout below, to make
+              // the progress bar render better when it's not present
+              marginBottom: rows.length !== sampleSize ? '5px' : '0',
+            }}
           />
-        ) : null}
-        <table data-test-subj="docTable" className="osd-table table" ref={tableRef}>
-          <thead>
-            <TableHeader
-              displayedColumns={displayedColumns}
-              defaultSortOrder={defaultSortOrder}
-              indexPattern={indexPattern}
-              onChangeSortOrder={onSort}
-              onMoveColumn={onMoveColumn}
-              onRemoveColumn={onRemoveColumn}
-              sortOrder={sort}
-            />
-          </thead>
-          <tbody>
-            {(showPagination ? displayedRows : rows.slice(0, renderedRowCount)).map(
-              (row: OpenSearchSearchHit, index: number) => {
-                return (
-                  <TableRow
-                    key={row._id}
-                    row={row}
-                    columns={displayedColumnNames}
-                    indexPattern={indexPattern}
-                    onRemoveColumn={onRemoveColumn}
-                    onAddColumn={onAddColumn}
-                    onFilter={onFilter}
-                    onClose={onClose}
-                    isShortDots={isShortDots}
-                  />
-                );
-              }
-            )}
-          </tbody>
-        </table>
-        {!showPagination && renderedRowCount < rows.length && (
-          <div ref={sentinelRef}>
-            <EuiProgress
-              size="xs"
-              color="accent"
-              data-test-subj="discoverRenderedRowsProgress"
-              style={{
-                // Add a little margin if we aren't rendering the truncation callout below, to make
-                // the progress bar render better when it's not present
-                marginBottom: rows.length !== sampleSize ? '5px' : '0',
-              }}
-            />
-          </div>
-        )}
-        {!showPagination && rows.length === sampleSize && (
-          <EuiCallOut className="dscTable__footer" data-test-subj="discoverDocTableFooter">
-            <FormattedMessage
-              id="explore.discover.howToSeeOtherMatchingDocumentsDescription"
-              defaultMessage="These are the first {sampleSize} documents matching
+        </div>
+      )}
+      {!showPagination && rows.length === sampleSize && (
+        <EuiCallOut className="exploreTable__footer" data-test-subj="discoverDocTableFooter">
+          <FormattedMessage
+            id="explore.howToSeeOtherMatchingDocumentsDescription"
+            defaultMessage="These are the first {sampleSize} documents matching
               your search, refine your search to see others."
-              values={{ sampleSize }}
-            />
-
-            <EuiSmallButtonEmpty onClick={scrollToTop}>
-              <FormattedMessage
-                id="explore.discover.backToTopLinkText"
-                defaultMessage="Back to top."
-              />
-            </EuiSmallButtonEmpty>
-          </EuiCallOut>
-        )}
-        {showPagination ? (
-          <Pagination
-            pageCount={pageCount}
-            activePage={activePage}
-            goToPage={goToPage}
-            startItem={currentRowCounts.startRow + 1}
-            endItem={currentRowCounts.endRow}
-            totalItems={hits}
-            sampleSize={sampleSize}
+            values={{ sampleSize }}
           />
-        ) : null}
-      </>
-    )
+
+          <EuiSmallButtonEmpty onClick={scrollToTop}>
+            <FormattedMessage id="explore.backToTopLinkText" defaultMessage="Back to top." />
+          </EuiSmallButtonEmpty>
+        </EuiCallOut>
+      )}
+      {showPagination ? (
+        <Pagination
+          pageCount={pageCount}
+          activePage={activePage}
+          goToPage={goToPage}
+          startItem={currentRowCounts.startRow + 1}
+          endItem={currentRowCounts.endRow}
+          totalItems={hits}
+          sampleSize={sampleSize}
+        />
+      ) : null}
+    </div>
   );
 };
 
-export const DefaultDiscoverTable = React.memo(DefaultDiscoverTableUI);
+export const DataTable = React.memo(DataTableUI);
