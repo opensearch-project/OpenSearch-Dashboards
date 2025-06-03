@@ -4,7 +4,6 @@
  */
 
 import { LineChartStyleControls } from '../line/line_vis_config';
-import { DiscoverViewServices } from '../../../../build_services';
 import { IFieldType, IndexPattern } from '../../../../opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
 import { LineVisStyleControlsProps } from '../line/line_vis_options';
@@ -29,7 +28,6 @@ export interface VisualizationType {
     };
   };
   readonly toExpression: (
-    services: DiscoverViewServices,
     searchContext: IExpressionLoaderParams['searchContext'],
     indexPattern: IndexPattern,
     transformedData?: Array<Record<string, any>>,

@@ -16,6 +16,8 @@ import { lineChartRule } from './line/line_chart_rules';
 import { ExploreVisualization } from './explore_visualization';
 import { getVisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
 
+import './explore_visualization_container.scss';
+
 export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
@@ -45,6 +47,8 @@ export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData)
       .showVisualization
   );
 
+  // Hook to get the visualization type based on the rows and field schema
+  // This will be called every time the rows or fieldSchema changes
   useEffect(() => {
     if (fieldSchema) {
       const result = getVisualizationType(rows, fieldSchema);
@@ -57,13 +61,13 @@ export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData)
     }
   }, [fieldSchema, rows]);
 
+  // Hook to generate the expression based on the visualization type and data
   useEffect(() => {
     async function loadExpression() {
       if (!rows || !indexPattern || !visualizationData) {
         return;
       }
       const exp = await visualizationData.visualizationType?.toExpression(
-        services,
         searchContext,
         indexPattern,
         visualizationData.transformedData,
@@ -78,6 +82,9 @@ export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData)
     loadExpression();
   }, [searchContext, rows, indexPattern, services, styleOptions, visualizationData]);
 
+  // Hook to update the search context whenever the query state changes
+  // This will ensure that the visualization is always up-to-date with the latest query and filters
+  // Also updates the enableViz state based on the query language
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
       setSearchContext({
@@ -109,13 +116,16 @@ export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData)
   }
 
   return (
-    <ExploreVisualization
-      expression={expression}
-      searchContext={searchContext}
-      styleOptions={styleOptions}
-      visualizationData={visualizationData}
-      onStyleChange={handleStyleChange}
-      ReactExpressionRenderer={ReactExpressionRenderer}
-    />
+    <div className="exploreVisualizationContainer">
+      <ExploreVisualization
+        data-subject-subj="exploreVisualization"
+        expression={expression}
+        searchContext={searchContext}
+        styleOptions={styleOptions}
+        visualizationData={visualizationData}
+        onStyleChange={handleStyleChange}
+        ReactExpressionRenderer={ReactExpressionRenderer}
+      />
+    </div>
   );
 };

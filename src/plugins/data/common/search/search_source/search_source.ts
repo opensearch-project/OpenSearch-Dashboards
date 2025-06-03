@@ -444,7 +444,6 @@ export class SearchSource {
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
           const dataFrameResponse = response as IDataFrameDefaultResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-          console.log('dataFrameResponse', dataFrameResponse);
           return onResponse(
             searchRequest,
             convertResult({

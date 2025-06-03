@@ -6,23 +6,23 @@
 import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
-import { GridOptions } from './grid_options';
-import { GridOptions as GridConfig } from '../line/line_vis_config';
+import { GridOptionsPanel } from './grid_options';
+import { GridOptions } from '../types';
 
 export default {
-  component: GridOptions,
+  component: GridOptionsPanel,
   title:
     'src/plugins/explore/public/application/legacy/discover/application/components/visualizations/style_panel/grid_options',
-} as ComponentMeta<typeof GridOptions>;
+} as ComponentMeta<typeof GridOptionsPanel>;
 
 // Template for the story
-const Template: ComponentStory<typeof GridOptions> = (args) => {
+const Template: ComponentStory<typeof GridOptionsPanel> = (args) => {
   // Use state to track changes
-  const [grid, setGrid] = useState<GridConfig>(args.grid);
+  const [grid, setGrid] = useState<GridOptions>(args.grid);
 
   return (
     <div style={{ maxWidth: '800px', padding: '16px' }}>
-      <GridOptions
+      <GridOptionsPanel
         grid={grid}
         onGridChange={(newGrid) => {
           setGrid(newGrid);

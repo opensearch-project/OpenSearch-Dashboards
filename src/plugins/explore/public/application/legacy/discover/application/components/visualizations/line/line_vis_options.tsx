@@ -9,12 +9,12 @@ import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
 import { BasicVisOptions } from '../style_panel/basic_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
-import { GridOptions } from '../style_panel/grid_options';
+import { GridOptionsPanel } from '../style_panel/grid_options';
 import { ExploreVisColumn } from '../types';
 import { AxesOptions } from '../style_panel/axes_options';
 
 export interface LineVisStyleControlsProps {
-  styleOptions: Partial<LineChartStyleControls>;
+  styleOptions: LineChartStyleControls;
   onStyleChange: (newOptions: Partial<LineChartStyleControls>) => void;
   numericalColumns?: ExploreVisColumn[];
   categoricalColumns?: ExploreVisColumn[];
@@ -28,7 +28,6 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   categoricalColumns = [],
   dateColumns = [],
 }) => {
-  console.log('LineVisStyleControls', styleOptions);
   const updateStyleOption = <K extends keyof LineChartStyleControls>(
     key: K,
     value: LineChartStyleControls[K]
@@ -85,7 +84,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
         defaultMessage: 'Grid',
       }),
       content: (
-        <GridOptions
+        <GridOptionsPanel
           grid={styleOptions.grid}
           onGridChange={(grid) => updateStyleOption('grid', grid)}
         />

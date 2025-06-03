@@ -4,73 +4,11 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../../../view_components/utils/use_visualization_types';
 import { Positions } from '../utils/collections';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import { toExpression } from './to_expression';
-
-// Threshold line configuration
-export interface ThresholdLine {
-  color: string;
-  show: boolean;
-  style: 'full' | 'dashed' | 'dot-dashed';
-  value: number;
-  width: number;
-}
-
-// Grid configuration
-export interface GridOptions {
-  categoryLines: boolean;
-  valueLines: boolean;
-}
-
-// Axis label configuration
-export interface AxisLabels {
-  show: boolean;
-  filter: boolean;
-  rotate: number;
-  truncate: number;
-}
-
-// Axis scale configuration
-export interface AxisScale {
-  type: 'linear' | 'log';
-  mode?: 'normal' | 'percentage';
-  defaultYExtents?: boolean;
-  setYExtents?: boolean;
-  min?: number;
-  max?: number;
-}
-
-// Axis title configuration
-export interface AxisTitle {
-  text?: string;
-}
-
-// Category axis configuration
-export interface CategoryAxis {
-  id: string;
-  type: 'category';
-  position: 'top' | 'bottom';
-  show: boolean;
-  style: Record<string, any>;
-  scale: AxisScale;
-  labels: AxisLabels;
-  title: AxisTitle;
-}
-
-// Value axis configuration
-export interface ValueAxis {
-  id: string;
-  name: string;
-  type: 'value';
-  position: 'left' | 'right';
-  show: boolean;
-  style: Record<string, any>;
-  scale: AxisScale;
-  labels: AxisLabels;
-  title: AxisTitle;
-}
+import { VisualizationType } from '../utils/use_visualization_types';
+import { CategoryAxis, GridOptions, ThresholdLine, ValueAxis } from '../types';
 
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
@@ -126,10 +64,6 @@ const defaultLineChartStyles: LineChartStyleControls = {
       type: 'category',
       position: 'bottom',
       show: true,
-      style: {},
-      scale: {
-        type: 'linear',
-      },
       labels: {
         show: true,
         filter: true,
@@ -150,13 +84,6 @@ const defaultLineChartStyles: LineChartStyleControls = {
       type: 'value',
       position: 'left',
       show: true,
-      style: {},
-      scale: {
-        type: 'linear',
-        mode: 'normal',
-        defaultYExtents: false,
-        setYExtents: false,
-      },
       labels: {
         show: true,
         rotate: 0,

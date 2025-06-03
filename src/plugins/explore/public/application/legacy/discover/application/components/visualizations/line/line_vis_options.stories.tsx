@@ -66,10 +66,6 @@ const defaultStyleOptions: LineChartStyleControls = {
       type: 'category',
       position: 'bottom',
       show: true,
-      style: {},
-      scale: {
-        type: 'linear',
-      },
       labels: {
         show: true,
         filter: true,
@@ -90,13 +86,6 @@ const defaultStyleOptions: LineChartStyleControls = {
       type: 'value',
       position: 'left',
       show: true,
-      style: {},
-      scale: {
-        type: 'linear',
-        mode: 'normal',
-        defaultYExtents: false,
-        setYExtents: false,
-      },
       labels: {
         show: true,
         rotate: 0,
@@ -113,9 +102,7 @@ const defaultStyleOptions: LineChartStyleControls = {
 // Template for the story
 const Template: ComponentStory<typeof LineVisStyleControls> = (args) => {
   // Use state to track changes
-  const [styleOptions, setStyleOptions] = useState<Partial<LineChartStyleControls>>(
-    args.styleOptions
-  );
+  const [styleOptions, setStyleOptions] = useState<LineChartStyleControls>(args.styleOptions);
 
   return (
     <div style={{ maxWidth: '800px', padding: '16px' }}>
@@ -171,13 +158,6 @@ MultipleValueAxes.args = {
         type: 'value',
         position: 'right',
         show: true,
-        style: {},
-        scale: {
-          type: 'linear',
-          mode: 'normal',
-          defaultYExtents: false,
-          setYExtents: false,
-        },
         labels: {
           show: true,
           rotate: 0,
