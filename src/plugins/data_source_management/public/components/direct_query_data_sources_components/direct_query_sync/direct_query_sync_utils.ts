@@ -55,7 +55,7 @@ export async function fetchDirectQuerySyncInfo({
       ['visualization', 'lens'].includes(ref.type)
     );
 
-    const indexPatternIds: string[] = [];
+    const indexPatternIds = new Set<string>();
     for (const panelRef of panelRefs) {
       const panelObj = response.objects.find(
         (obj) => obj.id === panelRef.id && obj.type === panelRef.type
@@ -64,12 +64,11 @@ export async function fetchDirectQuerySyncInfo({
 
       const indexPatternRef = panelObj.references.find((ref) => ref.type === 'index-pattern');
       if (indexPatternRef) {
-        indexPatternIds.push(indexPatternRef.id);
+        indexPatternIds.add(indexPatternRef.id);
       }
     }
 
-    const uniqueIndexPatternIds = Array.from(new Set(indexPatternIds));
-    const isConsistent = uniqueIndexPatternIds.length === 1;
+    const isConsistent = indexPatternIds.size === 1;
 
     if (!isConsistent) {
       return null;
@@ -78,12 +77,14 @@ export async function fetchDirectQuerySyncInfo({
     // Step 2: If consistent, fetch the index pattern's saved object to get mdsId and title
     let localMdsId: string | undefined;
     let indexTitle: string | null = null;
-    if (uniqueIndexPatternIds.length === 1) {
-      const selectedIndexPatternId = uniqueIndexPatternIds[0];
-      const indexPattern = await savedObjectsClient.get('index-pattern', selectedIndexPatternId);
-      const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
-      localMdsId = dataSourceRef?.id; // Can be undefined if no data-source reference
-      indexTitle = indexPattern.attributes.title || null;
+    if (indexPatternIds.size === 1) {
+      const selectedIndexPatternId = indexPatternIds.values().next().value;
+      if (typeof selectedIndexPatternId === 'string') {
+        const indexPattern = await savedObjectsClient.get('index-pattern', selectedIndexPatternId);
+        const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
+        localMdsId = dataSourceRef?.id;
+        indexTitle = indexPattern.attributes.title || null;
+      }
     }
 
     if (!indexTitle) {
