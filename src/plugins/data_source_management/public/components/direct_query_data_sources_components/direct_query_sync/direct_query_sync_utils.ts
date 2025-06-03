@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-
-export interface SavedObject {
-  id: string;
-  type: string;
-  attributes: any;
-  references: Array<{ name: string; type: string; id: string }>;
-}
+import { HttpStart, SavedObjectsClientContract, SavedObject } from 'opensearch-dashboards/public';
 
 export interface ExportDashboardsResponse {
   version: string;
