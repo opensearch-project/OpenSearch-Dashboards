@@ -8,7 +8,7 @@ import { EuiIcon } from '@elastic/eui';
 import { getEditorConfig, LanguageType } from './shared';
 import { ReusableEditor } from './resuable_editor';
 
-interface PromptEditorProps {
+export interface PromptEditorProps {
   languageType: LanguageType;
   prompt: string;
   isPromptReadOnly: boolean;

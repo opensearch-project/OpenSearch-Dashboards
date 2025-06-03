@@ -8,7 +8,7 @@ import { monaco } from '@osd/monaco';
 import { getEditorConfig, LanguageType } from './shared';
 import { ReusableEditor } from './resuable_editor';
 
-interface QueryEditorProps {
+export interface QueryEditorProps {
   languageType: LanguageType;
   queryString: string;
   isEditorReadOnly: boolean;
