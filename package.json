@@ -57,6 +57,8 @@
     "test:ftr": "scripts/use_node scripts/functional_tests",
     "test:ftr:server": "scripts/use_node scripts/functional_tests_server",
     "test:ftr:runner": "scripts/use_node scripts/functional_test_runner",
+    "test:cypress": "env TZ=America/Los_Angeles NO_COLOR=1 yarn cypress run",
+    "test:cypress:open": "env TZ=America/Los_Angeles NO_COLOR=1 yarn cypress open",
     "typecheck": "node ./scripts/ts_error_checker.js",
     "update-ts-baseline": "node ./scripts/update_ts_baseline.js",
     "checkLicenses": "scripts/use_node scripts/check_licenses --dev",
