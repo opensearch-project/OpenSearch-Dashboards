@@ -114,9 +114,9 @@ export class DataSourceManagementPlugin
   private authMethodsRegistry: IAuthenticationMethodRegistry = new AuthenticationMethodRegistry();
   private dataSourceSelection: DataSourceSelectionService = new DataSourceSelectionService();
   private featureFlagStatus: boolean = false;
-  private bannerId: string | null = null; // To store the banner ID for unmounting
-  private core: CoreStart | null = null; // To store the CoreStart instance
-  private currentAppId: string | undefined = undefined; // To store the current appId
+  private bannerId: string | null = null;
+  private core: CoreStart | null = null;
+  private currentAppId: string | undefined = undefined;
   private config: ConfigSchema;
 
   constructor(initializerContext: { config: { get: () => ConfigSchema } }) {
@@ -319,8 +319,9 @@ export class DataSourceManagementPlugin
     };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
-    const getDirectQuerySyncFromUrl = (): boolean | null => {
-      const parsedHash = parseUrlHash(window.location.href);
+    const getDirectQuerySyncFromUrl = (
+      parsedHash: ReturnType<typeof parseUrlHash>
+    ): boolean | null => {
       if (parsedHash && parsedHash.query) {
         const directQuerySync = parsedHash.query.directQuerySync;
         if (directQuerySync === 'true') return true;
@@ -329,8 +330,8 @@ export class DataSourceManagementPlugin
       return null;
     };
 
-    const shouldMountBanner = (): boolean => {
-      const urlFlag = getDirectQuerySyncFromUrl();
+    const shouldMountBanner = (parsedHash: ReturnType<typeof parseUrlHash>): boolean => {
+      const urlFlag = getDirectQuerySyncFromUrl(parsedHash);
       if (urlFlag !== null) {
         return urlFlag;
       }
@@ -341,11 +342,14 @@ export class DataSourceManagementPlugin
       const appId = this.currentAppId;
 
       if (appId === 'dashboards') {
-        const hash = window.location.hash;
-        const isDashboardViewMatch = hash.match(/#\/view\/([^\/?]+)(\?.*)?$/);
-        if (isDashboardViewMatch && isDashboardViewMatch[1]) {
-          const dashboardId = isDashboardViewMatch[1];
-          if (shouldMountBanner()) {
+        const parsedHash = parseUrlHash(window.location.href);
+        const pathName = parsedHash?.pathname || '';
+        const pathSegments = pathName.split('/').filter((segment) => segment);
+        const isDashboardViewPage = pathSegments.length === 2 && pathSegments[0] === 'view';
+        const dashboardId = isDashboardViewPage ? pathSegments[1] : null;
+
+        if (isDashboardViewPage && dashboardId) {
+          if (shouldMountBanner(parsedHash)) {
             if (!this.bannerId) {
               this.bannerId = core.overlays.banners.add(
                 toMountPoint(
@@ -368,7 +372,7 @@ export class DataSourceManagementPlugin
             core.overlays.banners.remove(this.bannerId);
             this.bannerId = null;
           }
-        } else if (!isDashboardViewMatch && this.bannerId) {
+        } else if (!isDashboardViewPage && this.bannerId) {
           core.overlays.banners.remove(this.bannerId);
           this.bannerId = null;
         }
