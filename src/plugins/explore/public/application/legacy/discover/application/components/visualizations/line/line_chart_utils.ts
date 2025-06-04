@@ -4,7 +4,7 @@
  */
 
 import { LineChartStyleControls } from './line_vis_config';
-import { ExploreVisColumn } from '../types';
+import { VisColumn } from '../types';
 
 /**
  * Get stroke dash array for different line styles
@@ -184,9 +184,9 @@ export const applyAxisStyling = (
   baseAxis: any,
   styles: Partial<LineChartStyleControls>,
   axisType: 'category' | 'value',
-  numericalColumns?: ExploreVisColumn[],
-  categoricalColumns?: ExploreVisColumn[],
-  dateColumns?: ExploreVisColumn[],
+  numericalColumns?: VisColumn[],
+  categoricalColumns?: VisColumn[],
+  dateColumns?: VisColumn[],
   axisIndex: number = 0 // Add axis index parameter with default value
 ): any => {
   if (!styles) return baseAxis;

@@ -10,15 +10,15 @@ import { LineChartStyleControls } from './line_vis_config';
 import { BasicVisOptions } from '../style_panel/basic_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
-import { ExploreVisColumn } from '../types';
+import { VisColumn } from '../types';
 import { AxesOptions } from '../style_panel/axes_options';
 
 export interface LineVisStyleControlsProps {
   styleOptions: LineChartStyleControls;
   onStyleChange: (newOptions: Partial<LineChartStyleControls>) => void;
-  numericalColumns?: ExploreVisColumn[];
-  categoricalColumns?: ExploreVisColumn[];
-  dateColumns?: ExploreVisColumn[];
+  numericalColumns?: VisColumn[];
+  categoricalColumns?: VisColumn[];
+  dateColumns?: VisColumn[];
 }
 
 export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({

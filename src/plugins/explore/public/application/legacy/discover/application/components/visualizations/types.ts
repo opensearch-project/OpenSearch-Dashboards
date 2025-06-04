@@ -5,21 +5,27 @@
 
 import { VisualizationType } from './utils/use_visualization_types';
 
-export interface ExploreVisColumn {
+export interface ChartTypeMapping {
+  type: string; // 'line', 'bar', 'scatter', etc.
+  priority: number; // Higher number = higher priority
+  name: string;
+}
+
+export interface VisColumn {
   id: number;
   name: string;
-  schema: ExploreVisFieldType;
+  schema: VisFieldType;
   column: string;
 }
 
-export type ExploreVisFieldType = 'numerical' | 'categorical' | 'date' | 'unknown';
+export type VisFieldType = 'numerical' | 'categorical' | 'date' | 'unknown';
 
 export interface VisualizationRule {
   name: string;
   matches: (
-    numericalColumns: ExploreVisColumn[],
-    categoricalColumns: ExploreVisColumn[],
-    dateColumns: ExploreVisColumn[]
+    numericalColumns: VisColumn[],
+    categoricalColumns: VisColumn[],
+    dateColumns: VisColumn[]
   ) => boolean;
   createConfig: () => VisualizationType;
 }

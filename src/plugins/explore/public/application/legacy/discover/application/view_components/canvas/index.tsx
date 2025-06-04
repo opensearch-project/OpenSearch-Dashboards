@@ -201,4 +201,4 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
 
 const MemoizedExploreDataTable = React.memo(ExploreDataTable);
 const MemoizedDiscoverChartContainer = React.memo(DiscoverChartContainer);
-const MemoizedExploreVisualizationContainer = React.memo(ExploreVisualizationContainer);
+const MemoizedVisualizationContainer = React.memo(VisualizationContainer);

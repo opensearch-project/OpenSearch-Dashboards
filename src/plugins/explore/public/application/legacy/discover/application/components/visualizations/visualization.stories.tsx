@@ -5,16 +5,16 @@
 
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { ExploreVisualization } from './explore_visualization';
+import { Visualization } from './visualization';
 import { Positions } from './utils/collections';
 import { LineVisStyleControls } from './line/line_vis_options';
 import { VisualizationTypeResult } from './utils/use_visualization_types';
 
 export default {
   title:
-    'src/plugins/explore/public/application/legacy/discover/application/components/visualizations/explore_visualization',
-  component: ExploreVisualization,
-} as ComponentMeta<typeof ExploreVisualization>;
+    'src/plugins/explore/public/application/legacy/discover/application/components/visualizations/visualization',
+  component: Visualization,
+} as ComponentMeta<typeof Visualization>;
 
 // Mock ReactExpressionRenderer component
 const MockReactExpressionRenderer: React.FC<any> = ({ expression }) => {
@@ -160,9 +160,7 @@ const mockSearchContext = {
   timeRange: { from: 'now-7d', to: 'now' },
 };
 
-const Template: ComponentStory<typeof ExploreVisualization> = (args) => (
-  <ExploreVisualization {...args} />
-);
+const Template: ComponentStory<typeof Visualization> = (args) => <Visualization {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
@@ -218,13 +216,6 @@ MultipleAxes.args = {
         type: 'value' as const,
         position: 'right' as const,
         show: true,
-        style: {},
-        scale: {
-          type: 'linear' as const,
-          mode: 'normal' as const,
-          defaultYExtents: false,
-          setYExtents: false,
-        },
         labels: {
           show: true,
           rotate: 0,

@@ -9,7 +9,7 @@ import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
 import { LineVisStyleControlsProps } from '../line/line_vis_options';
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../../../../../data/common';
 import { IExpressionLoaderParams } from '../../../../../../../../../expressions/public';
-import { ExploreVisColumn } from '../types';
+import { VisColumn } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 
 export interface VisualizationType {
@@ -31,19 +31,19 @@ export interface VisualizationType {
     searchContext: IExpressionLoaderParams['searchContext'],
     indexPattern: IndexPattern,
     transformedData?: Array<Record<string, any>>,
-    numericalColumns?: ExploreVisColumn[],
-    categoricalColumns?: ExploreVisColumn[],
-    dateColumns?: ExploreVisColumn[],
+    numericalColumns?: VisColumn[],
+    categoricalColumns?: VisColumn[],
+    dateColumns?: VisColumn[],
     styleOptions?: Partial<LineChartStyleControls>
   ) => Promise<string | undefined>;
 }
 
-export type ExploreVisFieldType = 'numerical' | 'categorical' | 'date' | 'unknown';
+export type VisFieldType = 'numerical' | 'categorical' | 'date' | 'unknown';
 
-// Map both OSD_FIELD_TYPES and OPENSEARCH_FIELD_TYPES to ExploreVisFieldType
+// Map both OSD_FIELD_TYPES and OPENSEARCH_FIELD_TYPES to VisFieldType
 // We also need to handle the case where a new field is created with a opensearch type
-const FIELD_TYPE_MAP: Partial<Record<string, ExploreVisFieldType>> = {
-  // Map OSD_FIELD_TYPES to ExploreVisFieldType
+const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
+  // Map OSD_FIELD_TYPES to VisFieldType
   [OSD_FIELD_TYPES.BOOLEAN]: 'categorical',
   [OSD_FIELD_TYPES.DATE]: 'date',
   [OSD_FIELD_TYPES.NUMBER]: 'numerical',
@@ -52,7 +52,7 @@ const FIELD_TYPE_MAP: Partial<Record<string, ExploreVisFieldType>> = {
   [OSD_FIELD_TYPES.NESTED]: 'unknown',
   [OSD_FIELD_TYPES.HISTOGRAM]: 'numerical',
 
-  // Map the rest of OPENSEARCH_FIELD_TYPES to ExploreVisFieldType
+  // Map the rest of OPENSEARCH_FIELD_TYPES to VisFieldType
   [OPENSEARCH_FIELD_TYPES.DATE_NANOS]: 'date',
   [OPENSEARCH_FIELD_TYPES.FLOAT]: 'numerical',
   [OPENSEARCH_FIELD_TYPES.HALF_FLOAT]: 'numerical',
@@ -69,13 +69,13 @@ const FIELD_TYPE_MAP: Partial<Record<string, ExploreVisFieldType>> = {
 
 export interface VisualizationTypeResult {
   visualizationType?: VisualizationType;
-  numericalColumns?: ExploreVisColumn[];
-  categoricalColumns?: ExploreVisColumn[];
-  dateColumns?: ExploreVisColumn[];
+  numericalColumns?: VisColumn[];
+  categoricalColumns?: VisColumn[];
+  dateColumns?: VisColumn[];
   transformedData?: Array<Record<string, any>>;
 }
 
-const getFieldTypeFromSchema = (schema?: string): ExploreVisFieldType =>
+const getFieldTypeFromSchema = (schema?: string): VisFieldType =>
   FIELD_TYPE_MAP[schema || ''] || 'unknown';
 
 // Implement this function to return the visualization type based on the query based on the returned data
@@ -86,7 +86,10 @@ export const getVisualizationType = (
   if (!fieldSchema || !rows) {
     return;
   }
-  const columns: ExploreVisColumn[] = fieldSchema.map((field, index) => {
+
+  console.log('schema:', fieldSchema);
+
+  const columns: VisColumn[] = fieldSchema.map((field, index) => {
     return {
       id: index,
       schema: getFieldTypeFromSchema(field.type),

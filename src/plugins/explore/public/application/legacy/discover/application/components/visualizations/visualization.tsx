@@ -9,7 +9,7 @@ import { IExpressionLoaderParams } from '../../../../../../../../expressions/pub
 import { VisualizationTypeResult } from './utils/use_visualization_types';
 import { LineChartStyleControls } from './line/line_vis_config';
 
-export interface ExploreVisualizationProps {
+export interface VisualizationProps {
   expression: string;
   searchContext: IExpressionLoaderParams['searchContext'];
   styleOptions: LineChartStyleControls;
@@ -21,7 +21,7 @@ export interface ExploreVisualizationProps {
   }>;
 }
 
-export const ExploreVisualization: React.FC<ExploreVisualizationProps> = ({
+export const Visualization: React.FC<VisualizationProps> = ({
   expression,
   searchContext,
   styleOptions,
