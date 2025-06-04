@@ -27,31 +27,31 @@ export const EditToobar: React.FC<EditToobarProps> = ({
         direction="row"
         gutterSize="s"
         justifyContent="spaceAround"
-        className="editToolbar"
+        className={`${className}__toolbar`}
       >
         <EuiFlexItem grow={false}>
           <button
             type="button"
-            className="editToolbar__button"
+            className={`${className}__button`}
             onClick={onEditClick}
             aria-label={editText}
           >
             <EuiIcon type="pencil" />
-            <span className="editText">{editText}</span>
+            <span className={`${className}__text`}>{editText}</span>
           </button>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHorizontalRule margin="xs" className="verticalSeparator" style={{ margin: '0px' }} />
+          <EuiHorizontalRule margin="xs" className={`${className}__separator`} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <button
             type="button"
-            className="editToolbar__button"
+            className={`${className}__button`}
             onClick={onClearEditor}
             aria-label={clearText}
           >
             <EuiIcon type="crossInCircleEmpty" />
-            <span className="editText">{clearText}</span>
+            <span className={`${className}__text`}>{clearText}</span>
           </button>
         </EuiFlexItem>
       </EuiFlexGroup>

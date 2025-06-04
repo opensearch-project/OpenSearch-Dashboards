@@ -2,15 +2,14 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
-export type LanguageType = 'nl' | 'kv' | 'ppl';
+import { LanguageType } from './types';
 
 export const getEditorConfig = (languageType: LanguageType) => {
   switch (languageType) {
-    case 'ppl':
-    case 'kv':
+    case LanguageType.PPL:
+    case LanguageType.KeyValue:
       return {
-        languageId: 'ppl',
+        languageId: LanguageType.PPL,
         options: {
           minimap: { enabled: false },
           automaticLayout: true,
@@ -24,7 +23,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
           wrappingIndent: 'same' as const,
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 1,
-          // scrollbar: { // Todo: Enable scrollbar with max height logic
+          // scrollbar: { // TODO: Enable scrollbar with max height logic
           //   vertical: 'visible' as const,
           //   horizontalScrollbarSize: 1,
           // },
@@ -50,7 +49,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
         },
         triggerSuggestOnFocus: false,
       };
-    case 'nl':
+    case LanguageType.Natural:
     default:
       return {
         languageId: 'plaintext',

@@ -5,8 +5,9 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { getEditorConfig, LanguageType } from './shared';
+import { getEditorConfig } from './shared';
 import { ReusableEditor } from './resuable_editor';
+import { EditorType, LanguageType } from './types';
 
 export interface PromptEditorProps {
   languageType: LanguageType;
@@ -28,7 +29,8 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
   onClearEditor,
 }) => {
   const editorConfig = getEditorConfig(languageType);
-  const langText = languageType !== 'nl' ? 'query' : 'prompt';
+
+  const editorType = languageType !== LanguageType.Natural ? EditorType.Query : EditorType.Prompt;
   return (
     <ReusableEditor
       value={prompt}
@@ -38,6 +40,7 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
       onEdit={onPromptEdit}
       onClear={onClearEditor}
       editorConfig={editorConfig}
+      // TODO: Placeholder text will be updated with new icons and dynamic lang name once query object integrated
       placeholder={
         <>
           Ask a question or search using <EuiIcon type="editorCodeBlock" /> PPL
@@ -46,7 +49,7 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
       editText="Edit Prompt"
       clearText="Clear Editor"
       height={32}
-      editorType={langText} // This is used for styling and identification
+      editorType={editorType}
     />
   );
 };
