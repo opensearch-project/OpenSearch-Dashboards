@@ -193,7 +193,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
       expect(screen.getByTestId('directQuerySyncBar')).toHaveTextContent(
         'Data sync is in progress'
       );
-      expect(screen.getByTestId('directQuerySyncBar')).toHaveClass('direct-query-sync-banner');
+      expect(screen.getByTestId('directQuerySyncBar')).toHaveClass('directQuerySync');
     });
   });
 

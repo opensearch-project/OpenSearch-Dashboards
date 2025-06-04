@@ -1,8 +1,15 @@
-// Adjusts the banner's bottom margin to reduce the gap between the banner and the dashboard content below it.
-.direct-query-sync-banner {
-  margin-bottom: -16px;
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-  .direct-query-sync-link {
+// Adjusts the banner's bottom margin to reduce the gap between the banner and the dashboard content below it.
+.directQuerySync {
+  &__banner {
+    margin-bottom: -$euiSize;
+  }
+
+  &__link {
     margin-left: $euiSizeXS;
   }
 }

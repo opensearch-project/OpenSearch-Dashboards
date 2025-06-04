@@ -42,9 +42,6 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
         http,
         savedObjectsClient,
         dashboardId,
-        onError: () => {
-          setSyncInfo(null);
-        },
       });
 
       if (!result) {
@@ -96,7 +93,7 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
   const state = EMR_STATES.get(loadStatus)!;
 
   return (
-    <div className="direct-query-sync-banner" data-test-subj="directQuerySyncBar">
+    <div className="directQuerySync__banner" data-test-subj="directQuerySyncBar">
       {state.terminal ? (
         <EuiText size="s">
           {i18n.translate('dataSourcesManagement.directQuerySync.dataScheduledToSync', {
@@ -114,7 +111,7 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
             },
           })}
 
-          <EuiLink className="direct-query-sync-link" onClick={handleSynchronize}>
+          <EuiLink className="directQuerySync__link" onClick={handleSynchronize}>
             {i18n.translate('dataSourcesManagement.directQuerySync.syncDataLink', {
               defaultMessage: 'Sync data',
             })}
