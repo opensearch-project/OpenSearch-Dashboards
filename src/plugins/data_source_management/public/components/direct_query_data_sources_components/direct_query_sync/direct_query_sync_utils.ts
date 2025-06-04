@@ -4,6 +4,7 @@
  */
 
 import { HttpStart, SavedObjectsClientContract, SavedObject } from 'opensearch-dashboards/public';
+import { DSL_MAPPING, DSL_BASE } from 'src/plugins/data_source_management/framework/utils/shared';
 
 export interface ExportDashboardsResponse {
   version: string;
@@ -23,10 +24,6 @@ export interface DirectQuerySyncInfo {
   mappingName: string | null;
   mdsId?: string;
 }
-
-const DIRECT_QUERY_BASE = '/api/directquery';
-const DSL_MAPPING = '/indices.getFieldMapping';
-const DSL_BASE = `${DIRECT_QUERY_BASE}/dsl`;
 
 export async function fetchDirectQuerySyncInfo({
   http,
