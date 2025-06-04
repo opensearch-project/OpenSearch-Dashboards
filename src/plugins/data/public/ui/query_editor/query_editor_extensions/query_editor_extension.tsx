@@ -171,21 +171,11 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
         props.config.getActionBarButtons?.(props.dependencies),
       ]);
 
-      if (bannerResult) {
-        setBanner(bannerResult);
-      }
-      if (componentResult) {
-        setComponent(componentResult);
-      }
-      if (queryControlButtonsResult) {
-        setQueryControlButtons(queryControlButtonsResult);
-      }
-      if (bottomPanelResult) {
-        setBottomPanel(bottomPanelResult);
-      }
-      if (actionBarButtonsResult) {
-        setActionBarButtons(actionBarButtonsResult);
-      }
+      setBanner(bannerResult ?? null);
+      setComponent(componentResult ?? null);
+      setQueryControlButtons(queryControlButtonsResult ?? null);
+      setBottomPanel(bottomPanelResult ?? null);
+      setActionBarButtons(actionBarButtonsResult ?? null);
     };
 
     fetchEnabled();
