@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExploreVisColumn, VisualizationRule } from './types';
+import { VisColumn, VisualizationRule } from './types';
 
 export class VisualizationRegistry {
   private rules: VisualizationRule[] = [];
@@ -18,7 +18,8 @@ export class VisualizationRegistry {
   /**
    * Get the matching visualization type based on the columns.
    */
-  getVisualizationType(columns: ExploreVisColumn[]) {
+  getVisualizationType(columns: VisColumn[]) {
+    console.log('Getting visualization type for columns:', columns);
     const numericalColumns = columns.filter((column) => column.schema === 'numerical');
     const categoricalColumns = columns.filter((column) => column.schema === 'categorical');
     const dateColumns = columns.filter((column) => column.schema === 'date');

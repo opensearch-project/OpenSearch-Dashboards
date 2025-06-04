@@ -13,12 +13,12 @@ import { IExpressionLoaderParams } from '../../../../../../../../expressions/pub
 import { LineChartStyleControls } from './line/line_vis_config';
 import { visualizationRegistry } from './visualization_registry';
 import { lineChartRule } from './line/line_chart_rules';
-import { ExploreVisualization } from './explore_visualization';
+import { Visualization } from './visualization';
 import { getVisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
 
-import './explore_visualization_container.scss';
+import './visualization_container.scss';
 
-export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
+export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
     data: {
@@ -119,9 +119,9 @@ export const ExploreVisualizationContainer = ({ rows, fieldSchema }: SearchData)
   }
 
   return (
-    <div className="exploreVisualizationContainer">
-      <ExploreVisualization
-        data-subject-subj="exploreVisualization"
+    <div className="visualizationContainer">
+      <Visualization
+        data-subject-subj="visualization"
         expression={expression}
         searchContext={searchContext}
         styleOptions={styleOptions}

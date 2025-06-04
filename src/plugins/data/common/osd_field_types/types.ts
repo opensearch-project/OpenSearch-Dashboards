@@ -62,7 +62,7 @@ export enum OPENSEARCH_FIELD_TYPES {
   HALF_FLOAT = 'half_float',
   SCALED_FLOAT = 'scaled_float',
   DOUBLE = 'double',
-  INTEGER = 'integer',
+  INTEGER = 'int', // opensearch has changed type from 'integer' to 'int'
   LONG = 'long',
   SHORT = 'short',
   UNSIGNED_LONG = 'unsigned_long',

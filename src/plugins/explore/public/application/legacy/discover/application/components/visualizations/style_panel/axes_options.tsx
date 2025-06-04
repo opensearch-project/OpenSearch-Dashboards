@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { CategoryAxis, ExploreVisColumn, ValueAxis } from '../types';
+import { CategoryAxis, VisColumn, ValueAxis } from '../types';
 import { useDebouncedValue, useDebouncedNumericValue } from '../utils/use_debounced_value';
 
 interface AxesOptionsProps {
@@ -26,14 +26,14 @@ interface AxesOptionsProps {
   valueAxes: ValueAxis[];
   onCategoryAxesChange: (categoryAxes: CategoryAxis[]) => void;
   onValueAxesChange: (valueAxes: ValueAxis[]) => void;
-  numericalColumns: ExploreVisColumn[];
-  categoricalColumns: ExploreVisColumn[];
-  dateColumns: ExploreVisColumn[];
+  numericalColumns: VisColumn[];
+  categoricalColumns: VisColumn[];
+  dateColumns: VisColumn[];
 }
 
 const getDefaultCategoryAxisTitle = (
-  dateColumns?: ExploreVisColumn[],
-  categoricalColumns?: ExploreVisColumn[]
+  dateColumns?: VisColumn[],
+  categoricalColumns?: VisColumn[]
 ) => {
   if (dateColumns?.length) {
     return dateColumns[0].name;
@@ -44,7 +44,7 @@ const getDefaultCategoryAxisTitle = (
   return 'Category';
 };
 
-const getDefaultValueAxisTitle = (numericalColumns?: ExploreVisColumn[], index: number = 0) => {
+const getDefaultValueAxisTitle = (numericalColumns?: VisColumn[], index: number = 0) => {
   if (numericalColumns && numericalColumns.length > index) {
     return numericalColumns[index].name;
   }

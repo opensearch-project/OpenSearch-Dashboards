@@ -11,7 +11,7 @@ import {
 } from '../../../../../../../../../expressions/public';
 import { IndexPattern } from '../../../../../../../../../data/public';
 import { LineChartStyleControls } from './line_vis_config';
-import { ExploreVisColumn } from '../types';
+import { VisColumn } from '../types';
 import {
   buildMarkConfig,
   createThresholdLayer,
@@ -30,8 +30,8 @@ import {
  */
 const createSimpleLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: ExploreVisColumn[],
-  dateColumns: ExploreVisColumn[],
+  numericalColumns: VisColumn[],
+  dateColumns: VisColumn[],
   styles: Partial<LineChartStyleControls>
 ): any => {
   const metricField = numericalColumns[0].column;
@@ -105,8 +105,8 @@ const createSimpleLineChart = (
  */
 const createLineBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: ExploreVisColumn[],
-  dateColumns: ExploreVisColumn[],
+  numericalColumns: VisColumn[],
+  dateColumns: VisColumn[],
   styles: Partial<LineChartStyleControls>
 ): any => {
   const metric1Field = numericalColumns[0].column;
@@ -232,9 +232,9 @@ const createLineBarChart = (
  */
 const createMultiLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: ExploreVisColumn[],
-  categoricalColumns: ExploreVisColumn[],
-  dateColumns: ExploreVisColumn[],
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
   styles: Partial<LineChartStyleControls>
 ): any => {
   const metricField = numericalColumns[0].column;
@@ -322,9 +322,9 @@ const createMultiLineChart = (
  */
 const createFacetedMultiLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: ExploreVisColumn[],
-  categoricalColumns: ExploreVisColumn[],
-  dateColumns: ExploreVisColumn[],
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
   styles: Partial<LineChartStyleControls>
 ): any => {
   const metricField = numericalColumns[0].column;
@@ -468,9 +468,9 @@ const createFacetedMultiLineChart = (
  */
 const createVegaLineSpec = (
   transformedData?: Array<Record<string, any>>,
-  numericalColumns?: ExploreVisColumn[],
-  categoricalColumns?: ExploreVisColumn[],
-  dateColumns?: ExploreVisColumn[],
+  numericalColumns?: VisColumn[],
+  categoricalColumns?: VisColumn[],
+  dateColumns?: VisColumn[],
   styleOptions?: Partial<LineChartStyleControls>
 ): any => {
   // Validate inputs
@@ -536,9 +536,9 @@ export const toExpression = async (
   searchContext: IExpressionLoaderParams['searchContext'],
   indexPattern: IndexPattern,
   transformedData?: Array<Record<string, any>>,
-  numericalColumns?: ExploreVisColumn[],
-  categoricalColumns?: ExploreVisColumn[],
-  dateColumns?: ExploreVisColumn[],
+  numericalColumns?: VisColumn[],
+  categoricalColumns?: VisColumn[],
+  dateColumns?: VisColumn[],
   styleOptions?: Partial<LineChartStyleControls>
 ): Promise<string> => {
   if (

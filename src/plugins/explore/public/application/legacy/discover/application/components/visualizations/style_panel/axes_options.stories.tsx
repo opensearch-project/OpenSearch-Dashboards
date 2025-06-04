@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { AxesOptions } from './axes_options';
-import { CategoryAxis, ExploreVisColumn, ValueAxis } from '../types';
+import { CategoryAxis, VisColumn, ValueAxis } from '../types';
 
 export default {
   component: AxesOptions,
@@ -16,18 +16,18 @@ export default {
 } as ComponentMeta<typeof AxesOptions>;
 
 // Mock data for the component props
-const mockNumericalColumns: ExploreVisColumn[] = [
+const mockNumericalColumns: VisColumn[] = [
   { id: 1, name: 'count', schema: 'numerical', column: 'count' },
   { id: 2, name: 'price', schema: 'numerical', column: 'price' },
   { id: 3, name: 'revenue', schema: 'numerical', column: 'revenue' },
 ];
 
-const mockCategoricalColumns: ExploreVisColumn[] = [
+const mockCategoricalColumns: VisColumn[] = [
   { id: 4, name: 'category', schema: 'categorical', column: 'category' },
   { id: 5, name: 'product', schema: 'categorical', column: 'product' },
 ];
 
-const mockDateColumns: ExploreVisColumn[] = [
+const mockDateColumns: VisColumn[] = [
   { id: 6, name: 'timestamp', schema: 'date', column: 'timestamp' },
 ];
 
