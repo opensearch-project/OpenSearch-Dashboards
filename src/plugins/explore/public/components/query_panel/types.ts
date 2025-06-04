@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Moment } from 'moment';
-import { LanguageType } from './components/editor_stack/shared';
 
 export interface RefreshInterval {
   pause: boolean;
@@ -19,6 +18,12 @@ export type TimeRange = {
 export interface TimeRangeBounds {
   min: Moment | undefined;
   max: Moment | undefined;
+}
+
+export enum LanguageType {
+  Natural = 'natural',
+  KeyValue = 'keyvalue',
+  PPL = 'ppl',
 }
 
 // eslint-disable-next-line
@@ -54,4 +59,9 @@ export enum ResultStatus {
   READY = 'ready', // results came back
   NO_RESULTS = 'none', // no results came back
   ERROR = 'error', // error occurred
+}
+
+export enum EditorType {
+  Query = 'query',
+  Prompt = 'prompt',
 }

@@ -8,10 +8,9 @@ import { debounce } from 'lodash';
 import { QueryPanelLayout } from './layout';
 import { EditorStack } from './components/editor_stack';
 import { QueryEditorFooter } from './components/footer/index';
-import { LanguageType } from './components/editor_stack/shared';
 import { RecentQueriesTable } from './components/footer/recent_query/table';
 import { QueryTypeDetector } from './utils/type_detection';
-import { Query, TimeRange } from './types';
+import { Query, TimeRange, LanguageType } from './types';
 import './index.scss';
 
 const intitialQuery = (language: LanguageType, dataset: string) => ({
@@ -24,7 +23,7 @@ const intitialQuery = (language: LanguageType, dataset: string) => ({
 const QueryPanel = () => {
   const [lineCount, setLineCount] = useState<number | undefined>(undefined);
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
-  const languageTypeRef = useRef<LanguageType>('nl'); // Default to PPL
+  const languageTypeRef = useRef<LanguageType>(LanguageType.Natural); // Default to PPL
   const [isDualEditor, setIsDualEditor] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPromptReadOnly, setIsPromptReadOnly] = useState(false);
@@ -85,12 +84,13 @@ const QueryPanel = () => {
     queryString?: string | { [key: string]: any },
     timeRange?: TimeRange
   ) => {
+    // TODO: call query run with querystring and timerange when datetime and queryslice is integrated
     onRun();
     setIsPromptReadOnly(true);
   };
 
   const onRun = async () => {
-    // TODO: Implement the actual run logic here
+    // TODO: Implement the actual run logic here when query actions ready
     setIsLoading(true); // Set loading to true
     await new Promise((resolve) => setTimeout(resolve, 3000)); // 3-second delay mock
     setIsLoading(false);
@@ -101,14 +101,14 @@ const QueryPanel = () => {
     setIsEditorReadOnly(false);
     setIsPromptReadOnly(false);
     setLineCount(undefined);
-    setCurrentQuery(intitialQuery('nl', 'test')); // TODO: Pass dataset name dynamically
+    setCurrentQuery(intitialQuery(LanguageType.Natural, 'test')); // TODO: Pass dataset name dynamically
   };
 
   const handlePromptRun = async (queryString?: string | { [key: string]: any }) => {
     onRun();
     const detectedLang = languageTypeRef.current;
 
-    if (detectedLang === 'nl') {
+    if (detectedLang === LanguageType.Natural) {
       // TODO: Call NL API to generate PPL query
 
       setIsDualEditor(true);
