@@ -4,6 +4,12 @@
  */
 
 .queryEditorFooter {
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiFlexGroup--gutterExtraSmall>.euiFlexItem {
+    margin: 0;
+  }
+
   .showInputType {
     color: $euiColorDarkShade; // Use closest match from OUI
     font-size: 12px;
@@ -20,5 +26,9 @@
   .showFieldsToggle {
     color: $euiColorPrimary; // '#0073e6' → $euiColorPrimary
     padding: 0;
+  }
+
+  .queryEditor__footerItem {
+    margin: 0 8px;
   }
 }
