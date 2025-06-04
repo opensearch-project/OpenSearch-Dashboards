@@ -15,3 +15,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new ExplorePlugin(initializerContext);
 }
 export { ExplorePluginSetup, ExplorePluginStart } from './types';
+export { DataExplorerServices } from './types';

@@ -3,13 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Dataset, DEFAULT_DATA } from '../../../../../../../data/common';
+import { Dataset, DEFAULT_DATA } from '../../../../data/common';
+import { DefaultViewState } from '../../../../data_explorer/public';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
-import { DataExplorerServices } from '../../types';
 import { getPreloadedState } from './preload';
 import { RootState } from './store';
+import { DataExplorerServices } from '../../types';
 
-export const loadReduxState = async (services: DataExplorerServices) => {
+export const loadReduxState = async (
+  services: DataExplorerServices,
+  defaults: DefaultViewState | (() => DefaultViewState) | (() => Promise<DefaultViewState>)
+) => {
   try {
     const serializedState = services.osdUrlStateStorage.get<RootState>('_a');
     if (serializedState !== null) {
@@ -55,7 +59,7 @@ export const loadReduxState = async (services: DataExplorerServices) => {
   }
 
   // If state is not found, load the default state
-  return await getPreloadedState(services);
+  return await getPreloadedState(services, defaults);
 };
 
 export const persistReduxState = (root: RootState, services: DataExplorerServices) => {

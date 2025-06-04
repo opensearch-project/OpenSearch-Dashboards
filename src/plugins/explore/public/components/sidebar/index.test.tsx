@@ -11,8 +11,8 @@ import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import configureMockStore from 'redux-mock-store';
 import { Sidebar } from './index'; // Adjust the import path as necessary
-import { MockS3DataSource } from '../../../discover/__mock__/index.test.mock';
-import { s3DataSourceMetadata } from '../../../../../../../data/public/data_sources/constants';
+import { MockS3DataSource } from '../../application/legacy/discover/__mock__/index.test.mock';
+import { s3DataSourceMetadata } from '../../../../data/public/data_sources/constants';
 
 const mockStore = configureMockStore();
 const initialState = {
@@ -26,7 +26,7 @@ export const createObservable = (data: any) => {
 
 const getMetaData = () => ({ ...s3DataSourceMetadata });
 
-jest.mock('../../../../../../../opensearch_dashboards_react/public', () => {
+jest.mock('../../../../opensearch_dashboards_react/public', () => {
   return {
     toMountPoint: jest.fn().mockImplementation((component) => () => component),
     useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -69,11 +69,6 @@ jest.mock('../../../../../../../opensearch_dashboards_react/public', () => {
     ),
   };
 });
-
-jest.mock('../../index', () => ({
-  useTypedSelector: jest.fn(),
-  useTypedDispatch: jest.fn(),
-}));
 
 describe('Sidebar Component', () => {
   it('renders without crashing', () => {
