@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui'; // Ensure this import is correct and matches the library's documentation
+import { EuiButton } from '@elastic/eui';
 
 interface RunQueryButtonProps {
   onClick: () => void;
