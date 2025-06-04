@@ -33,6 +33,7 @@ import { startServers, stopServers } from './lib';
 import { docExistsSuite } from './doc_exists';
 import { docMissingSuite } from './doc_missing';
 import { docMissingAndIndexReadOnlySuite } from './doc_missing_and_index_read_only';
+import { docPermissionControlledSuite } from './doc_permission_controlled';
 
 describe('uiSettings/routes', function () {
   beforeAll(startServers);
@@ -42,4 +43,8 @@ describe('uiSettings/routes', function () {
   describe('doc missing and index readonly', docMissingAndIndexReadOnlySuite);
   describe('doc exists', docExistsSuite);
   afterAll(stopServers);
+});
+
+describe('uiSettings/admin', function () {
+  describe('doc permission controlled', docPermissionControlledSuite);
 });
