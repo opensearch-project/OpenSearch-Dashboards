@@ -5,15 +5,22 @@
 
 import { updateWorkspaceState } from '../../../../core/server/utils';
 import { SavedObject } from '../../../../core/public';
-import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
+import {
+  httpServerMock,
+  savedObjectsClientMock,
+  coreMock,
+  loggingSystemMock,
+} from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
 import { workspaceClientMock } from '../workspace_client.mock';
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
+  const loggingService = loggingSystemMock.create();
+  const logger = loggingService.get();
   const mockedWorkspaceClient = workspaceClientMock.create();
-  const wrapperInstance = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+  const wrapperInstance = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient, logger);
   const mockedClient = savedObjectsClientMock.create();
   const workspaceEnabledMockRequest = httpServerMock.createOpenSearchDashboardsRequest();
   updateWorkspaceState(workspaceEnabledMockRequest, {
@@ -77,7 +84,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should throw error when passing in invalid workspaces`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -209,7 +219,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should pass a empty workspace array`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -226,7 +239,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should throw error when passing in invalid workspaces`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -242,6 +258,32 @@ describe('WorkspaceIdConsumerWrapper', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
       expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
       expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
+    });
+
+    it(`Should not throw error when passing in '*'`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      await mockedWrapperClient.find({
+        type: ['dashboard', 'visualization'],
+        workspaces: ['*'],
+      });
+      expect(mockedClient.find).toBeCalledWith({
+        type: ['dashboard', 'visualization'],
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'DEPRECATED: Using workspace="*" is deprecated and will be removed in future release.'
+        )
+      );
     });
   });
 
@@ -309,7 +351,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should get object when there is no workspace in options/request`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -366,7 +411,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should get data source when user is data source admin`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, { isDataSourceAdmin: true, requestWorkspaceId: 'foo' });
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -626,7 +674,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should bulkGet objects when there is no workspace in options/request`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -656,7 +707,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should bulkGet data source when user is data source admin`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, { isDataSourceAdmin: true, requestWorkspaceId: 'foo' });
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
