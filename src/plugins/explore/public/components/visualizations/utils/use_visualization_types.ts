@@ -4,11 +4,14 @@
  */
 
 import { LineChartStyleControls } from '../line/line_vis_config';
-import { IFieldType, IndexPattern } from '../../../../opensearch_dashboards_services';
-import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
+import {
+  IFieldType,
+  IndexPattern,
+} from '../../../application/legacy/discover/opensearch_dashboards_services';
+import { OpenSearchSearchHit } from '../../../application/legacy/discover/application/doc_views/doc_views_types';
 import { LineVisStyleControlsProps } from '../line/line_vis_options';
-import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../../../../../data/common';
-import { IExpressionLoaderParams } from '../../../../../../../../../expressions/public';
+import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
+import { IExpressionLoaderParams } from '../../../../../expressions/public';
 import { VisColumn } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 

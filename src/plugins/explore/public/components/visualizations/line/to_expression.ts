@@ -8,8 +8,8 @@ import {
   buildExpressionFunction,
   ExpressionFunctionOpenSearchDashboards,
   IExpressionLoaderParams,
-} from '../../../../../../../../../expressions/public';
-import { IndexPattern } from '../../../../../../../../../data/public';
+} from '../../../../../expressions/public';
+import { IndexPattern } from '../../../../../data/public';
 import { LineChartStyleControls } from './line_vis_config';
 import { VisColumn } from '../types';
 import {
