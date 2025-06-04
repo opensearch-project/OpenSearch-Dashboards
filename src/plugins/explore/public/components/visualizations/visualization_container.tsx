@@ -4,12 +4,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { DiscoverViewServices } from '../../../build_services';
-import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { useDiscoverContext } from '../../view_components/context';
+import { DiscoverViewServices } from '../../application/legacy/discover/build_services';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useDiscoverContext } from '../../application/legacy/discover/application/view_components/context';
 
-import { SearchData } from '../../view_components/utils';
-import { IExpressionLoaderParams } from '../../../../../../../../expressions/public';
+import { SearchData } from '../../application/legacy/discover/application/view_components/utils';
+import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { LineChartStyleControls } from './line/line_vis_config';
 import { visualizationRegistry } from './visualization_registry';
 import { lineChartRule } from './line/line_chart_rules';
