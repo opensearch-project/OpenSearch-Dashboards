@@ -90,7 +90,6 @@ describe('DashboardDirectQuerySyncBanner', () => {
         http,
         savedObjectsClient,
         dashboardId: 'dashboard-1',
-        onError: expect.any(Function),
       });
       expect(removeBanner).toHaveBeenCalled();
       expect(container.firstChild).toBeNull();
@@ -193,7 +192,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
       expect(screen.getByTestId('directQuerySyncBar')).toHaveTextContent(
         'Data sync is in progress'
       );
-      expect(screen.getByTestId('directQuerySyncBar')).toHaveClass('directQuerySync');
+      expect(screen.getByTestId('directQuerySyncBar')).toHaveClass('directQuerySync__banner');
     });
   });
 
