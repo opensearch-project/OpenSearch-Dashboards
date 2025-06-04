@@ -6,7 +6,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { NewExperienceBanner } from './new_experience_banner';
-import { NEW_DISCOVER_INFO_URL } from '../constants';
+import { NEW_DISCOVER_INFO_URL, SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY } from '../constants';
 
 describe('NewExperienceBanner', () => {
   it('renders the banner correctly', () => {
@@ -25,5 +25,16 @@ describe('NewExperienceBanner', () => {
     const learnMoreLink = screen.getByTestId('exploreNewExperienceBanner__learnMore');
     expect(learnMoreLink.getAttribute('href')).toBe(NEW_DISCOVER_INFO_URL);
     expect(learnMoreLink.getAttribute('target')).toBe('_blank');
+  });
+
+  it('renders the switch link correctly', () => {
+    jest.spyOn(Storage.prototype, 'setItem');
+    Storage.prototype.setItem = jest.fn();
+    render(<NewExperienceBanner />);
+    fireEvent.click(screen.getByTestId('exploreNewExperienceBanner__switch'));
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY,
+      'true'
+    );
   });
 });

@@ -40,7 +40,11 @@ export const NewExperienceBanner = () => {
       >
         new discover experience
       </EuiLink>
-      , or <EuiLink onClick={handleSwitch}>switch back to classic discover</EuiLink>.
+      , or{' '}
+      <EuiLink onClick={handleSwitch} data-test-subj="exploreNewExperienceBanner__switch">
+        switch back to classic discover
+      </EuiLink>
+      .
     </EuiCallOut>
   ) : null;
 };
