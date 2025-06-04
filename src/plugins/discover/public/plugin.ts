@@ -264,6 +264,7 @@ export class DiscoverPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
+      description: 'Analyze your data in OpenSearch and visualize key metrics.',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,

@@ -273,14 +273,12 @@ export async function searchNavigationLinks(
       });
   });
 
-  const linksWithDesc = allSearchAbleLinks.filter((link) => !!link.description);
-  console.log('linksWithDesc: ', linksWithDesc);
-
   try {
-    const linksContext = linksWithDesc.map((link) => ({
+    console.log('All links:', allSearchAbleLinks);
+    const linksContext = allSearchAbleLinks.map((link) => ({
       id: link.id,
       title: link.title,
-      description: link.description,
+      description: link.description ?? link.title,
     }));
     const semanticSearchResult = await http?.post('/api/workspaces/_semantic_search', {
       body: JSON.stringify({
@@ -289,14 +287,13 @@ export async function searchNavigationLinks(
       }),
     });
 
-    console.log('Raw API Response Body: ', semanticSearchResult); // This will contain the ranked list from backend
-
     const finalResult = semanticSearchResult
       .map((link: any) => {
         const originalFullLink = allSearchAbleLinks.find((fullLink) => fullLink.id === link.id);
         return originalFullLink || null;
       })
-      .filter(Boolean) as (ChromeRegistrationNavLink & ChromeNavLink)[];
+      // .filter(Boolean) as (ChromeRegistrationNavLink & ChromeNavLink)[];
+      .filter(Boolean) as Array<ChromeRegistrationNavLink & ChromeNavLink>;
 
     console.log('Final Semantic Search Result (from backend): ', finalResult);
     return finalResult;

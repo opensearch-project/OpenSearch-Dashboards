@@ -215,6 +215,7 @@ export class ManagementPlugin
     core.application.register({
       id: settingsLandingPageId,
       title: settingsLandingPageTitleForLeftNav,
+      description: 'Customize the appearance of the application, change feature behavior.',
       order: 100,
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
@@ -248,6 +249,7 @@ export class ManagementPlugin
     core.application.register({
       id: dataAdministrationLandingPageId,
       title: dataAdministrationPageTitleForLeftNav,
+      description: 'Administer data sources, access, users, and audit logs.',
       order: 100,
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
