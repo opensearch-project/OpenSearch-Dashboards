@@ -38,7 +38,7 @@
 
         .monaco-editor,
         .react-monaco-editor-container {
-          background-color: $euiColorDarkShade !important;
+          background-color: $euiColorLightShade !important;
           opacity: 0.5;
           pointer-events: none;
         }
@@ -75,7 +75,7 @@
         &__separator {
           width: 1px;
           height: 16px;
-          background: #d9d9d9;
+          background: $euiColorLightShade;
           margin: 0;
         }
 
@@ -83,6 +83,18 @@
           text-decoration-line: underline;
           margin-left: 3px;
         }
+      }
+
+      &.promptEditor--focused::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px; // Change thickness as needed
+        background: linear-gradient(90deg, #005eb8 0%, #e47fb2 53.5%, #1f9eff 100%);
+        pointer-events: none;
+        z-index: 2;
       }
     }
   }
@@ -133,7 +145,7 @@
 
         .monaco-editor,
         .react-monaco-editor-container {
-          background-color: $euiColorDarkShade !important;
+          background-color: $euiColorLightShade !important;
           opacity: 0.5;
           pointer-events: none;
         }
@@ -169,7 +181,7 @@
           &__separator {
             width: 1px;
             height: 16px;
-            background: #d9d9d9;
+            background: $euiColorLightShade;
             margin: 0;
           }
 
@@ -178,6 +190,10 @@
             margin-left: 3px;
           }
         }
+      }
+
+      &.queryEditor--focused {
+        border-bottom: 1px solid $euiColorPrimary;
       }
     }
   }
