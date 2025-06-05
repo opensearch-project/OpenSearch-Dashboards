@@ -58,7 +58,6 @@ export interface LanguageConfig {
     formatter?: (value: any, type: OSD_FIELD_TYPES) => any;
   };
   showDocLinks?: boolean;
-  showVisualization?: boolean;
   docLink?: {
     title: string;
     url: string;

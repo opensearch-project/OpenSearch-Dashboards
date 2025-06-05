@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { VisualizationTypeResult } from './utils/use_visualization_types';

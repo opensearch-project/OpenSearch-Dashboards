@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { LineChartStyleControls, ThresholdLine } from '../line/line_vis_config';
+import { ThresholdLine } from '../types';
 
 export interface ThresholdOptionsProps {
   thresholdLine: ThresholdLine;

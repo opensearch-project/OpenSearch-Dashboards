@@ -20,12 +20,48 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsPublicPlugin, ExpressionsStart } from 'src/plugins/expressions/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { DataExplorerPluginSetup } from './application/legacy/data_explorer';
+import {
+  VisualizationRegistryServiceSetup,
+  VisualizationRegistryServiceStart,
+} from './services/visualization_registry_service';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ExplorePluginSetup {}
+export interface ExplorePluginSetup {
+  /**
+   * Visualization registry service for registering visualization rules
+   */
+  visualizationRegistry: VisualizationRegistryServiceSetup;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ExplorePluginStart {}
+  /**
+   * Doc views registry for registering doc views
+   */
+  docViews: {
+    addDocView: any;
+  };
+
+  /**
+   * Doc views links registry for registering doc view links
+   */
+  docViewsLinks: {
+    addDocViewLink: any;
+  };
+}
+
+export interface ExplorePluginStart {
+  /**
+   * Visualization registry service for registering visualization rules
+   */
+  visualizationRegistry: VisualizationRegistryServiceStart;
+
+  /**
+   * Saved explore loader
+   */
+  savedExploreLoader: any;
+
+  /**
+   * URL generator
+   */
+  urlGenerator?: any;
+}
 
 /**
  * @internal

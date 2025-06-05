@@ -11,9 +11,12 @@ import { useDiscoverContext } from '../../application/legacy/discover/applicatio
 import { SearchData } from '../../application/legacy/discover/application/view_components/utils';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { LineChartStyleControls } from './line/line_vis_config';
-import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { Visualization } from './visualization';
-import { getVisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
+import {
+  getVisualizationType,
+  VisualizationTypeResult,
+  useVisualizationRegistry,
+} from './utils/use_visualization_types';
 
 import './visualization_container.scss';
 import { VisColumn } from './types';
@@ -41,13 +44,6 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
     timeRange: timefilter.timefilter.getTime(),
   });
 
-  // Currently only PPL has enabled visualization
-  // This can be removed once we only support PPL in discover and the vis is always enabled
-  const [enableViz, setEnableViz] = useState(
-    queryString.getLanguageService().getLanguage(queryString.getQuery()!.language)!
-      .showVisualization
-  );
-
   // Hook to get the visualization type based on the rows and field schema
   // This will be called every time the rows or fieldSchema changes
   useEffect(() => {
@@ -62,6 +58,9 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
     }
   }, [fieldSchema, rows]);
 
+  // Get the visualization registry
+  const visualizationRegistry = useVisualizationRegistry();
+
   // Hook to generate the expression based on the visualization type and data
   useEffect(() => {
     async function loadExpression() {
@@ -73,7 +72,7 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
       const selectedChartType = visualizationData.visualizationType?.type || 'line';
 
       // Get the selected rule id
-      const rule = ALL_VISUALIZATION_RULES.find((r) => r.id === visualizationData.ruleId);
+      const rule = visualizationRegistry.getRules().find((r) => r.id === visualizationData.ruleId);
 
       if (!rule || !rule.toExpression) {
         return;
@@ -112,7 +111,15 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
     }
 
     loadExpression();
-  }, [searchContext, rows, indexPattern, services, styleOptions, visualizationData]);
+  }, [
+    searchContext,
+    rows,
+    indexPattern,
+    services,
+    styleOptions,
+    visualizationData,
+    visualizationRegistry,
+  ]);
 
   // Hook to update the search context whenever the query state changes
   // This will ensure that the visualization is always up-to-date with the latest query and filters
@@ -124,11 +131,6 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
         timeRange: state.time,
         filters: state.filters,
       });
-
-      setEnableViz(
-        queryString.getLanguageService().getLanguage(state.query!.language)!.showVisualization ??
-          false
-      );
     });
 
     return () => {
@@ -143,7 +145,7 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
   };
 
   // Don't render if visualization is not enabled or data is not ready
-  if (!enableViz || !expression || !visualizationData || !styleOptions) {
+  if (!expression || !visualizationData || !styleOptions) {
     return null;
   }
 

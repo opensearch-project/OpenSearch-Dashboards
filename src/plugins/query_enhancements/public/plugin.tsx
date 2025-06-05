@@ -89,7 +89,6 @@ export class QueryEnhancementsPlugin
         url: 'https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/',
       },
       showDocLinks: false,
-      showVisualization: true,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
       editorSupportedAppNames: ['discover'],
       supportedAppNames: ['discover', 'data-explorer', 'explore'],

@@ -6,7 +6,6 @@
 import React from 'react';
 import { Positions } from '../utils/collections';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
-import { toExpression } from './to_expression';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { CategoryAxis, GridOptions, ThresholdLine, ValueAxis } from '../types';
 
@@ -100,7 +99,6 @@ const defaultLineChartStyles: LineChartStyleControls = {
 export const createLineConfig = (): VisualizationType => ({
   name: 'line',
   type: 'line',
-  toExpression,
   ui: {
     style: {
       defaults: defaultLineChartStyles,

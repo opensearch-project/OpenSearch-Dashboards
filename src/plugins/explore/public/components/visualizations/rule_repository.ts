@@ -11,6 +11,10 @@ import {
   createFacetedMultiLineChart,
 } from './line/to_expression';
 
+// The file contains visualization rules for different scenarios solely based on the number of metrics, categories, and dates fields.
+// Each rule can be mapped to multiple chart types with different priorities.
+// We take the highest priority chart type for default visualization type.
+
 // Rule 1: 1 Metric & 1 Date
 const oneMetricOneDateRule: VisualizationRule = {
   id: 'one-metric-one-date',
@@ -37,16 +41,10 @@ const oneMetricOneDateRule: VisualizationRule = {
         return createSimpleLineChart(transformedData, numericalColumns, dateColumns, styleOptions);
       case 'area':
         // TODO: Implement area chart creation
-        return createSimpleLineChart(transformedData, numericalColumns, dateColumns, {
-          ...styleOptions,
-          lineMode: 'area',
-        });
+        return;
       case 'bar':
         // TODO: Implement bar chart creation
-        return createSimpleLineChart(transformedData, numericalColumns, dateColumns, {
-          ...styleOptions,
-          lineMode: 'bar',
-        });
+        return;
       default:
         return createSimpleLineChart(transformedData, numericalColumns, dateColumns, styleOptions);
     }
@@ -79,16 +77,10 @@ const twoMetricOneDateRule: VisualizationRule = {
         return createLineBarChart(transformedData, numericalColumns, dateColumns, styleOptions);
       case 'area':
         // TODO: Implement area chart creation
-        return createLineBarChart(transformedData, numericalColumns, dateColumns, {
-          ...styleOptions,
-          lineMode: 'area',
-        });
+        return;
       case 'bar':
         // TODO: Implement bar chart creation
-        return createLineBarChart(transformedData, numericalColumns, dateColumns, {
-          ...styleOptions,
-          lineMode: 'bar',
-        });
+        return;
       default:
         return createLineBarChart(transformedData, numericalColumns, dateColumns, styleOptions);
     }
@@ -127,22 +119,10 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
         );
       case 'area':
         // TODO: Implement area chart creation
-        return createMultiLineChart(
-          transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          { ...styleOptions, lineMode: 'area' }
-        );
+        return;
       case 'bar':
         // TODO: Implement bar chart creation
-        return createMultiLineChart(
-          transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          { ...styleOptions, lineMode: 'bar' }
-        );
+        return;
       default:
         return createMultiLineChart(
           transformedData,
@@ -187,22 +167,10 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
         );
       case 'area':
         // TODO: Implement area chart creation
-        return createFacetedMultiLineChart(
-          transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          { ...styleOptions, lineMode: 'area' }
-        );
+        return;
       case 'bar':
         // TODO: Implement bar chart creation
-        return createFacetedMultiLineChart(
-          transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          { ...styleOptions, lineMode: 'bar' }
-        );
+        return;
       default:
         return createFacetedMultiLineChart(
           transformedData,

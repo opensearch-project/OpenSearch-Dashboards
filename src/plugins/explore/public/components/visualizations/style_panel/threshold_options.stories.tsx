@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { ThresholdOptions } from './threshold_options';
-import { ThresholdLine } from '../line/line_vis_config';
+import { ThresholdLine } from '../types';
 
 export default {
   component: ThresholdOptions,
