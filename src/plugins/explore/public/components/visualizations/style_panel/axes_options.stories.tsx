@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { AxesOptions } from './axes_options';
-import { CategoryAxis, VisColumn, ValueAxis } from '../types';
+import { CategoryAxis, VisColumn, ValueAxis, VisFieldType } from '../types';
 
 export default {
   component: AxesOptions,
@@ -17,18 +17,18 @@ export default {
 
 // Mock data for the component props
 const mockNumericalColumns: VisColumn[] = [
-  { id: 1, name: 'count', schema: 'numerical', column: 'count' },
-  { id: 2, name: 'price', schema: 'numerical', column: 'price' },
-  { id: 3, name: 'revenue', schema: 'numerical', column: 'revenue' },
+  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
+  { id: 2, name: 'price', schema: VisFieldType.Numerical, column: 'price' },
+  { id: 3, name: 'revenue', schema: VisFieldType.Numerical, column: 'revenue' },
 ];
 
 const mockCategoricalColumns: VisColumn[] = [
-  { id: 4, name: 'category', schema: 'categorical', column: 'category' },
-  { id: 5, name: 'product', schema: 'categorical', column: 'product' },
+  { id: 4, name: 'category', schema: VisFieldType.Categorical, column: 'category' },
+  { id: 5, name: 'product', schema: VisFieldType.Categorical, column: 'product' },
 ];
 
 const mockDateColumns: VisColumn[] = [
-  { id: 6, name: 'timestamp', schema: 'date', column: 'timestamp' },
+  { id: 6, name: 'timestamp', schema: VisFieldType.Date, column: 'timestamp' },
 ];
 
 const mockCategoryAxes: CategoryAxis[] = [
@@ -170,8 +170,8 @@ Rule2Scenario.args = {
     },
   ],
   numericalColumns: [
-    { id: 1, name: 'Bar Chart Metric', schema: 'numerical', column: 'count' },
-    { id: 2, name: 'Line Chart Metric', schema: 'numerical', column: 'price' },
+    { id: 1, name: 'Bar Chart Metric', schema: VisFieldType.Numerical, column: 'count' },
+    { id: 2, name: 'Line Chart Metric', schema: VisFieldType.Numerical, column: 'price' },
   ],
   categoricalColumns: [],
   dateColumns: mockDateColumns,

@@ -9,7 +9,7 @@ import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { LineVisStyleControls } from './line_vis_options';
 import { LineChartStyleControls } from './line_vis_config';
 import { Positions } from '../utils/collections';
-import { VisColumn } from '../types';
+import { VisColumn, VisFieldType } from '../types';
 
 export default {
   component: LineVisStyleControls,
@@ -19,18 +19,18 @@ export default {
 
 // Mock data for the component props
 const mockNumericalColumns: VisColumn[] = [
-  { id: 1, name: 'count', schema: 'numerical', column: 'count' },
-  { id: 2, name: 'price', schema: 'numerical', column: 'price' },
-  { id: 3, name: 'revenue', schema: 'numerical', column: 'revenue' },
+  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
+  { id: 2, name: 'price', schema: VisFieldType.Numerical, column: 'price' },
+  { id: 3, name: 'revenue', schema: VisFieldType.Numerical, column: 'revenue' },
 ];
 
 const mockCategoricalColumns: VisColumn[] = [
-  { id: 4, name: 'category', schema: 'categorical', column: 'category' },
-  { id: 5, name: 'product', schema: 'categorical', column: 'product' },
+  { id: 4, name: 'category', schema: VisFieldType.Categorical, column: 'category' },
+  { id: 5, name: 'product', schema: VisFieldType.Categorical, column: 'product' },
 ];
 
 const mockDateColumns: VisColumn[] = [
-  { id: 6, name: 'timestamp', schema: 'date', column: 'timestamp' },
+  { id: 6, name: 'timestamp', schema: VisFieldType.Date, column: 'timestamp' },
 ];
 
 // Default style options

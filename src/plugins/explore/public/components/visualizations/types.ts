@@ -35,7 +35,12 @@ export interface VisColumn {
   column: string;
 }
 
-export type VisFieldType = 'numerical' | 'categorical' | 'date' | 'unknown';
+export enum VisFieldType {
+  Numerical = 'numerical',
+  Categorical = 'categorical',
+  Date = 'date',
+  Unknown = 'date',
+}
 
 // Styling: Threshold line configuration
 export interface ThresholdLine {

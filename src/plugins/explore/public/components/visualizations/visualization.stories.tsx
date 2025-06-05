@@ -9,6 +9,7 @@ import { Visualization } from './visualization';
 import { Positions } from './utils/collections';
 import { LineVisStyleControls } from './line/line_vis_options';
 import { VisualizationTypeResult } from './utils/use_visualization_types';
+import { VisFieldType } from './types';
 
 export default {
   title:
@@ -147,11 +148,15 @@ const mockVisualizationData: VisualizationTypeResult = {
     { date: '2024-01-03', value: 120, category: 'B' },
     { date: '2024-01-04', value: 180, category: 'B' },
   ],
-  numericalColumns: [{ id: 1, column: 'value', name: 'Sales Value', schema: 'numerical' }],
-  categoricalColumns: [
-    { id: 2, column: 'category', name: 'Product Category', schema: 'categorical' },
+  numericalColumns: [
+    { id: 1, column: 'value', name: 'Sales Value', schema: VisFieldType.Numerical },
   ],
-  dateColumns: [{ id: 3, column: 'date', name: 'Date', schema: 'categorical' }],
+  categoricalColumns: [
+    { id: 2, column: 'category', name: 'Product Category', schema: VisFieldType.Categorical },
+  ],
+  dateColumns: [
+    { id: 3, column: VisFieldType.Date, name: VisFieldType.Date, schema: VisFieldType.Categorical },
+  ],
 };
 
 const mockSearchContext = {
@@ -202,8 +207,8 @@ MultipleAxes.args = {
   visualizationData: {
     ...mockVisualizationData,
     numericalColumns: [
-      { id: 1, column: 'value1', name: 'Revenue', schema: 'numerical' },
-      { id: 2, column: 'value2', name: 'Profit', schema: 'numerical' },
+      { id: 1, column: 'value1', name: 'Revenue', schema: VisFieldType.Numerical },
+      { id: 2, column: 'value2', name: 'Profit', schema: VisFieldType.Numerical },
     ],
   },
   styleOptions: {

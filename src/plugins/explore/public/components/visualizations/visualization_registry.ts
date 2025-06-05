@@ -5,19 +5,29 @@
 
 import { createLineConfig } from './line/line_vis_config';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
-import { ChartTypeMapping, VisColumn, VisualizationRule } from './types';
+import { ChartTypeMapping, VisColumn, VisFieldType, VisualizationRule } from './types';
 
+/**
+ * Registry for visualization rules and configurations.
+ * This class is designed to be used as a service that can be accessed by other plugins.
+ */
 export class VisualizationRegistry {
-  private rules: VisualizationRule[] = ALL_VISUALIZATION_RULES;
+  private rules: VisualizationRule[] = [];
+
+  constructor(initialRules: VisualizationRule[] = ALL_VISUALIZATION_RULES) {
+    this.rules = [...initialRules];
+  }
 
   /**
    * Get the matching visualization type based on the columns.
    * Currently every time this is called, it will browse all rules and find the best match.
    */
   getVisualizationType(columns: VisColumn[]) {
-    const numericalColumns = columns.filter((column) => column.schema === 'numerical');
-    const categoricalColumns = columns.filter((column) => column.schema === 'categorical');
-    const dateColumns = columns.filter((column) => column.schema === 'date');
+    const numericalColumns = columns.filter((column) => column.schema === VisFieldType.Numerical);
+    const categoricalColumns = columns.filter(
+      (column) => column.schema === VisFieldType.Categorical
+    );
+    const dateColumns = columns.filter((column) => column.schema === VisFieldType.Date);
 
     const bestMatch = this.findBestMatch(numericalColumns, categoricalColumns, dateColumns);
 
@@ -84,6 +94,39 @@ export class VisualizationRegistry {
         return;
     }
   }
+
+  /**
+   * Register a new visualization rule
+   * @param rule The visualization rule to register
+   */
+  public registerRule(rule: VisualizationRule) {
+    // Check if rule with the same ID already exists
+    const existingRuleIndex = this.rules.findIndex((r) => r.id === rule.id);
+    if (existingRuleIndex >= 0) {
+      // Replace the existing rule
+      this.rules[existingRuleIndex] = rule;
+    } else {
+      // Add the new rule
+      this.rules.push(rule);
+    }
+  }
+
+  /**
+   * Register multiple visualization rules
+   * @param rules The visualization rules to register
+   */
+  public registerRules(rules: VisualizationRule[]) {
+    rules.forEach((rule) => this.registerRule(rule));
+  }
+
+  /**
+   * Get all registered visualization rules
+   */
+  public getRules(): VisualizationRule[] {
+    return [...this.rules];
+  }
 }
 
+// Note: This singleton instance is kept for backward compatibility.
+// New code should use the VisualizationRegistryService instead.
 export const visualizationRegistry = new VisualizationRegistry();

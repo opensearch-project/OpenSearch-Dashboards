@@ -4,16 +4,14 @@
  */
 
 import { LineChartStyleControls } from '../line/line_vis_config';
-import {
-  IFieldType,
-  IndexPattern,
-} from '../../../application/legacy/discover/opensearch_dashboards_services';
+import { IFieldType } from '../../../application/legacy/discover/opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../application/legacy/discover/application/doc_views/doc_views_types';
 import { LineVisStyleControlsProps } from '../line/line_vis_options';
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
-import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { ChartTypeMapping, VisColumn } from '../types';
+import { ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DiscoverViewServices } from '../../../application/legacy/discover/build_services';
 
 export interface VisualizationType {
   readonly name: string;
@@ -30,52 +28,33 @@ export interface VisualizationType {
       }: LineVisStyleControlsProps) => JSX.Element;
     };
   };
-  readonly toExpression: (
-    searchContext: IExpressionLoaderParams['searchContext'],
-    indexPattern: IndexPattern,
-    toExpressionFn: (
-      transformedData: Array<Record<string, any>>,
-      numericalColumns: VisColumn[],
-      categoricalColumns: VisColumn[],
-      dateColumns: VisColumn[],
-      styleOptions: any,
-      chartType?: string
-    ) => any,
-    transformedData?: Array<Record<string, any>>,
-    numericalColumns?: VisColumn[],
-    categoricalColumns?: VisColumn[],
-    dateColumns?: VisColumn[],
-    styleOptions?: Partial<LineChartStyleControls>
-  ) => Promise<string | undefined>;
 }
-
-export type VisFieldType = 'numerical' | 'categorical' | 'date' | 'unknown';
 
 // Map both OSD_FIELD_TYPES and OPENSEARCH_FIELD_TYPES to VisFieldType
 // We also need to handle the case where a new field is created with a opensearch type
 const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   // Map OSD_FIELD_TYPES to VisFieldType
-  [OSD_FIELD_TYPES.BOOLEAN]: 'categorical',
-  [OSD_FIELD_TYPES.DATE]: 'date',
-  [OSD_FIELD_TYPES.NUMBER]: 'numerical',
-  [OSD_FIELD_TYPES.STRING]: 'categorical',
-  [OSD_FIELD_TYPES.OBJECT]: 'unknown',
-  [OSD_FIELD_TYPES.NESTED]: 'unknown',
-  [OSD_FIELD_TYPES.HISTOGRAM]: 'numerical',
+  [OSD_FIELD_TYPES.BOOLEAN]: VisFieldType.Categorical,
+  [OSD_FIELD_TYPES.DATE]: VisFieldType.Date,
+  [OSD_FIELD_TYPES.NUMBER]: VisFieldType.Numerical,
+  [OSD_FIELD_TYPES.STRING]: VisFieldType.Categorical,
+  [OSD_FIELD_TYPES.OBJECT]: VisFieldType.Unknown,
+  [OSD_FIELD_TYPES.NESTED]: VisFieldType.Unknown,
+  [OSD_FIELD_TYPES.HISTOGRAM]: VisFieldType.Numerical,
 
   // Map the rest of OPENSEARCH_FIELD_TYPES to VisFieldType
-  [OPENSEARCH_FIELD_TYPES.DATE_NANOS]: 'date',
-  [OPENSEARCH_FIELD_TYPES.FLOAT]: 'numerical',
-  [OPENSEARCH_FIELD_TYPES.HALF_FLOAT]: 'numerical',
-  [OPENSEARCH_FIELD_TYPES.SCALED_FLOAT]: 'numerical',
-  [OPENSEARCH_FIELD_TYPES.DOUBLE]: 'numerical',
-  [OPENSEARCH_FIELD_TYPES.INTEGER]: 'numerical',
-  [OPENSEARCH_FIELD_TYPES.LONG]: 'numerical',
-  [OPENSEARCH_FIELD_TYPES.SHORT]: 'numerical',
-  [OPENSEARCH_FIELD_TYPES.UNSIGNED_LONG]: 'numerical',
-  [OPENSEARCH_FIELD_TYPES.TEXT]: 'categorical',
-  [OPENSEARCH_FIELD_TYPES.KEYWORD]: 'categorical',
-  [OPENSEARCH_FIELD_TYPES.WILDCARD]: 'categorical',
+  [OPENSEARCH_FIELD_TYPES.DATE_NANOS]: VisFieldType.Date,
+  [OPENSEARCH_FIELD_TYPES.FLOAT]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.HALF_FLOAT]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.SCALED_FLOAT]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.DOUBLE]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.INTEGER]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.LONG]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.SHORT]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.UNSIGNED_LONG]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.TEXT]: VisFieldType.Categorical,
+  [OPENSEARCH_FIELD_TYPES.KEYWORD]: VisFieldType.Categorical,
+  [OPENSEARCH_FIELD_TYPES.WILDCARD]: VisFieldType.Categorical,
 };
 
 export interface VisualizationTypeResult {
@@ -97,12 +76,13 @@ export interface VisualizationTypeResult {
 }
 
 const getFieldTypeFromSchema = (schema?: string): VisFieldType =>
-  FIELD_TYPE_MAP[schema || ''] || 'unknown';
+  FIELD_TYPE_MAP[schema || ''] || VisFieldType.Unknown;
 
 // Implement this function to return the visualization type based on the query based on the returned data
 export const getVisualizationType = (
   rows?: OpenSearchSearchHit[],
-  fieldSchema?: Array<Partial<IFieldType>>
+  fieldSchema?: Array<Partial<IFieldType>>,
+  registry = visualizationRegistry
 ): VisualizationTypeResult | undefined => {
   if (!fieldSchema || !rows) {
     return;
@@ -127,7 +107,17 @@ export const getVisualizationType = (
   });
 
   return {
-    ...visualizationRegistry.getVisualizationType(columns),
+    ...registry.getVisualizationType(columns),
     transformedData,
   };
+};
+
+/**
+ * Hook to get the visualization registry from the service
+ */
+export const useVisualizationRegistry = () => {
+  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+
+  // If the service is available, use it, otherwise fall back to the singleton
+  return services.visualizationRegistry?.getRegistry() || visualizationRegistry;
 };
