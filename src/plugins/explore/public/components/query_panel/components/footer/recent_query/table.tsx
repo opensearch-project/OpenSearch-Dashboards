@@ -10,6 +10,7 @@ import { LanguageType } from '../../../types';
 
 export const MAX_RECENT_QUERY_SIZE = 10;
 
+// TODO: This component will be fully functional once integrated with query services.
 export function RecentQueriesTable({
   onClickRecentQuery,
   isVisible,
