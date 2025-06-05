@@ -56,7 +56,7 @@ export const workspaceSearchPages = async (
       coreStart.application.navigateToApp(link.id);
     };
 
-    const pages = searchResult.slice(0, 10).map((link: NavLink) => {
+    const pages = searchResult.slice(0, 10).map((link) => {
       return (
         <WorkspaceGlobalSearchPageItem
           link={link}

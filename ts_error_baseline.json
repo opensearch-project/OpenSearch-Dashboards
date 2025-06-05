@@ -372,27 +372,6 @@
       "message": "Expected 0-1 arguments, but got 2."
     },
     {
-      "file": "src/plugins/advanced_settings/public/management_app/advanced_settings.tsx",
-      "line": 186,
-      "column": 78,
-      "code": "TS2339",
-      "message": "Property 'DASHBOARD_ADMIN' does not exist on type 'typeof UiSettingScope'."
-    },
-    {
-      "file": "src/plugins/advanced_settings/public/management_app/advanced_settings.tsx",
-      "line": 191,
-      "column": 84,
-      "code": "TS2339",
-      "message": "Property 'DASHBOARD_ADMIN' does not exist on type 'typeof UiSettingScope'."
-    },
-    {
-      "file": "src/plugins/advanced_settings/public/management_app/advanced_settings.tsx",
-      "line": 205,
-      "column": 54,
-      "code": "TS2339",
-      "message": "Property 'DASHBOARD_ADMIN' does not exist on type 'typeof UiSettingScope'."
-    },
-    {
       "file": "src/plugins/advanced_settings/public/management_app/components/field/field.tsx",
       "line": 277,
       "column": 17,
@@ -1083,7 +1062,7 @@
       "line": 170,
       "column": 33,
       "code": "TS2345",
-      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_GLOBAL_APPLY_FILTER\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | ... 19 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
+      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | \"openInspector\" | \"deletePanel\" | ... 18 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
     },
     {
       "file": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.test.tsx",
@@ -1853,77 +1832,77 @@
       "line": 208,
       "column": 13,
       "code": "TS2322",
-      "message": "Type '{ filters: Filter[]; onFiltersUpdated: ((filters: Filter[]) => void) | undefined; intl: InjectedIntl; indexPatterns: IIndexPattern[]; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<Component<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | ... 5 more ... | \"isQueryEditorControl\">, any, any>> & Readonly<...> & Readonly<...>'."
+      "message": "Type '{ filters: Filter[]; onFiltersUpdated: ((filters: Filter[]) => void) | undefined; intl: InjectedIntl; indexPatterns: IIndexPattern[]; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<Component<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | ... 5 more ... | \"isQueryEditorControl\">, any, any>> & Readonly<...> & Readonly<...>'."
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 78,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 86,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 96,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 108,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 119,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 130,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 141,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 152,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 165,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 178,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/query_editor/editors/dql_editor/index.tsx",
@@ -2063,7 +2042,7 @@
       "line": 454,
       "column": 13,
       "code": "TS2322",
-      "message": "Type '{ filters: Filter[]; onFiltersUpdated: ((filters: Filter[]) => void) | undefined; intl: InjectedIntl; indexPatterns: IIndexPattern[]; showSaveQuery: boolean | undefined; ... 8 more ...; saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<...>; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<Component<Pick<Props, \"filters\" | \"saveQuery\" | \"indexPatterns\" | \"onLoad\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | ... 5 more ... | \"isQueryEditorControl\">, any, any>> & Readonly<...> & Readonly<...>'."
+      "message": "Type '{ filters: Filter[]; onFiltersUpdated: ((filters: Filter[]) => void) | undefined; intl: InjectedIntl; indexPatterns: IIndexPattern[]; showSaveQuery: boolean | undefined; ... 8 more ...; saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<...>; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<Component<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | ... 5 more ... | \"isQueryEditorControl\">, any, any>> & Readonly<...> & Readonly<...>'."
     },
     {
       "file": "src/plugins/data/public/ui/typeahead/suggestion_component.tsx",
@@ -2133,7 +2112,7 @@
       "line": 95,
       "column": 11,
       "code": "TS2322",
-      "message": "Type 'string' is not assignable to type '(MsearchHeader | MsearchBody)[]'."
+      "message": "Type 'string' is not assignable to type '(MsearchBody | MsearchHeader)[]'."
     },
     {
       "file": "src/plugins/data/server/search/routes/call_msearch.ts",
@@ -2154,7 +2133,7 @@
       "line": 226,
       "column": 53,
       "code": "TS7053",
-      "message": "Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Pick<Record<string, any>, \"metaFields\" | \"search:includeFrozen\" | \"courier:maxConcurrentShardRequests\" | \"courier:batchSearches\" | \"courier:setRequestPreference\" | ... 8 more ... | \"query:dataframe:hydrationStrategy\">'."
+      "message": "Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Pick<Record<string, any>, \"metaFields\" | \"doc_table:highlight\" | \"query:queryString:options\" | \"query:allowLeadingWildcards\" | \"sort:options\" | \"courier:ignoreFilterIfFieldNotInIndex\" | ... 7 more ... | \"dateFormat:tz\">'."
     },
     {
       "file": "src/plugins/data_explorer/public/components/app_container.test.tsx",
@@ -2637,7 +2616,7 @@
       "line": 351,
       "column": 5,
       "code": "TS2741",
-      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { credentials: SigV4Content | UsernamePasswordTypedContent | { [key: string]: string; }; type: string; }; }' but required in type 'DataSourceAttributes'."
+      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { credentials: UsernamePasswordTypedContent | SigV4Content | { [key: string]: string; }; type: string; }; }' but required in type 'DataSourceAttributes'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/create_data_source_wizard/components/create_form/create_data_source_form.tsx",
@@ -2945,21 +2924,21 @@
       "line": 56,
       "column": 31,
       "code": "TS2741",
-      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceSelectable\"; componentConfig: { fullWidth: boolean; onSelectedDataSources: Mock<any, any>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"uiSettings\" | \"hideLocalCluster\" | \"application\">'."
+      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceSelectable\"; componentConfig: { fullWidth: boolean; onSelectedDataSources: Mock<any, any>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"application\" | \"uiSettings\" | \"hideLocalCluster\">'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/data_source_menu/create_data_source_menu.test.tsx",
       "line": 84,
       "column": 27,
       "code": "TS2741",
-      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceSelectable\"; hideLocalCluster: boolean; componentConfig: { fullWidth: boolean; onSelectedDataSources: Mock<any, any>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"uiSettings\" | \"hideLocalCluster\" | \"application\">'."
+      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceSelectable\"; hideLocalCluster: boolean; componentConfig: { fullWidth: boolean; onSelectedDataSources: Mock<any, any>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"application\" | \"uiSettings\" | \"hideLocalCluster\">'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/data_source_menu/create_data_source_menu.test.tsx",
       "line": 153,
       "column": 31,
       "code": "TS2741",
-      "message": "Property 'onManageDataSource' is missing in type '{ setMenuMountPoint: Mock<(mountPoint: MountPoint<HTMLElement>) => void, any>; componentType: \"DataSourceSelectable\"; componentConfig: { fullWidth: boolean; hideLocalCluster: boolean; onSelectedDataSources: Mock<...>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"uiSettings\" | \"hideLocalCluster\" | \"application\">'."
+      "message": "Property 'onManageDataSource' is missing in type '{ setMenuMountPoint: Mock<(mountPoint: MountPoint<HTMLElement>) => void, any>; componentType: \"DataSourceSelectable\"; componentConfig: { fullWidth: boolean; hideLocalCluster: boolean; onSelectedDataSources: Mock<...>; savedObjects: SavedObjectsClientContract; notifications: MockedKeys<...>; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceSelectableConfig>, \"application\" | \"uiSettings\" | \"hideLocalCluster\">'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/data_source_menu/data_source_menu.tsx",
@@ -4121,7 +4100,7 @@
       "line": 36,
       "column": 3,
       "code": "TS2740",
-      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': remove, add, get$, addSuccess, and 3 more."
+      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, remove, get$, addSuccess, and 3 more."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/associated_object_management/associated_objects_details_flyout.test.tsx",
@@ -4177,7 +4156,7 @@
       "line": 47,
       "column": 3,
       "code": "TS2740",
-      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': remove, add, get$, addSuccess, and 3 more."
+      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, remove, get$, addSuccess, and 3 more."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/associated_object_management/associated_objects_tab.test.tsx",
@@ -4408,7 +4387,7 @@
       "line": 116,
       "column": 13,
       "code": "TS2741",
-      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceView\"; setMenuMountPoint: (menuMount: MountPoint<HTMLElement> | undefined) => void; componentConfig: { activeOption: { id: string; }[]; savedObjects: SavedObjectsClientContract; notifications: NotificationsStart; fullWidth: boolean; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceViewConfig>, \"uiSettings\" | \"hideLocalCluster\" | \"application\">'."
+      "message": "Property 'onManageDataSource' is missing in type '{ componentType: \"DataSourceView\"; setMenuMountPoint: (menuMount: MountPoint<HTMLElement> | undefined) => void; componentConfig: { activeOption: { id: string; }[]; savedObjects: SavedObjectsClientContract; notifications: NotificationsStart; fullWidth: boolean; }; }' but required in type 'Omit<DataSourceMenuProps<DataSourceViewConfig>, \"application\" | \"uiSettings\" | \"hideLocalCluster\">'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/connection_detail/direct_query_connection_detail.tsx",
@@ -4520,7 +4499,7 @@
       "line": 104,
       "column": 8,
       "code": "TS2739",
-      "message": "Type '{ roles: { label: string; value: string; }[]; selectedQueryPermissionRoles: never[]; setSelectedQueryPermissionRoles: Mock<any, any>; currentName: string; currentDetails: string; currentArn: string; ... 13 more ...; setArnForRequest: Mock<...>; }' is missing the following properties from type 'Readonly<Pick<ConfigureS3DatasourceProps, \"error\" | \"setError\" | \"application\" | \"navigation\" | \"roles\" | \"useNewUX\" | \"hasSecurityAccess\" | \"selectedQueryPermissionRoles\" | ... 14 more ... | \"setArnForRequest\">>': application, navigation, useNewUX"
+      "message": "Type '{ roles: { label: string; value: string; }[]; selectedQueryPermissionRoles: never[]; setSelectedQueryPermissionRoles: Mock<any, any>; currentName: string; currentDetails: string; currentArn: string; ... 13 more ...; setArnForRequest: Mock<...>; }' is missing the following properties from type 'Readonly<Pick<ConfigureS3DatasourceProps, \"application\" | \"navigation\" | \"error\" | \"roles\" | \"setError\" | \"useNewUX\" | \"hasSecurityAccess\" | \"selectedQueryPermissionRoles\" | ... 14 more ... | \"setArnForRequest\">>': application, navigation, useNewUX"
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/direct_query_data_source_configuration/amazon_s3/review_amazon_s3_data_source.test.tsx",
@@ -5094,14 +5073,14 @@
       "line": 356,
       "column": 13,
       "code": "TS2739",
-      "message": "Type '{ title: string; description: string; auth: { type: string; credentials: SigV4Content | UsernamePasswordTypedContent | { [key: string]: string; } | undefined; }; }' is missing the following properties from type 'DataSourceAttributes': endpoint, dataSourceVersion"
+      "message": "Type '{ title: string; description: string; auth: { type: string; credentials: UsernamePasswordTypedContent | SigV4Content | { [key: string]: string; } | undefined; }; }' is missing the following properties from type 'DataSourceAttributes': endpoint, dataSourceVersion"
     },
     {
       "file": "src/plugins/data_source_management/public/components/edit_data_source/components/edit_form/edit_data_source_form.tsx",
       "line": 460,
       "column": 11,
       "code": "TS2741",
-      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { credentials: SigV4Content | UsernamePasswordTypedContent | { [key: string]: string; } | undefined; type: string; }; }' but required in type 'DataSourceAttributes'."
+      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { credentials: UsernamePasswordTypedContent | SigV4Content | { [key: string]: string; } | undefined; type: string; }; }' but required in type 'DataSourceAttributes'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/edit_data_source/components/edit_form/edit_data_source_form.tsx",
@@ -5206,7 +5185,7 @@
       "line": 1126,
       "column": 11,
       "code": "TS2741",
-      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { type: string; credentials: SigV4Content | UsernamePasswordTypedContent | { ...; } | undefined; }; }' but required in type 'DataSourceAttributes'."
+      "message": "Property 'dataSourceVersion' is missing in type '{ title: string; description: string; endpoint: string; auth: { type: string; credentials: UsernamePasswordTypedContent | SigV4Content | { ...; } | undefined; }; }' but required in type 'DataSourceAttributes'."
     },
     {
       "file": "src/plugins/data_source_management/public/components/edit_data_source/components/header/header.test.tsx",
@@ -7670,7 +7649,7 @@
       "line": 333,
       "column": 11,
       "code": "TS2322",
-      "message": "Type '({ sortable: boolean; 'data-test-subj': string; headers?: string | undefined; onError?: ReactEventHandler<HTMLTableDataCellElement> | undefined; ... 278 more ...; hideForMobile?: boolean | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
+      "message": "Type '({ sortable: boolean; 'data-test-subj': string; abbr?: string | undefined; footer?: string | ReactElement<any, string | JSXElementConstructor<any>> | ((props: EuiTableFooterProps<...>) => ReactNode) | undefined; ... 278 more ...; hideForMobile?: boolean | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
     },
     {
       "file": "src/plugins/index_pattern_management/public/mocks.ts",
@@ -8762,14 +8741,14 @@
       "line": 221,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"search\" | \"documents\" | \"refresh\" | \"push\" | \"filter\" | \"help\" | \"stats\" | \"list\" | \"copy\" | \"link\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | \"image\" | \"polygon\" | \"stop\" | \"search\" | \"download\" | \"list\" | \"alert\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
       "line": 224,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"search\" | \"documents\" | \"refresh\" | \"push\" | \"filter\" | \"help\" | \"stats\" | \"list\" | \"copy\" | \"link\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | \"image\" | \"polygon\" | \"stop\" | \"search\" | \"download\" | \"list\" | \"alert\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
@@ -8860,14 +8839,14 @@
       "line": 191,
       "column": 30,
       "code": "TS2345",
-      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_GLOBAL_APPLY_FILTER\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | ... 19 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
+      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | \"openInspector\" | \"deletePanel\" | ... 18 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
     },
     {
       "file": "src/plugins/ui_actions/public/service/ui_actions_service.test.ts",
       "line": 201,
       "column": 30,
       "code": "TS2345",
-      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_GLOBAL_APPLY_FILTER\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | ... 19 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
+      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | \"openInspector\" | \"deletePanel\" | ... 18 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
     },
     {
       "file": "src/plugins/ui_actions/public/service/ui_actions_service.test.ts",
@@ -8944,14 +8923,14 @@
       "line": 58,
       "column": 24,
       "code": "TS2345",
-      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_GLOBAL_APPLY_FILTER\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | ... 19 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
+      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | \"openInspector\" | \"deletePanel\" | ... 18 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
     },
     {
       "file": "src/plugins/ui_actions/public/tests/get_trigger_compatible_actions.test.ts",
       "line": 65,
       "column": 24,
       "code": "TS2345",
-      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_GLOBAL_APPLY_FILTER\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | ... 19 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
+      "message": "Argument of type 'ActionByType<\"\" | \"ACTION_VISUALIZE_FIELD\" | \"ACTION_VISUALIZE_GEO_FIELD\" | \"ACTION_VISUALIZE_LENS_FIELD\" | \"ACTION_CUSTOMIZE_PANEL\" | \"ACTION_ADD_PANEL\" | \"openInspector\" | \"deletePanel\" | ... 18 more ... | \"ACTION_UNLINK_BOOK_FROM_LIBRARY\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
     },
     {
       "file": "src/plugins/ui_actions/public/tests/get_trigger_compatible_actions.test.ts",
@@ -9735,7 +9714,7 @@
       "line": 88,
       "column": 13,
       "code": "TS2322",
-      "message": "Type 'never[] | { colIndex: number; direction: \"asc\" | \"desc\"; }' is not assignable to type 'ColumnSort'."
+      "message": "Type 'never[] | { colIndex: number; direction: \"desc\" | \"asc\"; }' is not assignable to type 'ColumnSort'."
     },
     {
       "file": "src/plugins/vis_type_table/public/components/table_vis_component_group.test.tsx",
@@ -9952,7 +9931,7 @@
       "line": 121,
       "column": 46,
       "code": "TS2345",
-      "message": "Argument of type '{ name: string; title: string; icon: string; description: string; visualization: typeof VislibVisController; getSupportedTriggers: () => (\"SELECT_RANGE_TRIGGER\" | \"VALUE_CLICK_TRIGGER\")[]; visConfig: { ...; }; events: { ...; }; editorConfig: { ...; }; } | ... 6 more ... | { ...; }' is not assignable to parameter of type 'BaseVisTypeOptions<VisParams>'."
+      "message": "Argument of type '{ name: string; title: string; icon: string; description: string; visConfig: { defaults: { type: string; addTooltip: boolean; addLegend: boolean; isDisplayWarning: boolean; gauge: { alignment: \"automatic\"; ... 13 more ...; style: { ...; }; }; }; }; visualization: typeof VislibVisController; editorConfig: { ...; }; u...' is not assignable to parameter of type 'BaseVisTypeOptions<VisParams>'."
     },
     {
       "file": "src/plugins/vis_type_vislib/public/vislib/lib/binder.ts",
@@ -10001,70 +9980,70 @@
       "line": 104,
       "column": 8,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 119,
       "column": 8,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 134,
       "column": 8,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 159,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 176,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 199,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 6 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 6 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 225,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 246,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 266,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 282,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"savedObjects\" | \"uiSettings\" | \"usageCollection\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualize/public/actions/visualize_field_action.ts",
@@ -10109,13 +10088,6 @@
       "message": "Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?"
     },
     {
-      "file": "src/plugins/workspace/public/components/global_search/search_pages_command.tsx",
-      "line": 59,
-      "column": 32,
-      "code": "TS2339",
-      "message": "Property 'slice' does not exist on type 'Promise<(ChromeRegistrationNavLink & ChromeNavLink)[]>'."
-    },
-    {
       "file": "src/plugins/workspace/public/components/workspace_creator/workspace_creator.test.tsx",
       "line": 175,
       "column": 45,
@@ -10155,14 +10127,14 @@
       "line": 47,
       "column": 50,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"search\" | \"documents\" | \"refresh\" | ... 464 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | ... 464 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_selector/workspace_selector.test.tsx",
       "line": 51,
       "column": 54,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"search\" | \"documents\" | \"refresh\" | ... 464 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | ... 464 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/services/use_case_service.test.ts",
@@ -10172,6 +10144,6 @@
       "message": "Type 'BehaviorSubject<{ id: string; title: string; }[]>' is not assignable to type 'Observable<PublicAppInfo[]>'."
     }
   ],
-  "updatedAt": "2025-05-30T03:45:32.018Z",
+  "updatedAt": "2025-06-04T09:40:06.923Z",
   "tsconfig": "/home/ubuntu/OpenSearch-Dashboards/tsconfig.check.json"
 }
