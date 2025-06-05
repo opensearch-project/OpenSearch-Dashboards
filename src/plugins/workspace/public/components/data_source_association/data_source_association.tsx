@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@osd/i18n';
-import { useObservable, useEffectOnce } from 'react-use';
+import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { OverlayRef } from '../../../../../../src/core/public';
 import {
