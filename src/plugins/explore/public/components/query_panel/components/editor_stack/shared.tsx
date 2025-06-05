@@ -30,7 +30,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
           //   horizontalScrollbarSize: 1,
           // },
           // overviewRulerLanes: 0,
-          // hideCursorInOverviewRuler: false,
+          hideCursorInOverviewRuler: true,
           cursorStyle: 'line',
           suggest: {
             snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
