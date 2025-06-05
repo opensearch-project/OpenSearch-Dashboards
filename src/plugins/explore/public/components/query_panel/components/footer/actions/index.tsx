@@ -25,7 +25,7 @@ export const Actions: React.FC = () => {
       key={index}
       icon={<EuiIcon type={action.iconType} />}
       onClick={action.onClick}
-      data-test-subj={`actionMenuItem-${index}`}
+      data-test-subj={`queryEditorActionMenuItem-${index}`}
     >
       {action.label}
     </EuiContextMenuItem>

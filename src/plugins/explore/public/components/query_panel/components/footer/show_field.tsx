@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 interface ShowFieldToggleProps {
   isEnabled: boolean;
@@ -20,14 +21,22 @@ export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onT
     onToggle(newState);
   };
 
+  const buttonLabel = showField
+    ? i18n.translate('explore.queryPanel.showFieldToggle.hideFieldsLabel', {
+        defaultMessage: 'Hide Fields',
+      })
+    : i18n.translate('explore.queryPanel.showFieldToggle.showFieldsLabel', {
+        defaultMessage: 'Show Fields',
+      });
+
   return (
     <EuiButtonEmpty
       onClick={handleToggle}
-      iconType={showField ? 'menuLeft' : 'menuRight'} // Add the folderOpen icon
-      data-test-subj="showFields"
-      className="showFieldsToggle"
+      iconType={showField ? 'menuLeft' : 'menuRight'}
+      data-test-subj="queryEditorFooterShowFields"
+      className="queryEditorFooter__showFieldsToggle"
     >
-      {showField ? 'Hide Fields' : 'Show Fields'}
+      {buttonLabel}
     </EuiButtonEmpty>
   );
 };

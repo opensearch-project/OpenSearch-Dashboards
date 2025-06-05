@@ -10,7 +10,7 @@
     margin: 0;
   }
 
-  .showInputType {
+  &__showInputType {
     color: $euiColorDarkShade; // Use closest match from OUI
     font-size: $euiFontSizeXS;
     font-style: normal;
@@ -23,12 +23,14 @@
     padding: 0;
   }
 
-  .showFieldsToggle {
-    color: $euiColorPrimary; // '#0073e6' → $euiColorPrimary
-    padding: 0;
+  &__lineCount {
+    margin: 0 8px;
   }
 
-  .queryEditor__footerItem {
-    margin: 0 8px;
+  &__verticalSeparator {
+    width: 1px;
+    height: 16px;
+    background: #d9d9d9;
+    margin: 0 4px;
   }
 }

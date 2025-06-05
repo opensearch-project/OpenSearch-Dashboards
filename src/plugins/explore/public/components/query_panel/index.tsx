@@ -32,17 +32,19 @@ const QueryPanel = () => {
     intitialQuery(languageTypeRef.current, 'test')
   );
 
-  const onQuerystringChange = (value: string, isPrompt: boolean) => {
-    const query = {
-      ...currentQuery,
-    };
-    if (isPrompt) {
-      query.prompt = value;
-    } else {
-      query.query = value;
-    }
-    setCurrentQuery(query);
-  };
+  const onQuerystringChange = React.useCallback((value: string, isPrompt: boolean) => {
+    setCurrentQuery((prevQuery) => {
+      const query = {
+        ...prevQuery,
+      };
+      if (isPrompt) {
+        query.prompt = value;
+      } else {
+        query.query = value;
+      }
+      return query;
+    });
+  }, []);
 
   const detectLanguageType = debounce((query) => {
     const detector = new QueryTypeDetector();
@@ -55,30 +57,36 @@ const QueryPanel = () => {
     }));
   }, 500); // Adjust debounce time as needed
 
-  const onPromptChange = (value: string) => {
-    detectLanguageType(value);
-    onQuerystringChange(value, true);
+  const onPromptChange = React.useCallback(
+    (value: string) => {
+      detectLanguageType(value);
+      onQuerystringChange(value, true);
 
-    // If not dual editor and prompt contains PPL, set line count
-    if (!isDualEditor && value.trim()) {
-      const lines = value.split('\n').length;
-      setLineCount(lines > 1 || value.trim() ? lines : undefined);
-    } else if (!isDualEditor) {
-      setLineCount(undefined);
-    }
-  };
+      // If not dual editor and prompt contains PPL, set line count
+      if (!isDualEditor && value.trim()) {
+        const lines = value.split('\n').length;
+        setLineCount(lines > 1 || value.trim() ? lines : undefined);
+      } else if (!isDualEditor) {
+        setLineCount(undefined);
+      }
+    },
+    [isDualEditor, detectLanguageType, onQuerystringChange]
+  );
 
-  const onQueryChange = (value: string) => {
-    onQuerystringChange(value, false);
+  const onQueryChange = React.useCallback(
+    (value: string) => {
+      onQuerystringChange(value, false);
 
-    // In dual editor mode, use query editor's line count if there is PPL
-    if (isDualEditor && value.trim()) {
-      const lines = value.split('\n').length;
-      setLineCount(lines > 1 || value.trim() ? lines : undefined);
-    } else {
-      setLineCount(undefined);
-    }
-  };
+      // In dual editor mode, use query editor's line count if there is PPL
+      if (isDualEditor && value.trim()) {
+        const lines = value.split('\n').length;
+        setLineCount(lines > 1 || value.trim() ? lines : undefined);
+      } else {
+        setLineCount(undefined);
+      }
+    },
+    [isDualEditor, onQuerystringChange]
+  );
 
   const handleQueryRun = async (
     queryString?: string | { [key: string]: any },
@@ -112,6 +120,7 @@ const QueryPanel = () => {
       // TODO: Call NL API to generate PPL query
 
       setIsDualEditor(true);
+      setIsEditorReadOnly(true);
       setCurrentQuery((prevQuery) => ({
         ...prevQuery,
         query: 'source=test\n| where state=CA and year=2023\n| sort=asc',

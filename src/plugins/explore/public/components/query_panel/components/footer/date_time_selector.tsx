@@ -34,7 +34,7 @@ export const DateTimeRangePicker: React.FC = () => {
       onRefresh={onRefresh}
       showUpdateButton={false}
       isLoading={isLoading}
-      data-test-subj="dateTimeRangePicker"
+      data-test-subj="queryEditorDateTimeRangePicker"
       compressed={true}
     />
   );
