@@ -4,7 +4,7 @@
  */
 
 import { HttpStart, SavedObjectsClientContract, SavedObject } from 'opensearch-dashboards/public';
-import { DSL_MAPPING, DSL_BASE } from 'src/plugins/data_source_management/framework/utils/shared';
+import { DSL_MAPPING, DSL_BASE } from '../../../../framework/utils/shared';
 
 export interface ExportDashboardsResponse {
   version: string;
