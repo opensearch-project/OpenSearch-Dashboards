@@ -10803,28 +10803,28 @@
     },
     {
       "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 471,
+      "line": 519,
       "column": 52,
       "code": "TS2322",
       "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
     },
     {
       "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 550,
+      "line": 598,
       "column": 52,
       "code": "TS2322",
       "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
     },
     {
       "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 637,
+      "line": 688,
       "column": 52,
       "code": "TS2322",
       "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
     },
     {
       "file": "src/plugins/workspace/server/saved_objects/workspace_id_consumer_wrapper.test.ts",
-      "line": 668,
+      "line": 722,
       "column": 52,
       "code": "TS2322",
       "message": "Type '({ type: string; id: string; attributes: { description: string; }; references: string[]; workspaces: string[]; error?: undefined; } | { type: string; id: string; attributes: { description?: undefined; }; references: never[]; error: { ...; }; workspaces?: undefined; } | { ...; } | { ...; })[]' is not assignable to type 'SavedObject<unknown>[]'."
