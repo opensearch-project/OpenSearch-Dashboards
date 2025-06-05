@@ -168,7 +168,7 @@ export const createLineBarChart = (
         axis: applyAxisStyling(
           {
             title: metric2Name,
-            orient: Position.Right,
+            orient: Positions.RIGHT,
           },
           styles,
           'value',

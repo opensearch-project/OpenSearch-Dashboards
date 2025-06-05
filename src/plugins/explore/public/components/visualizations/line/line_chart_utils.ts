@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
-import { VisColumn } from '../types';
+import { ThresholdLineStyle, VisColumn } from '../types';
 import { Positions } from '../utils/collections';
 
 /**
@@ -15,11 +15,11 @@ import { Positions } from '../utils/collections';
  */
 export const getStrokeDash = (style: string): number[] | undefined => {
   switch (style) {
-    case 'dashed':
+    case ThresholdLineStyle.Dashed:
       return [5, 5];
-    case 'dot-dashed':
+    case ThresholdLineStyle.DotDashed:
       return [5, 5, 1, 5];
-    case 'full':
+    case ThresholdLineStyle.Full:
     default:
       return undefined;
   }

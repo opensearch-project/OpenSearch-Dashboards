@@ -44,11 +44,17 @@ export enum VisFieldType {
   Unknown = 'date',
 }
 
+export enum ThresholdLineStyle {
+  Full = 'full',
+  Dashed = 'dashed',
+  DotDashed = 'dot-dashed',
+}
+
 // Styling: Threshold line configuration
 export interface ThresholdLine {
   color: string;
   show: boolean;
-  style: 'full' | 'dashed' | 'dot-dashed';
+  style: ThresholdLineStyle;
   value: number;
   width: number;
 }

@@ -9,7 +9,7 @@ import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { LineVisStyleControls } from './line_vis_options';
 import { LineChartStyleControls } from './line_vis_config';
 import { Positions } from '../utils/collections';
-import { VisColumn, VisFieldType } from '../types';
+import { ThresholdLineStyle, VisColumn, VisFieldType } from '../types';
 
 export default {
   component: LineVisStyleControls,
@@ -50,7 +50,7 @@ const defaultStyleOptions: LineChartStyleControls = {
   thresholdLine: {
     color: '#E7664C',
     show: false,
-    style: 'full',
+    style: ThresholdLineStyle.Full,
     value: 10,
     width: 1,
   },

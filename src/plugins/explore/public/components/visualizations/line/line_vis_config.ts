@@ -7,7 +7,7 @@ import React from 'react';
 import { Positions } from '../utils/collections';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import { VisualizationType } from '../utils/use_visualization_types';
-import { CategoryAxis, GridOptions, ThresholdLine, ValueAxis } from '../types';
+import { CategoryAxis, GridOptions, ThresholdLine, ThresholdLineStyle, ValueAxis } from '../types';
 
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
@@ -47,7 +47,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
   thresholdLine: {
     color: '#E7664C',
     show: false,
-    style: 'full',
+    style: ThresholdLineStyle.Full,
     value: 10,
     width: 1,
   },

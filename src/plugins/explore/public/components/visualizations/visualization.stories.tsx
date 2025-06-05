@@ -9,7 +9,7 @@ import { Visualization } from './visualization';
 import { Positions } from './utils/collections';
 import { LineVisStyleControls } from './line/line_vis_options';
 import { VisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
-import { VisFieldType } from './types';
+import { ThresholdLineStyle, VisFieldType } from './types';
 import { LineChartStyleControls } from './line/line_vis_config';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 
@@ -74,7 +74,7 @@ const mockStyleOptions: LineChartStyleControls = {
   thresholdLine: {
     color: '#E7664C',
     show: false,
-    style: 'full' as const,
+    style: ThresholdLineStyle.Full,
     value: 10,
     width: 1,
   },
@@ -253,7 +253,7 @@ CustomColors.args = {
       show: true,
       value: 140,
       color: '#00BFB3',
-      style: 'dashed' as const,
+      style: ThresholdLineStyle.Dashed,
       width: 3,
     },
     addTimeMarker: true,

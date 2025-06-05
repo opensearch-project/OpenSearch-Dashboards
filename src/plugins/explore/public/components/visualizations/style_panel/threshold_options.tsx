@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { ThresholdLine } from '../types';
+import { ThresholdLine, ThresholdLineStyle } from '../types';
 
 export interface ThresholdOptionsProps {
   thresholdLine: ThresholdLine;
@@ -27,19 +27,19 @@ export interface ThresholdOptionsProps {
 
 const lineStyleOptions = [
   {
-    value: 'full',
+    value: ThresholdLineStyle.Full,
     text: i18n.translate('explore.stylePanel.threshold.lineStyle.full', {
       defaultMessage: 'Full',
     }),
   },
   {
-    value: 'dashed',
+    value: ThresholdLineStyle.Dashed,
     text: i18n.translate('explore.stylePanel.threshold.lineStyle.dashed', {
       defaultMessage: 'Dashed',
     }),
   },
   {
-    value: 'dot-dashed',
+    value: ThresholdLineStyle.DotDashed,
     text: i18n.translate('explore.stylePanel.threshold.lineStyle.dotDashed', {
       defaultMessage: 'Dot-dashed',
     }),
