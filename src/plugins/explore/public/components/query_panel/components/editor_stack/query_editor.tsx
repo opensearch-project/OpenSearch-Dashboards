@@ -5,7 +5,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { monaco } from '@osd/monaco';
-import { getEditorConfig, LanguageType } from './shared';
+import { getEditorConfig } from './shared';
+import { LanguageType, EditorType } from './types';
 import { ReusableEditor } from './resuable_editor';
 
 export interface QueryEditorProps {
@@ -18,9 +19,8 @@ export interface QueryEditorProps {
   onClearEditor: () => void;
 }
 
-// Todo: Move this dynamic comment once the actual query is loaded
+// TODO: Move this dynamic comment once the actual query is loaded
 const FIXED_COMMENT = '// AI Generated PPL at 00.03.33pm';
-const EDITOR_HEIGHT = 100;
 
 export const QueryEditor: React.FC<QueryEditorProps> = ({
   queryString,
@@ -64,8 +64,8 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
       editorConfig={editorConfig}
       editText="Edit Query"
       clearText="Clear Editor"
-      height={EDITOR_HEIGHT}
-      editorType="query" // This is used for styling and identification
+      height={editorConfig.height}
+      editorType={EditorType.Query} // This is used for styling and identification
       onChange={onChange}
       onRun={onQueryRun}
       onEdit={onQueryEdit}

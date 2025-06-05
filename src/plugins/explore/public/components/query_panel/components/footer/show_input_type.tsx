@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { LanguageType } from '../editor_stack/shared';
+import { LanguageType } from '../../types';
 
 interface ShowInputTypeProps {
   languageType: LanguageType; // Added the missing property
@@ -20,10 +20,10 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
   // Memoized function to determine the display text
   const getDisplayText = useMemo(() => {
     if (noInput) return '';
-    if (languageType === 'nl') {
+    if (languageType === LanguageType.Natural) {
       return isDualEditor ? 'Natural Language | PPL' : 'Natural Language';
     }
-    return 'PPL'; // Default to empty for other language types
+    return LanguageType.PPL.toUpperCase(); // Default to empty for other language types
   }, [languageType, isDualEditor, noInput]);
 
   return getDisplayText ? <span className="showInputType">{getDisplayText} </span> : null;

@@ -4,12 +4,14 @@
  */
 import { LanguageType } from './types';
 
+// TODO: Integrate this config with createEditor like wrapper after P0.This will help tp scale with multiple lang registration by external plugins
 export const getEditorConfig = (languageType: LanguageType) => {
   switch (languageType) {
     case LanguageType.PPL:
     case LanguageType.KeyValue:
       return {
         languageId: LanguageType.PPL,
+        height: 100,
         options: {
           minimap: { enabled: false },
           automaticLayout: true,
@@ -53,6 +55,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
     default:
       return {
         languageId: 'plaintext',
+        height: 32,
         options: {
           lineNumbers: 'off' as const, // Disable line numbers for NL
           wordWrap: 'on' as const, // Enable word wrapping for NL

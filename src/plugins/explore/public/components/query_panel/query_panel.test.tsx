@@ -7,7 +7,6 @@ import React from 'react';
 import { render, fireEvent, screen, act } from '@testing-library/react';
 import { QueryPanel } from './index';
 
-// Mock child components to focus on QueryPanel logic
 jest.mock('./layout', () => ({
   QueryPanelLayout: ({ children, footer }: any) => (
     <div>
@@ -89,7 +88,6 @@ describe('QueryPanel', () => {
     jest.useFakeTimers();
     render(<QueryPanel />);
     fireEvent.click(screen.getByText('Run query'));
-    // isLoading is internal, but you could check for side effects if you expose a loading indicator
     act(() => {
       jest.advanceTimersByTime(3000);
     });

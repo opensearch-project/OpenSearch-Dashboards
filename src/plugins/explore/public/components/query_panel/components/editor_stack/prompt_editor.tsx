@@ -48,7 +48,7 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
       }
       editText="Edit Prompt"
       clearText="Clear Editor"
-      height={32}
+      height={editorConfig.height}
       editorType={editorType}
     />
   );

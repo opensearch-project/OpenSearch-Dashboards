@@ -4,6 +4,8 @@
  */
 
 // TODO: Move this to  already configured datetime range picker
+// This component will be fully functional once integrated with query services.
+
 import React, { useState } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
 
@@ -15,15 +17,12 @@ export const DateTimeRangePicker: React.FC = () => {
   const onTimeChange = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
     setStart(newStart);
     setEnd(newEnd);
-    // console.log(`Time range updated: ${newStart} to ${newEnd}`);
   };
 
   const onRefresh = () => {
     setIsLoading(true);
-    // console.log('Refreshing data...');
     setTimeout(() => {
       setIsLoading(false);
-      // console.log('Data refreshed');
     }, 1000); // Simulate a refresh delay
   };
 

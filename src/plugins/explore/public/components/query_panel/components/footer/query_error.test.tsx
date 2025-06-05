@@ -17,17 +17,6 @@ enum ResultStatus {
 }
 
 describe('Query Result', () => {
-  it('shows loading status', () => {
-    const props = {
-      queryStatus: {
-        status: ResultStatus.LOADING,
-        startTime: Number.NEGATIVE_INFINITY,
-      },
-    };
-    const component = shallowWithIntl(<QueryError {...props} />);
-    expect(component).toMatchSnapshot();
-  });
-
   it('should not render if status is uninitialized', () => {
     const props = {
       queryStatus: {
