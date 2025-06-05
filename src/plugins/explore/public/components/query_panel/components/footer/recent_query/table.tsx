@@ -56,15 +56,18 @@ export function RecentQueriesTable({
   // TODO: dispatch action to get recent queries.
   // const [recentQueries, setRecentQueries] = useState<RecentQueryItem[]>(mockRecentQueries);
 
-  const getRowProps = (item: any) => ({
+  const getRowProps = (item: RecentQueryTableItem) => ({
     'data-test-subj': `row-${item.id}`,
     className: 'customRowClass',
     onClick: () => {},
   });
 
-  const getCellProps = (item: any, column: any) => ({
+  const getCellProps = (
+    item: RecentQueryTableItem,
+    column: EuiBasicTableColumn<RecentQueryTableItem>
+  ) => ({
     className: 'customCellClass',
-    'data-test-subj': `cell-${item.id}-${column.field}`,
+    'data-test-subj': `cell-${item.id}-${(column as { field?: string }).field ?? 'actions'}`,
     textOnly: true,
   });
 
