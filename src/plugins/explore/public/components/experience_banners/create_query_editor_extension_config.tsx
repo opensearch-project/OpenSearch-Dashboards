@@ -11,9 +11,8 @@ import {
 } from 'opensearch-dashboards/public';
 import { map, shareReplay, take } from 'rxjs/operators';
 import { QueryEditorExtensionConfig } from '../../../../data/public';
-import { NewExperienceBanner } from './new_experience_banner';
-import { ClassicExperienceBanner } from './classic_experience_banner';
 import { ExplorePluginStart, ExploreStartDependencies } from '../../types';
+import { ExperienceBannerWrapper } from './experience_banner_wrapper';
 
 export const createQueryEditorExtensionConfig = (
   core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>
@@ -33,18 +32,20 @@ export const createQueryEditorExtensionConfig = (
         take(1),
         shareReplay(1)
       ),
-    getBanner: async () => {
-      const [coreStart] = await core.getStartServices();
-      const currentAppId = await coreStart.application.currentAppId$.pipe(take(1)).toPromise();
-      return currentAppId === 'explore' ? (
-        <NewExperienceBanner />
-      ) : (
-        <ClassicExperienceBanner
-          navigateToExplore={() =>
-            coreStart.application.navigateToApp('explore', { replace: true })
-          }
-        />
-      );
+    getBanner: () => {
+      const initializeBanners = async () => {
+        const [coreStart] = await core.getStartServices();
+        const currentAppId = await coreStart.application.currentAppId$.pipe(take(1)).toPromise();
+
+        return {
+          showClassicExperienceBanner: currentAppId === 'data-explorer',
+          navigateToExplore: () => {
+            coreStart.application.navigateToApp('explore', { replace: true });
+          },
+        };
+      };
+
+      return <ExperienceBannerWrapper initializeBannerWrapper={initializeBanners} />;
     },
   };
 };

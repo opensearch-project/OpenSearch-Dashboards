@@ -4,9 +4,9 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { DataStructureMeta, Query } from '../../../../common';
 import { ResultStatus } from '../../../query/query_string/language_service/lib';
 
@@ -65,9 +65,7 @@ export interface QueryEditorExtensionConfig {
    * A function that determines if the query editor extension is enabled and should be rendered on UI.
    * @returns whether the extension is enabled.
    */
-  isEnabled$: (
-    dependencies: QueryEditorExtensionDependencies
-  ) => Promise<Observable<boolean>> | Observable<boolean>;
+  isEnabled$: (dependencies: QueryEditorExtensionDependencies) => Observable<boolean>;
   /**
    * @returns DataStructureMeta for a given data source id.
    */
@@ -80,18 +78,14 @@ export interface QueryEditorExtensionConfig {
    * @param dependencies - The dependencies required for the extension.
    * @returns The query editor extension component.
    */
-  getComponent?: (
-    dependencies: QueryEditorExtensionDependencies
-  ) => Promise<React.ReactElement> | React.ReactElement | null;
+  getComponent?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
   /**
    * A function that returns the query editor extension banner. The banner is a
    * component that will be displayed on top of the search bar.
    * @param dependencies - The dependencies required for the extension.
    * @returns The query editor extension component.
    */
-  getBanner?: (
-    dependencies: QueryEditorExtensionDependencies
-  ) => Promise<React.ReactElement> | React.ReactElement | null;
+  getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
   /**
    * A function that returns the action bar buttons. The action bar is a
    * component that will be displayed on top of the results table in the discover page, to the right
@@ -101,7 +95,7 @@ export interface QueryEditorExtensionConfig {
    */
   getActionBarButtons?: (
     dependencies: QueryEditorExtensionDependencies
-  ) => Promise<React.ReactElement> | React.ReactElement | null;
+  ) => React.ReactElement | null;
   /**
    * A function that returns the query control buttons. The query controls is the section to the right
    * of the query editor bar.
@@ -110,15 +104,13 @@ export interface QueryEditorExtensionConfig {
    */
   getQueryControlButtons?: (
     dependencies: QueryEditorExtensionDependencies
-  ) => Promise<React.ReactElement> | React.ReactElement | null;
+  ) => React.ReactElement | null;
   /**
    * Returns the footer element that is rendered at the bottom of the query editor.
    * @param dependencies - The dependencies required for the extension.
    * @returns The query editor extension component.
    */
-  getBottomPanel?: (
-    dependencies: QueryEditorExtensionDependencies
-  ) => Promise<React.ReactElement> | React.ReactElement | null;
+  getBottomPanel?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
 }
 
 const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
@@ -132,12 +124,18 @@ const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => 
 
 export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props) => {
   const [isEnabled, setIsEnabled] = useState(false);
-  const [banner, setBanner] = useState<ReactElement | null>(null);
-  const [component, setComponent] = useState<ReactElement | null>(null);
-  const [queryControlButtons, setQueryControlButtons] = useState<ReactElement | null>(null);
-  const [bottomPanel, setBottomPanel] = useState<ReactElement | null>(null);
-  const [actionBarButtons, setActionBarButtons] = useState<ReactElement | null>(null);
   const isMounted = useRef(false);
+
+  const { banner, component, queryControlButtons, bottomPanel, actionBarButtons } = useMemo(
+    () => ({
+      banner: props.config.getBanner?.(props.dependencies),
+      component: props.config.getComponent?.(props.dependencies),
+      queryControlButtons: props.config.getQueryControlButtons?.(props.dependencies),
+      bottomPanel: props.config.getBottomPanel?.(props.dependencies),
+      actionBarButtons: props.config.getActionBarButtons?.(props.dependencies),
+    }),
+    [props.config, props.dependencies]
+  );
 
   useEffect(() => {
     isMounted.current = true;
@@ -147,41 +145,10 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
   }, []);
 
   useEffect(() => {
-    let subscription: Subscription;
-
-    const fetchEnabled = async () => {
-      const isEnabledObservable = await props.config.isEnabled$(props.dependencies);
-      subscription = isEnabledObservable.subscribe((enabled) => {
-        if (isMounted.current) setIsEnabled(enabled);
-      });
-    };
-
-    const setComponents = async () => {
-      const [
-        bannerResult,
-        componentResult,
-        queryControlButtonsResult,
-        bottomPanelResult,
-        actionBarButtonsResult,
-      ] = await Promise.all([
-        props.config.getBanner?.(props.dependencies),
-        props.config.getComponent?.(props.dependencies),
-        props.config.getQueryControlButtons?.(props.dependencies),
-        props.config.getBottomPanel?.(props.dependencies),
-        props.config.getActionBarButtons?.(props.dependencies),
-      ]);
-
-      setBanner(bannerResult ?? null);
-      setComponent(componentResult ?? null);
-      setQueryControlButtons(queryControlButtonsResult ?? null);
-      setBottomPanel(bottomPanelResult ?? null);
-      setActionBarButtons(actionBarButtonsResult ?? null);
-    };
-
-    fetchEnabled();
-    setComponents();
-
-    return () => subscription?.unsubscribe();
+    const subscription = props.config.isEnabled$(props.dependencies).subscribe((enabled) => {
+      if (isMounted.current) setIsEnabled(enabled);
+    });
+    return () => subscription.unsubscribe();
   }, [props.dependencies, props.config]);
 
   if (!isEnabled) return null;
