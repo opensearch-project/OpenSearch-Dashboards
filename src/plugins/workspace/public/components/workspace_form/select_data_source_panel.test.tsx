@@ -22,6 +22,8 @@ const dataSources = [
     auth: '',
     dataSourceEngineType: '' as DataSourceEngineType,
     workspaces: [],
+    type: 'OpenSearch',
+    connectionType: DataSourceConnectionType.OpenSearchConnection,
   },
   {
     id: 'ds2',
@@ -30,6 +32,8 @@ const dataSources = [
     auth: '',
     dataSourceEngineType: '' as DataSourceEngineType,
     workspaces: [],
+    type: 'OpenSearch',
+    connectionType: DataSourceConnectionType.OpenSearchConnection,
   },
 ];
 

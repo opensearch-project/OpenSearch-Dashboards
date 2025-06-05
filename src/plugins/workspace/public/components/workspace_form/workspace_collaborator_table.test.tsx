@@ -9,9 +9,13 @@ import ReactDOM from 'react-dom';
 import { WorkspaceCollaboratorTable, getDisplayedType } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
+import { WorkspacePermissionItemType } from './constants';
+import { IWorkspaceResponse, WorkspacePermissionMode } from 'opensearch-dashboards/public';
+import { WorkspaceCollaboratorType } from '../../services';
+import { WorkspaceCollaboratorPermissionType } from '../../types';
 
 const mockCoreStart = coreMock.createStart();
-const displayedCollaboratorTypes = [
+const displayedCollaboratorTypes: WorkspaceCollaboratorType[] = [
   {
     id: 'user',
     name: 'User',
@@ -35,14 +39,18 @@ const { Provider } = createOpenSearchDashboardsReactContext(mockCoreStart);
 describe('getDisplayedTypes', () => {
   it('should return undefined if not match any collaborator type', () => {
     expect(
-      getDisplayedType(displayedCollaboratorTypes, { permissionType: 'unknown' })
+      getDisplayedType(displayedCollaboratorTypes, {
+        permissionType: 'unknown' as WorkspaceCollaboratorPermissionType,
+        collaboratorId: 'unknown',
+        accessLevel: 'readOnly',
+      })
     ).toBeUndefined();
   });
   it('should return "User"', () => {
     expect(
       getDisplayedType(displayedCollaboratorTypes, {
         collaboratorId: 'foo',
-        permissionType: 'user',
+        permissionType: WorkspacePermissionItemType.User,
         accessLevel: 'readOnly',
       })
     ).toEqual('User');
@@ -51,7 +59,7 @@ describe('getDisplayedTypes', () => {
     expect(
       getDisplayedType(displayedCollaboratorTypes, {
         collaboratorId: 'foo',
-        permissionType: 'group',
+        permissionType: WorkspacePermissionItemType.Group,
         accessLevel: 'readOnly',
       })
     ).toEqual('Group');
@@ -68,20 +76,20 @@ describe('WorkspaceCollaboratorTable', () => {
     permissionSettings: [
       {
         id: 0,
-        modes: ['library_write', 'write'],
-        type: 'user',
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+        type: WorkspacePermissionItemType.User,
         userId: 'admin',
       },
       {
         id: 1,
-        modes: ['library_read', 'read'],
-        type: 'group',
+        modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryRead],
+        type: WorkspacePermissionItemType.Group,
         group: 'group',
       },
       {
         id: 2,
-        modes: ['library_read', 'read'],
-        type: 'unknown',
+        modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryRead],
+        type: WorkspacePermissionItemType.Group,
       },
     ],
     handleSubmitPermissionSettings: jest.fn(),
@@ -92,7 +100,7 @@ describe('WorkspaceCollaboratorTable', () => {
   });
 
   it('should render empty state when no permission settings', () => {
-    const permissionSettings = [];
+    const permissionSettings: any[] = [];
 
     const { getByText } = render(
       <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
@@ -110,8 +118,8 @@ describe('WorkspaceCollaboratorTable', () => {
     const permissionSettings = [
       {
         id: 0,
-        modes: ['library_write', 'write'],
-        type: 'user',
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+        type: WorkspacePermissionItemType.User,
         userId: 'admin',
       },
     ];
@@ -136,13 +144,13 @@ describe('WorkspaceCollaboratorTable', () => {
     const permissionSettings = [
       {
         id: 0,
-        modes: ['library_write', 'write'],
-        type: 'user',
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+        type: WorkspacePermissionItemType.User,
         userId: 'admin',
       },
     ];
     const handleSubmitPermissionSettingsMock = () =>
-      new Promise<void>((resolve) => {
+      new Promise<IWorkspaceResponse<boolean>>((resolve) => {
         setTimeout(resolve, 1000);
       });
 
@@ -190,14 +198,14 @@ describe('WorkspaceCollaboratorTable', () => {
     const permissionSettings = [
       {
         id: 0,
-        modes: ['library_write', 'write'],
-        type: 'user',
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+        type: WorkspacePermissionItemType.User,
         userId: 'admin',
       },
       {
         id: 1,
-        modes: ['library_read', 'read'],
-        type: 'group',
+        modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryRead],
+        type: WorkspacePermissionItemType.Group,
         group: 'group',
       },
     ];
@@ -217,14 +225,14 @@ describe('WorkspaceCollaboratorTable', () => {
     const permissionSettings = [
       {
         id: 0,
-        modes: ['library_write', 'write'],
-        type: 'user',
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+        type: WorkspacePermissionItemType.User,
         userId: 'admin',
       },
       {
         id: 1,
-        modes: ['library_read', 'read'],
-        type: 'group',
+        modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryRead],
+        type: WorkspacePermissionItemType.Group,
         group: 'group',
       },
     ];
@@ -245,14 +253,14 @@ describe('WorkspaceCollaboratorTable', () => {
     const permissionSettings = [
       {
         id: 0,
-        modes: ['library_write', 'write'],
-        type: 'user',
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+        type: WorkspacePermissionItemType.User,
         userId: 'admin',
       },
       {
         id: 1,
-        modes: ['library_read', 'read'],
-        type: 'group',
+        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
+        type: WorkspacePermissionItemType.Group,
         group: 'group',
       },
     ];
@@ -299,8 +307,18 @@ describe('WorkspaceCollaboratorTable', () => {
 
     await waitFor(() => {
       expect(handleSubmitPermissionSettingsMock).toHaveBeenCalledWith([
-        { id: 0, modes: ['library_read', 'read'], type: 'user', userId: 'admin' },
-        { group: 'group', id: 1, modes: ['library_read', 'read'], type: 'group' },
+        {
+          id: 0,
+          modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
+          type: 'user',
+          userId: 'admin',
+        },
+        {
+          group: 'group',
+          id: 1,
+          modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
+          type: 'group',
+        },
       ]);
     });
     jest.runAllTimers();
@@ -311,13 +329,13 @@ describe('WorkspaceCollaboratorTable', () => {
     const permissionSettings = [
       {
         id: 0,
-        modes: ['library_write', 'write'],
-        type: 'user',
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+        type: WorkspacePermissionItemType.User,
         userId: 'admin',
       },
     ];
     const handleSubmitPermissionSettingsMock = () =>
-      new Promise<void>((resolve) => {
+      new Promise<IWorkspaceResponse<boolean>>((resolve) => {
         setTimeout(resolve, 1000);
       });
 
