@@ -20,7 +20,7 @@ import {
   EuiButtonEmpty,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
