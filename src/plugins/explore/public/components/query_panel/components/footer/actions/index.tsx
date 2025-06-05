@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// TODO: Actions are not scope of P0. This should bes tested with external plugins in next scope.
+
 import React from 'react';
 import {
   EuiButtonEmpty,

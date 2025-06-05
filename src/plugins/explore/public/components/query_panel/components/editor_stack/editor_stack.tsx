@@ -6,7 +6,7 @@
 import React from 'react';
 import { PromptEditor } from './prompt_editor';
 import { QueryEditor } from './query_editor';
-import { LanguageType } from './shared';
+import { LanguageType } from './types';
 import './index.scss';
 
 interface EditorStackProps {
@@ -53,10 +53,10 @@ const EditorStack: React.FC<EditorStackProps> = ({
       />
       {isDualEditor && (
         <QueryEditor
-          onChange={onQueryChange}
-          languageType="ppl"
+          languageType={LanguageType.PPL}
           queryString={queryString}
           isEditorReadOnly={isEditorReadOnly}
+          onChange={onQueryChange}
           onQueryRun={onQueryRun}
           onQueryEdit={onQueryEdit}
           onClearEditor={onClearEditor}

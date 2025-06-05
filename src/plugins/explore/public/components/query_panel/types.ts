@@ -29,7 +29,7 @@ export enum LanguageType {
 // eslint-disable-next-line
 export type Query = {
   query: string | { [key: string]: any };
-  language: LanguageType; // The language of the query (e.g., 'ppl', 'natural-language', etc.)
+  language: LanguageType;
   prompt?: string;
   dataset?: string;
 };

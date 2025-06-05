@@ -17,7 +17,7 @@ import { Actions } from './actions';
 import { DateTimeRangePicker } from './date_time_selector';
 import { RunQueryButton } from './run_query';
 import { ShowInputType } from './show_input_type';
-import { LanguageType } from '../editor_stack/shared';
+import { LanguageType } from '../../types';
 import { QueryError } from './query_error';
 import { ResultStatus } from '../../types';
 import './index.scss';
@@ -51,7 +51,7 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               <ShowFieldToggle
                 isEnabled={true}
                 onToggle={(enabled) => {
-                  // console.log('Show Fields toggled:', enabled)
+                  // Todo: Dispatch query action to update toggle value which can be used by field sidebar
                 }}
               />
             </EuiFlexItem>
@@ -79,11 +79,12 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <QueryError
+                // TODO: Update query error with query slice object
                 queryStatus={{
                   status: ResultStatus.ERROR,
                   body: {
                     error: {
-                      error: 'An error occurred while processing the query.',
+                      error: 'An error occurred while processing the query.', // TODO: This is mock error string
                     },
                   },
                 }}
