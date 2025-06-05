@@ -8,6 +8,7 @@ import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { AxesOptions } from './axes_options';
 import { CategoryAxis, VisColumn, ValueAxis, VisFieldType } from '../types';
+import { Positions } from '../utils/collections';
 
 export default {
   component: AxesOptions,
@@ -35,7 +36,7 @@ const mockCategoryAxes: CategoryAxis[] = [
   {
     id: 'CategoryAxis-1',
     type: 'category',
-    position: 'bottom',
+    position: Positions.BOTTOM,
     show: true,
     labels: {
       show: true,
@@ -54,7 +55,7 @@ const mockValueAxes: ValueAxis[] = [
     id: 'ValueAxis-1',
     name: 'LeftAxis-1',
     type: 'value',
-    position: 'left',
+    position: Positions.LEFT,
     show: true,
     labels: {
       show: true,
@@ -113,7 +114,7 @@ MultipleValueAxes.args = {
       id: 'ValueAxis-2',
       name: 'RightAxis-1',
       type: 'value',
-      position: 'right',
+      position: Positions.RIGHT,
       show: true,
       labels: {
         show: true,
@@ -140,7 +141,7 @@ Rule2Scenario.args = {
       id: 'ValueAxis-1',
       name: 'LeftAxis-1',
       type: 'value',
-      position: 'left',
+      position: Positions.LEFT,
       show: true,
       labels: {
         show: true,
@@ -156,7 +157,7 @@ Rule2Scenario.args = {
       id: 'ValueAxis-2',
       name: 'RightAxis-1',
       type: 'value',
-      position: 'right',
+      position: Positions.RIGHT,
       show: true,
       labels: {
         show: true,

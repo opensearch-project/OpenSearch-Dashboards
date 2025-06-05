@@ -13,6 +13,7 @@ import {
   getStrokeDash,
   ValueAxisPosition,
 } from './line_chart_utils';
+import { Positions } from '../utils/collections';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -167,7 +168,7 @@ export const createLineBarChart = (
         axis: applyAxisStyling(
           {
             title: metric2Name,
-            orient: 'right',
+            orient: Position.Right,
           },
           styles,
           'value',
@@ -276,7 +277,7 @@ export const createMultiLineChart = (
           styles?.addLegend !== false
             ? {
                 title: categoryName,
-                orient: styles?.legendPosition || 'right',
+                orient: styles?.legendPosition || Positions.RIGHT,
               }
             : null,
       },
@@ -390,7 +391,7 @@ export const createFacetedMultiLineChart = (
                 styles?.addLegend !== false
                   ? {
                       title: category1Name,
-                      orient: styles?.legendPosition || 'right',
+                      orient: styles?.legendPosition || Positions.RIGHT,
                     }
                   : null,
             },

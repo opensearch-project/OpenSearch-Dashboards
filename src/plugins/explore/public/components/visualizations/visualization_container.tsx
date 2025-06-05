@@ -52,7 +52,7 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
       if (result) {
         setVisualizationData({ ...result });
 
-        // Todo: everytime the fields change, do we reset the style options?
+        // TODO: everytime the fields change, do we reset the chart type and its style options? P1: we will implement chart type selection persistence
         setStyleOptions(result.visualizationType?.ui.style.defaults);
       }
     }

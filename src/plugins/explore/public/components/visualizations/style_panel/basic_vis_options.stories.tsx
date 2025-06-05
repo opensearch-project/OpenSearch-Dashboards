@@ -7,14 +7,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { BasicVisOptions } from './basic_vis_options';
-
-// Mock the Positions enum instead of importing it
-const Positions = {
-  RIGHT: 'right',
-  LEFT: 'left',
-  TOP: 'top',
-  BOTTOM: 'bottom',
-};
+import { Positions } from '../utils/collections';
 
 export default {
   component: BasicVisOptions,

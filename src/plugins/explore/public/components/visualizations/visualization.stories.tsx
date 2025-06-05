@@ -87,7 +87,7 @@ const mockStyleOptions: LineChartStyleControls = {
     {
       id: 'CategoryAxis-1',
       type: 'category' as const,
-      position: 'bottom' as const,
+      position: Positions.BOTTOM,
       show: true,
       labels: {
         show: true,
@@ -103,7 +103,7 @@ const mockStyleOptions: LineChartStyleControls = {
       id: 'ValueAxis-1',
       name: 'LeftAxis-1',
       type: 'value' as const,
-      position: 'left' as const,
+      position: Positions.LEFT,
       show: true,
       labels: {
         show: true,
@@ -210,7 +210,7 @@ MultipleAxes.args = {
         id: 'ValueAxis-2',
         name: 'RightAxis-1',
         type: 'value' as const,
-        position: 'right' as const,
+        position: Positions.RIGHT,
         show: true,
         labels: {
           show: true,
