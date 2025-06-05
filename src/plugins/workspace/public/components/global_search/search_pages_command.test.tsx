@@ -7,7 +7,7 @@ import { workspaceSearchPages } from './search_pages_command';
 import { WorkspaceUseCase } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
-import { NavGroupItemInMap, WorkspaceObject } from 'opensearch-dashboards/public';
+import { ChromeNavLink, NavGroupItemInMap, WorkspaceObject } from 'opensearch-dashboards/public';
 
 describe('<workspaceSearchPagesCommand />', () => {
   const registeredUseCases = new BehaviorSubject([
@@ -26,7 +26,7 @@ describe('<workspaceSearchPagesCommand />', () => {
     features: ['use-case-foo-group'],
   };
 
-  const navGroup: Record<string, NavGroupItemInMap> = {
+  const navGroup: Record<string, NavGroupItemInMap & { navLinks: ChromeNavLink[] }> = {
     'foo-group': {
       id: 'foo-group',
       title: 'Foo Group',
@@ -35,15 +35,21 @@ describe('<workspaceSearchPagesCommand />', () => {
         {
           id: 'foo-group-link1',
           title: 'Foo Group Link 1',
+          baseUrl: 'link1',
+          href: 'link1',
         },
         {
           id: 'foo-group-link2',
           title: 'Foo Group Link 2',
+          baseUrl: 'link2',
+          href: 'link2',
         },
         {
           id: 'foo-group-link3',
           title: 'Foo Group Link 3',
           hidden: true,
+          baseUrl: 'link3',
+          href: 'link3',
         },
       ],
     },
@@ -55,10 +61,14 @@ describe('<workspaceSearchPagesCommand />', () => {
         {
           id: 'dataAdministration-link1',
           title: 'Data Administration Link 1',
+          baseUrl: 'link1',
+          href: 'link1',
         },
         {
-          id: 'dataAdministration-link1',
+          id: 'dataAdministration-link2',
           title: 'Data Administration Link 2',
+          baseUrl: 'link2',
+          href: 'link2',
         },
       ],
     },
@@ -70,10 +80,14 @@ describe('<workspaceSearchPagesCommand />', () => {
         {
           id: 'settingsAndSetup-link1',
           title: 'Settings and Setup Link 1',
+          baseUrl: 'link1',
+          href: 'link1',
         },
         {
-          id: 'settingsAndSetup-link1',
+          id: 'settingsAndSetup-link2',
           title: 'Settings and Setup Link 2',
+          baseUrl: 'link2',
+          href: 'link2',
         },
       ],
     },

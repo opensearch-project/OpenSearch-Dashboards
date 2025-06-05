@@ -90,7 +90,7 @@ describe('WorkspaceBottomBar', () => {
   });
 
   it('should enable the "Save" button when name and description are empty', () => {
-    render(<WorkspaceBottomBar {...defaultProps} formData={{}} />);
+    render(<WorkspaceBottomBar {...defaultProps} formData={{ name: 'test' }} />);
     const saveChangesButton = screen.getByText('Save');
     expect(saveChangesButton.closest('button')).not.toBeDisabled();
   });

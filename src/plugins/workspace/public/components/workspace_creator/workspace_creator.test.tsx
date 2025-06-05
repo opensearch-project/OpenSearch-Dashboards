@@ -201,7 +201,7 @@ describe('WorkspaceCreator', () => {
   });
 
   afterAll(() => {
-    window.location = location;
+    window.location = location as Location;
   });
 
   it('should not create workspace when name is empty', async () => {

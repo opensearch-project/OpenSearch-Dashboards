@@ -1,0 +1,2 @@
+fix:
+- Revert workspaces=* and add warning log ([#9848](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9848))
