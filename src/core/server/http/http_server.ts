@@ -220,6 +220,12 @@ export class HttpServer {
       }
     }
 
+    // @ts-expect-error
+    if (global.__coverage__) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@cypress/code-coverage/middleware/hapi')(this.server);
+    }
+
     await this.server.start();
     const serverPath =
       this.config && this.config.rewriteBasePath && this.config.basePath !== undefined

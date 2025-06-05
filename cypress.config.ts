@@ -4,7 +4,9 @@
  */
 
 import { defineConfig } from 'cypress';
+import codeCoverageTask from '@cypress/code-coverage/task';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
+import { setupDynamicConfig } from './cypress/scripts/dynamic_config';
 // TODO: import { paste } from 'copy-paste';
 
 module.exports = defineConfig({
@@ -17,16 +19,16 @@ module.exports = defineConfig({
     runMode: 2,
     openMode: 0,
   },
-  viewportWidth: 1920,
-  viewportHeight: 1080,
+  viewportWidth: 2000,
+  viewportHeight: 1320,
   env: {
     ENGINE: {
       name: 'default',
-      url: 'http://localhost:9200',
+      url: undefined,
     },
     SECONDARY_ENGINE: {
       name: 'test_cluster',
-      url: 'http://localhost:9200',
+      url: undefined,
     },
     S3_ENGINE: {
       name: 'BasicS3Connection',
@@ -35,7 +37,6 @@ module.exports = defineConfig({
       password: process.env.S3_CONNECTION_PASSWORD,
     },
     openSearchUrl: 'http://localhost:9200',
-    SECURITY_ENABLED: false,
     AGGREGATION_VIEW: false,
     username: 'admin',
     password: 'myStrongPassword123!',
@@ -48,6 +49,9 @@ module.exports = defineConfig({
     WAIT_MS: 2000,
     DISABLE_LOCAL_CLUSTER: false,
     CYPRESS_RUNTIME_ENV: 'osd',
+
+    // This value is automatically determined at runtime
+    SECURITY_ENABLED: false,
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
@@ -57,10 +61,15 @@ module.exports = defineConfig({
   },
 });
 
-function setupNodeEvents(
+async function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
-): Cypress.PluginConfigOptions {
+): Promise<Cypress.PluginConfigOptions> {
+  if (process.env.COVERAGE) {
+    config.env.codeCoverage = { url: '/__coverage__' };
+    codeCoverageTask(on, config);
+  }
+
   const { webpackOptions } = webpackPreprocessor.defaultOptions;
 
   /**
@@ -84,12 +93,15 @@ function setupNodeEvents(
       webpackOptions,
     })
   );
+
   // TODO: Define the custom task to read clipboard
   /* on('task', {
     readClipboard() {
       return paste(); // Return the clipboard content
     },
   });*/
+
+  await setupDynamicConfig(config);
 
   return config;
 }

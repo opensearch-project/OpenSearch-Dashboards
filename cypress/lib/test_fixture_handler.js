@@ -19,7 +19,7 @@ export class TestFixtureHandler {
 
       return cy.request({
         method: 'PUT',
-        url: `${this.openSearchUrl}/${targetIndex}`,
+        url: `${this.openSearchUrl}/${targetIndex}/_mapping`,
         headers: {
           'Content-Type': 'application/json',
         },

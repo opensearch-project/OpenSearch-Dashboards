@@ -17,17 +17,14 @@ import {
 export function dashboardSanityTests() {
   const commonUI = new CommonUI(cy);
   const miscUtils = new MiscUtils(cy);
-  const baseURL = new URL(Cypress.config().baseUrl);
-  // remove trailing slash
-  const path = baseURL.pathname.replace(/\/$/, '');
 
   describe('dashboard sample data validation', () => {
     before(() => {});
 
     after(() => {});
 
-    describe('checking home page', () => {
-      before(() => {
+    ifEnabled('WORKSPACE').not('checking home page', () => {
+      beforeEach(() => {
         // Go to the home page
         miscUtils.visitPage('app/home#');
         cy.window().then((win) => win.localStorage.setItem('home:welcome:show', false));
@@ -40,35 +37,35 @@ export function dashboardSanityTests() {
 
       it('checking opensearch_dashboards_overview display', () => {
         // Check that opensearch_dashboards_overview is visable
-        commonUI.checkElementExists(`a[href="${path}/app/opensearch_dashboards_overview"]`, 1);
+        commonUI.checkElementExists(`a[href$="/app/opensearch_dashboards_overview"]`, 1);
       });
 
       it('checking tutorial_directory display', () => {
         // Check that tutorial_directory is visable
-        commonUI.checkElementExists(`a[href="${path}/app/home#/tutorial_directory"]`, 2);
+        commonUI.checkElementExists(`a[href$="/app/home#/tutorial_directory"]`, 2);
       });
 
       it('checking management display', () => {
         // Check that management is visable
-        commonUI.checkElementExists(`a[href="${path}/app/management"]`, 1);
+        commonUI.checkElementExists(`a[href$="/app/management"]`, 1);
       });
 
       it('checking dev_tools display', () => {
         // Check that dev_tools is visable
-        commonUI.checkElementExists(`a[href="${path}/app/dev_tools#/console"]`, 2);
+        commonUI.checkElementExists(`a[href$="/app/dev_tools#/console"]`, 2);
       });
 
       it('settings display', () => {
         // Check that settings is visable
         commonUI.checkElementExists(
-          `a[href="${path}/app/management/opensearch-dashboards/settings#defaultRoute"]`,
+          `a[href$="/app/management/opensearch-dashboards/settings#defaultRoute"]`,
           1
         );
       });
 
       it('checking feature_directory display', () => {
         // Check that feature_directory is visable
-        commonUI.checkElementExists(`a[href="${path}/app/home#/feature_directory"]`, 1);
+        commonUI.checkElementExists(`a[href$="/app/home#/feature_directory"]`, 1);
       });
 
       it('checking navigation display', () => {
@@ -83,9 +80,10 @@ export function dashboardSanityTests() {
     });
 
     describe('checking Dev Tools', () => {
-      before(() => {
+      beforeEach(() => {
         // Go to the Dev Tools page
         miscUtils.visitPage('app/dev_tools#/console');
+        cy.reload(true);
       });
 
       after(() => {});
@@ -107,7 +105,7 @@ export function dashboardSanityTests() {
       });
     });
 
-    describe('adding sample data', () => {
+    ifEnabled('WORKSPACE').not('adding sample data', () => {
       before(() => {
         miscUtils.addSampleData();
       });

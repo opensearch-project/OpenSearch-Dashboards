@@ -2,6 +2,46 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { BASE_PATH } from './constants';
+import { TestFixtureHandler } from '../lib/test_fixture_handler';
+
+/**
+ * Send a request to OpenSearch
+ *
+ * @param {Partial<Cypress.RequestOptions>} requestOptions
+ */
+
+Cypress.Commands.add('sendOpenSearch', (requestOptions) => {
+  const opts = { ...requestOptions };
+
+  // If the url is a relative one, prefix OpenSearch URL; otherwise, the request is going to a secondary endpoint
+  if (opts.url[0] === '/') {
+    opts.url = new URL(opts.url, Cypress.env('openSearchUrl'));
+
+    if (Cypress.env('SECURITY_ENABLED')) {
+      opts.auth = {
+        username: Cypress.env('username'),
+        password: Cypress.env('password'),
+      };
+    }
+  }
+
+  return cy.request(requestOptions);
+});
+
+// This function does not delete all indices
+Cypress.Commands.add('deleteAllIndices', () => {
+  cy.log('Deleting all indices');
+  cy.sendOpenSearch({
+    method: 'DELETE',
+    url: '/index*,sample*,opensearch_dashboards*,test*,cypress*',
+  });
+});
 
 // --- Typed commands --
 
@@ -41,12 +81,285 @@ Cypress.Commands.add('whenTestIdNotFound', (testIds, callbackFn, options = {}) =
   });
 });
 
+Cypress.Commands.add('createIndex', (index, policyID = null, settings = {}) => {
+  cy.sendOpenSearch({ method: 'PUT', url: `/${index}`, body: settings });
+  if (policyID != null) {
+    const body = { policy_id: policyID };
+
+    cy.sendOpenSearch({ method: 'POST', url: `${IM_API.ADD_POLICY_BASE}/${index}`, body });
+  }
+});
+
+Cypress.Commands.add('deleteIndex', (indexName, options = {}) => {
+  cy.sendOpenSearch({
+    method: 'DELETE',
+    url: `/${indexName}`,
+    failOnStatusCode: false,
+    ...options,
+  });
+});
+
+Cypress.Commands.add('getIndices', (index = null, settings = {}) => {
+  cy.sendOpenSearch({
+    method: 'GET',
+    url: `/_cat/indices/${index ? index : ''}`,
+    failOnStatusCode: false,
+    ...settings,
+  });
+});
+
+// TODO: Impliment chunking
+Cypress.Commands.add('bulkUploadDocs', (fixturePath, index) => {
+  const sendBulkAPIRequest = (ndjson) => {
+    const url = index
+      ? `${Cypress.env('openSearchUrl')}/${index}/_bulk`
+      : `${Cypress.env('openSearchUrl')}/_bulk`;
+    cy.log('bulkUploadDocs')
+      .request({
+        method: 'POST',
+        url,
+        headers: {
+          'content-type': 'application/json;charset=UTF-8',
+          'osd-xsrf': true,
+        },
+        body: ndjson,
+      })
+      .then((response) => {
+        if (response.body.errors) {
+          console.error(response.body.items);
+          throw new Error('Bulk upload failed');
+        }
+      });
+  };
+
+  cy.fixture(fixturePath, 'utf8').then((ndjson) => {
+    sendBulkAPIRequest(ndjson);
+  });
+
+  cy.sendOpenSearch({
+    method: 'POST',
+    url: `/_all/_refresh`,
+  });
+});
+
+Cypress.Commands.add('importSavedObjects', (fixturePath, overwrite = true) => {
+  const sendImportRequest = (ndjson) => {
+    const url = `/api/saved_objects/_import?${overwrite ? `overwrite=true` : ''}`;
+
+    const formData = new FormData();
+    formData.append('file', ndjson, 'savedObject.ndjson');
+
+    cy.log('importSavedObject')
+      .request({
+        method: 'POST',
+        url,
+        headers: {
+          'content-type': 'multipart/form-data',
+          'osd-xsrf': true,
+        },
+        body: formData,
+      })
+      .then((response) => {
+        if (response.body.errors) {
+          console.error(response.body.items);
+          throw new Error('Import failed');
+        }
+      });
+  };
+
+  cy.fixture(fixturePath)
+    .then((file) => Cypress.Blob.binaryStringToBlob(file))
+    .then((ndjson) => {
+      sendImportRequest(ndjson);
+    });
+});
+
+Cypress.Commands.add('deleteSavedObject', (type, id, options = {}) => {
+  const url = `/api/saved_objects/${type}/${id}`;
+
+  return cy.request({
+    method: 'DELETE',
+    url,
+    headers: {
+      'osd-xsrf': true,
+    },
+    failOnStatusCode: false,
+    ...options,
+  });
+});
+
+Cypress.Commands.add('deleteSavedObjectByType', (type, search) => {
+  const searchParams = new URLSearchParams({
+    fields: 'id',
+    type,
+  });
+
+  if (search) {
+    searchParams.set('search', search);
+  }
+
+  const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+
+  return cy.request(url).then((response) => {
+    console.log('response', response);
+    response.body.saved_objects.map(({ type, id }) => {
+      cy.deleteSavedObject(type, id);
+    });
+  });
+});
+
+// TODO: we should really make this a helper function that if the data source does not exist, it creates it so take
+// what you have for the dataset selector spec and move it here
+Cypress.Commands.add('ifDataSourceExists', (search) => {
+  const searchParams = new URLSearchParams({
+    fields: 'id',
+    type: 'data-source',
+  });
+
+  if (search) {
+    searchParams.set('search', search);
+  }
+
+  const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
+
+  return cy.request(url).then((response) => {
+    console.log('response', response);
+    return response.body.saved_objects.length > 0;
+  });
+});
+
+Cypress.Commands.add('createIndexPattern', (id, attributes, header = {}) => {
+  const url = `/api/saved_objects/index-pattern/${id}`;
+
+  cy.request({
+    method: 'POST',
+    url,
+    headers: {
+      'content-type': 'application/json;charset=UTF-8',
+      'osd-xsrf': true,
+      ...header,
+    },
+    body: JSON.stringify({
+      attributes,
+      references: [],
+    }),
+  });
+});
+
+Cypress.Commands.add('createDashboard', (attributes = {}, headers = {}) => {
+  const url = '/api/saved_objects/dashboard';
+
+  cy.request({
+    method: 'POST',
+    url,
+    headers: {
+      'content-type': 'application/json;charset=UTF-8',
+      'osd-xsrf': true,
+      ...headers,
+    },
+    body: JSON.stringify({
+      attributes,
+    }),
+  });
+});
+
+Cypress.Commands.add('changeDefaultTenant', (attributes, header = {}) => {
+  cy.sendOpenSearch({
+    method: 'PUT',
+    url: '/_plugins/_security/api/tenancy/config',
+    headers: {
+      'content-type': 'application/json;charset=UTF-8',
+      'osd-xsrf': true,
+      ...header,
+    },
+    body: JSON.stringify(attributes),
+  });
+});
+
+Cypress.Commands.add('deleteIndexPattern', (id, options = {}) =>
+  cy.deleteSavedObject('index-pattern', id, options)
+);
+
+Cypress.Commands.add('setAdvancedSetting', (changes) => {
+  const url = '/api/opensearch-dashboards/settings';
+  cy.log('setAdvancedSetting')
+    .request({
+      method: 'POST',
+      url,
+      qs: Cypress.env('SECURITY_ENABLED')
+        ? {
+            security_tenant: CURRENT_TENANT.defaultTenant,
+          }
+        : {},
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+      body: { changes },
+    })
+    .then((response) => {
+      if (response.body.errors) {
+        console.error(response.body.items);
+        throw new Error('Setting advanced setting failed');
+      }
+    });
+});
+
+// type: logs, ecommerce, flights
+Cypress.Commands.add('loadSampleData', (type) => {
+  cy.request({
+    method: 'POST',
+    headers: { 'osd-xsrf': 'opensearch-dashboards' },
+    url: `${BASE_PATH}/api/sample_data/${type}`,
+  });
+});
+
+Cypress.Commands.add('fleshTenantSettings', () => {
+  if (Cypress.env('SECURITY_ENABLED')) {
+    // Use xhr request is good enough to flesh tenant
+    cy.request({
+      url: `${BASE_PATH}/app/home?security_tenant=${CURRENT_TENANT.defaultTenant}`,
+      method: 'GET',
+      failOnStatusCode: false,
+    });
+  }
+});
+
 Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
   cy.wait(3000);
   cy.getElementByTestId('workspace-detail-delete-button').should('be.visible').click();
   cy.getElementByTestId('delete-workspace-modal-body').should('be.visible');
   cy.getElementByTestId('delete-workspace-modal-input').type(workspaceName);
   cy.getElementByTestId('delete-workspace-modal-confirm').click();
+  cy.contains(/successfully/);
+});
+
+Cypress.Commands.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
+  cy.intercept('POST', '/api/workspaces').as('createWorkspaceInterception');
+
+  cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
+    .should('be.visible')
+    .click();
+  cy.getElementByTestId('workspace-initial-button-create-observability-workspace')
+    .should('be.visible')
+    .click();
+  cy.getElementByTestId('workspaceForm-workspaceDetails-nameInputText')
+    .should('be.visible')
+    .type(workspaceName);
+  cy.getElementByTestId('workspace-creator-dataSources-assign-button')
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
+  cy.get(`.euiSelectableListItem[title="${dataSourceTitle}"]`)
+    .should('be.visible')
+    .trigger('click');
+  cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button').click();
+  cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
+
+  cy.wait('@createWorkspaceInterception').then((interception) => {
+    // save the created workspace ID as an alias
+    cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
+  });
   cy.contains(/successfully/);
 });
 
@@ -60,6 +373,27 @@ Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
     })
     .find('a.euiLink')
     .click();
+});
+
+Cypress.Commands.add('setupTestData', (endpoint, mappingFiles, dataFiles) => {
+  if (!Array.isArray(mappingFiles) || !Array.isArray(dataFiles)) {
+    throw new Error('Both mappingFiles and dataFiles must be arrays');
+  }
+
+  if (mappingFiles.length !== dataFiles.length) {
+    throw new Error('The number of mapping files must match the number of data files');
+  }
+
+  const handler = new TestFixtureHandler(cy, endpoint);
+
+  let chain = cy.wrap(null);
+  mappingFiles.forEach((mappingFile, index) => {
+    chain = chain
+      .then(() => handler.importMapping(mappingFile))
+      .then(() => handler.importData(dataFiles[index]));
+  });
+
+  return chain;
 });
 
 Cypress.Commands.add('setAdvancedSetting', (changes) => {
@@ -85,4 +419,19 @@ Cypress.Commands.add('setAdvancedSetting', (changes) => {
         throw new Error('Setting advanced setting failed');
       }
     });
+});
+
+Cypress.Commands.add('login', () => {
+  // much faster than log in through UI
+  cy.request({
+    method: 'POST',
+    url: '/auth/login',
+    body: {
+      username: Cypress.env('username'),
+      password: Cypress.env('password'),
+    },
+    headers: {
+      'osd-xsrf': true,
+    },
+  });
 });
