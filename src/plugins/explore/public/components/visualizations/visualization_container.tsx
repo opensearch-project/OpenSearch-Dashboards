@@ -150,7 +150,7 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
   }
 
   return (
-    <div className="visualizationContainer">
+    <div className="exploreVisContainer">
       <Visualization
         data-subject-subj="visualization"
         expression={expression}

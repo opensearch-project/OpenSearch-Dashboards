@@ -8,8 +8,10 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Visualization } from './visualization';
 import { Positions } from './utils/collections';
 import { LineVisStyleControls } from './line/line_vis_options';
-import { VisualizationTypeResult } from './utils/use_visualization_types';
+import { VisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
 import { VisFieldType } from './types';
+import { LineChartStyleControls } from './line/line_vis_config';
+import { IExpressionLoaderParams } from '../../../../expressions/public';
 
 export default {
   title:
@@ -58,13 +60,12 @@ const MockReactExpressionRenderer: React.FC<any> = ({ expression }) => {
   );
 };
 
-const mockStyleOptions = {
+const mockStyleOptions: LineChartStyleControls = {
   // Basic controls
   addTooltip: true,
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
-  mode: 'normal',
   showLine: true,
   lineMode: 'smooth',
   lineWidth: 2,
@@ -88,8 +89,6 @@ const mockStyleOptions = {
       type: 'category' as const,
       position: 'bottom' as const,
       show: true,
-      style: {},
-      scale: { type: 'linear' as const },
       labels: {
         show: true,
         filter: true,
@@ -106,13 +105,6 @@ const mockStyleOptions = {
       type: 'value' as const,
       position: 'left' as const,
       show: true,
-      style: {},
-      scale: {
-        type: 'linear' as const,
-        mode: 'normal' as const,
-        defaultYExtents: false,
-        setYExtents: false,
-      },
       labels: {
         show: true,
         rotate: 0,
@@ -125,10 +117,9 @@ const mockStyleOptions = {
 };
 
 // Mock the line configuration to avoid importing toExpression
-const mockLineConfig = {
+const mockLineConfig: VisualizationType = {
   name: 'line',
   type: 'line',
-  toExpression: async () => 'mocked expression',
   ui: {
     style: {
       defaults: mockStyleOptions,
@@ -159,7 +150,7 @@ const mockVisualizationData: VisualizationTypeResult = {
   ],
 };
 
-const mockSearchContext = {
+const mockSearchContext: IExpressionLoaderParams['searchContext'] = {
   query: { query: 'stats(sum(value)) by category', language: 'SQL' },
   filters: [],
   timeRange: { from: 'now-7d', to: 'now' },

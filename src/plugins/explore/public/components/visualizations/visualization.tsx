@@ -31,9 +31,9 @@ export const Visualization: React.FC<VisualizationProps> = ({
 }) => {
   return (
     <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem className="visualizationContainer">
-        <EuiPanel data-test-subj="visualizationLoader" className="visualizationPanel">
-          <div className="visualizationPanel__inner">
+      <EuiFlexItem>
+        <EuiPanel data-test-subj="exploreVisualizationLoader" className="exploreVisPanel">
+          <div className="exploreVisPanel__inner">
             <ReactExpressionRenderer
               key={JSON.stringify(searchContext) + expression}
               expression={expression}
@@ -43,8 +43,8 @@ export const Visualization: React.FC<VisualizationProps> = ({
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ width: '300px' }}>
-        <EuiPanel className="stylePanel" data-test-subj="stylePanel">
-          <div className="stylePanel__inner">
+        <EuiPanel className="exploreVisStylePanel" data-test-subj="exploreStylePanel">
+          <div className="exploreVisStylePanel__inner">
             {visualizationData.visualizationType?.ui.style.render({
               styleOptions,
               onStyleChange,

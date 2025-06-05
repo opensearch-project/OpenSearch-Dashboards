@@ -1,28 +1,28 @@
-.visualizationContainer {
+.exploreVisContainer {
   display: flex;
   min-height: 500px;
   overflow: hidden;
 }
 
-.visualizationPanel {
+.exploreVisPanel {
   min-height: 500px;
   display: flex;
   flex-direction: column;
 }
 
-.visualizationPanel__inner {
+.exploreVisPanel__inner {
   flex: 1 1 auto;
   overflow: auto;
 }
 
-.stylePanel {
+.exploreVisStylePanel {
   min-height: 500px;
   display: flex;
   flex-direction: column;
   width: 300px;
 }
 
-.stylePanel__inner {
+.exploreVisStylePanel__inner {
   flex: 1 1 auto;
   overflow: auto;
   padding-right: 8px;
