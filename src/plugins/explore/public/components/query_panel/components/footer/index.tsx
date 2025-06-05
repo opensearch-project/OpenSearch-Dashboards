@@ -22,7 +22,7 @@ const RECENT_QUERIES_LABEL = i18n.translate('explore.queryPanel.recentQueryLabel
   defaultMessage: 'Recent Queries',
 });
 
-interface QueryEditorFooterProps {
+interface QueryPanelFooterProps {
   languageType: LanguageType;
   onRunClick: () => void;
   onRecentClick: () => void;
@@ -32,7 +32,7 @@ interface QueryEditorFooterProps {
   lineCount: number | undefined;
 }
 
-export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
+export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   languageType,
   onRunClick,
   onRecentClick,
@@ -44,7 +44,7 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
   const showLineCount =
     typeof lineCount === 'number' && lineCount > 0 && languageType !== LanguageType.Natural;
   return (
-    <div className="queryEditorFooter">
+    <div className="queryPanel__footer">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
         {/* Left Section */}
         <EuiFlexItem grow={false}>
@@ -58,30 +58,30 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div className="queryEditorFooter__verticalSeparator" />
+              <div className="queryPanel__footer__verticalSeparator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={onRecentClick}
                 iconType="clock"
-                style={{ padding: '0px' }}
-                data-test-subj="queryEditorRecentQueriesButton"
+                className="queryPanel__footer__recentQueriesButton"
+                data-test-subj="queryPanelFooterRecentQueriesButton"
               >
                 {RECENT_QUERIES_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div className="queryEditorFooter__verticalSeparator" />
+              <div className="queryPanel__footer__verticalSeparator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SaveQueryButton />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div className="queryEditorFooter__verticalSeparator" />
+              <div className="queryPanel__footer__verticalSeparator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <QueryError
-                // TODO: Update query error with query slice object
+                // TODO: Update query error with query slice object and remove below mocked string
                 queryStatus={{
                   status: ResultStatus.ERROR,
                   body: {
@@ -92,7 +92,7 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
                 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ marginLeft: '10px' }}>
+            <EuiFlexItem grow={false} className="queryPanel__footer__showInputTypeWrapper">
               <ShowInputType
                 languageType={languageType}
                 isDualEditor={isDualEditor}
@@ -104,8 +104,8 @@ export const QueryEditorFooter: React.FC<QueryEditorFooterProps> = ({
                 <EuiText
                   size="xs"
                   color="subdued"
-                  className="queryEditorFooter__lineCount"
-                  data-test-subj="queryEditorFooterLineCount"
+                  className="queryPanel__footer__lineCount"
+                  data-test-subj="queryPanelFooterLineCount"
                 >
                   {`${lineCount} ${lineCount === 1 ? 'line' : 'lines'}`}
                 </EuiText>

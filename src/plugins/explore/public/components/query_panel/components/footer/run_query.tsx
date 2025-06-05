@@ -24,7 +24,7 @@ export const RunQueryButton: React.FC<RunQueryButtonProps> = ({
       fill
       onClick={onClick}
       isDisabled={isDisabled}
-      data-test-subj="runQueryButton"
+      data-test-subj="queryPanelFooterRunQueryButton"
       size="s"
       isLoading={isLoading}
     >

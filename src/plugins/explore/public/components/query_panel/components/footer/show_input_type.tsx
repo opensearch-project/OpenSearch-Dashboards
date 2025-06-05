@@ -38,8 +38,8 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
 
   return getDisplayText ? (
     <span
-      className="queryEditorFooter__showInputType"
-      data-test-subj="queryEditorFooterShowInputType"
+      className="queryPanel__footer__showInputType"
+      data-test-subj="queryPanelFooterShowInputType"
     >
       {getDisplayText}{' '}
     </span>

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.queryPanelLayout__editorArea {
+.queryPanel__editorArea {
+
   /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
   flex: 1;
   padding: 0;
@@ -53,8 +54,9 @@
         right: 4px;
         bottom: -7px;
         z-index: 10;
+
         /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 5%);
+        box-shadow: 0 1px 2px 0 $euiShadowColor;
 
         &__toolbar {
           border-radius: 24px;
@@ -85,16 +87,30 @@
         }
       }
 
+      /* stylelint-disable  @osd/stylelint/no_restricted_values */
       &.promptEditor--focused::after {
         content: '';
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        height: 2px; // Change thickness as needed
+        height: 2px;
+
+        // EUI tokens like $euiColorPrimary or $euiColorAccent are not designed for use in gradients.
         background: linear-gradient(90deg, #005eb8 0%, #e47fb2 53.5%, #1f9eff 100%);
         pointer-events: none;
         z-index: 2;
+      }
+
+      .promptEditor__placeholder {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: $euiTextColor;
+        font-size: $euiFontSizeXS;
+        font-weight: 400;
+        pointer-events: none;
+        z-index: 1;
       }
     }
   }
@@ -128,8 +144,9 @@
         }
 
         .comment-line span {
+
           /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
-          color: rgba(0, 255, 0, 10%); // Light green background
+          color: $euiColorSuccess;
         }
       }
 
@@ -159,8 +176,9 @@
           right: 4px;
           top: -12px;
           z-index: 10;
+
           /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 5%);
+          box-shadow: 0 1px 2px 0 $euiShadowColor;
 
           &__toolbar {
             border-radius: 24px;
@@ -194,6 +212,17 @@
 
       &.queryEditor--focused {
         border-bottom: 1px solid $euiColorPrimary;
+      }
+
+      .queryEditor__placeholder {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: $euiTextColor;
+        font-size: $euiFontSizeXS;
+        font-weight: 400;
+        pointer-events: none;
+        z-index: 1;
       }
     }
   }

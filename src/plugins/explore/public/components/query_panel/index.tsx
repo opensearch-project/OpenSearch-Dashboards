@@ -7,7 +7,7 @@ import React, { useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { QueryPanelLayout } from './layout';
 import { EditorStack } from './components/editor_stack';
-import { QueryEditorFooter } from './components/footer/index';
+import { QueryPanelFooter } from './components/footer';
 import { RecentQueriesTable } from './components/footer/recent_query/table';
 import { QueryTypeDetector } from './utils/type_detection';
 import { Query, TimeRange, LanguageType } from './types';
@@ -170,10 +170,10 @@ const QueryPanel = () => {
   );
 
   return (
-    <div className="queryContainer">
+    <div className="queryPanel__container">
       <QueryPanelLayout
         footer={
-          <QueryEditorFooter
+          <QueryPanelFooter
             isDualEditor={isDualEditor}
             isLoading={isLoading}
             languageType={currentQuery.language}
@@ -201,7 +201,7 @@ const QueryPanel = () => {
         />
       </QueryPanelLayout>
       {isRecentQueryVisible && (
-        <div className="recentQueriesContainer">
+        <div className="queryPanel__recentQueries">
           <RecentQueriesTable
             isVisible={isRecentQueryVisible}
             onClickRecentQuery={onClickRecentQuery}

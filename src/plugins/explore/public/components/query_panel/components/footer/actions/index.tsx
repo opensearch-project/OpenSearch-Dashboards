@@ -5,7 +5,8 @@
 
 // TODO: Actions are not scope of P0. This should bes tested with external plugins in next scope.
 
-import React from 'react';
+import React, { useState } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
@@ -13,7 +14,6 @@ import {
   EuiPopover,
   EuiIcon,
 } from '@elastic/eui';
-import { useState } from 'react';
 import { queryBarActionsRegistry } from './registry';
 
 export const Actions: React.FC = () => {
@@ -25,7 +25,7 @@ export const Actions: React.FC = () => {
       key={index}
       icon={<EuiIcon type={action.iconType} />}
       onClick={action.onClick}
-      data-test-subj={`queryEditorActionMenuItem-${index}`}
+      data-test-subj={`queryPanelFooterActionMenuItem-${index}`}
     >
       {action.label}
     </EuiContextMenuItem>
@@ -35,8 +35,10 @@ export const Actions: React.FC = () => {
     <EuiPopover
       button={
         <EuiButtonEmpty onClick={() => setIsOpen(!isOpen)}>
-          Actions
-          <EuiIcon type="arrowDown" style={{ margin: '0px 5px' }} />
+          {i18n.translate('explore.queryPanel.actions.buttonLabel', {
+            defaultMessage: 'Actions',
+          })}
+          <EuiIcon type="arrowDown" className="queryPanel__footer__actionsButtonIcon" />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}

@@ -127,8 +127,8 @@ export function RecentQueriesTable({
       columns={tableColumns}
       rowProps={getRowProps}
       cellProps={getCellProps}
-      className="recentQuery__table"
-      data-test-subj="recentQueryTable"
+      className="queryPanel__footer__recentQueryTable"
+      data-test-subj="queryPanelRecentQueryTable"
       tableLayout="fixed"
       compressed
     />

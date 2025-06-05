@@ -36,8 +36,9 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   const [decorated, setDecorated] = useState(false);
 
   // Inject comment only once when content is loaded
+  // TODO: UPDATE THIS WTH DYNAMIC DECODED STRING ONCE API INTEGRATED
   useEffect(() => {
-    if (queryString && !queryString.startsWith(FIXED_COMMENT)) {
+    if (queryString?.startsWith && !queryString.startsWith(FIXED_COMMENT)) {
       onChange(`${FIXED_COMMENT}\n${queryString}`);
     }
   }, [queryString, onChange]);

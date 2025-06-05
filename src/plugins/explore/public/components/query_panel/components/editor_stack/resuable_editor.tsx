@@ -4,6 +4,7 @@
  */
 
 import React, { useRef, useState, useCallback } from 'react';
+import { i18n } from '@osd/i18n';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { EditToobar } from './edit_toolbar';
@@ -25,16 +26,16 @@ export interface ReusableEditorProps {
   height?: number;
 }
 
-const placeholderStyles: React.CSSProperties = {
-  position: 'absolute',
-  top: 10,
-  left: 10,
-  color: '#676E75',
-  fontSize: 14,
-  fontWeight: 400,
-  fontFamily: 'Roboto Mono',
-  pointerEvents: 'none',
-  zIndex: 1,
+// Map EditorType enum to actual CSS class prefixes
+const getEditorClassPrefix = (editorType: EditorType): string => {
+  switch (editorType) {
+    case EditorType.Prompt:
+      return 'promptEditor';
+    case EditorType.Query:
+      return 'queryEditor';
+    default:
+      return 'queryEditor'; // fallback
+  }
 };
 
 export const ReusableEditor: React.FC<ReusableEditorProps> = ({
@@ -47,15 +48,28 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   onEditorDidMount,
   editorConfig,
   placeholder,
-  editText = 'Edit',
-  clearText = 'Clear',
+  editText,
+  clearText,
   height = 32, // default height
-  editorType = 'query',
+  editorType = EditorType.Query,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
   const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
   const [editorHeight, setEditorHeight] = useState(height);
+
+  const editorClassPrefix = getEditorClassPrefix(editorType);
+
+  const editTextI18n =
+    editText ||
+    i18n.translate('explore.queryPanel.reusableEditor.edit', {
+      defaultMessage: 'Edit',
+    });
+  const clearTextI18n =
+    clearText ||
+    i18n.translate('explore.queryPanel.reusableEditor.clear', {
+      defaultMessage: 'Clear',
+    });
 
   const handleEditClick = () => {
     onEdit();
@@ -82,7 +96,9 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
 
       editor.addAction({
         id: `run-on-enter-${editorType}`,
-        label: `Run on ${editorType} Enter`,
+        label: i18n.translate('explore.queryPanel.reusableEditor.run', {
+          defaultMessage: 'Run',
+        }),
         keybindings: [monaco.KeyCode.Enter],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1.5,
@@ -95,7 +111,10 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
 
       editor.addAction({
         id: `insert-new-line-${editorType}`,
-        label: `Insert New Line on ${editorType}`,
+        label: i18n.translate('explore.queryPanel.reusableEditor.insertNewLine', {
+          defaultMessage: `Insert New Line on {editorType}`,
+          values: { editorType },
+        }),
         // eslint-disable-next-line no-bitwise
         keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
         run: (ed) => {
@@ -142,17 +161,12 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   );
 
   return (
-    <div
-      className={`${editorType}EditorWrapper`}
-      style={{
-        position: 'relative',
-      }}
-    >
+    <div className={`${editorClassPrefix}Wrapper`}>
       <div
-        className={`${editorType}Editor ${isReadOnly ? `${editorType}Editor--readonly` : ''} ${
-          editorIsFocused && !isReadOnly ? `${editorType}Editor--focused` : undefined
+        className={`${editorClassPrefix} ${isReadOnly ? `${editorClassPrefix}--readonly` : ''} ${
+          editorIsFocused && !isReadOnly ? `${editorClassPrefix}--focused` : ''
         }`}
-        data-test-subj={`explore${editorType}Editor__multiLine`}
+        data-test-subj={`explore${editorClassPrefix}__multiLine`}
       >
         <CodeEditor
           height={editorHeight}
@@ -166,16 +180,16 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         />
 
         {!value && !editorIsFocused && !isReadOnly && (
-          <div style={placeholderStyles}>{placeholder}</div>
+          <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
         )}
 
         {isReadOnly && (
           <EditToobar
-            className={`${editorType}Editor__editOverlay`}
+            className={`${editorClassPrefix}__editOverlay`}
             onClearEditor={onClear}
             onEditClick={handleEditClick}
-            editText={editText}
-            clearText={clearText}
+            editText={editTextI18n}
+            clearText={clearTextI18n}
           />
         )}
       </div>
