@@ -5,6 +5,7 @@ node_modules/
 dist/
 build/
 .git/
+src/plugins/explore/public/components/data_table/data_table.mocks.ts
 
 # Local or predefined end points
 localhost
