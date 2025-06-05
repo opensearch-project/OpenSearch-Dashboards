@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 // TODO: This component will be fully functional once integrated with query services.
 interface RunQueryButtonProps {
@@ -27,7 +28,9 @@ export const RunQueryButton: React.FC<RunQueryButtonProps> = ({
       size="s"
       isLoading={isLoading}
     >
-      Run query
+      {i18n.translate('explore.queryPanel.runQueryButton.label', {
+        defaultMessage: 'Run query',
+      })}
     </EuiButton>
   );
 };

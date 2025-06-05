@@ -4,10 +4,11 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@osd/i18n';
 import { LanguageType } from '../../types';
 
 interface ShowInputTypeProps {
-  languageType: LanguageType; // Added the missing property
+  languageType: LanguageType;
   isDualEditor: boolean;
   noInput: boolean;
 }
@@ -19,11 +20,28 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
 }) => {
   const getDisplayText = useMemo(() => {
     if (noInput) return '';
+
     if (languageType === LanguageType.Natural) {
-      return isDualEditor ? 'Natural Language | PPL' : 'Natural Language';
+      return isDualEditor
+        ? i18n.translate('explore.queryPanel.showInputType.naturalAndPPLLabel', {
+            defaultMessage: 'Natural Language | PPL',
+          })
+        : i18n.translate('explore.queryPanel.showInputType.naturalLabel', {
+            defaultMessage: 'Natural Language',
+          });
     }
-    return LanguageType.PPL.toUpperCase(); // Default to empty for other language types
+
+    return i18n.translate('explore.queryPanel.showInputType.pplLabel', {
+      defaultMessage: 'PPL',
+    });
   }, [languageType, isDualEditor, noInput]);
 
-  return getDisplayText ? <span className="showInputType">{getDisplayText} </span> : null;
+  return getDisplayText ? (
+    <span
+      className="queryEditorFooter__showInputType"
+      data-test-subj="queryEditorFooterShowInputType"
+    >
+      {getDisplayText}{' '}
+    </span>
+  ) : null;
 };

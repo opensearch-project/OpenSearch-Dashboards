@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { i18n } from '@osd/i18n';
 import { monaco } from '@osd/monaco';
 import { getEditorConfig } from './shared';
 import { LanguageType, EditorType } from './types';
@@ -62,8 +63,12 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
       value={queryString}
       isReadOnly={isEditorReadOnly}
       editorConfig={editorConfig}
-      editText="Edit Query"
-      clearText="Clear Editor"
+      editText={i18n.translate('explore.queryPanel.queryEditor.editQuery', {
+        defaultMessage: 'Edit Query',
+      })}
+      clearText={i18n.translate('explore.queryPanel.queryEditor.clearEditor', {
+        defaultMessage: 'Clear Editor',
+      })}
       height={editorConfig.height}
       editorType={EditorType.Query} // This is used for styling and identification
       onChange={onChange}

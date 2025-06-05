@@ -24,6 +24,7 @@ import {
   EuiFieldText,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 export const SaveQueryButton: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -49,7 +50,10 @@ export const SaveQueryButton: React.FC = () => {
   const handleSave = () => {
     if (!queryName.trim()) {
       setError(
-        'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.'
+        i18n.translate('explore.queryPanel.saveQueryButton.nameRequiredError', {
+          defaultMessage:
+            'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.',
+        })
       );
       return;
     }
@@ -66,7 +70,9 @@ export const SaveQueryButton: React.FC = () => {
             style={{ color: '#0073e6', padding: '0px' }}
             data-test-subj="saveQueryButton"
           >
-            Saved Queries
+            {i18n.translate('explore.queryPanel.saveQueryButton.savedQueries', {
+              defaultMessage: 'Saved Queries',
+            })}
             <EuiIcon type="arrowDown" style={{ marginLeft: '5px' }} />
           </EuiButtonEmpty>
         }
@@ -74,18 +80,27 @@ export const SaveQueryButton: React.FC = () => {
         closePopover={closePopover}
         anchorPosition="downCenter"
       >
-        <EuiPopoverTitle>SAVED QUERIES</EuiPopoverTitle>
+        <EuiPopoverTitle>
+          {i18n.translate('explore.queryPanel.saveQueryButton.popoverTitle', {
+            defaultMessage: 'SAVED QUERIES',
+          })}
+        </EuiPopoverTitle>
         <div style={{ padding: '10px' }} data-test-subj="saveQueryPopoverBody">
           <EuiText size="s" style={{ color: '#676E75', maxWidth: '500px' }}>
             <p>
-              There are no saved queries. Save query text and filters that you want to use again.
+              {i18n.translate('explore.queryPanel.saveQueryButton.popoverBody', {
+                defaultMessage:
+                  'There are no saved queries. Save query text and filters that you want to use again.',
+              })}
             </p>
           </EuiText>
         </div>
         <EuiPopoverFooter>
           <div style={{ textAlign: 'right' }}>
             <EuiButton size="s" onClick={openModal} fill>
-              Save current query
+              {i18n.translate('explore.queryPanel.saveQueryButton.saveCurrentQuery', {
+                defaultMessage: 'Save current query',
+              })}
             </EuiButton>
           </div>
         </EuiPopoverFooter>
@@ -94,19 +109,36 @@ export const SaveQueryButton: React.FC = () => {
       {isModalOpen && (
         <EuiModal onClose={closeModal} style={{ width: '500px' }}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>Save query</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>
+              {i18n.translate('explore.queryPanel.saveQueryButton.modalTitle', {
+                defaultMessage: 'Save query',
+              })}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiText size="s" style={{ marginBottom: '15px', color: '#676E75' }}>
               <p>
-                There are no saved queries. Save query text and filters that you want to use again.
+                {i18n.translate('explore.queryPanel.saveQueryButton.modalBody', {
+                  defaultMessage:
+                    'There are no saved queries. Save query text and filters that you want to use again.',
+                })}
               </p>
             </EuiText>
             <EuiForm>
-              {/* Name Field */}
-              <EuiFormRow label="Name" isInvalid={!!error} error={error}>
+              <EuiFormRow
+                label={i18n.translate('explore.queryPanel.saveQueryButton.nameLabel', {
+                  defaultMessage: 'Name',
+                })}
+                isInvalid={!!error}
+                error={error}
+              >
                 <EuiFieldText
-                  placeholder="Enter query name"
+                  placeholder={i18n.translate(
+                    'explore.queryPanel.saveQueryButton.namePlaceholder',
+                    {
+                      defaultMessage: 'Enter query name',
+                    }
+                  )}
                   value={queryName}
                   onChange={(e) => setQueryName(e.target.value)}
                   isInvalid={!!error}
@@ -114,14 +146,23 @@ export const SaveQueryButton: React.FC = () => {
               </EuiFormRow>
               <EuiText size="s" style={{ margin: '15px 0', color: '#676E75' }}>
                 <p>
-                  There are no saved queries. Save query text and filters that you want to use
-                  again.
+                  {i18n.translate('explore.queryPanel.saveQueryButton.modalBody', {
+                    defaultMessage:
+                      'There are no saved queries. Save query text and filters that you want to use again.',
+                  })}
                 </p>
               </EuiText>
 
-              <EuiFormRow label="Description">
+              <EuiFormRow
+                label={i18n.translate('explore.queryPanel.saveQueryButton.descriptionLabel', {
+                  defaultMessage: 'Description',
+                })}
+              >
                 <EuiFieldText
-                  placeholder="Enter query description"
+                  placeholder={i18n.translate(
+                    'explore.queryPanel.saveQueryButton.descriptionPlaceholder',
+                    { defaultMessage: 'Enter query description' }
+                  )}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
@@ -129,7 +170,10 @@ export const SaveQueryButton: React.FC = () => {
 
               <EuiFormRow>
                 <EuiSwitch
-                  label="Include time filter"
+                  label={i18n.translate(
+                    'explore.queryPanel.saveQueryButton.includeTimeFilterLabel',
+                    { defaultMessage: 'Include time filter' }
+                  )}
                   checked={includeTimeFilter}
                   onChange={(e) => setIncludeTimeFilter(e.target.checked)}
                 />
@@ -138,10 +182,14 @@ export const SaveQueryButton: React.FC = () => {
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButton onClick={closeModal} color="text">
-              Cancel
+              {i18n.translate('explore.queryPanel.saveQueryButton.save', {
+                defaultMessage: 'Save',
+              })}
             </EuiButton>
             <EuiButton onClick={handleSave} fill>
-              Save
+              {i18n.translate('explore.queryPanel.saveQueryButton.save', {
+                defaultMessage: 'Save',
+              })}
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
