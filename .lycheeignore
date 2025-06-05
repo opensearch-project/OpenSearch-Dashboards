@@ -5,7 +5,7 @@ node_modules/
 dist/
 build/
 .git/
-\\.mocks\.ts$
+*.mocks.ts
 
 # Local or predefined end points
 localhost
