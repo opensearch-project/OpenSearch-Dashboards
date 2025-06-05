@@ -68,7 +68,7 @@
           width: fit-content;
           font-weight: 400;
           line-height: 18px;
-          font-size: 12px;
+          font-size: $euiFontSizeXS;
           color: $euiColorDarkShade;
         }
 
@@ -105,13 +105,13 @@
     .queryEditor {
       border: $euiBorderThin;
       border-top: 0;
-      font-size: 13px !important;
+      font-size: $euiFontSizeXS !important;
       border-radius: 1px;
       position: relative;
 
       .monaco-editor {
         border-radius: $euiSizeXS $euiSizeXS 0 0;
-        font-size: 13px;
+        font-size: $euiFontSizeXS;
 
         .margin {
           border-radius: $euiSizeXS 0 0 0;
@@ -124,7 +124,7 @@
         }
 
         .view-lines {
-          font-size: 13px;
+          font-size: $euiFontSizeXS;
         }
 
         .comment-line span {
@@ -138,7 +138,7 @@
       .monaco-editor .inputarea.ime-input,
       .monaco-editor .decorationsOverviewRuler {
         background-color: $euiColorEmptyShade;
-        font-size: 13px;
+        font-size: $euiFontSizeXS;
       }
 
       &.queryEditor--readonly {
@@ -174,7 +174,7 @@
             width: fit-content;
             font-weight: 400;
             line-height: 18px;
-            font-size: 12px;
+            font-size: $euiFontSizeXS;
             color: $euiColorDarkShade;
           }
 
