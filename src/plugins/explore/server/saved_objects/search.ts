@@ -29,7 +29,6 @@
  */
 
 import { SavedObjectsType } from 'opensearch-dashboards/server';
-import { searchMigrations } from './search_migrations';
 
 export const searchSavedObjectType: SavedObjectsType = {
   name: 'explore',
@@ -67,5 +66,4 @@ export const searchSavedObjectType: SavedObjectsType = {
       version: { type: 'integer' },
     },
   },
-  migrations: searchMigrations as any,
 };
