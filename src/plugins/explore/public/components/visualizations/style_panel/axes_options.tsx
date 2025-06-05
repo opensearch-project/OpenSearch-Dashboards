@@ -20,6 +20,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { CategoryAxis, VisColumn, ValueAxis } from '../types';
 import { useDebouncedValue, useDebouncedNumericValue } from '../utils/use_debounced_value';
+import { Positions } from '../utils/collections';
 
 interface AxesOptionsProps {
   categoryAxes: CategoryAxis[];
@@ -140,8 +141,8 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     if (isRule2) {
       const needsUpdate =
         valueAxes.length !== 2 ||
-        valueAxes[0]?.position !== 'left' ||
-        valueAxes[1]?.position !== 'right';
+        valueAxes[0]?.position !== Positions.LEFT ||
+        valueAxes[1]?.position !== Positions.RIGHT;
 
       if (needsUpdate) {
         const newValueAxes: ValueAxis[] = [
@@ -150,7 +151,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
             id: valueAxes[0]?.id || 'ValueAxis-1',
             name: valueAxes[0]?.name || 'LeftAxis-1',
             type: 'value',
-            position: 'left', // Force left position for first axis
+            position: Positions.LEFT, // Force left position for first axis
             show: valueAxes[0]?.show ?? true,
             title: valueAxes[0]?.title || { text: '' },
             labels: valueAxes[0]?.labels || { show: true, rotate: 0, truncate: 100, filter: false },
@@ -160,7 +161,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
             id: valueAxes[1]?.id || 'ValueAxis-2',
             name: valueAxes[1]?.name || 'RightAxis-1',
             type: 'value',
-            position: 'right', // Force right position for second axis
+            position: Positions.RIGHT, // Force right position for second axis
             show: valueAxes[1]?.show ?? true,
             title: valueAxes[1]?.title || { text: '' },
             labels: valueAxes[1]?.labels || { show: true, rotate: 0, truncate: 100, filter: false },
@@ -207,12 +208,12 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   value={axis.position}
                   onChange={(e) =>
                     updateCategoryAxis(index, {
-                      position: e.target.value as 'bottom' | 'top',
+                      position: e.target.value as Positions.BOTTOM | Positions.TOP,
                     })
                   }
                   options={[
-                    { value: 'bottom', text: 'Bottom' },
-                    { value: 'top', text: 'Top' },
+                    { value: Positions.BOTTOM, text: 'Bottom' },
+                    { value: Positions.TOP, text: 'Top' },
                   ]}
                 />
               </EuiFormRow>
@@ -383,12 +384,12 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                       value={axis.position}
                       onChange={(e) =>
                         updateValueAxis(index, {
-                          position: e.target.value as 'left' | 'right',
+                          position: e.target.value as Positions.LEFT | Positions.RIGHT,
                         })
                       }
                       options={[
-                        { value: 'left', text: 'Left' },
-                        { value: 'right', text: 'Right' },
+                        { value: Positions.LEFT, text: 'Left' },
+                        { value: Positions.RIGHT, text: 'Right' },
                       ]}
                       disabled={isRule2} // Position is fixed in Rule 2
                     />
@@ -531,12 +532,12 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                     value={axis.position}
                     onChange={(e) =>
                       updateValueAxis(index, {
-                        position: e.target.value as 'left' | 'right',
+                        position: e.target.value as Positions.LEFT | Positions.RIGHT,
                       })
                     }
                     options={[
-                      { value: 'left', text: 'Left' },
-                      { value: 'right', text: 'Right' },
+                      { value: Positions.LEFT, text: 'Left' },
+                      { value: Positions.RIGHT, text: 'Right' },
                     ]}
                   />
                 </EuiFormRow>

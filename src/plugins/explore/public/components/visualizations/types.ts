@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Positions } from './utils/collections';
+
 export interface ChartTypeMapping {
   type: string;
   priority: number; // Higher number means higher priority for rule matching
@@ -74,7 +76,7 @@ export interface AxisTitle {
 export interface CategoryAxis {
   id: string;
   type: 'category';
-  position: 'top' | 'bottom';
+  position: Positions.TOP | Positions.BOTTOM;
   show: boolean;
   labels: AxisLabels;
   title: AxisTitle;
@@ -85,7 +87,7 @@ export interface ValueAxis {
   id: string;
   name: string;
   type: 'value';
-  position: 'left' | 'right';
+  position: Positions.LEFT | Positions.RIGHT;
   show: boolean;
   labels: AxisLabels;
   title: AxisTitle;

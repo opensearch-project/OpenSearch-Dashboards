@@ -42,7 +42,7 @@ export const Visualization: React.FC<VisualizationProps> = ({
           </div>
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: '300px' }}>
+      <EuiFlexItem grow={false}>
         <EuiPanel className="exploreVisStylePanel" data-test-subj="exploreStylePanel">
           <div className="exploreVisStylePanel__inner">
             {visualizationData.visualizationType?.ui.style.render({

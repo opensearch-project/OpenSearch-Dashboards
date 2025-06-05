@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
 import { VisColumn } from '../types';
+import { Positions } from '../utils/collections';
 
 /**
  * Get stroke dash array for different line styles
@@ -149,7 +151,10 @@ export const createThresholdLayer = (styles: Partial<LineChartStyleControls> | u
   // Add tooltip content if enabled
   if (styles.addTooltip !== false) {
     thresholdLayer.encoding.tooltip = {
-      value: `Threshold: ${styles.thresholdLine.value}`,
+      value:
+        i18n.translate('explore.vis.thresholdValue', {
+          defaultMessage: 'Threshold: ',
+        }) + styles.thresholdLine.value,
     };
   }
 
@@ -249,12 +254,12 @@ export const applyAxisStyling = (
       if (axisIndex === 0) {
         return {
           ...baseAxis,
-          orient: 'left',
+          orient: Positions.LEFT,
         };
       } else {
         return {
           ...baseAxis,
-          orient: 'right',
+          orient: Positions.RIGHT,
         };
       }
     }
@@ -266,8 +271,8 @@ export const applyAxisStyling = (
       // For Rule 2, ensure correct positioning
       const orient = isRule2
         ? axisIndex === 0
-          ? 'left'
-          : 'right'
+          ? Positions.LEFT
+          : Positions.RIGHT
         : valueAxis.position || baseAxis.orient;
 
       // If show is false, hide the entire axis

@@ -61,7 +61,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
     {
       id: 'CategoryAxis-1',
       type: 'category',
-      position: 'bottom',
+      position: Positions.BOTTOM,
       show: true,
       labels: {
         show: true,
@@ -81,7 +81,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
       id: 'ValueAxis-1',
       name: 'LeftAxis-1',
       type: 'value',
-      position: 'left',
+      position: Positions.LEFT,
       show: true,
       labels: {
         show: true,
