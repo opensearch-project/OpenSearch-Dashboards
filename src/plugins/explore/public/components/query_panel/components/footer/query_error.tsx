@@ -121,8 +121,7 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
         size="xs"
         onClick={() => {}}
         isLoading
-        data-test-subj="queryResultLoading"
-        className="editor__footerItem"
+        data-test-subj="queryPanelResultLoading"
       >
         <EuiText size="xs" color="subdued" data-test-subj="queryResultLoadingMsg">
           {loadingText}
@@ -157,7 +156,7 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
         size="xs"
         onClick={() => {}}
       >
-        <EuiText size="xs" color="subdued" data-test-subj="queryResultCompleteMsg">
+        <EuiText size="xs" color="subdued" data-test-subj="queryPanelResultCompleteMsg">
           {message}
         </EuiText>
       </EuiButtonEmpty>
@@ -176,16 +175,10 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
           iconType={'alert'}
           size="xs"
           onClick={onButtonClick}
-          data-test-subj="queryResultErrorBtn"
-          className="editor__footerItem"
+          data-test-subj="queryPanelResultErrorBtn"
           color="danger"
         >
-          <EuiText
-            size="xs"
-            color="danger"
-            className="editor__footerItem"
-            data-test-subj="editorFooterItem"
-          >
+          <EuiText size="xs" color="danger" data-test-subj="queryPanelFooterItem">
             {i18n.translate('explore.queryPanel.queryResults.error', {
               defaultMessage: `Error`,
             })}
@@ -196,7 +189,7 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
       closePopover={() => setPopover(false)}
       panelPaddingSize="s"
       anchorPosition={'downRight'}
-      data-test-subj="queryResultError"
+      data-test-subj="queryPanelResultError"
     >
       <EuiPopoverTitle>
         {i18n.translate('explore.queryPanel.queryResults.errors', {
@@ -204,8 +197,7 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
         })}
       </EuiPopoverTitle>
       <div
-        style={{ width: '250px', maxHeight: '250px', overflowY: 'auto' }}
-        className="eui-textBreakWord"
+        className="queryPanel__footer__errorPopover eui-textBreakWord"
         data-test-subj="textBreakWord"
       >
         <EuiText size="s">
