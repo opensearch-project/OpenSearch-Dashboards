@@ -112,7 +112,7 @@ function getWrapWorkspaceListInContext(
   };
   coreStartMock.application.getUrlForApp.mockImplementation((id) => `http://localhost/${id}`);
 
-  const mockHeaderControl = ({ controls }) => {
+  const mockHeaderControl = ({ controls }: any) => {
     return controls?.[0].description ?? controls?.[0].renderComponent ?? null;
   };
 

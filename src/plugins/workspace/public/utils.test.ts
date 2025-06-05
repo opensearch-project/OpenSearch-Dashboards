@@ -1159,7 +1159,7 @@ describe('workspace utils: fetchRemoteClusterConnections', () => {
       {
         id: 'id1',
         title: 'title1',
-        dataSourceEngineType: 'InvalidEngineType',
+        dataSourceEngineType: 'InvalidEngineType' as DataSourceEngineType,
         description: '',
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       },
