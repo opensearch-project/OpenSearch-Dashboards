@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { ThresholdOptions } from './threshold_options';
-import { ThresholdLine } from '../types';
+import { ThresholdLine, ThresholdLineStyle } from '../types';
 
 export default {
   component: ThresholdOptions,
@@ -39,7 +39,7 @@ Primary.args = {
   thresholdLine: {
     color: '#E7664C',
     show: true,
-    style: 'full',
+    style: ThresholdLineStyle.Full,
     value: 10,
     width: 2,
   },
@@ -51,7 +51,7 @@ Hidden.args = {
   thresholdLine: {
     color: '#E7664C',
     show: false,
-    style: 'full',
+    style: ThresholdLineStyle.Full,
     value: 10,
     width: 2,
   },
@@ -63,7 +63,7 @@ DashedLine.args = {
   thresholdLine: {
     color: '#E7664C',
     show: true,
-    style: 'dashed',
+    style: ThresholdLineStyle.Dashed,
     value: 10,
     width: 2,
   },
@@ -75,7 +75,7 @@ DotDashedLine.args = {
   thresholdLine: {
     color: '#E7664C',
     show: true,
-    style: 'dot-dashed',
+    style: ThresholdLineStyle.DotDashed,
     value: 10,
     width: 2,
   },
@@ -87,7 +87,7 @@ ThickLine.args = {
   thresholdLine: {
     color: '#E7664C',
     show: true,
-    style: 'full',
+    style: ThresholdLineStyle.Full,
     value: 10,
     width: 5,
   },
@@ -99,7 +99,7 @@ BlueThreshold.args = {
   thresholdLine: {
     color: '#0077CC',
     show: true,
-    style: 'full',
+    style: ThresholdLineStyle.Full,
     value: 10,
     width: 2,
   },
