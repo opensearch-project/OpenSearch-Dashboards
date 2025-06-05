@@ -134,7 +134,7 @@ jobs:
             config: explore
             test_location: source
           # Explore tests - group 5
-          - group: 15
+          - group: 15Explore
             config: explore
             test_location: source
     container:

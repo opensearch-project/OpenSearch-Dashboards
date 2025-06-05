@@ -35,7 +35,7 @@ import {
   IEmbeddable,
 } from '../../../../../../embeddable/public';
 import { Filter, IIndexPattern, TimeRange, Query } from '../../../../../../data/public';
-import { SortOrder } from '../../../../saved_explore/types';
+import { SortOrder } from '../../../../types/saved_explore_types';
 import { SavedExplore } from '../../../../saved_explore';
 
 export interface SearchInput extends EmbeddableInput {
