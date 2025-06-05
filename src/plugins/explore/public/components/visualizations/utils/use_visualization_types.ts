@@ -12,7 +12,7 @@ import { OpenSearchSearchHit } from '../../../application/legacy/discover/applic
 import { LineVisStyleControlsProps } from '../line/line_vis_options';
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { VisColumn } from '../types';
+import { ChartTypeMapping, VisColumn } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 
 export interface VisualizationType {
@@ -33,6 +33,14 @@ export interface VisualizationType {
   readonly toExpression: (
     searchContext: IExpressionLoaderParams['searchContext'],
     indexPattern: IndexPattern,
+    toExpressionFn: (
+      transformedData: Array<Record<string, any>>,
+      numericalColumns: VisColumn[],
+      categoricalColumns: VisColumn[],
+      dateColumns: VisColumn[],
+      styleOptions: any,
+      chartType?: string
+    ) => any,
     transformedData?: Array<Record<string, any>>,
     numericalColumns?: VisColumn[],
     categoricalColumns?: VisColumn[],
@@ -75,7 +83,17 @@ export interface VisualizationTypeResult {
   numericalColumns?: VisColumn[];
   categoricalColumns?: VisColumn[];
   dateColumns?: VisColumn[];
+  ruleId?: string;
+  availableChartTypes?: ChartTypeMapping[];
   transformedData?: Array<Record<string, any>>;
+  toExpression?: (
+    transformedData: Array<Record<string, any>>,
+    numericalColumns: VisColumn[],
+    categoricalColumns: VisColumn[],
+    dateColumns: VisColumn[],
+    styleOptions: any,
+    chartType?: string
+  ) => any;
 }
 
 const getFieldTypeFromSchema = (schema?: string): VisFieldType =>
@@ -90,8 +108,6 @@ export const getVisualizationType = (
     return;
   }
 
-  console.log('schema:', fieldSchema);
-
   const columns: VisColumn[] = fieldSchema.map((field, index) => {
     return {
       id: index,
@@ -103,7 +119,9 @@ export const getVisualizationType = (
   const transformedData = rows.map((row: OpenSearchSearchHit) => {
     const transformedRow: Record<string, any> = {};
     for (const column of columns) {
-      transformedRow[column.column] = row._source[column.name];
+      // Type assertion for _source since it's marked as unknown
+      const source = row._source as Record<string, any>;
+      transformedRow[column.column] = source[column.name];
     }
     return transformedRow;
   });

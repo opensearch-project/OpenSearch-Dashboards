@@ -3,14 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisualizationType } from './utils/use_visualization_types';
-
 export interface ChartTypeMapping {
-  type: string; // 'line', 'bar', 'scatter', etc.
-  priority: number; // Higher number = higher priority
+  type: string;
+  priority: number; // Higher number means higher priority for rule matching
   name: string;
 }
 
+export interface VisualizationRule {
+  id: string; // Unique rule identifier
+  name: string;
+  description?: string;
+  matches: (
+    numericalColumns: VisColumn[],
+    categoricalColumns: VisColumn[],
+    dateColumns: VisColumn[]
+  ) => boolean;
+  chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
+  toExpression?: (
+    transformedData: Array<Record<string, any>>,
+    numericalColumns: VisColumn[],
+    categoricalColumns: VisColumn[],
+    dateColumns: VisColumn[],
+    styleOptions: any,
+    chartType?: string
+  ) => any;
+}
 export interface VisColumn {
   id: number;
   name: string;
@@ -19,16 +36,6 @@ export interface VisColumn {
 }
 
 export type VisFieldType = 'numerical' | 'categorical' | 'date' | 'unknown';
-
-export interface VisualizationRule {
-  name: string;
-  matches: (
-    numericalColumns: VisColumn[],
-    categoricalColumns: VisColumn[],
-    dateColumns: VisColumn[]
-  ) => boolean;
-  createConfig: () => VisualizationType;
-}
 
 // Styling: Threshold line configuration
 export interface ThresholdLine {
