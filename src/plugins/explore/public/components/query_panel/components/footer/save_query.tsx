@@ -67,13 +67,13 @@ export const SaveQueryButton: React.FC = () => {
           <EuiButtonEmpty
             onClick={onButtonClick}
             iconType="save"
-            style={{ color: '#0073e6', padding: '0px' }}
-            data-test-subj="saveQueryButton"
+            className="queryPanel__footer__saveQueryButton"
+            data-test-subj="queryPanelFootersaveQueryButton"
           >
             {i18n.translate('explore.queryPanel.saveQueryButton.savedQueries', {
               defaultMessage: 'Saved Queries',
             })}
-            <EuiIcon type="arrowDown" style={{ marginLeft: '5px' }} />
+            <EuiIcon type="arrowDown" className="queryPanel__footer__saveQueryButtonIcon" />
           </EuiButtonEmpty>
         }
         isOpen={isPopoverOpen}
@@ -85,8 +85,8 @@ export const SaveQueryButton: React.FC = () => {
             defaultMessage: 'SAVED QUERIES',
           })}
         </EuiPopoverTitle>
-        <div style={{ padding: '10px' }} data-test-subj="saveQueryPopoverBody">
-          <EuiText size="s" style={{ color: '#676E75', maxWidth: '500px' }}>
+        <div className="queryPanel__footer__popoverBody" data-test-subj="saveQueryPopoverBody">
+          <EuiText size="s" className="queryPanel__footer__popoverText">
             <p>
               {i18n.translate('explore.queryPanel.saveQueryButton.popoverBody', {
                 defaultMessage:
@@ -96,7 +96,7 @@ export const SaveQueryButton: React.FC = () => {
           </EuiText>
         </div>
         <EuiPopoverFooter>
-          <div style={{ textAlign: 'right' }}>
+          <div className="queryPanel__footer__popoverFooter">
             <EuiButton size="s" onClick={openModal} fill>
               {i18n.translate('explore.queryPanel.saveQueryButton.saveCurrentQuery', {
                 defaultMessage: 'Save current query',
@@ -107,7 +107,7 @@ export const SaveQueryButton: React.FC = () => {
       </EuiPopover>
 
       {isModalOpen && (
-        <EuiModal onClose={closeModal} style={{ width: '500px' }}>
+        <EuiModal onClose={closeModal} className="queryPanel__footer__modal">
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               {i18n.translate('explore.queryPanel.saveQueryButton.modalTitle', {
@@ -116,7 +116,7 @@ export const SaveQueryButton: React.FC = () => {
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiText size="s" style={{ marginBottom: '15px', color: '#676E75' }}>
+            <EuiText size="s" className="queryPanel__footer__modalText">
               <p>
                 {i18n.translate('explore.queryPanel.saveQueryButton.modalBody', {
                   defaultMessage:
@@ -144,11 +144,11 @@ export const SaveQueryButton: React.FC = () => {
                   isInvalid={!!error}
                 />
               </EuiFormRow>
-              <EuiText size="s" style={{ margin: '15px 0', color: '#676E75' }}>
+              <EuiText size="s" className="queryPanel__footer__modalTextSecondary">
                 <p>
-                  {i18n.translate('explore.queryPanel.saveQueryButton.modalBody', {
+                  {i18n.translate('explore.queryPanel.saveQueryButton.modalBodyNameRequired', {
                     defaultMessage:
-                      'There are no saved queries. Save query text and filters that you want to use again.',
+                      'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.',
                   })}
                 </p>
               </EuiText>

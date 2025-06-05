@@ -33,8 +33,8 @@ export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onT
     <EuiButtonEmpty
       onClick={handleToggle}
       iconType={showField ? 'menuLeft' : 'menuRight'}
-      data-test-subj="queryEditorFooterShowFields"
-      className="queryEditorFooter__showFieldsToggle"
+      data-test-subj="queryPanelFooterShowFields"
+      className="queryPanel__footer__showFieldsToggle"
     >
       {buttonLabel}
     </EuiButtonEmpty>

@@ -6,6 +6,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
 
+// TODO: Add storybook for this in next phase
 interface EditToobarProps {
   className?: string;
   onClearEditor: () => void;

@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.queryContainer {
+.queryPanel__container {
   position: relative;
 
-  .queryPanelLayout {
+  .queryPanel__layout {
     /* stylelint-disable  @osd/stylelint/no_restricted_values */
     padding: 8px;
     border-radius: 4px;
@@ -19,7 +19,7 @@
     box-sizing: border-box;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 5%), 0 1px 5px 0 rgba(0, 0, 0, 5%);
 
-    .verticalSeparator {
+    .queryPanel__verticalSeparator {
       width: 1px;
       height: 16px;
       background: #d9d9d9;
@@ -27,14 +27,14 @@
     }
   }
 
-  .recentQueriesContainer {
+  .queryPanel__recentQueries {
     position: absolute;
     top: 100%;
     right: 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 10%);
     z-index: 1000;
 
-    .recentQuery__table {
+    .queryPanel__recentQuery__table {
       border: $euiBorderThin;
       border-radius: $euiSizeXS;
       margin-top: 10px;

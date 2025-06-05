@@ -18,6 +18,7 @@ import { LanguageType } from '../../../types';
 //   },
 // ];
 
+// Todo: Once api integration done, write more test cases with data.
 describe('RecentQueriesTable', () => {
   it('renders recent queries table', () => {
     render(
