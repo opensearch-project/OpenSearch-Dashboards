@@ -20,11 +20,11 @@ import {
   EuiButtonEmpty,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { useObservable } from 'react-use';
+import { useObservable, useEffectOnce } from 'react-use';
 import { of } from 'rxjs';
 import { TopNavControlComponentData } from 'src/plugins/navigation/public';
 import { UiSettingScope } from '../../../../../../core/public';
@@ -75,10 +75,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const DataSourceAssociation = workspaceClient?.ui().DataSourceAssociation;
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
-  const defaultDataSourceIdRef = useRef(
-    uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)
-  );
-  const defaultDataSourceId = useObservable(defaultDataSourceIdRef.current);
+
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
   const canAssociateDataSource =
@@ -92,6 +89,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [selectedDataSources, setSelectedDataSources] = useState<DataSourceTableItem[]>([]);
+  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>();
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
@@ -109,6 +107,27 @@ export const ManageDirectQueryDataConnectionsTable = ({
       return item.id !== LOCAL_CLUSTER;
     },
   };
+
+  const loadDefaultDataSourceId = useCallback(async () => {
+    try {
+      const scope = !!currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
+      const id = await uiSettings.getUserProvidedWithScope<string | null>(
+        DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+        scope
+      );
+
+      setDefaultDataSourceId(id);
+    } catch (error) {
+      notifications.toasts.addWarning(error.message);
+    }
+  }, [uiSettings, currentWorkspace, notifications.toasts]);
+  useEffectOnce(() => {
+    loadDefaultDataSourceId();
+  });
+
+  useEffectOnce(() => {
+    loadDefaultDataSourceId();
+  });
 
   const setDefaultDataSource = async () => {
     try {
@@ -217,6 +236,11 @@ export const ManageDirectQueryDataConnectionsTable = ({
     fetchAllData();
   }, [http, savedObjects, notifications, featureFlagStatus]);
 
+  const handleOnDataSourceUpdated = useCallback(async () => {
+    await fetchDataSources();
+    await loadDefaultDataSourceId();
+  }, [fetchDataSources, loadDefaultDataSourceId]);
+
   /* Delete selected data sources*/
   const onClickDelete = () => {
     setIsDeleting(true);
@@ -275,6 +299,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
               true,
               currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
             );
+            await loadDefaultDataSourceId();
           }
         }
       }
@@ -287,6 +312,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
       savedObjects.client,
       uiSettings,
       workspaceClient,
+      loadDefaultDataSourceId,
     ]
   );
 
@@ -517,7 +543,8 @@ export const ManageDirectQueryDataConnectionsTable = ({
       renderComponent: (
         <DataSourceAssociation
           excludedDataSourceIds={data.map((ds) => ds.id)}
-          onComplete={() => fetchDataSources()}
+          onComplete={handleOnDataSourceUpdated}
+          defaultDataSourceId={defaultDataSourceId}
         />
       ),
     } as TopNavControlComponentData,
