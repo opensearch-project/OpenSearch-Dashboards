@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiPopover, EuiText, EuiPopoverTitle } from '@elastic/e
 import React, { useEffect, useMemo, useState } from 'react';
 import { ResultStatus } from '../../types';
 
+// TODO: Integrate this witih query error object once api itnregrated and make changes in error object and ui accoridnl
 export interface QueryStatus {
   status: ResultStatus;
   body?: {
