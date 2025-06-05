@@ -7,14 +7,7 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryError } from './query_error';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-
-enum ResultStatus {
-  UNINITIALIZED = 'uninitialized',
-  LOADING = 'loading', // initial data load
-  READY = 'ready', // results came back
-  NO_RESULTS = 'none', // no results came back
-  ERROR = 'error', // error occurred
-}
+import { ResultStatus } from './types';
 
 describe('Query Result', () => {
   it('should not render if status is uninitialized', () => {

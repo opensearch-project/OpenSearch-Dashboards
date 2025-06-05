@@ -149,10 +149,9 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
       }}
     >
       <div
-        className={`${editorType}Editor ${isReadOnly ? `${editorType}Editor--readonly` : ''}`}
-        style={{
-          borderBottom: editorIsFocused && !isReadOnly ? '1px solid #006BB4' : undefined,
-        }}
+        className={`${editorType}Editor ${isReadOnly ? `${editorType}Editor--readonly` : ''} ${
+          editorIsFocused && !isReadOnly ? `${editorType}Editor--focused` : undefined
+        }`}
         data-test-subj={`explore${editorType}Editor__multiLine`}
       >
         <CodeEditor
