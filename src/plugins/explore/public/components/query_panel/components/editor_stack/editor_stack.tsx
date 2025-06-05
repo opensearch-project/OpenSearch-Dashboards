@@ -41,7 +41,7 @@ const EditorStack: React.FC<EditorStackProps> = ({
   onClearEditor,
 }) => {
   return (
-    <div className="editorStack" data-test-subj="editor-stack">
+    <div className="queryPanel__editorStack" data-test-subj="queryPanelEditorStack">
       <PromptEditor
         onChange={onPromptChange}
         languageType={languageType}

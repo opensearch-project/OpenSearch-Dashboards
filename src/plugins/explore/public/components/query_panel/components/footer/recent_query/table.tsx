@@ -11,6 +11,7 @@ import { LanguageType } from '../../../types';
 export const MAX_RECENT_QUERY_SIZE = 10;
 
 // TODO: This component will be fully functional once integrated with query services.
+
 export function RecentQueriesTable({
   onClickRecentQuery,
   isVisible,
@@ -83,10 +84,10 @@ export function RecentQueriesTable({
           icon: 'play',
           type: 'icon',
           onClick: (item: RecentQueryTableItem) => {
-            onClickRecentQuery(
-              recentQueries.find((recentQuery) => recentQuery.id === item.id)?.query!,
-              recentQueries.find((recentQuery) => recentQuery.id === item.id)?.timeRange
-            );
+            const foundQuery = recentQueries.find((recentQuery) => recentQuery.id === item.id);
+            if (foundQuery) {
+              onClickRecentQuery(foundQuery.query, foundQuery.timeRange);
+            }
           },
           'data-test-subj': 'action-run',
         },

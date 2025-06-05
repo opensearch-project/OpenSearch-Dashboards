@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { getEditorConfig } from './shared';
 import { ReusableEditor } from './resuable_editor';
 import { EditorType, LanguageType } from './types';
@@ -31,6 +32,11 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
   const editorConfig = getEditorConfig(languageType);
 
   const editorType = languageType !== LanguageType.Natural ? EditorType.Query : EditorType.Prompt;
+
+  const placeholderText = i18n.translate('explore.queryPanel.promptEditor.placeholder', {
+    defaultMessage: 'Ask a question or search using PPL',
+  });
+
   return (
     <ReusableEditor
       value={prompt}
@@ -40,14 +46,17 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
       onEdit={onPromptEdit}
       onClear={onClearEditor}
       editorConfig={editorConfig}
-      // TODO: Placeholder text will be updated with new icons and dynamic lang name once query object integrated
       placeholder={
         <>
-          Ask a question or search using <EuiIcon type="editorCodeBlock" /> PPL
+          {placeholderText} <EuiIcon type="editorCodeBlock" />
         </>
       }
-      editText="Edit Prompt"
-      clearText="Clear Editor"
+      editText={i18n.translate('explore.queryPanel.promptEditor.editPrompt', {
+        defaultMessage: 'Edit Prompt',
+      })}
+      clearText={i18n.translate('explore.queryPanel.promptEditor.clearEditor', {
+        defaultMessage: 'Clear Editor',
+      })}
       height={editorConfig.height}
       editorType={editorType}
     />

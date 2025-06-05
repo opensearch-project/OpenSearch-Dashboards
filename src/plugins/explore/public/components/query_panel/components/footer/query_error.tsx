@@ -109,7 +109,7 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
     const time = Math.floor(elapsedTime / 1000);
     const loadingText =
       elapsedTime > BUFFER_TIME
-        ? i18n.translate('data.query.languageService.queryResults.loadTime', {
+        ? i18n.translate('explore.queryPanel.queryResults.loadTime', {
             defaultMessage: 'Loading {time} s',
             values: { time },
           })
@@ -133,19 +133,16 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
   if (props.queryStatus.status === ResultStatus.READY) {
     let message;
     if (!props.queryStatus.elapsedMs) {
-      message = i18n.translate('data.query.languageService.queryResults.completeNoTime', {
+      message = i18n.translate('explore.queryPanel.queryResults.completeNoTime', {
         defaultMessage: 'Completed',
       });
     } else if (props.queryStatus.elapsedMs < 1000) {
-      message = i18n.translate(
-        'data.query.languageService.queryResults.completeTimeInMilliseconds',
-        {
-          defaultMessage: 'Completed in {timeMS} ms',
-          values: { timeMS: props.queryStatus.elapsedMs },
-        }
-      );
+      message = i18n.translate('explore.queryPanel.queryResults.completeTimeInMilliseconds', {
+        defaultMessage: 'Completed in {timeMS} ms',
+        values: { timeMS: props.queryStatus.elapsedMs },
+      });
     } else {
-      message = i18n.translate('data.query.languageService.queryResults.completeTimeInSeconds', {
+      message = i18n.translate('explore.queryPanel.queryResults.completeTimeInSeconds', {
         defaultMessage: 'Completed in {time} s',
         values: { time: (props.queryStatus.elapsedMs / 1000).toFixed(1) },
       });
@@ -188,7 +185,7 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
             className="editor__footerItem"
             data-test-subj="editorFooterItem"
           >
-            {i18n.translate('data.query.languageService.queryResults.error', {
+            {i18n.translate('explore.queryPanel.queryResults.error', {
               defaultMessage: `Error`,
             })}
           </EuiText>
@@ -200,7 +197,11 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
       anchorPosition={'downRight'}
       data-test-subj="queryResultError"
     >
-      <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        {i18n.translate('explore.queryPanel.queryResults.errors', {
+          defaultMessage: `ERRORS`,
+        })}
+      </EuiPopoverTitle>
       <div
         style={{ width: '250px', maxHeight: '250px', overflowY: 'auto' }}
         className="eui-textBreakWord"
@@ -209,7 +210,7 @@ export function QueryError(props: { queryStatus: QueryStatus }) {
         <EuiText size="s">
           <p>
             <strong>
-              {i18n.translate('data.query.languageService.queryResults.message', {
+              {i18n.translate('explore.queryPanel.queryResults.message', {
                 defaultMessage: `Message:`,
               })}
             </strong>{' '}
