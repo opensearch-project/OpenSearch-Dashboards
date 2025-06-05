@@ -3,13 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  buildExpression,
-  buildExpressionFunction,
-  ExpressionFunctionOpenSearchDashboards,
-  IExpressionLoaderParams,
-} from '../../../../../expressions/public';
-import { IndexPattern } from '../../../../../data/public';
 import { LineChartStyleControls } from './line_vis_config';
 import { VisColumn } from '../types';
 import {
@@ -28,7 +21,7 @@ import {
  * @param styles The style options
  * @returns The Vega spec for a simple line chart
  */
-const createSimpleLineChart = (
+export const createSimpleLineChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
@@ -103,7 +96,7 @@ const createSimpleLineChart = (
  * @param styles The style options
  * @returns The Vega spec for a combined line and bar chart
  */
-const createLineBarChart = (
+export const createLineBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
@@ -230,7 +223,7 @@ const createLineBarChart = (
  * @param styles The style options
  * @returns The Vega spec for a multi-line chart
  */
-const createMultiLineChart = (
+export const createMultiLineChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
@@ -320,7 +313,7 @@ const createMultiLineChart = (
  * @param styles The style options
  * @returns The Vega spec for a faceted multi-line chart
  */
-const createFacetedMultiLineChart = (
+export const createFacetedMultiLineChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
@@ -455,121 +448,4 @@ const createFacetedMultiLineChart = (
       ],
     },
   };
-};
-
-/**
- * Create a Vega line chart specification based on the provided data and columns
- * @param transformedData The transformed data
- * @param numericalColumns The numerical columns
- * @param categoricalColumns The categorical columns
- * @param dateColumns The date columns
- * @param styleOptions The style options
- * @returns The Vega spec for the appropriate chart type
- */
-const createVegaLineSpec = (
-  transformedData?: Array<Record<string, any>>,
-  numericalColumns?: VisColumn[],
-  categoricalColumns?: VisColumn[],
-  dateColumns?: VisColumn[],
-  styleOptions?: Partial<LineChartStyleControls>
-): any => {
-  // Validate inputs
-  if (!transformedData || transformedData.length === 0) {
-    return null;
-  }
-
-  // Get column counts
-  const numMetrics = numericalColumns?.length || 0;
-  const numCategories = categoricalColumns?.length || 0;
-  const numDates = dateColumns?.length || 0;
-
-  const styles = { ...styleOptions };
-
-  // Rule 1: 1 Metric & 1 Date → Line Chart
-  if (numMetrics === 1 && numDates === 1 && numCategories === 0) {
-    return createSimpleLineChart(transformedData, numericalColumns!, dateColumns!, styles);
-  }
-
-  // Rule 2: 2 Metrics & 1 Date → Line + Bar Chart
-  else if (numMetrics === 2 && numDates === 1 && numCategories === 0) {
-    return createLineBarChart(transformedData, numericalColumns!, dateColumns!, styles);
-  }
-
-  // Rule 3: 1 Metric & 1 Date & 1 Categorical → Multi-line Chart
-  else if (numMetrics === 1 && numDates === 1 && numCategories === 1) {
-    return createMultiLineChart(
-      transformedData,
-      numericalColumns!,
-      categoricalColumns!,
-      dateColumns!,
-      styles
-    );
-  }
-
-  // Rule 4: 1 Metric & 1 Date & 2 Categorical → Faceted Multi-line Chart
-  else if (numMetrics === 1 && numDates === 1 && numCategories === 2) {
-    return createFacetedMultiLineChart(
-      transformedData,
-      numericalColumns!,
-      categoricalColumns!,
-      dateColumns!,
-      styles
-    );
-  }
-
-  // No matching rule found
-  return null;
-};
-
-/**
- * Convert the visualization configuration to an expression
- * @param searchContext The search context
- * @param indexPattern The index pattern
- * @param transformedData The transformed data
- * @param numericalColumns The numerical columns
- * @param categoricalColumns The categorical columns
- * @param dateColumns The date columns
- * @param styleOptions The style options
- * @returns The expression string
- */
-export const toExpression = async (
-  searchContext: IExpressionLoaderParams['searchContext'],
-  indexPattern: IndexPattern,
-  transformedData?: Array<Record<string, any>>,
-  numericalColumns?: VisColumn[],
-  categoricalColumns?: VisColumn[],
-  dateColumns?: VisColumn[],
-  styleOptions?: Partial<LineChartStyleControls>
-): Promise<string> => {
-  if (
-    !indexPattern ||
-    !searchContext ||
-    !JSON.stringify(searchContext.query).toLowerCase().includes('stats') // Empty visualization if query is not aggregated
-  ) {
-    return '';
-  }
-
-  const opensearchDashboards = buildExpressionFunction<ExpressionFunctionOpenSearchDashboards>(
-    'opensearchDashboards',
-    {}
-  );
-  const opensearchDashboardsContext = buildExpressionFunction('opensearch_dashboards_context', {
-    timeRange: JSON.stringify(searchContext.timeRange || {}),
-    filters: JSON.stringify(searchContext.filters || []),
-    query: JSON.stringify(searchContext.query || []),
-  });
-
-  const vegaSpec = createVegaLineSpec(
-    transformedData,
-    numericalColumns,
-    categoricalColumns,
-    dateColumns,
-    styleOptions
-  );
-
-  const vega = buildExpressionFunction<any>('vega', {
-    spec: JSON.stringify(vegaSpec),
-  });
-
-  return buildExpression([opensearchDashboards, opensearchDashboardsContext, vega]).toString();
 };

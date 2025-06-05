@@ -11,12 +11,13 @@ import { useDiscoverContext } from '../../application/legacy/discover/applicatio
 import { SearchData } from '../../application/legacy/discover/application/view_components/utils';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { LineChartStyleControls } from './line/line_vis_config';
-import { visualizationRegistry } from './visualization_registry';
-import { lineChartRule } from './line/line_chart_rules';
+import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { Visualization } from './visualization';
 import { getVisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
+import { VisColumn } from './types';
+import { toExpression } from './utils/to_expression';
 
 export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -27,9 +28,6 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
     expressions: { ReactExpressionRenderer },
   } = services;
   const { indexPattern } = useDiscoverContext();
-
-  // Register all rules, first one have the highest priority, start with this/add more notes
-  visualizationRegistry.registerRule(lineChartRule);
 
   const [visualizationData, setVisualizationData] = useState<VisualizationTypeResult | undefined>(
     undefined
@@ -67,12 +65,43 @@ export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
   // Hook to generate the expression based on the visualization type and data
   useEffect(() => {
     async function loadExpression() {
-      if (!rows || !indexPattern || !visualizationData) {
+      if (!rows || !indexPattern || !visualizationData || !visualizationData.ruleId) {
         return;
       }
-      const exp = await visualizationData.visualizationType?.toExpression(
+
+      // Get the selected chart type
+      const selectedChartType = visualizationData.visualizationType?.type || 'line';
+
+      // Get the selected rule id
+      const rule = ALL_VISUALIZATION_RULES.find((r) => r.id === visualizationData.ruleId);
+
+      if (!rule || !rule.toExpression) {
+        return;
+      }
+
+      // Create a function that call the specific rule's toExpression method
+      const ruleBasedToExpressionFn = (
+        transformedData: Array<Record<string, any>>,
+        numericalColumns: VisColumn[],
+        categoricalColumns: VisColumn[],
+        dateColumns: VisColumn[],
+        styleOpts: any
+      ) => {
+        return rule.toExpression!(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOpts,
+          selectedChartType
+        );
+      };
+
+      // Create a complete expression using the toExpression function including the OpenSearch Dashboards context and the Vega spec
+      const exp = await toExpression(
         searchContext,
         indexPattern,
+        ruleBasedToExpressionFn,
         visualizationData.transformedData,
         visualizationData.numericalColumns,
         visualizationData.categoricalColumns,
