@@ -7,6 +7,7 @@ import React, { useRef, useState, useCallback } from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { EditToobar } from './edit_toolbar';
+import { EditorType } from './types';
 
 export interface ReusableEditorProps {
   value: string;
@@ -20,7 +21,7 @@ export interface ReusableEditorProps {
   isReadOnly: boolean;
   editorConfig: any;
   placeholder?: React.ReactNode;
-  editorType?: 'query' | 'prompt';
+  editorType?: EditorType;
   height?: number;
 }
 
@@ -48,7 +49,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   placeholder,
   editText = 'Edit',
   clearText = 'Clear',
-  height = 32,
+  height = 32, // default height
   editorType = 'query',
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -152,7 +153,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         style={{
           borderBottom: editorIsFocused && !isReadOnly ? '1px solid #006BB4' : undefined,
         }}
-        data-test-subj={`osd${editorType}Editor__multiLine`}
+        data-test-subj={`explore${editorType}Editor__multiLine`}
       >
         <CodeEditor
           height={editorHeight}

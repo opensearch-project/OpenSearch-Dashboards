@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LanguageType } from '../../components/editor_stack/shared';
+import { LanguageType } from '../../types';
 
 export interface DetectionResult {
   type: LanguageType;
@@ -21,7 +21,7 @@ interface ScoreResult {
 export class QueryTypeDetector {
   private pplStartPatterns: RegExp[];
   private pplPipePatterns: RegExp[];
-  private nlStarters: RegExp[];
+  private nlStarters: RegExp[]; // nl: NATURAL LANGUAGE
 
   constructor() {
     this.pplStartPatterns = [
@@ -44,24 +44,24 @@ export class QueryTypeDetector {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) {
       return {
-        type: 'nl',
+        type: LanguageType.Natural,
         confidence: 0,
         reason: 'Empty query',
         warnings: ['No input provided'],
       };
     }
 
-    const scores: Record<'ppl' | 'kv' | 'nl', ScoreResult> = {
+    const scores: Record<LanguageType, ScoreResult> = {
       ppl: this._checkPpl(trimmedQuery),
-      kv: this._checkKeyValue(trimmedQuery),
-      nl: this._checkNaturalLanguage(trimmedQuery),
+      keyvalue: this._checkKeyValue(trimmedQuery),
+      natural: this._checkNaturalLanguage(trimmedQuery),
     };
 
     const sorted = (Object.keys(scores) as Array<keyof typeof scores>).sort(
       (a, b) => scores[b].score - scores[a].score
     );
     const best = sorted[0];
-    const fallback = scores[best].score < 0.4 ? 'nl' : best;
+    const fallback = scores[best].score < 0.4 ? LanguageType.Natural : best;
 
     return {
       type: fallback,

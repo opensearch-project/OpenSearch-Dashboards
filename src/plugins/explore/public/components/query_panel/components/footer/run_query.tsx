@@ -6,6 +6,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 
+// TODO: This component will be fully functional once integrated with query services.
 interface RunQueryButtonProps {
   onClick: () => void;
   isDisabled?: boolean;

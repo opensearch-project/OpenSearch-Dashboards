@@ -5,6 +5,9 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiButtonIcon, EuiContextMenu } from '@elastic/eui';
 
+// TODO: This language switcher is not p0 scope.
+// This can be integrate or removed depend on future scope possibilty.
+
 export const SwitchLanguage: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('PPL'); // Default language

@@ -4,6 +4,7 @@
  */
 
 // TODO: Integrate with saved queries service and update with real saved queries in list and  modify ui too.
+// This component will be fully functional once integrated with query services.
 import React, { useState } from 'react';
 import {
   EuiPopover,

@@ -3,24 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import moment from 'moment';
+import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import { RecentQueriesTableProps, RecentQueryItem, RecentQueryTableItem } from '../../../types';
+import { LanguageType } from '../../../types';
 
 export const MAX_RECENT_QUERY_SIZE = 10;
 
 export function RecentQueriesTable({
   onClickRecentQuery,
   isVisible,
-  languageType,
+  languageType, // TODO: Integrate the langType with filter if required once integration done
 }: RecentQueriesTableProps) {
   // Mock recent queries data
+  // TODO: Remove this once session queries integrated
   const recentQueries: RecentQueryItem[] = [
     {
       id: 1,
       query: {
         query: 'source=logs | where status=200',
-        language: 'ppl',
+        language: LanguageType.PPL,
         prompt: 'Get logs with status 200',
       },
 
@@ -31,7 +33,7 @@ export function RecentQueriesTable({
       id: 2,
       query: {
         query: 'source=metrics | stats avg(cpu) by host',
-        language: 'ppl',
+        language: LanguageType.PPL,
         prompt: 'Give me the average CPU usage by host',
       },
 
@@ -42,7 +44,7 @@ export function RecentQueriesTable({
       id: 3,
       query: {
         query: 'source=metrics | where error=500',
-        language: 'kv',
+        language: LanguageType.KeyValue,
         prompt: 'Give me the average CPU usage by host',
       },
       timeRange: { from: 'now-24h', to: 'now' },

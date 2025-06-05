@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// TODO: Basic setup for actions registry, this is not scope for P0.
+// Make changes if required after P0 and test with external plugins.
+
 export interface QueryBarAction {
   label: string;
   onClick: () => void;
@@ -25,21 +28,19 @@ export class QueryBarActionsRegistry {
 }
 
 // export const queryBarActionsRegistry = new QueryBarActionsRegistry();
+
+// TODO: This is mock data for storybook demo, replace this above line commented.
 export const queryBarActionsRegistry = {
   getAll: () => [
     {
       label: 'Set up an alert from query',
       iconType: 'bell', // Icon for alert
-      onClick: () => {
-        // console.log('Set up an alert from query clicked');
-      },
+      onClick: () => {},
     },
     {
       label: 'Suggest anomaly detection',
       iconType: 'anomalyDetection', // Icon for anomaly detection
-      onClick: () => {
-        // console.log('Suggest anomaly detection clicked');
-      },
+      onClick: () => {},
     },
   ],
 };
