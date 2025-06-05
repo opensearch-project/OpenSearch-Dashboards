@@ -16,10 +16,10 @@ import {
   EuiBasicTableColumn,
   EuiButtonIcon,
 } from '@elastic/eui';
-import React, { useCallback, useState, useRef } from 'react';
+import { of } from 'rxjs';
+import React, { useCallback, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce, useObservable } from 'react-use';
-import { of } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TopNavControlComponentData } from 'src/plugins/navigation/public';
@@ -73,10 +73,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const { HeaderControl } = navigation.ui;
   const workspaceClient = useObservable(workspaces.client$);
   const DataSourceAssociation = workspaceClient?.ui().DataSourceAssociation;
-  const defaultDataSourceIdRef = useRef(
-    uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)
-  );
-  const defaultDataSourceId = useObservable(defaultDataSourceIdRef.current);
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
   /* Component state variables */
@@ -92,7 +88,22 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
-  const previousDataSourcesRef = useRef(0);
+
+  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>();
+
+  const loadDefaultDataSourceId = useCallback(async () => {
+    try {
+      const scope = currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
+      const id = await uiSettings.getUserProvidedWithScope<string | null>(
+        DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+        scope
+      );
+
+      setDefaultDataSourceId(id);
+    } catch (error) {
+      notifications.toasts.addWarning(error.message);
+    }
+  }, [uiSettings, currentWorkspace, notifications.toasts]);
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -110,18 +121,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         setIsLoading(false);
       }
     })();
+    loadDefaultDataSourceId();
   });
-
-  const associateDataSourceButton = DataSourceAssociation && [
-    {
-      renderComponent: (
-        <DataSourceAssociation
-          excludedDataSourceIds={dataSources.map((ds) => ds.id)}
-          onComplete={() => fetchDataSources()}
-        />
-      ),
-    } as TopNavControlComponentData,
-  ];
 
   /* Toast Handlers */
   const handleDisplayToastMessage = useCallback(
@@ -164,18 +165,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         true
       );
       setDataSources(finalData);
-
-      // If all data sources have been deleted and new ones are being associated,
-      // we need to ensure a default data source is set.
-      if (previousDataSourcesRef.current === 0 && finalData.length >= 1) {
-        await setFirstDataSourceAsDefault(
-          savedObjects.client,
-          uiSettings,
-          true,
-          currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
-        );
-      }
-      previousDataSourcesRef.current = finalData.length;
     } catch (error) {
       setDataSources([]);
       handleDisplayToastMessage({
@@ -186,14 +175,24 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    handleDisplayToastMessage,
-    http,
-    uiSettings,
-    notifications,
-    savedObjects.client,
-    currentWorkspace,
-  ]);
+  }, [handleDisplayToastMessage, http, notifications, savedObjects.client]);
+
+  const handleOnDataSourceUpdated = useCallback(async () => {
+    await fetchDataSources();
+    await loadDefaultDataSourceId();
+  }, [fetchDataSources, loadDefaultDataSourceId]);
+
+  const associateDataSourceButton = DataSourceAssociation && [
+    {
+      renderComponent: (
+        <DataSourceAssociation
+          excludedDataSourceIds={dataSources.map((ds) => ds.id)}
+          onComplete={handleOnDataSourceUpdated}
+          // defaultDataSourceId={defaultDataSourceId}
+        />
+      ),
+    } as TopNavControlComponentData,
+  ];
 
   const onDissociate = useCallback(
     async (item: DataSourceTableItem | DataSourceTableItem[]) => {
@@ -220,6 +219,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
               true,
               UiSettingScope.WORKSPACE
             );
+            await loadDefaultDataSourceId();
           }
         }
       }
@@ -229,9 +229,10 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       defaultDataSourceId,
       fetchDataSources,
       overlays,
+      workspaceClient,
       savedObjects.client,
       uiSettings,
-      workspaceClient,
+      loadDefaultDataSourceId,
     ]
   );
 
@@ -438,7 +439,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     setIsDeleting(true);
 
     deleteMultipleDataSources(savedObjects.client, selectedDataSources)
-      .then(() => {
+      .then(async () => {
         setSelectedDataSources([]);
         // Fetch data sources
         fetchDataSources();
@@ -473,6 +474,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
             true,
             currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
           );
+          await loadDefaultDataSourceId();
           break;
         }
       }
@@ -603,6 +605,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
                 item.id,
                 UiSettingScope.WORKSPACE
               );
+              setDefaultDataSourceId(item.id);
             }}
           />
         );

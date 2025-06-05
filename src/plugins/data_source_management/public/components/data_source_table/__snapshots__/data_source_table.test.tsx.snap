@@ -3593,6 +3593,206 @@ exports[`DataSourceTable should handle datasources with empty description correc
             ],
             Array [
               Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
                 "pathname": "test-no-description",
               },
             ],
@@ -3623,6 +3823,166 @@ exports[`DataSourceTable should handle datasources with empty description correc
             ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
             Object {
               "type": "return",
               "value": undefined,
@@ -7041,8 +7401,296 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
                 "pathname": "test1",
               },
             ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
             Object {
               "type": "return",
               "value": undefined,

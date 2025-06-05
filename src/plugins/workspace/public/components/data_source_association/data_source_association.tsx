@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@osd/i18n';
-import { useObservable } from 'react-use';
+import { useObservable, useEffectOnce } from 'react-use';
 import { of } from 'rxjs';
 import { OverlayRef } from '../../../../../../src/core/public';
 import {
@@ -26,14 +26,21 @@ import {
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
   DATA_SOURCE_SAVED_OBJECT_TYPE,
 } from '../../../../data_source/common';
+import { UiSettingScope } from '../../../../../core/public';
 
 interface Props {
   excludedDataSourceIds: string[];
   onComplete?: () => void;
   onError?: () => void;
+  defaultDataSourceId?: string | null;
 }
 
-export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onError }: Props) => {
+export const DataSourceAssociation = ({
+  excludedDataSourceIds,
+  onComplete,
+  onError,
+  defaultDataSourceId,
+}: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const associationModalRef = useRef<OverlayRef>();
 
@@ -44,6 +51,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
     notifications,
     overlays,
     workspaces,
+    uiSettings,
   } = useOpenSearchDashboards().services;
   const workspaceClient = useObservable(workspaces?.client$ ?? of(null));
   const currentWorkspaceId = useObservable(workspaces?.currentWorkspaceId$ ?? of(null));
@@ -68,6 +76,10 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
 
           if (res.success) {
             failedCount = res.result.filter((r) => !!r.error).length;
+            if (!defaultDataSourceId && uiSettings) {
+              // If a default data source is not already set, automatically set the first selected data source as default.
+              await uiSettings.set('defaultDataSource', objects[0].id, UiSettingScope.WORKSPACE);
+            }
           } else {
             // If failed to workspaceClient.associate, all data sources association is failed
             failedCount = objects.length;
@@ -106,7 +118,15 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
         }
       }
     },
-    [workspaceClient, currentWorkspaceId, notifications, onComplete, onError]
+    [
+      workspaceClient,
+      currentWorkspaceId,
+      notifications,
+      onComplete,
+      onError,
+      defaultDataSourceId,
+      uiSettings,
+    ]
   );
 
   const showAssociationModal = useCallback(

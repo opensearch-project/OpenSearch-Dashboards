@@ -69,7 +69,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
         Promise.resolve(getMappedDataSources)
       );
       spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
-      spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
       await act(async () => {
         component = await mount(
           wrapWithIntl(
@@ -302,7 +302,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
       );
       spyOn(utils, 'getDataConnections').and.returnValue(Promise.resolve(mockedDataConnections));
       spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
-      spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
       const context = {
         ...mockedContext,
         application: {

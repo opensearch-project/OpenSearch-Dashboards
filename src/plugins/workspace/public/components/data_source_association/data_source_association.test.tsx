@@ -209,4 +209,41 @@ describe('<DataSourceAssociation />', () => {
       );
     });
   });
+
+  it('should set first data source as selected when associate and there is not a default data source', async () => {
+    const associateMock = jest.fn().mockResolvedValue({
+      success: true,
+      // id1 failed to associate with error
+      result: [{ id: 'id1', error: new Error() }, { id: 'id2' }],
+    });
+    servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
+      associate: associateMock,
+      copy: jest.fn(),
+      dissociate: jest.fn(),
+      ui: jest.fn(),
+    });
+    servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
+    spyOn(servicesMock.uiSettings, 'set').and.returnValue(true);
+
+    (AssociationDataSourceModalContent as jest.Mock).mockImplementation((props: any) => (
+      <button
+        onClick={() =>
+          props.handleAssignDataSourceConnections([
+            { id: 'id1', connectionType: DataSourceConnectionType.OpenSearchConnection },
+            { id: 'id2', connectionType: DataSourceConnectionType.OpenSearchConnection },
+          ])
+        }
+      >
+        Mocked association button
+      </button>
+    ));
+
+    render(<DataSourceAssociation excludedDataSourceIds={[]} defaultDataSourceId={null} />);
+    fireEvent.click(screen.getByTestId('workspaceAssociateDataSourceButton'));
+    fireEvent.click(screen.getByText('OpenSearch data sources'));
+    fireEvent.click(screen.getByText('Mocked association button'));
+    await waitFor(() => {
+      expect(servicesMock.uiSettings.set).toHaveBeenCalled();
+    });
+  });
 });
