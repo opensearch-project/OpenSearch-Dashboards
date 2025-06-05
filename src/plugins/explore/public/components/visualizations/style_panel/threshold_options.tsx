@@ -89,7 +89,7 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
             <EuiFieldNumber
               value={thresholdLine.value}
               onChange={(e) => updateThresholdOption('value', parseFloat(e.target.value) || 0)}
-              data-test-subj="thresholdValue"
+              data-test-subj="exploreVisThresholdValue"
             />
           </EuiFormRow>
 
@@ -101,7 +101,7 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
             <EuiColorPicker
               color={thresholdLine.color}
               onChange={(color) => updateThresholdOption('color', color)}
-              data-test-subj="thresholdColor"
+              data-test-subj="exploreVisThresholdColor"
             />
           </EuiFormRow>
 
@@ -114,7 +114,7 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
               options={lineStyleOptions}
               value={thresholdLine.style}
               onChange={(e) => updateThresholdOption('style', e.target.value)}
-              data-test-subj="thresholdStyle"
+              data-test-subj="exploreVisThresholdStyle"
             />
           </EuiFormRow>
 
@@ -134,7 +134,7 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
                     updateThresholdOption('width', parseInt(e.currentTarget.value, 10))
                   }
                   showValue
-                  data-test-subj="thresholdWidth"
+                  data-test-subj="exploreVisThresholdWidth"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -41,6 +41,25 @@ export const getVegaInterpolation = (lineMode: string): string => {
   }
 };
 
+type VegaLiteMarkConfig =
+  | {
+      type: 'bar';
+      opacity: number;
+      tooltip: boolean;
+    }
+  | {
+      type: 'point';
+      tooltip: boolean;
+      size: number;
+    }
+  | {
+      type: 'line';
+      tooltip: boolean;
+      strokeWidth: number;
+      interpolate: string;
+      point?: boolean;
+    };
+
 /**
  * Build proper Vega-Lite mark configuration
  * @param styles The style options
@@ -50,7 +69,7 @@ export const getVegaInterpolation = (lineMode: string): string => {
 export const buildMarkConfig = (
   styles: Partial<LineChartStyleControls> | undefined,
   markType: 'line' | 'bar' = 'line'
-): any => {
+): VegaLiteMarkConfig => {
   // Default values - handle undefined styles object
   const showLine = styles?.showLine !== false;
   const showDots = styles?.showDots !== false;
@@ -92,7 +111,7 @@ export const buildMarkConfig = (
       interpolate: getVegaInterpolation(lineMode),
     };
   } else {
-    // Neither line nor dots - fallback to points
+    // Toggle off both line and dots - show empty
     return {
       type: 'point',
       tooltip: addTooltip,
@@ -169,15 +188,20 @@ export const createTimeMarkerLayer = (styles: Partial<LineChartStyleControls> | 
   };
 };
 
+export enum ValueAxisPosition {
+  Left = 0,
+  Right = 1,
+}
+
 /**
  * Apply grid and axis styling
- * @param axis The base axis configuration
+ * @param baseAxis The base axis configuration
  * @param styles The style options
  * @param axisType The axis type ('category' or 'value')
  * @param numericalColumns The numerical columns
  * @param categoricalColumns The categorical columns
  * @param dateColumns The date columns
- * @param axisIndex The index of the value axis (0 for left, 1 for right)
+ * @param axisIndex The position of the value axis; default value axis is at left
  * @returns The styled axis configuration
  */
 export const applyAxisStyling = (
@@ -187,7 +211,7 @@ export const applyAxisStyling = (
   numericalColumns?: VisColumn[],
   categoricalColumns?: VisColumn[],
   dateColumns?: VisColumn[],
-  axisIndex: number = 0 // Add axis index parameter with default value
+  axisIndex: ValueAxisPosition = ValueAxisPosition.Left
 ): any => {
   if (!styles) return baseAxis;
 

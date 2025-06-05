@@ -17,7 +17,7 @@ export const Option: FC<Props> = ({ title, children }) => {
         id={title}
         buttonContent={title}
         className="dvOption"
-        data-test-subj={`dvOption-${title.replace(/\s+/g, '-')}`}
+        data-test-subj={`explore-dvOption-${title.replace(/\s+/g, '-')}`}
       >
         <EuiSpacer size="s" />
         <EuiPanel color="subdued" className="dvOption__panel">

@@ -11,6 +11,7 @@ import {
   createTimeMarkerLayer,
   applyAxisStyling,
   getStrokeDash,
+  ValueAxisPosition,
 } from './line_chart_utils';
 
 /**
@@ -138,7 +139,7 @@ export const createLineBarChart = (
           numericalColumns,
           [],
           dateColumns,
-          0 // First value axis (left)
+          ValueAxisPosition.Left // First value axis which is on the left
         ),
       },
       color: {
@@ -173,7 +174,7 @@ export const createLineBarChart = (
           numericalColumns,
           [],
           dateColumns,
-          1 // Second value axis (right)
+          ValueAxisPosition.Right // Second value axis which is on the right
         ),
         scale: { zero: false },
       },
