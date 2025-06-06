@@ -1,0 +1,2 @@
+feat:
+- Keep backward compatibility for UI setting client ([#9854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9854))
