@@ -5,12 +5,12 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { EditToobar } from './edit_toolbar';
+import { EditToolbar } from './edit_toolbar';
 
 describe('EditToolbar', () => {
   it('renders edit and clear buttons', () => {
     render(
-      <EditToobar
+      <EditToolbar
         onClearEditor={jest.fn()}
         onEditClick={jest.fn()}
         editText="Edit"
@@ -24,7 +24,7 @@ describe('EditToolbar', () => {
   it('calls handleEditClick when edit is clicked', () => {
     const handleEditClick = jest.fn();
     render(
-      <EditToobar
+      <EditToolbar
         onClearEditor={jest.fn()}
         onEditClick={handleEditClick}
         editText="Edit"
@@ -38,7 +38,7 @@ describe('EditToolbar', () => {
   it('calls handleClearEditor when clear is clicked', () => {
     const handleClearEditor = jest.fn();
     render(
-      <EditToobar
+      <EditToolbar
         onClearEditor={handleClearEditor}
         onEditClick={jest.fn()}
         editText="Edit"

@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
 
 // TODO: Add storybook for this in next phase
-interface EditToobarProps {
+interface EditToolbarProps {
   className?: string;
   onClearEditor: () => void;
   onEditClick: () => void;
@@ -15,7 +15,7 @@ interface EditToobarProps {
   clearText: string;
 }
 
-export const EditToobar: React.FC<EditToobarProps> = ({
+export const EditToobar: React.FC<EditToolbarProps> = ({
   className = 'promptEditor__editOverlay',
   onClearEditor,
   onEditClick,
