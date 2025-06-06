@@ -40,7 +40,7 @@ export const mockInitializerContext = {
       (): ConfigSchema => ({
         manageableBy: 'all',
         dataSourceAdmin: { groups: [] as string[] },
-        dashboardDirectQuerySyncEnabled: false,
+        directQuerySyncEnabled: false,
       })
     ),
   },

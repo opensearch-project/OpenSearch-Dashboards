@@ -15,7 +15,7 @@ export const configSchema = schema.object({
       defaultValue: [],
     }),
   }),
-  dashboardDirectQuerySyncEnabled: schema.boolean({
+  directQuerySyncEnabled: schema.boolean({
     defaultValue: false,
   }),
 });

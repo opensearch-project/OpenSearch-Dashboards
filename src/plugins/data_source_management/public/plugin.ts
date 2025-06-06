@@ -335,7 +335,7 @@ export class DataSourceManagementPlugin
       if (urlFlag !== null) {
         return urlFlag;
       }
-      return this.config.dashboardDirectQuerySyncEnabled;
+      return this.config.directQuerySyncEnabled;
     };
 
     const updateBanner = () => {
