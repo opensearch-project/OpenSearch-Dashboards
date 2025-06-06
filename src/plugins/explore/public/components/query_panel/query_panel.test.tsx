@@ -7,6 +7,8 @@ import React from 'react';
 import { render, fireEvent, screen, act } from '@testing-library/react';
 import { QueryPanel } from './index';
 
+// TODO: Add more test cases once api and services integrated.
+
 jest.mock('./layout', () => ({
   QueryPanelLayout: ({ children, footer }: any) => (
     <div>
@@ -28,10 +30,10 @@ jest.mock('./components/editor_stack', () => ({
   ),
 }));
 jest.mock('./components/footer/index', () => ({
-  QueryEditorFooter: (props: any) => (
+  QueryPanelFooter: (props: any) => (
     <div data-test-subj="footer-mock">
-      <button onClick={props.handleRunClick}>Run query</button>
-      <button onClick={props.handleRecentClick}>Recent Queries</button>
+      <button onClick={props.onRunClick}>Run query</button>
+      <button onClick={props.onRecentClick}>Recent Queries</button>
       {props.lineCount !== undefined && (
         <span data-test-subj="line-count">{props.lineCount} lines</span>
       )}
