@@ -41,10 +41,8 @@ import { setUsageCollector } from './application/legacy/data_explorer/services';
 import { DataExplorerServices } from './application/legacy/data_explorer';
 import { getPreloadedStore } from './application/legacy/data_explorer/utils/state_management';
 import { ExploreStart, DiscoverStartPlugins } from './application/legacy/discover/types';
-import { DocViewsRegistry } from './application/legacy/discover/application/doc_views/doc_views_registry';
+import { DocViewsRegistry } from './types/doc_views_types';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
-import { JsonCodeBlock } from './application/legacy/discover/application/components/json_code_block/json_code_block';
-import { DocViewTable } from './application/legacy/discover/application/components/table/table';
 import {
   getServices,
   setDocViewsLinksRegistry,
@@ -62,6 +60,8 @@ import { buildServices } from './application/legacy/discover/build_services';
 import { createSavedExploreLoader } from '.';
 import { isNavGroupInFeatureConfigs } from '../../../core/public';
 import { ExploreUrlGenerator } from './url_generator';
+import { DocViewTable } from './components/doc_viewer/doc_viewer_table/table';
+import { JsonCodeBlock } from './components/doc_viewer/json_code_block/json_code_block';
 
 export class ExplorePlugin
   implements
