@@ -7,7 +7,7 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { EditToobar } from './edit_toolbar';
 
-describe('EditToobar', () => {
+describe('EditToolbar', () => {
   it('renders edit and clear buttons', () => {
     render(
       <EditToobar
