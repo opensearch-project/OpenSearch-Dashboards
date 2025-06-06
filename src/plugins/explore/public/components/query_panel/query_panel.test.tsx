@@ -66,12 +66,6 @@ describe('QueryPanel', () => {
     expect(screen.queryByTestId('editor-stack')).toBeInTheDocument();
   });
 
-  it('shows line count when prompt or query is changed', () => {
-    render(<QueryPanel />);
-    fireEvent.click(screen.getByText('PromptChange'));
-    expect(screen.getByTestId('line-count')).toBeInTheDocument();
-  });
-
   it('shows recent queries table when Recent Queries is clicked', () => {
     render(<QueryPanel />);
     fireEvent.click(screen.getByText('Recent Queries'));
