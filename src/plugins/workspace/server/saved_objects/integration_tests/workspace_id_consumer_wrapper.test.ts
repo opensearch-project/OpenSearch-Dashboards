@@ -432,6 +432,39 @@ describe('workspace_id_consumer integration test', () => {
       });
     });
 
+    it('should return all data source when find with * out a workspace', async () => {
+      // Create a data source with workspace context
+      const createResult1 = await createDataSource('ds1');
+      const createResult2 = await createDataSource('ds2');
+      const dsId1 = createResult1.body.id;
+      const dsId2 = createResult2.body.id;
+
+      // Find all data sources with wildcard workspace
+      const findResult = await osdTestServer.request
+        .get(root, `/api/saved_objects/_find?type=data-source&workspaces=*`)
+        .expect(200);
+
+      // Verify the data source is returned
+      expect(findResult.body.total).toEqual(2);
+
+      const datasourceIdSet = new Set(
+        findResult.body.saved_objects.map((obj: SavedObject) => obj.id)
+      );
+
+      expect(datasourceIdSet.has(dsId1)).toBe(true);
+      expect(datasourceIdSet.has(dsId2)).toBe(true);
+
+      // Clean up
+      await deleteItem({
+        type: 'data-source',
+        id: dsId1,
+      });
+      await deleteItem({
+        type: 'data-source',
+        id: dsId2,
+      });
+    });
+
     it('should return error when find with a not existing workspace', async () => {
       const findResult = await osdTestServer.request
         .get(root, `/w/not_exist_workspace_id/api/saved_objects/_find?type=${dashboard.type}`)
