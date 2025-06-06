@@ -88,7 +88,7 @@
 
       /* stylelint-disable  @osd/stylelint/no_restricted_values */
       &.promptEditor--focused::after {
-        content: '';
+        content: "";
         position: absolute;
         bottom: 0;
         left: 0;
