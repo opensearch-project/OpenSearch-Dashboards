@@ -145,11 +145,13 @@ describe('ui settings', () => {
       };
       const { uiSettings } = setup({ defaults });
 
-      try {
-        await uiSettings.setMany({ one: 'value', user: 'val', workspace: 'value' });
-      } catch (error) {
-        expect(error.message).toBe('Unable to update "workspace", because it has multiple scopes');
-      }
+      await expect(
+        async () => await uiSettings.setMany({ one: 'value', user: 'val', workspace: 'value' })
+      ).not.toThrow();
+
+      expect(logger.warn).toBeCalledWith(
+        'Deprecation warning: Setting "workspace" with multiple scopes is deprecated. Please specify a single scope instead.'
+      );
     });
 
     it('automatically creates the savedConfig if it is missing', async () => {
