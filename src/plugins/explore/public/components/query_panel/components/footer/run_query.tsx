@@ -27,6 +27,7 @@ export const RunQueryButton: React.FC<RunQueryButtonProps> = ({
       data-test-subj="queryPanelFooterRunQueryButton"
       size="s"
       isLoading={isLoading}
+      style={{ marginLeft: '4px' }}
     >
       {i18n.translate('explore.queryPanel.runQueryButton.label', {
         defaultMessage: 'Run query',

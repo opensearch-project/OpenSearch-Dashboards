@@ -55,7 +55,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
         wrap
       >
         {/* Left Section */}
-        <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+        <EuiFlexItem grow={1} className="queryPanel__footer__minWidth0">
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={true} wrap>
             <EuiFlexItem grow={false}>
               <ShowFieldToggle
@@ -126,15 +126,15 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
         </EuiFlexItem>
 
         {/* Right Section */}
-        <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+        <EuiFlexItem grow={false} className="queryPanel__footer__minWidth0">
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={true} wrap>
-            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <EuiFlexItem grow={false} className="queryPanel__footer__minWidth0">
               <Actions />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <EuiFlexItem grow={false} className="queryPanel__footer__dateTimeRangePickerWrapper">
               <DateTimeRangePicker />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <EuiFlexItem grow={false} className="queryPanel__footer__minWidth0">
               <RunQueryButton onClick={onRunClick} isDisabled={noInput} isLoading={isLoading} />
             </EuiFlexItem>
           </EuiFlexGroup>
