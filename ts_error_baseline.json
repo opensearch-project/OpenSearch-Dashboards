@@ -2049,7 +2049,7 @@
       "line": 91,
       "column": 41,
       "code": "TS2345",
-      "message": "Argument of type 'import(\"/home/ubuntu/OpenSearch-Dashboards/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind | import(\"/home/ubuntu/OpenSearch-Dashboards/src/plugins/data/public/autocomplete/providers/query_suggestion_provider\").QuerySuggestionTypes' is not assignable to parameter of type 'string'."
+      "message": "Argument of type 'import(\"/home/ubuntu/OpenSearch-Dashboards/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind | import(\"/home/ubuntu/OpenSearch-Dashboards/src/pl...' is not assignable to parameter of type 'string'."
     },
     {
       "file": "src/plugins/data/server/index_patterns/fetcher/lib/opensearch_api.ts",
@@ -5595,94 +5595,66 @@
     },
     {
       "file": "src/plugins/data_source_management/public/mocks.ts",
-      "line": 525,
-      "column": 12,
-      "code": "TS2322",
-      "message": "Type '{ registerAuthenticationMethod: (authMethod: AuthenticationMethod) => void; dataSourceSelection: DataSourceSelectionService; ui: { ...; }; getDefaultDataSourceId: (uiSettings?: IUiSettingsClient | undefined, scope?: UiSettingScope | undefined) => Promise<...>; getDefaultDataSourceId$: (uiSettings?: IUiSettingsClient...' is not assignable to type 'DataSourceManagementPluginSetup'."
-    },
-    {
-      "file": "src/plugins/data_source_management/public/mocks.ts",
-      "line": 532,
+      "line": 649,
       "column": 3,
       "code": "TS2322",
       "message": "Type 'DetailedReactHTMLElement<{}, HTMLElement>' is not assignable to type '(state: { [key: string]: any; }, setState: Dispatch<any>) => Element'."
     },
     {
       "file": "src/plugins/data_source_management/public/mocks.ts",
-      "line": 1009,
+      "line": 1126,
       "column": 3,
       "code": "TS2739",
       "message": "Type '{ prepend: (url: string) => string; }' is missing the following properties from type 'IBasePath': get, getBasePath, remove, serverBasePath"
     },
     {
       "file": "src/plugins/data_source_management/public/mocks.ts",
-      "line": 1079,
+      "line": 1196,
       "column": 45,
       "code": "TS2304",
       "message": "Cannot find name 'IntegrationSetupInputs'."
     },
     {
-      "file": "src/plugins/data_source_management/public/plugin.test.ts",
-      "line": 140,
-      "column": 7,
-      "code": "TS2322",
-      "message": "Type '{ sections: { section: { opensearchDashboards: { registerApp: jest.Mock<any, any>; }; }; }; }' is not assignable to type 'ManagementSetup'."
-    },
-    {
-      "file": "src/plugins/data_source_management/public/plugin.test.ts",
-      "line": 141,
-      "column": 7,
-      "code": "TS2739",
-      "message": "Type '{ columns: { register: Mock<any, any>; }; }' is missing the following properties from type '{ creation: { addCreationConfig: (Config: typeof IndexPatternCreationConfig) => void; }; list: { addListConfig: (Config: typeof IndexPatternListConfig) => void; }; fieldFormatEditors: { ...; }; environment: { ...; }; columns: IndexPatternTableColumnServiceSetup; }': creation, list, fieldFormatEditors, environment"
-    },
-    {
-      "file": "src/plugins/data_source_management/public/plugin.test.ts",
-      "line": 159,
-      "column": 7,
-      "code": "TS2322",
-      "message": "Type '{ sections: { section: { opensearchDashboards: { registerApp: jest.Mock<any, any>; }; }; }; }' is not assignable to type 'ManagementSetup'."
-    },
-    {
-      "file": "src/plugins/data_source_management/public/plugin.test.ts",
-      "line": 160,
-      "column": 7,
-      "code": "TS2322",
-      "message": "Type '{ columns: { register: jest.Mock<any, any>; }; }' is not assignable to type '{ creation: { addCreationConfig: (Config: typeof IndexPatternCreationConfig) => void; }; list: { addListConfig: (Config: typeof IndexPatternListConfig) => void; }; fieldFormatEditors: { ...; }; environment: { ...; }; columns: IndexPatternTableColumnServiceSetup; }'."
-    },
-    {
-      "file": "src/plugins/data_source_management/public/plugin.test.ts",
-      "line": 178,
-      "column": 7,
-      "code": "TS2322",
-      "message": "Type '{ sections: { section: { opensearchDashboards: { registerApp: jest.Mock<any, any>; }; }; }; }' is not assignable to type 'ManagementSetup'."
-    },
-    {
-      "file": "src/plugins/data_source_management/public/plugin.test.ts",
-      "line": 179,
-      "column": 7,
-      "code": "TS2322",
-      "message": "Type '{ columns: { register: jest.Mock<any, any>; }; }' is not assignable to type '{ creation: { addCreationConfig: (Config: typeof IndexPatternCreationConfig) => void; }; list: { addListConfig: (Config: typeof IndexPatternListConfig) => void; }; fieldFormatEditors: { ...; }; environment: { ...; }; columns: IndexPatternTableColumnServiceSetup; }'."
-    },
-    {
       "file": "src/plugins/data_source_management/public/plugin.ts",
-      "line": 113,
+      "line": 126,
       "column": 10,
       "code": "TS2416",
-      "message": "Property 'setup' in type 'DataSourceManagementPlugin' is not assignable to the same property in base type 'Plugin<DataSourceManagementPluginSetup, DataSourceManagementPluginStart, DataSourceManagementSetupDependencies, object>'."
+      "message": "Property 'setup' in type 'DataSourceManagementPlugin' is not assignable to the same property in base type 'Plugin<DataSourceManagementPluginSetup, DataSourceManagementPluginStart, DataSourceManagementSetupDependencies, Readonly<...>>'."
     },
     {
       "file": "src/plugins/data_source_management/public/plugin.ts",
-      "line": 142,
+      "line": 151,
+      "column": 7,
+      "code": "TS2322",
+      "message": "Type '(params: AppMountParameters) => Promise<() => void>' is not assignable to type 'Mount'."
+    },
+    {
+      "file": "src/plugins/data_source_management/public/plugin.ts",
+      "line": 155,
       "column": 11,
       "code": "TS2345",
       "message": "Argument of type 'StartServicesAccessor<DataSourceManagementPluginStart, unknown>' is not assignable to parameter of type 'StartServicesAccessor<DataSourceManagementStartDependencies, unknown>'."
     },
     {
       "file": "src/plugins/data_source_management/public/plugin.ts",
-      "line": 163,
+      "line": 176,
       "column": 13,
       "code": "TS2345",
       "message": "Argument of type 'StartServicesAccessor<DataSourceManagementPluginStart, unknown>' is not assignable to parameter of type 'StartServicesAccessor<DataSourceManagementStartDependencies, unknown>'."
+    },
+    {
+      "file": "src/plugins/data_source_management/public/plugin.ts",
+      "line": 201,
+      "column": 7,
+      "code": "TS2322",
+      "message": "Type 'undefined' is not assignable to type 'DataSourceManagementPluginSetup'."
+    },
+    {
+      "file": "src/plugins/data_source_management/public/plugin.ts",
+      "line": 210,
+      "column": 32,
+      "code": "TS2551",
+      "message": "Property 'registerAuthenticationMethod' does not exist on type 'IAuthenticationMethodRegistry'. Did you mean 'getAllAuthenticationMethods'?"
     },
     {
       "file": "src/plugins/data_source_management/server/adaptors/ppl_plugin.ts",
@@ -7649,7 +7621,7 @@
       "line": 333,
       "column": 11,
       "code": "TS2322",
-      "message": "Type '({ sortable: boolean; 'data-test-subj': string; abbr?: string | undefined; footer?: string | ReactElement<any, string | JSXElementConstructor<any>> | ((props: EuiTableFooterProps<...>) => ReactNode) | undefined; ... 278 more ...; hideForMobile?: boolean | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
+      "message": "Type '({ sortable: boolean; 'data-test-subj': string; hidden?: boolean | undefined; color?: string | undefined; content?: string | undefined; style?: CSSProperties | undefined; ... 276 more ...; hideForMobile?: boolean | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
     },
     {
       "file": "src/plugins/index_pattern_management/public/mocks.ts",
@@ -8741,14 +8713,14 @@
       "line": 221,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | \"image\" | \"polygon\" | \"stop\" | \"search\" | \"download\" | \"list\" | \"alert\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | \"grid\" | \"invert\" | \"dot\" | \"menu\" | \"filter\" | \"scale\" | \"wordWrap\" | ... 456 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
       "line": 224,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | \"image\" | \"polygon\" | \"stop\" | \"search\" | \"download\" | \"list\" | \"alert\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | \"grid\" | \"invert\" | \"dot\" | \"menu\" | \"filter\" | \"scale\" | \"wordWrap\" | ... 456 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
@@ -10127,14 +10099,14 @@
       "line": 47,
       "column": 50,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | ... 464 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_selector/workspace_selector.test.tsx",
       "line": 51,
       "column": 54,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"link\" | \"menu\" | \"filter\" | ... 464 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; }[]>' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/services/use_case_service.test.ts",
@@ -10144,6 +10116,6 @@
       "message": "Type 'BehaviorSubject<{ id: string; title: string; }[]>' is not assignable to type 'Observable<PublicAppInfo[]>'."
     }
   ],
-  "updatedAt": "2025-06-04T09:40:06.923Z",
+  "updatedAt": "2025-06-06T17:25:29.837Z",
   "tsconfig": "/home/ubuntu/OpenSearch-Dashboards/tsconfig.check.json"
 }
