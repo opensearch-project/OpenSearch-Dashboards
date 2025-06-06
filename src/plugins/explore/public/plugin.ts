@@ -41,10 +41,8 @@ import { setUsageCollector } from './application/legacy/data_explorer/services';
 import { DataExplorerServices } from './application/legacy/data_explorer';
 import { getPreloadedStore } from './application/legacy/data_explorer/utils/state_management';
 import { ExploreStart, DiscoverStartPlugins } from './application/legacy/discover/types';
-import { DocViewsRegistry } from './application/legacy/discover/application/doc_views/doc_views_registry';
+import { DocViewsRegistry } from './types/doc_views_types';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
-import { JsonCodeBlock } from './application/legacy/discover/application/components/json_code_block/json_code_block';
-import { DocViewTable } from './application/legacy/discover/application/components/table/table';
 import {
   getServices,
   setDocViewsLinksRegistry,
@@ -62,6 +60,12 @@ import { buildServices } from './application/legacy/discover/build_services';
 import { createSavedExploreLoader } from '.';
 import { isNavGroupInFeatureConfigs } from '../../../core/public';
 import { ExploreUrlGenerator } from './url_generator';
+import {
+  createQueryEditorExtensionConfig,
+  SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY,
+} from './components/experience_banners';
+import { DocViewTable } from './components/doc_viewer/doc_viewer_table/table';
+import { JsonCodeBlock } from './components/doc_viewer/json_code_block/json_code_block';
 
 export class ExplorePlugin
   implements
@@ -217,6 +221,12 @@ export class ExplorePlugin
       stopUrlTracker();
     };
 
+    setupDeps.data.__enhance({
+      editor: {
+        queryEditorExtension: createQueryEditorExtensionConfig(core),
+      },
+    });
+
     // Register an application into the side navigation menu
     core.application.register({
       id: PLUGIN_ID,
@@ -233,12 +243,16 @@ export class ExplorePlugin
           .pipe(take(1))
           .toPromise()
           .then((workspace) => workspace?.features);
-        // We want to limit explore UI to only show up under the observability
-        // workspace. If user lands in the explore plugin URL in a different
-        // workspace, we will redirect them to classic discover.
+        const isExploreEnabledWorkspace =
+          (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+          false;
+        // We want to limit explore UI to only show up under the explore-enabled
+        // workspaces. If user lands in the explore plugin URL in a different
+        // workspace, we will redirect them to classic discover. We will also redirect if
+        // they have manually selected classic discover
         if (
-          !features ||
-          !isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)
+          !isExploreEnabledWorkspace ||
+          !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
         ) {
           coreStart.application.navigateToApp('discover', { replace: true });
           return () => {};

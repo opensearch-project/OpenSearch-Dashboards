@@ -17,7 +17,7 @@ import { search, syncQueryStateWithUrl, UI_SETTINGS } from '../../../../../../..
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
 import { TimechartHeaderBucketInterval } from '../../components/chart/timechart_header';
 import {
   getRequestInspectorStats,
@@ -72,7 +72,7 @@ export interface SearchData {
   fetchCounter?: number;
   fieldCounts?: Record<string, number>;
   hits?: number;
-  rows?: OpenSearchSearchHit[];
+  rows?: Array<OpenSearchSearchHit<Record<string, any>>>;
   bucketInterval?: TimechartHeaderBucketInterval | {};
   chartData?: Chart;
   title?: string;

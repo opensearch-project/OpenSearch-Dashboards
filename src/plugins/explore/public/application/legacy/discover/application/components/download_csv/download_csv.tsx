@@ -9,7 +9,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_content';
 import { useDiscoverDownloadCsv } from './use_download_csv';
 import { DownloadCsvFormId } from './constants';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
 import { IndexPattern } from '../../../../../../../../data/common';
 import { useDiscoverDownloadCsvToasts } from './use_download_csv_toasts';
 

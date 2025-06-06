@@ -1,0 +1,24 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreNewExperienceBanner {
+  display: flex;
+  flex-direction: row-reverse;
+
+  &__img {
+    margin-right: $ouiSizeXS;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > .euiCallOut__closeIcon {
+    position: static;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > .euiText {
+    flex: 1;
+    margin-top: 1px;
+  }
+}

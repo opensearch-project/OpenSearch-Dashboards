@@ -40,6 +40,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
 import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../../../../data/public';
 import { FIELDS_LIMIT_SETTING } from '../../../../../../../common/legacy/discover';
 import { getServices } from '../../../opensearch_dashboards_services';
@@ -66,7 +67,7 @@ export interface DiscoverSidebarProps {
   /**
    * hits fetched from OpenSearch, displayed in the doc table
    */
-  hits: Array<Record<string, unknown>>;
+  hits: Array<OpenSearchSearchHit<Record<string, any>>>;
   /**
    * Callback function when selecting a field
    */

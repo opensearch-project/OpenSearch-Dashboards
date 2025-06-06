@@ -33,7 +33,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../../../../../../types/doc_views_types';
 
 export interface HitsCounterProps {
   /**

@@ -32,10 +32,11 @@
 import { i18n } from '@osd/i18n';
 import { getFieldValueCounts } from './field_calculator';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../data/public';
+import { OpenSearchSearchHit } from '../../../../../../../types/doc_views_types';
 
 export function getDetails(
   field: IndexPatternField,
-  hits: Array<Record<string, unknown>>,
+  hits: Array<OpenSearchSearchHit<Record<string, any>>>,
   indexPattern?: IndexPattern
 ) {
   const defaultDetails = {

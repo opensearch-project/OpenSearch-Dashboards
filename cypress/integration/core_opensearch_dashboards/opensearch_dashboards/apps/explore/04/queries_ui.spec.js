@@ -157,7 +157,8 @@ export const runQueryTests = () => {
                   .invoke('text')
                   .then((language) => {
                     // Get the link with matching text content and verify href
-                    cy.get('a.euiLink.euiLink--primary')
+                    cy.get('.euiPopover__panel-isOpen')
+                      .find('a.euiLink.euiLink--primary')
                       .should('have.attr', 'href')
                       .then((href) => {
                         let expectedHref;
