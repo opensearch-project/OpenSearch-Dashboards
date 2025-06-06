@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import {
   CoreSetup,
   DEFAULT_NAV_GROUPS,
   isNavGroupInFeatureConfigs,
 } from 'opensearch-dashboards/public';
-import { map, shareReplay, take } from 'rxjs/operators';
+import React from 'react';
+import { map, take } from 'rxjs/operators';
 import { QueryEditorExtensionConfig } from '../../../../data/public';
 import { ExplorePluginStart, ExploreStartDependencies } from '../../types';
 import { ExperienceBannerWrapper } from './experience_banner_wrapper';
@@ -28,9 +28,7 @@ export const createQueryEditorExtensionConfig = (
             (features &&
               isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
             false
-        ),
-        take(1),
-        shareReplay(1)
+        )
       ),
     getBanner: () => {
       const initializeBanners = async () => {
