@@ -292,7 +292,6 @@ export async function searchNavigationLinks(
         const originalFullLink = allSearchAbleLinks.find((fullLink) => fullLink.id === link.id);
         return originalFullLink || null;
       })
-      // .filter(Boolean) as (ChromeRegistrationNavLink & ChromeNavLink)[];
       .filter(Boolean) as Array<ChromeRegistrationNavLink & ChromeNavLink>;
 
     console.log('Final Semantic Search Result (from backend): ', finalResult);

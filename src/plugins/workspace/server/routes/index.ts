@@ -116,6 +116,7 @@ const updateWorkspaceAttributesSchema = schema.object({
 
 // Declare a variable outside the route handler to cache the model.
 let semanticExtractor: any = null;
+let answerer: any = null;
 
 export function registerRoutes({
   client,
@@ -367,13 +368,19 @@ export function registerRoutes({
       try {
         const { query, links } = req.body;
 
-        // Filter links to ensure they have a description for the semantic search
-        let linksWithDescription = links.filter((link) => !!link.description);
-        linksWithDescription = Array.from(new Set(linksWithDescription.map((link) => link.id))).map(
-          (id) => linksWithDescription.find((link) => link.id === id)!
-        );
-
         console.log('-------------Enter semanticSearch (Node.js)-------------');
+        if (!answerer) {
+          const startTime = performance.now();
+          answerer = await pipeline(
+            'question-answering',
+            'Xenova/tiny-random-RoFormerForQuestionAnswering'
+          );
+          const endTime = performance.now();
+          const loadingTimeMs = endTime - startTime;
+
+          console.log('Answer loaded and ready for inference.');
+          console.log(`Answer loading took: ${loadingTimeMs.toFixed(2)} ms`);
+        }
 
         // Load the model only once and reuse it later
         if (!semanticExtractor) {
@@ -393,7 +400,7 @@ export function registerRoutes({
 
         // Generate embeddings for links
         const linkEmbeddings = await Promise.all(
-          linksWithDescription.map(async (link) => {
+          links.map(async (link) => {
             const titleOutput = await semanticExtractor(link.title, {
               pooling: 'mean',
               normalize: true,
@@ -409,13 +416,13 @@ export function registerRoutes({
               descriptionEmbedding = Array.from(descOutput.data) as number[];
             }
 
-            const WEIGHT_TITLE = 0.7;
-            const WEIGHT_DESC = 0.3;
+            const titleWeight = 0.7;
+            const descWeight = 0.3;
 
             let combinedEmbedding: number[] = [];
 
             combinedEmbedding = titleEmbedding.map(
-              (val, i) => val * WEIGHT_TITLE + descriptionEmbedding![i] * WEIGHT_DESC
+              (val, i) => val * titleWeight + descriptionEmbedding![i] * descWeight
             );
 
             return { ...link, embedding: combinedEmbedding };
@@ -430,17 +437,37 @@ export function registerRoutes({
         // Calculate scores and sort
         const scored = linkEmbeddings.map((link) => ({
           ...link,
-          // score: cosineSimilarity(queryEmbedding as number[], link.embedding as number[]),
           score: cos_sim(queryEmbedding as number[], link.embedding as number[]),
         }));
 
         scored.sort((a, b) => b.score - a.score);
 
         const semanticSearchResult = scored
-          .slice(0, 8)
-          .filter((item) => item.score > 0.08)
+          .slice(0, 5)
+          .filter((item) => item.score > 0.2)
           .map(({ embedding, ...rest }) => rest);
         console.log('semanticSearchResult: ', semanticSearchResult);
+
+        const qaResults = [];
+
+        for (const link of links) {
+          const answer = await answerer(query, link.description);
+          if (answer && answer.answer) {
+            qaResults.push({
+              linkId: link.id,
+              title: link.title,
+              description: link.description,
+              answer: answer.answer,
+              score: answer.score,
+            });
+          }
+        }
+
+        qaResults.sort((a, b) => b.score - a.score);
+
+        const finalQaResults = qaResults.slice(0, 5).filter((item) => item.score > 0.1);
+
+        console.log('Question Answering: ', finalQaResults);
 
         return res.ok({ body: semanticSearchResult });
       } catch (error) {

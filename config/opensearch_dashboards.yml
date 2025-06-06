@@ -1,5 +1,5 @@
 # OpenSearch Dashboards is served by a back end server. This setting specifies the port to use.
-#server.port: 5601
+# server.port: 5602
 
 # Specifies the address to which the OpenSearch Dashboards server will bind. IP addresses and host names are both valid values.
 # The default is 'localhost', which usually means remote machines will not be able to connect.
@@ -379,3 +379,28 @@
 
 # Set the value to true to enable the new UI for savedQueries in Discover
 # data.savedQueriesNewUI.enabled: true
+# for olly2
+workspace.enabled: true
+savedObjects.permission.enabled: true
+data_source.enabled: true
+uiSettings:
+  overrides:
+    'home:useNewHomePage': true
+    'courier:batchSearches': false
+    'query:enhancements:enabled': true
+  defaults:
+    'theme:darkMode': false
+assistant.alertInsight.enabled: true
+assistant.chat.enabled: true
+assistant.smartAnomalyDetector.enabled: true
+assistant.text2viz.enabled: true
+queryEnhancements.queryAssist.summary.enabled: true
+observability.query_assist.enabled: true
+# opensearch.hosts: ['http://k8s-ruanyl-opensear-0b8ea918c5-897697169.us-west-1.elb.amazonaws.com:80']
+opensearch.hosts:
+  ['http://k8s-zxshende-opensear-89396f29f2-469603532.us-east-1.elb.amazonaws.com:80']
+# opensearch.hosts: ['http://localhost:9200']
+opensearch.username: 'admin'
+opensearch.password: 'myStrongPassword123!'
+opensearchDashboards.dashboardAdmin.users: ['admin']
+server.port: 5602
