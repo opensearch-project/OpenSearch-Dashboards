@@ -333,8 +333,12 @@ export class UiSettingsClient implements IUiSettingsClient {
 
     Object.entries(changes).forEach(([key, val]) => {
       if (Array.isArray(this.defaults[key]?.scope) && (this.defaults[key].scope?.length ?? 0) > 1) {
-        // if this setting has more than one scope, we should not update this setting without specifying scope
-        throw new Error(`Unable to update "${key}", because it has multiple scopes`);
+        // If this setting applies to multiple scopes, categorize it as global to maintain backward compatibility.
+        globalChanges[key] = val;
+
+        this.log.warn(
+          `Deprecation warning: Setting "${key}" with multiple scopes is deprecated. Please specify a single scope instead.`
+        );
       } else if (this.userLevelSettingsKeys.includes(key)) {
         userChanges[key] = val;
       } else if (this.adminUiSettingsKeys.includes(key)) {
