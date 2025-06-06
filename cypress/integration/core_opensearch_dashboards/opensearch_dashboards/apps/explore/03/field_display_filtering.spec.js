@@ -74,7 +74,8 @@ const fieldDisplayFilteringTestSuite = () => {
           docTable.getExpandedDocTableRow(0, 0).within(() => {
             cy.getElementByTestId('addInclusiveFilterButton').should(shouldText);
             cy.getElementByTestId('removeInclusiveFilterButton').should(shouldText);
-            cy.getElementByTestId('addExistsFilterButton').should(shouldText);
+            // Temporarily disable filter button test in Explore, untill we add the feature back
+            // cy.getElementByTestId('addExistsFilterButton').should(shouldText);
           });
         };
 
