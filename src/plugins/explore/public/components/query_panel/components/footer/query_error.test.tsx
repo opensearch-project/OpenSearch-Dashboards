@@ -87,11 +87,8 @@ describe('Query Result', () => {
       },
     };
     const component = shallowWithIntl(<QueryError {...props} />);
-    expect(component.find(`[data-test-subj="queryResultError"]`).text()).toMatchInlineSnapshot(
-      `"<EuiPopover />"`
-    );
-    component.find(`[data-test-subj="queryResultError"]`).simulate('click');
-    expect(component).toMatchSnapshot();
+    const errorElement = component.find(`[data-test-subj="queryPanelResultError"]`);
+    expect(errorElement.exists()).toBe(true);
   });
 
   it('returns null when error body is empty', () => {

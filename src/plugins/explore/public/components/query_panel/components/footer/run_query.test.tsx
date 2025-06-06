@@ -22,6 +22,6 @@ describe('RunQueryButton', () => {
 
   it('is disabled when isDisabled is true', () => {
     render(<RunQueryButton onClick={jest.fn()} isDisabled />);
-    expect(screen.getByText('Run query')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Run query' })).toBeDisabled();
   });
 });

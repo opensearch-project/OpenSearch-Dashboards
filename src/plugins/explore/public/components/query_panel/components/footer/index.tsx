@@ -42,7 +42,9 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   lineCount,
 }) => {
   const showLineCount =
-    typeof lineCount === 'number' && lineCount > 0 && languageType !== LanguageType.Natural;
+    typeof lineCount === 'number' &&
+    lineCount > 0 &&
+    (languageType !== LanguageType.Natural || isDualEditor); // Show line number only for ppl or dual
   return (
     <div className="queryPanel__footer">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
@@ -107,7 +109,10 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                   className="queryPanel__footer__lineCount"
                   data-test-subj="queryPanelFooterLineCount"
                 >
-                  {`${lineCount} ${lineCount === 1 ? 'line' : 'lines'}`}
+                  {i18n.translate('explore.queryPanel.lineCountLabel', {
+                    defaultMessage: '{lineCount, plural, one {# line} other {# lines}}',
+                    values: { lineCount },
+                  })}
                 </EuiText>
               )}
             </EuiFlexItem>
