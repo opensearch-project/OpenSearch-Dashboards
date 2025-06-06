@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { debounce } from 'lodash';
 import { QueryPanelLayout } from './layout';
 import { EditorStack } from './components/editor_stack';
@@ -32,6 +32,10 @@ const QueryPanel = () => {
     intitialQuery(languageTypeRef.current, 'test')
   );
 
+  useEffect(() => {
+    return () => detectLanguageType.cancel();
+  }, [detectLanguageType]);
+  
   const onQueryStringChange = React.useCallback((value: string, isPrompt: boolean) => {
     setCurrentQuery((prevQuery) => {
       const query = {
@@ -46,16 +50,19 @@ const QueryPanel = () => {
     });
   }, []);
 
-  const detectLanguageType = debounce((query) => {
-    const detector = new QueryTypeDetector();
-    const result = detector.detect(query);
-    languageTypeRef.current = result.type;
-
-    setCurrentQuery((prevQuery) => ({
-      ...prevQuery,
-      language: result.type,
-    }));
-  }, 500); // Adjust debounce time as needed
+  const detectLanguageType = useMemo(() => 
+    debounce((query: string) => {
+      const detector = new QueryTypeDetector();
+      const result = detector.detect(query);
+      languageTypeRef.current = result.type;
+  
+      setCurrentQuery((prevQuery) => ({
+        ...prevQuery,
+        language: result.type,
+      }));
+    }, 500),
+    []
+  ); // Adjust debounce time as needed
 
   const onPromptChange = React.useCallback(
     (value: string) => {
