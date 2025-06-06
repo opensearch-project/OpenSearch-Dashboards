@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { debounce } from 'lodash';
 import { QueryPanelLayout } from './layout';
 import { EditorStack } from './components/editor_stack';
@@ -31,10 +31,6 @@ const QueryPanel = () => {
   const [currentQuery, setCurrentQuery] = useState<Query>(
     intitialQuery(languageTypeRef.current, 'test')
   );
-
-  useEffect(() => {
-    return () => detectLanguageType.cancel();
-  }, [detectLanguageType]);
   
   const onQueryStringChange = React.useCallback((value: string, isPrompt: boolean) => {
     setCurrentQuery((prevQuery) => {
@@ -63,6 +59,10 @@ const QueryPanel = () => {
     }, 500),
     []
   ); // Adjust debounce time as needed
+
+  useEffect(() => {
+    return () => detectLanguageType.cancel();
+  }, [detectLanguageType]);
 
   const onPromptChange = React.useCallback(
     (value: string) => {
