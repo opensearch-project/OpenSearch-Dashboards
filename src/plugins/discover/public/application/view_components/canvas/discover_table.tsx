@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -17,13 +17,14 @@ import {
   useDispatch,
   useSelector,
 } from '../../utils/state_management';
-import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
+import { IndexPatternField, opensearchFilters, ResultStatus } from '../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../saved_searches/types';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';
 import { filterColumns } from '../utils/filter_columns';
+import { SearchData } from '../utils/use_search';
 
 interface Props {
   rows?: OpenSearchSearchHit[];
@@ -41,7 +42,8 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
     indexPatterns,
   } = services;
 
-  const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
+  const { refetch$, indexPattern, savedSearch, data$ } = useDiscoverContext();
+  const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
     // check if state columns is not undefined, otherwise use buildColumns
@@ -54,9 +56,10 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
       columns,
       indexPattern,
       uiSettings.get(DEFAULT_COLUMNS_SETTING),
-      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
+      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+      fetchState.fieldCounts
     );
-  }, [columns, indexPattern, uiSettings]);
+  }, [columns, fetchState.fieldCounts, indexPattern, uiSettings]);
   const { sort } = useSelector((state) => {
     const stateSort = state.discover.sort;
     // check if state sort is not undefined, otherwise assign an empty array
@@ -65,6 +68,17 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
     };
   });
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const subscription = data$.subscribe((next) => {
+      if (next.status === ResultStatus.LOADING) return;
+      setFetchState(next);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [data$, fetchState]);
+
   const onAddColumn = (col: string) => {
     if (indexPattern && capabilities.discover?.save) {
       popularizeField(indexPattern, col, indexPatterns);
