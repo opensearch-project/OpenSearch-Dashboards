@@ -25,6 +25,17 @@ export interface DirectQuerySyncInfo {
   mdsId?: string;
 }
 
+export interface IndexPatternAttributes {
+  type: string;
+  fields: string;
+  title: string;
+  typeMeta: string;
+  timeFieldName?: string;
+  intervalName?: string;
+  sourceFilters?: string;
+  fieldFormatMap?: string;
+}
+
 export async function fetchDirectQuerySyncInfo({
   http,
   savedObjectsClient,
@@ -77,7 +88,10 @@ export async function fetchDirectQuerySyncInfo({
     if (indexPatternIds.size === 1) {
       const selectedIndexPatternId = indexPatternIds.values().next().value;
       if (typeof selectedIndexPatternId === 'string') {
-        const indexPattern = await savedObjectsClient.get('index-pattern', selectedIndexPatternId);
+        const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
+          'index-pattern',
+          selectedIndexPatternId
+        );
         const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
         localMdsId = dataSourceRef?.id;
         indexTitle = indexPattern.attributes.title || null;
