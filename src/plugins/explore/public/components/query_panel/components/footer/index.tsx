@@ -47,10 +47,16 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
     (languageType !== LanguageType.Natural || isDualEditor); // Show line number only for ppl or dual
   return (
     <div className="queryPanel__footer">
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        gutterSize="xs"
+        responsive={true}
+        wrap
+      >
         {/* Left Section */}
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={true} wrap>
             <EuiFlexItem grow={false}>
               <ShowFieldToggle
                 isEnabled={true}
@@ -120,15 +126,15 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
         </EuiFlexItem>
 
         {/* Right Section */}
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={true} wrap>
+            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
               <Actions />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
               <DateTimeRangePicker />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
               <RunQueryButton onClick={onRunClick} isDisabled={noInput} isLoading={isLoading} />
             </EuiFlexItem>
           </EuiFlexGroup>
