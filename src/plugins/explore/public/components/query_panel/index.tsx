@@ -84,8 +84,8 @@ const QueryPanel = () => {
     (value: string) => {
       onQueryStringChange(value, false);
 
-      // In dual editor mode, use query editor's line count if there is PPL
-      if (isDualEditor && languageTypeRef.current === LanguageType.PPL && value.trim()) {
+      // In dual editor mode, use query editor's line count
+      if (isDualEditor && value.trim()) {
         const lines = value.split('\n').length;
         setLineCount(lines > 1 || value.trim() ? lines : undefined);
       } else {
