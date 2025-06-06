@@ -51,7 +51,6 @@ const QueryPanel = () => {
       const detector = new QueryTypeDetector();
       const result = detector.detect(query);
       languageTypeRef.current = result.type;
-  
       setCurrentQuery((prevQuery) => ({
         ...prevQuery,
         language: result.type,
