@@ -60,7 +60,7 @@ const QueryPanel = () => {
   const onPromptChange = React.useCallback(
     (value: string) => {
       detectLanguageType(value);
-      onQuerystringChange(value, true);
+      onQueryStringChange(value, true);
 
       // If not dual editor and prompt contains PPL, set line count
       if (!isDualEditor && value.trim()) {
@@ -70,12 +70,12 @@ const QueryPanel = () => {
         setLineCount(undefined);
       }
     },
-    [isDualEditor, detectLanguageType, onQuerystringChange]
+    [isDualEditor, detectLanguageType, onQueryStringChange]
   );
 
   const onQueryChange = React.useCallback(
     (value: string) => {
-      onQuerystringChange(value, false);
+      onQueryStringChange(value, false);
 
       // In dual editor mode, use query editor's line count if there is PPL
       if (isDualEditor && value.trim()) {
@@ -85,7 +85,7 @@ const QueryPanel = () => {
         setLineCount(undefined);
       }
     },
-    [isDualEditor, onQuerystringChange]
+    [isDualEditor, onQueryStringChange]
   );
 
   const handleQueryRun = async (
