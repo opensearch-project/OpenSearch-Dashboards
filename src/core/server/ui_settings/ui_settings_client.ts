@@ -337,7 +337,7 @@ export class UiSettingsClient implements IUiSettingsClient {
         globalChanges[key] = val;
 
         this.log.warn(
-          `Deprecation warning: Setting "${key}" with multiple scopes is deprecated. Please specify a single scope instead.`
+          `Deprecation warning: The setting "${key}" has multiple scopes. Please specify a scope when updating it.`
         );
       } else if (this.userLevelSettingsKeys.includes(key)) {
         userChanges[key] = val;
