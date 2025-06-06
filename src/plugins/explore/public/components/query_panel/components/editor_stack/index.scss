@@ -36,7 +36,6 @@
       }
 
       &.promptEditor--readonly {
-
         .monaco-editor,
         .react-monaco-editor-container {
           background-color: $euiColorLightShade !important;
@@ -159,7 +158,6 @@
       }
 
       &.queryEditor--readonly {
-
         .monaco-editor,
         .react-monaco-editor-container {
           background-color: $euiColorLightShade !important;
