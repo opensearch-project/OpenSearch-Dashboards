@@ -6,7 +6,7 @@
 import { ShallowWrapper, shallow, mount } from 'enzyme';
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { i18n } from '@osd/i18n';
-import { SavedObjectsClientContract } from '../../../../../core/public';
+import { SavedObjectsClientContract, UiSettingScope } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { DataSourceSelectable } from './data_source_selectable';
@@ -61,6 +61,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(component).toMatchSnapshot();
@@ -82,6 +83,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
       />
     );
     expect(component).toMatchSnapshot();
@@ -103,6 +105,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -123,6 +126,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -148,6 +152,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -220,6 +225,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
         selectedOption={[{ id: 'test2', label: 'test2' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -239,6 +245,7 @@ describe('DataSourceSelectable', () => {
         notifications={toasts}
         onSelectedDataSources={onSelectedDataSource}
         disabled={false}
+        scope={UiSettingScope.WORKSPACE}
         hideLocalCluster={false}
         fullWidth={false}
         selectedOption={[{ id: 'test2' }]}
@@ -258,6 +265,7 @@ describe('DataSourceSelectable', () => {
         notifications={toasts}
         onSelectedDataSources={onSelectedDataSource}
         disabled={false}
+        scope={UiSettingScope.WORKSPACE}
         hideLocalCluster={false}
         fullWidth={false}
         // @ts-expect-error TS2322 TODO(ts-error): fixme
@@ -281,7 +289,11 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+<<<<<<< HEAD
         // @ts-expect-error TS2741 TODO(ts-error): fixme
+=======
+        scope={UiSettingScope.WORKSPACE}
+>>>>>>> 568386cb65 (fix type error)
         selectedOption={[{}]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -302,6 +314,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
         // @ts-expect-error TS2741 TODO(ts-error): fixme
         selectedOption={[{ label: 'test-label' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
@@ -322,6 +335,7 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         // @ts-expect-error TS2741 TODO(ts-error): fixme
         selectedOption={[{ label: '' }]}
+        scope={UiSettingScope.WORKSPACE}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -340,6 +354,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
         selectedOption={[]}
       />
     );
@@ -358,6 +373,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
         selectedOption={[{ id: 'test2' }]}
       />
     );
@@ -406,6 +422,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -489,6 +506,7 @@ describe('DataSourceSelectable', () => {
           disabled={false}
           hideLocalCluster={true}
           fullWidth={false}
+          scope={UiSettingScope.WORKSPACE}
           selectedOption={selectedOption}
           dataSourceFilter={(ds) => false}
         />
@@ -521,6 +539,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.WORKSPACE}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );

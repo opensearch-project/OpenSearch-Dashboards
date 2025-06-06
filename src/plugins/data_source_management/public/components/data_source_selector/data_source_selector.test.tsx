@@ -6,7 +6,7 @@
 import { ShallowWrapper, shallow } from 'enzyme';
 import { DataSourceSelector, LocalCluster } from './data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
-import { notificationServiceMock, coreMock } from '../../../../../core/public/mocks';
+import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import {
   getDataSourcesWithFieldsResponse,
