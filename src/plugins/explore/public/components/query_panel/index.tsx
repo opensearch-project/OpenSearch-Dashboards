@@ -31,7 +31,7 @@ const QueryPanel = () => {
   const [currentQuery, setCurrentQuery] = useState<Query>(
     intitialQuery(languageTypeRef.current, 'test')
   );
-  
+
   const onQueryStringChange = React.useCallback((value: string, isPrompt: boolean) => {
     setCurrentQuery((prevQuery) => {
       const query = {
@@ -46,16 +46,17 @@ const QueryPanel = () => {
     });
   }, []);
 
-  const detectLanguageType = useMemo(() => 
-    debounce((query: string) => {
-      const detector = new QueryTypeDetector();
-      const result = detector.detect(query);
-      languageTypeRef.current = result.type;
-      setCurrentQuery((prevQuery) => ({
-        ...prevQuery,
-        language: result.type,
-      }));
-    }, 500),
+  const detectLanguageType = useMemo(
+    () =>
+      debounce((query: string) => {
+        const detector = new QueryTypeDetector();
+        const result = detector.detect(query);
+        languageTypeRef.current = result.type;
+        setCurrentQuery((prevQuery) => ({
+          ...prevQuery,
+          language: result.type,
+        }));
+      }, 500),
     []
   ); // Adjust debounce time as needed
 
