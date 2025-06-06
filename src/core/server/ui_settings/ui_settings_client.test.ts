@@ -150,7 +150,7 @@ describe('ui settings', () => {
       ).not.toThrow();
 
       expect(logger.warn).toBeCalledWith(
-        'Deprecation warning: Setting "workspace" with multiple scopes is deprecated. Please specify a single scope instead.'
+        'Deprecation warning: The setting "workspace" has multiple scopes. Please specify a scope when updating it.'
       );
     });
 
