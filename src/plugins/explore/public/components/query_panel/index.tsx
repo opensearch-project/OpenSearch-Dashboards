@@ -32,7 +32,7 @@ const QueryPanel = () => {
     intitialQuery(languageTypeRef.current, 'test')
   );
 
-  const onQuerystringChange = React.useCallback((value: string, isPrompt: boolean) => {
+  const onQueryStringChange = React.useCallback((value: string, isPrompt: boolean) => {
     setCurrentQuery((prevQuery) => {
       const query = {
         ...prevQuery,
