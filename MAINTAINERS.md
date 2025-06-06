@@ -35,6 +35,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Joey Liu                  | [Maosaic](https://github.com/Maosaic)               | Amazon      |
 | Lin Wang                  | [wanglam](https://github.com/wanglam)               | Amazon      |
 | Daniel Rowe               | [d-buckner](https://github.com/d-buckner)           | Amazon      |
+| Tianyu Gao                | [raintygao](https://github.com/raintygao)           | Amazon      |
 
 ## Emeritus
 

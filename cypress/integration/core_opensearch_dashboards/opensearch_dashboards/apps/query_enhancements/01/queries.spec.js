@@ -8,6 +8,7 @@ import {
   INDEX_WITH_TIME_1,
   START_TIME,
   END_TIME,
+  INVALID_INDEX,
 } from '../../../../../../utils/apps/constants';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
@@ -113,6 +114,12 @@ const queriesTestSuite = () => {
         cy.getElementByTestId(`querySubmitButton`).click();
         cy.waitForSearch();
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+
+        // Test error message
+        const query = `SELECT * FROM ${INVALID_INDEX} LIMIT 10`;
+        const error = `no such index`;
+        cy.setQueryEditor(query);
+        cy.osd.verifyResultsError(error);
       });
 
       it('with PPL', () => {
@@ -145,6 +152,17 @@ const queriesTestSuite = () => {
           language: 'PPL',
           hitCount: '10,000',
         });
+
+        // Test none search PPL query
+        const statsQuery = `describe ${INDEX_WITH_TIME_1} | stats count()`;
+        cy.setQueryEditor(statsQuery);
+        cy.osd.verifyResultsCount(1);
+
+        // Test error message
+        const invalidQuery = `source = ${INVALID_INDEX}`;
+        const error = `no such index`;
+        cy.setQueryEditor(invalidQuery);
+        cy.osd.verifyResultsError(error);
       });
     });
   });

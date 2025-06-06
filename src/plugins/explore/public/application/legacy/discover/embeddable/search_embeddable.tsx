@@ -56,7 +56,7 @@ import {
   ISearchSource,
 } from '../opensearch_dashboards_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { SortOrder } from '../../../../saved_explore/types';
+import { SortOrder } from '../../../../types/saved_explore_types';
 import { SavedExplore } from '../../../../saved_explore';
 import {
   SAMPLE_SIZE_SETTING,

@@ -1,6 +1,11 @@
 # Copyright OpenSearch Contributors
 # SPDX-License-Identifier: Apache-2.0
 
+node_modules/
+dist/
+build/
+.git/
+
 # Local or predefined end points
 localhost
 //opensearch

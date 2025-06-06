@@ -90,7 +90,7 @@ function getWrapUserDefaultWorkspaceList(
     },
   };
 
-  const mockHeaderControl = ({ controls }) => {
+  const mockHeaderControl = ({ controls }: any) => {
     return controls?.[0].description ?? controls?.[0].renderComponent ?? null;
   };
 
