@@ -116,7 +116,6 @@ const updateWorkspaceAttributesSchema = schema.object({
 
 // Declare a variable outside the route handler to cache the model.
 let semanticExtractor: any = null;
-let answerer: any = null;
 
 export function registerRoutes({
   client,
@@ -369,18 +368,6 @@ export function registerRoutes({
         const { query, links } = req.body;
 
         console.log('-------------Enter semanticSearch (Node.js)-------------');
-        if (!answerer) {
-          const startTime = performance.now();
-          answerer = await pipeline(
-            'question-answering',
-            'Xenova/tiny-random-RoFormerForQuestionAnswering'
-          );
-          const endTime = performance.now();
-          const loadingTimeMs = endTime - startTime;
-
-          console.log('Answer loaded and ready for inference.');
-          console.log(`Answer loading took: ${loadingTimeMs.toFixed(2)} ms`);
-        }
 
         // Load the model only once and reuse it later
         if (!semanticExtractor) {
@@ -447,27 +434,6 @@ export function registerRoutes({
           .filter((item) => item.score > 0.2)
           .map(({ embedding, ...rest }) => rest);
         console.log('semanticSearchResult: ', semanticSearchResult);
-
-        const qaResults = [];
-
-        for (const link of links) {
-          const answer = await answerer(query, link.description);
-          if (answer && answer.answer) {
-            qaResults.push({
-              linkId: link.id,
-              title: link.title,
-              description: link.description,
-              answer: answer.answer,
-              score: answer.score,
-            });
-          }
-        }
-
-        qaResults.sort((a, b) => b.score - a.score);
-
-        const finalQaResults = qaResults.slice(0, 5).filter((item) => item.score > 0.1);
-
-        console.log('Question Answering: ', finalQaResults);
 
         return res.ok({ body: semanticSearchResult });
       } catch (error) {
