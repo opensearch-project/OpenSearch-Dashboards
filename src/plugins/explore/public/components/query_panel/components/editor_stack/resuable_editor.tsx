@@ -80,9 +80,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       const focusDisposable = editor.onDidFocusEditorText(() => {
-        if (blurTimeoutRef.current) {
-          clearTimeout(blurTimeoutRef.current);
-        }
+        clearTimeout(blurTimeoutRef.current);
         setEditorIsFocused(true);
       });
 
