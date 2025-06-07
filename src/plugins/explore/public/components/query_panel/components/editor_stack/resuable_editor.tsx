@@ -7,7 +7,7 @@ import React, { useRef, useState, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
-import { EditToobar } from './edit_toolbar';
+import { EditToolbar } from './edit_toolbar';
 import { EditorType } from './types';
 
 export interface ReusableEditorProps {
@@ -182,7 +182,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         )}
 
         {isReadOnly && (
-          <EditToobar
+          <EditToolbar
             className={`${editorClassPrefix}__editOverlay`}
             onClearEditor={onClear}
             onEditClick={handleEditClick}
