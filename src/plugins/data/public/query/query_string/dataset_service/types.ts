@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EuiIconProps } from '@elastic/eui';
+import { CoreStart } from 'opensearch-dashboards/public';
 import {
   Dataset,
   DatasetField,
@@ -117,5 +118,5 @@ export interface DatasetTypeConfig {
   /**
    * Returns the initial query that is added to the query editor when a dataset is selected.
    */
-  getInitialQueryString?: (query: Query) => string | void;
+  getInitialQueryString?: (query: Query, uiSettings?: CoreStart['uiSettings']) => string | void;
 }
