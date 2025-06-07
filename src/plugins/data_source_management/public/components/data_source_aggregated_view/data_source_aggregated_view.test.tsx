@@ -5,7 +5,6 @@
 
 import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
-import { i18n } from '@osd/i18n';
 import { DataSourceAggregatedView } from './data_source_aggregated_view';
 import {
   IToasts,
@@ -27,12 +26,7 @@ import {
 import * as utils from '../utils';
 import { EuiSelectable, EuiSwitch } from '@elastic/eui';
 import { DataSourceAttributes } from '../../types';
-import {
-  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
-  CONNECT_DATASOURCES_MESSAGE,
-  NO_COMPATIBLE_DATASOURCES_MESSAGE,
-  NO_DATASOURCES_CONNECTED_MESSAGE,
-} from '../constants';
+
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true)', () => {
