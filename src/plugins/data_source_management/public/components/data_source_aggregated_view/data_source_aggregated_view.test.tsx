@@ -39,6 +39,7 @@ import {
   // @ts-expect-error TS2305 TODO(ts-error): fixme
   NO_DATASOURCES_CONNECTED_MESSAGE,
 } from '../constants';
+
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true)', () => {
