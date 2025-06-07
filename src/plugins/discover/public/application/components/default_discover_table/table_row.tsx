@@ -106,7 +106,7 @@ const TableRowUI = ({
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
-        if (!fieldInfo?.filterable) {
+        if (fieldInfo?.filterable === false) {
           return (
             <td
               key={colName}

@@ -5,6 +5,7 @@
 
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { buildColumns } from '../../utils/columns';
+import { getIndexPatternFieldList } from '../../components/sidebar/lib/get_index_pattern_field_list';
 
 /**
  * Helper function to filter columns based on the fields of the index pattern.
@@ -20,14 +21,19 @@ export function filterColumns(
   columns: string[],
   indexPattern: IndexPattern | undefined,
   defaultColumns: string[],
-  modifyColumn: boolean
+  modifyColumn: boolean,
+  fieldCounts?: Record<string, number>
 ) {
   // if false, we keep all the chosen columns
   if (!modifyColumn) {
     return columns.length > 0 ? columns : ['_source'];
   }
   // if true, we keep columns that exist in the new index pattern
-  const fieldsName = indexPattern?.fields.getAll().map((fld) => fld.name) || [];
+  const fieldsName = (fieldCounts
+    ? getIndexPatternFieldList(indexPattern, fieldCounts)
+    : indexPattern?.fields.getAll() || []
+  ).map((fld) => fld.name);
+
   // combine columns and defaultColumns without duplicates
   const combinedColumns = [...new Set([...columns, ...defaultColumns])];
   const filteredColumns = combinedColumns.filter((column) => fieldsName.includes(column));
