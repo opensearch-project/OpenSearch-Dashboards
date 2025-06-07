@@ -141,6 +141,7 @@
     "**/kind-of": ">=6.0.3",
     "**/load-bmfont/phin": "^3.7.1",
     "**/loader-utils": "^2.0.4",
+    "**/micromatch": "^4.0.8",
     "**/minimist": "^1.2.6",
     "**/nanoid": "^3.3.8",
     "**/node-jose": "^2.2.0",
