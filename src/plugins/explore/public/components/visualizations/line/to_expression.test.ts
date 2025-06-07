@@ -9,8 +9,9 @@ import {
   createMultiLineChart,
   createFacetedMultiLineChart,
 } from './to_expression';
-import { Positions, ThresholdLineStyle, VisColumn, VisFieldType } from '../types';
+import { ThresholdLineStyle, VisColumn, VisFieldType } from '../types';
 import * as lineChartUtils from './line_chart_utils';
+import { Positions } from '../utils/collections';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({

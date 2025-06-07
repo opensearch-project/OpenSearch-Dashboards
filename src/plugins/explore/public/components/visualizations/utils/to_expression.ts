@@ -41,11 +41,7 @@ export const toExpression = async (
   dateColumns?: VisColumn[],
   styleOptions?: any
 ): Promise<string> => {
-  if (
-    !indexPattern ||
-    !searchContext ||
-    !JSON.stringify(searchContext.query).toLowerCase().includes('stats') // Empty visualization if query is not aggregated
-  ) {
+  if (!indexPattern || !searchContext) {
     return '';
   }
 

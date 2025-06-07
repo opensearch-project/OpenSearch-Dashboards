@@ -167,7 +167,6 @@ describe('VisualizationRegistry', () => {
       ];
 
       const result = registry.getVisualizationType(columns);
-
       expect(result?.numericalColumns).toHaveLength(2);
       expect(result?.categoricalColumns).toHaveLength(2);
       expect(result?.dateColumns).toHaveLength(1);

@@ -41,7 +41,7 @@ export enum VisFieldType {
   Numerical = 'numerical',
   Categorical = 'categorical',
   Date = 'date',
-  Unknown = 'date',
+  Unknown = 'unknown',
 }
 
 export enum ThresholdLineStyle {
