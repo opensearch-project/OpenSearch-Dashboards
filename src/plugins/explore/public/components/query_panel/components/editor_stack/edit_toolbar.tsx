@@ -15,7 +15,7 @@ interface EditToolbarProps {
   clearText: string;
 }
 
-export const EditToobar: React.FC<EditToolbarProps> = ({
+export const EditToolbar: React.FC<EditToolbarProps> = ({
   className = 'promptEditor__editOverlay',
   onClearEditor,
   onEditClick,
