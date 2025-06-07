@@ -6,7 +6,13 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { SavedObjectsClientContract, ToastsStart, SavedObject } from 'opensearch-dashboards/public';
+import {
+  SavedObjectsClientContract,
+  ToastsStart,
+  SavedObject,
+  WorkspacesStart,
+  UiSettingScope,
+} from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import {
   getDataSourcesWithFields,
@@ -34,6 +40,7 @@ export interface DataSourceSelectorProps {
   onSelectedDataSource: (dataSourceOption: DataSourceOption[]) => void;
   disabled: boolean;
   fullWidth: boolean;
+  getWorkspaces: () => WorkspacesStart;
   hideLocalCluster?: boolean;
   defaultOption?: DataSourceOption[];
   placeholderText?: string;
@@ -168,7 +175,13 @@ export class DataSourceSelector extends React.Component<
         return;
       }
 
-      const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
+      const currentWorkspaceId = this.props.getWorkspaces().currentWorkspaceId$.getValue();
+      const scope: UiSettingScope = !!currentWorkspaceId
+        ? UiSettingScope.WORKSPACE
+        : UiSettingScope.GLOBAL;
+
+      const defaultDataSource =
+        (await getDefaultDataSourceId(this.props.uiSettings, scope)) ?? null;
       // 5.1 Empty default option, [], just want to show placeholder
       if (this.props.defaultOption?.length === 0) {
         this.setState({
