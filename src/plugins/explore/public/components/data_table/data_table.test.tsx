@@ -138,7 +138,9 @@ describe('DefaultDiscoverTable', () => {
     });
   });
 
-  it('should pagination', () => {
+  it('should pagination', async () => {
+    const user = userEvent.setup();
+
     render(getDataTable(undefined, true));
 
     // Two Pagination component on the page, one at the top, one at the bottom.
@@ -146,13 +148,13 @@ describe('DefaultDiscoverTable', () => {
     expect(osdDocTablePagination[0]).toBeInTheDocument();
     expect(osdDocTablePagination[1]).toBeInTheDocument();
 
-    userEvent.click(screen.getAllByTestId('pagination-button-next')[0]);
+    await user.click(screen.getAllByTestId('pagination-button-next')[0]);
     expect(screen.queryByTestId('osdPaginationLimitsHitMessage')).not.toBeInTheDocument();
 
-    userEvent.click(screen.getAllByTestId('pagination-button-next')[0]);
+    await user.click(screen.getAllByTestId('pagination-button-next')[0]);
     expect(screen.queryAllByTestId('osdPaginationLimitsHitMessage')[0]).toBeInTheDocument();
 
-    userEvent.click(screen.getAllByTestId('pagination-button-previous')[0]);
+    await user.click(screen.getAllByTestId('pagination-button-previous')[0]);
     expect(screen.queryByTestId('osdPaginationLimitsHitMessage')).not.toBeInTheDocument();
   });
 });
