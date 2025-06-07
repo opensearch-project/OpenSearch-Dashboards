@@ -1,0 +1,226 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.queryPanel__editorArea {
+
+  /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+  flex: 1;
+  padding: 0;
+  background-color: $euiColorEmptyShade;
+  border-radius: 1px;
+
+  .promptEditorWrapper {
+    position: relative;
+
+    .promptEditor {
+      border: 1px solid $euiBorderColor;
+      border-radius: 1px;
+
+      .monaco-editor .view-overlays .current-line {
+        border: none;
+      }
+
+      .monaco-editor {
+        .margin {
+          background-color: $euiFormBackgroundColor;
+        }
+      }
+
+      .monaco-editor,
+      .monaco-editor-background,
+      .monaco-editor .inputarea.ime-input,
+      .monaco-editor .decorationsOverviewRuler {
+        background-color: $euiColorEmptyShade;
+      }
+
+      &.promptEditor--readonly {
+        .monaco-editor,
+        .react-monaco-editor-container {
+          background-color: $euiColorLightShade !important;
+          opacity: 0.5;
+          pointer-events: none;
+        }
+
+        .monaco-editor .cursor {
+          display: none !important;
+        }
+      }
+
+      .promptEditor__editOverlay {
+        position: absolute;
+        right: 4px;
+        bottom: -7px;
+        z-index: 10;
+
+        /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+        box-shadow: 0 1px 2px 0 $euiShadowColor;
+
+        &__toolbar {
+          border-radius: 24px;
+          border: 1px solid $euiBorderColor;
+          background: $euiColorEmptyShade;
+          display: flex;
+          cursor: pointer;
+          height: 24px;
+          padding: 4px 8px;
+          align-items: center;
+          width: fit-content;
+          font-weight: 400;
+          line-height: 18px;
+          font-size: $euiFontSizeXS;
+          color: $euiColorDarkShade;
+        }
+
+        &__separator {
+          width: 1px;
+          height: 16px;
+          background: $euiColorLightShade;
+          margin: 0;
+        }
+
+        &__text {
+          text-decoration-line: underline;
+          margin-left: 3px;
+        }
+      }
+
+      /* stylelint-disable  @osd/stylelint/no_restricted_values */
+      &.promptEditor--focused::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+
+        // EUI tokens like $euiColorPrimary or $euiColorAccent are not designed for use in gradients.
+        background: linear-gradient(90deg, #005eb8 0%, #e47fb2 53.5%, #1f9eff 100%);
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .promptEditor__placeholder {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: $euiTextColor;
+        font-size: $euiFontSizeXS;
+        font-weight: 400;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+  }
+
+  .queryEditorWrapper {
+    position: relative;
+
+    .queryEditor {
+      border: $euiBorderThin;
+      font-size: $euiFontSizeXS !important;
+      border-radius: 1px;
+      position: relative;
+
+      .monaco-editor {
+        border-radius: $euiSizeXS $euiSizeXS 0 0;
+        font-size: $euiFontSizeXS;
+
+        .margin {
+          border-radius: $euiSizeXS 0 0 0;
+          background-color: $euiFormBackgroundColor;
+          padding: 0 $euiSizeXS;
+        }
+
+        .monaco-scrollable-element {
+          border-radius: 0 $euiSizeXS 0 0;
+        }
+
+        .view-lines {
+          font-size: $euiFontSizeXS;
+        }
+
+        .comment-line span {
+
+          /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+          color: $euiColorSuccess;
+        }
+      }
+
+      .monaco-editor,
+      .monaco-editor-background,
+      .monaco-editor .inputarea.ime-input,
+      .monaco-editor .decorationsOverviewRuler {
+        background-color: $euiColorEmptyShade;
+        font-size: $euiFontSizeXS;
+      }
+
+      &.queryEditor--readonly {
+        .monaco-editor,
+        .react-monaco-editor-container {
+          background-color: $euiColorLightShade !important;
+          opacity: 0.5;
+          pointer-events: none;
+        }
+
+        .monaco-editor .cursor {
+          display: none !important;
+        }
+
+        .queryEditor__editOverlay {
+          position: absolute;
+          right: 4px;
+          top: -12px;
+          z-index: 10;
+
+          /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+          box-shadow: 0 1px 2px 0 $euiShadowColor;
+
+          &__toolbar {
+            border-radius: 24px;
+            border: 1px solid $euiBorderColor;
+            background: $euiColorEmptyShade;
+            display: flex;
+            cursor: pointer;
+            height: 24px;
+            padding: 4px 8px;
+            align-items: center;
+            width: fit-content;
+            font-weight: 400;
+            line-height: 18px;
+            font-size: $euiFontSizeXS;
+            color: $euiColorDarkShade;
+          }
+
+          &__separator {
+            width: 1px;
+            height: 16px;
+            background: $euiColorLightShade;
+            margin: 0;
+          }
+
+          &__text {
+            text-decoration-line: underline;
+            margin-left: 3px;
+          }
+        }
+      }
+
+      &.queryEditor--focused {
+        border-bottom: 1px solid $euiColorPrimary;
+      }
+
+      .queryEditor__placeholder {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: $euiTextColor;
+        font-size: $euiFontSizeXS;
+        font-weight: 400;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+  }
+}
