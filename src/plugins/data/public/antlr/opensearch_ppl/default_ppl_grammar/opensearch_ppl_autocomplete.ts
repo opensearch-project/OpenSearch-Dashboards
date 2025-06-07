@@ -13,10 +13,10 @@ import {
   ProcessVisitedRulesResult,
   SourceOrTableSuggestion,
   TableContextSuggestion,
-} from '../shared/types';
+} from '../../shared/types';
 import { OpenSearchPPLLexer } from './.generated/OpenSearchPPLLexer';
 import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
-import { removePotentialBackticks } from '../shared/utils';
+import { removePotentialBackticks } from '../../shared/utils';
 
 // These are keywords that we do not want to show in autocomplete
 export function getIgnoredTokens(): number[] {
