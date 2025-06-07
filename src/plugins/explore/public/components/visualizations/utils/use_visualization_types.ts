@@ -5,7 +5,7 @@
 
 import { LineChartStyleControls } from '../line/line_vis_config';
 import { IFieldType } from '../../../application/legacy/discover/opensearch_dashboards_services';
-import { OpenSearchSearchHit } from '../../../application/legacy/discover/application/doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { LineVisStyleControlsProps } from '../line/line_vis_options';
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
 import { ChartTypeMapping, VisColumn, VisFieldType } from '../types';
@@ -80,8 +80,8 @@ const getFieldTypeFromSchema = (schema?: string): VisFieldType =>
   FIELD_TYPE_MAP[schema || ''] || VisFieldType.Unknown;
 
 // Implement this function to return the visualization type based on the query based on the returned data
-export const getVisualizationType = (
-  rows?: OpenSearchSearchHit[],
+export const getVisualizationType = <T = unknown>(
+  rows?: Array<OpenSearchSearchHit<T>>,
   fieldSchema?: Array<Partial<IFieldType>>,
   registry = visualizationRegistry
 ): VisualizationTypeResult | undefined => {
