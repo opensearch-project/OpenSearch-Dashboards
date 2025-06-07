@@ -41,6 +41,7 @@ const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [OSD_FIELD_TYPES.OBJECT]: VisFieldType.Unknown,
   [OSD_FIELD_TYPES.NESTED]: VisFieldType.Unknown,
   [OSD_FIELD_TYPES.HISTOGRAM]: VisFieldType.Numerical,
+  [OSD_FIELD_TYPES.UNKNOWN]: VisFieldType.Unknown,
 
   // Map the rest of OPENSEARCH_FIELD_TYPES to VisFieldType
   [OPENSEARCH_FIELD_TYPES.DATE_NANOS]: VisFieldType.Date,

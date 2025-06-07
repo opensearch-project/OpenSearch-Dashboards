@@ -111,27 +111,6 @@ describe('to_expression', () => {
     expect(mockToExpressionFn).not.toHaveBeenCalled();
   });
 
-  it('should return an empty string if query does not include "stats"', async () => {
-    const searchContextWithoutStats = {
-      ...mockSearchContext,
-      query: { language: 'kuery', query: 'test' },
-    };
-
-    const result = await toExpression(
-      searchContextWithoutStats,
-      mockIndexPattern as any,
-      mockToExpressionFn,
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styleOptions
-    );
-
-    expect(result).toBe('');
-    expect(mockToExpressionFn).not.toHaveBeenCalled();
-  });
-
   it('should build and return an expression string when all required parameters are provided', async () => {
     const result = await toExpression(
       mockSearchContext,

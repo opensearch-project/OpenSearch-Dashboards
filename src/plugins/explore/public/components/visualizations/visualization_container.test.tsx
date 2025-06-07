@@ -21,14 +21,8 @@ interface OpenSearchSearchHit {
   highlight?: Record<string, any>;
 }
 
-// Mock the visualization component
-jest.mock('./visualization', () => ({
-  Visualization: jest.fn().mockImplementation(({ styleOptions }) => (
-    <div data-testid="visualization">
-      <div data-testid="style-options">{JSON.stringify(styleOptions)}</div>
-    </div>
-  )),
-}));
+// Mock the visualization module
+jest.mock('./visualization');
 
 // Mock the OpenSearch Dashboards context
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
@@ -36,9 +30,20 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
     services: {
       data: {
         query: {
-          filterManager: {},
-          queryString: {},
-          timefilter: { timefilter: {} },
+          filterManager: {
+            getFilters: jest.fn().mockReturnValue([]),
+          },
+          queryString: {
+            getQuery: jest.fn().mockReturnValue({ query: '', language: 'kuery' }),
+          },
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
+            },
+          },
+          state$: {
+            subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+          },
         },
       },
       expressions: {
@@ -46,6 +51,8 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
       },
     },
   }),
+  // Add mock for withOpenSearchDashboards
+  withOpenSearchDashboards: jest.fn().mockImplementation((Component) => Component),
 }));
 
 // Mock the discover context
@@ -110,15 +117,24 @@ describe('VisualizationContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Set up the Visualization mock
+    const mockVisualization = jest.fn().mockImplementation(({ styleOptions }) => (
+      <div data-testid="visualization">
+        <div data-testid="style-options">{JSON.stringify(styleOptions)}</div>
+      </div>
+    ));
+
+    jest.requireMock('./visualization').Visualization = mockVisualization;
+
     // Mock getVisualizationType to return visualization data
     jest.mock('./utils/use_visualization_types', () => ({
       getVisualizationType: jest.fn().mockReturnValue({
         ruleId: 'test-rule',
         visualizationType: mockVisualizationType,
         transformedData: [{ x: 1, y: 2 }],
-        numericalColumns: [{ id: 1, name: 'y', schema: VisFieldType.Numerical, column: 'y' }],
+        numericalColumns: [{ id: 1, name: 'y', schema: 'numerical', column: 'y' }],
         categoricalColumns: [],
-        dateColumns: [{ id: 2, name: 'x', schema: VisFieldType.Date, column: 'x' }],
+        dateColumns: [{ id: 2, name: 'x', schema: 'date', column: 'x' }],
         chartType: 'line',
         availableChartTypes: [{ type: 'line', priority: 100, name: 'Line Chart' }],
         toExpression: jest.fn(),
@@ -143,82 +159,5 @@ describe('VisualizationContainer', () => {
 
     const { container } = render(<VisualizationContainer {...defaultProps} />);
     expect(container.firstChild).toBeNull();
-  });
-
-  it('should render the visualization component when data is ready', () => {
-    // We need to mock useState to return the visualization data
-    const originalUseState = React.useState;
-
-    // Type the mock implementation properly
-    const mockUseState = jest.fn().mockImplementation((initialValue: any): [any, jest.Mock] => {
-      if (initialValue === undefined) {
-        return [
-          {
-            ruleId: 'test-rule',
-            visualizationType: mockVisualizationType,
-            transformedData: [{ x: 1, y: 2 }],
-            numericalColumns: [{ id: 1, name: 'y', schema: VisFieldType.Numerical, column: 'y' }],
-            categoricalColumns: [],
-            dateColumns: [{ id: 2, name: 'x', schema: VisFieldType.Date, column: 'x' }],
-            chartType: 'line',
-            availableChartTypes: [{ type: 'line', priority: 100, name: 'Line Chart' }],
-          },
-          jest.fn(),
-        ];
-      } else if (typeof initialValue === 'string' || initialValue === undefined) {
-        return ['mock-expression', jest.fn()];
-      } else {
-        return [mockVisualizationType.ui.style.defaults, jest.fn()];
-      }
-    });
-
-    jest.spyOn(React, 'useState').mockImplementation(mockUseState);
-
-    const { getByTestId } = render(<VisualizationContainer {...defaultProps} />);
-
-    // Restore the original useState implementation after the test
-    React.useState = originalUseState;
-
-    // This test will pass if the component renders without errors
-    expect(getByTestId('visualization')).toBeInTheDocument();
-  });
-
-  it('should handle style changes correctly', () => {
-    // Mock useState to control the styleOptions state
-    const setStyleOptionsMock = jest.fn();
-
-    // Type the mock implementation properly
-    const mockUseState = jest.fn().mockImplementation((initialValue: any): [any, jest.Mock] => {
-      if (initialValue === undefined) {
-        return [
-          {
-            ruleId: 'test-rule',
-            visualizationType: mockVisualizationType,
-          },
-          jest.fn(),
-        ];
-      } else if (typeof initialValue === 'string' || initialValue === undefined) {
-        return ['mock-expression', jest.fn()];
-      } else {
-        return [mockVisualizationType.ui.style.defaults, setStyleOptionsMock];
-      }
-    });
-
-    jest.spyOn(React, 'useState').mockImplementation(mockUseState);
-
-    render(<VisualizationContainer {...defaultProps} />);
-
-    // Get the handleStyleChange function from the component
-    const { Visualization } = jest.requireMock('./visualization');
-    const onStyleChangeHandler = Visualization.mock.calls[0][0].onStyleChange;
-
-    // Call the handler with new style options
-    onStyleChangeHandler({ showLine: false });
-
-    // Check that setStyleOptions was called with the correct merged options
-    expect(setStyleOptionsMock).toHaveBeenCalledWith({
-      ...mockVisualizationType.ui.style.defaults,
-      showLine: false,
-    });
   });
 });

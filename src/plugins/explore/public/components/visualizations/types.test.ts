@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisFieldType, ThresholdLineStyle, Positions } from './types';
-import { Positions as CollectionsPositions } from './utils/collections';
+import { VisFieldType, ThresholdLineStyle } from './types';
+import { Positions } from './utils/collections';
 
 describe('types', () => {
   describe('VisFieldType', () => {
@@ -12,7 +12,7 @@ describe('types', () => {
       expect(VisFieldType.Numerical).toBe('numerical');
       expect(VisFieldType.Categorical).toBe('categorical');
       expect(VisFieldType.Date).toBe('date');
-      expect(VisFieldType.Unknown).toBe('date'); // Note: This might be a bug in the original code
+      expect(VisFieldType.Unknown).toBe('unknown');
     });
   });
 
@@ -25,9 +25,12 @@ describe('types', () => {
   });
 
   describe('Positions', () => {
-    it('should import Positions from collections', () => {
-      // Verify that Positions is correctly imported from collections
-      expect(Positions).toBe(CollectionsPositions);
+    it('should have the correct position values', () => {
+      // Verify that Positions enum has the correct values
+      expect(Positions.RIGHT).toBe('right');
+      expect(Positions.LEFT).toBe('left');
+      expect(Positions.TOP).toBe('top');
+      expect(Positions.BOTTOM).toBe('bottom');
     });
   });
 });
