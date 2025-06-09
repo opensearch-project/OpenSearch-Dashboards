@@ -10,7 +10,7 @@ import { savedObjectsServiceMock } from '../../../../../../core/public/mocks';
 import { DashboardDirectQuerySyncBanner } from './direct_query_sync_banner';
 import { fetchDirectQuerySyncInfo } from './direct_query_sync_utils';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
-import { intervalAsMinutes, asProgress } from '../../../constants';
+import { intervalAsMinutes } from '../../../constants';
 import { DirectQueryLoadingStatus } from 'src/plugins/data_source_management/framework/types';
 
 // Mock dependencies

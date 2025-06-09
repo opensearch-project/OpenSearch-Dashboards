@@ -28,7 +28,7 @@ describe('useDirectQuery', () => {
   let stopLoadingMock: jest.Mock;
   let fetchMock: jest.Mock;
   let fetchWithJobIdMock: jest.Mock;
-  let usePollingMock: jest.Mock;
+  let usePollingMock: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
