@@ -8,8 +8,8 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { EditToolbar } from './edit_toolbar';
 
 describe('EditToolbar', () => {
-  const editBtnLabel = "TBEditBtn";
-  const clearBtnLabel = "TBEditBtn";
+  const editBtnLabel = 'TBEditBtn';
+  const clearBtnLabel = 'TBEditBtn';
 
   it('renders and handles edit button', () => {
     const handleEditClick = jest.fn();
@@ -21,7 +21,6 @@ describe('EditToolbar', () => {
         clearText={clearBtnLabel}
       />
     );
-    
     const el = screen.getByText(editBtnLabel);
     expect(el).toBeInTheDocument();
     fireEvent.click(el);
@@ -38,8 +37,9 @@ describe('EditToolbar', () => {
         clearText={clearBtnLabel}
       />
     );
-    
+
     const el = screen.getByText(clearBtnLabel);
+    expect(el).toBeInTheDocument();
     fireEvent.click(clearBtnLabel);
     expect(handleClearEditor).toHaveBeenCalled();
   });
