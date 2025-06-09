@@ -18,6 +18,7 @@ export interface IndexExtractionResult {
 }
 
 export interface DirectQuerySyncInfo {
+  indexState: string | null;
   refreshQuery: string;
   refreshInterval: number | null;
   lastRefreshTime: number | null;
