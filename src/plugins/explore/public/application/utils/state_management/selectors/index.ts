@@ -84,13 +84,6 @@ export const selectCurrentCacheKey = createSelector([selectUIState], (uiState) =
   return executionCacheKeys.length > 0 ? executionCacheKeys[0] : null;
 });
 
-// Legacy selector for backward compatibility - uses hardcoded timeRange
-export const selectCacheKey = createSelector([selectQuery], (query) => {
-  // Default timeRange - components should override with actual timeRange from context
-  const defaultTimeRange = { from: 'now-15m', to: 'now' };
-  return createCacheKey(query, defaultTimeRange);
-});
-
 export const selectResults = createSelector(
   [selectResultsState, selectCurrentCacheKey],
   (resultsState, cacheKey) => {
@@ -100,22 +93,22 @@ export const selectResults = createSelector(
 );
 
 export const selectRows = createSelector([selectResults], (results) => {
-  if (results?.hits?.hits) {
-    return results.hits.hits;
+  if ((results as any)?.hits?.hits) {
+    return (results as any).hits.hits;
   }
   return [];
 });
 
 export const selectTotalHits = createSelector([selectResults], (results) => {
-  if (results?.hits?.total?.value !== undefined) {
-    return results.hits.total.value;
+  if ((results as any)?.hits?.total?.value !== undefined) {
+    return (results as any).hits.total.value;
   }
   return 0;
 });
 
 export const selectFieldCounts = createSelector([selectResults], (results) => {
-  if (results?.fieldCounts) {
-    return results.fieldCounts;
+  if ((results as any)?.fieldCounts) {
+    return (results as any).fieldCounts;
   }
   return {};
 });
@@ -159,7 +152,6 @@ export const selectTabData = createSelector(
       query,
       results,
       status,
-      error,
       preparedQuery: query, // Components should prepare query using tabDefinition from context
     };
   }
