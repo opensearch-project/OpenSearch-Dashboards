@@ -1,0 +1,2 @@
+feat:
+- Implement polling for index state in Vended Dashboard progress ([#9862](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9862))
