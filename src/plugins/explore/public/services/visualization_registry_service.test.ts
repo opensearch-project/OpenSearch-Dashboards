@@ -12,20 +12,12 @@ describe('VisualizationRegistryService', () => {
   let mockRegisterRule: jest.Mock;
   let mockRegisterRules: jest.Mock;
   let mockGetRules: jest.Mock;
-  let mockRegistry: any;
 
   beforeEach(() => {
     // Create mock functions
     mockRegisterRule = jest.fn();
     mockRegisterRules = jest.fn();
     mockGetRules = jest.fn().mockReturnValue([]);
-
-    // Create a mock registry object
-    mockRegistry = {
-      registerRule: mockRegisterRule,
-      registerRules: mockRegisterRules,
-      getRules: mockGetRules,
-    };
 
     // Mock the VisualizationRegistry constructor and its methods
     jest
