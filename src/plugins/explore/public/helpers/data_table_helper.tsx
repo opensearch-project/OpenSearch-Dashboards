@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { getOsdFieldOverrides, IndexPattern } from 'src/plugins/data/public';
+import { getOsdFieldOverrides, IndexPattern } from '../../../../plugins/data/public';
 import { shortenDottedString } from './shorten_dotted_string';
 
 export interface LegacyDisplayedColumn {

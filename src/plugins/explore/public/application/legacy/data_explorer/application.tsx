@@ -26,7 +26,6 @@ export const renderApp = (
       <OpenSearchDashboardsContextProvider services={services}>
         <ReduxProvider store={store}>
           <services.i18n.Context>
-            <div>WIP: this is rendered by the new explore plugin</div>
             <Switch>
               <Route exact path="/">
                 <Redirect to={`${LOGS_VIEW_ID}#/`} />
