@@ -29,7 +29,7 @@ describe('Query Result', () => {
       },
     };
     const component = mountWithIntl(<QueryError {...props} />);
-    const loadingIndicator = component.find(`[data-test-subj="queryResultLoading"]`);
+    const loadingIndicator = component.find('[data-test-subj="queryResultLoading"]');
     expect(loadingIndicator.exists()).toBeFalsy();
     expect(component.find('EuiText').text()).toEqual('Completed');
   });
