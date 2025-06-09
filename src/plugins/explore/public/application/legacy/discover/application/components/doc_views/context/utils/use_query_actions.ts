@@ -9,7 +9,7 @@ import { useMemo, useCallback, useState } from 'react';
 import { Filter } from '../../../../../../../../../../data/public';
 import { fetchAnchor } from '../api/anchor';
 import { OpenSearchHitRecord, fetchSurroundingDocs } from '../api/context';
-import { DiscoverServices } from '../../../../../build_services';
+import { ExploreServices } from '../../../../../../../../types';
 import { useOpenSearchDashboards } from '../../../../../../../../../../opensearch_dashboards_react/public';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../../../../../../common/legacy/discover';
 import { getFirstSortableField, SortDirection } from '../api/utils/sorting';
@@ -27,7 +27,7 @@ const initialState: ContextQueryState = {
 };
 
 export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
-  const { services } = useOpenSearchDashboards<DiscoverServices>();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const { data, uiSettings, toastNotifications } = services;
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();

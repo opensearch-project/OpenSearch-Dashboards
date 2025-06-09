@@ -152,21 +152,24 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
       {displayToNavLinkInPortal &&
         createPortal(
           <EuiFlexGroup gutterSize="m">
-            {topNavLinks.map((topNavLink) => (
-              <EuiFlexItem grow={false} key={topNavLink.id}>
-                <EuiToolTip position="bottom" content={topNavLink.label}>
+            {topNavLinks.map((topNavLink, index) => (
+              <EuiFlexItem grow={false} key={(topNavLink as any).id || index}>
+                <EuiToolTip
+                  position="bottom"
+                  content={(topNavLink as any).label || (topNavLink as any).tooltip}
+                >
                   <EuiButtonIcon
-                    onClick={(event) => {
-                      topNavLink.run(event.currentTarget);
+                    onClick={(event: any) => {
+                      (topNavLink as any).run(event.currentTarget);
                     }}
-                    iconType={topNavLink.iconType}
-                    aria-label={topNavLink.ariaLabel}
+                    iconType={(topNavLink as any).iconType}
+                    aria-label={(topNavLink as any).ariaLabel}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>,
-          opts.optionalRef.topLinkRef.current
+          opts.optionalRef?.topLinkRef?.current!
         )}
       <TopNavMenu
         appName={PLUGIN_ID}

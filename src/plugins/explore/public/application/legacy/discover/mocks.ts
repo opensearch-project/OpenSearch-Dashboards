@@ -29,7 +29,7 @@
  */
 
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { DiscoverSetup, ExploreStart } from './index';
+import { ExplorePluginSetup, ExplorePluginStart } from '../../../types';
 import { chartPluginMock } from '../../../../../charts/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import { embeddablePluginMock } from '../../../../../embeddable/public/mocks';
@@ -39,10 +39,11 @@ import { opensearchDashboardsLegacyPluginMock } from '../../../../../opensearch_
 import { uiActionsPluginMock } from '../../../../../ui_actions/public/mocks';
 import { urlForwardingPluginMock } from '../../../../../url_forwarding/public/mocks';
 import { visualizationsPluginMock } from '../../../../../visualizations/public/mocks';
-import { buildServices, DiscoverServices } from './build_services';
+import { ExploreServices } from '../../../types';
+import { buildServices } from '../../../build_services';
 
-export type Setup = jest.Mocked<DiscoverSetup>;
-export type Start = jest.Mocked<ExploreStart>;
+export type Setup = jest.Mocked<ExplorePluginSetup>;
+export type Start = jest.Mocked<ExplorePluginStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
@@ -59,6 +60,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     savedExploreLoader: {} as any,
+    savedSearchLoader: {} as any,
     urlGenerator: {
       createUrl: jest.fn(),
     } as any,
@@ -66,7 +68,7 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
-const createDiscoverServicesMock = (): DiscoverServices =>
+const createExploreServicesMock = (): ExploreServices =>
   buildServices(
     coreMock.createStart(),
     {
@@ -80,11 +82,12 @@ const createDiscoverServicesMock = (): DiscoverServices =>
       visualizations: visualizationsPluginMock.createStartContract(),
       opensearchDashboardsLegacy: opensearchDashboardsLegacyPluginMock.createStartContract(),
     },
-    coreMock.createPluginInitializerContext()
+    coreMock.createPluginInitializerContext(),
+    {} as any // Mock tabRegistry
   );
 
 export const discoverPluginMock = {
-  createDiscoverServicesMock,
+  createExploreServicesMock,
   createSetupContract,
   createStartContract,
 };
