@@ -16,8 +16,8 @@ import {
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'opensearch-dashboards/server';
-import { getWorkspaceState } from 'opensearch-dashboards/server/utils';
+} from '../../../server';
+import { getWorkspaceState } from '../../../server/utils';
 import { DASHBOARD_ADMIN_SETTINGS_ID } from '../utils';
 
 /**

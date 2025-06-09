@@ -3,13 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  coreMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from 'opensearch-dashboards/server/mocks';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '../../../server/mocks';
 import { PermissionControlledUiSettingsWrapper } from './permission_controlled_ui_settings_wrapper';
-import { SavedObjectsErrorHelpers } from 'opensearch-dashboards/server';
+import { SavedObjectsErrorHelpers } from '../../../server';
 import { DASHBOARD_ADMIN_SETTINGS_ID } from '../utils';
 
 // Mock the getWorkspaceState function
