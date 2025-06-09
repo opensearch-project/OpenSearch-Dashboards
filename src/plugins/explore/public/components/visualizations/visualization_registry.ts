@@ -75,14 +75,6 @@ export class VisualizationRegistry {
   }
 
   /**
-   * Manually switch to a different chart type
-   */
-  private switchChartType(newType: string) {
-    // TODO: Implement logic to switch chart type
-    // This will be implemented to switch to chart type: ${newType}
-  }
-
-  /**
    * Get visualization configuration
    */
   private getVisualizationConfig(type: string) {

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Visualization, VisualizationProps } from './visualization';
 import { LineChartStyleControls } from './line/line_vis_config';
 import { VisFieldType } from './types';
@@ -33,13 +33,6 @@ const mockVisualizationType = {
     },
   },
 };
-
-// Create a mock for the ReactExpressionRenderer component
-const mockReactExpressionRenderer = jest.fn().mockImplementation(({ expression }) => (
-  <div data-testid="expression-renderer">
-    <div data-testid="expression-data">{JSON.stringify(expression)}</div>
-  </div>
-));
 
 describe('Visualization', () => {
   const defaultProps: VisualizationProps = {

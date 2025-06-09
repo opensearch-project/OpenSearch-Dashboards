@@ -14,7 +14,6 @@ import {
   ThresholdLine,
   ThresholdLineStyle,
   ValueAxis,
-  VisColumn,
   VisFieldType,
 } from '../types';
 import { BasicVisOptions } from '../style_panel/basic_vis_options';

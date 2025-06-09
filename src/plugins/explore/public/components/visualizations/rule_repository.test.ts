@@ -184,6 +184,7 @@ describe('rule_repository', () => {
         dateColumns,
         styleOptions
       );
+      expect(expression).toBe('multi-line-chart-expression');
       expect(createMultiLineChart).toHaveBeenCalledWith(
         transformedData,
         numericalColumns,

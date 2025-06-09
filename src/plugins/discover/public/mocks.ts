@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { expressionsPluginMock } from '../../expressions/public/mocks';
 import { DiscoverSetup, DiscoverStart } from '.';
 import { coreMock } from '../../../core/public/mocks';
 import { chartPluginMock } from '../../charts/public/mocks';
@@ -79,6 +80,7 @@ const createDiscoverServicesMock = (): DiscoverServices =>
       urlForwarding: urlForwardingPluginMock.createStartContract(),
       visualizations: visualizationsPluginMock.createStartContract(),
       opensearchDashboardsLegacy: opensearchDashboardsLegacyPluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
     },
     coreMock.createPluginInitializerContext()
   );

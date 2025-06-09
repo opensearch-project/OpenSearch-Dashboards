@@ -50,6 +50,7 @@ const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [OPENSEARCH_FIELD_TYPES.SCALED_FLOAT]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.DOUBLE]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.INTEGER]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.INT]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.LONG]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.SHORT]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.UNSIGNED_LONG]: VisFieldType.Numerical,
