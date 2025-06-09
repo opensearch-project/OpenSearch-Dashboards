@@ -11,8 +11,7 @@ import { GridOptions } from '../types';
 
 export default {
   component: GridOptionsPanel,
-  title:
-    'src/plugins/explore/public/application/legacy/discover/application/components/visualizations/style_panel/grid_options',
+  title: 'src/plugins/explore/public/components/visualizations/style_panel/grid_options',
 } as ComponentMeta<typeof GridOptionsPanel>;
 
 // Template for the story

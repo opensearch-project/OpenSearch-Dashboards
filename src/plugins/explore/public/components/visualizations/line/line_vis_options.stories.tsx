@@ -13,8 +13,7 @@ import { ThresholdLineStyle, VisColumn, VisFieldType } from '../types';
 
 export default {
   component: LineVisStyleControls,
-  title:
-    'src/plugins/explore/public/application/legacy/discover/application/components/visualizations/line/line_vis_options',
+  title: 'src/plugins/explore/public/components/visualizations/line/line_vis_options',
 } as ComponentMeta<typeof LineVisStyleControls>;
 
 // Mock data for the component props

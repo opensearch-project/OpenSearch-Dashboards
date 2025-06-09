@@ -12,8 +12,7 @@ import { Positions } from '../utils/collections';
 
 export default {
   component: AxesOptions,
-  title:
-    'src/plugins/explore/public/application/legacy/discover/application/components/visualizations/style_panel/axes_options',
+  title: 'src/plugins/explore/public/components/visualizations/style_panel/axes_options',
 } as ComponentMeta<typeof AxesOptions>;
 
 // Mock data for the component props

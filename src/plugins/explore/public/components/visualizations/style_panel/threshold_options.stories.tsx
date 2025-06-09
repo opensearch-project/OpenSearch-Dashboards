@@ -11,8 +11,7 @@ import { ThresholdLine, ThresholdLineStyle } from '../types';
 
 export default {
   component: ThresholdOptions,
-  title:
-    'src/plugins/explore/public/application/legacy/discover/application/components/visualizations/style_panel/threshold_options',
+  title: 'src/plugins/explore/public/components/visualizations/style_panel/threshold_options',
 } as ComponentMeta<typeof ThresholdOptions>;
 
 // Template for the story

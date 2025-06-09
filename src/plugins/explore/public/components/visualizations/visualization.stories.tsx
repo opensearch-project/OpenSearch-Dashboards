@@ -14,8 +14,7 @@ import { LineChartStyleControls } from './line/line_vis_config';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 
 export default {
-  title:
-    'src/plugins/explore/public/application/legacy/discover/application/components/visualizations/visualization',
+  title: 'src/plugins/explore/public/components/visualizations/visualization',
   component: Visualization,
 } as ComponentMeta<typeof Visualization>;
 
