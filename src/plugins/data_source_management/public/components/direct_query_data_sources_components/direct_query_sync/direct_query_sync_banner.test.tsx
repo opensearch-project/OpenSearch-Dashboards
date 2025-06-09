@@ -10,7 +10,7 @@ import { savedObjectsServiceMock } from '../../../../../../core/public/mocks';
 import { DashboardDirectQuerySyncBanner } from './direct_query_sync_banner';
 import { fetchDirectQuerySyncInfo } from './direct_query_sync_utils';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
-import { intervalAsMinutes } from '../../../constants';
+import { intervalAsMinutes, asProgress } from '../../../constants';
 import { DirectQueryLoadingStatus } from 'src/plugins/data_source_management/framework/types';
 
 // Mock dependencies
@@ -23,6 +23,7 @@ jest.mock('../../../../framework/hooks/direct_query_hook', () => ({
 }));
 
 jest.mock('../../../constants', () => ({
+  ...jest.requireActual('../../../constants'),
   EMR_STATES: new Map([
     ['initial', { ord: 100, terminal: true }],
     ['success', { ord: 100, terminal: true }],
@@ -103,6 +104,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
       lastRefreshTime: 1625097600000, // Some past timestamp
       mappingName: 'test_datasource.test_database.test_index',
       mdsId: 'mds-1',
+      indexState: 'active',
     });
 
     // Mock intervalAsMinutes for interval and last sync time
@@ -187,7 +189,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('directQuerySyncBar')).toBeInTheDocument();
-      expect(screen.getByText(/Data sync is in progress \(70% complete\)\./)).toBeInTheDocument();
+      expect(screen.getByText(/Data sync is in progress \(75% complete\)\./)).toBeInTheDocument();
       expect(screen.getByText(/The dashboard will reload on completion\./)).toBeInTheDocument();
       expect(screen.getByTestId('directQuerySyncBar')).toHaveTextContent(
         'Data sync is in progress'
@@ -332,7 +334,23 @@ describe('DashboardDirectQuerySyncBanner', () => {
       expect(screen.getByText('Sync data')).toBeInTheDocument();
     });
 
-    // Update loadStatus to 'success'
+    // In order to trigger the refresh, we need to have a job that was previously running. We don't
+    // refresh if we skip straight to "success".
+    (useDirectQuery as jest.Mock).mockReturnValue({
+      loadStatus: DirectQueryLoadingStatus.RUNNING,
+      startLoading: mockStartLoading,
+    });
+
+    rerender(
+      <DashboardDirectQuerySyncBanner
+        http={http}
+        notifications={notifications}
+        savedObjectsClient={savedObjectsClient}
+        dashboardId="dashboard-1"
+        removeBanner={removeBanner}
+      />
+    );
+
     (useDirectQuery as jest.Mock).mockReturnValue({
       loadStatus: DirectQueryLoadingStatus.SUCCESS,
       startLoading: mockStartLoading,

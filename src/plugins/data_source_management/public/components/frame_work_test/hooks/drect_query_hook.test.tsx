@@ -84,7 +84,10 @@ describe('useDirectQuery', () => {
       });
     });
 
-    expect(fetchMock).toHaveBeenCalledWith({ datasource: 'test_source' }, undefined);
+    expect(fetchMock).toHaveBeenCalledWith(
+      { datasource: 'test_source', query: 'SELECT 1', lang: 'sql' },
+      undefined
+    );
     expect(startPollingMock).toHaveBeenCalledWith({ queryId: 'test_query_id' });
   });
 
