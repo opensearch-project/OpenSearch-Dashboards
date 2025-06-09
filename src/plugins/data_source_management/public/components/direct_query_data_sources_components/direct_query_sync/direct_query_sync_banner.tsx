@@ -111,7 +111,7 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
   }
 
   return (
-    <div className="direct-query-sync" data-test-subj="directQuerySyncBar">
+    <div className="directQuerySync__banner" data-test-subj="directQuerySyncBar">
       {!progress.in_progress ? (
         <EuiText size="s">
           {i18n.translate('dataSourcesManagement.directQuerySync.dataScheduledToSync', {
