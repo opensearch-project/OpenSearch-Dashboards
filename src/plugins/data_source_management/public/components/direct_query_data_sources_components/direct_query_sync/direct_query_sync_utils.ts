@@ -116,7 +116,7 @@ export async function fetchDirectQuerySyncInfo({
     }
 
     // Step 5: Extract index parts, refresh interval, last refresh time, and name
-    const { parts, refreshInterval, lastRefreshTime, mappingName } = extractIndexInfo(
+    const { parts, refreshInterval, lastRefreshTime, mappingName, indexState } = extractIndexInfo(
       localMapping,
       resolvedIndex
     );
@@ -128,7 +128,14 @@ export async function fetchDirectQuerySyncInfo({
     // Step 6: Generate the refresh query
     const refreshQuery = generateRefreshQuery(parts);
 
-    return { refreshQuery, refreshInterval, lastRefreshTime, mappingName, mdsId: localMdsId };
+    return {
+      indexState,
+      refreshQuery,
+      refreshInterval,
+      lastRefreshTime,
+      mappingName,
+      mdsId: localMdsId,
+    };
   } catch (err) {
     return null;
   }
@@ -180,18 +187,26 @@ export function extractIndexInfo(
   refreshInterval: number | null;
   lastRefreshTime: number | null;
   mappingName: string | null;
+  indexState: string | null;
 } {
   const mappingValues = Object.values(mapping)[0] as any;
   if (!mappingValues) {
-    return { parts: null, refreshInterval: null, lastRefreshTime: null, mappingName: null };
+    return {
+      parts: null,
+      refreshInterval: null,
+      lastRefreshTime: null,
+      mappingName: null,
+      indexState: null,
+    };
   }
 
   const mappingName = mappingValues?.mappings?._meta?.name ?? null;
   const refreshInterval = mappingValues?.mappings?._meta?.properties?.refreshInterval ?? null;
   const lastRefreshTime = mappingValues?.mappings?._meta?.properties?.lastRefreshTime ?? null;
+  const indexState = mappingValues?.mappings?._meta?.properties?.indexState ?? null;
 
   const parts = extractIndexParts(mappingName, concreteTitle);
-  return { parts, refreshInterval, lastRefreshTime, mappingName };
+  return { parts, refreshInterval, lastRefreshTime, mappingName, indexState };
 }
 
 export function extractIndexParts(

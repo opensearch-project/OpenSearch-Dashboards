@@ -128,7 +128,7 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
                 : '--',
             },
           })}{' '}
-          <EuiLink onClick={handleSynchronize}>
+          <EuiLink className="directQuerySync__link" onClick={handleSynchronize}>
             {i18n.translate('dataSourcesManagement.directQuerySync.syncDataLink', {
               defaultMessage: 'Sync data',
             })}
