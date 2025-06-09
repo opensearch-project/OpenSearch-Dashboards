@@ -70,7 +70,7 @@ describe('DocViewer', () => {
     expect(osdDocViewer).not.toBeInTheDocument();
   });
 
-  it('render tab content', () => {
+  it('render tab content', async () => {
     const docViewsRegistry = new DocViewsRegistry();
     docViewsRegistry.addDocView({
       title: i18n.translate('explore.docViews.table.tableTitle', {
@@ -87,6 +87,8 @@ describe('DocViewer', () => {
       component: JsonCodeBlock,
     });
 
+    const user = userEvent.setup();
+
     render(<DocViewer renderProps={mockRenderProps} docViewsRegistry={docViewsRegistry} />);
 
     const osdDocViewer = screen.queryByTestId('osdDocViewer');
@@ -96,7 +98,7 @@ describe('DocViewer', () => {
     expect(osdDocViewerTable).toBeInTheDocument();
 
     // switch tabs
-    userEvent.click(screen.getByRole('tab', { selected: false }));
+    await user.click(screen.getByRole('tab', { selected: false }));
 
     const osdJsonCodeBlock = screen.queryByTestId('osdJsonCodeBlock');
     expect(osdJsonCodeBlock).toBeInTheDocument();
