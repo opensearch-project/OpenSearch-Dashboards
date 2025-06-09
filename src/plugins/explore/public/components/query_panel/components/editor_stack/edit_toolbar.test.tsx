@@ -40,7 +40,7 @@ describe('EditToolbar', () => {
 
     const el = screen.getByText(clearBtnLabel);
     expect(el).toBeInTheDocument();
-    fireEvent.click(clearBtnLabel);
+    fireEvent.click(el);
     expect(handleClearEditor).toHaveBeenCalled();
   });
 });

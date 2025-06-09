@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiButtonEmpty } from '@elastic/eui';
 
 // TODO: Add storybook for this in next phase
 interface EditToolbarProps {
@@ -31,29 +31,29 @@ export const EditToolbar: React.FC<EditToolbarProps> = ({
         className={`${className}__toolbar`}
       >
         <EuiFlexItem grow={false}>
-          <button
-            type="button"
+          <EuiButtonEmpty
+            size="xs"
             className={`${className}__button`}
             onClick={onEditClick}
             aria-label={editText}
+            iconType="pencil"
           >
-            <EuiIcon type="pencil" />
             <span className={`${className}__text`}>{editText}</span>
-          </button>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHorizontalRule margin="xs" className={`${className}__separator`} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <button
-            type="button"
+          <EuiButtonEmpty
+            size="xs"
             className={`${className}__button`}
             onClick={onClearEditor}
             aria-label={clearText}
+            iconType="crossInCircleEmpty"
           >
-            <EuiIcon type="crossInCircleEmpty" />
             <span className={`${className}__text`}>{clearText}</span>
-          </button>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
