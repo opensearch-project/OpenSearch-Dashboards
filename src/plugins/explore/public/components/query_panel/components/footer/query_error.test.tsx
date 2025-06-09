@@ -50,7 +50,7 @@ describe('Query Result', () => {
     const props = {
       queryStatus: {
         status: ResultStatus.READY,
-        startTime: new Date().getTime(),
+        startTime: Date.now(),
         elapsedMs: 2000,
       },
     };
