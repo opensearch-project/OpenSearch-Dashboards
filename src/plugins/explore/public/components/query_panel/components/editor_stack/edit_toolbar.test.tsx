@@ -8,44 +8,39 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { EditToolbar } from './edit_toolbar';
 
 describe('EditToolbar', () => {
-  it('renders edit and clear buttons', () => {
-    render(
-      <EditToolbar
-        onClearEditor={jest.fn()}
-        onEditClick={jest.fn()}
-        editText="Edit"
-        clearText="Clear"
-      />
-    );
-    expect(screen.getByText('Edit')).toBeInTheDocument();
-    expect(screen.getByText('Clear')).toBeInTheDocument();
-  });
+  const editBtnLabel = "TBEditBtn";
+  const clearBtnLabel = "TBEditBtn";
 
-  it('calls handleEditClick when edit is clicked', () => {
+  it('renders and handles edit button', () => {
     const handleEditClick = jest.fn();
     render(
       <EditToolbar
         onClearEditor={jest.fn()}
         onEditClick={handleEditClick}
-        editText="Edit"
-        clearText="Clear"
+        editText={editBtnLabel}
+        clearText={clearBtnLabel}
       />
     );
-    fireEvent.click(screen.getByText('Edit'));
+    
+    const el = screen.getByText(editBtnLabel);
+    expect(el).toBeInTheDocument();
+    fireEvent.click(el);
     expect(handleEditClick).toHaveBeenCalled();
   });
 
-  it('calls handleClearEditor when clear is clicked', () => {
+  it('renders and handles clear button', () => {
     const handleClearEditor = jest.fn();
     render(
       <EditToolbar
         onClearEditor={handleClearEditor}
         onEditClick={jest.fn()}
-        editText="Edit"
-        clearText="Clear"
+        editText={editBtnLabel}
+        clearText={clearBtnLabel}
       />
     );
-    fireEvent.click(screen.getByText('Clear'));
+    
+    const el = screen.getByText(clearBtnLabel);
+    fireEvent.click(clearBtnLabel);
     expect(handleClearEditor).toHaveBeenCalled();
   });
 });
