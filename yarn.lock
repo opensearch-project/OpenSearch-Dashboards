@@ -6967,7 +6967,7 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.11.tgz#d421b6c527a3037f7c84433fd2c4229e016863d3"
   integrity sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==
 
-"@types/json-schema@^7.0.15", "@types/json-schema@^7.0.4":
+"@types/json-schema@^7.0.4":
   version "7.0.15"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
@@ -23059,7 +23059,7 @@ schema-utils@^3.0.0:
     ajv "^6.12.5"
     ajv-keywords "^3.5.2"
 
-schema-utils@^4.2.0, schema-utils@^4.3.0, schema-utils@^4.3.2:
+schema-utils@^4.2.0, schema-utils@^4.3.0:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-4.3.2.tgz#0c10878bf4a73fd2b1dfd14b9462b26788c806ae"
   integrity sha512-Gn/JaSk/Mt9gYubxTtSn/QCV4em9mpAPiR1rqy/Ocu19u/G9J5WWdNoUT4SiV6mFC3y6cxyFcFwdzPM3FgxGAQ==
@@ -24701,21 +24701,6 @@ terminal-link@^2.0.0:
   dependencies:
     ansi-escapes "^4.2.1"
     supports-hyperlinks "^2.0.0"
-
-terser-webpack-plugin@^1.4.3:
-  version "1.4.6"
-  resolved "https://registry.yarnpkg.com/terser-webpack-plugin/-/terser-webpack-plugin-1.4.6.tgz#87fcb6593fd1c977cd09e56143ecd31404600755"
-  integrity sha512-2lBVf/VMVIddjSn3GqbT90GvIJ/eYXJkt8cTzU7NbjKqK8fwv18Ftr4PlbF46b/e88743iZFL5Dtr/rC4hjIeA==
-  dependencies:
-    cacache "^12.0.2"
-    find-cache-dir "^2.1.0"
-    is-wsl "^1.1.0"
-    schema-utils "^1.0.0"
-    serialize-javascript "^4.0.0"
-    source-map "^0.6.1"
-    terser "^4.1.2"
-    webpack-sources "^1.4.0"
-    worker-farm "^1.7.0"
 
 terser-webpack-plugin@^2.1.2:
   version "2.3.8"
@@ -26694,11 +26679,12 @@ webpack-virtual-modules@^0.2.2:
   dependencies:
     debug "^3.0.0"
 
-webpack@4:
-  version "4.47.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.47.0.tgz#8b8a02152d7076aeb03b61b47dad2eeed9810ebc"
-  integrity sha512-td7fYwgLSrky3fI1EuU5cneU4+pbH6GgOfuKNS1tNPcfdGinGELAqsb/BP4nnvZyKSG2i/xFGU7+n2PvZA8HJQ==
+webpack@4, "webpack@>=4.43.0 <6.0.0", "webpack@npm:@amoo-miki/webpack@4.46.0-xxhash.1":
+  version "4.46.0-xxhash.1"
+  resolved "https://registry.yarnpkg.com/@amoo-miki/webpack/-/webpack-4.46.0-xxhash.1.tgz#e8fdb0399d36715e558ad35e3ff70fd1d4ea47a7"
+  integrity sha512-gPwQMqfrE9326g+rZoU4BPOfcYvEcAR0XxfpV9AGUcRwl2oHoqEwq7nxSWchilpGV1i9XI7mCa8u8k4ePz6ziA==
   dependencies:
+    "@node-rs/xxhash" "^1.3.0"
     "@webassemblyjs/ast" "1.9.0"
     "@webassemblyjs/helper-module-context" "1.9.0"
     "@webassemblyjs/wasm-edit" "1.9.0"
@@ -26709,49 +26695,19 @@ webpack@4:
     chrome-trace-event "^1.0.2"
     enhanced-resolve "^4.5.0"
     eslint-scope "^4.0.3"
+    glob-to-regexp "^0.4.1"
     json-parse-better-errors "^1.0.2"
     loader-runner "^2.4.0"
-    loader-utils "^1.2.3"
+    loader-utils "^2.0.4"
     memory-fs "^0.4.1"
-    micromatch "^3.1.10"
     mkdirp "^0.5.3"
     neo-async "^2.6.1"
     node-libs-browser "^2.2.1"
     schema-utils "^1.0.0"
     tapable "^1.1.3"
-    terser-webpack-plugin "^1.4.3"
+    terser-webpack-plugin "npm:@amoo-miki/terser-webpack-plugin@1.4.5-rc.2"
     watchpack "^1.7.4"
     webpack-sources "^1.4.1"
-
-"webpack@>=4.43.0 <6.0.0":
-  version "5.99.7"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.99.7.tgz#60201c1ca66da046b07d006c2f6e0cc5e8a7bdba"
-  integrity sha512-CNqKBRMQjwcmKR0idID5va1qlhrqVUKpovi+Ec79ksW8ux7iS1+A6VqzfZXgVYCFRKl7XL5ap3ZoMpwBJxcg0w==
-  dependencies:
-    "@types/eslint-scope" "^3.7.7"
-    "@types/estree" "^1.0.6"
-    "@types/json-schema" "^7.0.15"
-    "@webassemblyjs/ast" "^1.14.1"
-    "@webassemblyjs/wasm-edit" "^1.14.1"
-    "@webassemblyjs/wasm-parser" "^1.14.1"
-    acorn "^8.14.0"
-    browserslist "^4.24.0"
-    chrome-trace-event "^1.0.2"
-    enhanced-resolve "^5.17.1"
-    es-module-lexer "^1.2.1"
-    eslint-scope "5.1.1"
-    events "^3.2.0"
-    glob-to-regexp "^0.4.1"
-    graceful-fs "^4.2.11"
-    json-parse-even-better-errors "^2.3.1"
-    loader-runner "^4.2.0"
-    mime-types "^2.1.27"
-    neo-async "^2.6.2"
-    schema-utils "^4.3.2"
-    tapable "^2.1.1"
-    terser-webpack-plugin "^5.3.11"
-    watchpack "^2.4.1"
-    webpack-sources "^3.2.3"
 
 webpack@^5:
   version "5.99.6"
@@ -26781,36 +26737,6 @@ webpack@^5:
     terser-webpack-plugin "^5.3.11"
     watchpack "^2.4.1"
     webpack-sources "^3.2.3"
-
-"webpack@npm:@amoo-miki/webpack@4.46.0-xxhash.1":
-  version "4.46.0-xxhash.1"
-  resolved "https://registry.yarnpkg.com/@amoo-miki/webpack/-/webpack-4.46.0-xxhash.1.tgz#e8fdb0399d36715e558ad35e3ff70fd1d4ea47a7"
-  integrity sha512-gPwQMqfrE9326g+rZoU4BPOfcYvEcAR0XxfpV9AGUcRwl2oHoqEwq7nxSWchilpGV1i9XI7mCa8u8k4ePz6ziA==
-  dependencies:
-    "@node-rs/xxhash" "^1.3.0"
-    "@webassemblyjs/ast" "1.9.0"
-    "@webassemblyjs/helper-module-context" "1.9.0"
-    "@webassemblyjs/wasm-edit" "1.9.0"
-    "@webassemblyjs/wasm-parser" "1.9.0"
-    acorn "^6.4.1"
-    ajv "^6.10.2"
-    ajv-keywords "^3.4.1"
-    chrome-trace-event "^1.0.2"
-    enhanced-resolve "^4.5.0"
-    eslint-scope "^4.0.3"
-    glob-to-regexp "^0.4.1"
-    json-parse-better-errors "^1.0.2"
-    loader-runner "^2.4.0"
-    loader-utils "^2.0.4"
-    memory-fs "^0.4.1"
-    mkdirp "^0.5.3"
-    neo-async "^2.6.1"
-    node-libs-browser "^2.2.1"
-    schema-utils "^1.0.0"
-    tapable "^1.1.3"
-    terser-webpack-plugin "npm:@amoo-miki/terser-webpack-plugin@1.4.5-rc.2"
-    watchpack "^1.7.4"
-    webpack-sources "^1.4.1"
 
 whatwg-encoding@^1.0.5:
   version "1.0.5"

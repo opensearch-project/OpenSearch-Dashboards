@@ -113,6 +113,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
+    "**/@storybook/**/webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1",
     "**/@lhci/**/lighthouse": "^12.3.0",
     "**/axios": "^1.8.2",
     "**/browserify-rsa": "^4.1.1",
