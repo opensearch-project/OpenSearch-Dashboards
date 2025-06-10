@@ -13,15 +13,19 @@ describe('QueryTypeDetector', () => {
     const result = detector.detect('');
     expect(result.type).toBe(LanguageType.Natural);
     expect(result.confidence).toBe(0);
-    expect(result.reason).toBe('Empty query');
-    expect(result.warnings).toContain('No input provided');
+    expect(result.reason).toBe('Invalid query input');
+    expect(result.warnings).toContain('No valid input provided');
   });
 
   it('detects PPL query by source pattern', () => {
     const result = detector.detect('source=logs | where status=200');
     expect(result.type).toBe(LanguageType.PPL);
     expect(result.confidence).toBeGreaterThan(0.4);
-    expect(result.reason).toContain('Starts with PPL pattern');
+    expect(result.reason).toContain(
+      'Starts with PPL keyword: source=logs; Contains pipe character ' +
+        "'|'" +
+        '; Has known PPL pipe commands'
+    );
   });
 
   it('detects keyvalue query by key=value', () => {
