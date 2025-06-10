@@ -16,7 +16,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
           minimap: { enabled: false },
           automaticLayout: true,
           scrollBeyondLastLine: false,
-          fontSize: 12,
+          fontSize: 13,
           lineHeight: 20,
           fontFamily: 'var(--font-code)',
           lineNumbers: 'on' as const,

@@ -12,22 +12,25 @@ describe('QueryBarActionsRegistry', () => {
     registry = new QueryBarActionsRegistry();
   });
 
-  it('registers and retrieves actions', () => {
-    const action: QueryBarAction = { label: 'Test Action', onClick: jest.fn() };
-    registry.register(action);
-    expect(registry.getAll()).toEqual([action]);
-  });
+  it('registers actions and returns a sorted, immutable copy of the actions array', () => {
+    const action1: QueryBarAction = { id: 'a', label: 'A', onClick: jest.fn(), order: 2 };
+    const action2: QueryBarAction = { id: 'b', label: 'B', onClick: jest.fn(), order: 1 };
+    const action3: QueryBarAction = { id: 'c', label: 'C', onClick: jest.fn() }; // no order
+    registry.register(action1);
+    registry.register(action2);
+    registry.register(action3);
 
-  it('returns a copy of actions array', () => {
-    const action: QueryBarAction = { label: 'Test Action', onClick: jest.fn() };
-    registry.register(action);
+    // Should be sorted by order, then id
     const actions = registry.getAll();
-    actions.push({ label: 'Another', onClick: jest.fn() });
-    expect(registry.getAll()).toHaveLength(1);
+    expect(actions.map((a) => a.id)).toEqual(['b', 'a', 'c']);
+
+    // Validate immutability
+    actions.push({ id: 'd', label: 'D', onClick: jest.fn() });
+    expect(registry.getAll()).toHaveLength(3);
   });
 
   it('clears all actions', () => {
-    registry.register({ label: 'Action 1', onClick: jest.fn() });
+    registry.register({ id: 'a', label: 'Action 1', onClick: jest.fn() });
     registry.clear();
     expect(registry.getAll()).toEqual([]);
   });

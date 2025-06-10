@@ -4,6 +4,7 @@
  */
 
 import { LanguageType } from '../../types';
+import { PatternUtils, MAX_QUERY_LENGTH } from './constants';
 
 export interface DetectionResult {
   type: LanguageType;
@@ -19,42 +20,40 @@ interface ScoreResult {
 }
 
 export class QueryTypeDetector {
-  private pplStartPatterns: RegExp[];
-  private pplPipePatterns: RegExp[];
-  private nlStarters: RegExp[]; // nl: NATURAL LANGUAGE
-
-  constructor() {
-    this.pplStartPatterns = [
-      /^\s*source\b/i, // Matches "source" as a standalone word
-      /^\s*source\s*=/i, // Matches "source=" with optional spaces
-      /^\s*from\s+\w+/i, // Matches "from <word>"
-      /^\s*search\s+index\s*=/i, // Matches "search index="
-    ];
-    this.pplPipePatterns = [/\|\s*(where|filter|fields|sort|limit|stats|rename|eval)\b/i];
-    this.nlStarters = [
-      /^\s*(show|list|get|find|search|display|give|retrieve|fetch|tell)\b/i, // Common action verbs
-      /^\s*(what|how|when|where|why|which|who)\b/i, // Question starters
-      /^\s*(can|could|would|will|please|should|may|might|shall)\b/i, // Modal verbs
-      /^\s*(explain|describe|summarize|analyze|compare|calculate)\b/i, // Analytical verbs
-      /^\s*(is|are|was|were|do|does|did|has|have|had|am|be|being|been|the)\b/i, // Auxiliary verbs
-    ];
-  }
-
   detect(query: string): DetectionResult {
-    const trimmedQuery = query.trim();
-    if (!trimmedQuery) {
+    // Security: Validate and normalize input
+    if (!query || typeof query !== 'string') {
       return {
         type: LanguageType.Natural,
         confidence: 0,
-        reason: 'Empty query',
-        warnings: ['No input provided'],
+        reason: 'Invalid query input',
+        warnings: ['No valid input provided'],
+      };
+    }
+
+    if (query.length > MAX_QUERY_LENGTH) {
+      return {
+        type: LanguageType.Natural,
+        confidence: 0,
+        reason: 'Query too long',
+        warnings: [`Query exceeds maximum length of ${MAX_QUERY_LENGTH} characters`],
+      };
+    }
+
+    const normalizedQuery = PatternUtils.normalizeQuery(query);
+    if (!normalizedQuery) {
+      return {
+        type: LanguageType.Natural,
+        confidence: 0,
+        reason: 'Empty query after normalization',
+        warnings: ['No meaningful content after processing'],
       };
     }
 
     const scores: Record<LanguageType, ScoreResult> = {
-      ppl: this._checkPpl(trimmedQuery),
-      keyvalue: this._checkKeyValue(trimmedQuery),
-      natural: this._checkNaturalLanguage(trimmedQuery),
+      ppl: this._checkPpl(normalizedQuery),
+      keyvalue: this._checkKeyValue(normalizedQuery),
+      natural: this._checkNaturalLanguage(normalizedQuery),
     };
 
     const sorted = (Object.keys(scores) as Array<keyof typeof scores>).sort(
@@ -76,25 +75,35 @@ export class QueryTypeDetector {
     const reasons: string[] = [];
     const warnings: string[] = [];
 
-    if (this.pplStartPatterns.some((p) => p.test(query))) {
-      score += 0.5;
-      reasons.push('Starts with PPL pattern (e.g., source=, from, search)');
+    const tokens = PatternUtils.tokenize(query);
+    if (tokens.length === 0) {
+      return { score: 0, reason: 'No tokens found', warnings: ['Empty tokenized query'] };
     }
 
+    const firstToken = tokens[0];
+
+    // Check PPL start patterns (safe token matching)
+    if (PatternUtils.isPplStart(firstToken)) {
+      score += 0.5;
+      reasons.push(`Starts with PPL keyword: ${firstToken}`);
+    }
+
+    // Check for pipe character (simple string search)
     if (query.includes('|')) {
       score += 0.2;
       reasons.push("Contains pipe character '|'");
+
+      // Check for PPL pipe commands after pipe
+      if (PatternUtils.hasPplPipeCommand(tokens)) {
+        score += 0.1;
+        reasons.push('Has known PPL pipe commands');
+      }
     }
 
-    if (this.pplPipePatterns.some((p) => p.test(query))) {
-      score += 0.1;
-      reasons.push('Has known PPL pipe commands');
-    }
-
-    // Reduce score if NL starters or general English words are detected
-    if (this.nlStarters.some((p) => p.test(query))) {
+    // Penalize if starts with natural language
+    if (PatternUtils.isNaturalLanguageStart(firstToken)) {
       score -= 0.2;
-      reasons.push('Contains natural language starter (e.g., show, what, can, if is)');
+      reasons.push(`Contains natural language starter: ${firstToken}`);
     }
 
     if (score > 0 && score < 0.3) {
@@ -109,56 +118,41 @@ export class QueryTypeDetector {
     const reasons: string[] = [];
     const warnings: string[] = [];
 
-    const quotedKvPattern = /(\w+)\s*=\s*(['"])[^'"]*\2/g; // key="value" or key='value'
-    const unquotedKvPattern = /(\w+)\s*=\s*[^"'\s]+/g; // key=value
-    const booleanOpsPattern = /\b(and|or)\b/gi; // boolean operators
-    const sourcePattern = /^\s*source\s*=\s*\S+/i; // source= at start
+    // Parse key-value pairs safely
+    const kvPairs = PatternUtils.parseKeyValuePairs(query);
+    const booleanOpCount = PatternUtils.countBooleanOperators(query);
 
-    const quotedMatches = [...query.matchAll(quotedKvPattern)];
-    const unquotedMatches = [...query.matchAll(unquotedKvPattern)];
-    const booleanMatches = [...query.matchAll(booleanOpsPattern)];
-    const hasSourceStart = sourcePattern.test(query);
+    const tokens = PatternUtils.tokenize(query);
+    const firstToken = tokens.length > 0 ? tokens[0] : '';
 
-    // De-duplicate overlapping matches (quoted matches are subset of unquoted)
-    const totalKvCount = new Set([
-      ...quotedMatches.map((m) => m.index),
-      ...unquotedMatches.map((m) => m.index),
-    ]).size;
-
-    if (totalKvCount > 0) {
-      score += 0.4 + (totalKvCount - 1) * 0.1;
-      reasons.push(`Detected ${totalKvCount} key=value pair(s)`);
+    if (kvPairs.length > 0) {
+      score += 0.4 + (kvPairs.length - 1) * 0.1;
+      reasons.push(`Detected ${kvPairs.length} key=value pair(s)`);
     }
 
-    if (booleanMatches.length > 0) {
+    if (booleanOpCount > 0) {
       score += 0.2;
-      reasons.push(
-        `Contains boolean operator(s): ${[
-          ...new Set(booleanMatches.map((m) => m[0].toLowerCase())),
-        ].join(', ')}`
-      );
+      reasons.push(`Contains ${booleanOpCount} boolean operator(s)`);
     }
 
-    if (hasSourceStart) {
+    // Check for source= pattern at start
+    if (firstToken.toLowerCase().startsWith('source=')) {
       score += 0.1;
       reasons.push('Starts with source= pattern');
     }
 
-    // Reduce score if NL starters or general English words are detected
-    if (this.nlStarters.some((p) => p.test(query))) {
+    // Penalize if starts with natural language
+    if (PatternUtils.isNaturalLanguageStart(firstToken)) {
       score -= 0.2;
-      reasons.push('Contains natural language starter (e.g., show, what, can)');
+      reasons.push(`Contains natural language starter: ${firstToken}`);
     }
 
-    if (/\|/.test(query)) {
+    // Warning for mixed syntax
+    if (query.includes('|')) {
       warnings.push('Pipe character found; possibly mixed with PPL');
     }
 
-    return {
-      score,
-      reason: reasons.join('; '),
-      warnings,
-    };
+    return { score, reason: reasons.join('; '), warnings };
   }
 
   private _checkNaturalLanguage(query: string): ScoreResult {
@@ -166,22 +160,32 @@ export class QueryTypeDetector {
     const reasons: string[] = [];
     const warnings: string[] = [];
 
-    if (this.nlStarters.some((p) => p.test(query))) {
+    const tokens = PatternUtils.tokenize(query);
+    if (tokens.length === 0) {
+      return { score: 0, reason: 'No tokens found', warnings: ['Empty tokenized query'] };
+    }
+
+    const firstToken = tokens[0];
+
+    // Check natural language starters (safe token matching)
+    if (PatternUtils.isNaturalLanguageStart(firstToken)) {
       score += 0.4;
-      reasons.push('Starts with natural language pattern (e.g., show, what, can)');
+      reasons.push(`Starts with natural language pattern: ${firstToken}`);
     }
 
-    const wordCount = query.split(/\s+/).length;
-    if (wordCount > 5) {
+    // Word count scoring
+    if (tokens.length > 5) {
       score += 0.1;
-      reasons.push('Long query with multiple words');
+      reasons.push(`Long query with ${tokens.length} words`);
     }
 
-    if (/[?]/.test(query)) {
+    // Question mark check (simple string search)
+    if (query.includes('?')) {
       score += 0.1;
       reasons.push('Contains a question mark');
     }
 
+    // Absence of structured syntax
     if (!query.includes('|') && !query.includes('=')) {
       score += 0.2;
       reasons.push('No PPL or key=value syntax present');

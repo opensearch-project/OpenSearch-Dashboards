@@ -17,8 +17,6 @@
   &__showInputType {
     color: $euiColorDarkShade; // Use closest match from OUI
     font-size: $euiFontSizeXS;
-    font-style: normal;
-    font-weight: 400;
     line-height: 21px;
   }
 
@@ -32,7 +30,7 @@
 
   &__verticalSeparator {
     width: 1px;
-    height: 16px;
+    height: $euiSize;
     background: $euiColorLightShade;
     margin: 0 4px;
   }
