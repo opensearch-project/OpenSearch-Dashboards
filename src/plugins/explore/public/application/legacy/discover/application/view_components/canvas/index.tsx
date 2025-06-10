@@ -25,6 +25,7 @@ import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dash
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../../../../common/legacy/discover';
 import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
 import { ExploreDataTable } from '../../../../../../components/data_table/explore_data_table';
+import { VisualizationContainer } from '../../../../../../components/visualizations/visualization_container';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: ViewProps) {
@@ -127,6 +128,11 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       name: 'Logs',
       content: <MemoizedExploreDataTable rows={rows} scrollToTop={scrollToTop} />,
     },
+    {
+      id: 'explore_visualization_tab',
+      name: 'Visualization',
+      content: <MemoizedVisualizationContainer {...fetchState} />,
+    },
   ];
 
   return (
@@ -200,3 +206,4 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
 
 const MemoizedExploreDataTable = React.memo(ExploreDataTable);
 const MemoizedDiscoverChartContainer = React.memo(DiscoverChartContainer);
+const MemoizedVisualizationContainer = React.memo(VisualizationContainer);
