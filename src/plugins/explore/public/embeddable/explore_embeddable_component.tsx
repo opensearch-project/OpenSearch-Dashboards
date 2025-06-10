@@ -6,18 +6,17 @@
 import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SearchProps } from './search_embeddable';
+import { ExploreProps } from './explore_embeddable';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { VisualizationNoResults } from '../../../visualizations/public';
 import {
   DataGridTable,
   DataGridTableProps,
-} from '../application/components/data_grid/data_grid_table';
-import { VisualizationNoResults } from '../../../../../../visualizations/public';
-import { getServices } from '../opensearch_dashboards_services';
-import './search_embeddable.scss';
-import { OpenSearchDashboardsContextProvider } from '../../../../../../opensearch_dashboards_react/public';
+} from '../application/legacy/discover/application/components/data_grid/data_grid_table';
+import { getServices } from '../application/legacy/discover/opensearch_dashboards_services';
 
-interface SearchEmbeddableProps {
-  searchProps: SearchProps;
+interface ExploreEmbeddableProps {
+  searchProps: ExploreProps;
 }
 export type DiscoverEmbeddableProps = DataGridTableProps;
 
@@ -25,7 +24,7 @@ export const DataGridTableMemoized = React.memo((props: DataGridTableProps) => (
   <DataGridTable {...props} />
 ));
 
-export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps) {
+export function ExploreEmbeddableComponent({ searchProps }: ExploreEmbeddableProps) {
   const services = getServices();
   const discoverEmbeddableProps = {
     columns: searchProps.columns,
@@ -54,7 +53,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
           gutterSize="xs"
           direction="column"
           responsive={false}
-          data-test-subj="embeddedSavedSearchDocTable"
+          data-test-subj="embeddedSavedExploreDocTable"
           className="eui-xScrollWithShadows eui-yScrollWithShadows"
         >
           {discoverEmbeddableProps.hits !== 0 ? (

@@ -28,35 +28,6 @@
  * under the License.
  */
 
-import {
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../../../../embeddable/public';
-import { Filter, IIndexPattern, TimeRange, Query } from '../../../../../../data/public';
-import { SortOrder } from '../../../../types/saved_explore_types';
-import { SavedExplore } from '../../../../saved_explore';
-
-export interface SearchInput extends EmbeddableInput {
-  timeRange: TimeRange;
-  query?: Query;
-  filters?: Filter[];
-  hidePanelTitles?: boolean;
-  columns?: string[];
-  sort?: SortOrder[];
-}
-
-export interface SearchOutput extends EmbeddableOutput {
-  editUrl: string;
-  indexPatterns?: IIndexPattern[];
-  editable: boolean;
-}
-
-export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
-  getSavedSearch(): SavedExplore;
-}
-
-export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
-  type: string;
-}
+export { EXPLORE_EMBEDDABLE_TYPE } from './constants';
+export * from './types';
+export * from './explore_embeddable_factory';

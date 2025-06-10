@@ -29,32 +29,31 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { UiActionsStart } from '../../../../../../ui_actions/public';
-import { getServices } from '../opensearch_dashboards_services';
+import { UiActionsStart } from '../../../ui_actions/public';
 import {
   EmbeddableFactoryDefinition,
   Container,
   ErrorEmbeddable,
-} from '../../../../../../embeddable/public';
-import { TimeRange } from '../../../../../../data/public';
-import { SearchEmbeddable } from './search_embeddable';
-import { SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+} from '../../../embeddable/public';
+import { TimeRange } from '../../../data/public';
+import { ExploreEmbeddable, ExploreInput, ExploreOutput } from './types';
+import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
+import { getServices } from '../application/legacy/discover/opensearch_dashboards_services';
 
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
   isEditable: () => boolean;
 }
 
-export class SearchEmbeddableFactory
-  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SearchEmbeddable> {
-  public readonly type = SEARCH_EMBEDDABLE_TYPE;
+export class ExploreEmbeddableFactory
+  implements EmbeddableFactoryDefinition<ExploreInput, ExploreOutput, ExploreEmbeddable> {
+  public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
-    name: i18n.translate('explore.discover.savedSearch.savedObjectName', {
-      defaultMessage: 'Saved search',
+    name: i18n.translate('explore.savedExplore.savedObjectName', {
+      defaultMessage: 'Saved explore',
     }),
-    type: 'search',
-    getIconForSavedObject: () => 'search',
+    type: 'explore',
+    getIconForSavedObject: () => 'explore',
     includeFields: ['kibanaSavedObjectMeta'],
   };
 
@@ -69,33 +68,33 @@ export class SearchEmbeddableFactory
   };
 
   public getDisplayName() {
-    return i18n.translate('explore.discover.embeddable.search.displayName', {
-      defaultMessage: 'search',
+    return i18n.translate('explore.embeddable.explore.displayName', {
+      defaultMessage: 'explore',
     });
   }
 
   public createFromSavedObject = async (
     savedObjectId: string,
-    input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
+    input: Partial<ExploreInput> & { id: string; timeRange: TimeRange },
     parent?: Container
-  ): Promise<SearchEmbeddable | ErrorEmbeddable> => {
+  ): Promise<ExploreEmbeddable | ErrorEmbeddable> => {
     const services = getServices();
     const filterManager = services.filterManager;
     const url = await services.getSavedSearchUrlById(savedObjectId);
-    const editUrl = services.addBasePath(`/app/data-explorer/discover${url}`);
+    const editUrl = services.addBasePath(`/app/explore/logs/${url}`);
 
     try {
       const savedObject = await services.getSavedSearchById(savedObjectId);
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
-      const { SearchEmbeddable: SearchEmbeddableClass } = await import('./search_embeddable');
-      return new SearchEmbeddableClass(
+      const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
+      return new ExploreEmbeddableClass(
         {
-          savedSearch: savedObject,
+          savedExplore: savedObject,
           editUrl,
           editPath: url,
           filterManager,
-          editable: services.capabilities.discover.save as boolean,
+          editable: services.capabilities.discover!.save as boolean,
           indexPatterns: indexPattern ? [indexPattern] : [],
           services,
         },
@@ -109,7 +108,7 @@ export class SearchEmbeddableFactory
     }
   };
 
-  public async create(input: SearchInput) {
-    return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
+  public async create(input: ExploreInput) {
+    return new ErrorEmbeddable('Saved explores can only be created from a saved object', input);
   }
 }

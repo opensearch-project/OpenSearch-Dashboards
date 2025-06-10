@@ -123,6 +123,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
   };
 
   private getCreateMenuItems(): ReactElement[] {
+    console.log('AddPanelFlyout.getCreateMenuItems', ...this.props.getAllFactories());
     return [...this.props.getAllFactories()]
       .filter(
         (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()

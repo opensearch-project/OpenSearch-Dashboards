@@ -28,4 +28,4 @@
  * under the License.
  */
 
-export const SEARCH_EMBEDDABLE_TYPE = 'search';
+export const EXPLORE_EMBEDDABLE_TYPE = 'explore';
