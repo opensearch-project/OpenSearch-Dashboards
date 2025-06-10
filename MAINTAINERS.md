@@ -1,6 +1,6 @@
 ## Overview
 
-This document contains a list of maintainers in this repo. See [opensearch-project/.github/RESPONSIBILITIES.md](https://github.com/opensearch-project/.github/blob/main/RESPONSIBILITIES.md#maintainer-responsibilities) that explains what the role of maintainer means, what maintainers do in this and other repos, and how they should be doing it. If you're interested in contributing, and becoming a maintainer, see [CONTRIBUTING](CONTRIBUTING.md).
+This document contains a list of maintainers in this repo. See [Responsibilities](#responsibilities) for more information about the maintainer role. If you're interested in contributing, and becoming a maintainer, see [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Current Maintainers
 
@@ -47,3 +47,10 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Sean Neumann  | [seanneumann](https://github.com/seanneumann) | Contributor |
 | Kristen Tian  | [kristenTian](https://github.com/kristenTian) | Amazon      |
 | Matt Provost  | [BSFishy](https://github.com/BSFishy)         | Amazon      |
+
+## Responsibilities
+
+See [opensearch-project/.github/RESPONSIBILITIES.md](https://github.com/opensearch-project/.github/blob/main/RESPONSIBILITIES.md#maintainer-responsibilities) that explains what the role of maintainer means, what maintainers do in this and other repos, and how they should be doing it.
+
+In addition to the standard responsibilities above, this respository also requires:
+- PRs should not be merged unless all CI passes. If a CI failure must be overridden, please add a comment articulating why with the logins of two supporting maintainers (who are not the PR author).
