@@ -38,7 +38,6 @@ $customSize10: 10px;
       }
 
       &.promptEditor--readonly {
-
         .monaco-editor,
         .react-monaco-editor-container {
           background-color: $euiColorLightShade !important;
@@ -96,7 +95,7 @@ $customSize10: 10px;
         }
 
         // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-        .euiButtonContent>*+* {
+        .euiButtonContent > * + * {
           margin-inline-start: 4px;
         }
       }
@@ -128,7 +127,6 @@ $customSize10: 10px;
 
   .queryEditorWrapper {
     position: relative;
-
     .queryEditor {
       border: $euiBorderThin;
       border-radius: $euiBorderRadiusSmall;
@@ -171,7 +169,6 @@ $customSize10: 10px;
       }
 
       &.queryEditor--readonly {
-
         .monaco-editor,
         .react-monaco-editor-container {
           background-color: $euiColorLightShade !important;
@@ -228,7 +225,7 @@ $customSize10: 10px;
           }
 
           // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-          .euiButtonContent>*+* {
+          .euiButtonContent > * + * {
             margin-inline-start: 4px;
           }
         }
