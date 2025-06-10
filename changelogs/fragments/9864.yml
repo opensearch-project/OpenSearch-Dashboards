@@ -1,0 +1,2 @@
+chore:
+- Remove jest-specific-snapshot from osd-storybook ([#9864](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9864))
