@@ -189,6 +189,9 @@ describe('field_calculator', function () {
         _source: {
           extension: `${hit._source.extension}-${i}`,
         },
+        _index: 'testIndex',
+        _id: 'testId',
+        _score: 1,
       }));
       params.count = undefined;
       const extensions = getFieldValueCounts(params);
@@ -260,6 +263,9 @@ describe('field_calculator', function () {
         _source: {
           extension: { foo: hit._source.extension },
         },
+        _index: 'testIndex',
+        _id: 'testId',
+        _score: 1,
       }));
       params.grouped = true;
       expect(typeof getFieldValueCounts(params).error).toBe('string');

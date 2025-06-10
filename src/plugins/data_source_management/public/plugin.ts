@@ -15,6 +15,9 @@ import {
   MountPoint,
   Plugin,
 } from '../../../core/public';
+import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import { DashboardDirectQuerySyncBanner } from './components/direct_query_data_sources_components/direct_query_sync/direct_query_sync_banner';
+import { parseUrlHash } from '../../opensearch_dashboards_utils/public';
 
 import { PLUGIN_NAME } from '../common';
 import { createDataSourceSelector } from './components/data_source_selector/create_data_source_selector';
@@ -42,7 +45,6 @@ import {
 import { DataSourceSelectionService } from './service/data_source_selection_service';
 import { catalogRequestIntercept } from '../framework/catalog_cache/cache_intercept';
 import { createGetterSetter } from '../../../../src/plugins/opensearch_dashboards_utils/public';
-import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   RenderAccelerationDetailsFlyoutParams,
   RenderAccelerationFlyoutParams,
@@ -52,6 +54,7 @@ import { AccelerationDetailsFlyout } from './components/direct_query_data_source
 import { CreateAcceleration } from './components/direct_query_data_sources_components/acceleration_creation/create/create_acceleration';
 import { AssociatedObjectsDetailsFlyout } from './components/direct_query_data_sources_components/associated_object_management/associated_objects_details_flyout';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
+import { ConfigSchema } from '../config';
 
 export const [
   getRenderAccelerationDetailsFlyout,
@@ -104,16 +107,26 @@ export class DataSourceManagementPlugin
     Plugin<
       DataSourceManagementPluginSetup,
       DataSourceManagementPluginStart,
-      DataSourceManagementSetupDependencies
+      DataSourceManagementSetupDependencies,
+      ConfigSchema
     > {
-  private started = false;
-  private authMethodsRegistry = new AuthenticationMethodRegistry();
-  private dataSourceSelection = new DataSourceSelectionService();
+  private started: boolean = false;
+  private authMethodsRegistry: IAuthenticationMethodRegistry = new AuthenticationMethodRegistry();
+  private dataSourceSelection: DataSourceSelectionService = new DataSourceSelectionService();
   private featureFlagStatus: boolean = false;
+  private bannerId: string | null = null;
+  private core: CoreStart | null = null;
+  private currentAppId: string | undefined = undefined;
+  private config: ConfigSchema;
+
+  constructor(initializerContext: { config: { get: () => ConfigSchema } }) {
+    this.config = initializerContext.config.get();
+  }
+
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
     { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
-  ) {
+  ): DataSourceManagementPluginSetup {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
     const uiSettings = core.uiSettings;
     setUiSettings(uiSettings);
@@ -135,7 +148,7 @@ export class DataSourceManagementPlugin
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
       order: 1,
-      mount: async (params) => {
+      mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
 
         return mountManagementSection(
@@ -217,15 +230,18 @@ export class DataSourceManagementPlugin
       dataSourceSelection: this.dataSourceSelection,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource!),
-        getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
+        getDataSourceMenu: <T>(): React.ComponentType<DataSourceMenuProps<T>> =>
+          createDataSourceMenu<T>(),
       },
       getDefaultDataSourceId,
       getDefaultDataSourceId$,
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): DataSourceManagementPluginStart {
     this.started = true;
+    this.core = core;
+
     setApplication(core.application);
     core.http.intercept({
       request: catalogRequestIntercept(),
@@ -240,7 +256,7 @@ export class DataSourceManagementPlugin
       const accelerationDetailsFlyout = core.overlays.openFlyout(
         toMountPoint(
           React.createElement(AccelerationDetailsFlyout, {
-            featureFlagStatus: this.featureFlagStatus, // Use the stored featureFlagStatus
+            featureFlagStatus: this.featureFlagStatus,
             acceleration,
             dataSourceName,
             resetFlyout: () => accelerationDetailsFlyout.close(),
@@ -303,10 +319,89 @@ export class DataSourceManagementPlugin
     };
     setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
+    const getDirectQuerySyncFromUrl = (
+      parsedHash: ReturnType<typeof parseUrlHash>
+    ): boolean | null => {
+      if (parsedHash && parsedHash.query) {
+        const directQuerySync = parsedHash.query.directQuerySync;
+        if (directQuerySync === 'true') return true;
+        if (directQuerySync === 'false') return false;
+      }
+      return null;
+    };
+
+    const shouldMountBanner = (parsedHash: ReturnType<typeof parseUrlHash>): boolean => {
+      const urlFlag = getDirectQuerySyncFromUrl(parsedHash);
+      if (urlFlag !== null) {
+        return urlFlag;
+      }
+      return this.config.directQuerySyncEnabled;
+    };
+
+    const updateBanner = () => {
+      const appId = this.currentAppId;
+
+      if (appId === 'dashboards') {
+        const parsedHash = parseUrlHash(window.location.href);
+        const pathName = parsedHash?.pathname || '';
+        const pathSegments = pathName.split('/').filter((segment) => segment);
+        const isDashboardViewPage = pathSegments.length === 2 && pathSegments[0] === 'view';
+        const dashboardId = isDashboardViewPage ? pathSegments[1] : null;
+
+        if (isDashboardViewPage && dashboardId) {
+          if (shouldMountBanner(parsedHash)) {
+            if (!this.bannerId) {
+              this.bannerId = core.overlays.banners.add(
+                toMountPoint(
+                  React.createElement(DashboardDirectQuerySyncBanner, {
+                    dashboardId,
+                    http: core.http,
+                    notifications: core.notifications,
+                    savedObjectsClient: core.savedObjects.client,
+                    removeBanner: () => {
+                      if (this.bannerId) {
+                        core.overlays.banners.remove(this.bannerId);
+                        this.bannerId = null;
+                      }
+                    },
+                  })
+                )
+              );
+            }
+          } else if (this.bannerId) {
+            core.overlays.banners.remove(this.bannerId);
+            this.bannerId = null;
+          }
+        } else if (!isDashboardViewPage && this.bannerId) {
+          core.overlays.banners.remove(this.bannerId);
+          this.bannerId = null;
+        }
+      } else if (this.bannerId) {
+        core.overlays.banners.remove(this.bannerId);
+        this.bannerId = null;
+      }
+    };
+
+    core.application.currentAppId$.subscribe((appId: string | undefined) => {
+      this.currentAppId = appId;
+      updateBanner();
+    });
+
+    window.addEventListener('hashchange', () => {
+      updateBanner();
+    });
+
+    updateBanner();
+
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.bannerId && this.core) {
+      this.core.overlays.banners.remove(this.bannerId);
+      this.bannerId = null;
+    }
+  }
 }

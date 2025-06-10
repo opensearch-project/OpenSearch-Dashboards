@@ -9,7 +9,7 @@ import moment from 'moment';
 import { saveAs } from 'file-saver';
 import { useDiscoverContext } from '../../view_components/context';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
 import { useSelector } from '../../utils/state_management';
 import { getLegacyDisplayedColumns } from '../default_discover_table/helper';
 import { IndexPattern, UI_SETTINGS } from '../../../../../../../../data/common';
