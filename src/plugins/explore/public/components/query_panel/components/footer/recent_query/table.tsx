@@ -5,6 +5,7 @@
 import React from 'react';
 import moment from 'moment';
 import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { RecentQueriesTableProps, RecentQueryItem, RecentQueryTableItem } from '../../../types';
 import { LanguageType } from '../../../types';
 
@@ -73,14 +74,30 @@ export function RecentQueriesTable({
   });
 
   const tableColumns: Array<EuiBasicTableColumn<RecentQueryTableItem>> = [
-    { field: 'query', name: 'Recent query' },
-    { field: 'time', name: 'Last run' },
     {
-      name: 'Actions',
+      field: 'query',
+      name: i18n.translate('explore.queryPanel.recentQueryTable.queryColumn', {
+        defaultMessage: 'Recent query',
+      }),
+    },
+    {
+      field: 'time',
+      name: i18n.translate('explore.queryPanel.recentQueryTable.lastRunColumn', {
+        defaultMessage: 'Last run',
+      }),
+    },
+    {
+      name: i18n.translate('explore.queryPanel.recentQueryTable.actionsColumn', {
+        defaultMessage: 'Actions',
+      }),
       actions: [
         {
-          name: 'Run',
-          description: 'Run recent query',
+          name: i18n.translate('explore.queryPanel.recentQueryTable.runAction', {
+            defaultMessage: 'Run',
+          }),
+          description: i18n.translate('explore.queryPanel.recentQueryTable.runActionDescription', {
+            defaultMessage: 'Run recent query',
+          }),
           icon: 'play',
           type: 'icon',
           onClick: (item: RecentQueryTableItem) => {
@@ -98,7 +115,12 @@ export function RecentQueriesTable({
                 <EuiButtonIcon
                   onClick={copy}
                   iconType="copyClipboard"
-                  aria-label="Copy recent query"
+                  aria-label={i18n.translate(
+                    'explore.queryPanel.recentQueryTable.copyActionAriaLabel',
+                    {
+                      defaultMessage: 'Copy recent query',
+                    }
+                  )}
                 />
               )}
             </EuiCopy>
