@@ -1,0 +1,302 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LineVisStyleControls handles empty column arrays gracefully 1`] = `
+<EuiTabbedContent
+  autoFocus="selected"
+  expand={false}
+  initialSelectedTab={
+    Object {
+      "content": <BasicVisOptions
+        addLegend={true}
+        addTimeMarker={false}
+        addTooltip={true}
+        legendPosition="right"
+        lineMode="smooth"
+        lineWidth={2}
+        onAddLegendChange={[Function]}
+        onAddTimeMarkerChange={[Function]}
+        onAddTooltipChange={[Function]}
+        onLegendPositionChange={[Function]}
+        onLineModeChange={[Function]}
+        onLineWidthChange={[Function]}
+        onShowDotsChange={[Function]}
+        onShowLineChange={[Function]}
+        showDots={true}
+        showLine={true}
+      />,
+      "id": "basic",
+      "name": "Basic",
+    }
+  }
+  size="s"
+  tabs={
+    Array [
+      Object {
+        "content": <BasicVisOptions
+          addLegend={true}
+          addTimeMarker={false}
+          addTooltip={true}
+          legendPosition="right"
+          lineMode="smooth"
+          lineWidth={2}
+          onAddLegendChange={[Function]}
+          onAddTimeMarkerChange={[Function]}
+          onAddTooltipChange={[Function]}
+          onLegendPositionChange={[Function]}
+          onLineModeChange={[Function]}
+          onLineWidthChange={[Function]}
+          onShowDotsChange={[Function]}
+          onShowLineChange={[Function]}
+          showDots={true}
+          showLine={true}
+        />,
+        "id": "basic",
+        "name": "Basic",
+      },
+      Object {
+        "content": <ThresholdOptions
+          onThresholdChange={[Function]}
+          thresholdLine={
+            Object {
+              "color": "#E7664C",
+              "show": false,
+              "style": "full",
+              "value": 10,
+              "width": 1,
+            }
+          }
+        />,
+        "id": "threshold",
+        "name": "Threshold",
+      },
+      Object {
+        "content": <GridOptionsPanel
+          grid={
+            Object {
+              "categoryLines": true,
+              "valueLines": true,
+            }
+          }
+          onGridChange={[Function]}
+        />,
+        "id": "grid",
+        "name": "Grid",
+      },
+      Object {
+        "content": <AxesOptions
+          categoricalColumns={Array []}
+          categoryAxes={
+            Array [
+              Object {
+                "id": "CategoryAxis-1",
+                "labels": Object {
+                  "filter": true,
+                  "rotate": 0,
+                  "show": true,
+                  "truncate": 100,
+                },
+                "position": "bottom",
+                "show": true,
+                "title": Object {
+                  "text": "",
+                },
+                "type": "category",
+              },
+            ]
+          }
+          dateColumns={Array []}
+          numericalColumns={Array []}
+          onCategoryAxesChange={[Function]}
+          onValueAxesChange={[Function]}
+          valueAxes={
+            Array [
+              Object {
+                "id": "ValueAxis-1",
+                "labels": Object {
+                  "filter": false,
+                  "rotate": 0,
+                  "show": true,
+                  "truncate": 100,
+                },
+                "name": "LeftAxis-1",
+                "position": "left",
+                "show": true,
+                "title": Object {
+                  "text": "",
+                },
+                "type": "value",
+              },
+            ]
+          }
+        />,
+        "id": "axes",
+        "name": "Axes",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`LineVisStyleControls renders without crashing 1`] = `
+<EuiTabbedContent
+  autoFocus="selected"
+  expand={false}
+  initialSelectedTab={
+    Object {
+      "content": <BasicVisOptions
+        addLegend={true}
+        addTimeMarker={false}
+        addTooltip={true}
+        legendPosition="right"
+        lineMode="smooth"
+        lineWidth={2}
+        onAddLegendChange={[Function]}
+        onAddTimeMarkerChange={[Function]}
+        onAddTooltipChange={[Function]}
+        onLegendPositionChange={[Function]}
+        onLineModeChange={[Function]}
+        onLineWidthChange={[Function]}
+        onShowDotsChange={[Function]}
+        onShowLineChange={[Function]}
+        showDots={true}
+        showLine={true}
+      />,
+      "id": "basic",
+      "name": "Basic",
+    }
+  }
+  size="s"
+  tabs={
+    Array [
+      Object {
+        "content": <BasicVisOptions
+          addLegend={true}
+          addTimeMarker={false}
+          addTooltip={true}
+          legendPosition="right"
+          lineMode="smooth"
+          lineWidth={2}
+          onAddLegendChange={[Function]}
+          onAddTimeMarkerChange={[Function]}
+          onAddTooltipChange={[Function]}
+          onLegendPositionChange={[Function]}
+          onLineModeChange={[Function]}
+          onLineWidthChange={[Function]}
+          onShowDotsChange={[Function]}
+          onShowLineChange={[Function]}
+          showDots={true}
+          showLine={true}
+        />,
+        "id": "basic",
+        "name": "Basic",
+      },
+      Object {
+        "content": <ThresholdOptions
+          onThresholdChange={[Function]}
+          thresholdLine={
+            Object {
+              "color": "#E7664C",
+              "show": false,
+              "style": "full",
+              "value": 10,
+              "width": 1,
+            }
+          }
+        />,
+        "id": "threshold",
+        "name": "Threshold",
+      },
+      Object {
+        "content": <GridOptionsPanel
+          grid={
+            Object {
+              "categoryLines": true,
+              "valueLines": true,
+            }
+          }
+          onGridChange={[Function]}
+        />,
+        "id": "grid",
+        "name": "Grid",
+      },
+      Object {
+        "content": <AxesOptions
+          categoricalColumns={
+            Array [
+              Object {
+                "column": "field-2",
+                "id": 2,
+                "name": "category",
+                "schema": "categorical",
+              },
+            ]
+          }
+          categoryAxes={
+            Array [
+              Object {
+                "id": "CategoryAxis-1",
+                "labels": Object {
+                  "filter": true,
+                  "rotate": 0,
+                  "show": true,
+                  "truncate": 100,
+                },
+                "position": "bottom",
+                "show": true,
+                "title": Object {
+                  "text": "",
+                },
+                "type": "category",
+              },
+            ]
+          }
+          dateColumns={
+            Array [
+              Object {
+                "column": "field-0",
+                "id": 0,
+                "name": "date",
+                "schema": "date",
+              },
+            ]
+          }
+          numericalColumns={
+            Array [
+              Object {
+                "column": "field-1",
+                "id": 1,
+                "name": "value",
+                "schema": "numerical",
+              },
+            ]
+          }
+          onCategoryAxesChange={[Function]}
+          onValueAxesChange={[Function]}
+          valueAxes={
+            Array [
+              Object {
+                "id": "ValueAxis-1",
+                "labels": Object {
+                  "filter": false,
+                  "rotate": 0,
+                  "show": true,
+                  "truncate": 100,
+                },
+                "name": "LeftAxis-1",
+                "position": "left",
+                "show": true,
+                "title": Object {
+                  "text": "",
+                },
+                "type": "value",
+              },
+            ]
+          }
+        />,
+        "id": "axes",
+        "name": "Axes",
+      },
+    ]
+  }
+/>
+`;

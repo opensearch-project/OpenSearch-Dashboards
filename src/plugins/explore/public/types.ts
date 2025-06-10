@@ -32,6 +32,11 @@ import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import {
+  ExpressionsPublicPlugin,
+  ExpressionsSetup,
+  ExpressionsStart,
+} from 'src/plugins/expressions/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { ScopedHistory } from '../../../core/public';
@@ -40,11 +45,18 @@ import { TabRegistryService } from './services/tab_registry/tab_registry_service
 import { ReduxStore } from './application/utils/interfaces';
 import { Adapters } from '../../inspector/public';
 
+import {
+  VisualizationRegistryService,
+  VisualizationRegistryServiceSetup,
+  VisualizationRegistryServiceStart,
+} from './services/visualization_registry_service';
+
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
 // ============================================================================
 
 export interface ExplorePluginSetup {
+  visualizationRegistry: VisualizationRegistryServiceSetup;
   docViews: {
     addDocView: (docViewSpec: unknown) => void;
   };
@@ -54,6 +66,7 @@ export interface ExplorePluginSetup {
 }
 
 export interface ExplorePluginStart {
+  visualizationRegistry: VisualizationRegistryServiceStart;
   urlGenerator?: UrlGeneratorContract<'EXPLORE_APP_URL_GENERATOR'>;
   savedSearchLoader: SavedExploreLoader;
   savedExploreLoader: SavedExploreLoader;
@@ -77,6 +90,7 @@ export interface ExploreSetupDependencies {
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
 }
 
 /**
@@ -93,6 +107,7 @@ export interface ExploreStartDependencies {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
+  expressions: ExpressionsStart;
 }
 
 // ============================================================================
@@ -141,11 +156,12 @@ export interface ExploreServices {
   // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
   store?: ReduxStore; // Redux store
   viewRegistry?: Record<string, unknown>; // ViewServiceStart - will be replaced with tabRegistry
-  expressions?: Record<string, unknown>; // ExpressionsStart
   embeddable: EmbeddableStart; // EmbeddableStart
   scopedHistory?: ScopedHistory; // ScopedHistory
   osdUrlStateStorage?: IOsdUrlStateStorage; // IOsdUrlStateStorage
 
   // Explore-specific services
   tabRegistry: TabRegistryService;
+  visualizationRegistry: VisualizationRegistryService;
+  expressions: ExpressionsStart;
 }

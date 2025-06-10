@@ -8,6 +8,7 @@ import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import rison from 'rison-node';
 import { stringify } from 'query-string';
+import { VisualizationRegistryService } from './services/visualization_registry_service';
 import {
   createOsdUrlStateStorage,
   createOsdUrlTracker,
@@ -81,6 +82,9 @@ export class ExplorePlugin
   // Add a new property for the tab registry
   private tabRegistry: TabRegistryService = new TabRegistryService();
 
+  /** visualization registry */
+  private visualizationRegistryService = new VisualizationRegistryService();
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
   }
@@ -91,6 +95,7 @@ export class ExplorePlugin
   ): ExplorePluginSetup {
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
+    const visualizationRegistryService = this.visualizationRegistryService.setup();
 
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
@@ -269,7 +274,8 @@ export class ExplorePlugin
           coreStart,
           pluginsStart,
           this.initializerContext,
-          this.tabRegistry
+          this.tabRegistry,
+          this.visualizationRegistryService
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -347,6 +353,7 @@ export class ExplorePlugin
         addDocViewLink: (docViewLinkSpec: unknown) =>
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
+      visualizationRegistry: visualizationRegistryService,
     };
   }
 
@@ -357,7 +364,13 @@ export class ExplorePlugin
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = buildServices(core, plugins, this.initializerContext, this.tabRegistry);
+      const services = buildServices(
+        core,
+        plugins,
+        this.initializerContext,
+        this.tabRegistry,
+        this.visualizationRegistryService
+      );
       setLegacyServices(services);
       this.servicesInitialized = true;
 
@@ -378,6 +391,7 @@ export class ExplorePlugin
       urlGenerator: this.urlGenerator,
       savedSearchLoader: savedExploreLoader, // For backward compatibility
       savedExploreLoader,
+      visualizationRegistry: this.visualizationRegistryService.start(),
     };
   }
 
