@@ -23,13 +23,18 @@ const intitialQuery = (language: LanguageType, dataset: string) => ({
 const QueryPanel = () => {
   const [lineCount, setLineCount] = useState<number | undefined>(undefined);
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
-  const languageTypeRef = useRef<LanguageType>(LanguageType.Natural); // Default to PPL
+
+  // We use useRef to track the latest detected language type immediately,
+  // since setState is async and we're using a debounced detector.
+  // This ensures accurate access to languageTypeRef.current without waiting for re-renders
+  const languageTypeRef = useRef<LanguageType>(LanguageType.Natural); // Default to Natural
+
   const [isDualEditor, setIsDualEditor] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPromptReadOnly, setIsPromptReadOnly] = useState(false);
   const [isEditorReadOnly, setIsEditorReadOnly] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<Query>(
-    intitialQuery(languageTypeRef.current, 'test')
+    intitialQuery(languageTypeRef.current, 'test') // TODO: Update this with dataset
   );
 
   const onQueryStringChange = React.useCallback((value: string, isPrompt: boolean) => {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
@@ -55,10 +55,18 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
-  const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
+  const blurTimeoutRef = useRef<number | null>(null);
   const [editorHeight, setEditorHeight] = useState(height);
 
   const editorClassPrefix = getEditorClassPrefix(editorType);
+
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current !== null) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const editTextI18n =
     editText ||
@@ -80,13 +88,17 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       const focusDisposable = editor.onDidFocusEditorText(() => {
-        clearTimeout(blurTimeoutRef.current);
+        if (blurTimeoutRef.current !== null) {
+          clearTimeout(blurTimeoutRef.current);
+          blurTimeoutRef.current = null;
+        }
         setEditorIsFocused(true);
       });
 
       const blurDisposable = editor.onDidBlurEditorText(() => {
-        blurTimeoutRef.current = setTimeout(() => {
+        blurTimeoutRef.current = window.setTimeout(() => {
           setEditorIsFocused(false);
+          blurTimeoutRef.current = null; // reset after running
         }, 300);
       });
 
@@ -110,7 +122,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
       editor.addAction({
         id: `insert-new-line-${editorType}`,
         label: i18n.translate('explore.queryPanel.reusableEditor.insertNewLine', {
-          defaultMessage: `Insert New Line on {editorType}`,
+          defaultMessage: 'Insert New Line on {editorType}',
           values: { editorType },
         }),
         // eslint-disable-next-line no-bitwise
@@ -151,7 +163,10 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
       return () => {
         focusDisposable.dispose();
         blurDisposable.dispose();
-        clearTimeout(blurTimeoutRef.current);
+        if (blurTimeoutRef.current !== null) {
+          clearTimeout(blurTimeoutRef.current);
+          blurTimeoutRef.current = null;
+        }
         return editor;
       };
     },
