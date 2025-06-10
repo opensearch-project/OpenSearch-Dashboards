@@ -54,7 +54,7 @@ export type Progress = { in_progress: true; percentage: number } | { in_progress
  */
 export const asProgress = (
   state: string | null,
-  queryStatus: DirectQueryLoadingStatus,
+  queryStatus: DirectQueryLoadingStatus | null,
   hasLastRefresh: boolean
 ): Progress => {
   // Query loading status takes precedence if in a processing state, otherwise fallback to state

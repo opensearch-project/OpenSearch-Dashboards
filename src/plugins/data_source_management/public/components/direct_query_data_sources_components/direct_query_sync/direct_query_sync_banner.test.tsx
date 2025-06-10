@@ -10,7 +10,7 @@ import { savedObjectsServiceMock } from '../../../../../../core/public/mocks';
 import { DashboardDirectQuerySyncBanner } from './direct_query_sync_banner';
 import { fetchDirectQuerySyncInfo } from './direct_query_sync_utils';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
-import { intervalAsMinutes } from '../../../constants';
+import { asProgress, ExternalIndexState, intervalAsMinutes } from '../../../constants';
 import { DirectQueryLoadingStatus } from 'src/plugins/data_source_management/framework/types';
 
 // Mock dependencies
@@ -369,5 +369,133 @@ describe('DashboardDirectQuerySyncBanner', () => {
     await waitFor(() => {
       expect(mockReload).toHaveBeenCalled();
     });
+  });
+});
+
+describe('asProgress converter', () => {
+  it('Prioritizes query status over index state when present', () => {
+    const cases = [
+      {
+        input: {
+          state: ExternalIndexState.ACTIVE,
+          status: DirectQueryLoadingStatus.SUBMITTED,
+          hasLastRefresh: true,
+        },
+        expect: { in_progress: true, percentage: 0 },
+      },
+      {
+        input: {
+          state: ExternalIndexState.CREATING,
+          status: DirectQueryLoadingStatus.SCHEDULED,
+          hasLastRefresh: false,
+        },
+        expect: { in_progress: true, percentage: 25 },
+      },
+      {
+        input: {
+          state: ExternalIndexState.REFRESHING,
+          status: DirectQueryLoadingStatus.WAITING,
+          hasLastRefresh: true,
+        },
+        expect: { in_progress: true, percentage: 50 },
+      },
+      {
+        input: {
+          state: ExternalIndexState.RECOVERING,
+          status: DirectQueryLoadingStatus.RUNNING,
+          hasLastRefresh: false,
+        },
+        expect: { in_progress: true, percentage: 75 },
+      },
+    ];
+
+    for (const c of cases) {
+      const result = asProgress(c.input.state, c.input.status, c.input.hasLastRefresh);
+      expect(result).toEqual(c.expect);
+    }
+  });
+
+  it('Handles index states correctly when no query is running', () => {
+    const cases = [
+      {
+        input: {
+          state: ExternalIndexState.ACTIVE,
+          status: DirectQueryLoadingStatus.INITIAL,
+          hasLastRefresh: true,
+        },
+        expect: { in_progress: false },
+      },
+      {
+        input: {
+          state: ExternalIndexState.ACTIVE,
+          status: DirectQueryLoadingStatus.INITIAL,
+          hasLastRefresh: false,
+        },
+        expect: { in_progress: true, percentage: 30 },
+      },
+      {
+        input: {
+          state: ExternalIndexState.CREATING,
+          status: DirectQueryLoadingStatus.INITIAL,
+          hasLastRefresh: false,
+        },
+        expect: { in_progress: true, percentage: 30 },
+      },
+      {
+        input: {
+          state: ExternalIndexState.REFRESHING,
+          status: DirectQueryLoadingStatus.INITIAL,
+          hasLastRefresh: false,
+        },
+        expect: { in_progress: true, percentage: 60 },
+      },
+      {
+        input: {
+          state: ExternalIndexState.RECOVERING,
+          status: DirectQueryLoadingStatus.INITIAL,
+          hasLastRefresh: true,
+        },
+        expect: { in_progress: true, percentage: 60 },
+      },
+      {
+        input: {
+          state: ExternalIndexState.CANCELLING,
+          status: DirectQueryLoadingStatus.INITIAL,
+          hasLastRefresh: false,
+        },
+        expect: { in_progress: true, percentage: 90 },
+      },
+    ];
+
+    for (const c of cases) {
+      const result = asProgress(c.input.state, c.input.status, c.input.hasLastRefresh);
+      expect(result).toEqual(c.expect);
+    }
+  });
+
+  it('Handles edge cases and null states', () => {
+    const cases = [
+      {
+        input: {
+          state: null,
+          status: null,
+          hasLastRefresh: false,
+        },
+        expect: { in_progress: false },
+      },
+      {
+        input: {
+          state: 'invalid_state',
+          status: null,
+          hasLastRefresh: true,
+        },
+        expect: { in_progress: false },
+      },
+    ];
+
+    for (const c of cases) {
+      const result = asProgress(c.input.state, c.input.status, c.input.hasLastRefresh);
+      expect(result).toEqual(c.expect);
+    }
   });
 });
