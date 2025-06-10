@@ -23,6 +23,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   tabifyAggResponse,
+  IFieldType,
 } from '../../../opensearch_dashboards_services';
 import {
   buildPointSeriesData,
@@ -71,6 +72,7 @@ export interface SearchData {
   status: ResultStatus;
   fetchCounter?: number;
   fieldCounts?: Record<string, number>;
+  fieldSchema?: Array<Partial<IFieldType>>;
   hits?: number;
   rows?: Array<OpenSearchSearchHit<Record<string, any>>>;
   bucketInterval?: TimechartHeaderBucketInterval | {};
@@ -143,10 +145,12 @@ export const useSearch = (services: DiscoverViewServices) => {
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
     fieldCounts: Record<string, number>;
+    fieldSchema: Record<string, string>;
     rows?: OpenSearchSearchHit[];
   }>({
     abortController: undefined,
     fieldCounts: {},
+    fieldSchema: {},
   });
   const fetchForMaxCsvStateRef = useRef<{ abortController: AbortController | undefined }>({
     abortController: undefined,
@@ -345,6 +349,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       data$.next({
         status: rows.length > 0 ? ResultStatus.READY : ResultStatus.NO_RESULTS,
         fieldCounts: fetchStateRef.current.fieldCounts,
+        fieldSchema: searchSource.getDataFrame()?.schema,
         hits,
         rows,
         bucketInterval,
