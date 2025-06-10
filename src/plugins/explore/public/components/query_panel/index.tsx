@@ -69,20 +69,30 @@ const QueryPanel = () => {
     return () => detectLanguageType.cancel();
   }, [detectLanguageType]);
 
+  // Helper to update line count based on editor mode and value
+  const updateLineCount = React.useCallback((value: string, isDual: boolean) => {
+    const trimValue = value.trim();
+    if (trimValue) {
+      const lines = trimValue.split('\n').length;
+      setLineCount(lines > 1 || trimValue ? lines : undefined);
+    } else {
+      setLineCount(undefined);
+    }
+  }, []);
+
   const onPromptChange = React.useCallback(
     (value: string) => {
       detectLanguageType(value);
       onQueryStringChange(value, true);
 
       // If not dual editor and prompt contains PPL, set line count
-      if (!isDualEditor && languageTypeRef.current === LanguageType.PPL && value.trim()) {
-        const lines = value.split('\n').length;
-        setLineCount(lines > 1 || value.trim() ? lines : undefined);
+      if (!isDualEditor && languageTypeRef.current === LanguageType.PPL) {
+        updateLineCount(value, false);
       } else if (!isDualEditor) {
         setLineCount(undefined);
       }
     },
-    [isDualEditor, detectLanguageType, onQueryStringChange]
+    [isDualEditor, detectLanguageType, onQueryStringChange, updateLineCount]
   );
 
   const onQueryChange = React.useCallback(
@@ -90,14 +100,13 @@ const QueryPanel = () => {
       onQueryStringChange(value, false);
 
       // In dual editor mode, use query editor's line count
-      if (isDualEditor && value.trim()) {
-        const lines = value.split('\n').length;
-        setLineCount(lines > 1 || value.trim() ? lines : undefined);
+      if (isDualEditor) {
+        updateLineCount(value, true);
       } else {
         setLineCount(undefined);
       }
     },
-    [isDualEditor, onQueryStringChange]
+    [isDualEditor, onQueryStringChange, updateLineCount]
   );
 
   const handleQueryRun = async (
@@ -137,7 +146,7 @@ const QueryPanel = () => {
         ...prevQuery,
         query: 'source=test\n| where state=CA and year=2023\n| sort=asc',
       }));
-      // TODO: Update query object with  generated ppl query
+      // TODO: Update query object with generated ppl query
     } else {
       setIsDualEditor(false);
       setCurrentQuery((prevQuery) => ({

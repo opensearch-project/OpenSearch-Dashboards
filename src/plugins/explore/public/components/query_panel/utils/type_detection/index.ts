@@ -19,6 +19,8 @@ interface ScoreResult {
   warnings: string[];
 }
 
+// TODO: Add localication for reason if facing user ui, currently only for internal use.
+
 export class QueryTypeDetector {
   detect(query: string): DetectionResult {
     // Security: Validate and normalize input

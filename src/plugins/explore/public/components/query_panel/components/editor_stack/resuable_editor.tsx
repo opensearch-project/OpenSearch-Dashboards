@@ -55,16 +55,14 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
-  const blurTimeoutRef = useRef<number | null>(null);
+  const blurTimeoutRef = useRef<number | undefined>(undefined);
   const [editorHeight, setEditorHeight] = useState(height);
 
   const editorClassPrefix = getEditorClassPrefix(editorType);
 
   useEffect(() => {
     return () => {
-      if (blurTimeoutRef.current !== null) {
-        clearTimeout(blurTimeoutRef.current);
-      }
+      clearTimeout(blurTimeoutRef.current);
     };
   }, []);
 
@@ -88,17 +86,13 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       const focusDisposable = editor.onDidFocusEditorText(() => {
-        if (blurTimeoutRef.current !== null) {
-          clearTimeout(blurTimeoutRef.current);
-          blurTimeoutRef.current = null;
-        }
+        clearTimeout(blurTimeoutRef.current);
         setEditorIsFocused(true);
       });
 
       const blurDisposable = editor.onDidBlurEditorText(() => {
         blurTimeoutRef.current = window.setTimeout(() => {
           setEditorIsFocused(false);
-          blurTimeoutRef.current = null; // reset after running
         }, 300);
       });
 
@@ -163,10 +157,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
       return () => {
         focusDisposable.dispose();
         blurDisposable.dispose();
-        if (blurTimeoutRef.current !== null) {
-          clearTimeout(blurTimeoutRef.current);
-          blurTimeoutRef.current = null;
-        }
+        clearTimeout(blurTimeoutRef.current);
         return editor;
       };
     },
