@@ -13,7 +13,7 @@ import {
 } from 'opensearch-dashboards/public';
 
 import { fetchDirectQuerySyncInfo, DirectQuerySyncInfo } from './direct_query_sync_utils';
-import { asProgress, intervalAsMinutes, Progress } from '../../../constants';
+import { asSyncProgress, intervalAsMinutes, SyncProgress } from '../../../constants';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
 import './direct_query_sync_banner.scss';
 
@@ -34,7 +34,7 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
 }) => {
   const [syncInfo, setSyncInfo] = useState<DirectQuerySyncInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [progress, setProgress] = useState<Progress>({ in_progress: false });
+  const [progress, setProgress] = useState<SyncProgress>({ in_progress: false });
 
   const { loadStatus: queryStatus, startLoading: startQuerying } = useDirectQuery(
     http,
@@ -69,7 +69,7 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
       return;
     }
 
-    const nextProgress = asProgress(
+    const nextProgress = asSyncProgress(
       syncInfo.indexState,
       queryStatus,
       Boolean(syncInfo.lastRefreshTime)
@@ -127,7 +127,7 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
                   )}`
                 : '--',
             },
-          })}{' '}
+          })}
           <EuiLink className="directQuerySync__link" onClick={handleSynchronize}>
             {i18n.translate('dataSourcesManagement.directQuerySync.syncDataLink', {
               defaultMessage: 'Sync data',
@@ -136,7 +136,7 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
         </EuiText>
       ) : (
         <EuiCallOut size="s">
-          <EuiLoadingSpinner size="s" />{' '}
+          <EuiLoadingSpinner size="s" />
           {i18n.translate('dataSourcesManagement.directQuerySync.dataSyncInProgress', {
             defaultMessage:
               'Data sync is in progress ({progress}% complete). The dashboard will reload on completion.',

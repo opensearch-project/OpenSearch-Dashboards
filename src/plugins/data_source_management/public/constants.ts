@@ -40,7 +40,7 @@ export const ExternalIndexState = {
   CANCELLING: 'cancelling',
 };
 
-export type Progress = { in_progress: true; percentage: number } | { in_progress: false };
+export type SyncProgress = { in_progress: true; percentage: number } | { in_progress: false };
 
 /**
  * Given the current state of an external index, convert it to a `Progress` value. Since the
@@ -52,11 +52,11 @@ export type Progress = { in_progress: true; percentage: number } | { in_progress
  * @param hasLastRefresh Whether the index has been refreshed before.
  * @returns A `Progress` value
  */
-export const asProgress = (
+export const asSyncProgress = (
   state: string | null,
   queryStatus: DirectQueryLoadingStatus | null,
   hasLastRefresh: boolean
-): Progress => {
+): SyncProgress => {
   // Query loading status takes precedence if in a processing state, otherwise fallback to state
   switch (queryStatus) {
     case DirectQueryLoadingStatus.SUBMITTED:

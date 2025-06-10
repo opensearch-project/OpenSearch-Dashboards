@@ -10,7 +10,7 @@ import { savedObjectsServiceMock } from '../../../../../../core/public/mocks';
 import { DashboardDirectQuerySyncBanner } from './direct_query_sync_banner';
 import { fetchDirectQuerySyncInfo } from './direct_query_sync_utils';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
-import { asProgress, ExternalIndexState, intervalAsMinutes } from '../../../constants';
+import { asSyncProgress, ExternalIndexState, intervalAsMinutes } from '../../../constants';
 import { DirectQueryLoadingStatus } from 'src/plugins/data_source_management/framework/types';
 
 // Mock dependencies
@@ -410,7 +410,7 @@ describe('asProgress converter', () => {
     ];
 
     for (const c of cases) {
-      const result = asProgress(c.input.state, c.input.status, c.input.hasLastRefresh);
+      const result = asSyncProgress(c.input.state, c.input.status, c.input.hasLastRefresh);
       expect(result).toEqual(c.expect);
     }
   });
@@ -468,7 +468,7 @@ describe('asProgress converter', () => {
     ];
 
     for (const c of cases) {
-      const result = asProgress(c.input.state, c.input.status, c.input.hasLastRefresh);
+      const result = asSyncProgress(c.input.state, c.input.status, c.input.hasLastRefresh);
       expect(result).toEqual(c.expect);
     }
   });
@@ -494,7 +494,7 @@ describe('asProgress converter', () => {
     ];
 
     for (const c of cases) {
-      const result = asProgress(c.input.state, c.input.status, c.input.hasLastRefresh);
+      const result = asSyncProgress(c.input.state, c.input.status, c.input.hasLastRefresh);
       expect(result).toEqual(c.expect);
     }
   });
