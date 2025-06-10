@@ -113,6 +113,8 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
+    "**/@storybook/**/webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1",
+    "**/@storybook/**/micromatch": "^4.0.8",
     "**/@lhci/**/lighthouse": "^12.3.0",
     "**/axios": "^1.8.2",
     "**/browserify-rsa": "^4.1.1",
@@ -141,7 +143,6 @@
     "**/kind-of": ">=6.0.3",
     "**/load-bmfont/phin": "^3.7.1",
     "**/loader-utils": "^2.0.4",
-    "**/micromatch": "^4.0.8",
     "**/minimist": "^1.2.6",
     "**/nanoid": "^3.3.8",
     "**/node-jose": "^2.2.0",
