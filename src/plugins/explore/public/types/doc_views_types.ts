@@ -4,12 +4,24 @@
  */
 
 import { ComponentType } from 'react';
-import { SearchResponse } from 'elasticsearch';
+import { Explanation } from 'elasticsearch';
 import { IndexPattern } from 'src/plugins/data/public';
 
-export type OpenSearchSearchHit<T = unknown> = SearchResponse<T>['hits']['hits'][number] & {
+export interface OpenSearchSearchHit<T = unknown> {
+  _index: string;
+  _type?: string;
+  _id: string;
+  _score: number | null;
+  _source: T;
+  _version?: number;
+  _explanation?: Explanation;
+  fields?: any;
+  highlight?: any;
+  inner_hits?: any;
+  matched_queries?: string[];
+  sort?: string[] | number[];
   isAnchor?: boolean;
-};
+}
 
 export interface FieldMapping {
   filterable?: boolean;

@@ -1,0 +1,29 @@
+.exploreVisContainer {
+  display: flex;
+  min-height: 500px;
+  overflow: hidden;
+}
+
+.exploreVisPanel {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.exploreVisPanel__inner {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.exploreVisStylePanel {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+}
+
+.exploreVisStylePanel__inner {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-right: 8px;
+}

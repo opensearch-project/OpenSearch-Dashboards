@@ -307,14 +307,14 @@ export const mapDataSourceConnectionToOpensearchDataSource = (
 };
 
 export const convertDataSourcesToOpenSearchAndDataConnections = (
-  dataSources: DataConnection[] | DataSource[]
+  dataSources: Array<DataSource | DataConnection>
 ): Record<'openSearchConnections' | 'dataConnections', DataSourceConnection[]> => {
   const openSearchConnections = dataSources
-    .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
-    .map((ds: DataSource) => {
+    .filter((ds: DataConnection | DataSource) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+    .map((ds: DataConnection | DataSource) => {
       return {
         id: ds.id,
-        type: ds.dataSourceEngineType,
+        type: (ds as DataSource).dataSourceEngineType,
         connectionType: DataSourceConnectionType.OpenSearchConnection,
         name: ds.title,
         description: ds.description,

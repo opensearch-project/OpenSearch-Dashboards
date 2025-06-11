@@ -54,6 +54,7 @@ describe('workspace_id_consumer integration test', () => {
           migrations: {
             skip: false,
           },
+          data_source: { enabled: true },
         },
       },
     });
@@ -108,6 +109,22 @@ describe('workspace_id_consumer integration test', () => {
     await deleteItem({
       type: dashboard.type,
       id: 'bar',
+    });
+  };
+
+  const createDataSource = async (dataSourceTitle: string) => {
+    return await osdTestServer.request.post(root, `/api/saved_objects/data-source`).send({
+      attributes: {
+        title: dataSourceTitle,
+        description: '',
+        endpoint: 'http://localhost:9201',
+        auth: {
+          type: 'no_auth',
+        },
+        dataSourceVersion: '',
+        dataSourceEngineType: 'opensearch',
+        installedPlugins: [],
+      },
     });
   };
 
@@ -337,6 +354,115 @@ describe('workspace_id_consumer integration test', () => {
           })
         )
       );
+    });
+
+    it('should not return 400 error when find with *', async () => {
+      await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(200);
+
+      const findResult = await osdTestServer.request
+        .get(
+          root,
+          `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=${dashboard.type}&workspaces=*`
+        )
+        .expect(200);
+
+      expect(findResult.body.total).toEqual(1);
+      expect(findResult.body.saved_objects[0].workspaces).toEqual([createdFooWorkspace.id]);
+
+      await deleteItem({
+        type: dashboard.type,
+        id: 'foo',
+      });
+    });
+
+    it('should return all data source when find with * within a workspace', async () => {
+      // Create a data source with workspace context
+      const createResult1 = await createDataSource('ds1');
+      const createResult2 = await createDataSource('ds2');
+      const withOutWorkspaceDSId = createResult1.body.id;
+      const withWorkspaceDSId = createResult2.body.id;
+
+      await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/workspaces/_associate`)
+        .send({
+          savedObjects: [
+            {
+              id: withWorkspaceDSId,
+              type: 'data-source',
+            },
+          ],
+          workspaceId: createdFooWorkspace.id,
+        })
+        .expect(200);
+
+      // Find all data sources with wildcard workspace
+      const findResult = await osdTestServer.request
+        .get(
+          root,
+          `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=data-source&workspaces=*`
+        )
+        .expect(200);
+
+      // Verify the data source is returned
+      expect(findResult.body.total).toEqual(2);
+
+      const datasourceIdSet = new Set(
+        findResult.body.saved_objects.map((obj: SavedObject) => obj.id)
+      );
+
+      expect(datasourceIdSet.has(withOutWorkspaceDSId)).toBe(true);
+      expect(datasourceIdSet.has(withWorkspaceDSId)).toBe(true);
+
+      // Clean up
+      await deleteItem({
+        type: 'data-source',
+        id: withOutWorkspaceDSId,
+      });
+      await deleteItem({
+        type: 'data-source',
+        id: withWorkspaceDSId,
+      });
+    });
+
+    it('should return all data source when find with * out a workspace', async () => {
+      // Create a data source with workspace context
+      const createResult1 = await createDataSource('ds1');
+      const createResult2 = await createDataSource('ds2');
+      const dsId1 = createResult1.body.id;
+      const dsId2 = createResult2.body.id;
+
+      // Find all data sources with wildcard workspace
+      const findResult = await osdTestServer.request
+        .get(root, `/api/saved_objects/_find?type=data-source&workspaces=*`)
+        .expect(200);
+
+      // Verify the data source is returned
+      expect(findResult.body.total).toEqual(2);
+
+      const datasourceIdSet = new Set(
+        findResult.body.saved_objects.map((obj: SavedObject) => obj.id)
+      );
+
+      expect(datasourceIdSet.has(dsId1)).toBe(true);
+      expect(datasourceIdSet.has(dsId2)).toBe(true);
+
+      // Clean up
+      await deleteItem({
+        type: 'data-source',
+        id: dsId1,
+      });
+      await deleteItem({
+        type: 'data-source',
+        id: dsId2,
+      });
     });
 
     it('should return error when find with a not existing workspace', async () => {

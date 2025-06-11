@@ -17,12 +17,13 @@ import { search, syncQueryStateWithUrl, UI_SETTINGS } from '../../../../../../..
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
 import { TimechartHeaderBucketInterval } from '../../components/chart/timechart_header';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   tabifyAggResponse,
+  IFieldType,
 } from '../../../opensearch_dashboards_services';
 import {
   buildPointSeriesData,
@@ -71,8 +72,9 @@ export interface SearchData {
   status: ResultStatus;
   fetchCounter?: number;
   fieldCounts?: Record<string, number>;
+  fieldSchema?: Array<Partial<IFieldType>>;
   hits?: number;
-  rows?: OpenSearchSearchHit[];
+  rows?: Array<OpenSearchSearchHit<Record<string, any>>>;
   bucketInterval?: TimechartHeaderBucketInterval | {};
   chartData?: Chart;
   title?: string;
@@ -143,10 +145,12 @@ export const useSearch = (services: DiscoverViewServices) => {
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
     fieldCounts: Record<string, number>;
+    fieldSchema: Record<string, string>;
     rows?: OpenSearchSearchHit[];
   }>({
     abortController: undefined,
     fieldCounts: {},
+    fieldSchema: {},
   });
   const fetchForMaxCsvStateRef = useRef<{ abortController: AbortController | undefined }>({
     abortController: undefined,
@@ -345,6 +349,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       data$.next({
         status: rows.length > 0 ? ResultStatus.READY : ResultStatus.NO_RESULTS,
         fieldCounts: fetchStateRef.current.fieldCounts,
+        fieldSchema: searchSource.getDataFrame()?.schema,
         hits,
         rows,
         bucketInterval,

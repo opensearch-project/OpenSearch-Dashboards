@@ -38,6 +38,7 @@ import React from 'react';
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
 import { getStubIndexPattern } from '../../../../../../../../data/public/test_utils';
+import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
 
 jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: () => ({
@@ -81,7 +82,7 @@ function getCompProps(): DiscoverSidebarProps {
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
   const hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit) as Array<
-    Record<string, unknown>
+    OpenSearchSearchHit<Record<string, any>>
   >;
 
   const fieldCounts: Record<string, number> = {};
@@ -102,6 +103,7 @@ function getCompProps(): DiscoverSidebarProps {
     onCreateIndexPattern: jest.fn(),
     selectedIndexPattern: indexPattern,
     onReorderFields: jest.fn(),
+    isEnhancementsEnabledOverride: false,
   };
 }
 

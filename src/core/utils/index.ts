@@ -37,7 +37,12 @@ export {
   IContextProvider,
 } from './context';
 export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
-export { WORKSPACE_USE_CASE_PREFIX, WORKSPACE_PATH_PREFIX, WORKSPACE_TYPE } from './constants';
+export {
+  WORKSPACE_USE_CASE_PREFIX,
+  WORKSPACE_PATH_PREFIX,
+  WORKSPACE_TYPE,
+  ENABLE_AI_FEATURES,
+} from './constants';
 export {
   getWorkspaceIdFromUrl,
   formatUrlWithWorkspaceId,

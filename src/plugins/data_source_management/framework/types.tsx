@@ -9,6 +9,7 @@ export enum DirectQueryLoadingStatus {
   SUCCESS = 'success',
   FAILED = 'failed',
   RUNNING = 'running',
+  SUBMITTED = 'submitted',
   SCHEDULED = 'scheduled',
   CANCELED = 'canceled',
   WAITING = 'waiting',

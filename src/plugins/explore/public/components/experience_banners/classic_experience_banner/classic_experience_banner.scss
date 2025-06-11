@@ -1,0 +1,23 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreClassicExperienceBanner {
+  &__img {
+    margin-right: $ouiSizeXS;
+  }
+
+  // EuiCallOut wraps children within two divs
+  & > div > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    // Adding some specificity by nesting
+    .exploreClassicExperienceBanner__newExperienceButton {
+      font-size: $ouiFontSizeXS;
+      height: $ouiSizeL;
+    }
+  }
+}

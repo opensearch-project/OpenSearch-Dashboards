@@ -7,7 +7,7 @@ import { firstValueFrom } from '@osd/std';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { QueryEditorExtensionDependencies, QueryStringContract } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { ConfigSchema } from '../../../common/config';
@@ -61,6 +61,24 @@ describe('CreateExtension', () => {
     query: mockQueryWithIndexPattern,
     fetchStatus: ResultStatus.NO_RESULTS,
   };
+  beforeAll(() => {
+    coreSetupMock.getStartServices.mockResolvedValue([
+      {
+        ...coreMock.createStart(),
+        uiSettings: {
+          ...uiSettingsServiceMock.createStartContract(),
+          get: jest.fn().mockImplementation((key) => {
+            if (key === 'enableAIFeatures') {
+              return true;
+            }
+          }),
+        },
+      },
+      {},
+      {},
+    ]);
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
     clearCache();

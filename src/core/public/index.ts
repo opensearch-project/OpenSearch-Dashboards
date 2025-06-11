@@ -120,6 +120,7 @@ export {
   ESSENTIAL_USE_CASE_ID,
   OBSERVABILITY_USE_CASE_ID,
   SECURITY_ANALYTICS_USE_CASE_ID,
+  ENABLE_AI_FEATURES,
 } from '../utils';
 export {
   AppCategory,

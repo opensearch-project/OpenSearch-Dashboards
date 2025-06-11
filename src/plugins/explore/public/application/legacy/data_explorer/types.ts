@@ -11,6 +11,7 @@ import { IOsdUrlStateStorage } from '../../../../../opensearch_dashboards_utils/
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../../data/public';
 import { Store } from './utils/state_management';
 import { UsageCollectionSetup } from '../../../../../usage_collection/public';
+import { VisualizationRegistryService } from '../../../../public/services/visualization_registry_service';
 
 export type DataExplorerPluginSetup = ViewServiceSetup;
 
@@ -36,4 +37,5 @@ export interface DataExplorerServices extends CoreStart {
   data: DataPublicPluginStart;
   scopedHistory: ScopedHistory;
   osdUrlStateStorage: IOsdUrlStateStorage;
+  visualizationRegistry?: VisualizationRegistryService;
 }

@@ -14,7 +14,7 @@ import { TableRow } from './table_row';
 import { getServices, IndexPattern } from '../../../opensearch_dashboards_services';
 import { Pagination } from './pagination';
 import { getLegacyDisplayedColumns } from './helper';
-import { SortDirection, SortOrder } from '../../../../../../saved_explore/types';
+import { SortDirection, SortOrder } from '../../../../../../types/saved_explore_types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,

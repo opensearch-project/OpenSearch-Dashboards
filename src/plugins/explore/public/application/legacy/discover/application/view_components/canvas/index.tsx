@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './discover_canvas.scss';
+
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { HeaderVariant } from 'opensearch-dashboards/public';
+import { ExploreTabs } from '../../../../../../components/tabs/tabs';
 import { LOGS_VIEW_ID } from '../../../../../../../common';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../data_explorer';
-import { DiscoverTable } from './discover_table';
 import { DiscoverChartContainer } from './discover_chart_container';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
@@ -21,8 +23,9 @@ import { DiscoverResultsActionBar } from '../../components/results_action_bar/re
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../../../../common/legacy/discover';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import './discover_canvas.scss';
+import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
+import { ExploreDataTable } from '../../../../../../components/data_table/explore_data_table';
+import { VisualizationContainer } from '../../../../../../components/visualizations/visualization_container';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: ViewProps) {
@@ -53,7 +56,10 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
     },
     [refetch$]
   );
-  const [rows, setRows] = useState<OpenSearchSearchHit[] | undefined>(undefined);
+  // eslint-disable-next-line @typescript-eslint/array-type
+  const [rows, setRows] = useState<OpenSearchSearchHit<Record<string, any>>[] | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
@@ -115,6 +121,20 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
     />
   );
 
+  const tabs = [
+    // TODO: Translate
+    {
+      id: 'explore_logs_tab',
+      name: 'Logs',
+      content: <MemoizedExploreDataTable rows={rows} scrollToTop={scrollToTop} />,
+    },
+    {
+      id: 'explore_visualization_tab',
+      name: 'Visualization',
+      content: <MemoizedVisualizationContainer {...fetchState} />,
+    },
+  ];
+
   return (
     <EuiPanel
       panelRef={panelRef}
@@ -159,7 +179,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
               <>
                 <MemoizedDiscoverChartContainer {...fetchState} />
                 {discoverResultsActionBar}
-                <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+                <ExploreTabs tabs={tabs} />
               </>
             ) : (
               <EuiPanel
@@ -170,7 +190,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
               >
                 <MemoizedDiscoverChartContainer {...fetchState} />
                 {discoverResultsActionBar}
-                <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+                <ExploreTabs tabs={tabs} />
               </EuiPanel>
             ))}
         </>
@@ -184,5 +204,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
   );
 }
 
-const MemoizedDiscoverTable = React.memo(DiscoverTable);
+const MemoizedExploreDataTable = React.memo(ExploreDataTable);
 const MemoizedDiscoverChartContainer = React.memo(DiscoverChartContainer);
+const MemoizedVisualizationContainer = React.memo(VisualizationContainer);

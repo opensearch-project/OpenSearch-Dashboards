@@ -4,7 +4,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { BehaviorSubject } from 'rxjs';
 import {
   HttpFetchError,
   HttpFetchOptions,
