@@ -25,6 +25,8 @@ interface DirectQuerySyncProps {
   removeBanner: () => void;
 }
 
+const SYNC_INFO_POLLING_INTERVAL_MS = 10000;
+
 export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
   http,
   notifications,
@@ -59,7 +61,7 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
     };
 
     loadSyncInfo();
-    const interval = setInterval(loadSyncInfo, 10000);
+    const interval = setInterval(loadSyncInfo, SYNC_INFO_POLLING_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [dashboardId, http, savedObjectsClient, removeBanner]);
 
