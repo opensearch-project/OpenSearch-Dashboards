@@ -10,7 +10,6 @@ import {
   SavedObjectsClientContract,
   ToastsStart,
   SavedObject,
-  WorkspacesStart,
   UiSettingScope,
 } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
@@ -26,6 +25,7 @@ import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selector.scss';
 import { DataSourceOption } from '../data_source_menu/types';
+import { getWorkspaces } from '../utils';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSourcesManagement.localCluster', {
@@ -40,7 +40,6 @@ export interface DataSourceSelectorProps {
   onSelectedDataSource: (dataSourceOption: DataSourceOption[]) => void;
   disabled: boolean;
   fullWidth: boolean;
-  getWorkspaces: () => WorkspacesStart;
   hideLocalCluster?: boolean;
   defaultOption?: DataSourceOption[];
   placeholderText?: string;
@@ -175,7 +174,7 @@ export class DataSourceSelector extends React.Component<
         return;
       }
 
-      const currentWorkspaceId = this.props.getWorkspaces().currentWorkspaceId$.getValue();
+      const currentWorkspaceId = getWorkspaces().currentWorkspaceId$.getValue();
       const scope: UiSettingScope = !!currentWorkspaceId
         ? UiSettingScope.WORKSPACE
         : UiSettingScope.GLOBAL;
