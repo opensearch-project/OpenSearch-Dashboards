@@ -340,4 +340,20 @@ describe('ensureDefaultIndexPattern', () => {
     await ensureDefaultIndexPattern.call(indexPatterns);
     expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern2');
   });
+
+  test('should not throw error when getDataSource throws error', async () => {
+    ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
+      uiSettings,
+      onRedirectNoIndexPattern,
+      true,
+      savedObjectsClient
+    );
+
+    indexPatterns.getIds.mockResolvedValue(['pattern1']);
+    indexPatterns.get.mockRejectedValue(new Error('Failed to get index pattern'));
+
+    await expect(
+      async () => await ensureDefaultIndexPattern.call(indexPatterns)
+    ).not.toThrowError();
+  });
 });
