@@ -1,0 +1,2 @@
+feat:
+- Make default index pattern method more robust ([#9867](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9867))
