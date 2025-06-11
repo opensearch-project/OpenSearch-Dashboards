@@ -3,8 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Positions } from './utils/collections';
+// import { Positions } from './utils/collections';
 
+export enum Positions {
+  RIGHT = 'right',
+  LEFT = 'left',
+  TOP = 'top',
+  BOTTOM = 'bottom',
+}
 export interface ChartTypeMapping {
   type: string;
   priority: number; // Higher number means higher priority for rule matching
@@ -97,4 +103,76 @@ export interface ValueAxis {
   show: boolean;
   labels: AxisLabels;
   title: AxisTitle;
+}
+
+export interface FieldSetting {
+  default: VisColumn;
+  options?: VisColumn[];
+}
+
+export enum AxisRole {
+  X = 'x',
+  Y = 'y',
+}
+
+export enum AxisPosition {
+  LEFT = 'left',
+  RIGHT = 'right',
+  BOTTOM = 'bottom',
+  TOP = 'top',
+}
+// for heatmap the axies can serve as value axis or category axis in 2 scienrios
+
+export interface Grid {
+  showLines: boolean;
+}
+
+export interface StandardAxes {
+  id: string;
+  name?: string;
+  field?: FieldSetting;
+  type?: 'value' | 'category';
+  position: Positions;
+  show: boolean;
+  style: Record<string, any>;
+  // scale?: AxisScale;
+  labels: AxisLabels;
+  title: AxisTitle;
+  grid: Grid;
+  axisRole: AxisRole;
+}
+
+export enum ScaleType {
+  LINEAR = 'linear',
+  LOG = 'log',
+  SQRT = 'sqrt',
+}
+
+export enum PointShape {
+  CIRCLE = 'circle',
+  SQUARE = 'square',
+  CROSS = 'cross',
+  DIAMOND = 'diamond',
+}
+
+export enum ColorSchemas {
+  BLUES = 'blues',
+  GREENS = 'greens',
+  GREYS = 'greys',
+  REDS = 'reds',
+  YELLOWORANGE = 'yelloworangered',
+  GREENBLUE = 'greenblue',
+}
+
+export interface RangeValue {
+  min?: number;
+  max?: number;
+}
+
+export enum LabelAggregationType {
+  SUM = 'sum',
+  MEAN = 'mean',
+  MAX = 'max',
+  MIN = 'min',
+  NONE = 'none',
 }

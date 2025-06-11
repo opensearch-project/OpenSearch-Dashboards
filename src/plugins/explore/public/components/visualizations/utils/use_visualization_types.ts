@@ -4,28 +4,50 @@
  */
 
 import { LineChartStyleControls } from '../line/line_vis_config';
+import { PieChartStyleControls } from '../pie/pie_vis_config';
+import { MetricChartStyleControls } from '../metric/metric_vis_config';
+import { HeatmapChartStyleControls } from '../heatmap/heatmap_vis_config';
+import { ScatterChartStyleControls } from '../scatter/scatter_vis_config';
 import { IFieldType } from '../../../application/legacy/discover/opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { LineVisStyleControlsProps } from '../line/line_vis_options';
+
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
 import { ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../application/legacy/discover/build_services';
 
+export type AllChartStyleControls =
+  | LineChartStyleControls
+  | PieChartStyleControls
+  | MetricChartStyleControls
+  | HeatmapChartStyleControls
+  | ScatterChartStyleControls;
+
+export type AllVisStyleControlsProps = LineVisStyleControlsProps;
+
+export interface StyleControlsProps {
+  styleOptions: AllChartStyleControls;
+  onStyleChange: (newStyle: Partial<AllChartStyleControls>) => void;
+  numericalColumns?: VisColumn[];
+  categoricalColumns?: VisColumn[];
+  dateColumns?: VisColumn[];
+}
+
 export interface VisualizationType {
   readonly name: string;
   readonly type: string;
   readonly ui: {
     style: {
-      defaults: LineChartStyleControls;
+      defaults: AllChartStyleControls;
       render: ({
         styleOptions,
         onStyleChange,
         numericalColumns,
         categoricalColumns,
         dateColumns,
-      }: LineVisStyleControlsProps) => JSX.Element;
+      }: StyleControlsProps) => JSX.Element;
     };
   };
 }

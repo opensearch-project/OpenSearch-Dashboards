@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Positions } from '../utils/collections';
+import { Positions } from '../types';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { CategoryAxis, GridOptions, ThresholdLine, ThresholdLineStyle, ValueAxis } from '../types';

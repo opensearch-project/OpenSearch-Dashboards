@@ -4,7 +4,7 @@
  */
 
 import { LineChartStyleControls } from './line_vis_config';
-import { VisColumn } from '../types';
+import { VisColumn, Positions } from '../types';
 import {
   buildMarkConfig,
   createThresholdLayer,
@@ -13,7 +13,6 @@ import {
   getStrokeDash,
   ValueAxisPosition,
 } from './line_chart_utils';
-import { Positions } from '../utils/collections';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -82,6 +81,7 @@ export const createSimpleLineChart = (
     layers.push(timeMarkerLayer);
   }
 
+  console.trace('line');
   return {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     title: `${metricName} Over Time`,

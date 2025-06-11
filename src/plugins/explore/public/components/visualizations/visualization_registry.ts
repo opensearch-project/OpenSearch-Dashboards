@@ -4,6 +4,7 @@
  */
 
 import { createLineConfig } from './line/line_vis_config';
+import { createHeatmapConfig } from './heatmap/heatmap_vis_config';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { ChartTypeMapping, VisColumn, VisFieldType, VisualizationRule } from './types';
 
@@ -81,6 +82,8 @@ export class VisualizationRegistry {
     switch (type) {
       case 'line':
         return createLineConfig();
+      case 'heatmap':
+        return createHeatmapConfig();
       // TODO: Add other chart types' configs here
       default:
         return;

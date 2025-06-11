@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiFieldNumber,
   EuiFlexGroup,
@@ -16,21 +16,16 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
-import { getPositions, Positions } from '../utils/collections';
+import { getPositions } from '../utils/collections';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
+import { Positions } from '../types';
 
 interface BasicVisOptionsProps {
-  addTooltip: boolean;
-  addLegend: boolean;
-  legendPosition: string;
   addTimeMarker: boolean;
   showLine: boolean;
   lineMode: string;
   lineWidth: number;
   showDots: boolean;
-  onAddTooltipChange: (addTooltip: boolean) => void;
-  onAddLegendChange: (addLegend: boolean) => void;
-  onLegendPositionChange: (legendPosition: Positions) => void;
   onAddTimeMarkerChange: (addTimeMarker: boolean) => void;
   onShowLineChange: (showLine: boolean) => void;
   onLineModeChange: (lineMode: string) => void;
@@ -39,17 +34,11 @@ interface BasicVisOptionsProps {
 }
 
 export const BasicVisOptions = ({
-  addTooltip,
-  addLegend,
-  legendPosition,
   addTimeMarker,
   showLine,
   lineMode,
   lineWidth,
   showDots,
-  onAddTooltipChange,
-  onAddLegendChange,
-  onLegendPositionChange,
   onAddTimeMarkerChange,
   onShowLineChange,
   onLineModeChange,
@@ -58,7 +47,6 @@ export const BasicVisOptions = ({
 }: BasicVisOptionsProps) => {
   // Could import and reuse { getConfigCollections } from '../../../../../vis_type_vislib/public';
   // That requires adding vis_type_vislib as a dependency to discover, and somehow that throw errors
-  const legendPositions = getPositions();
 
   // Use debounced value for line width
   const [localLineWidth, handleLineWidthChange] = useDebouncedNumericValue(
@@ -147,7 +135,7 @@ export const BasicVisOptions = ({
 
       <EuiSpacer size="s" />
 
-      <EuiFormRow
+      {/* <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.showLegend', {
           defaultMessage: 'Show legend',
         })}
@@ -157,9 +145,9 @@ export const BasicVisOptions = ({
           checked={addLegend}
           onChange={(e) => onAddLegendChange(e.target.checked)}
         />
-      </EuiFormRow>
+      </EuiFormRow> */}
 
-      {addLegend && (
+      {/* {addLegend && (
         <EuiFormRow
           label={i18n.translate('explore.stylePanel.basic.legendPosition', {
             defaultMessage: 'Legend position',
@@ -183,7 +171,7 @@ export const BasicVisOptions = ({
           checked={addTooltip}
           onChange={(e) => onAddTooltipChange(e.target.checked)}
         />
-      </EuiFormRow>
+      </EuiFormRow> */}
 
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {

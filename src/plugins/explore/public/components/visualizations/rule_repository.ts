@@ -11,6 +11,8 @@ import {
   createFacetedMultiLineChart,
 } from './line/to_expression';
 
+import { createHeatmapChart } from './heatmap/to_expression';
+
 // The file contains visualization rules for different scenarios solely based on the number of metrics, categories, and dates fields.
 // Each rule can be mapped to multiple chart types with different priorities.
 // We take the highest priority chart type for default visualization type.
@@ -183,6 +185,32 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
   },
 };
 
+const threeMetricsRule: VisualizationRule = {
+  id: 'three-metric',
+  name: '3 Metric',
+  description: 'Heatmap with bin for three metric',
+  matches: (numerical, categorical, date) =>
+    numerical.length === 3 && date.length === 0 && categorical.length === 0,
+  chartTypes: [{ type: 'heatmap', priority: 100, name: 'Heatmap' }],
+  toExpression: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'heatmap'
+  ) => {
+    console.log('heatmap');
+    return createHeatmapChart(
+      transformedData,
+      numericalColumns,
+      dateColumns,
+      categoricalColumns,
+      styleOptions
+    );
+  },
+};
+
 // TODO: add more rules here as needed
 
 // Export all rules
@@ -191,4 +219,5 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   twoMetricOneDateRule,
   oneMetricOneCateOneDateRule,
   oneMetricTwoCateOneDateRule,
+  threeMetricsRule,
 ];

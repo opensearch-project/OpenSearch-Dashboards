@@ -8,6 +8,7 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
 import { BasicVisOptions } from '../style_panel/basic_vis_options';
+import { GeneralVisOptions } from '../style_panel/general_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { VisColumn } from '../types';
@@ -37,25 +38,35 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
 
   const tabs: EuiTabbedContentTab[] = [
     {
+      id: 'general',
+      name: i18n.translate('explore.vis.lineChart.tabs.general', {
+        defaultMessage: 'General',
+      }),
+      content: (
+        <GeneralVisOptions
+          addTooltip={styleOptions.addTooltip}
+          addLegend={styleOptions.addLegend}
+          legendPosition={styleOptions.legendPosition}
+          onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
+          onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
+          onLegendPositionChange={(legendPosition) =>
+            updateStyleOption('legendPosition', legendPosition)
+          }
+        />
+      ),
+    },
+    {
       id: 'basic',
       name: i18n.translate('explore.vis.lineChart.tabs.basic', {
         defaultMessage: 'Basic',
       }),
       content: (
         <BasicVisOptions
-          addTooltip={styleOptions.addTooltip}
-          addLegend={styleOptions.addLegend}
-          legendPosition={styleOptions.legendPosition}
           addTimeMarker={styleOptions.addTimeMarker}
           showLine={styleOptions.showLine}
           lineMode={styleOptions.lineMode}
           lineWidth={styleOptions.lineWidth}
           showDots={styleOptions.showDots}
-          onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
-          onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
-          onLegendPositionChange={(legendPosition) =>
-            updateStyleOption('legendPosition', legendPosition)
-          }
           onAddTimeMarkerChange={(addTimeMarker) =>
             updateStyleOption('addTimeMarker', addTimeMarker)
           }
