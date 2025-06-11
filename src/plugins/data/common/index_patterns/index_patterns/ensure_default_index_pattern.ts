@@ -64,8 +64,22 @@ export const createEnsureDefaultIndexPattern = (
       if (!dataSourceRef) {
         return;
       }
-      const result = await this.getDataSource(dataSourceRef.id);
-      if (result.error?.statusCode === 403 || result.error?.statusCode === 404) {
+      let isDefaultIndexPatternReferenceValid = true;
+
+      if (!dataSourceRef.id) {
+        isDefaultIndexPatternReferenceValid = false;
+      } else {
+        try {
+          const result = await this.getDataSource(dataSourceRef.id);
+          isDefaultIndexPatternReferenceValid = !(
+            result.error?.statusCode === 403 || result.error?.statusCode === 404
+          );
+        } catch (e) {
+          return;
+        }
+      }
+
+      if (!isDefaultIndexPatternReferenceValid) {
         try {
           if (savedObjectsClient) {
             const datasources = await savedObjectsClient.find({ type: 'data-source' });
@@ -74,9 +88,21 @@ export const createEnsureDefaultIndexPattern = (
             patterns = [];
             indexPatterns.forEach((item) => {
               const sourceRef = item.references?.find((ref) => ref.type === 'data-source');
-              const refId = sourceRef?.id;
-              const refIdBool = !!refId;
-              if (!refIdBool || existDataSources.includes(refId)) {
+              let isDataSourceReferenceValid = false;
+              /**
+               * the reference will be valid only when:
+               * 1. no data source reference
+               * 2. data source reference exists and with a valid data source id
+               */
+              if (!sourceRef) {
+                isDataSourceReferenceValid = true;
+              }
+
+              if (sourceRef?.id && existDataSources.includes(sourceRef.id)) {
+                isDataSourceReferenceValid = true;
+              }
+
+              if (isDataSourceReferenceValid) {
                 patterns.push(item.id);
               }
             });
