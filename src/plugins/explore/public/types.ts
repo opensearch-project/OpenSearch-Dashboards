@@ -37,6 +37,8 @@ import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/
 import { ScopedHistory } from '../../../core/public';
 import { SavedExploreLoader, SavedExplore } from './saved_explore';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
+import { ReduxStore } from './application/utils/interfaces';
+import { Adapters } from '../../inspector/public';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -115,7 +117,7 @@ export interface ExploreServices {
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract; // Direct access for convenience (same as data.indexPatterns)
   inspector: InspectorPublicPluginStart;
-  inspectorAdapters: Record<string, unknown>;
+  inspectorAdapters: Adapters;
   metadata: { branch: string };
   navigation: NavigationStart;
   share?: SharePluginStart;
@@ -123,7 +125,7 @@ export interface ExploreServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedExploreById: (id?: string) => Promise<SavedExplore>;
+  getSavedExploreById: (id?: string) => Promise<SavedExplore | undefined>;
   getSavedExploreUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
@@ -137,12 +139,12 @@ export interface ExploreServices {
   overlays: CoreStart['overlays'];
 
   // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
-  store?: import('./application/utils/interfaces').ReduxStore; // Redux store
-  viewRegistry: Record<string, unknown>; // ViewServiceStart - will be replaced with tabRegistry
-  expressions: Record<string, unknown>; // ExpressionsStart
+  store?: ReduxStore; // Redux store
+  viewRegistry?: Record<string, unknown>; // ViewServiceStart - will be replaced with tabRegistry
+  expressions?: Record<string, unknown>; // ExpressionsStart
   embeddable: EmbeddableStart; // EmbeddableStart
-  scopedHistory: ScopedHistory; // ScopedHistory
-  osdUrlStateStorage: IOsdUrlStateStorage; // IOsdUrlStateStorage
+  scopedHistory?: ScopedHistory; // ScopedHistory
+  osdUrlStateStorage?: IOsdUrlStateStorage; // IOsdUrlStateStorage
 
   // Explore-specific services
   tabRegistry: TabRegistryService;

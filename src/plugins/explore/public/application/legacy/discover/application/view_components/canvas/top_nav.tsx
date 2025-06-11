@@ -90,7 +90,8 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     data.query,
     osdUrlStateStorage
   );
-  const showActionsInGroup = false; // Use portal approach to display actions in nav bar
+  const showActionsInGroup = uiSettings.get('home:useNewHomePage');
+  // const showActionsInGroup = false; // Use portal approach to display actions in nav bar
 
   const topNavLinks = getTopNavLinks(
     services,
@@ -193,7 +194,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         onSavedQueryIdChange={updateSavedQueryId}
         datasetSelectorRef={opts?.optionalRef?.datasetSelectorRef}
         datePickerRef={opts?.optionalRef?.datePickerRef}
-        groupActions={!showActionsInGroup}
+        groupActions={showActionsInGroup}
         screenTitle={screenTitle}
         queryStatus={queryStatus}
         showQueryBar={false}

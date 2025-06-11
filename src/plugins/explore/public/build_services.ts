@@ -9,9 +9,10 @@ import { Storage } from '../../opensearch_dashboards_utils/public';
 import { RequestAdapter } from '../../inspector/public';
 
 import { ExploreStartDependencies, ExploreServices } from './types';
-import { createSavedExploreLoader, SavedExplore } from './saved_explore';
+import { createSavedExploreLoader } from './saved_explore';
 import { getHistory } from './application/legacy/discover/opensearch_dashboards_services';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
+import { getSavedExploreById as getSavedExploreByIdFromClient } from './application/utils/hooks/use_saved_explore';
 
 export function buildServices(
   core: CoreStart,
@@ -40,8 +41,7 @@ export function buildServices(
     filterManager: plugins.data.query.filterManager,
     indexPatterns: plugins.data.indexPatterns, // Direct access for convenience
     getSavedExploreById: async (id?: string) => {
-      const { getSavedExploreById } = await import('./application/utils/hooks/use_saved_explore');
-      return getSavedExploreById(savedObjectService.client, id);
+      return getSavedExploreByIdFromClient(services.savedObjectsClient, id);
     },
     getSavedExploreUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
