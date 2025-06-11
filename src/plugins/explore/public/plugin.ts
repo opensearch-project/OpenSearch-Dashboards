@@ -67,6 +67,7 @@ import {
 } from './components/experience_banners';
 import { DocViewTable } from './components/doc_viewer/doc_viewer_table/table';
 import { JsonCodeBlock } from './components/doc_viewer/json_code_block/json_code_block';
+import { ExploreEmbeddableFactory } from './embeddable';
 
 export class ExplorePlugin
   implements
@@ -371,6 +372,8 @@ export class ExplorePlugin
       ),
     });
 
+    this.registerEmbeddable(core, setupDeps);
+
     return {
       ...viewServiceSetup,
       docViews: {
@@ -418,17 +421,19 @@ export class ExplorePlugin
     }
   }
 
-  // TODO: Register embeddable factory when ready
-  // private registerEmbeddable(core: CoreSetup<ExploreStartPlugins>, plugins: ExploreSetupPlugins) {
-  //   const getStartServices = async () => {
-  //     const [coreStart, deps] = await core.getStartServices();
-  //     return {
-  //       executeTriggerActions: deps.uiActions.executeTriggerActions,
-  //       isEditable: () => coreStart.application.capabilities.discover?.save as boolean,
-  //     };
-  //   };
+  private registerEmbeddable(
+    core: CoreSetup<ExploreStartDependencies>,
+    plugins: ExploreSetupDependencies
+  ) {
+    const getStartServices = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return {
+        executeTriggerActions: deps.uiActions.executeTriggerActions,
+        isEditable: () => coreStart.application.capabilities.discover?.save as boolean,
+      };
+    };
 
-  //   const factory = new ExploreEmbeddableFactory(getStartServices);
-  //   plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
-  // }
+    const factory = new ExploreEmbeddableFactory(getStartServices);
+    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+  }
 }

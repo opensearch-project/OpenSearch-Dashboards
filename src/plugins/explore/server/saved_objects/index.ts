@@ -28,4 +28,4 @@
  * under the License.
  */
 
-export { searchSavedObjectType } from './search';
+export { exploreSavedObjectType } from './search';

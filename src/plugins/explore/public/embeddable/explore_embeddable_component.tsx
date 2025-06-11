@@ -16,7 +16,7 @@ import {
 import { getServices } from '../application/legacy/discover/opensearch_dashboards_services';
 
 interface ExploreEmbeddableProps {
-  searchProps: ExploreProps;
+  exploreProps: ExploreProps;
 }
 export type DiscoverEmbeddableProps = DataGridTableProps;
 
@@ -24,25 +24,25 @@ export const DataGridTableMemoized = React.memo((props: DataGridTableProps) => (
   <DataGridTable {...props} />
 ));
 
-export function ExploreEmbeddableComponent({ searchProps }: ExploreEmbeddableProps) {
+export function ExploreEmbeddableComponent({ exploreProps }: ExploreEmbeddableProps) {
   const services = getServices();
   const discoverEmbeddableProps = {
-    columns: searchProps.columns,
-    indexPattern: searchProps.indexPattern,
-    onAddColumn: searchProps.onAddColumn,
-    onFilter: searchProps.onFilter,
-    onMoveColumn: searchProps.onMoveColumn,
-    onRemoveColumn: searchProps.onRemoveColumn,
-    onReorderColumn: searchProps.onReorderColumn,
-    onSort: searchProps.onSort,
-    rows: searchProps.rows,
-    onSetColumns: searchProps.onSetColumns,
-    sort: searchProps.sort,
-    displayTimeColumn: searchProps.displayTimeColumn,
-    services: searchProps.services,
-    hits: searchProps.hits,
-    title: searchProps.title,
-    description: searchProps.description,
+    columns: exploreProps.columns,
+    indexPattern: exploreProps.indexPattern,
+    onAddColumn: exploreProps.onAddColumn,
+    onFilter: exploreProps.onFilter,
+    onMoveColumn: exploreProps.onMoveColumn,
+    onRemoveColumn: exploreProps.onRemoveColumn,
+    onReorderColumn: exploreProps.onReorderColumn,
+    onSort: exploreProps.onSort,
+    rows: exploreProps.rows,
+    onSetColumns: exploreProps.onSetColumns,
+    sort: exploreProps.sort,
+    displayTimeColumn: exploreProps.displayTimeColumn,
+    services: exploreProps.services,
+    hits: exploreProps.hits,
+    title: exploreProps.title,
+    description: exploreProps.description,
     showPagination: true,
   } as DiscoverEmbeddableProps;
 

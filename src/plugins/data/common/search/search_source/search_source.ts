@@ -615,7 +615,19 @@ export class SearchSource {
    * @resolved {Object|null} - the flat data of the SearchSource
    */
   private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }) {
+    console.log('mergeProps passed searchRequest', searchRequest);
+    console.log('mergeProps root', this.fields);
     Object.entries(this.fields).forEach(([key, value]) => {
+      if (
+        key === 'query' &&
+        searchRequest.query &&
+        value.language !== searchRequest.query.language
+      ) {
+        // skip combining queries with its parent search source queries
+        // as currently dashboards do not support combining queries
+        // ex. adding PPL based saved explore to dashboard
+        return;
+      }
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
     if (this.parent) {
@@ -638,6 +650,7 @@ export class SearchSource {
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
+    console.log('flattening search source query', query);
     searchRequest.indexType = this.getIndexType(index);
 
     const computedFields = index ? index.getComputedFields() : {};

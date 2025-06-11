@@ -61,6 +61,8 @@ import { getRequestInspectorStats, getResponseInspectorStats } from '../../../da
 import { getSortForSearchSource } from '../application/legacy/discover/application/view_components/utils/get_sort_for_search_source';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
+import { getServices } from '../application/legacy/discover/opensearch_dashboards_services';
+import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 
 export interface ExploreProps {
   columns?: string[];
@@ -338,6 +340,7 @@ export class ExploreEmbeddable
 
     try {
       // Make the request
+      console.log('explore embeddable fetch called', searchSource.getField('query'));
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
       });

@@ -30,7 +30,7 @@
 
 import { SavedObjectsType } from 'opensearch-dashboards/server';
 
-export const searchSavedObjectType: SavedObjectsType = {
+export const exploreSavedObjectType: SavedObjectsType = {
   name: 'explore',
   hidden: false,
   namespaceType: 'single',
