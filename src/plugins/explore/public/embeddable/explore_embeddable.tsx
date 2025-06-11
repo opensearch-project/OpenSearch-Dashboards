@@ -1,0 +1,306 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { isEqual } from 'lodash';
+import * as Rx from 'rxjs';
+import { Subscription } from 'rxjs';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { i18n } from '@osd/i18n';
+import { RequestAdapter, Adapters } from '../../../inspector/public';
+import {
+  opensearchFilters,
+  Filter,
+  TimeRange,
+  FilterManager,
+  getTime,
+  Query,
+  UI_SETTINGS,
+} from '../../../data/public';
+import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
+import { SearchInput, SearchOutput } from './types';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  getServices,
+  IndexPattern,
+  ISearchSource,
+} from '../application/legacy/discover/opensearch_dashboards_services';
+import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
+import { SortOrder } from '../types/saved_explore_types';
+import { SavedExplore } from '../saved_explore';
+import { SAMPLE_SIZE_SETTING } from '../../common/legacy/discover';
+import { ExploreEmbeddableComponent } from './explore_embeddable_component';
+import { DiscoverServices } from '../application/legacy/discover/build_services';
+import { ExpressionRenderError } from '../../../expressions/public';
+import { getVisualizationType } from '../components/visualizations/utils/use_visualization_types';
+import { VisColumn } from '../components/visualizations/types';
+import { toExpression } from '../components/visualizations/utils/to_expression';
+
+export interface SearchProps {
+  description?: string;
+  sort?: SortOrder[];
+  inspectorAdapters?: Adapters;
+  rows?: any[];
+  indexPattern?: IndexPattern;
+  hits?: number;
+  isLoading?: boolean;
+  services: DiscoverServices;
+  expression?: string;
+  searchContext?: {
+    query: Query | undefined;
+    filters: Filter[] | undefined;
+    timeRange: TimeRange | undefined;
+  };
+}
+
+interface SearchEmbeddableConfig {
+  savedSearch: SavedExplore;
+  editUrl: string;
+  editPath: string;
+  indexPatterns?: IndexPattern[];
+  editable: boolean;
+  filterManager: FilterManager;
+  services: DiscoverServices;
+}
+
+export class ExploreEmbeddable
+  extends Embeddable<SearchInput, SearchOutput>
+  implements IEmbeddable<SearchInput, SearchOutput> {
+  private abortController?: AbortController;
+  private readonly savedSearch: SavedExplore;
+  private inspectorAdaptors: Adapters;
+  private searchProps?: SearchProps;
+  private filtersSearchSource?: ISearchSource;
+  private subscription: Subscription;
+  private autoRefreshFetchSubscription?: Subscription;
+  public readonly type = EXPLORE_EMBEDDABLE_TYPE;
+  private services: DiscoverServices;
+  private prevState = {
+    filters: undefined as Filter[] | undefined,
+    query: undefined as Query | undefined,
+    timeRange: undefined as TimeRange | undefined,
+  };
+  private node?: HTMLElement;
+
+  constructor(
+    { savedSearch, editUrl, editPath, indexPatterns, editable, services }: SearchEmbeddableConfig,
+    initialInput: SearchInput,
+    parent?: Container
+  ) {
+    super(
+      initialInput,
+      {
+        defaultTitle: savedSearch.title,
+        editUrl,
+        editPath,
+        editApp: 'discover',
+        indexPatterns,
+        editable,
+      },
+      parent
+    );
+    this.services = services;
+    this.savedSearch = savedSearch;
+    this.inspectorAdaptors = {
+      requests: new RequestAdapter(),
+    };
+    this.initializeSearchProps();
+
+    this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+      this.updateHandler();
+    });
+    this.autoRefreshFetchSubscription = getServices()
+      .timefilter.getAutoRefreshFetch$()
+      .subscribe(() => {
+        this.updateHandler(true);
+      });
+  }
+
+  private initializeSearchProps() {
+    const { searchSource } = this.savedSearch;
+    const indexPattern = searchSource.getField('index');
+    if (!indexPattern) return;
+    this.searchProps = {
+      inspectorAdapters: this.inspectorAdaptors,
+      rows: [],
+      description: this.savedSearch.description,
+      services: this.services,
+      indexPattern,
+      isLoading: false,
+    };
+    const timeRangeSearchSource = searchSource.create();
+    timeRangeSearchSource.setField('filter', () => {
+      if (!this.searchProps || !this.input.timeRange) return;
+      return getTime(indexPattern, this.input.timeRange);
+    });
+    this.filtersSearchSource = searchSource.create();
+    this.filtersSearchSource.setParent(timeRangeSearchSource);
+    searchSource.setParent(this.filtersSearchSource);
+    const currentQuery = this.services.data.query.queryString.getQuery();
+    this.services.data.query.queryString.setQuery(this.savedSearch.searchSource.getField('query'));
+    searchSource.setFields({
+      index: indexPattern,
+      query: this.savedSearch.searchSource.getField('query'),
+      highlightAll: true,
+      version: true,
+    });
+  }
+
+  private async updateHandler(force = false) {
+    const { filters, query, timeRange } = this.input;
+    const needFetch =
+      force ||
+      !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
+      !isEqual(query, this.prevState.query) ||
+      !isEqual(timeRange, this.prevState.timeRange);
+    if (needFetch) {
+      this.prevState = { filters, query, timeRange };
+      await this.fetch();
+    }
+    if (this.node && this.searchProps) {
+      this.renderComponent(this.node, this.searchProps);
+    }
+  }
+
+  public reload() {
+    this.updateHandler(true);
+  }
+
+  private fetch = async () => {
+    if (!this.searchProps) return;
+    const { searchSource } = this.savedSearch;
+    if (this.abortController) this.abortController.abort();
+    this.abortController = new AbortController();
+    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
+
+    this.inspectorAdaptors.requests.reset();
+    const title = i18n.translate('explore.embeddable.inspectorRequestDataTitle', {
+      defaultMessage: 'Data',
+    });
+    const description = i18n.translate('explore.embeddable.inspectorRequestDescription', {
+      defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
+    });
+    const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
+    inspectorRequest.stats(getRequestInspectorStats(searchSource));
+    searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
+      inspectorRequest.json(body);
+    });
+    this.updateOutput({ loading: true, error: undefined });
+    this.searchProps.isLoading = true;
+    const query = searchSource.getField('query');
+    const languageConfig = this.services.data.query.queryString
+      .getLanguageService()
+      .getLanguage(query!.language);
+    const resp = await searchSource.fetch({
+      abortSignal: this.abortController.signal,
+      withLongNumeralsSupport: await getServices().uiSettings.get(
+        UI_SETTINGS.DATA_WITH_LONG_NUMERALS
+      ),
+      ...(languageConfig &&
+        languageConfig.fields?.formatter && {
+          formatter: languageConfig.fields.formatter,
+        }),
+    });
+    const rows = resp.hits.hits;
+    this.searchProps.rows = rows;
+    const fieldSchema = searchSource.getDataFrame()?.schema;
+    const visualizationData = getVisualizationType(rows, fieldSchema);
+    const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
+    if (displayVis) {
+      const selectedChartType = visualizationData?.visualizationType?.type || 'line';
+      const rule = this.services.visualizationRegistry
+        .start()
+        .getRules()
+        .find((r) => r.id === visualizationData.ruleId);
+      const ruleBasedToExpressionFn = (
+        transformedData: Array<Record<string, any>>,
+        numericalColumns: VisColumn[],
+        categoricalColumns: VisColumn[],
+        dateColumns: VisColumn[],
+        styleOpts: any
+      ) => {
+        return rule.toExpression!(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOpts,
+          selectedChartType
+        );
+      };
+      const searchContext = {
+        query: this.input.query,
+        filters: this.input.filters,
+        timeRange: this.input.timeRange,
+      };
+      this.searchProps.searchContext = searchContext;
+      const indexPattern = this.savedSearch.searchSource.getField('index');
+      const styleOptions = visualizationData?.visualizationType?.ui.style.defaults;
+      const exp = await toExpression(
+        searchContext,
+        indexPattern!,
+        ruleBasedToExpressionFn,
+        visualizationData.transformedData,
+        visualizationData.numericalColumns,
+        visualizationData.categoricalColumns,
+        visualizationData.dateColumns,
+        styleOptions
+      );
+      this.searchProps.expression = exp;
+    }
+    this.updateOutput({ loading: false, error: undefined });
+    inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
+    this.searchProps.rows = rows;
+    this.searchProps.hits = resp.hits.total;
+    this.searchProps.isLoading = false;
+  };
+
+  private renderComponent(node: HTMLElement, searchProps: SearchProps) {
+    if (!this.searchProps) return;
+    const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
+    ReactDOM.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />, node);
+  }
+
+  public destroy() {
+    super.destroy();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+
+    if (this.autoRefreshFetchSubscription) {
+      this.autoRefreshFetchSubscription.unsubscribe();
+    }
+
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    if (this.searchProps) {
+      delete this.searchProps;
+    }
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
+  }
+
+  onContainerError = (error: ExpressionRenderError) => {
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.renderComplete.dispatchError();
+    this.updateOutput({ loading: false, error });
+  };
+
+  public render(node: HTMLElement) {
+    if (!this.searchProps) {
+      throw new Error('Search scope not defined');
+    }
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
+    this.node = node;
+    this.renderComponent(node, this.searchProps);
+  }
+}
