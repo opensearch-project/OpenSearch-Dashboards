@@ -9,7 +9,7 @@ import { EditToolbar } from './edit_toolbar';
 
 describe('EditToolbar', () => {
   const editBtnLabel = 'TBEditBtn';
-  const clearBtnLabel = 'TBEditBtn';
+  const clearBtnLabel = 'TBClearBtn';
 
   it('renders and handles edit button', () => {
     const handleEditClick = jest.fn();
