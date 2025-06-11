@@ -36,6 +36,7 @@ import { useTimefilterSubscription } from './utils/hooks/use_timefilter_subscrip
 import { ExploreDataTable } from '../components/data_table/explore_data_table';
 import { ExploreTabs } from '../components/tabs/tabs';
 import { useHeaderVariants } from './utils/hooks/use_header_variants';
+import { NewExperienceBanner } from '../components/experience_banners/new_experience_banner';
 
 /**
  * Main application component for the Explore plugin
@@ -148,6 +149,10 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
 
             {/* HeaderDatasetSelector component - renders dataset selector in portal */}
             <HeaderDatasetSelector datasetSelectorRef={datasetSelectorRef} />
+
+            <div className="dscCanvas__experienceBannerWrapper">
+              <NewExperienceBanner />
+            </div>
 
             {/* QueryPanel component */}
             <div className="dscCanvas__queryPanel">
