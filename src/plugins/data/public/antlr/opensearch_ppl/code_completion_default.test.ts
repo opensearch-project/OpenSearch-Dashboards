@@ -4,7 +4,7 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { getSuggestions } from './code_completion';
+import { getDefaultSuggestions } from './code_completion';
 import { IndexPattern } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
 import { QuerySuggestion } from '../../autocomplete';
@@ -35,7 +35,7 @@ describe('ppl code_completion', () => {
       query: string,
       position: monaco.Position = new monaco.Position(1, query.length + 1)
     ) => {
-      return getSuggestions({
+      return getDefaultSuggestions({
         query,
         indexPattern: mockIndexPattern,
         position,
@@ -58,7 +58,7 @@ describe('ppl code_completion', () => {
     };
 
     it('should return empty array when required parameters are missing', async () => {
-      const result = await getSuggestions({
+      const result = await getDefaultSuggestions({
         query: '',
         indexPattern: (null as unknown) as IndexPattern,
         position: mockPosition,

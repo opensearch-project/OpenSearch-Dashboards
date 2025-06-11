@@ -25,8 +25,8 @@ export function registerDataSourceConnectionsRoutes(
         ? context.dataSource.opensearch.legacy.getClient(request.params.id).callAPI
         : defaultClient.asScoped(request).callAsCurrentUser;
       try {
-        const resp = await client('enhancements.getDataConnections');
-        return response.ok({ body: resp });
+        const resp = await client('enhancements.getDataConnections', {});
+        return response.ok({ body: resp as any });
       } catch (error) {
         if (error.statusCode === 404 || error.statusCode === 400) {
           return response.ok({ body: [] });
@@ -60,7 +60,7 @@ export function registerDataSourceConnectionsRoutes(
         const resp = await client('enhancements.getJobStatus', {
           queryId: request.query.queryId,
         });
-        return response.ok({ body: resp });
+        return response.ok({ body: resp as any });
       } catch (error) {
         // Transform 500 errors to 503 to indicate service availability issues
         const statusCode = error.statusCode === 500 ? 503 : error.statusCode || 503;
@@ -91,7 +91,7 @@ export function registerDataSourceConnectionsRoutes(
           : defaultClient.asScoped(request).callAsCurrentUser;
 
         const resp = await client('enhancements.runDirectQuery', { body: request.body });
-        return response.ok({ body: resp });
+        return response.ok({ body: resp as any });
       } catch (error) {
         // Transform 500 errors to 503 to indicate service availability issues
         const statusCode = error.statusCode === 500 ? 503 : error.statusCode || 503;

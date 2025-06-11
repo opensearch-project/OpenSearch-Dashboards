@@ -11,7 +11,7 @@ import {
   openSearchPplAutocompleteData,
   processVisitedRules,
 } from './opensearch_ppl_autocomplete';
-import { SourceOrTableSuggestion } from '../shared/types';
+import { SourceOrTableSuggestion } from '../../shared/types';
 
 describe('Token Dictionary and Ignored Tokens', () => {
   it('should correctly set the token dictionary', () => {

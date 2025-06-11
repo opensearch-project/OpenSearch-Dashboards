@@ -33,14 +33,14 @@
       "line": 7,
       "column": 24,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'express'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/express/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'express'. '/home/ubuntu/Dashboards-dev/node_modules/express/index.js' implicitly has an 'any' type."
     },
     {
       "file": "node_modules/@storybook/core-common/dist/ts3.9/utils/progress-reporting.d.ts",
       "line": 1,
       "column": 24,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'express'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/express/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'express'. '/home/ubuntu/Dashboards-dev/node_modules/express/index.js' implicitly has an 'any' type."
     },
     {
       "file": "node_modules/antlr4ng/dist/CommonToken.d.ts",
@@ -54,14 +54,14 @@
       "line": 1,
       "column": 36,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'ip-address'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/ip-address/ip-address.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'ip-address'. '/home/ubuntu/Dashboards-dev/node_modules/ip-address/ip-address.js' implicitly has an 'any' type."
     },
     {
       "file": "node_modules/ip-cidr/index.d.ts",
       "line": 2,
       "column": 28,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'jsbn'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/jsbn/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'jsbn'. '/home/ubuntu/Dashboards-dev/node_modules/jsbn/index.js' implicitly has an 'any' type."
     },
     {
       "file": "node_modules/react-use/lib/useGeolocation.d.ts",
@@ -201,7 +201,7 @@
       "line": 32,
       "column": 19,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'node-fetch'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/node-fetch/lib/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'node-fetch'. '/home/ubuntu/Dashboards-dev/node_modules/node-fetch/lib/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/dev/build/tasks/os_packages/create_os_package_tasks.test.ts",
@@ -1055,7 +1055,7 @@
       "line": 13,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/home/ubuntu/Dashboards-dev/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/dashboard/public/application/embeddable/dashboard_container.test.tsx",
@@ -1069,7 +1069,7 @@
       "line": 31,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/home/ubuntu/Dashboards-dev/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx",
@@ -1303,14 +1303,28 @@
       "message": "'int' is declared but never used."
     },
     {
-      "file": "src/plugins/data/public/antlr/opensearch_ppl/.generated/OpenSearchPPLLexer.ts",
+      "file": "src/plugins/data/public/antlr/opensearch_ppl/default_ppl_grammar/.generated/OpenSearchPPLLexer.ts",
       "line": 4,
       "column": 1,
       "code": "TS6133",
       "message": "'Token' is declared but its value is never read."
     },
     {
-      "file": "src/plugins/data/public/antlr/opensearch_ppl/.generated/OpenSearchPPLParser.ts",
+      "file": "src/plugins/data/public/antlr/opensearch_ppl/default_ppl_grammar/.generated/OpenSearchPPLParser.ts",
+      "line": 10,
+      "column": 6,
+      "code": "TS6196",
+      "message": "'int' is declared but never used."
+    },
+    {
+      "file": "src/plugins/data/public/antlr/opensearch_ppl/simplified_ppl_grammar/.generated/OpenSearchPPLLexer.ts",
+      "line": 4,
+      "column": 1,
+      "code": "TS6133",
+      "message": "'Token' is declared but its value is never read."
+    },
+    {
+      "file": "src/plugins/data/public/antlr/opensearch_ppl/simplified_ppl_grammar/.generated/OpenSearchPPLParser.ts",
       "line": 10,
       "column": 6,
       "code": "TS6196",
@@ -1455,13 +1469,6 @@
       "column": 32,
       "code": "TS2339",
       "message": "Property 'mockRejectedValue' does not exist on type '() => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>'."
-    },
-    {
-      "file": "src/plugins/data/public/plugin.ts",
-      "line": 162,
-      "column": 7,
-      "code": "TS2345",
-      "message": "Argument of type 'ActionByType<\"ACTION_GLOBAL_APPLY_FILTER\">' is not assignable to parameter of type 'ActionDefinition<{}>'."
     },
     {
       "file": "src/plugins/data/public/query/persisted_log/persisted_log.test.ts",
@@ -1832,77 +1839,77 @@
       "line": 208,
       "column": 13,
       "code": "TS2322",
-      "message": "Type '{ filters: Filter[]; onFiltersUpdated: ((filters: Filter[]) => void) | undefined; intl: InjectedIntl; indexPatterns: IIndexPattern[]; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<Component<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | ... 5 more ... | \"isQueryEditorControl\">, any, any>> & Readonly<...> & Readonly<...>'."
+      "message": "Type '{ filters: Filter[]; onFiltersUpdated: ((filters: Filter[]) => void) | undefined; intl: InjectedIntl; indexPatterns: IIndexPattern[]; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<Component<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | ... 5 more ... | \"isQueryEditorControl\">, any, any>> & Readonly<...> & Readonly<...>'."
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 78,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 86,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 96,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 108,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 119,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 130,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 141,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 152,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 165,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/filter_bar/filter_options.test.tsx",
       "line": 178,
       "column": 36,
       "code": "TS2739",
-      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | \"saveQuery\" | \"loadedSavedQuery\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
+      "message": "Type '{ savedQueryService: { saveQuery: Mock<any, any>; getAllSavedQueries: Mock<any, any>; findSavedQueries: Mock<any, any>; getSavedQuery: Mock<any, any>; deleteSavedQuery: Mock<...>; getSavedQueryCount: Mock<...>; }; ... 9 more ...; useSaveQueryMenu: boolean; }' is missing the following properties from type 'Readonly<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"onInitiateSave\" | \"onInitiateSaveAsNew\" | \"loadedSavedQuery\" | \"useSaveQueryMenu\" | \"isQueryEditorControl\">>': saveQuery, onInitiateSave, onInitiateSaveAsNew, isQueryEditorControl"
     },
     {
       "file": "src/plugins/data/public/ui/query_editor/editors/dql_editor/index.tsx",
@@ -1945,13 +1952,6 @@
       "column": 29,
       "code": "TS2322",
       "message": "Type '{ children: Element; showNoDataPopover: boolean; storage: { get: Mock<any, any>; set: Mock<any, any>; remove: Mock<any, any>; clear: Mock<any, any>; }; }' is not assignable to type '{ showNoDataPopover?: boolean | undefined; storage: DataStorage; children: ReactElement<any, string | JSXElementConstructor<any>>; }'."
-    },
-    {
-      "file": "src/plugins/data/public/ui/query_editor/query_editor.tsx",
-      "line": 261,
-      "column": 20,
-      "code": "TS2345",
-      "message": "Argument of type '(s: MonacoCompatibleQuerySuggestion) => { label: string; kind: monaco.languages.CompletionItemKind; insertText: string; insertTextRules: monaco.languages.CompletionItemInsertTextRule | undefined; range: monaco.Range; detail: string; command: { ...; }; sortText: string; }' is not assignable to parameter of type '(value: QuerySuggestion, index: number, array: QuerySuggestion[]) => { label: string; kind: CompletionItemKind; insertText: string; ... 4 more ...; sortText: string; }'."
     },
     {
       "file": "src/plugins/data/public/ui/query_string_input/no_data_popover.test.tsx",
@@ -2042,14 +2042,14 @@
       "line": 454,
       "column": 13,
       "code": "TS2322",
-      "message": "Type '{ filters: Filter[]; onFiltersUpdated: ((filters: Filter[]) => void) | undefined; intl: InjectedIntl; indexPatterns: IIndexPattern[]; showSaveQuery: boolean | undefined; ... 8 more ...; saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<...>; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<Component<Pick<Props, \"onLoad\" | \"filters\" | \"indexPatterns\" | \"showSaveQuery\" | \"onClearSavedQuery\" | \"onFiltersUpdated\" | \"savedQueryService\" | ... 5 more ... | \"isQueryEditorControl\">, any, any>> & Readonly<...> & Readonly<...>'."
+      "message": "Type '{ filters: Filter[]; onFiltersUpdated: ((filters: Filter[]) => void) | undefined; intl: InjectedIntl; indexPatterns: IIndexPattern[]; showSaveQuery: boolean | undefined; ... 8 more ...; saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<...>; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<Component<Pick<Props, \"onLoad\" | \"indexPatterns\" | \"saveQuery\" | \"savedQueryService\" | \"filters\" | \"showSaveQuery\" | \"onClearSavedQuery\" | ... 5 more ... | \"isQueryEditorControl\">, any, any>> & Readonly<...> & Readonly<...>'."
     },
     {
       "file": "src/plugins/data/public/ui/typeahead/suggestion_component.tsx",
       "line": 91,
       "column": 41,
       "code": "TS2345",
-      "message": "Argument of type 'import(\"/home/ubuntu/OpenSearch-Dashboards/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind | import(\"/home/ubuntu/OpenSearch-Dashboards/src/pl...' is not assignable to parameter of type 'string'."
+      "message": "Argument of type 'import(\"/home/ubuntu/Dashboards-dev/node_modules/monaco-editor/esm/vs/editor/editor.api\").languages.CompletionItemKind | import(\"/home/ubuntu/Dashboards-dev/src/plugins/data/public/autocomplete/providers/query_suggestion_provider\").QuerySuggestionTypes' is not assignable to parameter of type 'string'."
     },
     {
       "file": "src/plugins/data/server/index_patterns/fetcher/lib/opensearch_api.ts",
@@ -2070,14 +2070,14 @@
       "line": 31,
       "column": 54,
       "code": "TS2345",
-      "message": "Argument of type 'PluginInitializerContext<{ search: { usageTelemetry: { enabled: boolean; }; }; }>' is not assignable to parameter of type 'Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; usageTelemetry: Readonly<{} & { enabled: boolean; }>; }>; enhancements: Readonly<...>; autocomplete: Readonly<...>; savedQueriesNewUI: Readonly<...>; }>'."
+      "message": "Argument of type 'PluginInitializerContext<{ search: { usageTelemetry: { enabled: boolean; }; }; }>' is not assignable to parameter of type 'Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; usageTelemetry: Readonly<{} & { enabled: boolean; }>; }>; autocomplete: Readonly<...>; enhancements: Readonly<...>; savedQueriesNewUI: Readonly<...>; }>'."
     },
     {
       "file": "src/plugins/data/server/search/collectors/usage.test.ts",
       "line": 36,
       "column": 54,
       "code": "TS2345",
-      "message": "Argument of type 'PluginInitializerContext<{ search: { usageTelemetry: { enabled: boolean; }; }; }>' is not assignable to parameter of type 'Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; usageTelemetry: Readonly<{} & { enabled: boolean; }>; }>; enhancements: Readonly<...>; autocomplete: Readonly<...>; savedQueriesNewUI: Readonly<...>; }>'."
+      "message": "Argument of type 'PluginInitializerContext<{ search: { usageTelemetry: { enabled: boolean; }; }; }>' is not assignable to parameter of type 'Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; usageTelemetry: Readonly<{} & { enabled: boolean; }>; }>; autocomplete: Readonly<...>; enhancements: Readonly<...>; savedQueriesNewUI: Readonly<...>; }>'."
     },
     {
       "file": "src/plugins/data/server/search/opensearch_search/opensearch_search_strategy.test.ts",
@@ -2112,7 +2112,7 @@
       "line": 95,
       "column": 11,
       "code": "TS2322",
-      "message": "Type 'string' is not assignable to type '(MsearchBody | MsearchHeader)[]'."
+      "message": "Type 'string' is not assignable to type '(MsearchHeader | MsearchBody)[]'."
     },
     {
       "file": "src/plugins/data/server/search/routes/call_msearch.ts",
@@ -2280,7 +2280,7 @@
       "line": 8,
       "column": 35,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module './http_aws_es/connector'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/data_source/server/legacy/http_aws_es/connector.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module './http_aws_es/connector'. '/home/ubuntu/Dashboards-dev/src/plugins/data_source/server/legacy/http_aws_es/connector.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source/server/legacy/configure_legacy_client.ts",
@@ -2385,7 +2385,7 @@
       "line": 6,
       "column": 17,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'dns-sync'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/dns-sync/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'dns-sync'. '/home/ubuntu/Dashboards-dev/node_modules/dns-sync/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/framework/catalog_cache/cache_loader.tsx",
@@ -3610,21 +3610,21 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/materialized_view/add_column_popover.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/materialized_view/column_expression.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/materialized_view/column_expression.tsx",
@@ -3638,21 +3638,21 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/materialized_view/materialized_view_builder.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/query_visual_editor.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/query_visual_editor.test.tsx",
@@ -3687,21 +3687,21 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/skipping_index/delete_fields_modal.test.tsx",
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/skipping_index/generate_fields.test.tsx",
       "line": 13,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/skipping_index/generate_fields.test.tsx",
@@ -3722,7 +3722,7 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/skipping_index/skipping_index_builder.test.tsx",
@@ -3932,7 +3932,7 @@
       "line": 8,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_management/acceleration_table.test.tsx",
@@ -4100,7 +4100,7 @@
       "line": 36,
       "column": 3,
       "code": "TS2740",
-      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, remove, get$, addSuccess, and 3 more."
+      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, get$, remove, addSuccess, and 3 more."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/associated_object_management/associated_objects_details_flyout.test.tsx",
@@ -4156,7 +4156,7 @@
       "line": 47,
       "column": 3,
       "code": "TS2740",
-      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, remove, get$, addSuccess, and 3 more."
+      "message": "Type '{ addWarning: Mock<any, any>; }' is missing the following properties from type 'IToasts': add, get$, remove, addSuccess, and 3 more."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/associated_object_management/associated_objects_tab.test.tsx",
@@ -4191,7 +4191,7 @@
       "line": 10,
       "column": 22,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'react-test-renderer'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'react-test-renderer'. '/home/ubuntu/Dashboards-dev/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/associated_object_management/associated_objects_table.test.tsx",
@@ -4499,7 +4499,7 @@
       "line": 104,
       "column": 8,
       "code": "TS2739",
-      "message": "Type '{ roles: { label: string; value: string; }[]; selectedQueryPermissionRoles: never[]; setSelectedQueryPermissionRoles: Mock<any, any>; currentName: string; currentDetails: string; currentArn: string; ... 13 more ...; setArnForRequest: Mock<...>; }' is missing the following properties from type 'Readonly<Pick<ConfigureS3DatasourceProps, \"application\" | \"navigation\" | \"error\" | \"roles\" | \"setError\" | \"useNewUX\" | \"hasSecurityAccess\" | \"selectedQueryPermissionRoles\" | ... 14 more ... | \"setArnForRequest\">>': application, navigation, useNewUX"
+      "message": "Type '{ roles: { label: string; value: string; }[]; selectedQueryPermissionRoles: never[]; setSelectedQueryPermissionRoles: Mock<any, any>; currentName: string; currentDetails: string; currentArn: string; ... 13 more ...; setArnForRequest: Mock<...>; }' is missing the following properties from type 'Readonly<Pick<ConfigureS3DatasourceProps, \"application\" | \"navigation\" | \"error\" | \"setError\" | \"useNewUX\" | \"setNameForRequest\" | \"setDetailsForRequest\" | ... 15 more ... | \"setArnForRequest\">>': application, navigation, useNewUX"
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/direct_query_data_source_configuration/amazon_s3/review_amazon_s3_data_source.test.tsx",
@@ -4611,7 +4611,7 @@
       "line": 7,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/integrations/create_integration_helpers.test.ts",
@@ -4674,7 +4674,7 @@
       "line": 7,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/integrations/installed_integrations_table.test.tsx",
@@ -4702,7 +4702,7 @@
       "line": 7,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/integrations/setup_integration.test.tsx",
@@ -4779,7 +4779,7 @@
       "line": 7,
       "column": 21,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'enzyme-adapter-react-16'. '/home/ubuntu/Dashboards-dev/node_modules/enzyme-adapter-react-16/build/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/data_source_management/public/components/direct_query_data_sources_components/integrations/setup_integration_inputs.test.tsx",
@@ -6340,7 +6340,7 @@
       "line": 31,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/home/ubuntu/Dashboards-dev/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/embeddable/server/types.ts",
@@ -6686,13 +6686,6 @@
       "message": "Argument of type '{ onChange: jest.Mock<any, any>; value: string; types: string[]; }' is not assignable to parameter of type 'Props'."
     },
     {
-      "file": "src/plugins/explore/public/application/legacy/discover/application/components/sidebar/discover_sidebar.test.tsx",
-      "line": 94,
-      "column": 3,
-      "code": "TS2741",
-      "message": "Property 'isEnhancementsEnabledOverride' is missing in type '{ columns: string[]; fieldCounts: Record<string, number>; hits: Record<string, unknown>[]; onAddFilter: jest.Mock<any, any>; onAddField: jest.Mock<any, any>; onRemoveField: jest.Mock<...>; onNormalize: jest.Mock<...>; onCreateIndexPattern: jest.Mock<...>; selectedIndexPattern: IndexPattern; onReorderFields: jest.Moc...' but required in type 'DiscoverSidebarProps'."
-    },
-    {
       "file": "src/plugins/explore/public/application/legacy/discover/application/components/table/table_row.tsx",
       "line": 31,
       "column": 1,
@@ -6886,7 +6879,7 @@
       "line": 10,
       "column": 46,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module './home_app'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/home/public/application/components/home_app.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module './home_app'. '/home/ubuntu/Dashboards-dev/src/plugins/home/public/application/components/home_app.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/home/public/application/components/home_app.test.tsx",
@@ -7488,7 +7481,7 @@
       "line": 288,
       "column": 7,
       "code": "TS2322",
-      "message": "Type '{ ignoreUnavailable: true; expand_wildcards: \"all\" | \"open\"; index: string; body: { size: number; aggs: { indices: { terms: { field: string; size: number; }; }; }; }; }' is not assignable to type 'ISearchRequestParams<Record<string, any>>'."
+      "message": "Type '{ ignoreUnavailable: true; expand_wildcards: \"open\" | \"all\"; index: string; body: { size: number; aggs: { indices: { terms: { field: string; size: number; }; }; }; }; }' is not assignable to type 'ISearchRequestParams<Record<string, any>>'."
     },
     {
       "file": "src/plugins/index_pattern_management/public/components/create_index_pattern_wizard/lib/get_remote_connections.test.ts",
@@ -7593,7 +7586,7 @@
       "line": 35,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/home/ubuntu/Dashboards-dev/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/index_pattern_management/public/components/index_pattern_table/empty_state/empty_state.tsx",
@@ -7621,7 +7614,7 @@
       "line": 333,
       "column": 11,
       "code": "TS2322",
-      "message": "Type '({ sortable: boolean; 'data-test-subj': string; hidden?: boolean | undefined; color?: string | undefined; content?: string | undefined; style?: CSSProperties | undefined; ... 276 more ...; hideForMobile?: boolean | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
+      "message": "Type '({ sortable: boolean; 'data-test-subj': string; height?: string | number | undefined; name: ReactNode; placeholder?: string | undefined; readOnly?: boolean | undefined; width?: string | undefined; ... 275 more ...; valign?: \"baseline\" | ... 3 more ... | undefined; } | { ...; })[]' is not assignable to type 'EuiBasicTableColumn<IndexPatternTableItem>[]'."
     },
     {
       "file": "src/plugins/index_pattern_management/public/mocks.ts",
@@ -7691,7 +7684,7 @@
       "line": 44,
       "column": 8,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module './opensearch_dashboards_services'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/maps_legacy/public/opensearch_dashboards_services.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module './opensearch_dashboards_services'. '/home/ubuntu/Dashboards-dev/src/plugins/maps_legacy/public/opensearch_dashboards_services.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.test.tsx",
@@ -7950,7 +7943,7 @@
       "line": 8,
       "column": 31,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'react-test-renderer'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'react-test-renderer'. '/home/ubuntu/Dashboards-dev/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/region_map/public/components/region_map_options.test.tsx",
@@ -8013,7 +8006,7 @@
       "line": 8,
       "column": 31,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module 'react-test-renderer'. '/home/ubuntu/OpenSearch-Dashboards/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module 'react-test-renderer'. '/home/ubuntu/Dashboards-dev/node_modules/react-test-renderer/index.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/region_map/public/components/style_options.test.tsx",
@@ -8293,14 +8286,14 @@
       "line": 34,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/home/ubuntu/Dashboards-dev/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/saved_objects_management/public/management_section/objects_table/components/table.test.tsx",
       "line": 33,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/home/ubuntu/Dashboards-dev/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/saved_objects_management/public/management_section/objects_table/components/table.test.tsx",
@@ -8713,14 +8706,14 @@
       "line": 221,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | \"grid\" | \"invert\" | \"dot\" | \"menu\" | \"filter\" | \"scale\" | \"wordWrap\" | ... 456 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'toolTipContent' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"list\" | \"color\" | \"link\" | \"menu\" | \"filter\" | \"image\" | \"polygon\" | \"stop\" | \"search\" | \"download\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
       "line": 224,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | \"grid\" | \"invert\" | \"dot\" | \"menu\" | \"filter\" | \"scale\" | \"wordWrap\" | ... 456 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
+      "message": "Property 'disabled' does not exist on type '{ name: string | Element; icon: \"string\" | \"number\" | \"function\" | \"list\" | \"color\" | \"link\" | \"menu\" | \"filter\" | \"image\" | \"polygon\" | \"stop\" | \"search\" | \"download\" | ... 457 more ... | undefined; ... 4 more ...; _title: string | Element; }'."
     },
     {
       "file": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
@@ -9791,7 +9784,7 @@
       "line": 36,
       "column": 33,
       "code": "TS2306",
-      "message": "File '/home/ubuntu/OpenSearch-Dashboards/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
+      "message": "File '/home/ubuntu/Dashboards-dev/node_modules/@elastic/eui/lib/test/index.d.ts' is not a module."
     },
     {
       "file": "src/plugins/vis_type_vega/public/data_model/opensearch_query_parser.ts",
@@ -9854,7 +9847,7 @@
       "line": 42,
       "column": 32,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module '../lib/vega'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/vis_type_vega/public/lib/vega.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module '../lib/vega'. '/home/ubuntu/Dashboards-dev/src/plugins/vis_type_vega/public/lib/vega.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/vis_type_vega/public/vega_inspector/vega_adapter.ts",
@@ -9896,14 +9889,14 @@
       "line": 42,
       "column": 8,
       "code": "TS7016",
-      "message": "Could not find a declaration file for module './vislib/response_handler'. '/home/ubuntu/OpenSearch-Dashboards/src/plugins/vis_type_vislib/public/vislib/response_handler.js' implicitly has an 'any' type."
+      "message": "Could not find a declaration file for module './vislib/response_handler'. '/home/ubuntu/Dashboards-dev/src/plugins/vis_type_vislib/public/vislib/response_handler.js' implicitly has an 'any' type."
     },
     {
       "file": "src/plugins/vis_type_vislib/public/plugin.ts",
       "line": 121,
       "column": 46,
       "code": "TS2345",
-      "message": "Argument of type '{ name: string; title: string; icon: string; description: string; visConfig: { defaults: { type: string; addTooltip: boolean; addLegend: boolean; isDisplayWarning: boolean; gauge: { alignment: \"automatic\"; ... 13 more ...; style: { ...; }; }; }; }; visualization: typeof VislibVisController; editorConfig: { ...; }; u...' is not assignable to parameter of type 'BaseVisTypeOptions<VisParams>'."
+      "message": "Argument of type '{ name: string; title: string; icon: string; description: string; toExpressionAst: (vis: Vis<VisParams>, params: any) => Promise<ExpressionAstExpression>; ... 4 more ...; editorConfig: { ...; }; } | ... 6 more ... | { ...; }' is not assignable to parameter of type 'BaseVisTypeOptions<VisParams>'."
     },
     {
       "file": "src/plugins/vis_type_vislib/public/vislib/lib/binder.ts",
@@ -9952,70 +9945,70 @@
       "line": 104,
       "column": 8,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 119,
       "column": 8,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 134,
       "column": 8,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 159,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 176,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 199,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 6 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 6 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 225,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: Mock<any, any>; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; ... 4 more ...; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 246,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 266,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualizations/public/wizard/new_vis_modal.test.tsx",
       "line": 282,
       "column": 10,
       "code": "TS2741",
-      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"data\" | \"children\" | \"application\" | \"onClose\" | ... 8 more ... | \"outsideVisualizeApp\">'."
+      "message": "Property 'data' is missing in type '{ isOpen: true; onClose: () => null; visTypesRegistry: { get: <TVisParams>(visualization: string) => VisType<TVisParams>; all: () => VisType<unknown>[]; getAliases: () => VisTypeAlias[]; }; addBasePath: (url: string) => string; uiSettings: any; application: ApplicationStart; savedObjects: SavedObjectsStart; }' but required in type 'Pick<Readonly<TypeSelectionProps> & Readonly<{ children?: ReactNode; }>, \"children\" | \"data\" | \"application\" | \"savedObjects\" | ... 8 more ... | \"outsideVisualizeApp\">'."
     },
     {
       "file": "src/plugins/visualize/public/actions/visualize_field_action.ts",
@@ -10099,14 +10092,14 @@
       "line": 47,
       "column": 50,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"list\" | \"color\" | \"link\" | \"menu\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/components/workspace_selector/workspace_selector.test.tsx",
       "line": 51,
       "column": 54,
       "code": "TS2322",
-      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"color\" | \"copy\" | \"grab\" | \"help\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
+      "message": "Type 'BehaviorSubject<{ features: { id: string; title: string; }[]; id: string; title: string; description: string; order?: number | undefined; icon?: \"string\" | \"number\" | \"function\" | \"list\" | \"color\" | \"link\" | \"menu\" | ... 463 more ... | undefined; type?: NavGroupType | undefined; status?: NavGroupStatus | undefined; ...' is not assignable to type 'BehaviorSubject<WorkspaceUseCase[]>'."
     },
     {
       "file": "src/plugins/workspace/public/services/use_case_service.test.ts",
@@ -10116,6 +10109,6 @@
       "message": "Type 'BehaviorSubject<{ id: string; title: string; }[]>' is not assignable to type 'Observable<PublicAppInfo[]>'."
     }
   ],
-  "updatedAt": "2025-06-06T17:25:29.837Z",
-  "tsconfig": "/home/ubuntu/OpenSearch-Dashboards/tsconfig.check.json"
+  "updatedAt": "2025-06-11T00:22:07.815Z",
+  "tsconfig": "/home/ubuntu/Dashboards-dev/tsconfig.check.json"
 }
