@@ -60,6 +60,7 @@ import { NavigationPublicPluginStart } from '../../../../../navigation/public';
 import { DataExplorerServices } from '../data_explorer';
 import { Storage } from '../../../../../opensearch_dashboards_utils/public';
 import { DiscoverStartPlugins } from './types';
+import { ExpressionsStart } from '../../../../../expressions/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -86,6 +87,7 @@ export interface DiscoverServices {
   visualizations: VisualizationsStart;
   storage: Storage;
   uiActions: UiActionsStart;
+  expressions: ExpressionsStart;
 }
 
 export function buildServices(
@@ -130,6 +132,7 @@ export function buildServices(
     visualizations: plugins.visualizations,
     storage,
     uiActions: plugins.uiActions,
+    expressions: plugins.expressions,
   };
 }
 
