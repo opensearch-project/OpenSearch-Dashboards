@@ -229,6 +229,7 @@
     "ajv": "^8.11.0",
     "antlr4-c3": "^3.4.1",
     "antlr4ng": "^3.0.4",
+    "bert-tokenizer": "^1.1.8",
     "bluebird": "3.5.5",
     "chalk": "^4.1.0",
     "chokidar": "^3.4.2",

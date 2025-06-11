@@ -4,7 +4,8 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { cos_sim, pipeline, env } from '@huggingface/transformers';
+import { readFile } from 'fs/promises';
+import * as path from 'path';
 import {
   IRouter,
   Logger,
@@ -23,6 +24,7 @@ import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
+import { SparseSearch } from '../sparse_search';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -113,9 +115,6 @@ const updateWorkspaceAttributesSchema = schema.object({
   features: schema.maybe(featuresSchema),
   ...workspaceOptionalAttributesSchema,
 });
-
-// Declare a variable outside the route handler to cache the model.
-let semanticExtractor: any = null;
 
 export function registerRoutes({
   client,
@@ -365,81 +364,23 @@ export function registerRoutes({
     },
     async (context, req, res) => {
       try {
-        const { query, links } = req.body;
+        const { query } = req.body;
+        const filePath = path.join(__dirname, 'doc_vectors.json');
+        const data = await readFile(filePath, 'utf8');
+        const jsonData = JSON.parse(data);
+        const searcher = new SparseSearch(jsonData);
+        const results = searcher.search(query);
 
-        console.log('-------------Enter semanticSearch (Node.js)-------------');
+        console.log(`---------- Neural Sparse Search: ${query} -----------`);
+        results.forEach((result) => {
+          console.log(`Score: ${result.score.toFixed(2)} | ${result.text}`);
+        });
 
-        // Load the model only once and reuse it later
-        if (!semanticExtractor) {
-          env.allowRemoteModels = false;
-          env.localModelPath = 'src/plugins/workspace/public/models';
-          console.log('Model not yet loaded. Initializing pipeline...');
-          const startTime = performance.now();
-          semanticExtractor = await pipeline('feature-extraction', 'Xenova/all_mini_lm_l6_v2');
-          const endTime = performance.now();
-          const loadingTimeMs = endTime - startTime;
-
-          console.log('Model loaded and ready for inference.');
-          console.log(`Model loading took: ${loadingTimeMs.toFixed(2)} ms`);
-        } else {
-          console.log('Model already loaded. Reusing existing pipeline.');
-        }
-
-        // Generate embeddings for links
-        const linkEmbeddings = await Promise.all(
-          links.map(async (link) => {
-            const titleOutput = await semanticExtractor(link.title, {
-              pooling: 'mean',
-              normalize: true,
-            });
-            const titleEmbedding = Array.from(titleOutput.data) as number[];
-
-            let descriptionEmbedding: number[] | undefined;
-            if (link.description) {
-              const descOutput = await semanticExtractor(link.description, {
-                pooling: 'mean',
-                normalize: true,
-              });
-              descriptionEmbedding = Array.from(descOutput.data) as number[];
-            }
-
-            const titleWeight = 0.7;
-            const descWeight = 0.3;
-
-            let combinedEmbedding: number[] = [];
-
-            combinedEmbedding = titleEmbedding.map(
-              (val, i) => val * titleWeight + descriptionEmbedding![i] * descWeight
-            );
-
-            return { ...link, embedding: combinedEmbedding };
-          })
-        );
-
-        // Generate embedding for the query
-        const queryEmbedding = Array.from(
-          (await semanticExtractor(query, { pooling: 'mean', normalize: true })).data
-        );
-
-        // Calculate scores and sort
-        const scored = linkEmbeddings.map((link) => ({
-          ...link,
-          score: cos_sim(queryEmbedding as number[], link.embedding as number[]),
-        }));
-
-        scored.sort((a, b) => b.score - a.score);
-
-        const semanticSearchResult = scored
-          .slice(0, 5)
-          .filter((item) => item.score > 0.2)
-          .map(({ embedding, ...rest }) => rest);
-        console.log('semanticSearchResult: ', semanticSearchResult);
-
-        return res.ok({ body: semanticSearchResult });
+        return res.ok({ body: results });
       } catch (error) {
-        console.error('Error during semantic search:', error);
+        console.error('Error during sparse semantic search:', error);
         return res.badRequest({
-          body: { message: 'Failed to perform semantic search' },
+          body: { message: 'Failed to perform sparse semantic search' },
         });
       }
     }

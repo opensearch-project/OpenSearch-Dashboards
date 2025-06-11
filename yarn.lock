@@ -9726,6 +9726,11 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
+bert-tokenizer@^1.1.8:
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/bert-tokenizer/-/bert-tokenizer-1.1.8.tgz#094563cc1612a6b32ec52d1d1102c1f71c1b6668"
+  integrity sha512-IwCiQpnVUJA5qqRSFPYhWC6UfynOGjKY+v4cbBT1lirqpRcIDP4gYgBwY6OsuBwyde0T0JkTq/hMV8DgVyaG9g==
+
 better-opn@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/better-opn/-/better-opn-2.1.1.tgz#94a55b4695dc79288f31d7d0e5f658320759f7c6"
