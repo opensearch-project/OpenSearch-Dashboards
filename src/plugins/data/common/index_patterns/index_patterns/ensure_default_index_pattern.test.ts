@@ -339,6 +339,26 @@ describe('ensureDefaultIndexPattern', () => {
 
     await ensureDefaultIndexPattern.call(indexPatterns);
     expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern2');
+    uiSettings.set.mockClear();
+
+    savedObjectsClient.find.mockImplementation(async (params) => {
+      if (params.type === 'data-source') {
+        return Promise.resolve([{ id: 'ds2' }] as Array<SavedObject<unknown>>);
+      }
+      if (params.type === 'index-pattern') {
+        return Promise.resolve([
+          {
+            id: 'pattern1',
+            references: [{ id: 'ds2', type: 'data-source' }],
+          },
+        ] as Array<SavedObject<unknown>>);
+      }
+
+      return [] as Array<SavedObject<unknown>>;
+    });
+
+    await ensureDefaultIndexPattern.call(indexPatterns);
+    expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern1');
   });
 
   test('should not throw error when getDataSource throws error', async () => {
