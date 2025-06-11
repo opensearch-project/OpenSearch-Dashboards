@@ -6,6 +6,7 @@
 // TODO: Integrate with saved queries service and update with real saved queries in list and  modify ui too.
 // This component will be fully functional once integrated with query services.
 import React, { useState } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiPopover,
   EuiButtonEmpty,
@@ -24,7 +25,6 @@ import {
   EuiFieldText,
   EuiSwitch,
 } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 
 export const SaveQueryButton: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

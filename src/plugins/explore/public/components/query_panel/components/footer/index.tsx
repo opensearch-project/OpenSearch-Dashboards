@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ShowFieldToggle } from './show_field';
 import { SaveQueryButton } from './save_query';
 import { Actions } from './actions';
@@ -29,7 +29,6 @@ interface QueryPanelFooterProps {
   isDualEditor: boolean;
   isLoading: boolean;
   noInput: boolean;
-  lineCount: number | undefined;
 }
 
 export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
@@ -39,12 +38,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   isDualEditor,
   isLoading,
   noInput,
-  lineCount,
 }) => {
-  const showLineCount =
-    typeof lineCount === 'number' &&
-    lineCount > 0 &&
-    (languageType !== LanguageType.Natural || isDualEditor); // Show line number only for ppl or dual
   return (
     <div className="queryPanel__footer">
       <EuiFlexGroup
@@ -107,21 +101,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                 noInput={noInput}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {showLineCount && (
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  className="queryPanel__footer__lineCount"
-                  data-test-subj="queryPanelFooterLineCount"
-                >
-                  {i18n.translate('explore.queryPanel.lineCountLabel', {
-                    defaultMessage: '{lineCount, plural, one {# line} other {# lines}}',
-                    values: { lineCount },
-                  })}
-                </EuiText>
-              )}
-            </EuiFlexItem>
+            {/* Removed line count feature */}
           </EuiFlexGroup>
         </EuiFlexItem>
 

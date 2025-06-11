@@ -21,7 +21,6 @@ const intitialQuery = (language: LanguageType, dataset: string) => ({
 });
 
 const QueryPanel = () => {
-  const [lineCount, setLineCount] = useState<number | undefined>(undefined);
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
 
   // We use useRef to track the latest detected language type immediately,
@@ -69,44 +68,19 @@ const QueryPanel = () => {
     return () => detectLanguageType.cancel();
   }, [detectLanguageType]);
 
-  // Helper to update line count based on editor mode and value
-  const updateLineCount = React.useCallback((value: string, isDual: boolean) => {
-    const trimValue = value.trim();
-    if (trimValue) {
-      const lines = trimValue.split('\n').length;
-      setLineCount(lines > 1 || trimValue ? lines : undefined);
-    } else {
-      setLineCount(undefined);
-    }
-  }, []);
-
   const onPromptChange = React.useCallback(
     (value: string) => {
       detectLanguageType(value);
       onQueryStringChange(value, true);
-
-      // If not dual editor and prompt contains PPL, set line count
-      if (!isDualEditor && languageTypeRef.current === LanguageType.PPL) {
-        updateLineCount(value, false);
-      } else if (!isDualEditor) {
-        setLineCount(undefined);
-      }
     },
-    [isDualEditor, detectLanguageType, onQueryStringChange, updateLineCount]
+    [detectLanguageType, onQueryStringChange]
   );
 
   const onQueryChange = React.useCallback(
     (value: string) => {
       onQueryStringChange(value, false);
-
-      // In dual editor mode, use query editor's line count
-      if (isDualEditor) {
-        updateLineCount(value, true);
-      } else {
-        setLineCount(undefined);
-      }
     },
-    [isDualEditor, onQueryStringChange, updateLineCount]
+    [onQueryStringChange]
   );
 
   const handleQueryRun = async (
@@ -129,7 +103,6 @@ const QueryPanel = () => {
     setIsDualEditor(false);
     setIsEditorReadOnly(false);
     setIsPromptReadOnly(false);
-    setLineCount(undefined);
     setCurrentQuery(intitialQuery(LanguageType.Natural, 'test')); // TODO: Pass dataset name dynamically
   };
 
@@ -201,7 +174,6 @@ const QueryPanel = () => {
             onRunClick={handleRunClick}
             onRecentClick={handleRecentClick}
             noInput={noInput}
-            lineCount={lineCount}
           />
         }
       >

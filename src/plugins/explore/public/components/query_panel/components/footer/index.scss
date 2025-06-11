@@ -6,7 +6,7 @@
 .queryPanel__footer {
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .euiFlexGroup--gutterExtraSmall > .euiFlexItem {
+  .euiFlexGroup--gutterExtraSmall>.euiFlexItem {
     margin: 0;
   }
 
@@ -22,10 +22,6 @@
 
   &__showInputTypeWrapper {
     margin-left: 10px;
-  }
-
-  &__lineCount {
-    margin: 0 8px;
   }
 
   &__verticalSeparator {
