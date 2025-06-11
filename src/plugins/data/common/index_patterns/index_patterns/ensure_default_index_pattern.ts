@@ -93,8 +93,8 @@ export const createEnsureDefaultIndexPattern = (
               let isDataSourceReferenceValid = false;
               /**
                * the reference will be valid only when:
-               * 1. no data source reference
-               * 2. data source reference exists and with a valid data source id
+               * 1. no data source reference(local cluster)
+               * 2. data source reference exists with a valid data source id
                */
               if (!sourceRef) {
                 isDataSourceReferenceValid = true;
