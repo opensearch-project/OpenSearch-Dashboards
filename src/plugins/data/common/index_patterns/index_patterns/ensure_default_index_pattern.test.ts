@@ -349,8 +349,12 @@ describe('ensureDefaultIndexPattern', () => {
       savedObjectsClient
     );
 
+    uiSettings.get.mockResolvedValue('pattern1');
+    indexPatterns.get.mockResolvedValue({
+      dataSourceRef: { id: 'datasource1', type: 'data-source' },
+    } as IndexPattern);
     indexPatterns.getIds.mockResolvedValue(['pattern1']);
-    indexPatterns.get.mockRejectedValue(new Error('Failed to get index pattern'));
+    indexPatterns.getDataSource.mockRejectedValue(new Error('Failed to get data source'));
 
     await expect(
       async () => await ensureDefaultIndexPattern.call(indexPatterns)
