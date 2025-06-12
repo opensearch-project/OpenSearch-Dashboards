@@ -1,0 +1,557 @@
+there are multiple options:
+
+Option 1. Streamlined Redux Approach
+
+Use Redux actions and middleware to handle query execution.
+
+* Timefilter subscriptions are handled directly in the plugin setup
+* All query execution logic is in one place (the middleware)
+* Each user action maps to specific Redux actions
+* Components only need to dispatch actions
+
+0.Setup
+
+redux store
+
+// State types
+interface QueryState {
+  pplQuery: string; // will change to use the query state object in queryStringManager to follow same contract 
+}
+
+interface UIState {
+  activeTabId: string;
+  isLoading: boolean;
+}
+
+interface ResultsState {
+  [transformedQuery: string]: any;
+}
+
+// Root state
+interface RootState {
+  query: QueryState;
+  ui: UIState;
+  results: ResultsState;
+}
+
+actions
+
+// Action types
+const SET_QUERY = 'query/setQuery';
+const SET_ACTIVE_TAB = 'ui/setActiveTab';
+const TIME_RANGE_CHANGED = 'trigger/timeRangeChanged'; // Just a trigger, doesn't store data
+const SET_LOADING = 'ui/setLoading';
+const QUERY_SUCCESS = 'results/querySuccess';
+const QUERY_ERROR = 'ui/queryError';
+const CLEAR_RESULTS = 'results/clearResults';
+const EXECUTE_QUERY = 'query/executeQuery';
+
+1. Initialize Timefilter Subscriptions in Plugin Setup
+
+Instead of using a separate React component, we can subscribe to timefilter changes directly in the plugin's setup or start method:
+
+// In plugin.ts file
+public start(core, plugins) {
+  const { data } = plugins;
+  const { timefilter } = data.query.timefilter;
+  
+  // Subscribe to time filter changes
+  const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(() => {
+    // Dispatch action to Redux store
+    store.dispatch({ type: 'EXECUTE_QUERY', payload: { clearCache: true } });
+  });
+  
+  
+  // Clean up subscriptions when plugin stops
+  this.onStop.add(() => {
+    timeUpdateSubscription.unsubscribe();
+  });
+  
+  // Return plugin API
+  return {
+    // ...
+  };
+}
+
+This approach centralizes the subscription logic in the plugin itself, rather than spreading it across components.
+
+Note: While the data service is available in the start method, the timefilter might not be fully initialized or configured yet. The timefilter often gets its initial state from URL parameters, which happens during application mounting. If above does not work,  we will subscribe at the component level, not in the plugin start method. This ensures that the subscription happens after the application is mounted and the timefilter is fully initialized.
+
+
+function ExploreApp() {
+  const dispatch = useDispatch();
+  const { data } = useOpenSearchDashboards<ExploreServices>();
+  
+  // Subscribe to timefilter changes
+  useEffect(() => {
+    const subscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe(() => {
+      dispatch({ type: 'EXECUTE_QUERY', payload: { clearCache: true } });
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [data.query.timefilter.timefilter, dispatch]);
+
+  
+  // Rest of component...
+}
+
+
+
+2. Query Middleware
+
+// Query middleware
+const queryMiddleware = ({ getState, dispatch }) => {
+  let searchSource = null;
+  
+  // Initialize SearchSource
+  const initSearchSource = async () => {
+    if (!searchSource) {
+      searchSource = await data.search.searchSource.create();
+    }
+    return searchSource;
+  };
+  
+  return next => async action => {
+    // Let the action go through first
+    const result = next(action);
+    
+    // Handle actions that should trigger query execution
+    if (
+      action.type === 'EXECUTE_QUERY' || 
+      action.type === 'SET_ACTIVE_TAB' || 
+      action.type === 'TIME_RANGE_CHANGED'
+    ) {
+      const state = getState();
+      const { pplQuery } = state.query;
+      const { activeTabId } = state.ui;
+      
+      // Get current time range directly from timefilter service
+      const timeRange = data.query.timefilter.timefilter.getTime();
+      
+      // Get tab definition
+      const tabDefinition = tabRegistry.getTab(activeTabId);
+      if (!tabDefinition) return result;
+      
+      // Transform query based on active tab
+      const transformedQuery = tabDefinition.transformQuery(pplQuery);
+      
+      // Initialize SearchSource if needed
+      const searchSource = await initSearchSource();
+      
+      // Update SearchSource
+      const timeRangeFilter = data.query.timefilter.timefilter.createFilter(indexPattern);
+      searchSource
+        .setField('index', indexPattern)
+        .setField('query', { query: transformedQuery, language: 'ppl' })
+        .setField('filter', timeRangeFilter ? [timeRangeFilter] : []);
+      
+      // Create cache key
+      const cacheKey = createCacheKey(transformedQuery, timeRange);
+      
+      // Clear cache if requested or if time range changed
+      if (
+        (action.type === 'EXECUTE_QUERY' && action.payload.clearCache) ||
+        action.type === 'TIME_RANGE_CHANGED'
+      ) {
+        dispatch({ type: 'CLEAR_RESULTS' });
+      }
+      
+      // Check cache for tab switches
+      if (action.type === 'SET_ACTIVE_TAB') {
+        const resultsState = state.results;
+        if (resultsState[cacheKey]) {
+          // Use cached results
+          return result;
+        }
+      }
+      
+      // Execute query
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
+      try {
+        const results = await searchSource.fetch();
+        dispatch({ 
+          type: 'QUERY_SUCCESS', 
+          payload: { 
+            cacheKey, 
+            results 
+          } 
+        });
+      } catch (error) {
+        dispatch({ type: 'QUERY_ERROR', payload: error });
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+    }
+    
+    return result;
+  };
+};
+
+// Helper function to create cache key
+function createCacheKey(transformedQuery, timeRange) {
+  return JSON.stringify({
+    query: transformedQuery,
+    timeRange,
+  });
+}
+
+
+
+3. Component Usage
+
+function ExploreApp() {
+  const dispatch = useDispatch();
+  
+  // Handle run button click
+  const handleRunQuery = useCallback((query) => {
+    dispatch({ type: 'SET_QUERY', payload: query });
+    dispatch({ type: 'EXECUTE_QUERY', payload: { clearCache: true } });
+  }, [dispatch]);
+  
+  // Handle tab switch
+  const handleTabSwitch = useCallback((tabId) => {
+    dispatch({ type: 'SET_ACTIVE_TAB', payload: tabId });
+    // No need to dispatch executeQuery - the middleware will handle it
+  }, [dispatch]);
+  
+  return (
+    <>
+      <QueryPanel onRunQuery={handleRunQuery} />
+      <TabBar onTabSwitch={handleTabSwitch} />
+      {/* ... */}
+    </>
+  );
+}
+
+4.Detailed Scenarios
+
+Scenario 1: Fire a Query When TimeFilter is Updated
+
+1. TimeFilter Changes: User changes time range in UI
+2. TimeFilter Service Updates: Core timefilter service updates its internal state
+3. Subscription Triggers: Our subscription in the plugin setup dispatches: store.dispatch({ type: 'TIME_RANGE_CHANGED' });
+4. Middleware Intercepts: The queryMiddleware intercepts the TIME_RANGE_CHANGED action
+5. Get Current Time Range: The middleware gets the current time range directly from the timefilter service
+6. Cache Cleared: The middleware dispatches CLEAR_RESULTS
+7. SearchSource Updated: The middleware updates the SearchSource with:
+    1. The transformed query based on active tab
+    2. The current time range filter from the timefilter service
+8. Query Executed: The middleware executes the query and dispatches:
+    1. SET_LOADING with true before execution
+    2. QUERY_SUCCESS with results after execution 
+    3. SET_LOADING with false after execution
+
+Scenario 2: Fire a Query When User Clicks Run Button
+
+1. User Clicks Run: handleRunQuery is called with the new query
+2. Actions Dispatched: The handler dispatches:
+    1. dispatch({ type: 'SET_QUERY', payload: query });
+    2. dispatch({ type: 'EXECUTE_QUERY', payload: { clearCache: true } });
+3. Middleware Intercepts: The queryMiddleware intercepts the EXECUTE_QUERY action
+4. 4-8 same as scenario 1
+
+Scenario 3: Switch Tab
+
+1. User Clicks Tab: handleTabSwitch is called with the new tab ID
+2. Action Dispatched: The handler dispatches:dispatch({ type: 'SET_ACTIVE_TAB', payload: tabId });
+3. Middleware Intercepts: The queryMiddleware intercepts the SET_ACTIVE_TAB action
+4. Get Current Time Range: The middleware gets the current time range directly from the timefilter service
+5. SearchSource Updated: The middleware updates the SearchSource with:
+    1. The transformed query based on the new active tab
+    2. The current time range filter from the timefilter service
+6. Cache Checked: The middleware checks if results exist for the cache key:
+    1. If results exist, it does nothing (uses cached results)
+    2. If no results exist, it executes the query as in steps 8 of Scenario 1
+
+
+
+Option 2: Component-Driven Approach with Redux (Similar to vis_builder)
+
+Use Redux actions and dispatch but without middleware. This approach is more component-driven, with hooks that encapsulate specific functionality.
+
+1. Uses hooks to encapsulate functionality (like vis_builder)
+2. Leverages Redux for state management
+3. Handles query execution in hooks rather than middleware
+4. Keeps components focused on user interaction and rendering
+
+0.setup
+
+Similar. We don’t need to have actions for timefilter change.
+
+1.SearchContext Hook
+
+function useSearchContext() {
+  const { data } = useOpenSearchDashboards<ExploreServices>();
+  const pplQuery = useSelector((state) => state.query.pplQuery);
+  const activeTabId = useSelector((state) => state.ui.activeTabId);
+  
+  // Create a ref to track the current search context
+  const searchContextRef = useRef({
+    query: pplQuery,
+    timeRange: data.query.timefilter.timefilter.getTime(),
+    activeTabId,
+  });
+  
+  // Update ref when Redux state changes
+  useEffect(() => {
+    searchContextRef.current = {
+      ...searchContextRef.current,
+      query: pplQuery,
+      activeTabId,
+    };
+  }, [pplQuery, activeTabId]);
+  
+  // Update ref when timefilter changes
+  useEffect(() => {
+    const subscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe(() => {
+      searchContextRef.current = {
+        ...searchContextRef.current,
+        timeRange: data.query.timefilter.timefilter.getTime(),
+      };
+      
+      // Trigger a re-render
+      forceUpdate();
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [data.query.timefilter.timefilter]);
+  
+  // Force update helper
+  const [, forceUpdate] = useReducer(x => x + 1, 0);
+  
+  return searchContextRef.current;
+}
+
+4.Query Execution Hook
+
+function useQueryExecution() {
+  const dispatch = useDispatch();
+  const { data, tabRegistry } = useOpenSearchDashboards<ExploreServices>();
+  const searchContext = useSearchContext();
+  const prevSearchContextRef = useRef(null);
+  
+  // SearchSource instance
+  const searchSourceRef = useRef(null);
+  
+  // Initialize SearchSource
+  useEffect(() => {
+    async function initSearchSource() {
+      if (!searchSourceRef.current) {
+        searchSourceRef.current = await data.search.searchSource.create();
+      }
+    }
+    
+    initSearchSource();
+    
+    return () => {
+      // Clean up SearchSource if needed
+      searchSourceRef.current = null;
+    };
+  }, [data.search.searchSource]);
+  
+  // Execute query when searchContext changes
+  useEffect(() => {
+    if (!searchSourceRef.current) return;
+    
+    const prevContext = prevSearchContextRef.current;
+    prevSearchContextRef.current = { ...searchContext };
+    
+    // Determine if this is a tab switch or a context change
+    const isTabSwitch = prevContext && 
+                        prevContext.activeTabId !== searchContext.activeTabId &&
+                        prevContext.query === searchContext.query &&
+                        JSON.stringify(prevContext.timeRange) === JSON.stringify(searchContext.timeRange);
+    
+    // Get tab definition
+    const tabDefinition = tabRegistry.getTab(searchContext.activeTabId);
+    if (!tabDefinition) return;
+    
+    // Transform query based on active tab
+    const transformedQuery = tabDefinition.transformQuery(searchContext.query);
+    
+    // Update SearchSource
+    const searchSource = searchSourceRef.current;
+    const timeRangeFilter = data.query.timefilter.timefilter.createFilter(indexPattern);
+    
+    searchSource
+      .setField('index', indexPattern)
+      .setField('query', { query: transformedQuery, language: 'ppl' })
+      .setField('filter', timeRangeFilter ? [timeRangeFilter] : []);
+    
+    // Create cache key
+    const cacheKey = createCacheKey(transformedQuery, searchContext.timeRange);
+    
+    // For tab switches, check cache first
+    if (isTabSwitch) {
+      const resultsState = store.getState().results;
+      if (resultsState[cacheKey]) {
+        // Use cached results
+        return;
+      }
+    } else {
+      // For context changes, clear cache
+      dispatch(clearResults());
+    }
+    
+    // Execute query
+    executeQuery(searchSource, cacheKey);
+  }, [searchContext, dispatch, data.query.timefilter.timefilter, tabRegistry]);
+  
+  // Helper function to execute query
+  const executeQuery = useCallback(async (searchSource, cacheKey) => {
+    dispatch(setLoading(true));
+    
+    try {
+      const results = await searchSource.fetch();
+      dispatch(querySuccess(cacheKey, results));
+    } catch (error) {
+      dispatch(queryError(error));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }, [dispatch]);
+  
+  // Helper function to create cache key
+  const createCacheKey = useCallback((transformedQuery, timeRange) => {
+    return JSON.stringify({
+      query: transformedQuery,
+      timeRange,
+    });
+  }, []);
+  
+  // Return function to manually trigger query execution
+  return {
+    executeQuery: () => {
+      if (!searchSourceRef.current) return;
+      
+      const tabDefinition = tabRegistry.getTab(searchContext.activeTabId);
+      if (!tabDefinition) return;
+      
+      const transformedQuery = tabDefinition.transformQuery(searchContext.query);
+      const cacheKey = createCacheKey(transformedQuery, searchContext.timeRange);
+      
+      dispatch(clearResults());
+      executeQuery(searchSourceRef.current, cacheKey);
+    }
+  };
+}
+
+5. Component Usage
+
+function ExploreApp() {
+  const dispatch = useDispatch();
+  const { executeQuery } = useQueryExecution();
+  
+  // Handle run button click
+  const handleRunQuery = useCallback((query) => {
+    dispatch(setQuery(query));
+    // The query execution will be triggered by the useQueryExecution hook
+    // when it detects the searchContext change
+  }, [dispatch]);
+  
+  // Handle tab switch
+  const handleTabSwitch = useCallback((tabId) => {
+    dispatch(setActiveTab(tabId));
+    // The query execution will be triggered by the useQueryExecution hook
+    // when it detects the searchContext change
+  }, [dispatch]);
+  
+  return (
+    <>
+      <QueryPanel onRunQuery={handleRunQuery} />
+      <TabBar onTabSwitch={handleTabSwitch} />
+      {/* ... */}
+    </>
+  );
+}
+
+6.Detailed Scenarios
+
+Scenario 1: Fire a Query When TimeFilter is Updated
+
+* TimeFilter Changes: User changes time range in UI
+* TimeFilter Service Updates: Core timefilter service updates its internal state
+* SearchContext Updates: Our subscription in useSearchContext updates the searchContext:
+
+searchContextRef.current = {
+  ...searchContextRef.current,
+  timeRange: data.query.timefilter.timefilter.getTime(),
+};
+forceUpdate();
+
+* useQueryExecution Detects Change: The effect in useQueryExecution detects the searchContext change
+* Cache Cleared: Since this is not a tab switch, the hook dispatches clearResults
+* SearchSource Updated: The hook updates the SearchSource with:
+    * The transformed query based on active tab
+    * The current time range filter from the timefilter service
+* Query Executed: The hook executes the query and dispatches:
+    * setLoading(true) before 
+    * executionquerySuccess with results after execution
+    * setLoading(false) after execution
+
+Scenario 2: Fire a Query When User Clicks Run Button
+
+* User Clicks Run: handleRunQuery is called with the new query
+* Redux State Updated: The handler dispatches: dispatch(setQuery(query));
+* SearchContext Updates: The effect in useSearchContext updates the searchContext
+
+searchContextRef.current = {
+  ...searchContextRef.current,
+  query: pplQuery,
+};
+
+* useQueryExecution Detects Change: Same as in Scenario 1 steps 4-7
+
+Scenario 3: Switch Tab
+
+* User Clicks Tab: handleTabSwitch is called with the new tab ID
+* Redux State Updated: The handler dispatches:dispatch(setActiveTab(tabId));
+    SearchContext Updates: The effect in useSearchContext updates the SearchSource
+
+searchContext:searchContextRef.current = {
+  ...searchContextRef.current,
+  activeTabId,
+};
+
+* useQueryExecution Detects Change: The effect in useQueryExecution detects the searchContext change
+* Tab Switch Detected: The hook detects that only the activeTabId changed (isTabSwitch = true)
+* SearchSource Updated: The hook updates the SearchSource with:
+    * The transformed query based on the new active tab
+    * The current time range filter from the timefilter service
+* Cache Checked: The hook checks if results exist for the cache key:
+    * If results exist, it does nothing (uses cached results)
+    * If no results exist, it executes the query as in steps 7 of Scenario 1
+
+
+
+Compare
+
+Timefilter changes
+
+Component-Driven Approach:
+
+    * We subscribe to timefilter changes in the useSearchContext hook
+    * When timefilter changes, we update the searchContext
+    * The useQueryExecution hook has a useEffect that watches for searchContext changes
+    * When searchContext changes, the useEffect in useQueryExecution runs and executes the query
+
+Middleware Approach:
+
+    * We subscribe to timefilter changes (either in a component or in the plugin setup)
+    * When timefilter changes, we dispatch an action (e.g., TIME_RANGE_CHANGED or EXECUTE_QUERY)
+    * The middleware intercepts this action
+    * The middleware then executes the query
+
+Logic
+
+Option 1
+
+* Centralizes query execution logic in one place
+* Clearer action flow
+
+Option 2 
+
+* Has logic encapsulated in hooks and is more flexible for component-specific behavior
+* Easier to test individual hooks
+
