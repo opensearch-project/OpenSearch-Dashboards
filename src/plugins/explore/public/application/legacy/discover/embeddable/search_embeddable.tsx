@@ -64,7 +64,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
 } from '../../../../../common/legacy/discover';
 import { SearchEmbeddableComponent } from './search_embeddable_component';
-import { DiscoverServices } from '../build_services';
+import { ExploreServices } from '../../../../types';
 import * as columnActions from '../application/utils/state_management/common';
 import { buildColumns } from '../application/utils/columns';
 
@@ -86,7 +86,7 @@ export interface SearchProps {
   hits?: number;
   isLoading?: boolean;
   displayTimeColumn?: boolean;
-  services: DiscoverServices;
+  services: ExploreServices;
   title?: string;
 }
 
@@ -97,7 +97,7 @@ interface SearchEmbeddableConfig {
   indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
-  services: DiscoverServices;
+  services: ExploreServices;
 }
 
 export class SearchEmbeddable
@@ -111,7 +111,7 @@ export class SearchEmbeddable
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private services: DiscoverServices;
+  private services: ExploreServices;
   private filterManager: FilterManager;
   private abortController?: AbortController;
 
