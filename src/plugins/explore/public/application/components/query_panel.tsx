@@ -178,20 +178,19 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef }) => {
 
   // Execute query when run button is clicked
   const handleRunQuery = useCallback(async () => {
-    // Start transaction to batch state updates
     dispatch(beginTransaction());
+    try {
+      // Update query string in Redux
+      dispatch(setQueryString(localQuery));
 
-    // Update query state
-    dispatch(setQueryString(localQuery));
+      // Clear results cache (component decision)
+      dispatch(clearResults());
 
-    // Clear results cache
-    dispatch(clearResults());
-
-    // Commit transaction
-    dispatch(finishTransaction());
-
-    // Execute query directly with services (cache keys will be stored in Redux automatically)
-    await dispatch(executeQueries({ clearCache: true, services }) as any);
+      // Execute queries
+      await dispatch(executeQueries({ clearCache: true, services }) as any);
+    } finally {
+      dispatch(finishTransaction());
+    }
   }, [dispatch, localQuery, services]);
 
   // Handle editor mount
