@@ -15,18 +15,24 @@ import { IndexPatternField, opensearchFilters, UI_SETTINGS } from '../../../../d
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
 import {
-  addColumn,
-  removeColumn,
   useDispatch,
   useSelector,
 } from '../../application/legacy/discover/application/utils/state_management';
-import { DiscoverViewServices } from '../../application/legacy/discover/build_services';
-import { useDiscoverContext } from '../../application/legacy/discover/application/view_components/context';
 import { popularizeField } from '../../application/legacy/discover/application/helpers/popularize_field';
 import { buildColumns } from '../../application/legacy/discover/application/utils/columns';
 import { filterColumns } from '../../application/legacy/discover/application/view_components/utils/filter_columns';
 import { getLegacyDisplayedColumns } from '../../helpers/data_table_helper';
 import { getDocViewsRegistry } from '../../application/legacy/discover/opensearch_dashboards_services';
+import { ExploreServices } from '../../types';
+import {
+  selectColumns,
+  selectSavedSearch,
+} from '../../application/utils/state_management/selectors';
+import { useIndexPatternContext } from '../../application/components/index_pattern_context';
+import {
+  addColumn,
+  removeColumn,
+} from '../../application/utils/state_management/slices/legacy_slice';
 
 interface Props {
   rows?: Array<OpenSearchSearchHit<Record<string, any>>>;
@@ -34,7 +40,7 @@ interface Props {
 }
 
 export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
-  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const {
     uiSettings,
     data: {
@@ -44,15 +50,9 @@ export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
     indexPatterns,
   } = services;
 
-  const { indexPattern, savedSearch } = useDiscoverContext();
-
-  const { columns } = useSelector((state) => {
-    const stateColumns = state.logs?.columns;
-    // check if state columns is not undefined, otherwise use buildColumns
-    return {
-      columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
-    };
-  });
+  const savedSearch = useSelector(selectSavedSearch);
+  const columns = useSelector(selectColumns);
+  const { indexPattern } = useIndexPatternContext();
 
   const tableColumns = useMemo(() => {
     if (indexPattern == null) {
@@ -130,8 +130,8 @@ export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
     <div
       data-render-complete={true}
       data-shared-item=""
-      data-title={savedSearch?.id ? savedSearch.title : ''}
-      data-description={savedSearch?.id ? savedSearch.description : ''}
+      data-title={savedSearch || ''}
+      data-description={savedSearch || ''}
       data-test-subj="discoverTable"
       className="eui-xScrollWithShadows"
       style={{ height: '100%' }}

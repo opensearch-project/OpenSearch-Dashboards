@@ -241,7 +241,7 @@ describe('Query Actions', () => {
 
     it('should return null if index pattern has no time field', async () => {
       // Remove time field from index pattern
-      mockservices.data.indexPattern.timeFieldName = undefined;
+      mockServices.data.indexPattern.timeFieldName = undefined;
 
       // Execute the thunk
       const result = await store.dispatch(executeHistogramQuery());
