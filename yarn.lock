@@ -4700,6 +4700,18 @@
   resolved "https://registry.yarnpkg.com/@nicolo-ribaudo/chokidar-2/-/chokidar-2-2.1.8-no-fsevents.3.tgz#323d72dd25103d0c4fbdce89dadf574a787b1f9b"
   integrity sha512-s88O1aVtXftvp5bCPB7WnmXc5IwOZZ7YPuwNPt+GtOOXpPvad1LfbmjYv+qII7zP6RU2QGnqve27dnLycEnyEQ==
 
+"@nlpjs/bert-tokenizer@^5.0.0-alpha.5":
+  version "5.0.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@nlpjs/bert-tokenizer/-/bert-tokenizer-5.0.0-alpha.5.tgz#9094c957600c50491de7917408ef736213d04cac"
+  integrity sha512-Q4EwiorX7gJJBk/IrAjBiDwHGgc/SXBljrITQenly/YPzLBcR9l8sTMXe6UVTRJ1elxCn9G117xfqnIVn36dog==
+  dependencies:
+    "@nlpjs/core" "^5.0.0-alpha.5"
+
+"@nlpjs/core@^5.0.0-alpha.5":
+  version "5.0.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@nlpjs/core/-/core-5.0.0-alpha.5.tgz#8638a83d0593bb3afe608d2dea0e36eb238a508c"
+  integrity sha512-6KER6Jsy/KLVNor2isRsYV5XjVtYVaYLLqEmQt69Nmw2tIYyzzhzPxZPmOaU++OWfiUaZWGMgNueJHAmK6sApw==
+
 "@node-rs/xxhash-android-arm-eabi@1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@node-rs/xxhash-android-arm-eabi/-/xxhash-android-arm-eabi-1.4.0.tgz#55ace4d3882686d1e379aaf613e1338d78f13fc8"
@@ -9725,11 +9737,6 @@ bcrypt-pbkdf@^1.0.0:
   integrity sha512-qeFIXtP4MSoi6NLqO12WfqARWWuCKi2Rn/9hJLEmtB5yTNr9DqFWkJRCf2qShWzPeAMRnOgCrq0sg/KLv5ES9w==
   dependencies:
     tweetnacl "^0.14.3"
-
-bert-tokenizer@^1.1.8:
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/bert-tokenizer/-/bert-tokenizer-1.1.8.tgz#094563cc1612a6b32ec52d1d1102c1f71c1b6668"
-  integrity sha512-IwCiQpnVUJA5qqRSFPYhWC6UfynOGjKY+v4cbBT1lirqpRcIDP4gYgBwY6OsuBwyde0T0JkTq/hMV8DgVyaG9g==
 
 better-opn@^2.1.1:
   version "2.1.1"

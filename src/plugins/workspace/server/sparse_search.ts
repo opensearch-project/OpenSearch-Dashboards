@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BertTokenizer } from 'bert-tokenizer';
+import { BertWordPieceTokenizer } from '@nlpjs/bert-tokenizer';
 
 export interface DocumentVector {
   text: string;
@@ -48,13 +48,6 @@ export class SparseSearch {
     return vec;
   }
 
-  private tokenizeQuery(query: string): string[] {
-    return query
-      .toLowerCase()
-      .split(/[^a-z0-9']+/)
-      .filter((token) => token.length > 0);
-  }
-
   private buildQueryVector(tokens: string[]): number[] {
     const vec = new Array(this.idf.length).fill(0);
 
@@ -86,14 +79,14 @@ export class SparseSearch {
     titleScore: number;
     descScore: number;
   }> {
-    // const tokens = this.tokenizeQuery(query);
-    const bertTokenizer = new BertTokenizer('node_modules/bert-tokenizer/assets/vocab.json', true);
-    const tokenIds = bertTokenizer.tokenize(query);
-    const tokens = bertTokenizer
-      .convertIdsToTokens(tokenIds)
-      .map((token) => token.replace(/^▁/, ''));
+    const nlpBertTokenizer = new BertWordPieceTokenizer({ vocabContent: Object.keys(this.vocab) });
+    const tokenizedResult = nlpBertTokenizer.tokenizeSentence(query);
+    const tokensArray = tokenizedResult.tokens;
+    console.log('Tokenization: ', tokensArray);
 
-    const queryVec = this.buildQueryVector(tokens);
+    const queryVec = this.buildQueryVector(tokensArray);
+    const nonZeroCount = queryVec.filter((value) => value !== 0).length;
+    console.log('Non-zero values count: ', nonZeroCount);
 
     const results = this.documents.map((doc, idx) => {
       const titleScore = this.similarity(queryVec, this.titleVectors[idx]);
