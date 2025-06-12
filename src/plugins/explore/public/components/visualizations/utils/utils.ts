@@ -56,7 +56,10 @@ export const applyAxisStyling = (axesStyle?: StandardAxes): any => {
   return fullAxisConfig;
 };
 
-export function getAxisByRole(axes: StandardAxes[], axisRole: 'x' | 'y'): StandardAxes | undefined {
+export function getAxisByRole(
+  axes: StandardAxes[],
+  axisRole: AxisRole.X | AxisRole.Y
+): StandardAxes | undefined {
   return axes.find((axis) => axis.axisRole === axisRole);
 }
 

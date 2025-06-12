@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { getPositions } from '../utils/collections';
 import { Positions } from '../types';
-interface GeneralVisOptionsProps {
+export interface GeneralVisOptionsProps {
   addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Positions;
@@ -37,7 +37,7 @@ export const GeneralVisOptions = ({
   const legendPositions = getPositions();
 
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel paddingSize="s" data-test-subj="generalSettingsPanel">
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
         <EuiFlexItem>
           <EuiTitle size="xs">

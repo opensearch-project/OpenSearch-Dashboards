@@ -4,7 +4,7 @@
  */
 
 import { ScatterChartStyleControls } from './scatter_vis_config';
-import { VisColumn } from '../types';
+import { VisColumn, AxisRole, VEGASCHEMA } from '../types';
 import { applyAxisStyling, getAxisByRole } from '../utils/utils';
 
 export const createTwoMetricScatter = (
@@ -14,8 +14,8 @@ export const createTwoMetricScatter = (
   dateColumns: VisColumn[],
   styles: Partial<ScatterChartStyleControls>
 ): any => {
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], 'x');
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], 'y');
+  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
+  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
   const markLayer = {
     mark: {
       type: 'point',
@@ -39,7 +39,7 @@ export const createTwoMetricScatter = (
   };
 
   const baseSpec = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     data: { values: transformedData },
     layer: [markLayer].filter(Boolean),
   };
@@ -55,8 +55,8 @@ export const createTwoMetricOneCateScatter = (
 ): any => {
   const categoryFields = categoricalColumns?.map((item) => item.column);
   const categoryNames = categoricalColumns?.map((item) => item.name);
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], 'x');
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], 'y');
+  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
+  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
   const markLayer = {
     mark: {
       type: 'point',
@@ -77,11 +77,11 @@ export const createTwoMetricOneCateScatter = (
         axis: applyAxisStyling(yAxis),
       },
       color: {
-        field: categoryFields![0],
+        field: categoryFields[0],
         type: 'nominal',
         legend: styles?.addLegend
           ? {
-              title: categoryNames![0] || 'Metrics',
+              title: categoryNames[0] || 'Metrics',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
@@ -91,7 +91,7 @@ export const createTwoMetricOneCateScatter = (
   };
 
   const baseSpec = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: transformedData },
     layer: [markLayer].filter(Boolean),
@@ -108,8 +108,8 @@ export const createThreeMetricOneCateScatter = (
 ): any => {
   const categoryFields = categoricalColumns?.map((item) => item.column);
   const categoryNames = categoricalColumns?.map((item) => item.name);
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], 'x');
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], 'y');
+  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
+  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
   const numericalSize = numericalColumns?.filter(
     (f) => f.column !== xAxis?.field?.default.column && f.column !== yAxis?.field?.default.column
   )[0];
@@ -133,11 +133,11 @@ export const createThreeMetricOneCateScatter = (
         axis: applyAxisStyling(yAxis),
       },
       color: {
-        field: categoryFields![0],
+        field: categoryFields[0],
         type: 'nominal',
         legend: styles?.addLegend
           ? {
-              title: categoryNames![0] || 'Metrics',
+              title: categoryNames[0] || 'Metrics',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
@@ -158,7 +158,7 @@ export const createThreeMetricOneCateScatter = (
   };
 
   const baseSpec = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: transformedData },
     layer: [markLayer].filter(Boolean),

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LabelAggregationType, VisColumn } from '../types';
+import type { Encoding } from 'vega-lite/build/src/encoding';
+import { LabelAggregationType, VisColumn, ColorSchemas, FieldSetting } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { generateColorBySchema } from '../utils/utils';
 
@@ -11,22 +12,25 @@ import { generateColorBySchema } from '../utils/utils';
 export const createlabelLayer = (
   styles: Partial<HeatmapChartStyleControls>,
   isRegular: boolean,
+  colorField: string,
   xAxis?: VisColumn,
-  yAxis?: VisColumn,
-  color?: string
+  yAxis?: VisColumn
 ) => {
   if (!styles.label?.show) {
     return null;
   }
-  const textEncoding: any = {
-    field: color,
+  const textEncoding: Encoding<string>['text'] = {
+    field: colorField,
     format: '.1f',
   };
+
+  // For heatmaps with binned x and y axes, aggregation on the label is typically applied to avoid overlapping marks,
+  // as multiple data points may fall into the same bin.
 
   if (!isRegular && styles.label.type !== LabelAggregationType.NONE && styles.label.type) {
     textEncoding.aggregate = styles.label.type;
   }
-  const labelLayer: any = {
+  const labelLayer = {
     mark: {
       type: 'text',
       color: styles.label.overwriteColor ? styles.label.color : 'black',
@@ -51,11 +55,9 @@ export const createlabelLayer = (
 
 export const getDataBound = (
   transformedData: Array<Record<string, any>>,
-  numericalColor: string
+  colorField: string
 ): number[] => {
-  if (!transformedData) return [];
-
-  const values = transformedData.map((d) => Number(d[numericalColor])).filter((v) => !isNaN(v));
+  const values = transformedData.map((d) => Number(d[colorField])).filter((v) => !isNaN(v));
 
   return values.length > 0 ? [Math.min(...values), Math.max(...values)] : [];
 };
@@ -77,8 +79,12 @@ export const addTransform = (styles: Partial<HeatmapChartStyleControls>, numeric
 
 export const setRange = (styles: Partial<HeatmapChartStyleControls>) => {
   const ranges = styles?.exclusive?.customRanges ?? [];
-  // always make sure the range lenghth >=2 to interpolate
-  const colors = generateColorBySchema(ranges.length + 1, styles?.exclusive?.colorSchema!);
+  // we only consider the case when user actually adds a range
+  // in such case, we can ensure range length >=2 to interpolate color
+  const colors = generateColorBySchema(
+    ranges.length + 1,
+    styles?.exclusive?.colorSchema ?? ColorSchemas.BLUES
+  );
   return colors;
 };
 
@@ -86,18 +92,17 @@ export const enhanceStyle = (
   markLayer: any,
   styles: Partial<HeatmapChartStyleControls>,
   transformedData: Array<Record<string, any>>,
-  numericalColor: string
+  colorField: string
 ) => {
+  // In percentageMode, set domain to [0, 1] and apply a transform layer to the percentage value.
   if (styles.exclusive?.percentageMode && styles.addLegend) {
     markLayer.encoding.color.scale.domain = [0, 1];
     markLayer.encoding.color.legend.format = '.0%';
   }
 
-  if (
-    styles.exclusive?.scaleToDataBounds &&
-    getDataBound(transformedData, numericalColor).length > 0
-  ) {
-    markLayer.encoding.color.scale.domain = getDataBound(transformedData, numericalColor);
+  // for scaleToDataBounds, simply set the domain to [min, max]
+  if (styles.exclusive?.scaleToDataBounds && getDataBound(transformedData, colorField).length > 0) {
+    markLayer.encoding.color.scale.domain = getDataBound(transformedData, colorField);
   }
 
   if (
@@ -107,11 +112,12 @@ export const enhanceStyle = (
   ) {
     const customRanges = styles.exclusive?.customRanges;
 
-    const [min, max] = getDataBound(transformedData, numericalColor);
+    const [min, max] = getDataBound(transformedData, colorField);
 
     // identify min and max to set domain
     const domainMin = Math.min(...customRanges.map((r) => r.min ?? min));
     const domainMax = Math.max(...customRanges?.map((r) => r.max ?? max));
+    // overwrite color scale type to quantize to map continuous domains to discrete output ranges
     markLayer.encoding.color.scale.type = 'quantize';
     markLayer.encoding.color.scale.domain = [domainMin, domainMax];
 
@@ -120,3 +126,30 @@ export const enhanceStyle = (
     markLayer.encoding.color.scale.range = range;
   }
 };
+
+export function inferAxesFromColumns(
+  numerical?: VisColumn[],
+  categorical?: VisColumn[]
+): { x: FieldSetting | undefined; y: FieldSetting | undefined } {
+  if (numerical?.length === 3) {
+    return {
+      x: {
+        default: numerical[0],
+        options: numerical,
+      },
+      y: {
+        default: numerical[1],
+        options: numerical,
+      },
+    };
+  }
+  if (numerical?.length === 1 && categorical?.length === 2) {
+    return {
+      x: {
+        default: categorical[0],
+      },
+      y: { default: categorical[1] },
+    };
+  }
+  return { x: undefined, y: undefined };
+}

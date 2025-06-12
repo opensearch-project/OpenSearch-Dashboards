@@ -10,7 +10,6 @@ import { HeatmapChartStyleControls } from '../heatmap/heatmap_vis_config';
 import { ScatterChartStyleControls } from '../scatter/scatter_vis_config';
 import { IFieldType } from '../../../application/legacy/discover/opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
-import { LineVisStyleControlsProps } from '../line/line_vis_options';
 
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
 import { ChartTypeMapping, VisColumn, VisFieldType } from '../types';

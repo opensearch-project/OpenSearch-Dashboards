@@ -4,18 +4,18 @@
  */
 
 import { MetricChartStyleControls } from './metric_vis_config';
-import { VisColumn, RangeValue, ColorSchemas } from '../types';
+import { VisColumn, RangeValue, ColorSchemas, VEGASCHEMA } from '../types';
 import { generateColorBySchema } from '../utils/utils';
 
 export const createSingleMetric = (
-  transformedData?: Array<Record<string, any>>,
-  numericalColumns?: VisColumn[],
-  categoricalColumns?: VisColumn[],
-  dateColumns?: VisColumn[],
-  styleOptions?: Partial<MetricChartStyleControls>
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styleOptions: Partial<MetricChartStyleControls>
 ) => {
-  const numericFields = numericalColumns?.map((item) => item.column)[0];
-  const numericNames = numericalColumns?.map((item) => item.name)[0];
+  const numericFields = numericalColumns[0].column;
+  const numericNames = numericalColumns[0].name;
 
   function generateColorConditions(ranges: RangeValue[], color: ColorSchemas) {
     const colors = generateColorBySchema(ranges.length + 1, color);
@@ -82,7 +82,7 @@ export const createSingleMetric = (
   }
 
   const baseSpec = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     data: { values: transformedData },
     layer: [markLayer, styleOptions?.showTitle ? titleLayer : null].filter(Boolean),
   };

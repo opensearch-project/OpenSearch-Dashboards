@@ -29,7 +29,7 @@ export interface ExclusiveHeatmapConfig {
   colorScaleType: ScaleType;
   scaleToDataBounds: boolean;
   percentageMode: boolean;
-  maxNumberOfColors: string;
+  maxNumberOfColors: number;
   useCustomRanges: boolean;
   customRanges?: RangeValue[];
 }
@@ -60,7 +60,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     colorScaleType: ScaleType.LINEAR,
     scaleToDataBounds: false,
     percentageMode: false,
-    maxNumberOfColors: '4',
+    maxNumberOfColors: 4,
     useCustomRanges: false,
   },
   label: {

@@ -4,7 +4,7 @@
  */
 
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { VisColumn, ScaleType } from '../types';
+import { VisColumn, ScaleType, AxisRole, VEGASCHEMA } from '../types';
 import { applyAxisStyling, getAxisByRole } from '../utils/utils';
 import { createlabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
 
@@ -13,10 +13,10 @@ export const createHeatmapWithBin = (
   numericalColumns: VisColumn[],
   styles: Partial<HeatmapChartStyleControls>
 ) => {
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], 'x');
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], 'y');
+  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
+  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
 
-  const numericalColor = numericalColumns?.filter(
+  const colorFieldColumn = numericalColumns?.filter(
     (f) => f.column !== xAxis?.field?.default.column && f.column !== yAxis?.field?.default.column
   )[0];
 
@@ -41,7 +41,7 @@ export const createHeatmapWithBin = (
         axis: applyAxisStyling(yAxis),
       },
       color: {
-        field: numericalColor.column,
+        field: colorFieldColumn.column,
         type: 'quantitative',
         bin:
           !styles.exclusive?.useCustomRanges && styles.exclusive?.colorScaleType !== ScaleType.LOG
@@ -54,7 +54,7 @@ export const createHeatmapWithBin = (
         },
         legend: styles.addLegend
           ? {
-              title: numericalColor.name || 'Metrics',
+              title: colorFieldColumn.name || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
@@ -62,20 +62,20 @@ export const createHeatmapWithBin = (
     },
   };
 
-  enhanceStyle(markLayer, styles, transformedData, numericalColor.column);
+  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn.column);
 
   const baseSpec = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     data: { values: transformedData },
-    transform: addTransform(styles, numericalColor.column),
+    transform: addTransform(styles, colorFieldColumn.column),
     layer: [
       markLayer,
       createlabelLayer(
         styles,
         false,
+        colorFieldColumn.column,
         xAxis?.field?.default,
-        yAxis?.field?.default,
-        numericalColor.column
+        yAxis?.field?.default
       ),
     ].filter(Boolean),
   };
@@ -87,10 +87,10 @@ export const createRegularHeatmap = (
   numericalColumns: VisColumn[],
   styles: Partial<HeatmapChartStyleControls>
 ) => {
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], 'x');
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], 'y');
+  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
+  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
 
-  const numericalColor = numericalColumns![0];
+  const colorFieldColumn = numericalColumns![0];
   const markLayer: any = {
     mark: {
       type: 'rect',
@@ -110,7 +110,7 @@ export const createRegularHeatmap = (
         axis: applyAxisStyling(yAxis),
       },
       color: {
-        field: numericalColor.column,
+        field: colorFieldColumn.column,
         type: 'quantitative',
         // log doesn't support bin, delete log or disable bin when scale type is log?
         bin:
@@ -124,7 +124,7 @@ export const createRegularHeatmap = (
         },
         legend: styles.addLegend
           ? {
-              title: numericalColor.name || 'Metrics',
+              title: colorFieldColumn.name || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
@@ -132,20 +132,20 @@ export const createRegularHeatmap = (
     },
   };
 
-  enhanceStyle(markLayer, styles, transformedData, numericalColor.column);
+  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn.column);
 
   const baseSpec = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     data: { values: transformedData },
-    transform: addTransform(styles, numericalColor.column),
+    transform: addTransform(styles, colorFieldColumn.column),
     layer: [
       markLayer,
       createlabelLayer(
         styles,
         true,
+        colorFieldColumn.column,
         xAxis?.field?.default,
-        yAxis?.field?.default,
-        numericalColor.column
+        yAxis?.field?.default
       ),
     ].filter(Boolean),
   };

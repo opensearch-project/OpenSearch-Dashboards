@@ -8,10 +8,11 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ScatterChartStyleControls } from './scatter_vis_config';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { VisColumn, FieldSetting, AxisRole, StandardAxes, Positions } from '../types';
+import { VisColumn, AxisRole, StandardAxes } from '../types';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/standard_axes_options';
 import { swapAxes } from '../utils/utils';
+import { inferAxesFromColumns } from './scatter_chart_utils';
 
 export interface ScatterVisStyleControlsProps {
   styleOptions: ScatterChartStyleControls;
@@ -35,43 +36,8 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
     onStyleChange({ [key]: value });
   };
 
-  function interAxesFromColumns(
-    numerical?: VisColumn[],
-    categorical?: VisColumn[]
-  ): { x: FieldSetting | undefined; y: FieldSetting | undefined } {
-    if (numerical?.length === 2 && categorical?.length === 0) {
-      return {
-        x: {
-          default: numerical[0],
-        },
-        y: {
-          default: numerical[1],
-        },
-      };
-    }
-    if (numerical?.length === 2 && categorical?.length === 1) {
-      return {
-        x: {
-          default: numerical[0],
-        },
-        y: { default: numerical[1] },
-      };
-    }
-
-    if (numerical?.length === 3 && categorical?.length === 1) {
-      return {
-        x: {
-          default: numerical[0],
-          options: numerical,
-        },
-        y: { default: numerical[1], options: numerical },
-      };
-    }
-    return { x: undefined, y: undefined };
-  }
-
   useEffect(() => {
-    const { x, y } = interAxesFromColumns(numericalColumns, categoricalColumns);
+    const { x, y } = inferAxesFromColumns(numericalColumns, categoricalColumns);
     const axesWithFields = styleOptions.StandardAxes.map((axis) => {
       if (axis.axisRole === AxisRole.X) {
         return { ...axis, field: x };
@@ -86,7 +52,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numericalColumns, categoricalColumns, dateColumns]);
 
-  const handleChangeSwitchAxes = (axes: StandardAxes[]) => {
+  const handleSwitchAxes = (axes: StandardAxes[]) => {
     const updateAxes = swapAxes(axes);
     updateStyleOption('StandardAxes', updateAxes);
   };
@@ -131,7 +97,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
         <AllAxesOptions
           disableGrid={false}
           standardAxes={styleOptions.StandardAxes}
-          onChangeSwitchAxes={handleChangeSwitchAxes}
+          onChangeSwitchAxes={handleSwitchAxes}
           onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
         />
       ),

@@ -8,11 +8,12 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { VisColumn, FieldSetting, StandardAxes, AxisRole, Positions } from '../types';
+import { VisColumn, StandardAxes, AxisRole } from '../types';
 import {
   HeatmapLabelVisOptions,
   HeatmapExclusiveVisOptions,
 } from './heatmap_exclusive_vis_options';
+import { inferAxesFromColumns } from './heatmap_chart_utils';
 import { AllAxesOptions } from '../style_panel/standard_axes_options';
 import { swapAxes } from '../utils/utils';
 
@@ -39,35 +40,8 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
     onStyleChange({ [key]: value });
   };
 
-  function interAxesFromColumns(
-    numerical?: VisColumn[],
-    categorical?: VisColumn[]
-  ): { x: FieldSetting | undefined; y: FieldSetting | undefined } {
-    if (numerical?.length === 3) {
-      return {
-        x: {
-          default: numerical[0],
-          options: numerical,
-        },
-        y: {
-          default: numerical[1],
-          options: numerical,
-        },
-      };
-    }
-    if (numerical?.length === 1 && categorical?.length === 2) {
-      return {
-        x: {
-          default: categorical[0],
-        },
-        y: { default: categorical[1] },
-      };
-    }
-    return { x: undefined, y: undefined };
-  }
-
   useEffect(() => {
-    const { x, y } = interAxesFromColumns(numericalColumns, categoricalColumns);
+    const { x, y } = inferAxesFromColumns(numericalColumns, categoricalColumns);
     const axesWithFields = styleOptions.StandardAxes.map((axis) => {
       if (axis.axisRole === AxisRole.X) {
         return { ...axis, field: x };
@@ -82,7 +56,7 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numericalColumns, categoricalColumns, dateColumns]);
 
-  const handleChangeSwitchAxes = (axes: StandardAxes[]) => {
+  const handleSwitchAxes = (axes: StandardAxes[]) => {
     const updateAxes = swapAxes(axes);
     updateStyleOption('StandardAxes', updateAxes);
   };
@@ -140,7 +114,7 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
         <AllAxesOptions
           disableGrid={true}
           standardAxes={styleOptions.StandardAxes}
-          onChangeSwitchAxes={handleChangeSwitchAxes}
+          onChangeSwitchAxes={handleSwitchAxes}
           onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
         />
       ),

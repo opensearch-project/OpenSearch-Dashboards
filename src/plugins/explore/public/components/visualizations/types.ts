@@ -113,12 +113,6 @@ export enum AxisRole {
   Y = 'y',
 }
 
-export enum AxisPosition {
-  LEFT = 'left',
-  RIGHT = 'right',
-  BOTTOM = 'bottom',
-  TOP = 'top',
-}
 // for heatmap the axies can serve as value axis or category axis in 2 scienrios
 
 export interface Grid {
@@ -173,3 +167,5 @@ export enum LabelAggregationType {
   MIN = 'min',
   NONE = 'none',
 }
+
+export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';

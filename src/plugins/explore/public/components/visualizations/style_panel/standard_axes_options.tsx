@@ -266,7 +266,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   onChangeSwitchAxes,
 }) => {
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel paddingSize="s" data-test-subj="standardAxesPanel">
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
@@ -278,7 +278,14 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => onChangeSwitchAxes(standardAxes)}>Switch X and Y</EuiButton>
+          <EuiButton
+            onClick={() => onChangeSwitchAxes(standardAxes)}
+            data-test-subj="switchAxesButton"
+          >
+            {i18n.translate('explore.vis.standardAxes.switchXY', {
+              defaultMessage: 'Switch X and Y',
+            })}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>
           <StandardAxesOptions

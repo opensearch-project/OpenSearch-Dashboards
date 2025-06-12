@@ -4,30 +4,30 @@
  */
 
 import { PieChartStyleControls } from './pie_vis_config';
-import { VisColumn } from '../types';
+import { VisColumn, VEGASCHEMA } from '../types';
 
 export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions?: Partial<PieChartStyleControls>
+  styleOptions: Partial<PieChartStyleControls>
 ) => {
-  const numericFields = numericalColumns.map((item) => item.column)[0];
-  const numericNames = numericalColumns.map((item) => item.name)[0];
-  const categoryField = categoricalColumns.map((item) => item.column)[0];
+  const numericField = numericalColumns[0].column;
+  const numericName = numericalColumns[0].name;
+  const categoryField = categoricalColumns[0].column;
 
   const encodingBase = {
     theta: {
-      field: numericFields,
+      field: numericField,
       type: 'quantitative',
       stack: true,
     },
     color: {
       field: categoryField,
       type: 'nominal',
-      legend: styleOptions?.addLegend
-        ? { title: numericNames, orient: styleOptions?.legendPosition, symbolLimit: 10 }
+      legend: styleOptions.addLegend
+        ? { title: numericName, orient: styleOptions.legendPosition, symbolLimit: 10 }
         : null,
     },
   };
@@ -35,7 +35,7 @@ export const createPieSpec = (
   const markLayer = {
     mark: {
       type: 'arc',
-      innerRadius: styleOptions?.exclusive?.donut ? 30 : 0,
+      innerRadius: styleOptions.exclusive?.donut ? 30 : 0,
       radius: 130,
       tooltip: styleOptions?.addTooltip,
     },
@@ -44,7 +44,7 @@ export const createPieSpec = (
   const labelLayer = {
     mark: {
       type: 'text',
-      limit: styleOptions?.exclusive?.truncate ? styleOptions?.exclusive?.truncate : 100,
+      limit: styleOptions.exclusive?.truncate ? styleOptions.exclusive?.truncate : 100,
       radius: 180,
     },
     encoding: {
@@ -63,20 +63,20 @@ export const createPieSpec = (
     },
     encoding: {
       text: {
-        field: numericFields,
+        field: numericField,
         type: 'nominal',
       },
     },
   };
 
   const baseSpec = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: transformedData },
     layer: [
       markLayer,
-      styleOptions?.exclusive?.showLabels ? labelLayer : null,
-      styleOptions?.exclusive?.showValues ? valueLayer : null,
+      styleOptions.exclusive?.showLabels ? labelLayer : null,
+      styleOptions.exclusive?.showValues ? valueLayer : null,
     ].filter(Boolean),
     encoding: encodingBase,
   };

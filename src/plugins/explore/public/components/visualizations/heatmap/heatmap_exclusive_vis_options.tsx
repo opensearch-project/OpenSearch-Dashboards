@@ -20,6 +20,7 @@ import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { ColorSchemas, ScaleType, RangeValue, LabelAggregationType } from '../types';
 import { getColorSchemas, getScaleType, getLabelType } from '../utils/collections';
 import { CustomRange } from '../style_panel/custom_ranges';
+import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 
 interface HeatmapVisOptionsProps {
   styles: HeatmapChartStyleControls['exclusive'];
@@ -45,8 +46,18 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
   const colorSchemas = getColorSchemas();
   const scaleTypes = getScaleType();
 
+  const [maxNumberOfColors, handleMaxNumberOfColors] = useDebouncedNumericValue(
+    styles.maxNumberOfColors,
+    (val) => onChange({ ...styles, maxNumberOfColors: val }),
+    {
+      min: 2,
+      max: 20,
+      defaultValue: 4,
+    }
+  );
+
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel paddingSize="s" data-test-subj="heatmapExclusivePanel">
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
         <EuiFlexItem>
           <EuiFormRow
@@ -121,8 +132,8 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
                 min={2}
                 disabled={styles.useCustomRanges}
                 placeholder="Max number of colors"
-                value={styles.maxNumberOfColors}
-                onChange={(e) => updateExclusiveOption('maxNumberOfColors', e.target.value)}
+                value={maxNumberOfColors}
+                onChange={(e) => handleMaxNumberOfColors(e.target.value)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -169,7 +180,7 @@ export const HeatmapLabelVisOptions = ({
   };
   const labelType = getLabelType();
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel paddingSize="s" data-test-subj="heatmapLabelPanel">
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
         <EuiFlexItem>
           <EuiSwitch

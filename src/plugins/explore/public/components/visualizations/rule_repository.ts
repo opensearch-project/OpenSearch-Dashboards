@@ -211,6 +211,7 @@ const threeMetricsRule: VisualizationRule = {
   },
 };
 
+// TODO: when stack bar is implemented, heatmap map only matches group by field > 7
 const oneMetricTwoCateRule: VisualizationRule = {
   id: 'one-metric-two-category',
   name: 'one metric and two category',

@@ -38,9 +38,9 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
 
   const tabs: EuiTabbedContentTab[] = [
     {
-      id: 'general',
+      id: 'basic',
       name: i18n.translate('explore.vis.lineChart.tabs.general', {
-        defaultMessage: 'General',
+        defaultMessage: 'Basic',
       }),
       content: (
         <GeneralVisOptions
@@ -56,7 +56,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
       ),
     },
     {
-      id: 'basic',
+      id: 'exclusive',
       name: i18n.translate('explore.vis.lineChart.tabs.exclusive', {
         defaultMessage: 'Exclusive',
       }),

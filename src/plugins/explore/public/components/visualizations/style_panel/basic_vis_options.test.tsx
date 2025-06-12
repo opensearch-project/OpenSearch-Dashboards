@@ -6,7 +6,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BasicVisOptions } from './basic_vis_options';
-import { Positions } from '../types';
 
 // Mock the debounced value hooks
 jest.mock('../utils/use_debounced_value', () => {
