@@ -20,6 +20,7 @@ import { Chart } from './utils';
 import { useDispatch, useSelector } from '../../utils/state_management';
 import { setInterval } from '../../../../../utils/state_management/slices/legacy_slice';
 import { executeQueries } from '../../../../../utils/state_management/actions/query_actions';
+import { clearResults } from '../../../../../utils/state_management/slices/results_slice';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
@@ -47,7 +48,11 @@ export const DiscoverChart = ({
   const dispatch = useDispatch();
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
-    // Replace refetch$.next() with executeQueries to update histogram
+
+    // EXPLICIT cache clear - same pattern as other triggers
+    dispatch(clearResults());
+
+    // Execute queries - interval will be picked up from Redux state
     dispatch(executeQueries({ services }) as any);
   };
   const timefilterUpdateHandler = useCallback(
