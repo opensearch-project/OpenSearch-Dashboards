@@ -106,7 +106,7 @@ const mockProps: UseDiscoverDownloadCsvProps = {
 
 describe('useDiscoverDownloadCsv', () => {
   beforeAll(() => {
-    setServices(discoverPluginMock.createDiscoverServicesMock());
+    setServices(discoverPluginMock.createExploreServicesMock());
   });
 
   describe('forematRowsForCsv', () => {

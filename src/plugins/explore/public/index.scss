@@ -2,4 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* stylelint-disable no-empty-source */
+
+// Import the new layout styles
+@import "./application/components/explore_layout";
