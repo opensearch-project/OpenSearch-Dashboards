@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './app.scss';
+
 import React, { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -16,6 +18,7 @@ import {
   EuiPageBody,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
+import { HeaderVariant } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../types';
 import { RootState } from './utils/state_management/store';
@@ -30,7 +33,9 @@ import { HeaderDatasetSelector } from './components/header_dataset_selector';
 import { useInitialQueryExecution } from './utils/hooks/use_initial_query_execution';
 import { useUrlStateSync } from './utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from './utils/hooks/use_timefilter_subscription';
-import './app.scss';
+import { ExploreDataTable } from '../components/data_table/explore_data_table';
+import { ExploreTabs } from '../components/tabs/tabs';
+import { useHeaderVariants } from './utils/hooks/use_header_variants';
 
 /**
  * Main application component for the Explore plugin
@@ -39,6 +44,7 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const showActionsInGroup = services.uiSettings.get('home:useNewHomePage', false);
 
   // Get status and rows for histogram and tab content
   const status = useSelector((state: RootState) => {
@@ -54,7 +60,7 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
     for (const cacheKey of executionCacheKeys) {
       const results = state.results[cacheKey];
       if (results) {
-        const hits = (results as any)?.hits?.hits || [];
+        const hits = results.hits?.hits || [];
         return hits;
       }
     }
@@ -67,6 +73,7 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
   useInitialQueryExecution(services);
   useUrlStateSync(services);
   useTimefilterSubscription(services);
+  useHeaderVariants(services, HeaderVariant.APPLICATION);
 
   // TODO: Clean out refs for portal positioning if not needed.
   const topLinkRef = useRef<HTMLDivElement>(null);
@@ -93,20 +100,36 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
     showSaveQuery: true,
   };
 
+  const showChart =
+    status === ResultStatus.READY ||
+    (status === ResultStatus.LOADING && !!rows?.length) ||
+    (status === ResultStatus.ERROR && !!rows?.length);
+
+  const tabs = [
+    // TODO: Translate
+    {
+      id: 'explore_logs_tab',
+      name: 'Logs',
+      content: <ExploreDataTable rows={rows} />,
+    },
+  ];
+
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
         {/* Nav bar structure exactly like data_explorer */}
         <EuiFlexGroup
           direction="row"
-          className="mainPage navBar"
+          className={showActionsInGroup ? '' : 'mainPage navBar'}
           gutterSize="none"
           alignItems="center"
           justifyContent="spaceBetween"
         >
-          <EuiFlexItem grow={false}>
-            <div ref={topLinkRef} />
-          </EuiFlexItem>
+          {!showActionsInGroup && (
+            <EuiFlexItem grow={false}>
+              <div ref={topLinkRef} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -122,7 +145,6 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
         <EuiPage className="deLayout" paddingSize="none" grow={false}>
           <EuiPageBody>
             {/* TopNav component - configured like discover */}
-            <TopNav {...topNavProps} />
 
             {/* HeaderDatasetSelector component - renders dataset selector in portal */}
             <HeaderDatasetSelector datasetSelectorRef={datasetSelectorRef} />
@@ -135,7 +157,7 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
             {/* Main content area with resizable panels under QueryPanel */}
             <EuiResizableContainer
               direction={isMobile ? 'vertical' : 'horizontal'}
-              style={{ flex: 1 }}
+              style={{ flex: 1, minHeight: 0 }}
             >
               {(EuiResizablePanel, EuiResizableButton) => (
                 <>
@@ -152,32 +174,27 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
                   <EuiResizableButton />
 
                   {/* Right Panel: Chart and Tab Content */}
-                  <EuiResizablePanel initialSize={80} mode="main" paddingSize="none">
-                    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                      {/* Chart container from legacy - show above tabs when there are results */}
-                      {(() => {
-                        const showChart =
-                          status === ResultStatus.READY ||
-                          (status === ResultStatus.LOADING && !!rows?.length) ||
-                          (status === ResultStatus.ERROR && !!rows?.length);
+                  <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
+                    <EuiPageBody className="deLayout__canvas">
+                      <EuiPanel
+                        hasBorder={true}
+                        hasShadow={false}
+                        paddingSize="s"
+                        className="dscCanvas"
+                        data-test-subj="dscCanvas"
+                        borderRadius="l"
+                      >
+                        <TopNav {...topNavProps} />
+                        {/* Chart container from legacy - show above tabs when there are results */}
+                        {showChart && (
+                          <div className="dscCanvas__chart">
+                            <DiscoverChartContainer />
+                          </div>
+                        )}
 
-                        return showChart;
-                      })() && (
-                        <div className="dscCanvas__chart">
-                          <DiscoverChartContainer />
-                        </div>
-                      )}
-
-                      {/* Tab Bar for switching between tabs */}
-                      <div className="dscCanvas__tabBar">
-                        <TabBar />
-                      </div>
-
-                      {/* Tab content that renders the active tab */}
-                      <div className="dscCanvas__tabContent">
-                        <TabContent />
-                      </div>
-                    </div>
+                        <ExploreTabs tabs={tabs} />
+                      </EuiPanel>
+                    </EuiPageBody>
                   </EuiResizablePanel>
                 </>
               )}
