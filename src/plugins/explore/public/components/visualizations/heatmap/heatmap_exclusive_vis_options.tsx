@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { ColorSchemas, ScaleType, RangeValue } from '../types';
+import { ColorSchemas, ScaleType, RangeValue, LabelAggregationType } from '../types';
 import { getColorSchemas, getScaleType, getLabelType } from '../utils/collections';
 import { CustomRange } from '../style_panel/custom_ranges';
 
@@ -223,7 +223,9 @@ export const HeatmapLabelVisOptions = ({
                 >
                   <EuiSelect
                     value={styles.type}
-                    onChange={(e) => updateLabelOption('type', e.target.value as any)}
+                    onChange={(e) =>
+                      updateLabelOption('type', e.target.value as LabelAggregationType)
+                    }
                     options={labelType}
                   />
                 </EuiFormRow>

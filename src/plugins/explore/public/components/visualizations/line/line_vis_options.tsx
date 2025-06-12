@@ -57,8 +57,8 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
     },
     {
       id: 'basic',
-      name: i18n.translate('explore.vis.lineChart.tabs.basic', {
-        defaultMessage: 'Basic',
+      name: i18n.translate('explore.vis.lineChart.tabs.exclusive', {
+        defaultMessage: 'Exclusive',
       }),
       content: (
         <BasicVisOptions

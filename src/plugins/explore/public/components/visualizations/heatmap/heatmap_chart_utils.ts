@@ -60,10 +60,7 @@ export const getDataBound = (
   return values.length > 0 ? [Math.min(...values), Math.max(...values)] : [];
 };
 
-export const addTransform = (
-  styles: Partial<HeatmapChartStyleControls> | undefined,
-  numericFields: string | undefined
-) => {
+export const addTransform = (styles: Partial<HeatmapChartStyleControls>, numericFields: string) => {
   if (styles?.exclusive?.percentageMode) {
     return [
       {

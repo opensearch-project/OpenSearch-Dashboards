@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import { Positions } from './utils/collections';
-
 export enum Positions {
   RIGHT = 'right',
   LEFT = 'left',

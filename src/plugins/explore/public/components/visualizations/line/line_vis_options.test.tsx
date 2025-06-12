@@ -7,13 +7,13 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import { EuiTabbedContent } from '@elastic/eui';
-import { Positions } from '../utils/collections';
 import {
   CategoryAxis,
   GridOptions,
   ThresholdLine,
   ThresholdLineStyle,
   ValueAxis,
+  Positions,
   VisFieldType,
 } from '../types';
 import { BasicVisOptions } from '../style_panel/basic_vis_options';

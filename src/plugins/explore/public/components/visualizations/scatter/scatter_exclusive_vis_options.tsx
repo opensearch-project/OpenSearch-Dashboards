@@ -57,7 +57,9 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
-            label="Filled"
+            label={i18n.translate('explore.vis.scatter.filled', {
+              defaultMessage: 'Filled',
+            })}
             checked={styles.filled}
             onChange={(e) => updateStyle('filled', e.target.checked)}
           />

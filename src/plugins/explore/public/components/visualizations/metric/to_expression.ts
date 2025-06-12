@@ -18,7 +18,7 @@ export const createSingleMetric = (
   const numericNames = numericalColumns?.map((item) => item.name)[0];
 
   function generateColorConditions(ranges: RangeValue[], color: ColorSchemas) {
-    const colors = generateColorBySchema(ranges.length ?? 0, color);
+    const colors = generateColorBySchema(ranges.length + 1, color);
     const conditions = [];
 
     for (let i = 0; i < ranges.length; i++) {

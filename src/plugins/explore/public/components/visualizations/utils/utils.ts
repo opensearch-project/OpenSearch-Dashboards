@@ -73,7 +73,7 @@ export function generateColorBySchema(count: number, schema: ColorSchemas): stri
     [ColorSchemas.GREYS]: { start: [240, 240, 240], end: [51, 51, 51] },
     [ColorSchemas.REDS]: { start: [255, 204, 204], end: [102, 0, 0] },
     [ColorSchemas.YELLOWORANGE]: { start: [255, 255, 204], end: [204, 102, 0] },
-    [ColorSchemas.GREENBLUE]: { start: [204, 255, 255], end: [0, 102, 102] },
+    [ColorSchemas.GREENBLUE]: { start: [204, 255, 204], end: [0, 0, 51] },
   };
 
   const range = colorRanges[schema];

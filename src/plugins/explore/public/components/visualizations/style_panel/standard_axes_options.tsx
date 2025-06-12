@@ -15,7 +15,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { StandardAxes, Positions } from '../types';
+import { StandardAxes, Positions, AxisRole } from '../types';
 import { DebouncedTruncateField, DebouncedText } from './utils';
 
 interface AllAxesOptionsProps {
@@ -56,7 +56,8 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
   return (
     <>
       {standardAxes.map((axis, index) => {
-        const isYAxis = axis.axisRole === 'y';
+        const isYAxis = axis.axisRole === AxisRole.Y;
+
         return (
           <div key={axis.id}>
             <EuiFlexGroup gutterSize="s" direction="column" alignItems="flexStart">
@@ -143,7 +144,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
-                </EuiFlexGroup>{' '}
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow>

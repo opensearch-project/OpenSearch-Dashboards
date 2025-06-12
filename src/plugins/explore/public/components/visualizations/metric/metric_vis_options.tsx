@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiTabbedContent,
@@ -59,7 +59,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   const tabs: EuiTabbedContentTab[] = [
     {
       id: 'exclusive',
-      name: i18n.translate('explore.vis.metricChart.tabs.exclusive', {
+      name: i18n.translate('explore.vis.metric.tabs.exclusive', {
         defaultMessage: 'Exclusive',
       }),
       content: (
@@ -68,7 +68,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h4>
-                  {i18n.translate('explore.stylePanel.metric.settings', {
+                  {i18n.translate('explore.vis.metric.settings', {
                     defaultMessage: 'Metric Settings',
                   })}
                 </h4>
@@ -104,7 +104,9 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiSwitch
-                label="Use color for font color"
+                label={i18n.translate('explore.vis.metric.useColor', {
+                  defaultMessage: 'Use color for font color',
+                })}
                 checked={styleOptions.useColor}
                 onChange={(e) => updateStyleOption('useColor', e.target.checked)}
               />
@@ -113,7 +115,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               <>
                 <EuiFlexItem>
                   <EuiFormRow
-                    label={i18n.translate('explore.stylePanel.heatmap.exclusive.colorSchema', {
+                    label={i18n.translate('explore.vis.metric.colorSchema', {
                       defaultMessage: 'Color Schema',
                     })}
                   >

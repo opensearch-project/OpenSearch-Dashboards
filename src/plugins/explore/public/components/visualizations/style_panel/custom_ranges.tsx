@@ -35,6 +35,7 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, prevMax, o
   const handleDeleteRange = () => {
     onDelete(index);
   };
+
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -86,7 +87,7 @@ export const CustomRange: React.FC<CustomRangeProps> = ({ customRanges, onCustom
 
   const handleAddRange = () => {
     const lastRange = ranges[ranges.length - 1];
-    const newMin = lastRange?.max;
+    const newMin = lastRange?.max ?? 0;
     const newRange = { min: newMin, max: undefined };
 
     const updated = [...ranges, newRange];
@@ -103,7 +104,7 @@ export const CustomRange: React.FC<CustomRangeProps> = ({ customRanges, onCustom
     <>
       <EuiSpacer size="m" />
       {ranges.map((range, index) => {
-        const prevMax = index > 0 ? ranges[index - 1].max : undefined;
+        const prevMax = index > 0 ? ranges[index - 1].max : 0;
         return (
           <Range
             key={index}

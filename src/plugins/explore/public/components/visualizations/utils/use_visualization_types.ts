@@ -25,8 +25,6 @@ export type AllChartStyleControls =
   | HeatmapChartStyleControls
   | ScatterChartStyleControls;
 
-export type AllVisStyleControlsProps = LineVisStyleControlsProps;
-
 export interface StyleControlsProps {
   styleOptions: AllChartStyleControls;
   onStyleChange: (newStyle: Partial<AllChartStyleControls>) => void;
