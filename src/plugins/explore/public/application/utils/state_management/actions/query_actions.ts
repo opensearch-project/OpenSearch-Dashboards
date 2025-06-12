@@ -92,9 +92,9 @@ export const computeQueryContext = (query: any, activeTabId: string, services: E
 };
 
 /**
- * Enhanced executeQueries with cache awareness and smart execution strategy
+ * Enhanced executeQueries orchestrator (simplified - no cache logic)
  */
-export const executeQueries = (options: { clearCache?: boolean; services: ExploreServices }) => {
+export const executeQueries = (options: { services: ExploreServices }) => {
   return async (dispatch: Dispatch, getState: () => any) => {
     const { services } = options;
 
@@ -115,62 +115,51 @@ export const executeQueries = (options: { clearCache?: boolean; services: Explor
       queriesEqual,
     } = computeQueryContext(query, activeTabId, services);
 
-    // Check what needs execution
-    const needsDefaultQuery = options.clearCache || !results[defaultCacheKey];
-    const needsActiveTabQuery = options.clearCache || !results[activeTabCacheKey];
+    // Check what needs execution (for tab switching case)
+    const needsDefaultQuery = !results[defaultCacheKey];
+    const needsActiveTabQuery = !results[activeTabCacheKey];
 
-    if (queriesEqual) {
-      // Single query for both histogram and tab data
-      if (needsDefaultQuery) {
-        await dispatch(
-          executeQueryWithHistogram({
+    const promises = [];
+    const cacheKeys = [];
+
+    // ALWAYS execute histogram query (for defaultQuery) if needed
+    if (needsDefaultQuery) {
+      // Get interval from Redux state for histogram
+      const interval = state.legacy?.interval;
+
+      promises.push(
+        dispatch(
+          executeHistogramQuery({
             services,
             preparedQuery: defaultQuery,
             cacheKey: defaultCacheKey,
+            interval, // Pass interval from Redux state
           }) as any
-        );
-      }
-
-      // Store cache keys for UI components
-      dispatch(setExecutionCacheKeys([defaultCacheKey]));
-      return { cacheKeys: [defaultCacheKey] };
-    } else {
-      // Two separate queries needed
-      const promises = [];
-      const cacheKeys = [];
-
-      if (needsDefaultQuery) {
-        promises.push(
-          dispatch(
-            executeQueryWithHistogram({
-              services,
-              preparedQuery: defaultQuery,
-              cacheKey: defaultCacheKey,
-            }) as any
-          )
-        );
-        cacheKeys.push(defaultCacheKey);
-      }
-
-      if (needsActiveTabQuery) {
-        promises.push(
-          dispatch(
-            executeQueryWithHistogram({
-              services,
-              preparedQuery: activeTabQuery,
-              cacheKey: activeTabCacheKey,
-            }) as any
-          )
-        );
-        cacheKeys.push(activeTabCacheKey);
-      }
-
-      await Promise.all(promises);
-
-      // Store cache keys for UI components
-      dispatch(setExecutionCacheKeys(cacheKeys));
-      return { cacheKeys };
+        )
+      );
+      cacheKeys.push(defaultCacheKey);
     }
+
+    // CONDITIONALLY execute tab query (only if queries are different and needed)
+    if (!queriesEqual && needsActiveTabQuery) {
+      promises.push(
+        dispatch(
+          executeTabQuery({
+            services,
+            preparedQuery: activeTabQuery,
+            cacheKey: activeTabCacheKey,
+          }) as any
+        )
+      );
+      cacheKeys.push(activeTabCacheKey);
+    }
+
+    await Promise.all(promises);
+
+    // Store appropriate cache keys for UI components
+    const finalCacheKeys = queriesEqual ? [defaultCacheKey] : cacheKeys;
+    dispatch(setExecutionCacheKeys(finalCacheKeys));
+    return { cacheKeys: finalCacheKeys };
   };
 };
 
@@ -334,6 +323,303 @@ export const executeQueryWithHistogram = (options: {
       throw error;
     } finally {
       // AbortController cleanup handled by component
+    }
+  };
+};
+
+/**
+ * Helper function to create SearchSource with common configuration
+ */
+const createSearchSourceWithQuery = async (
+  query: any,
+  indexPattern: any,
+  services: ExploreServices,
+  includeHistogram: boolean = false,
+  customInterval?: string
+) => {
+  // Create new SearchSource for this query
+  const searchSource = await services.data.search.searchSource.create();
+
+  const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(indexPattern);
+
+  // Configure SearchSource
+  searchSource
+    .setField('index', indexPattern)
+    .setField('query', {
+      query: query.query,
+      language: query.language,
+    })
+    .setField('filter', timeRangeFilter ? [timeRangeFilter] : []);
+
+  // Add histogram aggregations if requested and time-based
+  if (includeHistogram && indexPattern.timeFieldName) {
+    const timeRange = services.data.query.timefilter.timefilter.getTime();
+    const aggConfig = {
+      aggs: {
+        histogram: {
+          date_histogram: {
+            field: indexPattern.timeFieldName,
+            interval: customInterval || 'auto',
+            min_doc_count: 0,
+            extended_bounds: {
+              min: timeRange.from,
+              max: timeRange.to,
+            },
+          },
+        },
+      },
+      size: 500, // Limit hits for performance
+    };
+
+    searchSource.setField('aggs', aggConfig.aggs);
+    searchSource.setField('size', aggConfig.size);
+  }
+
+  return searchSource;
+};
+
+/**
+ * Execute histogram query with aggregations (pure query execution)
+ */
+export const executeHistogramQuery = (options: {
+  services: ExploreServices;
+  preparedQuery: any;
+  cacheKey: string;
+  interval?: string;
+}) => {
+  return async (dispatch: Dispatch, getState: () => any) => {
+    const { services, preparedQuery, cacheKey, interval } = options;
+
+    if (!services) {
+      return;
+    }
+
+    try {
+      dispatch(setStatus(ResultStatus.LOADING));
+
+      // Create abort controller
+      const abortController = new AbortController();
+
+      // Reset inspector adapter (with safety check)
+      if (services.inspectorAdapters?.requests) {
+        (services.inspectorAdapters.requests as any).reset();
+      }
+
+      // Create inspector request
+      const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
+        defaultMessage: 'data',
+      });
+      const description = i18n.translate('explore.discover.inspectorRequestDescription', {
+        defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
+      });
+      const inspectorRequest = (services.inspectorAdapters?.requests as any)?.start(title, {
+        description,
+      });
+
+      // Get IndexPattern
+      let indexPattern;
+      if (preparedQuery.dataset) {
+        indexPattern = await services.data.indexPatterns.get(
+          preparedQuery.dataset.id,
+          preparedQuery.dataset.type !== 'INDEX_PATTERN'
+        );
+      } else {
+        indexPattern = (services.data as any).indexPattern;
+      }
+
+      if (!indexPattern) {
+        throw new Error('IndexPattern not found for query execution');
+      }
+
+      // Get interval from Redux state if not provided
+      const state = getState();
+      const effectiveInterval = interval || state.legacy?.interval || 'auto';
+
+      // Create SearchSource with histogram aggregations
+      const searchSource = await createSearchSourceWithQuery(
+        preparedQuery,
+        indexPattern,
+        services,
+        true, // Include histogram
+        effectiveInterval
+      );
+
+      // Add inspector stats
+      if ((services as any).getRequestInspectorStats && inspectorRequest) {
+        inspectorRequest.stats((services as any).getRequestInspectorStats(searchSource));
+      }
+
+      // Get search request body for inspector
+      if (inspectorRequest) {
+        searchSource.getSearchRequestBody().then((body: object) => {
+          inspectorRequest.json(body);
+        });
+      }
+
+      // Execute query
+      const rawResults = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
+      });
+
+      // Add response stats to inspector
+      if (inspectorRequest) {
+        if ((services as any).getResponseInspectorStats) {
+          inspectorRequest
+            .stats((services as any).getResponseInspectorStats(rawResults, searchSource))
+            .ok({ json: rawResults });
+        } else {
+          inspectorRequest.ok({ json: rawResults });
+        }
+      }
+
+      // Store RAW results in cache
+      const rawResultsWithMeta = {
+        ...rawResults,
+        elapsedMs: inspectorRequest.getTime(),
+      };
+
+      dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
+
+      // Set status based on results
+      if (rawResults.hits && rawResults.hits.hits && rawResults.hits.hits.length > 0) {
+        dispatch(setStatus(ResultStatus.READY));
+      } else {
+        dispatch(setStatus(ResultStatus.NO_RESULTS));
+      }
+
+      return rawResultsWithMeta;
+    } catch (error: any) {
+      // Handle abort errors
+      if (error instanceof Error && error.name === 'AbortError') {
+        dispatch(setStatus(ResultStatus.READY)); // Keep current status on abort
+        return;
+      }
+
+      // Use search service to show error (like Discover does)
+      services.data.search.showError(error as Error);
+      dispatch(setStatus(ResultStatus.ERROR));
+      throw error;
+    }
+  };
+};
+
+/**
+ * Execute tab query without aggregations (pure query execution)
+ */
+export const executeTabQuery = (options: {
+  services: ExploreServices;
+  preparedQuery: any;
+  cacheKey: string;
+}) => {
+  return async (dispatch: Dispatch, getState: () => any) => {
+    const { services, preparedQuery, cacheKey } = options;
+
+    if (!services) {
+      return;
+    }
+
+    try {
+      dispatch(setStatus(ResultStatus.LOADING));
+
+      // Create abort controller
+      const abortController = new AbortController();
+
+      // Reset inspector adapter (with safety check)
+      if (services.inspectorAdapters?.requests) {
+        (services.inspectorAdapters.requests as any).reset();
+      }
+
+      // Create inspector request
+      const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
+        defaultMessage: 'data',
+      });
+      const description = i18n.translate('explore.discover.inspectorRequestDescription', {
+        defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
+      });
+      const inspectorRequest = (services.inspectorAdapters?.requests as any)?.start(title, {
+        description,
+      });
+
+      // Get IndexPattern
+      let indexPattern;
+      if (preparedQuery.dataset) {
+        indexPattern = await services.data.indexPatterns.get(
+          preparedQuery.dataset.id,
+          preparedQuery.dataset.type !== 'INDEX_PATTERN'
+        );
+      } else {
+        indexPattern = (services.data as any).indexPattern;
+      }
+
+      if (!indexPattern) {
+        throw new Error('IndexPattern not found for query execution');
+      }
+
+      // Create SearchSource without histogram aggregations
+      const searchSource = await createSearchSourceWithQuery(
+        preparedQuery,
+        indexPattern,
+        services,
+        false // No histogram
+      );
+
+      // Add inspector stats
+      if ((services as any).getRequestInspectorStats && inspectorRequest) {
+        inspectorRequest.stats((services as any).getRequestInspectorStats(searchSource));
+      }
+
+      // Get search request body for inspector
+      if (inspectorRequest) {
+        searchSource.getSearchRequestBody().then((body: object) => {
+          inspectorRequest.json(body);
+        });
+      }
+
+      // Execute query
+      const rawResults = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
+      });
+
+      // Add response stats to inspector
+      if (inspectorRequest) {
+        if ((services as any).getResponseInspectorStats) {
+          inspectorRequest
+            .stats((services as any).getResponseInspectorStats(rawResults, searchSource))
+            .ok({ json: rawResults });
+        } else {
+          inspectorRequest.ok({ json: rawResults });
+        }
+      }
+
+      // Store RAW results in cache
+      const rawResultsWithMeta = {
+        ...rawResults,
+        elapsedMs: inspectorRequest.getTime(),
+      };
+
+      dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
+
+      // Set status based on results
+      if (rawResults.hits && rawResults.hits.hits && rawResults.hits.hits.length > 0) {
+        dispatch(setStatus(ResultStatus.READY));
+      } else {
+        dispatch(setStatus(ResultStatus.NO_RESULTS));
+      }
+
+      return rawResultsWithMeta;
+    } catch (error: any) {
+      // Handle abort errors
+      if (error instanceof Error && error.name === 'AbortError') {
+        dispatch(setStatus(ResultStatus.READY)); // Keep current status on abort
+        return;
+      }
+
+      // Use search service to show error (like Discover does)
+      services.data.search.showError(error as Error);
+      dispatch(setStatus(ResultStatus.ERROR));
+      throw error;
     }
   };
 };
