@@ -13,9 +13,10 @@ import {
 } from 'opensearch-dashboards/public';
 
 import { fetchDirectQuerySyncInfo, DirectQuerySyncInfo } from './direct_query_sync_utils';
-import { asSyncProgress, intervalAsMinutes, SyncProgress } from '../../../constants';
+import { intervalAsMinutes } from '../../../constants';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
 import './direct_query_sync_banner.scss';
+import { asSyncProgress, SyncProgress } from './sync_progress';
 
 interface DirectQuerySyncProps {
   http: HttpStart;

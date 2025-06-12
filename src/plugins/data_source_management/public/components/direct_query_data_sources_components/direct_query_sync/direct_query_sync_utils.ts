@@ -5,6 +5,7 @@
 
 import { HttpStart, SavedObjectsClientContract, SavedObject } from 'opensearch-dashboards/public';
 import { DSL_MAPPING, DSL_BASE } from '../../../../framework/utils/shared';
+import { ExternalIndexState } from '../../../../framework/types';
 
 export interface ExportDashboardsResponse {
   version: string;
@@ -187,7 +188,7 @@ export function extractIndexInfo(
   refreshInterval: number | null;
   lastRefreshTime: number | null;
   mappingName: string | null;
-  indexState: string | null;
+  indexState: string | ExternalIndexState | null;
 } {
   const mappingValues = Object.values(mapping)[0] as any;
   if (!mappingValues) {

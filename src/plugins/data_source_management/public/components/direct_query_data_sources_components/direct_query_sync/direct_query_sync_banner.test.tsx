@@ -10,8 +10,12 @@ import { savedObjectsServiceMock } from '../../../../../../core/public/mocks';
 import { DashboardDirectQuerySyncBanner } from './direct_query_sync_banner';
 import { fetchDirectQuerySyncInfo } from './direct_query_sync_utils';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
-import { asSyncProgress, ExternalIndexState, intervalAsMinutes } from '../../../constants';
-import { DirectQueryLoadingStatus } from 'src/plugins/data_source_management/framework/types';
+import { intervalAsMinutes } from '../../../constants';
+import {
+  DirectQueryLoadingStatus,
+  ExternalIndexState,
+} from 'src/plugins/data_source_management/framework/types';
+import { asSyncProgress } from './sync_progress';
 
 // Mock dependencies
 jest.mock('./direct_query_sync_utils', () => ({
