@@ -12,12 +12,7 @@ import { TabComponentProps } from '../../../services/tab_registry/tab_registry_s
  * This is a simplified version that just shows a message
  * In a real implementation, this would render actual visualizations
  */
-export const VisualizationsTab: React.FC<TabComponentProps> = ({
-  query,
-  results,
-  isLoading,
-  error,
-}) => {
+export const VisualizationsTab: React.FC<TabComponentProps> = ({ query, results, error }) => {
   // Check if we have aggregation results
   const hasAggregations = results?.aggregations && Object.keys(results.aggregations).length > 0;
 
@@ -29,16 +24,6 @@ export const VisualizationsTab: React.FC<TabComponentProps> = ({
         </EuiTitle>
         <EuiText>
           <p>{error.message}</p>
-        </EuiText>
-      </EuiPanel>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <EuiPanel hasBorder paddingSize="l">
-        <EuiText textAlign="center">
-          <p>Loading visualizations...</p>
         </EuiText>
       </EuiPanel>
     );
