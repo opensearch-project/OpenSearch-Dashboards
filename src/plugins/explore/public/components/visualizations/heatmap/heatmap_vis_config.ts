@@ -45,10 +45,6 @@ export interface HeatmapChartStyleControls {
 
   exclusive: ExclusiveHeatmapConfig;
   label: HeatmapLabels;
-
-  // Additional vis_lib compatibility
-  type: string;
-  highLightRange?: boolean;
 }
 
 export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
@@ -116,10 +112,6 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
       axisRole: AxisRole.X,
     },
   ],
-
-  // Additional properties
-  type: 'heatmap',
-  highLightRange: false,
 };
 
 export const createHeatmapConfig = (): VisualizationType => ({

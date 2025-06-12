@@ -11,6 +11,7 @@ import { GeneralVisOptions } from '../style_panel/general_vis_options';
 import { VisColumn, FieldSetting, AxisRole, StandardAxes, Positions } from '../types';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/standard_axes_options';
+import { swapAxes } from '../utils/utils';
 
 export interface ScatterVisStyleControlsProps {
   styleOptions: ScatterChartStyleControls;
@@ -35,8 +36,8 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   };
 
   function interAxesFromColumns(
-    numerical?: DiscoverVisColumn[],
-    categorical?: DiscoverVisColumn[]
+    numerical?: VisColumn[],
+    categorical?: VisColumn[]
   ): { x: FieldSetting | undefined; y: FieldSetting | undefined } {
     if (numerical?.length === 2 && categorical?.length === 0) {
       return {
@@ -84,37 +85,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
     updateStyleOption('StandardAxes', axesWithFields);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numericalColumns, categoricalColumns, dateColumns]);
-
-  function swapAxes(axes: StandardAxes[]) {
-    return axes.map((axis) => {
-      if (axis.axisRole === AxisRole.Y) {
-        return {
-          ...axis,
-          axisRole: AxisRole.X,
-          position:
-            axis.position === Positions.LEFT
-              ? Positions.BOTTOM
-              : axis.position === Positions.RIGHT
-              ? Positions.TOP
-              : axis.position,
-        };
-      }
-
-      if (axis.axisRole === AxisRole.X) {
-        return {
-          ...axis,
-          axisRole: AxisRole.Y,
-          position:
-            axis.position === Positions.BOTTOM
-              ? Positions.LEFT
-              : axis.position === Positions.TOP
-              ? Positions.RIGHT
-              : axis.position,
-        };
-      }
-      return axis;
-    });
-  }
 
   const handleChangeSwitchAxes = (axes: StandardAxes[]) => {
     const updateAxes = swapAxes(axes);

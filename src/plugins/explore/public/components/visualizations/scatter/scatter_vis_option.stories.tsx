@@ -7,24 +7,23 @@ import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { ScatterVisStyleControls } from './scatter_vis_options';
 import { ScatterChartStyleControls, defaultScatterChartStyles } from './scatter_vis_config';
-import { DiscoverVisColumn, PointShape, AxisPosition, AxisRole } from '../types';
+import { VisColumn, PointShape, Positions, AxisRole, VisFieldType } from '../types';
 
 export default {
   component: ScatterVisStyleControls,
-  title:
-    'src/plugins/discover/public/application/components/visualizations/scatter/scatter_vis_options',
+  title: 'src/plugins/explore/public/components/visualizations/scatter/scatter_vis_options',
 } as ComponentMeta<typeof ScatterVisStyleControls>;
 
 // Mock data for the component props
-const mockNumericalColumns: DiscoverVisColumn[] = [
-  { id: 1, name: 'count', schema: 'numerical', column: 'count' },
-  { id: 2, name: 'avarage', schema: 'numerical', column: 'avarage' },
+const mockNumericalColumns: VisColumn[] = [
+  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
+  { id: 2, name: 'avarage', schema: VisFieldType.Numerical, column: 'avarage' },
 ];
 
-const mockCategoricalColumns: DiscoverVisColumn[] = [
-  { id: 2, name: 'category', schema: 'categorical', column: 'category' },
+const mockCategoricalColumns: VisColumn[] = [
+  { id: 2, name: 'category', schema: VisFieldType.Categorical, column: 'category' },
 ];
-const mockDateColumns: DiscoverVisColumn[] = [];
+const mockDateColumns: VisColumn[] = [];
 
 const Template: ComponentStory<typeof ScatterVisStyleControls> = (args) => {
   // Use state to track changes
@@ -72,10 +71,10 @@ ScatterExclusive.args = {
   dateColumns: mockDateColumns,
 };
 
-const mockThreeNumericalColumns: DiscoverVisColumn[] = [
-  { id: 1, name: 'count', schema: 'numerical', column: 'count' },
-  { id: 2, name: 'avarage', schema: 'numerical', column: 'avarage' },
-  { id: 3, name: 'min', schema: 'numerical', column: 'min' },
+const mockThreeNumericalColumns: VisColumn[] = [
+  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
+  { id: 2, name: 'avarage', schema: VisFieldType.Numerical, column: 'avarage' },
+  { id: 3, name: 'min', schema: VisFieldType.Numerical, column: 'min' },
 ];
 
 export const ScatterWithField = Template.bind({});
@@ -85,7 +84,7 @@ ScatterWithField.args = {
     StandardAxes: [
       {
         id: '1',
-        position: AxisPosition.RIGHT,
+        position: Positions.RIGHT,
         field: {
           default: mockThreeNumericalColumns[1],
           options: mockThreeNumericalColumns,
@@ -106,7 +105,7 @@ ScatterWithField.args = {
       },
       {
         id: '3',
-        position: AxisPosition.RIGHT,
+        position: Positions.RIGHT,
         field: {
           default: mockThreeNumericalColumns[2],
           options: mockThreeNumericalColumns,

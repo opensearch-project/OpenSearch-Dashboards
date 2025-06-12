@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../../../view_components/utils/use_visualization_types';
+import { VisualizationType } from '../utils/use_visualization_types';
 
 import { PieVisStyleControls, PieChartStyleControlsProps } from './pie_vis_options';
-import { toExpression } from './to_expression';
 import { Positions } from '../types';
 
 export interface PieExclusiveStyleControl {
@@ -44,7 +43,6 @@ export const defaultPieChartStyles: PieChartStyleControls = {
 export const createPieConfig = (): VisualizationType => ({
   name: 'pie',
   type: 'pie',
-  toExpression,
   ui: {
     style: {
       defaults: defaultPieChartStyles,

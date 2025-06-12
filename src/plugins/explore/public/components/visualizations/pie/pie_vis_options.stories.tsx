@@ -7,22 +7,22 @@ import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { PieVisStyleControls } from './pie_vis_options';
 import { PieChartStyleControls, defaultPieChartStyles } from './pie_vis_config';
-import { DiscoverVisColumn } from '../types';
+import { VisColumn, VisFieldType } from '../types';
 
 export default {
   component: PieVisStyleControls,
-  title: 'src/plugins/discover/public/application/components/visualizations/pie/pie_vis_options',
+  title: 'src/plugins/explore/public/components/visualizations/pie/pie_vis_options',
 } as ComponentMeta<typeof PieVisStyleControls>;
 
 // Mock data for the component props
-const mockNumericalColumns: DiscoverVisColumn[] = [
-  { id: 1, name: 'count', schema: 'numerical', column: 'count' },
+const mockNumericalColumns: VisColumn[] = [
+  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
 ];
 
-const mockCategoricalColumns: DiscoverVisColumn[] = [
-  { id: 2, name: 'category', schema: 'categorical', column: 'category' },
+const mockCategoricalColumns: VisColumn[] = [
+  { id: 2, name: 'category', schema: VisFieldType.Categorical, column: 'category' },
 ];
-const mockDateColumns: DiscoverVisColumn[] = [];
+const mockDateColumns: VisColumn[] = [];
 
 const Template: ComponentStory<typeof PieVisStyleControls> = (args) => {
   // Use state to track changes

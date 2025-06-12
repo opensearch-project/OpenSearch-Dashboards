@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 import { IExpressionLoaderParams } from '../../../../expressions/public';
-import { LineChartStyleControls } from './line/line_vis_config';
+
 import { Visualization } from './visualization';
 import {
   getVisualizationType,
@@ -56,7 +56,6 @@ export const VisualizationContainer = ({ rows, fieldSchema }: Props) => {
   useEffect(() => {
     if (fieldSchema) {
       const result = getVisualizationType(rows, fieldSchema);
-      console.log('result', result);
       if (result) {
         setVisualizationData({ ...result });
 
@@ -115,7 +114,6 @@ export const VisualizationContainer = ({ rows, fieldSchema }: Props) => {
         visualizationData.dateColumns,
         styleOptions
       );
-      console.log('exp', exp);
       setExpression(exp);
     }
 

@@ -4,35 +4,38 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { debounce } from 'lodash';
 import { i18n } from '@osd/i18n';
 import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiRange,
-  EuiFieldText,
-  EuiSpacer,
+  EuiFieldNumber,
+  EuiPanel,
+  EuiSelect,
   EuiSwitch,
+  EuiFormRow,
+  EuiTitle,
 } from '@elastic/eui';
 import { MetricChartStyleControls } from './metric_vis_config';
-import { VisColumn, RangeValue } from '../types';
+import { VisColumn, RangeValue, ColorSchemas } from '../types';
 import { CustomRange } from '../style_panel/custom_ranges';
-import { useStyleControls } from '../utils/use_style_control';
+import { DebouncedText } from '../style_panel/utils';
+import { useDebouncedNumericValue } from '../utils/use_debounced_value';
+import { getColorSchemas } from '../utils/collections';
 
 export interface MetricVisStyleControlsProps {
   styleOptions: MetricChartStyleControls;
   onStyleChange: (newOptions: Partial<MetricChartStyleControls>) => void;
-  numericalColumns?: DiscoverVisColumn[];
-  categoricalColumns?: DiscoverVisColumn[];
-  dateColumns?: DiscoverVisColumn[];
+  numericalColumns?: VisColumn[];
+  categoricalColumns?: VisColumn[];
+  dateColumns?: VisColumn[];
 }
 
 export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   styleOptions,
   onStyleChange,
+  numericalColumns = [],
 }) => {
   const updateStyleOption = <K extends keyof MetricChartStyleControls>(
     key: K,
@@ -40,6 +43,19 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   ) => {
     onStyleChange({ [key]: value });
   };
+
+  const [fontSize, handleFontSize] = useDebouncedNumericValue(
+    styleOptions.fontSize,
+    (val) => onStyleChange({ fontSize: val }),
+    {
+      min: 10,
+      max: 100,
+      defaultValue: 60,
+    }
+  );
+
+  const colorSchemas = getColorSchemas();
+
   const tabs: EuiTabbedContentTab[] = [
     {
       id: 'exclusive',
@@ -47,58 +63,44 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
         defaultMessage: 'Exclusive',
       }),
       content: (
-        <>
-          <EuiSpacer />
+        <EuiPanel paddingSize="s">
           <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
             <EuiFlexItem>
-              {/* <SwitchOption
-                label="Show Titles"
-                paramName="showTitle"
-                value={styleOptions.showTitle}
-                setValue={(_, val) => updateStyleOption('showTitle', val)}
-              /> */}
+              <EuiTitle size="xs">
+                <h4>
+                  {i18n.translate('explore.stylePanel.metric.settings', {
+                    defaultMessage: 'Metric Settings',
+                  })}
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSwitch
+                label="Show title"
+                checked={styleOptions.showTitle}
+                onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
+              />
             </EuiFlexItem>
             {styleOptions.showTitle && (
               <EuiFlexItem>
-                <EuiFlexGroup
-                  alignItems="flexStart"
-                  direction="column"
-                  justifyContent="center"
-                  gutterSize="none"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">Title</EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFieldText
-                      compressed
-                      placeholder="metric title"
-                      value={styleOptions.title}
-                      onChange={(e) => updateStyleOption('title', e.target.value)}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <DebouncedText
+                  value={styleOptions.title || numericalColumns[0].name}
+                  placeholder="Metric title"
+                  onChange={(text) => updateStyleOption('title', text)}
+                  label={i18n.translate('explore.vis.metric.title', {
+                    defaultMessage: 'Axis title',
+                  })}
+                />
               </EuiFlexItem>
             )}
             <EuiFlexItem>
-              <EuiFlexGroup
-                alignItems="flexStart"
-                direction="column"
-                justifyContent="center"
-                gutterSize="none"
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.fontSize', {
+                  defaultMessage: 'Font Size',
+                })}
               >
-                <EuiFlexItem>
-                  <EuiText size="s">Font Size</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiRange
-                    max={100}
-                    value={styleOptions.fontSize}
-                    onChange={(e) => updateStyleOption('fontSize', Number(e.currentTarget.value))}
-                    showInput
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                <EuiFieldNumber value={fontSize} onChange={(e) => handleFontSize(e.target.value)} />
+              </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiSwitch
@@ -108,17 +110,34 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               />
             </EuiFlexItem>
             {styleOptions.useColor && (
-              <EuiFlexItem>
-                <CustomRange
-                  customRanges={styleOptions.customRanges}
-                  onCustomRangesChange={(ranges: RangeValue[]) => {
-                    updateStyleOption('customRanges', ranges);
-                  }}
-                />
-              </EuiFlexItem>
+              <>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={i18n.translate('explore.stylePanel.heatmap.exclusive.colorSchema', {
+                      defaultMessage: 'Color Schema',
+                    })}
+                  >
+                    <EuiSelect
+                      options={colorSchemas}
+                      value={styleOptions.colorSchema}
+                      onChange={(e) =>
+                        updateStyleOption('colorSchema', e.target.value as ColorSchemas)
+                      }
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <CustomRange
+                    customRanges={styleOptions.customRanges}
+                    onCustomRangesChange={(ranges: RangeValue[]) => {
+                      updateStyleOption('customRanges', ranges);
+                    }}
+                  />
+                </EuiFlexItem>
+              </>
             )}
           </EuiFlexGroup>
-        </>
+        </EuiPanel>
       ),
     },
   ];

@@ -11,8 +11,7 @@ import { VisColumn, StandardAxes, Positions, AxisRole, VisFieldType } from '../t
 
 export default {
   component: AllAxesOptions,
-  title:
-    'src/plugins/discover/public/application/components/visualizations/style_panel/standard_axes_options',
+  title: 'src/plugins/explore/public/components/visualizations/style_panel/standard_axes_options',
 } as ComponentMeta<typeof AllAxesOptions>;
 
 // Mock data for the component props

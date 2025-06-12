@@ -135,7 +135,6 @@ export interface StandardAxes {
   position: Positions;
   show: boolean;
   style: Record<string, any>;
-  // scale?: AxisScale;
   labels: AxisLabels;
   title: AxisTitle;
   grid: Grid;

@@ -4,41 +4,14 @@
  */
 
 import { i18n } from '@osd/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiPanel,
-  EuiFormRow,
-  EuiFieldNumber,
-} from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiPanel } from '@elastic/eui';
+import React from 'react';
 import { PieChartStyleControls } from './pie_vis_config';
-import { useDebouncedNumericValue } from '../utils/use_debounced_value';
-
+import { DebouncedTruncateField } from '../style_panel/utils';
 interface PieVisOptionsProps {
   styles: PieChartStyleControls['exclusive'];
   onChange: (styles: PieChartStyleControls['exclusive']) => void;
 }
-
-// Component for a single axis title input with debouncing
-const DebouncedTruncateField: React.FC<{
-  value: number;
-  onChange: (value: number) => void;
-  label: string;
-}> = ({ value, onChange, label }) => {
-  const [localValue, handleChange] = useDebouncedNumericValue(value, onChange, {
-    delay: 500,
-    min: 1,
-    defaultValue: 100,
-  });
-
-  return (
-    <EuiFormRow label={label}>
-      <EuiFieldNumber value={localValue} onChange={(e) => handleChange(e.target.value)} />
-    </EuiFormRow>
-  );
-};
 
 export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps) => {
   const updateStyle = <K extends keyof PieChartStyleControls['exclusive']>(
@@ -56,7 +29,7 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
         <EuiFlexItem>
           <EuiSwitch
-            label={i18n.translate('explore.stylePanel.pie.exclusive.donut', {
+            label={i18n.translate('explore.vis.pie.exclusive.donut', {
               defaultMessage: 'Donut',
             })}
             checked={styles.donut}
@@ -65,7 +38,7 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
-            label={i18n.translate('explore.stylePanel.pie.exclusive.showValues', {
+            label={i18n.translate('explore.vis.pie.exclusive.showValues', {
               defaultMessage: 'Show Values',
             })}
             checked={styles.showValues}
@@ -74,7 +47,7 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
-            label={i18n.translate('explore.stylePanel.pie.exclusive.showLabels', {
+            label={i18n.translate('explore.vis.pie.exclusive.showLabels', {
               defaultMessage: 'Show Labels',
             })}
             checked={styles.showLabels}
@@ -86,7 +59,7 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
           <DebouncedTruncateField
             value={styles.truncate ?? 100}
             onChange={(truncateValue) => updateStyle('truncate', truncateValue)}
-            label={i18n.translate('explore.stylePanel.pie.exclusive.labelTruncate', {
+            label={i18n.translate('explore.vis.pie.exclusive.labelTruncate', {
               defaultMessage: 'Label truncate',
             })}
           />

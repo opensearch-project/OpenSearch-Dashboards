@@ -11,8 +11,7 @@ import { Positions } from '../types';
 
 export default {
   component: GeneralVisOptions,
-  title:
-    'src/plugins/discover/public/application/components/visualizations/style_panel/general_vis_options',
+  title: 'src/plugins/explore/public/components/visualizations/style_panel/general_vis_options',
 } as ComponentMeta<typeof GeneralVisOptions>;
 
 // Template for the story

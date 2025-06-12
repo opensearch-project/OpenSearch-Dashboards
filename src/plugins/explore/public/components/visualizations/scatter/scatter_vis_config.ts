@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../../../view_components/utils/use_visualization_types';
+import { VisualizationType } from '../utils/use_visualization_types';
 import { ScatterVisStyleControls, ScatterVisStyleControlsProps } from './scatter_vis_options';
-import { toExpression } from './to_expression';
-import { StandardAxes, PointShape, Positions, AxisRole, AxisPosition } from '../types';
+import { StandardAxes, PointShape, AxisRole, Positions } from '../types';
 
 export interface ExclusiveScatterConfig {
   pointShape: PointShape;
@@ -25,9 +24,6 @@ export interface ScatterChartStyleControls {
   StandardAxes: StandardAxes[];
 
   exclusive: ExclusiveScatterConfig;
-
-  // Additional vis_lib compatibility
-  type: string;
 }
 
 export const defaultScatterChartStyles: ScatterChartStyleControls = {
@@ -46,7 +42,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
   StandardAxes: [
     {
       id: 'Axis-1',
-      position: AxisPosition.BOTTOM,
+      position: Positions.BOTTOM,
       show: true,
       style: {},
       labels: {
@@ -63,7 +59,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
     },
     {
       id: 'Axis-2',
-      position: AxisPosition.LEFT,
+      position: Positions.LEFT,
       show: true,
       style: {},
       labels: {
@@ -79,15 +75,11 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
       axisRole: AxisRole.Y,
     },
   ],
-
-  // Additional properties
-  type: 'scatter',
 };
 
 export const createScatterConfig = (): VisualizationType => ({
   name: 'scatter',
   type: 'scatter',
-  toExpression,
   ui: {
     style: {
       defaults: defaultScatterChartStyles,

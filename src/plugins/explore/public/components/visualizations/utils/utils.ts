@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StandardAxes, ColorSchemas } from '../types';
+import { StandardAxes, ColorSchemas, AxisRole, Positions } from '../types';
 
 export const applyAxisStyling = (axesStyle?: StandardAxes): any => {
   const gridEnabled = axesStyle?.grid.showLines ?? true;
@@ -60,7 +60,7 @@ export function getAxisByRole(axes: StandardAxes[], axisRole: 'x' | 'y'): Standa
   return axes.find((axis) => axis.axisRole === axisRole);
 }
 
-export function generateColorBySchema(schema: ColorSchemas, count: number): string[] {
+export function generateColorBySchema(count: number, schema: ColorSchemas): string[] {
   const colors: string[] = [];
 
   // Define RGB gradient start and end for each schema
@@ -93,4 +93,35 @@ export function generateColorBySchema(schema: ColorSchemas, count: number): stri
     colors.push(hex);
   }
   return colors;
+}
+
+export function swapAxes(axes: StandardAxes[]) {
+  return axes.map((axis) => {
+    if (axis.axisRole === AxisRole.Y) {
+      return {
+        ...axis,
+        axisRole: AxisRole.X,
+        position:
+          axis.position === Positions.LEFT
+            ? Positions.BOTTOM
+            : axis.position === Positions.RIGHT
+            ? Positions.TOP
+            : axis.position,
+      };
+    }
+
+    if (axis.axisRole === AxisRole.X) {
+      return {
+        ...axis,
+        axisRole: AxisRole.Y,
+        position:
+          axis.position === Positions.BOTTOM
+            ? Positions.LEFT
+            : axis.position === Positions.TOP
+            ? Positions.RIGHT
+            : axis.position,
+      };
+    }
+    return axis;
+  });
 }

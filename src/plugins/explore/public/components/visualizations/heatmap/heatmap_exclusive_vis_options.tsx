@@ -12,7 +12,6 @@ import {
   EuiFieldNumber,
   EuiColorPicker,
   EuiFormRow,
-  EuiSpacer,
   EuiPanel,
   EuiSelect,
 } from '@elastic/eui';
@@ -170,8 +169,7 @@ export const HeatmapLabelVisOptions = ({
   };
   const labelType = getLabelType();
   return (
-    <>
-      <EuiSpacer />
+    <EuiPanel paddingSize="s">
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
         <EuiFlexItem>
           <EuiSwitch
@@ -203,33 +201,37 @@ export const HeatmapLabelVisOptions = ({
               />
             </EuiFlexItem>
             {styles.overwriteColor && (
-              <EuiFormRow
-                label={i18n.translate('explore.stylePanel.heatmap.label.color', {
-                  defaultMessage: 'Color',
-                })}
-              >
-                <EuiColorPicker
-                  onChange={(color) => updateLabelOption('color', color)}
-                  color={styles.color}
-                />
-              </EuiFormRow>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={i18n.translate('explore.stylePanel.heatmap.label.color', {
+                    defaultMessage: 'Color',
+                  })}
+                >
+                  <EuiColorPicker
+                    onChange={(color) => updateLabelOption('color', color)}
+                    color={styles.color}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
             )}
             {shouldShowType && (
-              <EuiFormRow
-                label={i18n.translate('explore.stylePanel.heatmap.label.type', {
-                  defaultMessage: 'Type',
-                })}
-              >
-                <EuiSelect
-                  value={styles.type}
-                  onChange={(e) => updateLabelOption('type', e.target.value as any)}
-                  options={labelType}
-                />
-              </EuiFormRow>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={i18n.translate('explore.stylePanel.heatmap.label.type', {
+                    defaultMessage: 'Type',
+                  })}
+                >
+                  <EuiSelect
+                    value={styles.type}
+                    onChange={(e) => updateLabelOption('type', e.target.value as any)}
+                    options={labelType}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
             )}
           </>
         )}
       </EuiFlexGroup>
-    </>
+    </EuiPanel>
   );
 };

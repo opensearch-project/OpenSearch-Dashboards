@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiFieldNumber,
   EuiFlexGroup,
@@ -16,9 +16,7 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
-import { getPositions } from '../utils/collections';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
-import { Positions } from '../types';
 
 interface BasicVisOptionsProps {
   addTimeMarker: boolean;
@@ -134,44 +132,6 @@ export const BasicVisOptions = ({
       </EuiFormRow>
 
       <EuiSpacer size="s" />
-
-      {/* <EuiFormRow
-        label={i18n.translate('explore.stylePanel.basic.showLegend', {
-          defaultMessage: 'Show legend',
-        })}
-      >
-        <EuiSwitch
-          label=""
-          checked={addLegend}
-          onChange={(e) => onAddLegendChange(e.target.checked)}
-        />
-      </EuiFormRow> */}
-
-      {/* {addLegend && (
-        <EuiFormRow
-          label={i18n.translate('explore.stylePanel.basic.legendPosition', {
-            defaultMessage: 'Legend position',
-          })}
-        >
-          <EuiSelect
-            options={legendPositions}
-            value={legendPosition}
-            onChange={(e) => onLegendPositionChange(e.target.value as Positions)}
-          />
-        </EuiFormRow>
-      )}
-
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.basic.showTooltip', {
-          defaultMessage: 'Show tooltip',
-        })}
-      >
-        <EuiSwitch
-          label=""
-          checked={addTooltip}
-          onChange={(e) => onAddTooltipChange(e.target.checked)}
-        />
-      </EuiFormRow> */}
 
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {

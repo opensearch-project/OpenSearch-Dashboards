@@ -81,7 +81,6 @@ export const createSimpleLineChart = (
     layers.push(timeMarkerLayer);
   }
 
-  console.trace('line');
   return {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     title: `${metricName} Over Time`,

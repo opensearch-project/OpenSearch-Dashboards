@@ -4,16 +4,16 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../../../view_components/utils/use_visualization_types';
+import { VisualizationType } from '../utils/use_visualization_types';
 import { MetricVisStyleControlsProps, MetricVisStyleControls } from './metric_vis_options';
-import { toExpression } from './to_expression';
-import { RangeValue } from '../types';
+import { RangeValue, ColorSchemas } from '../types';
 
 export interface MetricChartStyleControls {
   showTitle: boolean;
   title: string;
   fontSize: number;
   useColor: boolean;
+  colorSchema: ColorSchemas;
   customRanges?: RangeValue[];
 }
 
@@ -22,12 +22,12 @@ export const defaultMetricChartStyles: MetricChartStyleControls = {
   title: '',
   fontSize: 60,
   useColor: false,
+  colorSchema: ColorSchemas.BLUES,
 };
 
 export const createMetricConfig = (): VisualizationType => ({
   name: 'metric',
   type: 'metric',
-  toExpression,
   ui: {
     style: {
       defaults: defaultMetricChartStyles,
