@@ -3,44 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ColorSchemas, LabelAggregationType, VisColumn } from '../types';
+import { LabelAggregationType, VisColumn } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { generateColorBySchema } from '../utils/utils';
-
-// export function generateColorBySchema(count: number, schema: ColorSchemas): string[] {
-//   const colors: string[] = [];
-
-//   // Define RGB gradient start and end for each schema
-//   const colorRanges: Record<
-//     ColorSchemas,
-//     { start: [number, number, number]; end: [number, number, number] }
-//   > = {
-//     [ColorSchemas.BLUES]: { start: [173, 216, 230], end: [0, 0, 51] },
-//     [ColorSchemas.GREENS]: { start: [204, 255, 204], end: [0, 51, 0] },
-//     [ColorSchemas.GREYS]: { start: [240, 240, 240], end: [51, 51, 51] },
-//     [ColorSchemas.REDS]: { start: [255, 204, 204], end: [102, 0, 0] },
-//     [ColorSchemas.YELLOWORANGE]: { start: [255, 255, 204], end: [204, 102, 0] },
-//     [ColorSchemas.GREENBLUE]: { start: [204, 255, 255], end: [0, 102, 102] },
-//   };
-
-//   const range = colorRanges[schema];
-//   if (!range) return colors;
-
-//   const [startR, startG, startB] = range.start;
-//   const [endR, endG, endB] = range.end;
-
-//   for (let i = 0; i < count; i++) {
-//     const t = count === 1 ? 0 : i / (count - 1);
-//     const r = Math.round(startR + (endR - startR) * t);
-//     const g = Math.round(startG + (endG - startG) * t);
-//     const b = Math.round(startB + (endB - startB) * t);
-//     const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b
-//       .toString(16)
-//       .padStart(2, '0')}`;
-//     colors.push(hex);
-//   }
-//   return colors;
-// }
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createlabelLayer = (
