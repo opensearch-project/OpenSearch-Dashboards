@@ -85,6 +85,11 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
     top: 0;
     right: 0;
   }
+
+  &__experienceBannerWrapper {
+    margin-bottom: $euiSizeS;
+    margin-top: $euiSizeS;
+  }
 }
 
 // TopNav styles for the Discover
