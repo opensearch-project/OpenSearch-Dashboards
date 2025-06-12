@@ -19,7 +19,7 @@ import { ExploreServices } from '../../../../../../types';
 import { Chart } from './utils';
 import { useDispatch, useSelector } from '../../utils/state_management';
 import { setInterval } from '../../../../../utils/state_management/slices/legacy_slice';
-import { executeHistogramQuery } from '../../../../../utils/state_management/actions/query_actions';
+import { executeQueries } from '../../../../../utils/state_management/actions/query_actions';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
@@ -47,8 +47,8 @@ export const DiscoverChart = ({
   const dispatch = useDispatch();
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
-    // Replace refetch$.next() with executeHistogramQuery to only update histogram
-    dispatch(executeHistogramQuery({ services }) as any);
+    // Replace refetch$.next() with executeQueries to update histogram
+    dispatch(executeQueries({ services }) as any);
   };
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {

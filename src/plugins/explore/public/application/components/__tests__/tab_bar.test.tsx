@@ -8,8 +8,8 @@ import { Provider } from 'react-redux';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { TabBar } from '../tab_bar';
-import { uiReducer } from '../../state_management/slices/ui_slice';
-import { queryReducer } from '../../state_management/slices/query_slice';
+import { uiReducer } from '../../utils/state_management/slices/ui_slice';
+import { queryReducer } from '../../utils/state_management/slices/query_slice';
 
 // Mock the transaction actions
 jest.mock('../../state_management/actions/transaction_actions', () => ({
