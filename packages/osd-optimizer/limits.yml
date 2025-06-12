@@ -1,21 +1,21 @@
 pageLoadAssetSize:
   advancedSettings: 27596
   apmOss: 18996
-  assistantDashboards: 521995
   bfetch: 41874
   charts: 159211
   console: 46235
   contentManagement: 189948
-  core: 995264
+  core: 1001367
   dashboard: 694542
-  data: 2701242
+  data: 3277774
   dataExplorer: 142726
   dataImporter: 22156
   dataSource: 24232
-  dataSourceManagement: 541476
+  dataSourceManagement: 548234
   devTools: 66175
-  discover: 823326
+  discover: 825721
   embeddable: 242671
+  explore: 999025
   expressions: 224120
   home: 75810
   indexPatternManagement: 154366
@@ -28,7 +28,7 @@ pageLoadAssetSize:
   opensearchDashboardsLegacy: 107855
   opensearchDashboardsOverview: 56426
   opensearchDashboardsReact: 162353
-  opensearchDashboardsUtils: 233344
+  opensearchDashboardsUtils: 238693
   opensearchUiShared: 326798
   queryEnhancements: 437883
   regionMap: 66098
