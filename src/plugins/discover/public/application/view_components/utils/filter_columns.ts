@@ -15,7 +15,8 @@ import { getIndexPatternFieldList } from '../../components/sidebar/lib/get_index
  * @param columns Array of column names
  * @param indexPattern Index pattern object
  * @param defaultColumns Array of default columns
- * @param modifyColumn Booelan of 'discover:modifyColumnsOnSwitch'
+ * @param modifyColumn Boolean of 'discover:modifyColumnsOnSwitch'
+ * @param fieldCounts Number of times a field appears in results
  */
 export function filterColumns(
   columns: string[],

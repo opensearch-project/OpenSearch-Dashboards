@@ -27,13 +27,15 @@ import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';
 import { filterColumns } from '../utils/filter_columns';
+import { SearchData } from '../utils/use_search';
 
 interface Props {
   rows?: OpenSearchSearchHit[];
   scrollToTop?: () => void;
+  fetchState?: SearchData;
 }
 
-export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
+export const DiscoverTable = ({ rows, scrollToTop, fetchState }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
     uiSettings,
@@ -57,9 +59,10 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
       columns,
       indexPattern,
       uiSettings.get(DEFAULT_COLUMNS_SETTING),
-      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
+      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+      fetchState?.fieldCounts
     );
-  }, [columns, indexPattern, uiSettings]);
+  }, [columns, fetchState, indexPattern, uiSettings]);
   const { sort } = useSelector((state) => {
     const stateSort = state.logs.sort;
     // check if state sort is not undefined, otherwise assign an empty array

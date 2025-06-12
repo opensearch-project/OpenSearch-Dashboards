@@ -27,13 +27,15 @@ import { buildColumns } from '../../application/legacy/discover/application/util
 import { filterColumns } from '../../application/legacy/discover/application/view_components/utils/filter_columns';
 import { getLegacyDisplayedColumns } from '../../helpers/data_table_helper';
 import { getDocViewsRegistry } from '../../application/legacy/discover/opensearch_dashboards_services';
+import { SearchData } from '../../application/legacy/discover/application/view_components/utils/use_search';
 
 interface Props {
   rows?: Array<OpenSearchSearchHit<Record<string, any>>>;
   scrollToTop?: () => void;
+  fetchState?: SearchData;
 }
 
-export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
+export const ExploreDataTable = ({ rows, scrollToTop, fetchState }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
     uiSettings,
@@ -63,7 +65,8 @@ export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
       columns,
       indexPattern,
       uiSettings.get(DEFAULT_COLUMNS_SETTING),
-      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
+      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+      fetchState?.fieldCounts
     );
 
     let adjustedColumns = buildColumns(filteredColumns);
@@ -80,7 +83,7 @@ export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
     );
 
     return displayedColumns;
-  }, [columns, indexPattern, uiSettings]);
+  }, [columns, fetchState, indexPattern, uiSettings]);
 
   const docViewsRegistry = getDocViewsRegistry();
 
