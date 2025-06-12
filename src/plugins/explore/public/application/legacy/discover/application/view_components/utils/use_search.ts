@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IFieldType } from '../../../../../../../../data/common';
+
 // ResultStatus enum for explore plugin
 // This replaces the use_search hook since logic moved to middleware
 export enum ResultStatus {

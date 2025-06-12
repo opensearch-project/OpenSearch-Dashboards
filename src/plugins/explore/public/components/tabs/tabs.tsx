@@ -5,7 +5,7 @@
 
 import './tabs.scss';
 import React from 'react';
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 export interface IExploreTabsProps {
   tabs: Array<{

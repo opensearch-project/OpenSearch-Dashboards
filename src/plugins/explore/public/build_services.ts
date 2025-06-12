@@ -13,12 +13,14 @@ import { createSavedExploreLoader } from './saved_explore';
 import { getHistory } from './application/legacy/discover/opensearch_dashboards_services';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { getSavedExploreById as getSavedExploreByIdFromClient } from './application/utils/hooks/use_saved_explore';
+import { VisualizationRegistryService } from './services/visualization_registry_service';
 
 export function buildServices(
   core: CoreStart,
   plugins: ExploreStartDependencies,
   context: PluginInitializerContext,
-  tabRegistry: TabRegistryService
+  tabRegistry: TabRegistryService,
+  visualizationRegistry: VisualizationRegistryService
 ): ExploreServices {
   const services: SavedObjectOpenSearchDashboardsServices = {
     savedObjectsClient: core.savedObjects.client,
@@ -72,12 +74,13 @@ export function buildServices(
     // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
     store: undefined, // Will be set by the store
     viewRegistry: undefined, // Will be replaced with tabRegistry
-    expressions: undefined, // Not available in ExploreStartDependencies
     embeddable: plugins.embeddable,
     scopedHistory: undefined, // Will be set by the app
     osdUrlStateStorage: undefined, // Will be set by the app
 
     // Explore-specific services
     tabRegistry,
+    visualizationRegistry,
+    expressions: plugins.expressions,
   };
 }
