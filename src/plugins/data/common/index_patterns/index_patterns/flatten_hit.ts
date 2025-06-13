@@ -43,12 +43,12 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';
     _.forOwn(obj, function (val, key) {
       key = keyPrefix + key;
-
       if (deep) {
         const field = fields(key);
         const isNestedField = field && field.type === 'nested';
         const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.first(val));
         if (isArrayOfObjects && !isNestedField) {
+          flat[key] = val;
           _.each(val, (v) => flatten(v, key));
           return;
         }
