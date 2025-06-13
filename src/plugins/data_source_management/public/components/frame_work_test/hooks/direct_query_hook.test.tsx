@@ -77,10 +77,17 @@ describe('useDirectQuery', () => {
     const { result } = renderHook(() => useDirectQuery(httpMock, notificationsMock));
 
     await act(async () => {
-      await result.current.startLoading({ datasource: 'test_source' });
+      await result.current.startLoading({
+        datasource: 'test_source',
+        query: 'SELECT 1',
+        lang: 'sql',
+      });
     });
 
-    expect(fetchMock).toHaveBeenCalledWith({ datasource: 'test_source' }, undefined);
+    expect(fetchMock).toHaveBeenCalledWith(
+      { datasource: 'test_source', query: 'SELECT 1', lang: 'sql' },
+      undefined
+    );
     expect(startPollingMock).toHaveBeenCalledWith({ queryId: 'test_query_id' });
   });
 
@@ -91,7 +98,11 @@ describe('useDirectQuery', () => {
     const { result } = renderHook(() => useDirectQuery(httpMock, notificationsMock));
 
     await act(async () => {
-      await result.current.startLoading({ datasource: 'test_source' });
+      await result.current.startLoading({
+        datasource: 'test_source',
+        query: 'SELECT 1',
+        lang: 'sql',
+      });
     });
 
     expect(result.current.loadStatus).toBe(DirectQueryLoadingStatus.FAILED);
