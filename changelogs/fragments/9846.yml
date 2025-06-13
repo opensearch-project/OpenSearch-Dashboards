@@ -1,0 +1,2 @@
+chore:
+- Add package resolutions to fix braces CVE-2024-4068 ([#9846](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9846))
