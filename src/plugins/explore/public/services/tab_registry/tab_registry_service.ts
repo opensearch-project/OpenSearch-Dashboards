@@ -29,14 +29,11 @@ export interface TabDefinition {
   // Language-aware query handling
   supportedLanguages: string[];
 
-  // Transform complete query object instead of just string
-  prepareQuery: (query: Query) => Query;
+  // Transform complete query object instead of just string (now optional)
+  prepareQuery?: (query: Query) => Query;
 
-  // Optional data processor for raw results
-  dataProcessor?: (
-    rawResults: Record<string, unknown>,
-    indexPattern: Record<string, unknown>
-  ) => Record<string, unknown>;
+  // Optional results processor for raw results
+  resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;
 
   // UI Components
   component: React.ComponentType<TabComponentProps>;

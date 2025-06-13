@@ -8,10 +8,10 @@ import { Provider } from 'react-redux';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { QueryPanel } from '../query_panel';
-import { queryReducer } from '../../state_management/slices/query_slice';
-import { uiReducer } from '../../state_management/slices/ui_slice';
-import { resultsReducer } from '../../state_management/slices/results_slice';
-import { transactionReducer } from '../../state_management/slices/transaction_slice';
+import { queryReducer } from '../../utils/state_management/slices/query_slice';
+import { uiReducer } from '../../utils/state_management/slices/ui_slice';
+import { resultsReducer } from '../../utils/state_management/slices/results_slice';
+// Transaction functionality is handled in ui_slice
 
 // Mock the DefaultInput component
 jest.mock(
@@ -91,7 +91,6 @@ describe('QueryPanel', () => {
         query: queryReducer,
         ui: uiReducer,
         results: resultsReducer,
-        transaction: transactionReducer,
       },
       preloadedState: {
         query: {
@@ -218,7 +217,6 @@ describe('QueryPanel', () => {
         query: queryReducer,
         ui: uiReducer,
         results: resultsReducer,
-        transaction: transactionReducer,
       },
       preloadedState: {
         query: {
@@ -258,7 +256,6 @@ describe('QueryPanel', () => {
         query: queryReducer,
         ui: uiReducer,
         results: resultsReducer,
-        transaction: transactionReducer,
       },
       preloadedState: {
         query: {
