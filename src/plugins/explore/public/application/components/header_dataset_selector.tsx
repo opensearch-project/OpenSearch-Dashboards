@@ -8,12 +8,13 @@ import { useDispatch } from 'react-redux';
 import { DatasetSelector, DatasetSelectorAppearance, Query } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
-import {
-  updateQueryOnly,
-  updateDatasetOnly,
-  executeHybridQuery,
-} from '../utils/state_management/actions/query_actions';
+import { executeQueries } from '../utils/state_management/actions/query_actions';
 import { clearResults } from '../utils/state_management/slices/results_slice';
+import {
+  beginTransaction,
+  finishTransaction,
+} from '../utils/state_management/actions/transaction_actions';
+import { setDataset, setQuery } from '../utils/state_management/slices/query_slice';
 
 export interface HeaderDatasetSelectorProps {
   datasetSelectorRef: React.RefObject<HTMLDivElement>;
@@ -41,17 +42,21 @@ export const HeaderDatasetSelector: React.FC<HeaderDatasetSelectorProps> = ({
   const handleDatasetSelect = useCallback(
     (query: Query, dateRange?: any) => {
       if (!isMounted.current || !query.dataset) return;
-
       const queryStringState = services.data.query.queryString.getQuery();
 
-      // Update Redux with separate actions (no transaction needed for single updates)
-      dispatch(updateQueryOnly(queryStringState));
+      dispatch(beginTransaction());
+      try {
+        // Clear results cache since dataset changed (component decision)
+        dispatch(clearResults());
 
-      // Clear results cache since dataset changed
-      dispatch(clearResults());
+        // Update dataset
+        dispatch(setQuery(queryStringState));
 
-      // Execute hybrid query strategy after dataset change
-      dispatch(executeHybridQuery({ services }) as any);
+        // Execute queries
+        dispatch(executeQueries({ clearCache: true, services }) as any);
+      } finally {
+        dispatch(finishTransaction());
+      }
     },
     [dispatch, services]
   );

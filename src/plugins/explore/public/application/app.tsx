@@ -19,7 +19,7 @@ import {
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../types';
 import { RootState } from './utils/state_management/store';
-import { ResultStatus } from './legacy/discover/application/view_components/utils/use_search';
+import { ResultStatus } from './utils/state_management/types';
 import { TopNav } from './legacy/discover/application/view_components/canvas/top_nav';
 import { DiscoverChartContainer } from './legacy/discover/application/view_components/canvas/discover_chart_container';
 import { QueryPanel } from './components/query_panel';
@@ -50,11 +50,16 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
       return [];
     }
 
-    const cacheKey = executionCacheKeys[0];
-    const results = state.results[cacheKey];
-    const hits = (results as any)?.hits?.hits || [];
+    // Try all available cache keys to find one with results (same logic as TabContent)
+    for (const cacheKey of executionCacheKeys) {
+      const results = state.results[cacheKey];
+      if (results) {
+        const hits = (results as any)?.hits?.hits || [];
+        return hits;
+      }
+    }
 
-    return hits;
+    return [];
   });
 
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
@@ -150,9 +155,14 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
                   <EuiResizablePanel initialSize={80} mode="main" paddingSize="none">
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                       {/* Chart container from legacy - show above tabs when there are results */}
-                      {(status === ResultStatus.READY ||
-                        (status === ResultStatus.LOADING && !!rows?.length) ||
-                        (status === ResultStatus.ERROR && !!rows?.length)) && (
+                      {(() => {
+                        const showChart =
+                          status === ResultStatus.READY ||
+                          (status === ResultStatus.LOADING && !!rows?.length) ||
+                          (status === ResultStatus.ERROR && !!rows?.length);
+
+                        return showChart;
+                      })() && (
                         <div className="dscCanvas__chart">
                           <DiscoverChartContainer />
                         </div>
