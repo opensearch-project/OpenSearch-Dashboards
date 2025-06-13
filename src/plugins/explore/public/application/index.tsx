@@ -15,6 +15,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboa
 import { IndexPatternProvider } from './components/index_pattern_context';
 import { ExploreFlavorId } from '../../common';
 import { TracesPage } from './pages/traces';
+import { MetricsPage } from './pages/metrics';
 
 // Route component props interface
 interface ExploreRouteProps {
@@ -31,6 +32,8 @@ const renderExploreFlavor = (flavorId: ExploreFlavorId, props: ExploreComponentP
       return <LogsPage setHeaderActionMenu={props.setHeaderActionMenu} />;
     case 'traces':
       return <TracesPage setHeaderActionMenu={props.setHeaderActionMenu} />;
+    case 'metrics':
+      return <MetricsPage setHeaderActionMenu={props.setHeaderActionMenu} />;
     default:
       const invalidId: never = flavorId;
       return `Unexpected explore flavor id: ${invalidId}`;

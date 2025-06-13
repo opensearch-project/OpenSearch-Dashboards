@@ -329,6 +329,12 @@ export class ExplorePlugin
         title: 'Traces',
       })
     );
+    core.application.register(
+      createExploreApp(EXPLORE_FLAVOR_ID.METRICS, {
+        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.METRICS}`,
+        title: 'Metrics',
+      })
+    );
     core.application.register(createExploreApp());
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
@@ -345,6 +351,12 @@ export class ExplorePlugin
       },
       {
         id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.TRACES}`,
+        category: undefined,
+        order: 300,
+        parentNavLinkId: PLUGIN_ID,
+      },
+      {
+        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.METRICS}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,

@@ -8,6 +8,7 @@ export const PLUGIN_NAME = 'Discover';
 export const EXPLORE_FLAVOR_ID = {
   LOGS: 'logs',
   TRACES: 'traces',
+  METRICS: 'metrics',
 } as const;
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
