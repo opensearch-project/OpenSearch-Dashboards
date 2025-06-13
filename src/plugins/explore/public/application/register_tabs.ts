@@ -24,20 +24,6 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     order: 10,
     supportedLanguages: ['PPL'],
 
-    prepareQuery: (query: import('../../../data/common').Query) => {
-      if (query.language === 'PPL') {
-        // Remove stats pipe for logs view
-        return {
-          ...query,
-          query:
-            typeof query.query === 'string'
-              ? query.query.replace(/\s*\|\s*stats.*$/i, '')
-              : query.query,
-        };
-      }
-      return query;
-    },
-
     component: LogsTabComponent,
 
     // Add lifecycle hooks
