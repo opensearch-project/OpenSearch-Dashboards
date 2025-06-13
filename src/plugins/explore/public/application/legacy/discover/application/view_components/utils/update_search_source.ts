@@ -9,8 +9,8 @@ import {
   indexPatterns as indexPatternUtils,
   AggConfigs,
 } from '../../../../../../../../data/public';
-import { DiscoverServices } from '../../../build_services';
 import { SortOrder } from '../../../../../../types/saved_explore_types';
+import { ExploreServices } from '../../../../../../types';
 import { getSortForSearchSource } from './get_sort_for_search_source';
 import {
   SORT_DEFAULT_ORDER_SETTING,
@@ -19,7 +19,7 @@ import {
 
 interface Props {
   indexPattern: IndexPattern;
-  services: DiscoverServices;
+  services: ExploreServices;
   sort: SortOrder[] | undefined;
   searchSource?: ISearchSource;
   histogramConfigs?: AggConfigs;
