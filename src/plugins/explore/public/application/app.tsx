@@ -37,6 +37,7 @@ import { ExploreDataTable } from '../components/data_table/explore_data_table';
 import { ExploreTabs } from '../components/tabs/tabs';
 import { useHeaderVariants } from './utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../components/experience_banners/new_experience_banner';
+import { VisualizationContainer } from '../components/visualizations/visualization_container';
 
 /**
  * Main application component for the Explore plugin
@@ -63,6 +64,23 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
       if (results) {
         const hits = results.hits?.hits || [];
         return hits;
+      }
+    }
+
+    return [];
+  });
+
+  const fieldSchema = useSelector((state: RootState) => {
+    const executionCacheKeys = state.ui?.executionCacheKeys || [];
+    if (executionCacheKeys.length === 0) {
+      return [];
+    }
+
+    // Try all available cache keys to find one with field schema
+    for (const cacheKey of executionCacheKeys) {
+      const results = state.results[cacheKey];
+      if (results && results.fieldSchema) {
+        return results.fieldSchema;
       }
     }
 
@@ -112,6 +130,11 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
       id: 'explore_logs_tab',
       name: 'Logs',
       content: <ExploreDataTable rows={rows} />,
+    },
+    {
+      id: 'explore_visualization_tab',
+      name: 'Visualization',
+      content: <MemoizedVisualizationContainer rows={rows} fieldSchema={fieldSchema} />,
     },
   ];
 
@@ -210,3 +233,5 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
     </EuiErrorBoundary>
   );
 };
+
+const MemoizedVisualizationContainer = React.memo(VisualizationContainer);
