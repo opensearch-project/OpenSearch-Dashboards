@@ -30,52 +30,151 @@
 
 const path = require('path');
 
-const createLangWorkerConfig = (lang) => ({
+const commonConfig = {
   mode: 'production',
-  entry: path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`),
-  output: {
-    path: path.resolve(__dirname, 'target/public'),
-    filename: `${lang}.editor.worker.js`,
-    hashFunction: 'Xxh64',
-  },
+  devtool: 'source-map',
   resolve: {
-    modules: ['node_modules'],
-    extensions: ['.js', '.ts', '.tsx'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs'],
+    alias: {
+      'monaco-editor': path.resolve(__dirname, '../../node_modules/monaco-editor'),
+    },
+    // Resolve modules prioritizing source over target
+    modules: [path.resolve(__dirname, 'src'), 'node_modules'],
   },
-  stats: 'errors-only',
   module: {
     rules: [
       {
-        test: /\.(js|ts)$/,
-        exclude: /node_modules/,
+        test: /\.tsx?$/,
         use: {
           loader: 'babel-loader',
           options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  targets: {
+                    browsers: ['last 2 versions', 'ie >= 11'],
+                  },
+                  modules: false,
+                },
+              ],
+              '@babel/preset-typescript',
+            ],
+            plugins: [
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-proposal-optional-chaining',
+              '@babel/plugin-transform-class-static-block',
+              '@babel/plugin-transform-private-methods',
+            ],
+          },
+        },
+        exclude: [/node_modules(?!\/antlr4ng)/, /target/, path.resolve(__dirname, 'target')],
+      },
+      {
+        // Handle all JavaScript files with Babel transformation
+        test: /\.js$/,
+        exclude: [/node_modules(?!\/antlr4ng)/, path.resolve(__dirname, 'target')],
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  targets: {
+                    browsers: ['last 2 versions', 'ie >= 11'],
+                  },
+                  modules: false,
+                },
+              ],
+            ],
+            plugins: [
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-proposal-optional-chaining',
+              '@babel/plugin-transform-class-static-block',
+              '@babel/plugin-transform-private-methods',
+            ],
           },
         },
       },
-      // Process CSS files for Monaco editor
+      {
+        // Handle antlr4ng and monaco-editor modules specifically
+        test: /\.m?js$/,
+        include: /node_modules[/\\](antlr4ng|monaco-editor)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  targets: {
+                    browsers: ['last 2 versions', 'ie >= 11'],
+                  },
+                  modules: false,
+                },
+              ],
+            ],
+            plugins: [
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-proposal-optional-chaining',
+              '@babel/plugin-transform-class-static-block',
+              '@babel/plugin-transform-private-methods',
+            ],
+          },
+        },
+      },
+      {
+        // Handle ANTLR generated TypeScript files specifically
+        test: /\.ts$/,
+        include: [
+          path.resolve(__dirname, 'src/ppl/.generated'),
+          path.resolve(__dirname, 'src/sql/.generated'),
+        ],
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  targets: {
+                    browsers: ['last 2 versions', 'ie >= 11'],
+                  },
+                  modules: false,
+                },
+              ],
+              '@babel/preset-typescript',
+            ],
+            plugins: [
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-transform-class-static-block',
+              '@babel/plugin-transform-private-methods',
+            ],
+          },
+        },
+      },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
-      // Handle font files for codicons
       {
-        test: /\.(woff|woff2|ttf|eot)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'fonts/',
-            },
-          },
-        ],
+        test: /\.(woff|woff2|eot|ttf|otf)$/,
+        use: 'file-loader',
       },
     ],
   },
+};
+
+const createLangWorkerConfig = (lang) => ({
+  ...commonConfig,
+  entry: path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`),
+  output: {
+    path: path.resolve(__dirname, 'target/public'),
+    filename: `${lang}.editor.worker.js`,
+    globalObject: 'self',
+  },
+  stats: 'errors-only',
 });
 
 module.exports = [createLangWorkerConfig('xjson'), createLangWorkerConfig('json')];
