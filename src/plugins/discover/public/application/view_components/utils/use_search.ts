@@ -256,6 +256,9 @@ export const useSearch = (services: DiscoverViewServices) => {
     // Abort any in-progress requests before fetching again
     if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
     fetchStateRef.current.abortController = new AbortController();
+
+    fetchStateRef.current.fieldCounts = {};
+
     const histogramConfigs = dataset.timeFieldName
       ? createHistogramConfigs(dataset, interval || 'auto', data)
       : undefined;
@@ -456,6 +459,8 @@ export const useSearch = (services: DiscoverViewServices) => {
       if (fetchForMaxCsvStateRef.current.abortController)
         fetchForMaxCsvStateRef.current.abortController.abort();
       fetchForMaxCsvStateRef.current.abortController = new AbortController();
+
+      fetchStateRef.current.fieldCounts = {};
 
       const searchSource = await updateSearchSource({
         indexPattern: dataset,
