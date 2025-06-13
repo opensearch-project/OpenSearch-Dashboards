@@ -5454,21 +5454,21 @@
       "message": "Type '{ name: string; dataType: string; }' is not assignable to type 'CachedColumn'."
     },
     {
-      "file": "src/plugins/data_source_management/public/components/frame_work_test/hooks/drect_query_hook.test.tsx",
+      "file": "src/plugins/data_source_management/public/components/frame_work_test/hooks/direct_query_hook.test.tsx",
       "line": 31,
       "column": 7,
       "code": "TS6133",
       "message": "'usePollingMock' is declared but its value is never read."
     },
     {
-      "file": "src/plugins/data_source_management/public/components/frame_work_test/hooks/drect_query_hook.test.tsx",
+      "file": "src/plugins/data_source_management/public/components/frame_work_test/hooks/direct_query_hook.test.tsx",
       "line": 80,
       "column": 41,
       "code": "TS2345",
       "message": "Argument of type '{ datasource: string; }' is not assignable to parameter of type 'DirectQueryRequest'."
     },
     {
-      "file": "src/plugins/data_source_management/public/components/frame_work_test/hooks/drect_query_hook.test.tsx",
+      "file": "src/plugins/data_source_management/public/components/frame_work_test/hooks/direct_query_hook.test.tsx",
       "line": 94,
       "column": 41,
       "code": "TS2345",
