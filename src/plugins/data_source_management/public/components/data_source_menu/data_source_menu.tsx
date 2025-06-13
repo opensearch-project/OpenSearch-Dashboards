@@ -4,7 +4,6 @@
  */
 
 import React, { ReactElement } from 'react';
-
 import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';
 import { DataSourceMultiSelectable } from '../data_source_multi_selectable';
@@ -26,6 +25,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     hideLocalCluster,
     application,
     onManageDataSource,
+    scope,
   } = props;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
@@ -48,6 +48,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         onSelectedDataSources={onSelectedDataSources}
         uiSettings={uiSettings}
         application={application}
+        scope={scope}
       />
     );
   }
@@ -65,6 +66,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         onSelectedDataSources={onSelectedDataSources!}
         uiSettings={uiSettings}
         application={application}
+        scope={scope}
       />
     );
   }
@@ -92,6 +94,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         fullWidth={fullWidth}
         uiSettings={uiSettings}
         application={application}
+        scope={scope}
       />
     );
   }
@@ -118,6 +121,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         displayAllCompatibleDataSources={displayAllCompatibleDataSources}
         uiSettings={uiSettings}
         application={application}
+        scope={scope}
       />
     );
   }

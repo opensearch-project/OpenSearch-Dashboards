@@ -6,7 +6,12 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { SavedObjectsClientContract, ToastsStart, SavedObject } from 'opensearch-dashboards/public';
+import {
+  SavedObjectsClientContract,
+  ToastsStart,
+  SavedObject,
+  UiSettingScope,
+} from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import {
   getDataSourcesWithFields,
@@ -20,6 +25,7 @@ import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selector.scss';
 import { DataSourceOption } from '../data_source_menu/types';
+import { getWorkspaces } from '../utils';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSourcesManagement.localCluster', {
@@ -168,7 +174,13 @@ export class DataSourceSelector extends React.Component<
         return;
       }
 
-      const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
+      const currentWorkspaceId = getWorkspaces().currentWorkspaceId$.getValue();
+      const scope: UiSettingScope = !!currentWorkspaceId
+        ? UiSettingScope.WORKSPACE
+        : UiSettingScope.GLOBAL;
+
+      const defaultDataSource =
+        (await getDefaultDataSourceId(this.props.uiSettings, scope)) ?? null;
       // 5.1 Empty default option, [], just want to show placeholder
       if (this.props.defaultOption?.length === 0) {
         this.setState({
