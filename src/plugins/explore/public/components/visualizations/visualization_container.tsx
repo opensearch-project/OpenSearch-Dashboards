@@ -4,11 +4,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { DiscoverViewServices } from '../../application/legacy/discover/build_services';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { useDiscoverContext } from '../../application/legacy/discover/application/view_components/context';
 
-import { SearchData } from '../../application/legacy/discover/application/view_components/utils';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { LineChartStyleControls } from './line/line_vis_config';
 import { Visualization } from './visualization';
@@ -21,16 +18,25 @@ import {
 import './visualization_container.scss';
 import { VisColumn } from './types';
 import { toExpression } from './utils/to_expression';
+import { OpenSearchSearchHit } from '../../types/doc_views_types';
+import { IFieldType } from '../../../../data/common';
+import { useIndexPatternContext } from '../../application/components/index_pattern_context';
+import { ExploreServices } from '../../types';
 
-export const VisualizationContainer = ({ rows, fieldSchema }: SearchData) => {
-  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+interface Props {
+  rows?: Array<OpenSearchSearchHit<Record<string, any>>>;
+  fieldSchema?: Array<Partial<IFieldType>>;
+}
+
+export const VisualizationContainer = ({ rows, fieldSchema }: Props) => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const {
     data: {
       query: { filterManager, queryString, timefilter },
     },
     expressions: { ReactExpressionRenderer },
   } = services;
-  const { indexPattern } = useDiscoverContext();
+  const { indexPattern } = useIndexPatternContext();
 
   const [visualizationData, setVisualizationData] = useState<VisualizationTypeResult | undefined>(
     undefined
