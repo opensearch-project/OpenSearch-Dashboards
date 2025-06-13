@@ -183,11 +183,11 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef }) => {
       // Update query string in Redux
       dispatch(setQueryString(localQuery));
 
-      // Clear results cache (component decision)
+      // EXPLICIT cache clear - separate cache logic
       dispatch(clearResults());
 
-      // Execute queries
-      await dispatch(executeQueries({ clearCache: true, services }) as any);
+      // Execute queries - cache already cleared
+      await dispatch(executeQueries({ services }) as any);
     } finally {
       dispatch(finishTransaction());
     }

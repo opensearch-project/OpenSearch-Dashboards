@@ -9,7 +9,11 @@ import { EuiTabs, EuiTab } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
 import { setActiveTab } from '../utils/state_management/slices/ui_slice';
-import { executeQueries } from '../utils/state_management/actions/query_actions';
+import {
+  executeQueries,
+  defaultPrepareQuery,
+} from '../utils/state_management/actions/query_actions';
+import { createCacheKey } from '../utils/state_management/handlers/query_handler';
 import {
   beginTransaction,
   finishTransaction,
@@ -35,6 +39,7 @@ export const TabBar: React.FC = () => {
   const activeTabId = useSelector(selectActiveTabId);
   const queryLanguage = useSelector(selectQueryLanguage);
   const query = useSelector(selectQuery);
+  const results = useSelector((state: any) => state.results);
 
   // Get all tabs from tabRegistry service
   const allTabs = useMemo(() => {
@@ -47,7 +52,7 @@ export const TabBar: React.FC = () => {
     return allTabs.filter((tab: TabDefinition) => tab.supportedLanguages.includes(queryLanguage));
   }, [allTabs, queryLanguage]);
 
-  // Handle tab click with transaction pattern
+  // Handle tab click with special cache-aware logic
   const handleTabClick = useCallback(
     (tabId: string) => {
       if (tabId === activeTabId) return;
@@ -55,12 +60,32 @@ export const TabBar: React.FC = () => {
       dispatch(beginTransaction());
       try {
         dispatch(setActiveTab(tabId));
-        dispatch(executeQueries({ services }) as any); // No clearCache - use cache if available
+
+        // SPECIAL: Check cache first, only execute if cache miss
+        // Get new activeTab's prepareQuery to check cache
+        const newActiveTab = services.tabRegistry?.getTab(tabId);
+        const activeTabPrepareQuery = newActiveTab?.prepareQuery || defaultPrepareQuery;
+        const activeTabQuery = activeTabPrepareQuery(query);
+        const timeRange = services.data.query.timefilter.timefilter.getTime();
+        const activeTabCacheKey = createCacheKey(activeTabQuery, timeRange);
+
+        // Also check if we need histogram data
+        const defaultQuery = defaultPrepareQuery(query);
+        const defaultCacheKey = createCacheKey(defaultQuery, timeRange);
+
+        // Only execute if cache miss
+        const needsActiveTabQuery = !results[activeTabCacheKey];
+        const needsDefaultQuery = !results[defaultCacheKey];
+
+        if (needsActiveTabQuery || needsDefaultQuery) {
+          // NO clearResults() - preserve existing cache
+          dispatch(executeQueries({ services }) as any);
+        }
       } finally {
         dispatch(finishTransaction());
       }
     },
-    [dispatch, activeTabId, services]
+    [dispatch, activeTabId, services, query, results]
   );
 
   // If no tabs support the current language, show all tabs

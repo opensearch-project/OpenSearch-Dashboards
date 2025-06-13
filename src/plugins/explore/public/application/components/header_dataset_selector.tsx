@@ -46,14 +46,14 @@ export const HeaderDatasetSelector: React.FC<HeaderDatasetSelectorProps> = ({
 
       dispatch(beginTransaction());
       try {
-        // Clear results cache since dataset changed (component decision)
+        // EXPLICIT cache clear - separate cache logic
         dispatch(clearResults());
 
         // Update dataset
         dispatch(setQuery(queryStringState));
 
-        // Execute queries
-        dispatch(executeQueries({ clearCache: true, services }) as any);
+        // Execute queries - cache already cleared
+        dispatch(executeQueries({ services }) as any);
       } finally {
         dispatch(finishTransaction());
       }
