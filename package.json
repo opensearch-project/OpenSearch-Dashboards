@@ -58,6 +58,7 @@
     "test:ftr:server": "scripts/use_node scripts/functional_tests_server",
     "test:ftr:runner": "scripts/use_node scripts/functional_test_runner",
     "typecheck": "node ./scripts/ts_error_checker.js",
+    "update-bundle-size-limits" : "node scripts/build_opensearch_dashboards_platform_plugins --update-limits",
     "update-ts-baseline": "node ./scripts/update_ts_baseline.js",
     "checkLicenses": "scripts/use_node scripts/check_licenses --dev",
     "notice:validate": "scripts/use_node scripts/notice --validate",
@@ -113,6 +114,8 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
+    "**/@storybook/**/webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1",
+    "**/@storybook/**/micromatch": "^4.0.8",
     "**/@lhci/**/lighthouse": "^12.3.0",
     "**/axios": "^1.8.2",
     "**/browserify-rsa": "^4.1.1",

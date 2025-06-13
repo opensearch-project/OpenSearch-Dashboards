@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CharStream, CommonTokenStream, Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
+import {
+  CharStream,
+  CommonTokenStream,
+  Lexer as LexerType,
+  Parser as ParserType,
+  PredictionMode,
+} from 'antlr4ng';
 import { CursorPosition, LexerConstructor, ParserConstructor } from '../shared/types';
 import { getCursorIndex } from '../shared/cursor';
 const spaceSymbols = '(\\s|\r\n|\n|\r)+';
@@ -51,5 +57,6 @@ export function createParser<L extends LexerType, P extends ParserType>(
 ): P {
   const parser = new Parser(new CommonTokenStream(new Lexer(CharStream.fromString(query))));
   parser.removeErrorListeners();
+  parser.interpreter.predictionMode = PredictionMode.LL; // Handle more ambigious queries
   return parser;
 }
