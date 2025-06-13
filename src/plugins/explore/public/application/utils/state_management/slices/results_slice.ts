@@ -4,9 +4,14 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { SearchResponse } from 'elasticsearch';
+
+export interface ISearchResult extends SearchResponse<any> {
+  elapsedMs: number;
+}
 
 export interface ResultsState {
-  [cacheKey: string]: Record<string, unknown>;
+  [cacheKey: string]: ISearchResult;
 }
 
 const initialState: ResultsState = {};
@@ -15,10 +20,7 @@ const resultsSlice = createSlice({
   name: 'results',
   initialState,
   reducers: {
-    setResults: (
-      state,
-      action: PayloadAction<{ cacheKey: string; results: Record<string, unknown> }>
-    ) => {
+    setResults: (state, action: PayloadAction<{ cacheKey: string; results: ISearchResult }>) => {
       const { cacheKey, results } = action.payload;
       state[cacheKey] = results;
     },
