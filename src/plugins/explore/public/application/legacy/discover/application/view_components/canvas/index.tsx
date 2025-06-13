@@ -9,7 +9,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { HeaderVariant } from 'opensearch-dashboards/public';
 import { ExploreTabs } from '../../../../../../components/tabs/tabs';
-import { EXPLORE_VIEW_ID } from '../../../../../../../common';
+import { EXPLORE_FLAVOR_ID } from '../../../../../../../common';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../../../../data_explorer/public';
 import { DiscoverChartContainer } from './discover_chart_container';
@@ -113,7 +113,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       showResetButton={!!savedSearch?.id}
       resetQuery={() => {
         core.application.navigateToApp('explore', {
-          path: `${EXPLORE_VIEW_ID.LOGS}#/view/${savedSearch?.id}`,
+          path: `${EXPLORE_FLAVOR_ID.LOGS}#/view/${savedSearch?.id}`,
         });
       }}
       rows={rows}

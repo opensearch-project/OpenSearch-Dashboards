@@ -28,7 +28,7 @@ import {
   url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
-import { EXPLORE_VIEW_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { EXPLORE_FLAVOR_ID, ExploreFlavorId, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/config';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
@@ -212,7 +212,7 @@ export class ExplorePlugin
       },
     });
 
-    const exploreAppOptions: App = {
+    const createExploreApp = (flavorId?: ExploreFlavorId, options: Partial<App> = {}): App => ({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       updater$: this.appStateUpdater.asObservable(),
@@ -245,6 +245,14 @@ export class ExplorePlugin
           !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
         ) {
           coreStart.application.navigateToApp('discover', { replace: true });
+          return () => {};
+        }
+
+        // If there's no flavor id, by default redirect to the logs flavor.
+        if (!flavorId) {
+          coreStart.application.navigateToApp(`${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.LOGS}`, {
+            replace: true,
+          });
           return () => {};
         }
 
@@ -297,7 +305,7 @@ export class ExplorePlugin
         appMounted();
 
         // Call renderApp with params, services, and store
-        const unmount = renderApp(params, services, store);
+        const unmount = renderApp(params, services, store, flavorId);
 
         return () => {
           appUnMounted();
@@ -305,40 +313,40 @@ export class ExplorePlugin
           unsubscribeStore();
         };
       },
-    };
+      ...options,
+    });
 
     // Register applications into the side navigation menu
-    core.application.register(exploreAppOptions);
-    core.application.register({
-      ...exploreAppOptions,
-      id: `${PLUGIN_ID}/${EXPLORE_VIEW_ID.LOGS}`,
-      title: 'Logs',
-    });
-    core.application.register({
-      ...exploreAppOptions,
-      id: `${PLUGIN_ID}/${EXPLORE_VIEW_ID.TRACES}`,
-      title: 'Traces',
-    });
+    core.application.register(
+      createExploreApp(EXPLORE_FLAVOR_ID.LOGS, {
+        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.LOGS}`,
+        title: 'Logs',
+      })
+    );
+    core.application.register(
+      createExploreApp(EXPLORE_FLAVOR_ID.TRACES, {
+        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.TRACES}`,
+        title: 'Traces',
+      })
+    );
+    core.application.register(createExploreApp());
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
-        showInAllNavGroup: false,
       },
       {
-        id: `${PLUGIN_ID}/${EXPLORE_VIEW_ID.LOGS}`,
+        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.LOGS}`,
         category: undefined,
         order: 300,
-        showInAllNavGroup: false,
         parentNavLinkId: PLUGIN_ID,
       },
       {
-        id: `${PLUGIN_ID}/${EXPLORE_VIEW_ID.TRACES}`,
+        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.TRACES}`,
         category: undefined,
         order: 300,
-        showInAllNavGroup: false,
         parentNavLinkId: PLUGIN_ID,
       },
     ]);

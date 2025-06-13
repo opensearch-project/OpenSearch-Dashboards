@@ -30,7 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { EXPLORE_VIEW_ID } from '../../../../../../common';
+import { EXPLORE_FLAVOR_ID } from '../../../../../../common';
 import { getServices } from '../../opensearch_dashboards_services';
 
 export function getRootBreadcrumbs(): EuiBreadcrumb[] {
@@ -41,7 +41,7 @@ export function getRootBreadcrumbs(): EuiBreadcrumb[] {
         defaultMessage: 'Discover',
       }),
       onClick: () =>
-        core.application.navigateToApp('explore', { path: `${EXPLORE_VIEW_ID.LOGS}#/` }),
+        core.application.navigateToApp('explore', { path: `${EXPLORE_FLAVOR_ID.LOGS}#/` }),
     },
   ];
 }
