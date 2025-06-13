@@ -32,7 +32,6 @@
  - Add new experience banners for explore for both new and classic ([#9842](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9842))
  - Update data plugin's __enhance type to include promises ([#9842](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9842))
  - Add tabs in explore, introduce logs tab ([#9849](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9849))
- - Implement polling for index state in Vended Dashboard progress ([#9862](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9862))
  - Make default index pattern method more robust ([#9867](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9867))
 
 ### 🐛 Bug Fixes
