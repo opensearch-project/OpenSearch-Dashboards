@@ -243,7 +243,6 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                     <EuiFlexItem grow={false} className="osdTopNavMenu">
                       {renderMenu(menuClassName)}
                     </EuiFlexItem>
-                    <EuiFlexItem grow={true} />
                     <EuiFlexItem grow={false} className="globalDatePicker">
                       <div ref={datePickerRef} />
                     </EuiFlexItem>

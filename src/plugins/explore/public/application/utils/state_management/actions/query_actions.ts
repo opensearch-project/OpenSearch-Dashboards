@@ -307,7 +307,7 @@ export const executeQueryWithHistogram = (options: {
       // NOTE: Don't store indexPattern in Redux to avoid serialization issues
       const rawResultsWithMeta = {
         ...rawResults,
-        elapsedMs: inspectorRequest.getTime(),
+        elapsedMs: inspectorRequest.getTime() as number,
         // indexPattern removed - will be obtained from useIndexPatternContext in TabContent
       };
 
