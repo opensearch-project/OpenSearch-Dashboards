@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "regenerator-runtime": "^0.13.3",
-    "monaco-editor": "^0.52.0"
+    "monaco-editor": "^0.52.0",
+    "antlr4ng": "^3.0.4"
   },
   "devDependencies": {
     "@node-rs/xxhash": "^1.3.0",
@@ -25,6 +26,12 @@
     "supports-color": "^7.0.0",
     "typescript": "4.5.5",
     "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1",
-    "webpack-cli": "^4.9.2"
+    "webpack-cli": "^4.9.2",
+    "@babel/plugin-proposal-class-properties": "^7.18.0",
+    "@babel/plugin-proposal-optional-chaining": "^7.21.0",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
+    "@babel/plugin-transform-modules-commonjs": "^7.22.9",
+    "@babel/plugin-transform-class-static-block": "^7.24.4",
+    "@babel/plugin-transform-private-methods": "^7.24.7"
   }
 }
