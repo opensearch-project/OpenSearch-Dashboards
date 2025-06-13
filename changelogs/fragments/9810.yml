@@ -1,0 +1,2 @@
+chore:
+- Bump hoek, webpack-dev-middleware, trim-newlines to resolve CVEs ([#9810](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9810))
