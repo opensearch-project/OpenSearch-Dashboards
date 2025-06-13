@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './app.scss';
+import './logs_page.scss';
 
 import React, { useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   EuiErrorBoundary,
   EuiPanel,
@@ -18,31 +17,29 @@ import {
   EuiPageBody,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { HeaderVariant } from 'opensearch-dashboards/public';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { ExploreServices } from '../types';
-import { RootState } from './utils/state_management/store';
-import { ResultStatus } from './utils/state_management/types';
-import { TopNav } from './legacy/discover/application/view_components/canvas/top_nav';
-import { DiscoverChartContainer } from './legacy/discover/application/view_components/canvas/discover_chart_container';
-import { QueryPanel } from './components/query_panel';
-import { TabBar } from './components/tab_bar';
-import { TabContent } from './components/tab_content';
-import { DiscoverPanel } from './legacy/discover/application/view_components/panel';
-import { HeaderDatasetSelector } from './components/header_dataset_selector';
-import { useInitialQueryExecution } from './utils/hooks/use_initial_query_execution';
-import { useUrlStateSync } from './utils/hooks/use_url_state_sync';
-import { useTimefilterSubscription } from './utils/hooks/use_timefilter_subscription';
-import { ExploreDataTable } from '../components/data_table/explore_data_table';
-import { ExploreTabs } from '../components/tabs/tabs';
-import { useHeaderVariants } from './utils/hooks/use_header_variants';
-import { NewExperienceBanner } from '../components/experience_banners/new_experience_banner';
-import { VisualizationContainer } from '../components/visualizations/visualization_container';
+import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../../types';
+import { RootState } from '../../utils/state_management/store';
+import { ResultStatus } from '../../utils/state_management/types';
+import { TopNav } from '../../legacy/discover/application/view_components/canvas/top_nav';
+import { DiscoverChartContainer } from '../../legacy/discover/application/view_components/canvas/discover_chart_container';
+import { QueryPanel } from '../../components/query_panel';
+import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
+import { HeaderDatasetSelector } from '../../components/header_dataset_selector';
+import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
+import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
+import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
+import { ExploreDataTable } from '../../../components/data_table/explore_data_table';
+import { ExploreTabs } from '../../../components/tabs/tabs';
+import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
+import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
+import { VisualizationContainer } from '../../../components/visualizations/visualization_container';
 
 /**
  * Main application component for the Explore plugin
  */
-export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => void }> = ({
+export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>> = ({
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
