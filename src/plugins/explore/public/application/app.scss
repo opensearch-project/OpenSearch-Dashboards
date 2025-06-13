@@ -1,0 +1,26 @@
+$osdHeaderOffset: $euiHeaderHeightCompensation;
+
+.mainPage {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .navBar {
+    padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSizeM;
+    border-bottom: $euiBorderThin;
+  }
+}
+
+.dscCanvas {
+  // Ensure proper spacing and layout
+  .dscCanvas__queryPanel {
+    margin-bottom: $euiSizeS;
+  }
+
+  .dscCanvas__tabBar {
+    margin-bottom: $euiSizeS;
+  }
+
+  .dscCanvas__chart {
+    margin-bottom: $euiSizeS;
+  }
+}

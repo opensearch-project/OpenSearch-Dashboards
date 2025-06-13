@@ -1,0 +1,830 @@
+Explore Plugin Architecture Design (Query Focus)
+
+Round 1: Initial Architecture Direction
+       Decision: Move away from Discover's architecture pattern
+Round 2: Query State Management
+       Decision: Move query state to local Redux store (not global QueryStringManager)
+Round 3: Implementation Approach
+      Decision: Use React with direct SearchSource management (not embeddable container approach)
+
+
+Current Round Decisions Required
+1. Redux for State Management (Need approval)
+
+* Decision: Use Redux with the four-slice architecture defined in section 2.2.2
+
+2. Cache Results by Transformed Query (Need approval)
+
+* Decision: Cache query results using transformed query string as key
+
+3. Middleware Usage (Need decision)
+
+* Options:
+    * Option A: Component-based approach (as detailed in 2.1.2 workflows for components)
+    * Option B: Use middleware (as detailed in section 2.3.3)
+* Recommendation: Start with component-based approach for P0, consider middleware for optimization
+
+4. Tab Owner Contract and Registration (Need approval)
+
+* Decision: Implement the TabDefinition interface as specified in section 2.4.1
+* Note: This might change due to flavor definition. But it should impact how to register the tab comp. Not one way door.
+
+
+
+1. Overview
+
+1.1 Problem Statement
+
+The core problem we're trying to solve is how to efficiently manage multiple tabs (visualizations, patterns) that each require different query transformations while providing a smooth user experience.
+
+
+1.2 Key Differences from Discover
+
+* Multiple tabs (Logs and Visualization) with different query processing needs
+* No FilterManager (filters will be in state and update query)
+* Each tab has different executed query and requires transformation before execute (e.g., removing stats pipe in PPL)
+* State management using actions and selectors instead of useState
+
+2. Core Architecture
+
+2.1 Overview
+
+2.1.1 Architecture Layers
+
+The Explore plugin architecture consists of several interconnected layers:
+
+UI Layer: Contains the main application components that users interact with.
+
+* ExploreApp: The main application component that orchestrates the overall UI
+* Query Panel: Handles query input and editing
+* Tab Bar: Allows switching between different tab types (Logs, Visualizations, Patterns)
+* Tab Components: Purely presentational components that render tab-specific content
+
+
+State Management Layer: Manages application state using Redux store and middleware.
+
+* Redux Store: Central state container with slices
+
+Services Layer: Provides business logic services like Tab Registry.
+Data Layer: Handles data access through SearchSource and URL state storage.
+
+2.1.2 Main workflows
+
+Workflow 1: Application Initialization
+
+1. Load Initial State from URL: The ExploreApp component retrieves state from URL parameters using `osdUrlStateStorage.get('_a')` and initializes the Redux store with this state
+2. Sync Global State with URL: The ExploreApp syncs the global state (`_g` parameter) with query services:
+    1. Retrieves time and filter state from URL using osdUrlStateStorage.get('_g')
+    2. Updates timefilter and filterManager directly with this state
+    3. Sets up bidirectional sync between URL and services using syncQueryStateWithUrl
+3. Register Built-in Tabs: The ExploreApp registers all built-in tabs with the tab registry service during initialization
+4. Initialize Time Filter Component: The TimeFilter component is rendered as part of the ExploreApp
+    1. A custom hook (like `useTimeFilter`) would be created to encapsulate time filter logic
+    2. This hook uses `useEffect` to subscribe to timefilter's `getTimeUpdate$()` and getAutoRefreshFetch$()
+    3. When these observables emit events, the hook triggers query execution
+5. Translate query to executed query for tab: Get activeTab from the store by selector. Apply the active tab's transform function to the query.
+6. Create Search Source and fire query
+7. Store result in cache: Cache the query results keyed by the transformed query
+8. Render Initial UI: The ExploreApp renders the application components with the initial state and results
+
+
+
+Workflow 2: Fire a query
+
+1. Trigger Query Execution: Query can be triggered from multiple sources
+    1. From Query Panel: When user clicks run button, the QueryPanel component
+        1. Dispatch action to update query state 
+        2. Calls the shared executeQuery function with current query and active tab
+    2. From Time Filter: When time range changes or auto-refresh occurs:
+        1. The TimeFilter component's useEffect hook detects the change via subscription
+        2. Calls the shared executeQuery function with current query and active tab
+    3. From Tab Bar: When switching tabs:
+        1. Updates UI state with the new active tab
+        2. Checks if results exist in cache for the transformed query
+        3. If no cache exists, calls the shared executeQuery function
+2. Get Active Tab Definition: The executeQuery function:
+    1. Gets the active tab ID from UI state
+    2. Accesses the tab's transformQuery method
+3. Transform Query: Apply tab-specific transformation to the query
+    1. Each tab has its own transformQuery method (e.g., removing stats pipe for logs)
+    2. The transformed query becomes the cache key for results
+4. Set Loading State: Update Redux store with loading state
+    1. Dispatch action to set isLoading to true
+    2. This triggers UI components to show loading indicators
+5. Create or Update SearchSource
+    1. Use the search service to create or modify a SearchSource
+        1. Set the transformed query
+        2. Set the current time range from timefilter
+6. Execute Query: Send the query to the backend:
+    1. Call searchSource.fetch() which returns a Promise
+    2. Handle the Promise with then/catch for success/error cases
+7. Process Results: When results are received:
+    1. Dispatch action to store results in Redux, keyed by transformed query
+    2. This allows for efficient cache lookup when switching tabs
+8. Update UI: Finalize the query execution:
+    1. Dispatch action to set isLoading to false
+9. Render UI: The ExploreApp renders the application components with the initial state and results
+
+
+Workflow 3: Switch tab
+Similar to fire a query with one more step to check cache from result slice using transformed query.
+
+2.2 State Management
+
+2.2.1 Types of State and Potential Race Conditions
+
+The Explore plugin manages two distinct types of state:
+
+
+* Global State: Shared across OpenSearch Dashboards
+    * Content: Time filter settings
+    * Storage: `_g` parameter in URL
+    * Persistence: Persists across navigation between different apps
+    * Management: Handled by OpenSearch Dashboards core services
+* Application State: Specific to Explore plugin
+    * Content: Query, UI settings, tab-specific state 
+    * Storage: `_a` parameter in URL
+    * Persistence: Persists during page reloads but resets when navigating away
+    * Management: Handled by Redux store and middleware
+
+2.2.2  Redux Store
+
+The Explore plugin uses Redux for state management. The Redux store is structured with four main slices, each handling a specific concern and having its own update patterns and lifecycle::
+
+// Note: This is not a finalized state structure
+
+// Query Slice - Manages the current query input
+interface QueryState {
+  pplQuery: string;    // PPL query string
+  prompt: string;      // Natural language prompt (for AI-assisted querying)
+}
+
+// UI Slice - Manages UI-related state
+interface UIState {
+  activeTabId: string; // 'visualizations' or 'patterns'
+  flavor: string;      // For visualizations: 'log', 'line', 'pie', etc.
+  isLoading: boolean;  // Loading state
+}
+
+// Results Cache Slice - Stores query results keyed by transformed query
+interface ResultsState {
+  [transformedQuery: string]: any;  // Results keyed by transformed query
+}
+
+// Tab Slice - Allows tab owners to add their own custom state
+interface TabState {
+  // Tab-specific state that allows tab owners to add their own states
+  // Each tab can define and store its own custom state here
+  [tabId: string]: {
+    // Custom state properties defined by tab owners
+    [key: string]: any;
+  }
+}
+
+2.3.3 Other option: Use Middleware
+
+Multiple components and events can trigger the same actions in Explore, creating potential race conditions. For example, executeQuery action can be triggered by 1) run button click 2) tab switch 3) time filters changes 4) auto-refresh timer, 5) page reload 6) browser navigation
+
+Without proper management, these concurrent triggers could cause inconsistent state, duplicate queries, or stale results. For example, if the user clicks the run button at the same moment an auto-refresh timer fires, two competing query executions could occur.
+
+One option we could consider is to use middleware to centralize the logics. For example, we could implement two middlewares:
+
+ Query Middleware
+
+* Query Transformation
+* SearchSource Management
+* Query Execution
+* Sample code here
+
+Compare
+
+* Component based Approach
+    * Components (ExploreApp) directly handle query execution
+    * Each component is responsible for its part of the workflow (ex. Datepicker, side panel)
+    * Components (ExploreApp) check cache and transform queries themselves
+* Middleware Approach
+    * Components only dispatch actions
+    * Middleware intercepts actions and handles query execution
+    * Centralized logic for cache checking and query transformation
+
+
+[Optional if we want more centralized state management] URL Sync Middleware
+The URL Sync Middleware is responsible for synchronizing the Redux state with the URL. Instead of using the useEffect-based approach from vis_builder, we'll implement a pure middleware solution.
+
+* Handle both `_a` and `_g` in the URL Sync Middleware
+* State persistence
+    * State to URL Synchronization
+    * URL to State Synchronization
+* Initial State Loading
+* History Management
+* Sample code here
+
+2.4 Tab Owner Contract and Registrations 
+
+To enable extensibility, the Explore plugin provides a standard contract for tab owners. This contract defines how tabs are registered, how they transform queries, and UI component.
+
+2.4.1 Contract Definition
+
+// Note: this is a sample contract
+
+export interface TabDefinition {
+  id: string;                 // Unique identifier for the tab
+  label: string;              // Display label for the tab 
+  flavor: string[];           // Flavor allows to show different tabs
+  order?: number;              // Display order in the tab bar
+  
+  // Query handling
+  transformQuery: (query: string) => string;  // Transform the query for this tab
+  
+  // UI Components
+  component: React.ComponentType<TabComponentProps>;   // React component to render
+  
+  // Optional lifecycle hooks
+  onActive?: () => void;    // Called when tab becomes active
+  onInactive?: () => void;  // Called when tab becomes inactive
+}
+
+export interface TabComponentProps {
+  query: string;              // Current query
+  results: any;               // Query results
+  isLoading: boolean;         // Loading state
+  error: Error | null;        // Error state
+}
+
+2.4.2 Register build-in tabs and external tabs
+
+Tab Registry Creation: The Explore plugin creates a tab registry during initialization.
+
+export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
+  private readonly tabRegistry = new TabRegistryService();
+
+  public async setup(core: CoreSetup, plugins: ExploreSetupPlugins): Promise<ExplorePluginSetup> {
+    // Register application, etc. (existing code)
+    
+    // Register built-in tabs
+    this.registerBuiltInTabs();
+    
+    // Expose tab registry in setup
+    return {
+      // Method for other plugins to register tabs
+      registerTab: (tabDefinition: TabDefinition) => {
+        this.tabRegistry.registerTab(tabDefinition);
+      }
+    };
+  }
+  
+  // ... rest of the plugin code
+}
+
+
+
+2.4.3 Register Tab to Explore
+
+Built-in Tab Registration: The Explore plugin registers its built-in tabs (Logs, Visualizations, Patterns) with the registry
+
+* Create a tab component that renders the tab content
+* Define a query transformer function for the tab
+* Register the tab with the tab registry during plugin initialization
+
+private registerBuiltInTabs() {
+  // Register Logs Tab
+  this.tabRegistry.registerTab({
+    id: 'logs',
+    label: 'Logs',
+    order: 10,
+    component: LogsTabComponent,
+    
+    // Transform query for logs (remove stats pipe)
+    transformQuery: (query: string) => {
+      // Remove stats pipe for logs view
+      return query.replace(/\s*\|\s*stats.*$/i, '');
+    }
+  });
+  
+
+[Optional for P0] External Tab Registration: External plugins can register their tabs with the registry during their setup phase.
+
+* Declare a dependency on the Explore plugin in opensearch_dashboards.json
+* Create a tab component in the plugin
+* Define a query transformer function
+* Register tab with Explore's tab registry during plugin's setup phase
+
+import { Plugin } from 'opensearch-dashboards/server';
+import { TabDefinition } from '../../explore/public/services/tab_registry/tab_registry_service';
+
+export class ExternalPlugin implements Plugin {
+  public setup(core: CoreSetup, plugins: { explore: ExplorePluginSetup }) {
+    // Check if Explore plugin is available
+    if (plugins.explore && plugins.explore.registerTab) {
+      // Register a tab in the Explore plugin
+      plugins.explore.registerTab({
+        id: 'external-tab',
+        label: 'External Tab',
+        order: 100,
+        component: ExternalTabComponent,
+        
+        // Custom query transformation
+        transformQuery: (query: string) => {
+          return `${query} | custom-transformation`;
+        }
+      });
+    }
+  }
+}
+
+
+2.4.4 Tab Rendering
+The Explore application renders tabs based on the registry contents.
+
+
+3. Other Workflows
+
+3.1. Saved Object and Dashboard Integration
+
+Use option 4 schema in Option 4. Create a new saved object type “search-next” to include both saved search and its visualization: Saved explore contract design
+
+Saving as option 1 with different type in the references or as option 2 using activeTab are two way door. The key difference is what we want to render in dashboard: 1) a container embeddable with tabs 2) a single child embeddable
+
+3.1.1 Save Explore
+
+* Save Redux state slices separately in their own attributes (queryState, uiState, tabState)
+
+obj.queryState = JSON.stringify(state.query);
+obj.uiState = JSON.stringify(state.ui);
+obj.tabState = JSON.stringify(state.tab);
+
+* DO NOT save the results cache state as it should be recreated when needed
+* Save only the active tab's SearchSource in searchSourceJSON  and Save Only Index Pattern (or future dataset) in SearchSourceFields
+
+// Note: this will be updated with new dataset and dataset service
+obj.searchSourceFields = { index: indexPattern };
+
+* Save Flavor
+* Save Active Tab Type in References or have a type property
+    * QQ: for logs → should we save the type to visualizations?
+
+{
+  "attributes": {
+    "title": "My Explore View",
+    "description": "Description of my explore view",
+    "version": 1,
+    "queryState": "{\"pplQuery\":\"source=my-index | stats count() by host\",\"prompt\":\"Show me host counts\"}",
+    "uiState": "{\"activeTabId\":\"visualizations\",\"flavor\":\"line\",\"isLoading\":false}",
+    "tabState": "{\"visualizations\":{\"chartOptions\":{\"showLegend\":true}}}",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\" ....}"
+    }
+  },
+  // other parts same as option 4
+  ... 
+  references: [
+    {
+      name: "kibanaSavedObjectMeta.searchSourceJSON.index",
+      type: "log", // log, patterns, visualization
+      id: "rcmdje_f9deed80-f0b8-11ef-8950-f5d8bd21ccc0_d3d7af60-4c81-11e8-b3d7-01146121b73d"
+    }
+  ]
+}
+
+
+
+3.1.2 Load Saved Explore 
+
+* Recreate the SearchSource from the saved searchSourceJSON
+*   Restore Redux state from the saved state fields (query, ui, tab)
+*   Set the active tab based on the reference type
+* Initialize an empty results cache - this will be populated when queries are executed
+
+3.1.3 Render Saved Explore in Dashboard
+
+When adding a saved Explore object to a dashboard:
+
+1. User adds the saved object to a dashboard
+2. Dashboard container creates a panel
+3. ExploreEmbeddableFactory loads the saved object
+4. Factory determines the reference type (log or visualization)
+5.  Factory delegates to the appropriate specialized factory:
+    1. If type is "log", use LogEmbeddableFactory
+    2. If type is "visualization", use VisualizationEmbeddableFactory
+6. The specialized factory creates the appropriate embeddable
+7. Dashboard renders only that specific embeddable (not the full Explore interface)
+
+
+
+3.2 Navigation and Refresh
+
+
+
+4. Other Architecture Option: Embeddable Container with Independent SearchSources (stop reading)
+
+4.1 Understanding Embeddables
+
+Before diving into the options, let's clarify what embeddables are and their key characteristics:
+
+What is an Embeddable?
+An embeddable is a reusable UI component in OpenSearch Dashboards that follows a specific contract:
+
+interface Embeddable<TInputState = {}, TOutputState = {}> {
+  // Input state (props)
+  readonly input: TInputState;
+  
+  // Output state (internal state that's exposed)
+  readonly output: TOutputState;
+  
+  // Observable streams of input/output changes
+  getInput$(): Observable<TInputState>;
+  getOutput$(): Observable<TOutputState>;
+  
+  // Update input (synchronously)
+  updateInput(changes: Partial<TInputState>): void;
+  
+  // Render to DOM
+  render(domNode: HTMLElement): void;
+  
+  // Lifecycle methods
+  reload(): void;
+  destroy(): void;
+}
+
+Key Characteristics of Embeddables
+
+1. Input/Output Pattern: Clear separation between input (props) and output (state)
+2. Synchronous Updates: Input changes are processed synchronously
+3. Observable State: Both input and output are exposed as observables
+4. Lifecycle Management: Standard methods for initialization, reload, and cleanup
+5. Dashboard Integration: Can be added to dashboards
+
+What is an Embeddable Container?
+An embeddable container is a special type of embeddable that can contain other embeddables.
+
+4.2 Architecture Overview
+
+
+4.3 How Input Helps Avoid Race Conditions
+
+The embeddable's updateInput method is a key feature that helps avoid race conditions:
+
+// In ExploreContainerEmbeddable
+public updateInput(changes: Partial<ExploreContainerInput>): void {
+  // Call parent implementation to update this.input
+  super.updateInput(changes);
+  
+  // Track what changed
+  const queryChanged = changes.query !== undefined;
+  const timeRangeChanged = changes.timeRange !== undefined;
+  const activeTabChanged = changes.activeTabId !== undefined;
+  
+  // Handle changes synchronously in a specific order
+  if (activeTabChanged) {
+    this.handleActiveTabChange(changes.activeTabId!);
+  }
+  
+  if (queryChanged) {
+    this.handleQueryChange(changes.query!);
+  }
+  
+  if (timeRangeChanged) {
+    this.handleTimeRangeChange(changes.timeRange!);
+  }
+  
+  // If any change requires query execution, execute it once
+  if (queryChanged || timeRangeChanged || activeTabChanged) {
+    this.executeQueryForActiveTab();
+  }
+}
+
+This synchronous processing ensures:
+
+1. Changes are processed in a predictable order
+2. Related changes are batched together
+3. Query execution happens only once per update cycle
+
+4.4 Workflow: Fire a Query
+
+
+
+
+
+5.Appendix
+
+* OSD Platform State Management Framework
+* Observability 2025 UX - July 10
+* Observability 2025 Design & Other Doc’s
+* Discover 2.0 Forking Strategy
+* [Draft] Accelerating building on OpenSearch Dashboards: The Architecture Review Board
+* Query-based Visualization(WIP)
+* Agent and Models
+* Current QueryStringManager Architecture
+* SearchSource Research
+* PPL Dashboard with Filtering
+* https://quip-amazon.com/U0olAVNLxopn
+
+6.Sample code
+
+Query Middleware sample code
+
+import { Middleware } from 'redux';
+import { TimefilterContract } from 'src/plugins/data/public';
+import { TabRegistry } from '../services/tab_registry';
+import { SearchService } from '../services/search';
+import { AppState, QueryState, UIState, ResultsState } from './types';
+import { setLoading, setResults, clearResults } from './actions';
+
+// Define action types
+const SET_QUERY = 'query/setQuery';
+const SET_ACTIVE_TAB = 'ui/setActiveTab';
+const SET_INITIAL_STATE = 'app/setInitialState';
+
+// Define a type for the middleware
+export type QueryMiddleware = Middleware<{}, AppState>;
+
+// Keep track of current request to allow cancellation
+let currentRequest: AbortController | null = null;
+
+/**
+ * Creates the Query Middleware
+ */
+export const createQueryMiddleware = (
+  tabRegistry: TabRegistry,
+  searchService: SearchService,
+  timefilter: TimefilterContract
+): QueryMiddleware => {
+  
+  // Subscribe to timefilter updates
+  const timefilterSubscription = timefilter.getTimeUpdate$().subscribe(() => {
+    // When time changes, we need to re-execute queries
+    // This will be handled by dispatching an internal action
+    return ({ dispatch, getState }) => {
+      const state = getState();
+      executeQuery(dispatch, state, tabRegistry, searchService);
+    };
+  });
+
+  // Subscribe to auto-refresh
+  const autoRefreshSubscription = timefilter.getAutoRefreshFetch$().subscribe(() => {
+    // When auto-refresh triggers, we need to re-execute queries
+    return ({ dispatch, getState }) => {
+      const state = getState();
+      executeQuery(dispatch, state, tabRegistry, searchService);
+    };
+  });
+
+  // Return the actual middleware function
+  return store => next => action => {
+    const { dispatch, getState } = store;
+    const prevState = getState();
+    
+    // Let the action pass through first to update state
+    const result = next(action);
+    const state = getState();
+    
+    // Handle actions that should trigger query execution
+    switch (action.type) {
+      case SET_QUERY:
+        // Clear results when query changes
+        dispatch(clearResults());
+        // Execute the new query
+        executeQuery(dispatch, state, tabRegistry, searchService);
+        break;
+        
+      case SET_ACTIVE_TAB:
+        // When switching tabs, check if we have cached results
+        const activeTabId = state.ui.activeTabId;
+        const query = state.query.pplQuery;
+        const tab = tabRegistry.getTab(activeTabId);
+        
+        if (tab) {
+          const transformedQuery = tab.transformQuery(query);
+          const cachedResults = state.results[transformedQuery];
+          
+          if (!cachedResults) {
+            // No cached results, execute query
+            executeQuery(dispatch, state, tabRegistry, searchService);
+          }
+        }
+        break;
+        
+      case SET_INITIAL_STATE:
+        // When initial state is loaded (page refresh, navigation)
+        // Check if we need to execute a query
+        if (state.query.pplQuery) {
+          executeQuery(dispatch, state, tabRegistry, searchService);
+        }
+        break;
+    }
+    
+    return result;
+  };
+};
+
+/**
+ * Execute a query based on the current state
+ */
+async function executeQuery(
+  dispatch: any,
+  state: AppState,
+  tabRegistry: TabRegistry,
+  searchService: SearchService
+) {
+  const { query, ui } = state;
+  const { pplQuery } = query;
+  const { activeTabId } = ui;
+  
+  // If no query or no active tab, do nothing
+  if (!pplQuery || !activeTabId) return;
+  
+  // Get the active tab
+  const tab = tabRegistry.getTab(activeTabId);
+  if (!tab) return;
+  
+  // Transform the query based on the active tab
+  const transformedQuery = tab.transformQuery(pplQuery);
+  
+  // Set loading state
+  dispatch(setLoading(true));
+  
+  // Cancel any existing request
+  if (currentRequest) {
+    currentRequest.abort();
+  }
+  
+  // Create a new abort controller for this request
+  currentRequest = new AbortController();
+  const signal = currentRequest.signal;
+  
+  try {
+    // Get or create a SearchSource for this tab
+    const searchSource = searchService.getSearchSourceForTab(activeTabId);
+    
+    // Configure the SearchSource with the transformed query
+    searchSource.setField('query', transformedQuery);
+    
+    // Execute the query
+    const results = await searchSource.fetch({ signal });
+    
+    // Cache the results
+    dispatch(setResults(transformedQuery, results));
+    
+    // Clear loading state
+    dispatch(setLoading(false));
+    
+    // Clear the current request
+    currentRequest = null;
+  } catch (error) {
+    // Only handle errors if the request wasn't aborted
+    if (error.name !== 'AbortError') {
+      console.error('Error executing query:', error);
+      dispatch(setLoading(false));
+    }
+  }
+}
+
+/**
+ * Cleanup function to unsubscribe from observables
+ */
+export const cleanupQueryMiddleware = () => {
+  if (timefilterSubscription) {
+    timefilterSubscription.unsubscribe();
+  }
+  
+  if (autoRefreshSubscription) {
+    autoRefreshSubscription.unsubscribe();
+  }
+};
+
+
+
+
+URL sync middleware sample code
+
+export const enhancedUrlSyncMiddleware: Middleware = store => next => action => {
+  const result = next(action);
+  
+  if (!isInternalAction(action)) {
+    // Handle application state (_a)
+    const { query, ui, tab } = store.getState();
+    persistReduxState({ query, ui, tab }, services.osdUrlStateStorage);
+    
+    // Handle global state (_g)
+    const globalState = services.data.query.getState();
+    services.osdUrlStateStorage.set('_g', globalState, { replace: true });
+  }
+  
+  return result;
+};
+
+
+
+Detailed workflow for render saved explore in dashboard
+
+1. User adds a saved Explore object to a dashboard: The user clicks "Add" in the dashboard and selects the saved Explore object.
+2. Dashboard container calls addNewEmbeddable.
+
+ dashboardContainer.addNewEmbeddable('explore', {
+     savedObjectId: 'saved-explore-123'
+   });
+
+3. Dashboard container creates a panel state:
+
+const panelState = {
+     type: 'explore',
+     explicitInput: {
+       id: 'panel-123',
+       savedObjectId: 'saved-explore-123'
+     }
+   };
+
+4.Dashboard container adds the panel state to its input
+
+this.updateInput({
+     panels: {
+       ...this.input.panels,
+       [panelState.explicitInput.id]: panelState,
+     },
+   });
+
+5.This triggers the maybeUpdateChildren method
+6.onPanelAdded gets the appropriate factory and creates the embeddable
+
+embeddable = isSavedObjectEmbeddableInput(inputForChild)
+         ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
+         : await factory.create(inputForChild, this);
+
+7.ExploreEmbeddableFactory.createFromSavedObject loads the saved object and delegates to the appropriate factory
+
+public async createFromSavedObject(
+     savedObjectId: string,
+     input: SavedObjectEmbeddableInput,
+     parent?: Container
+   ) {
+     // Load the saved explore object
+     const savedObject = await getServices().getSavedExploreById(savedObjectId);
+     
+     // Determine the type from the references
+     const referenceType = savedObject.references[0].type;
+     
+     // Get the appropriate factory based on the reference type
+     const factory = this.getFactory(referenceType === 'log' ? 'search' : 'visualization');
+     
+     if (!factory) {
+       throw new Error(`Factory for type '${referenceType}' not found`);
+     }
+     
+     // Create the appropriate embeddable using the factory
+     return await factory.createFromSavedObject(
+       savedObjectId,
+       input,
+       parent
+     );
+
+8. The appropriate factory creates the embeddable:
+
+* If the reference type is "log", the LogEmbeddableFactory creates a LogEmbeddable
+* If the reference type is "visualization", the VisualizationEmbeddableFactory creates a VisualizationEmbeddable
+
+9. The embeddable is rendered in the dashboard:
+
+// In Container.onPanelAdded
+   if (embeddable) {
+     this.children[embeddable.id] = embeddable;
+     this.updateOutput({
+       embeddableLoaded: {
+         ...this.output.embeddableLoaded,
+         [panel.explicitInput.id]: true
+       },
+     });
+   }
+
+10.The dashboard renders the panel with the embeddable:
+
+// In DashboardGrid.renderPanel
+    const panel = this.props.panels[panelId];
+    const embeddable = this.props.getEmbeddable(panelId);
+    
+    return (
+      <DashboardPanel
+        key={panelId}
+        panelId={panelId}
+        embeddable={embeddable}
+        // ...
+      />
+    );
+
+11. The embeddable renders its content:
+
+* For a LogEmbeddable, it renders only the table component
+* For a VisualizationEmbeddable, it renders only the visualization component
+
+
+SearchSource chain is simple as current dashboard
+
+searchSource (original saved search)
+       ▲
+       │ (parent)
+       │
+filtersSearchSource (handles dashboard filters)
+       ▲
+       │ (parent)
+       │
+timeRangeSearchSource (handles dashboard time range)
+
