@@ -26,6 +26,7 @@ import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_
 import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
 import { DataExplorerPluginSetup } from '../data_explorer';
 import { UsageCollectionSetup } from '../../../../../usage_collection/public';
+import { ExpressionsStart } from '../../../../../expressions/public';
 
 /**
  * @public
@@ -96,4 +97,5 @@ export interface DiscoverStartPlugins {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
+  expressions: ExpressionsStart;
 }
