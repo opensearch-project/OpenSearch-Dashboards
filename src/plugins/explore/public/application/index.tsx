@@ -10,10 +10,11 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { Store } from 'redux';
 import { AppMountParameters } from '../../../../core/public';
 import { ExploreServices } from '../types';
-import { LogsPage } from './pages/logs/logs_page';
+import { LogsPage } from './pages/logs';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { IndexPatternProvider } from './components/index_pattern_context';
-import { LOGS_VIEW_ID, TRACES_VIEW_ID } from '../../common';
+import { EXPLORE_VIEW_ID } from '../../common';
+import { TracesPage } from './pages/traces';
 
 // Route component props interface
 interface ExploreRouteProps {
@@ -27,7 +28,7 @@ const ExploreLogsRoute = (
 ) => <LogsPage setHeaderActionMenu={props.setHeaderActionMenu} />;
 const ExploreTracesRoute = (
   props: ExploreRouteProps & Pick<AppMountParameters, 'setHeaderActionMenu'>
-) => <LogsPage setHeaderActionMenu={props.setHeaderActionMenu} />;
+) => <TracesPage setHeaderActionMenu={props.setHeaderActionMenu} />;
 
 // View route for saved searches
 const ViewRoute = (props: ExploreRouteProps & Pick<AppMountParameters, 'setHeaderActionMenu'>) => (
@@ -57,12 +58,12 @@ export const renderApp = (
                   <ViewRoute {...mainRouteProps} />
                 </Route>
 
-                <Redirect from="/" to={`${LOGS_VIEW_ID}#/`} exact />
+                <Redirect from="/" to={`${EXPLORE_VIEW_ID.LOGS}#/`} exact />
 
-                <Route path={[`/${LOGS_VIEW_ID}`]} exact={false}>
+                <Route path={[`/${EXPLORE_VIEW_ID.LOGS}`]} exact={false}>
                   <ExploreLogsRoute {...mainRouteProps} />
                 </Route>
-                <Route path={[`/${TRACES_VIEW_ID}`]} exact={false}>
+                <Route path={[`/${EXPLORE_VIEW_ID.TRACES}`]} exact={false}>
                   <ExploreTracesRoute {...mainRouteProps} />
                 </Route>
               </Switch>

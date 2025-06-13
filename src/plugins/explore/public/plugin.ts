@@ -28,7 +28,7 @@ import {
   url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
-import { LOGS_VIEW_ID, PLUGIN_ID, PLUGIN_NAME, TRACES_VIEW_ID } from '../common';
+import { EXPLORE_VIEW_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/config';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
@@ -309,8 +309,16 @@ export class ExplorePlugin
 
     // Register applications into the side navigation menu
     core.application.register(exploreAppOptions);
-    core.application.register({ ...exploreAppOptions, id: 'explore/logs', title: 'Logs' });
-    core.application.register({ ...exploreAppOptions, id: 'explore/traces', title: 'Traces' });
+    core.application.register({
+      ...exploreAppOptions,
+      id: `${PLUGIN_ID}/${EXPLORE_VIEW_ID.LOGS}`,
+      title: 'Logs',
+    });
+    core.application.register({
+      ...exploreAppOptions,
+      id: `${PLUGIN_ID}/${EXPLORE_VIEW_ID.TRACES}`,
+      title: 'Traces',
+    });
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
@@ -320,14 +328,14 @@ export class ExplorePlugin
         showInAllNavGroup: false,
       },
       {
-        id: 'explore/logs',
+        id: `${PLUGIN_ID}/${EXPLORE_VIEW_ID.LOGS}`,
         category: undefined,
         order: 300,
         showInAllNavGroup: false,
         parentNavLinkId: PLUGIN_ID,
       },
       {
-        id: 'explore/traces',
+        id: `${PLUGIN_ID}/${EXPLORE_VIEW_ID.TRACES}`,
         category: undefined,
         order: 300,
         showInAllNavGroup: false,

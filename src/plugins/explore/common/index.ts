@@ -5,8 +5,10 @@
 
 export const PLUGIN_ID = 'explore';
 export const PLUGIN_NAME = 'Discover';
-export const LOGS_VIEW_ID = 'logs';
-export const TRACES_VIEW_ID = 'traces';
+export const EXPLORE_VIEW_ID = {
+  LOGS: 'logs',
+  TRACES: 'traces',
+};
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';
