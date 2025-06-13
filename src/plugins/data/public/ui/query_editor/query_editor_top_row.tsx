@@ -4,7 +4,7 @@
  */
 import dateMath from '@elastic/datemath';
 import {
-  EuiButton,
+  EuiSuperUpdateButton,
   EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,6 +12,7 @@ import {
   OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -281,18 +282,17 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     const button = props.customSubmitButton ? (
       React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
     ) : (
-      <EuiButton
+      <EuiSuperUpdateButton
+        needsUpdate={props.isDirty}
         isDisabled={isDateRangeInvalid}
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
-        className="euiSuperUpdateButton"
-        iconType="play"
-        fill
-        size={'s'}
-      >
-        Run
-      </EuiButton>
+        aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
+          defaultMessage: 'Submit query',
+        })}
+        compressed={true}
+      />
     );
 
     if (!shouldRenderDatePicker()) {
