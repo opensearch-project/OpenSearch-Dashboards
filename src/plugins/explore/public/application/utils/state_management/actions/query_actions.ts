@@ -6,23 +6,32 @@
 import { Dispatch } from 'redux';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { RequestAdapter } from '../../../../../../inspector/public';
 import { setStatus, setExecutionCacheKeys } from '../slices/ui_slice';
-import { ResultStatus } from '../../../legacy/discover/application/view_components/utils/use_search';
+import { ResultStatus } from '../types';
 import { setResults, clearResults } from '../slices/results_slice';
 import { createCacheKey } from '../handlers/query_handler';
+import { ExploreServices } from '../../../../types';
+
+/**
+ * Default query preparation for tabs (removes stats pipe for histogram compatibility)
+ */
+export const defaultPrepareQuery = (query: any) => {
+  // TODO: In future, define language-specific prepare methods
+  // For now, remove stats pipe for histogram compatibility
+  return {
+    ...query,
+    query:
+      typeof query.query === 'string' ? query.query.replace(/\s*\|\s*stats.*$/i, '') : query.query,
+  };
+};
 
 /**
  * Default results processor for tabs
- * Processes raw hits to calculate field counts
+ * Processes raw hits to calculate field counts and optionally includes histogram data
  */
-export const defaultResultsProcessor = (
-  rawResults: any,
-  indexPattern: any,
-  includeHistogram = false
-) => {
+export const defaultResultsProcessor = (rawResults: any, indexPattern: any) => {
   const fieldCounts: Record<string, number> = {};
-  if (rawResults.hits && rawResults.hits.hits) {
+  if (rawResults.hits && rawResults.hits.hits && indexPattern) {
     for (const hit of rawResults.hits.hits) {
       const fields = Object.keys(indexPattern.flattenHit(hit));
       for (const fieldName of fields) {
@@ -34,10 +43,12 @@ export const defaultResultsProcessor = (
   const result: any = {
     hits: rawResults.hits,
     fieldCounts,
+    indexPattern, // Include IndexPattern for LogsTab (passed from TabContent)
+    elapsedMs: rawResults.elapsedMs, // Include timing info from raw results
   };
 
   // Add histogram data if requested and available
-  if (includeHistogram && rawResults.aggregations) {
+  if (rawResults.aggregations && indexPattern) {
     result.chartData = transformAggregationToChartData(rawResults, indexPattern);
     result.bucketInterval = { interval: 'auto', scale: 1 };
   }
@@ -47,263 +58,135 @@ export const defaultResultsProcessor = (
 
 /**
  * Creates a cache key for storing query results
- * This is a regular function, not a thunk
+ * Uses the same logic as the original createCacheKey for consistency
  */
 export const createTabCacheKey = (query: any, timeRange: any): string => {
-  const queryString = query?.query || query || '';
-  const cacheKey = `${queryString}_${timeRange.from}_${timeRange.to}`;
+  const result = createCacheKey(query, timeRange);
 
-  return cacheKey;
+  return result;
 };
 
 /**
- * Separate update actions that don't trigger execution
+ * Compute query context for cache-aware execution
  */
-export const updateQueryOnly = (query: any) => ({ type: 'query/setQuery', payload: query });
-export const updateDatasetOnly = (dataset: any) => ({ type: 'query/setDataset', payload: dataset });
+export const computeQueryContext = (query: any, activeTabId: string, services: ExploreServices) => {
+  const timeRange = services.data.query.timefilter.timefilter.getTime();
+  const activeTab = services.tabRegistry?.getTab(activeTabId);
+
+  const defaultQuery = defaultPrepareQuery(query);
+  const activeTabPrepareQuery = activeTab?.prepareQuery || defaultPrepareQuery;
+  const activeTabQuery = activeTabPrepareQuery(query);
+
+  const defaultCacheKey = createCacheKey(defaultQuery, timeRange);
+  const activeTabCacheKey = createCacheKey(activeTabQuery, timeRange);
+  const queriesEqual = JSON.stringify(defaultQuery) === JSON.stringify(activeTabQuery);
+
+  return {
+    timeRange,
+    defaultQuery,
+    activeTabQuery,
+    defaultCacheKey,
+    activeTabCacheKey,
+    queriesEqual,
+  };
+};
 
 /**
- * Enhanced executeQueries with reason and cache awareness
+ * Enhanced executeQueries with cache awareness and smart execution strategy
  */
-export const executeQueries = (
-  options: {
-    clearCache?: boolean;
-    services: any;
-    reason?: 'user_action' | 'tab_switch' | 'dataset_change';
-    preparedQueries?: Array<{ query: any; cacheKey: string; tabId: string }>;
-  } = { services: null }
-) => {
+export const executeQueries = (options: { clearCache?: boolean; services: ExploreServices }) => {
   return async (dispatch: Dispatch, getState: () => any) => {
-    const { reason = 'user_action', preparedQueries, services } = options;
+    const { services } = options;
 
     if (!services) {
       return { cacheKeys: [] };
     }
 
-    // Generate cache keys if not provided
     const state = getState();
-    const finalPreparedQueries = preparedQueries || generatePreparedQueries(state, services);
+    const query = state.query;
+    const activeTabId = state.ui.activeTabId || 'logs';
+    const results = state.results;
 
-    if (reason === 'tab_switch' && finalPreparedQueries) {
-      await dispatch(
-        executeTabSwitchQuery({
-          targetTabId: state.ui.activeTabId,
-          services,
-          preparedQueries: finalPreparedQueries,
-        }) as any
-      );
+    const {
+      defaultQuery,
+      activeTabQuery,
+      defaultCacheKey,
+      activeTabCacheKey,
+      queriesEqual,
+    } = computeQueryContext(query, activeTabId, services);
 
-      // Store cache keys in Redux state for UI components to access
-      const cacheKeys = finalPreparedQueries.map((q) => q.cacheKey);
+    // Check what needs execution
+    const needsDefaultQuery = options.clearCache || !results[defaultCacheKey];
+    const needsActiveTabQuery = options.clearCache || !results[activeTabCacheKey];
+
+    if (queriesEqual) {
+      // Single query for both histogram and tab data
+      if (needsDefaultQuery) {
+        await dispatch(
+          executeQueryWithHistogram({
+            services,
+            preparedQuery: defaultQuery,
+            cacheKey: defaultCacheKey,
+          }) as any
+        );
+      }
+
+      // Store cache keys for UI components
+      dispatch(setExecutionCacheKeys([defaultCacheKey]));
+      return { cacheKeys: [defaultCacheKey] };
+    } else {
+      // Two separate queries needed
+      const promises = [];
+      const cacheKeys = [];
+
+      if (needsDefaultQuery) {
+        promises.push(
+          dispatch(
+            executeQueryWithHistogram({
+              services,
+              preparedQuery: defaultQuery,
+              cacheKey: defaultCacheKey,
+            }) as any
+          )
+        );
+        cacheKeys.push(defaultCacheKey);
+      }
+
+      if (needsActiveTabQuery) {
+        promises.push(
+          dispatch(
+            executeQueryWithHistogram({
+              services,
+              preparedQuery: activeTabQuery,
+              cacheKey: activeTabCacheKey,
+            }) as any
+          )
+        );
+        cacheKeys.push(activeTabCacheKey);
+      }
+
+      await Promise.all(promises);
+
+      // Store cache keys for UI components
       dispatch(setExecutionCacheKeys(cacheKeys));
-
       return { cacheKeys };
     }
-
-    if (options.clearCache) {
-      dispatch(clearResults());
-    }
-
-    await dispatch(executeHybridQuery({ services, preparedQueries: finalPreparedQueries }) as any);
-
-    // Store cache keys in Redux state for UI components to access
-    const cacheKeys = finalPreparedQueries.map((q) => q.cacheKey);
-    dispatch(setExecutionCacheKeys(cacheKeys));
-
-    return { cacheKeys };
   };
 };
 
 /**
- * Generate prepared queries with cache keys at execution time
+ * Execute query with histogram aggregations - stores RAW results only
  */
-const generatePreparedQueries = (state: any, services: any) => {
-  const activeTabId = state.ui.activeTabId || 'logs';
-  const queries = [];
-
-  // Get current time range for cache key generation
-  const timeRange = services.data.query.timefilter.timefilter.getTime();
-
-  // Always include logs tab for histogram
-  const logsTab = services.tabRegistry?.getTab('logs');
-
-  if (logsTab) {
-    const logsQuery = logsTab.prepareQuery ? logsTab.prepareQuery(state.query) : state.query;
-
-    const logsCacheKey = createTabCacheKey(logsQuery, timeRange);
-
-    queries.push({
-      query: logsQuery,
-      tabId: 'logs',
-      cacheKey: logsCacheKey,
-    });
-  } else {
-    // Fallback when tabRegistry is not available - use state.query directly
-
-    const fallbackCacheKey = createTabCacheKey(state.query, timeRange);
-
-    queries.push({
-      query: state.query,
-      tabId: 'logs',
-      cacheKey: fallbackCacheKey,
-    });
-  }
-
-  // If active tab is not logs, add it as well (dual query strategy)
-  if (activeTabId !== 'logs') {
-    const activeTab = services.tabRegistry?.getTab(activeTabId);
-    if (activeTab) {
-      const activeQuery = activeTab.prepareQuery
-        ? activeTab.prepareQuery(state.query)
-        : state.query;
-      const activeCacheKey = createTabCacheKey(activeQuery, timeRange);
-      queries.push({
-        query: activeQuery,
-        tabId: activeTabId,
-        cacheKey: activeCacheKey,
-      });
-    }
-  }
-
-  return queries;
-};
-
-/**
- * Cache-aware tab switching query execution
- */
-export const executeTabSwitchQuery = (options: {
-  targetTabId: string;
-  services: any;
-  preparedQueries: Array<{ query: any; cacheKey: string; tabId: string }>;
+export const executeQueryWithHistogram = (options: {
+  services: ExploreServices;
+  preparedQuery?: any;
+  cacheKey?: string;
 }) => {
-  return async (dispatch: Dispatch, getState: () => any) => {
-    const { targetTabId, services, preparedQueries } = options;
-    const state = getState();
-
-    // Check cache status for all required queries
-    const cacheStatus = preparedQueries.map(({ cacheKey, tabId }) => ({
-      cacheKey,
-      tabId,
-      cached: !!state.results[cacheKey],
-    }));
-
-    const missingCaches = cacheStatus.filter((item) => !item.cached);
-
-    if (missingCaches.length === 0) {
-      return; // UI will use cacheKeys to get data
-    }
-
-    // Determine execution strategy based on missing caches
-    if (targetTabId === 'logs') {
-      // Switching to logs - only need one query with histogram
-
-      return dispatch(
-        executeTabQueryWithHistogram({
-          services,
-          preparedQuery: preparedQueries[0].query,
-          cacheKey: preparedQueries[0].cacheKey,
-        }) as any
-      );
-    } else {
-      // Switching to other tab - need two queries
-      const histogramMissing = missingCaches.find((item) => item.tabId === 'logs');
-      const activeTabMissing = missingCaches.find((item) => item.tabId === targetTabId);
-
-      if (histogramMissing && activeTabMissing) {
-        return dispatch(executeHybridQuery({ services, preparedQueries }) as any);
-      } else if (histogramMissing) {
-        const histogramQuery = preparedQueries.find((item) => item.tabId === 'logs');
-        if (histogramQuery) {
-          return dispatch(
-            executeTabQueryWithHistogram({
-              services,
-              preparedQuery: histogramQuery.query,
-              cacheKey: histogramQuery.cacheKey,
-            }) as any
-          );
-        }
-      } else if (activeTabMissing) {
-        const activeTabQuery = preparedQueries.find((item) => item.tabId === targetTabId);
-        if (activeTabQuery) {
-          return dispatch(
-            executeTabQuery({
-              services,
-              tabId: targetTabId,
-              preparedQuery: activeTabQuery.query,
-              cacheKey: activeTabQuery.cacheKey,
-            }) as any
-          );
-        }
-      }
-    }
-  };
-};
-
-/**
- * Hybrid query strategy - single for logs, dual for others
- */
-export const executeHybridQuery = (options: {
-  services: any;
-  preparedQueries?: Array<{ query: any; cacheKey: string; tabId: string }>;
-}) => {
-  return async (dispatch: Dispatch, getState: () => any) => {
-    const { services, preparedQueries } = options;
-    const state = getState();
-    const activeTabId = state.ui.activeTabId;
-
-    if (activeTabId === 'logs') {
-      // Strategy A: Single query with histogram
-
-      const logsQuery = preparedQueries?.find((item) => item.tabId === 'logs');
-      return dispatch(
-        executeTabQueryWithHistogram({
-          services,
-          preparedQuery: logsQuery?.query,
-          cacheKey: logsQuery?.cacheKey,
-        }) as any
-      );
-    } else {
-      // Strategy B: Dual queries
-
-      const histogramQuery = preparedQueries?.find((item) => item.tabId === 'logs');
-      const activeTabQuery = preparedQueries?.find((item) => item.tabId === activeTabId);
-
-      // Execute both queries
-      await dispatch(
-        executeTabQueryWithHistogram({
-          services,
-          preparedQuery: histogramQuery?.query,
-          cacheKey: histogramQuery?.cacheKey,
-        }) as any
-      );
-
-      return dispatch(
-        executeTabQuery({
-          services,
-          tabId: activeTabId,
-          preparedQuery: activeTabQuery?.query,
-          cacheKey: activeTabQuery?.cacheKey,
-        }) as any
-      );
-    }
-  };
-};
-
-/**
- * Execute tab query with histogram aggregations (for logs tab)
- */
-export const executeTabQueryWithHistogram = (
-  options: {
-    services: any;
-    preparedQuery?: any;
-    cacheKey?: string;
-  } = { services: null }
-) => {
   return async (dispatch: Dispatch, getState: () => any) => {
     const state = getState();
     const query = options.preparedQuery || state.query;
     const services = options.services;
-    const cacheKey = options.cacheKey || createTabCacheKey(query, { from: 'now-15m', to: 'now' });
+    const cacheKey = options.cacheKey || createCacheKey(query, { from: 'now-15m', to: 'now' });
 
     if (!services) {
       return;
@@ -322,7 +205,7 @@ export const executeTabQueryWithHistogram = (
 
       // Reset inspector adapter (with safety check)
       if (services.inspectorAdapters?.requests) {
-        services.inspectorAdapters.requests.reset();
+        (services.inspectorAdapters.requests as any).reset();
       }
 
       // Create inspector request
@@ -332,7 +215,9 @@ export const executeTabQueryWithHistogram = (
       const description = i18n.translate('explore.discover.inspectorRequestDescription', {
         defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
       });
-      const inspectorRequest = services.inspectorAdapters?.requests?.start(title, { description });
+      const inspectorRequest = (services.inspectorAdapters?.requests as any)?.start(title, {
+        description,
+      });
 
       // Create new SearchSource for this query
       const searchSource = await services.data.search.searchSource.create();
@@ -346,7 +231,7 @@ export const executeTabQueryWithHistogram = (
           query.dataset.type !== 'INDEX_PATTERN'
         );
       } else {
-        indexPattern = services.data.indexPattern;
+        indexPattern = (services.data as any).indexPattern;
       }
 
       if (!indexPattern) {
@@ -390,8 +275,8 @@ export const executeTabQueryWithHistogram = (
       }
 
       // Add inspector stats
-      if (services.getRequestInspectorStats && inspectorRequest) {
-        inspectorRequest.stats(services.getRequestInspectorStats(searchSource));
+      if ((services as any).getRequestInspectorStats && inspectorRequest) {
+        inspectorRequest.stats((services as any).getRequestInspectorStats(searchSource));
       }
 
       // Get search request body for inspector
@@ -402,42 +287,40 @@ export const executeTabQueryWithHistogram = (
       }
 
       // Execute query
-      const results = await searchSource.fetch({
+      const rawResults = await searchSource.fetch({
         abortSignal: abortController.signal,
         withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
       });
 
       // Add response stats to inspector
       if (inspectorRequest) {
-        if (services.getResponseInspectorStats) {
+        if ((services as any).getResponseInspectorStats) {
           inspectorRequest
-            .stats(services.getResponseInspectorStats(results, searchSource))
-            .ok({ json: results });
+            .stats((services as any).getResponseInspectorStats(rawResults, searchSource))
+            .ok({ json: rawResults });
         } else {
-          inspectorRequest.ok({ json: results });
+          inspectorRequest.ok({ json: rawResults });
         }
       }
 
-      // Process results with enhanced processor that includes histogram
-      const processedData = defaultResultsProcessor(results, indexPattern, true);
-
-      const tabData = {
-        ...processedData,
+      // Store RAW results in cache (processing moved to TabContent)
+      // NOTE: Don't store indexPattern in Redux to avoid serialization issues
+      const rawResultsWithMeta = {
+        ...rawResults,
         elapsedMs: inspectorRequest.getTime(),
-        indexPattern, // Include the properly converted IndexPattern with flattenHit method
+        // indexPattern removed - will be obtained from useIndexPatternContext in TabContent
       };
 
-      // Store results in cache
-      dispatch(setResults({ cacheKey, results: tabData }));
+      dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
 
       // Set status based on results
-      if (tabData.hits && tabData.hits.hits && tabData.hits.hits.length > 0) {
+      if (rawResults.hits && rawResults.hits.hits && rawResults.hits.hits.length > 0) {
         dispatch(setStatus(ResultStatus.READY));
       } else {
         dispatch(setStatus(ResultStatus.NO_RESULTS));
       }
 
-      return tabData;
+      return rawResultsWithMeta;
     } catch (error: any) {
       // Handle abort errors
       if (error instanceof Error && error.name === 'AbortError') {
@@ -451,261 +334,12 @@ export const executeTabQueryWithHistogram = (
       throw error;
     } finally {
       // AbortController cleanup handled by component
-    }
-  };
-};
-
-/**
- * This is a Redux Thunk for executing tab queries
- * A Redux Thunk is a function that returns another function which receives dispatch and getState
- * This pattern allows for async logic and accessing the Redux store
- */
-export const executeTabQuery = (
-  options: {
-    clearCache?: boolean;
-    services?: any;
-    tabId?: string;
-    preparedQuery?: any;
-    cacheKey?: string;
-  } = {}
-) => {
-  // This is the thunk function that will be executed by the Redux Thunk middleware
-  return async (dispatch: Dispatch, getState: () => any) => {
-    const state = getState();
-    const query = options.preparedQuery || state.query; // Now query state is flattened
-    const services = options.services; // Services now passed as parameter
-
-    if (!services) {
-      return;
-    }
-
-    // Clear cache if requested
-    if (options.clearCache) {
-      dispatch(clearResults());
-    }
-
-    // Prepare query for the tab (transform if needed)
-    const tabDefinition = services.tabRegistry?.getTab?.(
-      options.tabId || state.ui.activeTab || 'logs'
-    );
-    const preparedQuery = tabDefinition?.prepareQuery ? tabDefinition.prepareQuery(query) : query;
-
-    // Create cache key for this specific query
-    const timeRange = services.data.query.timefilter.timefilter.getTime();
-    const cacheKey = options.cacheKey || createCacheKey(preparedQuery, timeRange);
-
-    // Check cache first
-    if (state.results[cacheKey]) {
-      return state.results[cacheKey];
-    }
-
-    try {
-      dispatch(setStatus(ResultStatus.LOADING));
-
-      // Create abort controller
-      const abortController = new AbortController();
-
-      // Reset inspector adapter (with safety check)
-      if (services.inspectorAdapters?.requests) {
-        services.inspectorAdapters.requests.reset();
-      }
-
-      // Create inspector request
-      const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
-        defaultMessage: 'data',
-      });
-      const description = i18n.translate('explore.discover.inspectorRequestDescription', {
-        defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
-      });
-      const inspectorRequest = services.inspectorAdapters?.requests?.start(title, { description });
-
-      // Create new SearchSource for this query
-      const searchSource = await services.data.search.searchSource.create();
-
-      // Configure SearchSource - need to get actual IndexPattern, not Dataset
-      let indexPattern;
-      if (preparedQuery.dataset) {
-        // Convert Dataset to IndexPattern
-        indexPattern = await services.data.indexPatterns.get(
-          preparedQuery.dataset.id,
-          preparedQuery.dataset.type !== 'INDEX_PATTERN'
-        );
-      } else {
-        indexPattern = services.data.indexPattern;
-      }
-
-      if (!indexPattern) {
-        throw new Error('IndexPattern not found for query execution');
-      }
-
-      const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(indexPattern);
-
-      searchSource
-        .setField('index', indexPattern)
-        .setField('query', {
-          query: preparedQuery.query,
-          language: preparedQuery.language,
-        })
-        .setField('filter', timeRangeFilter ? [timeRangeFilter] : []);
-
-      // Add inspector stats
-      if (services.getRequestInspectorStats && inspectorRequest) {
-        inspectorRequest.stats(services.getRequestInspectorStats(searchSource));
-      }
-
-      // Get search request body for inspector
-      if (inspectorRequest) {
-        searchSource.getSearchRequestBody().then((body: object) => {
-          inspectorRequest.json(body);
-        });
-      }
-
-      // Execute query
-      const results = await searchSource.fetch({
-        abortSignal: abortController.signal,
-        withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
-      });
-
-      // Add response stats to inspector
-      if (inspectorRequest) {
-        if (services.getResponseInspectorStats) {
-          inspectorRequest
-            .stats(services.getResponseInspectorStats(results, searchSource))
-            .ok({ json: results });
-        } else {
-          inspectorRequest.ok({ json: results });
-        }
-      }
-
-      // Get current tab definition to use its data processor
-      const currentTabId = state.ui.activeTab || 'logs'; // Default to logs tab
-      const tabRegistry = services.tabRegistry;
-      const currentTabDefinition = tabRegistry?.getTab(currentTabId);
-
-      // Use tab's processor or default results processor
-      const processor = currentTabDefinition?.dataProcessor || defaultResultsProcessor;
-      const processedData = processor(results, indexPattern);
-
-      const tabData = {
-        ...processedData,
-        elapsedMs: inspectorRequest.getTime(),
-        indexPattern, // Include the properly converted IndexPattern with flattenHit method
-      };
-
-      // Store results in cache
-      dispatch(setResults({ cacheKey, results: tabData }));
-
-      // Set status based on results
-      if (tabData.hits && tabData.hits.hits && tabData.hits.hits.length > 0) {
-        dispatch(setStatus(ResultStatus.READY));
-      } else {
-        dispatch(setStatus(ResultStatus.NO_RESULTS));
-      }
-
-      return tabData;
-    } catch (error: any) {
-      // Handle abort errors
-      if (error instanceof Error && error.name === 'AbortError') {
-        dispatch(setStatus(ResultStatus.READY)); // Keep current status on abort
-        return;
-      }
-
-      // Use search service to show error (like Discover does)
-      services.data.search.showError(error as Error);
-      dispatch(setStatus(ResultStatus.ERROR));
-      throw error;
-    } finally {
-      // AbortController cleanup handled by component
-    }
-  };
-};
-
-/**
- * This is a Redux Thunk for executing histogram queries
- * It demonstrates how thunks can perform async operations and dispatch multiple actions
- */
-export const executeHistogramQuery = (options: { services?: any } = {}) => {
-  // Return a thunk function
-  return async (dispatch: Dispatch, getState: () => any) => {
-    const state = getState();
-    const query = state.query; // Now query state is flattened
-    const services = options.services; // Services now passed as parameter
-
-    if (!services) {
-      return;
-    }
-
-    // Skip if no time field
-    const indexPattern = query.dataset || services.data.indexPattern;
-    if (!indexPattern.timeFieldName) {
-      return null;
-    }
-
-    try {
-      // Executing histogram query
-
-      // Create new SearchSource for histogram query
-      const searchSource = await services.data.search.searchSource.create();
-
-      // Get current time range
-      const timeRange = services.data.query.timefilter.timefilter.getTime();
-
-      // Configure SearchSource
-      const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(indexPattern);
-
-      // Add aggregation for histogram
-      const aggConfig = {
-        aggs: {
-          histogram: {
-            date_histogram: {
-              field: indexPattern.timeFieldName,
-              interval: 'auto',
-              min_doc_count: 0,
-              extended_bounds: {
-                min: timeRange.from,
-                max: timeRange.to,
-              },
-            },
-          },
-        },
-        size: 0,
-      };
-
-      searchSource
-        .setField('index', indexPattern)
-        .setField('query', {
-          query: query.query,
-          language: query.language,
-        })
-        .setField('filter', timeRangeFilter ? [timeRangeFilter] : [])
-        .setField('aggs', aggConfig.aggs);
-
-      // Execute query
-      const results = await searchSource.fetch();
-
-      // Process results to create chart data
-      const bucketInterval = {
-        interval: aggConfig.aggs.histogram.date_histogram.interval,
-        scale: 1,
-      };
-
-      // Transform aggregation results into chart data
-      const chartData = transformAggregationToChartData(results, indexPattern);
-
-      return {
-        chartData,
-        bucketInterval,
-      };
-    } catch (error) {
-      // Error executing histogram query
-      return null;
     }
   };
 };
 
 /**
  * Helper function to transform aggregation results into chart data
- * This is a regular function, not a thunk
  */
 function transformAggregationToChartData(results: any, indexPattern: any) {
   if (!results.aggregations || !results.aggregations.histogram) {

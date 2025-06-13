@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   IndexPatternField,
@@ -30,6 +30,7 @@ import { ExploreServices } from '../../../../../../types';
 import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
+import { defaultResultsProcessor } from '../../../../../utils/state_management/actions/query_actions';
 
 export function DiscoverPanel() {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -46,18 +47,29 @@ export function DiscoverPanel() {
   const columns = useSelector(selectColumns);
   const dataset = useSelector(selectIndexPattern); // This is actually a Dataset, not IndexPattern
   const queryState = useSelector(selectQuery);
-  const results = useSelector(selectResults); // Get current results from cache
+  const executionCacheKeys = useSelector((state: any) => state.ui?.executionCacheKeys || []);
+
+  // Get raw results from Redux
+  const cacheKey = executionCacheKeys.length > 0 ? executionCacheKeys[0] : '';
+  const rawResults = useSelector((state: any) => (cacheKey ? state.results[cacheKey] : null));
 
   // Get IndexPattern from centralized context
-  const {
-    indexPattern,
-    isLoading: indexPatternLoading,
-    error: indexPatternError,
-  } = useIndexPatternContext();
+  const { indexPattern } = useIndexPatternContext();
 
-  // Get fieldCounts and rows from current results (after query execution)
-  const fieldCounts = results?.fieldCounts || {};
-  const rows = (results as any)?.hits?.hits || [];
+  // Process raw results to get field counts and rows
+  const processedResults = useMemo(() => {
+    if (!rawResults || !indexPattern) {
+      return null;
+    }
+
+    // Use defaultResultsProcessor without histogram (DiscoverPanel doesn't need chart data)
+    const processed = defaultResultsProcessor(rawResults, indexPattern, false);
+    return processed;
+  }, [rawResults, indexPattern]);
+
+  // Get fieldCounts and rows from processed results
+  const fieldCounts = processedResults?.fieldCounts || {};
+  const rows = (processedResults as any)?.hits?.hits || [];
 
   // Add debug for services.data.query.queryString
   const queryStringManager = services.data?.query?.queryString;
