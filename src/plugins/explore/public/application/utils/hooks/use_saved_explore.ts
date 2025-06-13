@@ -5,12 +5,15 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { getStateFromSavedObject } from '../../../saved_explore/transforms';
-import { SavedExplore, SavedExploreAttributes } from '../../../saved_explore/types';
+import { SavedExplore, SavedExploreAttributes } from '../../../types/saved_explore_types';
 import { setState } from '../state_management/slices/legacy_slice';
 import { setQuery } from '../state_management/slices/query_slice';
+import { Query } from '../../../../../data/common';
+import { ISearchSource } from '../../../../../data/public';
 
 /**
  * Hook for loading saved explore objects (following vis_builder pattern)
@@ -72,7 +75,7 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
           dispatch(setState(legacyStateWithId));
         }
         if (state.query) {
-          dispatch(setQuery(state.query as import('../../../../../data/common').Query));
+          dispatch(setQuery(state.query as Query));
         }
         // Note: UI state would be handled by UI slice when implemented
         // For now, we skip UI state updates
@@ -90,7 +93,7 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
           id: savedExploreObject.id,
           title,
           description,
-          searchSource: {} as import('../../../../../data/public').ISearchSource, // Will be populated from searchSourceFields
+          searchSource: {} as ISearchSource, // Will be populated from searchSourceFields
           legacyState: savedExploreObject.attributes.legacyState,
           uiState: savedExploreObject.attributes.uiState,
           queryState: savedExploreObject.attributes.queryState,
@@ -140,20 +143,20 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
  * Helper function to get saved explore by ID (similar to vis_builder)
  */
 export const getSavedExploreById = async (
-  savedObjectsClient: import('opensearch-dashboards/public').SavedObjectsClientContract,
+  savedObjectsClient: SavedObjectsClientContract,
   exploreId?: string
 ): Promise<SavedExplore | undefined> => {
   if (!exploreId) return undefined;
 
   try {
-    const savedObject = await savedObjectsClient.get('explore', exploreId);
-    const { title, description, state } = getStateFromSavedObject(savedObject.attributes);
+    const savedObject = await savedObjectsClient.get<SavedExploreAttributes>('explore', exploreId);
+    const { title, description } = getStateFromSavedObject(savedObject.attributes);
 
     return {
       id: savedObject.id,
       title,
       description,
-      searchSource: {} as import('../../../../../data/public').ISearchSource,
+      searchSource: {} as ISearchSource,
       legacyState: savedObject.attributes.legacyState,
       uiState: savedObject.attributes.uiState,
       queryState: savedObject.attributes.queryState,

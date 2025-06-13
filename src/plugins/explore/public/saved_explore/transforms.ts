@@ -7,7 +7,7 @@ import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../data/public';
 import { InvalidJSONProperty } from '../../../opensearch_dashboards_utils/public';
 import { LegacyState } from '../application/utils/state_management/slices/legacy_slice';
-import { SavedExplore, SavedExploreAttributes } from './types';
+import { SavedExplore, SavedExploreAttributes } from '../types/saved_explore_types';
 
 export interface ExploreState {
   legacy: LegacyState;
