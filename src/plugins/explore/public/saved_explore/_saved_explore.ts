@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LOGS_VIEW_ID } from '../../common';
 import {
   createSavedObjectClass,
   SavedObject,
@@ -56,7 +55,7 @@ export function createSavedExploreClass(services: SavedObjectOpenSearchDashboard
       });
       this.showInRecentlyAccessed = true;
       this.id = id;
-      this.getFullPath = () => `/app/explore/${LOGS_VIEW_ID}#/view/${String(this.id)}`;
+      this.getFullPath = () => `/app/explore#/view/${String(this.id)}`;
     }
   }
 

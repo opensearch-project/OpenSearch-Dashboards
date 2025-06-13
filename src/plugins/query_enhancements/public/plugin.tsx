@@ -90,7 +90,7 @@ export class QueryEnhancementsPlugin
       },
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
-      editorSupportedAppNames: ['discover'],
+      editorSupportedAppNames: ['discover', 'explore'],
       supportedAppNames: ['discover', 'data-explorer', 'explore'],
       sampleQueries: [
         {

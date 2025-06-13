@@ -6,8 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { IndexPattern, useQueryStringManager } from '../../../../../../../../data/public';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../../../../common/legacy/discover';
-import { DiscoverViewServices } from '../../../build_services';
+import { ExploreServices } from '../../../../../../types';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
 import { updateIndexPattern, useSelector } from '../../utils/state_management';
 
@@ -22,20 +21,16 @@ import { updateIndexPattern, useSelector } from '../../utils/state_management';
  * 4. If there's any error fetching the index pattern details, a warning notification is shown.
  *
  * @param services - The services needed to fetch the index patterns and show notifications.
- * @param store - The redux store in data_explorer to dispatch actions.
  * @returns - The fetched index pattern.
  */
-export const useIndexPattern = (services: DiscoverViewServices) => {
+export const useIndexPattern = (services: ExploreServices) => {
   const { data, toastNotifications, uiSettings, store } = services;
   const { query } = useQueryStringManager({
     queryString: data.query.queryString,
   });
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  const isQueryEnhancementEnabled = useMemo(
-    () => uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING),
-    [uiSettings]
-  );
+  const isQueryEnhancementEnabled = true;
 
   const fetchIndexPatternDetails = useCallback((id: string) => data.indexPatterns.get(id), [
     data.indexPatterns,
