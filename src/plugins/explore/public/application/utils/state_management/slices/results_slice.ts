@@ -6,8 +6,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { SearchResponse } from 'elasticsearch';
 
+import { IFieldType } from '../../../../../../../../src/plugins/data/common';
+
 export interface ISearchResult extends SearchResponse<any> {
   elapsedMs: number;
+  fieldSchema?: Array<Partial<IFieldType>>;
 }
 
 export interface ResultsState {

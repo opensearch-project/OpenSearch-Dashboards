@@ -477,6 +477,7 @@ export const executeHistogramQuery = (options: {
       const rawResultsWithMeta = {
         ...rawResults,
         elapsedMs: inspectorRequest.getTime(),
+        fieldSchema: searchSource.getDataFrame()?.schema,
       };
 
       dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
