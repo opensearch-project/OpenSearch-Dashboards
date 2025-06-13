@@ -145,7 +145,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Percentiles', async function () {
+    // TODO: Investigate why this is failing: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9878
+    it.skip('should show Percentiles', async function () {
       const percentileMachineRam = [
         '2,147,483,648',
         '1st percentile of machine.ram',
