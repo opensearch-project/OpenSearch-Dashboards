@@ -1,2 +1,0 @@
-fix:
-- Fix update button issue in DateTimeRange picker ([#9875](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9875))

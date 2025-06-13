@@ -1,2 +1,0 @@
-fix:
-- Data source opensearch client honors the timeout settings in yaml file ([#9651](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9651))

@@ -1,2 +1,0 @@
-fix:
-- Adds the displaying of unknown fields back to Discover ([#9856](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9856))
