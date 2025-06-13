@@ -79,3 +79,4 @@ snapshots.js
 # Ignore the lighthousereport generatated
 .lighthouserc.js
 .lhci_output.json
+/.lighthouseci/
