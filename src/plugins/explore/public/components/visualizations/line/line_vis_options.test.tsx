@@ -7,19 +7,20 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import { EuiTabbedContent } from '@elastic/eui';
-import { Positions } from '../utils/collections';
 import {
   CategoryAxis,
   GridOptions,
   ThresholdLine,
   ThresholdLineStyle,
   ValueAxis,
+  Positions,
   VisFieldType,
 } from '../types';
 import { BasicVisOptions } from '../style_panel/basic_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { AxesOptions } from '../style_panel/axes_options';
+import { GeneralVisOptions } from '../style_panel/general_vis_options';
 
 // Mock the i18n module
 jest.mock('@osd/i18n', () => ({
@@ -131,25 +132,34 @@ describe('LineVisStyleControls', () => {
     const tabbedContent = wrapper.find(EuiTabbedContent);
 
     expect(tabbedContent.exists()).toBe(true);
-    expect(tabbedContent.prop('tabs')).toHaveLength(4);
+    expect(tabbedContent.prop('tabs')).toHaveLength(5);
 
     const tabIds = tabbedContent.prop('tabs').map((tab) => tab.id);
-    expect(tabIds).toEqual(['basic', 'threshold', 'grid', 'axes']);
+    expect(tabIds).toEqual(['basic', 'exclusive', 'threshold', 'grid', 'axes']);
 
     const tabNames = tabbedContent.prop('tabs').map((tab) => tab.name);
-    expect(tabNames).toEqual(['Basic', 'Threshold', 'Grid', 'Axes']);
+    expect(tabNames).toEqual(['Basic', 'Exclusive', 'Threshold', 'Grid', 'Axes']);
   });
 
-  it('renders the BasicVisOptions component in the first tab', () => {
+  it('renders the GeneralVisOptions component in the first tab', () => {
     const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const basicTab = wrapper.find(EuiTabbedContent).prop('tabs')[0];
+    const generalTab = wrapper.find(EuiTabbedContent).prop('tabs')[0];
+    const generalTabContent = shallow(<div>{generalTab.content}</div>);
+    expect(generalTabContent.find(GeneralVisOptions).exists()).toBe(true);
+    expect(generalTabContent.find(GeneralVisOptions).props()).toMatchObject({
+      addTooltip: mockProps.styleOptions.addTooltip,
+      addLegend: mockProps.styleOptions.addLegend,
+      legendPosition: mockProps.styleOptions.legendPosition,
+    });
+  });
+
+  it('renders the BasicVisOptions component in the second tab', () => {
+    const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
+    const basicTab = wrapper.find(EuiTabbedContent).prop('tabs')[1];
     const basicTabContent = shallow(<div>{basicTab.content}</div>);
 
     expect(basicTabContent.find(BasicVisOptions).exists()).toBe(true);
     expect(basicTabContent.find(BasicVisOptions).props()).toMatchObject({
-      addTooltip: mockProps.styleOptions.addTooltip,
-      addLegend: mockProps.styleOptions.addLegend,
-      legendPosition: mockProps.styleOptions.legendPosition,
       addTimeMarker: mockProps.styleOptions.addTimeMarker,
       showLine: mockProps.styleOptions.showLine,
       lineMode: mockProps.styleOptions.lineMode,
@@ -158,9 +168,9 @@ describe('LineVisStyleControls', () => {
     });
   });
 
-  it('renders the ThresholdOptions component in the second tab', () => {
+  it('renders the ThresholdOptions component in the third tab', () => {
     const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const thresholdTab = wrapper.find(EuiTabbedContent).prop('tabs')[1];
+    const thresholdTab = wrapper.find(EuiTabbedContent).prop('tabs')[2];
     const thresholdTabContent = shallow(<div>{thresholdTab.content}</div>);
 
     expect(thresholdTabContent.find(ThresholdOptions).exists()).toBe(true);
@@ -169,9 +179,9 @@ describe('LineVisStyleControls', () => {
     });
   });
 
-  it('renders the GridOptionsPanel component in the third tab', () => {
+  it('renders the GridOptionsPanel component in the fourth tab', () => {
     const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const gridTab = wrapper.find(EuiTabbedContent).prop('tabs')[2];
+    const gridTab = wrapper.find(EuiTabbedContent).prop('tabs')[3];
     const gridTabContent = shallow(<div>{gridTab.content}</div>);
 
     expect(gridTabContent.find(GridOptionsPanel).exists()).toBe(true);
@@ -180,9 +190,9 @@ describe('LineVisStyleControls', () => {
     });
   });
 
-  it('renders the AxesOptions component in the fourth tab', () => {
+  it('renders the AxesOptions component in the fifth tab', () => {
     const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const axesTab = wrapper.find(EuiTabbedContent).prop('tabs')[3];
+    const axesTab = wrapper.find(EuiTabbedContent).prop('tabs')[4];
     const axesTabContent = shallow(<div>{axesTab.content}</div>);
 
     expect(axesTabContent.find(AxesOptions).exists()).toBe(true);
@@ -197,12 +207,8 @@ describe('LineVisStyleControls', () => {
 
   it('calls onStyleChange with the correct parameters when a style option changes', () => {
     const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const basicTab = wrapper.find(EuiTabbedContent).prop('tabs')[0];
+    const basicTab = wrapper.find(EuiTabbedContent).prop('tabs')[1];
     const basicTabContent = shallow(<div>{basicTab.content}</div>);
-
-    // Simulate changing the addTooltip option
-    basicTabContent.find(BasicVisOptions).prop('onAddTooltipChange')(false);
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addTooltip: false });
 
     // Simulate changing the lineWidth option
     basicTabContent.find(BasicVisOptions).prop('onLineWidthChange')(3);
@@ -221,7 +227,7 @@ describe('LineVisStyleControls', () => {
     expect(wrapper).toMatchSnapshot();
 
     // Check that the AxesOptions component still renders with empty arrays
-    const axesTab = wrapper.find(EuiTabbedContent).prop('tabs')[3];
+    const axesTab = wrapper.find(EuiTabbedContent).prop('tabs')[4];
     const axesTabContent = shallow(<div>{axesTab.content}</div>);
 
     expect(axesTabContent.find(AxesOptions).props()).toMatchObject({

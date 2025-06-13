@@ -5,8 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
-import { ThresholdLineStyle, VisColumn } from '../types';
-import { Positions } from '../utils/collections';
+import { ThresholdLineStyle, VisColumn, Positions } from '../types';
 
 /**
  * Get stroke dash array for different line styles

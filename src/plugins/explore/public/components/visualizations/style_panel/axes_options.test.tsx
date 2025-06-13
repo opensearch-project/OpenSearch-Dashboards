@@ -6,8 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AxesOptions } from './axes_options';
-import { CategoryAxis, ValueAxis, VisColumn, VisFieldType } from '../types';
-import { Positions } from '../utils/collections';
+import { CategoryAxis, ValueAxis, VisColumn, VisFieldType, Positions } from '../types';
 
 // Mock the debounced value hooks
 jest.mock('../utils/use_debounced_value', () => {
