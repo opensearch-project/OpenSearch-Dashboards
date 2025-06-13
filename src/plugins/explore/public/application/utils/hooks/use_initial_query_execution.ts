@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import { executeQueries } from '../state_management/actions/query_actions';
+import { clearResults } from '../state_management/slices/results_slice';
 
 /**
  * Hook to handle initial query execution on page load
@@ -32,14 +33,13 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
       shouldSearchOnPageLoad &&
       services
     ) {
-      // Trigger initial query execution (cache keys will be stored in Redux)
+      // EXPLICIT cache clear for consistency
+      dispatch(clearResults());
+
+      // Execute queries - cache already cleared
       dispatch(executeQueries({ services }) as unknown);
 
       setIsInitialized(true);
-    } else {
-      if (isInitialized)
-        if (!queryState.query)
-          if (!queryState.dataset) if (!shouldSearchOnPageLoad) if (!services) return;
     }
   }, [
     isInitialized,

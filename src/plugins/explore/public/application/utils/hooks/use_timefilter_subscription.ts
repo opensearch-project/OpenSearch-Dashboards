@@ -27,9 +27,9 @@ export const useTimefilterSubscription = (services: ExploreServices) => {
       .subscribe(() => {
         // Only execute if we have a query and dataset
         if (queryState.query && queryState.dataset) {
-          // Clear cached results when time range changes
+          // EXPLICIT cache clear - separate cache logic
           dispatch(clearResults());
-          // Re-execute queries with new time range (cache keys will be stored in Redux)
+          // Execute queries - cache already cleared
           dispatch(executeQueries({ services }) as unknown);
         }
       });
