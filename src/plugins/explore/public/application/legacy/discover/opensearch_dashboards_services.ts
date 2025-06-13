@@ -32,16 +32,16 @@ import _ from 'lodash';
 import { createHashHistory } from 'history';
 import { ScopedHistory, AppMountParameters } from 'opensearch-dashboards/public';
 import { UiActionsStart } from '../../../../../ui_actions/public';
-import { DiscoverServices } from './build_services';
+import { ExploreServices } from '../../../types';
 import { createGetterSetter } from '../../../../../opensearch_dashboards_utils/public';
 import { search } from '../../../../../data/public';
 import { DocViewsRegistry } from '../../../types/doc_views_types';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
 
-let services: DiscoverServices | null = null;
+let services: ExploreServices | null = null;
 let uiActions: UiActionsStart;
 
-export function getServices(): DiscoverServices {
+export function getServices(): ExploreServices {
   if (!services) {
     throw new Error('Discover services are not yet available');
   }

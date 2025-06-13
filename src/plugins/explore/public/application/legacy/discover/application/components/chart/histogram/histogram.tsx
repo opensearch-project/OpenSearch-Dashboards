@@ -58,12 +58,12 @@ import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription, combineLatest } from 'rxjs';
 import { Chart as IChart } from '../utils/point_series';
-import { DiscoverServices } from '../../../../build_services';
+import { ExploreServices } from '../../../../../../../types';
 
 export interface DiscoverHistogramProps {
   chartData: IChart;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
-  services: DiscoverServices;
+  services: ExploreServices;
 }
 
 interface DiscoverHistogramState {
