@@ -31,14 +31,13 @@
 const path = require('path');
 
 const commonConfig = {
-  mode: 'production',
+  mode: 'development',
   devtool: 'source-map',
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs'],
     alias: {
       'monaco-editor': path.resolve(__dirname, '../../node_modules/monaco-editor'),
     },
-    // Resolve modules prioritizing source over target
     modules: [path.resolve(__dirname, 'src'), 'node_modules'],
   },
   module: {
@@ -58,7 +57,12 @@ const commonConfig = {
                   modules: false,
                 },
               ],
-              '@babel/preset-typescript',
+              [
+                '@babel/preset-typescript',
+                {
+                  allowDeclareFields: true,
+                },
+              ],
             ],
             plugins: [
               '@babel/plugin-proposal-class-properties',
@@ -71,7 +75,6 @@ const commonConfig = {
         exclude: [/node_modules(?!\/antlr4ng)/, /target/, path.resolve(__dirname, 'target')],
       },
       {
-        // Handle all JavaScript files with Babel transformation
         test: /\.js$/,
         exclude: [/node_modules(?!\/antlr4ng)/, path.resolve(__dirname, 'target')],
         use: {
@@ -98,7 +101,6 @@ const commonConfig = {
         },
       },
       {
-        // Handle antlr4ng and monaco-editor modules specifically
         test: /\.m?js$/,
         include: /node_modules[/\\](antlr4ng|monaco-editor)/,
         use: {
@@ -125,7 +127,6 @@ const commonConfig = {
         },
       },
       {
-        // Handle ANTLR generated TypeScript files specifically
         test: /\.ts$/,
         include: [
           path.resolve(__dirname, 'src/ppl/.generated'),
@@ -162,19 +163,41 @@ const commonConfig = {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
         use: 'file-loader',
       },
+      // Add raw-loader for worker files
+      {
+        test: /\.worker\.js$/,
+        use: 'raw-loader',
+      },
     ],
   },
 };
 
-const createLangWorkerConfig = (lang) => ({
-  ...commonConfig,
-  entry: path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`),
-  output: {
-    path: path.resolve(__dirname, 'target/public'),
-    filename: `${lang}.editor.worker.js`,
-    globalObject: 'self',
+module.exports = [
+  {
+    ...commonConfig,
+    entry: './src/ppl/worker/ppl.worker.ts',
+    output: {
+      path: path.resolve(__dirname, 'target/public'),
+      filename: 'ppl.editor.worker.js',
+      globalObject: 'self',
+    },
   },
-  stats: 'errors-only',
-});
-
-module.exports = [createLangWorkerConfig('xjson'), createLangWorkerConfig('json')];
+  {
+    ...commonConfig,
+    entry: './src/json/worker/json.worker.ts',
+    output: {
+      path: path.resolve(__dirname, 'target/public'),
+      filename: 'json.editor.worker.js',
+      globalObject: 'self',
+    },
+  },
+  {
+    ...commonConfig,
+    entry: './src/xjson/worker/xjson.worker.ts',
+    output: {
+      path: path.resolve(__dirname, 'target/public'),
+      filename: 'xjson.editor.worker.js',
+      globalObject: 'self',
+    },
+  },
+];

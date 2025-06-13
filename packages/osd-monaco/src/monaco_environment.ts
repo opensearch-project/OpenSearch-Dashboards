@@ -11,9 +11,9 @@ window.MonacoEnvironment = {
     const workerSrc = getWorker(label);
     if (workerSrc) {
       const blob = new Blob([workerSrc], { type: 'application/javascript' });
-      return new Worker(URL.createObjectURL(blob));
+      const worker = new Worker(URL.createObjectURL(blob));
+      return worker;
     }
-    // Return a default worker if no specific worker is found
-    return new Worker(URL.createObjectURL(new Blob([''], { type: 'application/javascript' })));
+    throw new Error(`No worker available for language: ${label}`);
   },
 };

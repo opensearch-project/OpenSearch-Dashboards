@@ -30,6 +30,7 @@
 
 export { monaco } from './monaco';
 export { XJsonLang } from './xjson';
+export { PPLLang } from './ppl';
 import './json';
 
 /* eslint-disable-next-line @osd/eslint/module_migration */
