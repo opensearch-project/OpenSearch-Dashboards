@@ -5,17 +5,27 @@
 
 import { BertWordPieceTokenizer } from '@nlpjs/bert-tokenizer';
 
-export interface DocumentVector {
-  text: string;
-  vector: Record<string, number>;
+export interface Document {
+  id: string;
+  title: {
+    text: string;
+    vector: Array<Number>;
+  };
+  description: {
+    text: string;
+    vector: Array<Number>;
+  };
+  document: {
+    text: string;
+    vector: Array<Number>;
+  };
 }
 
 export interface SparseSearchData {
-  titles: DocumentVector[];
-  descriptions: DocumentVector[];
   vocab: Record<string, number>;
   idf: number[];
   special_tokens: number[];
+  documents: any;
 }
 
 export class SparseSearch {
@@ -25,6 +35,7 @@ export class SparseSearch {
   private specialTokens: Set<number>;
   private titleVectors: number[][];
   private descVectors: number[][];
+  private docVectors: number[][];
 
   constructor(data: SparseSearchData) {
     this.documents = data.documents;
@@ -38,9 +49,12 @@ export class SparseSearch {
     this.descVectors = this.documents.map((doc) =>
       this.createVector(doc.description.vector, this.idf.length)
     );
+    this.docVectors = this.documents.map((doc) =>
+      this.createVector(doc.document.vector, this.idf.length)
+    );
   }
 
-  private createVector(sparseVector: Record<string, number>, length: number): number[] {
+  private createVector(sparseVector: Array<Number>, length: number): number[] {
     const vec = new Array(length).fill(0);
     for (const [dim, val] of Object.entries(sparseVector)) {
       vec[parseInt(dim)] = val;
@@ -85,18 +99,18 @@ export class SparseSearch {
     console.log('Tokenization: ', tokensArray);
 
     const queryVec = this.buildQueryVector(tokensArray);
-    const nonZeroCount = queryVec.filter((value) => value !== 0).length;
-    console.log('Non-zero values count: ', nonZeroCount);
+    const nonZeroValues = queryVec.filter((value) => value !== 0);
+    console.log('Non-zero values count: ', nonZeroValues.length);
+    console.log('Non-zero values: ', nonZeroValues);
 
     const results = this.documents.map((doc, idx) => {
       const titleScore = this.similarity(queryVec, this.titleVectors[idx]);
       const descScore = this.similarity(queryVec, this.descVectors[idx]);
-      const combinedScore = titleScore * 0.7 + descScore * 0.3;
-
+      const score = this.similarity(queryVec, this.docVectors[idx]);
       return {
         id: doc.id,
         text: `${doc.title.text}: ${doc.description.text}`,
-        score: combinedScore,
+        score: score,
         titleScore,
         descScore,
       };
