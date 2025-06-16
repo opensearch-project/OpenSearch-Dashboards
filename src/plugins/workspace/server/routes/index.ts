@@ -24,7 +24,7 @@ import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
-import { SparseSearch } from '../sparse_search';
+import { Document, SparseSearch } from '../sparse_search';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -115,6 +115,13 @@ const updateWorkspaceAttributesSchema = schema.object({
   features: schema.maybe(featuresSchema),
   ...workspaceOptionalAttributesSchema,
 });
+
+let jsonData: {
+  documents: Document[];
+  vocab: Record<string, number>;
+  idf: number[];
+  special_tokens: number[];
+};
 
 export function registerRoutes({
   client,
@@ -365,11 +372,16 @@ export function registerRoutes({
     async (context, req, res) => {
       try {
         const { query } = req.body;
-        const filePath = path.join(__dirname, 'doc_vectors.json');
-        const data = await readFile(filePath, 'utf8');
-        const jsonData = JSON.parse(data);
+
+        if (!jsonData) {
+          const filePath = path.join(__dirname, 'doc_vectors.json');
+          const data = await readFile(filePath, 'utf8');
+          jsonData = JSON.parse(data);
+        }
         const searcher = new SparseSearch(jsonData);
+        console.time('SearchQueryTime');
         const results = searcher.search(query);
+        console.timeEnd('SearchQueryTime');
 
         console.log(`---------- Neural Sparse Search: ${query} -----------`);
         results.forEach((result) => {
