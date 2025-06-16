@@ -142,6 +142,7 @@ export interface ExploreServices {
   visualizations: VisualizationsStart;
   storage: Storage;
   uiActions: UiActionsStart;
+  appName: string; // Required by autocomplete service
 
   // Additional CoreStart properties that are accessed directly
   savedObjects: CoreStart['savedObjects'];

@@ -44,6 +44,7 @@ export {
   DefaultInput,
   DQLBody,
   SingleLineInput,
+  getEffectiveLanguageForAutoComplete,
 } from './query_editor';
 export {
   SearchBar,
