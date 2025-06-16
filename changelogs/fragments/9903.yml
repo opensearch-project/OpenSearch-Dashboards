@@ -1,0 +1,2 @@
+chore:
+- Fix CVE 2025-5889 braces-expansion ([#9903](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9903))
