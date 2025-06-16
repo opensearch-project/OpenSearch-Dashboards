@@ -42,7 +42,7 @@ import {
   EuiFlyoutBody,
   EuiText,
 } from '@elastic/eui';
-import { EXPLORE_FLAVOR_ID } from '../../../../../../../common';
+import { ExploreFlavor } from '../../../../../../../common';
 import { SavedObjectFinderUi } from '../../../../../../../../saved_objects/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../../../types';
@@ -120,7 +120,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
               // the state change.
               store!.dispatch({ type: 'logs/incrementSaveExploreLoadCount' });
               application.navigateToApp('explore', {
-                path: `${EXPLORE_FLAVOR_ID.LOGS}#/view/${id}`,
+                path: `${ExploreFlavor.Logs}#/view/${id}`,
               });
             }
             onClose();

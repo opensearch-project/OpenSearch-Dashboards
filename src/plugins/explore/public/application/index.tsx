@@ -13,9 +13,10 @@ import { ExploreServices } from '../types';
 import { LogsPage } from './pages/logs';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { IndexPatternProvider } from './components/index_pattern_context';
-import { ExploreFlavorId } from '../../common';
+import { ExploreFlavor } from '../../common';
 import { TracesPage } from './pages/traces';
 import { MetricsPage } from './pages/metrics';
+import { NoFlavor } from './components/no_view';
 
 // Route component props interface
 interface ExploreRouteProps {
@@ -26,16 +27,18 @@ interface ExploreRouteProps {
 type ExploreComponentProps = ExploreRouteProps &
   Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>;
 
-const renderExploreFlavor = (flavorId: ExploreFlavorId, props: ExploreComponentProps) => {
-  switch (flavorId) {
-    case 'logs':
+const renderExploreFlavor = (flavor: ExploreFlavor, props: ExploreComponentProps) => {
+  switch (flavor) {
+    case ExploreFlavor.Logs:
       return <LogsPage setHeaderActionMenu={props.setHeaderActionMenu} />;
-    case 'traces':
+    case ExploreFlavor.Traces:
       return <TracesPage setHeaderActionMenu={props.setHeaderActionMenu} />;
-    case 'metrics':
+    case ExploreFlavor.Metrics:
       return <MetricsPage setHeaderActionMenu={props.setHeaderActionMenu} />;
     default:
-      const invalidId: never = flavorId;
+      // This code should never be reached at runtime, it exists to make the
+      // switch cases exhaustive
+      const invalidId: never = flavor;
       return `Unexpected explore flavor id: ${invalidId}`;
   }
 };
@@ -49,7 +52,7 @@ export const renderApp = (
   { element, history, setHeaderActionMenu }: AppMountParameters,
   services: ExploreServices,
   store: Store,
-  flavorId: ExploreFlavorId
+  flavor: ExploreFlavor
 ) => {
   // Create main route props
   const mainRouteProps = {
@@ -70,7 +73,7 @@ export const renderApp = (
                 </Route>
 
                 <Route path={[`/`]} exact={false}>
-                  {renderExploreFlavor(flavorId, mainRouteProps)}
+                  {renderExploreFlavor(flavor, mainRouteProps)}
                 </Route>
               </Switch>
             </services.core.i18n.Context>

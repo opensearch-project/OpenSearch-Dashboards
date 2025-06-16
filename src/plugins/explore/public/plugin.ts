@@ -28,7 +28,7 @@ import {
   url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
-import { EXPLORE_FLAVOR_ID, ExploreFlavorId, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/config';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
@@ -212,7 +212,7 @@ export class ExplorePlugin
       },
     });
 
-    const createExploreApp = (flavorId?: ExploreFlavorId, options: Partial<App> = {}): App => ({
+    const createExploreApp = (flavor?: ExploreFlavor, options: Partial<App> = {}): App => ({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       updater$: this.appStateUpdater.asObservable(),
@@ -249,8 +249,8 @@ export class ExplorePlugin
         }
 
         // If there's no flavor id, by default redirect to the logs flavor.
-        if (!flavorId) {
-          coreStart.application.navigateToApp(`${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.LOGS}`, {
+        if (!flavor) {
+          coreStart.application.navigateToApp(`${PLUGIN_ID}/${ExploreFlavor.Logs}`, {
             replace: true,
           });
           return () => {};
@@ -305,7 +305,7 @@ export class ExplorePlugin
         appMounted();
 
         // Call renderApp with params, services, and store
-        const unmount = renderApp(params, services, store, flavorId);
+        const unmount = renderApp(params, services, store, flavor);
 
         return () => {
           appUnMounted();
@@ -318,20 +318,20 @@ export class ExplorePlugin
 
     // Register applications into the side navigation menu
     core.application.register(
-      createExploreApp(EXPLORE_FLAVOR_ID.LOGS, {
-        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.LOGS}`,
+      createExploreApp(ExploreFlavor.Logs, {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
         title: 'Logs',
       })
     );
     core.application.register(
-      createExploreApp(EXPLORE_FLAVOR_ID.TRACES, {
-        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.TRACES}`,
+      createExploreApp(ExploreFlavor.Traces, {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         title: 'Traces',
       })
     );
     core.application.register(
-      createExploreApp(EXPLORE_FLAVOR_ID.METRICS, {
-        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.METRICS}`,
+      createExploreApp(ExploreFlavor.Metrics, {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         title: 'Metrics',
       })
     );
@@ -344,19 +344,19 @@ export class ExplorePlugin
         order: 300,
       },
       {
-        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.LOGS}`,
+        id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
       {
-        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.TRACES}`,
+        id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
       {
-        id: `${PLUGIN_ID}/${EXPLORE_FLAVOR_ID.METRICS}`,
+        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,

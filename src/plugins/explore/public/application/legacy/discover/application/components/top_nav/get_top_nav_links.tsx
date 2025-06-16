@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { EXPLORE_FLAVOR_ID } from '../../../../../../../common';
+import { ExploreFlavor } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { SavedExplore } from '../../../../../../saved_explore';
 import { Adapters } from '../../../../../../../../inspector/public';
@@ -62,7 +62,7 @@ const getLegacyTopNavLinks = (
     }),
     run() {
       core.application.navigateToApp('explore', {
-        path: `${EXPLORE_FLAVOR_ID.LOGS}#/`,
+        path: `${ExploreFlavor.Logs}#/`,
       });
     },
     testId: 'discoverNewButton',
@@ -328,7 +328,7 @@ export const getTopNavLinks = (
     }),
     run() {
       core.application.navigateToApp('explore', {
-        path: `${EXPLORE_FLAVOR_ID.LOGS}#/`,
+        path: `${ExploreFlavor.Logs}#/`,
       });
       // TODO this behavior is different from Discover. Clicking New in Explore
       // only closes the saved search and does not change the query.

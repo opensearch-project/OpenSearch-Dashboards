@@ -5,11 +5,6 @@
 
 export const PLUGIN_ID = 'explore';
 export const PLUGIN_NAME = 'Discover';
-export const EXPLORE_FLAVOR_ID = {
-  LOGS: 'logs',
-  TRACES: 'traces',
-  METRICS: 'metrics',
-} as const;
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';
@@ -23,4 +18,8 @@ export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
 export const QUERY_ENHANCEMENT_ENABLED_SETTING = 'query:enhancements:enabled';
 
-export type ExploreFlavorId = typeof EXPLORE_FLAVOR_ID[keyof typeof EXPLORE_FLAVOR_ID];
+export enum ExploreFlavor {
+  Logs = 'logs',
+  Traces = 'traces',
+  Metrics = 'metrics',
+}
