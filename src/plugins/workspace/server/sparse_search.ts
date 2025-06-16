@@ -5,19 +5,21 @@
 
 import { BertWordPieceTokenizer } from '@nlpjs/bert-tokenizer';
 
+export type SparseVector = Record<number, number>;
+
 export interface Document {
   id: string;
   title: {
     text: string;
-    vector: Array<Number>;
+    vector: SparseVector;
   };
   description: {
     text: string;
-    vector: Array<Number>;
+    vector: SparseVector;
   };
   document: {
     text: string;
-    vector: Array<Number>;
+    vector: SparseVector;
   };
 }
 
@@ -25,7 +27,7 @@ export interface SparseSearchData {
   vocab: Record<string, number>;
   idf: number[];
   special_tokens: number[];
-  documents: any;
+  documents: Document[];
 }
 
 export class SparseSearch {
@@ -33,9 +35,9 @@ export class SparseSearch {
   private vocab: Record<string, number>;
   private idf: number[];
   private specialTokens: Set<number>;
-  private titleVectors: number[][];
-  private descVectors: number[][];
-  private docVectors: number[][];
+  private titleVectors: SparseVector[];
+  private descVectors: SparseVector[];
+  private docVectors: SparseVector[];
 
   constructor(data: SparseSearchData) {
     this.documents = data.documents;
@@ -43,27 +45,13 @@ export class SparseSearch {
     this.idf = data.idf;
     this.specialTokens = new Set(data.special_tokens);
 
-    this.titleVectors = this.documents.map((doc) =>
-      this.createVector(doc.title.vector, this.idf.length)
-    );
-    this.descVectors = this.documents.map((doc) =>
-      this.createVector(doc.description.vector, this.idf.length)
-    );
-    this.docVectors = this.documents.map((doc) =>
-      this.createVector(doc.document.vector, this.idf.length)
-    );
+    this.titleVectors = this.documents.map((doc) => doc.title.vector);
+    this.descVectors = this.documents.map((doc) => doc.description.vector);
+    this.docVectors = this.documents.map((doc) => doc.document.vector);
   }
 
-  private createVector(sparseVector: Array<Number>, length: number): number[] {
-    const vec = new Array(length).fill(0);
-    for (const [dim, val] of Object.entries(sparseVector)) {
-      vec[parseInt(dim)] = val;
-    }
-    return vec;
-  }
-
-  private buildQueryVector(tokens: string[]): number[] {
-    const vec = new Array(this.idf.length).fill(0);
+  private buildQueryVector(tokens: string[]): SparseVector {
+    const vec: SparseVector = {};
 
     tokens.forEach((token) => {
       const tokenId = this.vocab[token];
@@ -75,10 +63,13 @@ export class SparseSearch {
     return vec;
   }
 
-  private similarity(queryVec: number[], docVec: number[]): number {
+  private similarity(queryVec: SparseVector, docVec: SparseVector): number {
     let score = 0;
-    for (let i = 0; i < queryVec.length; i++) {
-      score += queryVec[i] * docVec[i];
+    for (const dimStr in queryVec) {
+      const dim = parseInt(dimStr);
+      if (docVec[dim] !== undefined) {
+        score += queryVec[dim] * docVec[dim];
+      }
     }
     return score;
   }
@@ -99,9 +90,8 @@ export class SparseSearch {
     console.log('Tokenization: ', tokensArray);
 
     const queryVec = this.buildQueryVector(tokensArray);
-    const nonZeroValues = queryVec.filter((value) => value !== 0);
-    console.log('Non-zero values count: ', nonZeroValues.length);
-    console.log('Non-zero values: ', nonZeroValues);
+    console.log('Non-zero query dimensions count: ', Object.keys(queryVec).length);
+    console.log('Non-zero query vector: ', queryVec);
 
     const results = this.documents.map((doc, idx) => {
       const titleScore = this.similarity(queryVec, this.titleVectors[idx]);
