@@ -3,35 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { MetricsPage } from './metrics_page';
-import { ResultStatus } from '../../utils/state_management/types';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { discoverPluginMock } from '../../legacy/discover/mocks';
+import { ResultStatus } from '../../utils/state_management/types';
+import { MetricsPage } from './metrics_page';
 
-// Mock the OpenSearchDashboards context
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
-    services: {
-      uiSettings: {
-        get: jest.fn().mockImplementation((key, defaultValue) => defaultValue),
-      },
-      data: {
-        query: {
-          timefilter: {
-            timefilter: {
-              setTime: jest.fn(),
-            },
-          },
-        },
-      },
-    },
+    services: jest.fn(),
   }),
+  withOpenSearchDashboards: jest.fn((component: React.Component) => component),
 }));
 
-// Mock the components used in LogsPage
 jest.mock('../../components/query_panel', () => ({
   QueryPanel: () => <div data-test-subj="query-panel">Query Panel</div>,
 }));
@@ -92,65 +80,6 @@ jest.mock('../../../components/visualizations/visualization_container', () => {
   };
 });
 
-// Mock useIsWithinBreakpoints hook
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    useIsWithinBreakpoints: jest.fn().mockReturnValue(false),
-    EuiErrorBoundary: ({ children }: { children: React.ReactNode }) => (
-      <div data-test-subj="error-boundary">{children}</div>
-    ),
-    EuiPanel: ({ children, ...rest }: { children: React.ReactNode; [key: string]: any }) => (
-      <div data-test-subj="eui-panel" {...rest}>
-        {children}
-      </div>
-    ),
-    EuiFlexGroup: ({ children, ...rest }: { children: React.ReactNode; [key: string]: any }) => (
-      <div data-test-subj="eui-flex-group" {...rest}>
-        {children}
-      </div>
-    ),
-    EuiFlexItem: ({ children, ...rest }: { children: React.ReactNode; [key: string]: any }) => (
-      <div data-test-subj="eui-flex-item" {...rest}>
-        {children}
-      </div>
-    ),
-    EuiResizableContainer: ({ children }: { children: Function }) => {
-      const EuiResizablePanel = ({
-        children: panelChildren,
-        ...rest
-      }: {
-        children: React.ReactNode;
-        [key: string]: any;
-      }) => (
-        <div data-test-subj="eui-resizable-panel" {...rest}>
-          {panelChildren}
-        </div>
-      );
-      const EuiResizableButton = () => (
-        <div data-test-subj="eui-resizable-button">Resize Button</div>
-      );
-      return (
-        <div data-test-subj="eui-resizable-container">
-          {children(EuiResizablePanel, EuiResizableButton)}
-        </div>
-      );
-    },
-    EuiPage: ({ children, ...rest }: { children: React.ReactNode; [key: string]: any }) => (
-      <div data-test-subj="eui-page" {...rest}>
-        {children}
-      </div>
-    ),
-    EuiPageBody: ({ children, ...rest }: { children: React.ReactNode; [key: string]: any }) => (
-      <div data-test-subj="eui-page-body" {...rest}>
-        {children}
-      </div>
-    ),
-  };
-});
-
-// Mock the hooks
 jest.mock('../../utils/hooks/use_initial_query_execution', () => ({
   useInitialQueryExecution: jest.fn(),
 }));
@@ -163,12 +92,7 @@ jest.mock('../../utils/hooks/use_timefilter_subscription', () => ({
   useTimefilterSubscription: jest.fn(),
 }));
 
-jest.mock('../../utils/hooks/use_header_variants', () => ({
-  useHeaderVariants: jest.fn(),
-}));
-
-describe('LogsPage', () => {
-  // Helper function to create a test store with different states
+describe('MetricsPage', () => {
   const createTestStore = (
     status = ResultStatus.UNINITIALIZED,
     rows: OpenSearchSearchHit[] = [],
@@ -192,6 +116,19 @@ describe('LogsPage', () => {
     });
   };
 
+  beforeEach(() => {
+    const exploreServices = discoverPluginMock.createExploreServicesMock();
+    const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
+    exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
+    (useOpenSearchDashboards as jest.Mock).mockReturnValue({
+      services: exploreServicesMock,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
@@ -200,8 +137,6 @@ describe('LogsPage', () => {
       </Provider>
     );
 
-    // Check that the main components are rendered
-    expect(screen.getByTestId('error-boundary')).toBeInTheDocument();
     expect(screen.getByTestId('header-dataset-selector')).toBeInTheDocument();
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
@@ -291,11 +226,9 @@ describe('LogsPage', () => {
       </Provider>
     );
 
-    // Check that both tabs are rendered
     expect(screen.getByTestId('tab-explore_logs_tab')).toBeInTheDocument();
     expect(screen.getByTestId('tab-explore_visualization_tab')).toBeInTheDocument();
 
-    // Check that the tab content is rendered
     expect(screen.getByTestId('explore-data-table')).toBeInTheDocument();
     expect(screen.getByTestId('visualization-container')).toBeInTheDocument();
   });
@@ -309,7 +242,6 @@ describe('LogsPage', () => {
       </Provider>
     );
 
-    // The setHeaderActionMenu prop should be passed to TopNav
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 
