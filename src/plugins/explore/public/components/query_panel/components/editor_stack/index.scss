@@ -1,0 +1,250 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+$customSize10: 10px;
+
+.queryPanel__editorArea {
+
+  /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+  flex: 1;
+  padding: 0;
+  background-color: $euiColorEmptyShade;
+  border-radius: $euiBorderRadiusSmall;
+
+  .promptEditorWrapper {
+    position: relative;
+
+    .promptEditor {
+      border: 1px solid $euiBorderColor;
+      border-radius: $euiBorderRadiusSmall;
+
+      .monaco-editor .view-overlays .current-line {
+        border: none;
+      }
+
+      .monaco-editor {
+        .margin {
+          background-color: $euiFormBackgroundColor;
+        }
+      }
+
+      .monaco-editor,
+      .monaco-editor-background,
+      .monaco-editor .inputarea.ime-input,
+      .monaco-editor .decorationsOverviewRuler {
+        background-color: $euiColorEmptyShade;
+      }
+
+      &.promptEditor--readonly {
+        .monaco-editor,
+        .react-monaco-editor-container {
+          background-color: $euiColorLightShade !important;
+          opacity: 0.5;
+          pointer-events: none;
+        }
+
+        .monaco-editor .cursor {
+          display: none !important;
+        }
+      }
+
+      .promptEditor__editOverlay {
+        position: absolute;
+        right: $customSize10;
+        bottom: -7px;
+        z-index: 10;
+
+        /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+        box-shadow: 0 1px 2px 0 $euiShadowColor;
+
+        // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+        .euiButtonEmpty,
+        .euiButtonEmpty .euiButtonEmpty__content {
+          padding: 0;
+          color: $euiColorDarkShade;
+          margin: 0;
+        }
+
+        &__toolbar {
+          border-radius: $euiBorderRadius;
+          border: 1px solid $euiBorderColor;
+          background: $euiColorEmptyShade;
+          display: flex;
+          cursor: pointer;
+          height: $euiSizeL;
+          padding: $euiSizeXS;
+          align-items: center;
+          width: fit-content;
+          font-size: $euiFontSizeXS;
+          color: $euiColorDarkShade;
+        }
+
+        &__separator {
+          width: 1px;
+          height: $euiSize;
+          background: $euiColorLightShade;
+          margin: 0;
+        }
+
+        &__text {
+          text-decoration-line: underline;
+          font-size: $euiFontSizeXS;
+          line-height: inherit;
+        }
+
+        // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+        .euiButtonContent > * + * {
+          margin-inline-start: 4px;
+        }
+      }
+
+      /* stylelint-disable  @osd/stylelint/no_restricted_values */
+      &.promptEditor--focused::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #005eb8 0%, #e47fb2 53.5%, #1f9eff 100%);
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .promptEditor__placeholder {
+        position: absolute;
+        top: $customSize10;
+        left: $customSize10;
+        color: $euiTextColor;
+        font-size: $euiFontSizeXS;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+  }
+
+  .queryEditorWrapper {
+    position: relative;
+
+    .queryEditor {
+      border: $euiBorderThin;
+      border-radius: $euiBorderRadiusSmall;
+      position: relative;
+
+      .monaco-editor .view-overlays .current-line {
+        border: none;
+      }
+
+      .monaco-editor {
+        border-radius: $euiSizeXS $euiSizeXS 0 0;
+        font-size: $euiFontSizeXS;
+
+        .margin {
+          border-radius: $euiSizeXS 0 0 0;
+          background-color: $euiFormBackgroundColor;
+          padding: 0 $euiSizeXS;
+        }
+
+        .monaco-scrollable-element {
+          border-radius: 0 $euiSizeXS 0 0;
+        }
+
+        .view-lines {
+          font-size: $euiFontSizeXS;
+        }
+
+        .comment-line span {
+          /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+          color: $euiColorSuccess;
+        }
+      }
+
+      .monaco-editor,
+      .monaco-editor-background,
+      .monaco-editor .inputarea.ime-input,
+      .monaco-editor .decorationsOverviewRuler {
+        background-color: $euiColorEmptyShade;
+        font-size: $euiFontSizeXS;
+      }
+
+      &.queryEditor--readonly {
+        .monaco-editor,
+        .react-monaco-editor-container {
+          background-color: $euiColorLightShade !important;
+          opacity: 0.5;
+          pointer-events: none;
+        }
+
+        .monaco-editor .cursor {
+          display: none !important;
+        }
+
+        .queryEditor__editOverlay {
+          position: absolute;
+          right: $customSize10;
+          top: -12px;
+          z-index: 10;
+
+          /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+          box-shadow: 0 1px 2px 0 $euiShadowColor;
+
+          // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+          .euiButtonEmpty,
+          .euiButtonEmpty .euiButtonEmpty__content {
+            padding: 0;
+            color: $euiColorDarkShade;
+            margin: 0;
+          }
+
+          &__toolbar {
+            border-radius: $euiBorderRadius;
+            border: 1px solid $euiBorderColor;
+            background: $euiColorEmptyShade;
+            display: flex;
+            cursor: pointer;
+            height: $euiSizeL;
+            padding: $euiSizeXS;
+            align-items: center;
+            width: fit-content;
+            font-size: $euiFontSizeXS;
+            color: $euiColorDarkShade;
+          }
+
+          &__separator {
+            width: 1px;
+            height: $euiSize;
+            background: $euiColorLightShade;
+            margin: 0;
+          }
+
+          &__text {
+            text-decoration-line: underline;
+            font-size: $euiFontSizeXS;
+            line-height: inherit;
+          }
+
+          // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+          .euiButtonContent > * + * {
+            margin-inline-start: 4px;
+          }
+        }
+      }
+
+      &.queryEditor--focused {
+        border-bottom: 1px solid $euiColorPrimary;
+      }
+
+      .queryEditor__placeholder {
+        position: absolute;
+        top: $customSize10;
+        left: $customSize10;
+        color: $euiTextColor;
+        font-size: $euiFontSizeXS;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+  }
+}
