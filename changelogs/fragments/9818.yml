@@ -1,3 +1,0 @@
-feat:
-- Deprecate showInAllNavGroup property ([#9818](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9818))
-- Register search overview page to all use case by using addNavLinksToGroup ([#9818](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9818))

@@ -35,6 +35,7 @@ import { QueryEditorExtensions } from './query_editor_extensions';
 import { getQueryService, getIndexPatterns } from '../../services';
 import { DefaultInputProps } from './editors';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
+import { getEffectiveLanguageForAutoComplete } from './utils';
 
 export interface QueryEditorProps {
   query: Query;
@@ -70,6 +71,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [lineCount, setLineCount] = useState<number | undefined>(undefined);
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
+  const [currentAppId, setCurrentAppId] = useState<string>(''); // Add app ID state
 
   const inputRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -108,6 +110,12 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    services.application?.currentAppId$?.subscribe?.((appId) => {
+      setCurrentAppId(appId || '');
+    });
+  }, [services.application?.currentAppId$]);
 
   const renderQueryEditorExtensions = () => {
     if (
@@ -233,11 +241,13 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     const dataset = queryString.getQuery().dataset;
     const indexPattern = dataset ? await getIndexPatterns().get(dataset.id) : undefined;
 
+    const language = getEffectiveLanguageForAutoComplete(queryRef.current.language, currentAppId);
+
     const suggestions = await services.data.autocomplete.getQuerySuggestions({
       query: inputRef.current?.getValue() ?? '',
       selectionStart: model.getOffsetAt(position), // not needed, position handles same thing. remove
       selectionEnd: model.getOffsetAt(position),
-      language: queryRef.current.language,
+      language,
       indexPattern,
       datasetType: dataset?.type,
       position,
@@ -256,20 +266,28 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     return {
       suggestions:
         suggestions && suggestions.length > 0
-          ? suggestions
-              .filter((s) => 'detail' in s) // designed to remove suggestion not of type MonacoCompatible
-              .map((s: MonacoCompatibleQuerySuggestion) => {
-                return {
-                  label: s.text,
-                  kind: s.type as monaco.languages.CompletionItemKind,
-                  insertText: s.insertText ?? s.text,
-                  insertTextRules: s.insertTextRules ?? undefined,
-                  range: s.replacePosition ?? defaultRange,
-                  detail: s.detail,
-                  command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
-                  sortText: s.sortText ?? s.text, // when undefined, the falsy value will default to the label
-                };
-              })
+          ? (suggestions.filter((s) => 'detail' in s) as MonacoCompatibleQuerySuggestion[]) // Cast the filtered array
+              .map(
+                (
+                  s: MonacoCompatibleQuerySuggestion,
+                  _index: number,
+                  _array: MonacoCompatibleQuerySuggestion[]
+                ) => {
+                  return {
+                    label: s.text,
+                    kind: s.type as monaco.languages.CompletionItemKind,
+                    insertText: s.insertText ?? s.text,
+                    insertTextRules: s.insertTextRules ?? undefined,
+                    range: s.replacePosition ?? defaultRange,
+                    detail: s.detail,
+                    command: {
+                      id: 'editor.action.triggerSuggest',
+                      title: 'Trigger Next Suggestion',
+                    },
+                    sortText: s.sortText ?? s.text, // when undefined, the falsy value will default to the label
+                  };
+                }
+              )
           : [],
       incomplete: false,
     };

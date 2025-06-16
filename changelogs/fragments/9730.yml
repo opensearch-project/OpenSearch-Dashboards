@@ -1,2 +1,0 @@
-fix:
-- Fix SigV4 signing mismatch issue with ?v query parameter ([#9730](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9730))

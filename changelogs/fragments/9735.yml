@@ -1,2 +1,0 @@
-fix:
-- Chatbot flyout cannot be resized beyond the window size ([#9735](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9735))

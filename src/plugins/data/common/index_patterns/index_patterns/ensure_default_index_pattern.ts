@@ -64,8 +64,24 @@ export const createEnsureDefaultIndexPattern = (
       if (!dataSourceRef) {
         return;
       }
-      const result = await this.getDataSource(dataSourceRef.id);
-      if (result.error?.statusCode === 403 || result.error?.statusCode === 404) {
+      let isDefaultIndexPatternReferenceValid = true;
+
+      if (!dataSourceRef.id) {
+        isDefaultIndexPatternReferenceValid = false;
+      } else {
+        try {
+          const result = await this.getDataSource(dataSourceRef.id);
+          isDefaultIndexPatternReferenceValid = !(
+            result.error?.statusCode === 403 || result.error?.statusCode === 404
+          );
+        } catch (e) {
+          // The logic below for updating the default index pattern only handles cases where the data source is not found or the user lacks access permissions
+          // For other unexpected errors, we simply return to prevent infinite loops when updating the default index pattern.
+          return;
+        }
+      }
+
+      if (!isDefaultIndexPatternReferenceValid) {
         try {
           if (savedObjectsClient) {
             const datasources = await savedObjectsClient.find({ type: 'data-source' });
@@ -74,9 +90,21 @@ export const createEnsureDefaultIndexPattern = (
             patterns = [];
             indexPatterns.forEach((item) => {
               const sourceRef = item.references?.find((ref) => ref.type === 'data-source');
-              const refId = sourceRef?.id;
-              const refIdBool = !!refId;
-              if (!refIdBool || existDataSources.includes(refId)) {
+              let isDataSourceReferenceValid = false;
+              /**
+               * The reference is valid when either:
+               * 1. No data source is referenced (using local cluster, which must be available for OpenSearch Dashboards to function)
+               * 2. A data source is referenced with a valid ID
+               */
+              if (!sourceRef) {
+                isDataSourceReferenceValid = true;
+              }
+
+              if (sourceRef?.id && existDataSources.includes(sourceRef.id)) {
+                isDataSourceReferenceValid = true;
+              }
+
+              if (isDataSourceReferenceValid) {
                 patterns.push(item.id);
               }
             });

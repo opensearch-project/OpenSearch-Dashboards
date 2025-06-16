@@ -16,6 +16,21 @@ export enum DirectQueryLoadingStatus {
   INITIAL = 'initial',
 }
 
+/**
+ * States for data-source driven indices, adhering to the OS-Spark state machine. See:
+ * https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md#index-state-transition
+ *
+ * Non-exhaustive: There may be more index states in the future. This should usually be typed as
+ * `ExternalIndexState | string`.
+ */
+export enum ExternalIndexState {
+  CREATING = 'creating',
+  ACTIVE = 'active',
+  REFRESHING = 'refreshing',
+  RECOVERING = 'recovering',
+  CANCELLING = 'cancelling',
+}
+
 export interface DirectQueryRequest {
   query: string;
   lang: string;

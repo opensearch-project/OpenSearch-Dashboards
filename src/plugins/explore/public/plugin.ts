@@ -9,6 +9,7 @@ import { i18n } from '@osd/i18n';
 import rison from 'rison-node';
 import { stringify } from 'query-string';
 import { lazy } from 'react';
+import { VisualizationRegistryService } from './services/visualization_registry_service';
 import { opensearchFilters } from '../../data/public';
 import {
   createOsdUrlStateStorage,
@@ -90,6 +91,9 @@ export class ExplorePlugin
   private urlGenerator?: ExploreStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: DiscoverStartPlugins };
 
+  /** visualization registry */
+  private visualizationRegistryService = new VisualizationRegistryService();
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
   }
@@ -110,6 +114,7 @@ export class ExplorePlugin
     }
 
     const viewService = this.viewService;
+    const visualizationRegistryService = this.visualizationRegistryService.setup();
 
     setUsageCollector(setupDeps.usageCollection);
     this.docViewsRegistry = new DocViewsRegistry();
@@ -276,6 +281,7 @@ export class ExplorePlugin
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           }),
           viewRegistry: viewService.start(),
+          visualizationRegistry: this.visualizationRegistryService,
         };
 
         // Get start services as specified in opensearch_dashboards.json
@@ -373,6 +379,7 @@ export class ExplorePlugin
       docViewsLinks: {
         addDocViewLink: this.docViewsLinksRegistry.addDocViewLink.bind(this.docViewsLinksRegistry),
       },
+      visualizationRegistry: visualizationRegistryService,
     };
   }
 
@@ -401,6 +408,7 @@ export class ExplorePlugin
         chrome: core.chrome,
         overlays: core.overlays,
       }),
+      visualizationRegistry: this.visualizationRegistryService.start(),
     };
   }
 

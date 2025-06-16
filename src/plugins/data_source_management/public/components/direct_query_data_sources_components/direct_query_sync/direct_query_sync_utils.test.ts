@@ -141,6 +141,7 @@ describe('DirectQuerySyncUtils', () => {
                 properties: {
                   refreshInterval: 300,
                   lastRefreshTime: 1625097600000,
+                  indexState: 'refreshing',
                 },
               },
             },
@@ -166,6 +167,7 @@ describe('DirectQuerySyncUtils', () => {
         lastRefreshTime: 1625097600000,
         mappingName: 'test_datasource.test_database.test_index',
         mdsId: 'mds-1',
+        indexState: 'refreshing',
       });
       expect(http.get).toHaveBeenCalledTimes(3);
       expect(http.get).toHaveBeenCalledWith('/api/opensearch-dashboards/dashboards/export', {
@@ -324,6 +326,7 @@ describe('DirectQuerySyncUtils', () => {
         refreshInterval: null,
         lastRefreshTime: null,
         mappingName: null,
+        indexState: null,
       });
     });
 
@@ -336,6 +339,7 @@ describe('DirectQuerySyncUtils', () => {
               properties: {
                 refreshInterval: 300,
                 lastRefreshTime: 1625097600000,
+                indexState: 'active',
               },
             },
           },
@@ -353,6 +357,7 @@ describe('DirectQuerySyncUtils', () => {
         refreshInterval: 300,
         lastRefreshTime: 1625097600000,
         mappingName: 'test_datasource.test_database.test_index',
+        indexState: 'active',
       });
     });
 
@@ -364,6 +369,7 @@ describe('DirectQuerySyncUtils', () => {
               properties: {
                 refreshInterval: 300,
                 lastRefreshTime: 1625097600000,
+                indexState: 'active',
               },
             },
           },
@@ -381,6 +387,7 @@ describe('DirectQuerySyncUtils', () => {
         refreshInterval: 300,
         lastRefreshTime: 1625097600000,
         mappingName: null,
+        indexState: 'active',
       });
     });
   });
