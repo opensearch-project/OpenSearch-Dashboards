@@ -1,0 +1,98 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.queryPanel__footer {
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiFlexGroup--gutterExtraSmall>.euiFlexItem {
+    margin: 0;
+  }
+
+  .customEuiButtonContent {
+    padding: 0;
+  }
+
+  &__showInputType {
+    color: $euiColorDarkShade; // Use closest match from OUI
+    font-size: $euiFontSizeXS;
+    line-height: 21px;
+  }
+
+  &__showInputTypeWrapper {
+    margin-left: 10px;
+  }
+
+  &__verticalSeparator {
+    width: 1px;
+    height: $euiSize;
+    background: $euiColorLightShade;
+    margin: 0 4px;
+  }
+
+  &__recentQueries {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    box-shadow: 0 2px 4px $euiShadowColor;
+    z-index: 1000;
+  }
+
+  &__popoverBody {
+    padding: 10px;
+  }
+
+  &__popoverText {
+    color: $euiColorMediumShade;
+    max-width: 500px;
+  }
+
+  &__popoverFooter {
+    text-align: right;
+  }
+
+  &__modal {
+    width: 500px;
+  }
+
+  &__modalText {
+    margin-bottom: 15px;
+    color: $euiColorMediumShade;
+  }
+
+  &__modalTextSecondary {
+    margin: 15px 0;
+    color: $euiColorMediumShade;
+  }
+
+  &__recentQueryTable {
+    border: $euiBorderThin;
+    border-radius: $euiSizeXS;
+    margin-top: 10px;
+    display: flex;
+    padding: 4px;
+    align-items: center;
+    gap: 8px;
+    flex: 1 0 0;
+
+    thead {
+      background-color: $euiColorLightestShade;
+    }
+  }
+
+  &__errorPopover {
+    width: 250px;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  &__dateTimeRangePickerWrapper {
+    min-width: 0;
+    max-width: 350px;
+  }
+
+  &__minWidth0 {
+    min-width: 0;
+  }
+}
