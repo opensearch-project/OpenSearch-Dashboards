@@ -22,7 +22,7 @@ interface StartServices {
 }
 
 export class ExploreEmbeddableFactory
-  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SearchEmbeddable> {
+  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, ExploreEmbeddable> {
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
     name: i18n.translate('explore.savedExplore.savedObjectName', {
@@ -59,27 +59,27 @@ export class ExploreEmbeddableFactory
     const url = await services.getSavedSearchUrlById(savedObjectId);
     const editUrl = services.addBasePath(`/app/explorer/discover${url}`);
 
-    // try {
-    const savedObject = await services.getSavedSearchById(savedObjectId);
-    const indexPattern = savedObject.searchSource.getField('index');
-    const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
-    return new ExploreEmbeddableClass(
-      {
-        savedSearch: savedObject,
-        editUrl,
-        editPath: url,
-        filterManager,
-        editable: services.capabilities.discover?.save as boolean,
-        indexPatterns: indexPattern ? [indexPattern] : [],
-        services,
-      },
-      input,
-      parent
-    );
-    // } catch (e) {
-    //   console.error(e); // eslint-disable-line no-console
-    //   return new ErrorEmbeddable(e, input, parent);
-    // }
+    try {
+      const savedObject = await services.getSavedSearchById(savedObjectId);
+      const indexPattern = savedObject.searchSource.getField('index');
+      const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
+      return new ExploreEmbeddableClass(
+        {
+          savedExplore: savedObject,
+          editUrl,
+          editPath: url,
+          filterManager,
+          editable: services.capabilities.discover?.save as boolean,
+          indexPatterns: indexPattern ? [indexPattern] : [],
+          services,
+        },
+        input,
+        parent
+      );
+    } catch (e) {
+      console.error(e); // eslint-disable-line no-console
+      return new ErrorEmbeddable(e, input, parent);
+    }
   };
 
   public async create(input: SearchInput) {

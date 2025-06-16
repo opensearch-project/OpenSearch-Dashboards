@@ -57,7 +57,7 @@ export interface SearchProps {
 }
 
 interface SearchEmbeddableConfig {
-  savedSearch: SavedExplore;
+  savedExplore: SavedExplore;
   editUrl: string;
   editPath: string;
   indexPatterns?: IndexPattern[];
@@ -70,7 +70,7 @@ export class ExploreEmbeddable
   extends Embeddable<SearchInput, SearchOutput>
   implements IEmbeddable<SearchInput, SearchOutput> {
   private abortController?: AbortController;
-  private readonly savedSearch: SavedExplore;
+  private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
   private searchProps?: SearchProps;
   private filtersSearchSource?: ISearchSource;
@@ -86,14 +86,14 @@ export class ExploreEmbeddable
   private node?: HTMLElement;
 
   constructor(
-    { savedSearch, editUrl, editPath, indexPatterns, editable, services }: SearchEmbeddableConfig,
+    { savedExplore, editUrl, editPath, indexPatterns, editable, services }: SearchEmbeddableConfig,
     initialInput: SearchInput,
     parent?: Container
   ) {
     super(
       initialInput,
       {
-        defaultTitle: savedSearch.title,
+        defaultTitle: savedExplore.title,
         editUrl,
         editPath,
         editApp: 'discover',
@@ -103,7 +103,7 @@ export class ExploreEmbeddable
       parent
     );
     this.services = services;
-    this.savedSearch = savedSearch;
+    this.savedExplore = savedExplore;
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
     };
@@ -120,13 +120,13 @@ export class ExploreEmbeddable
   }
 
   private initializeSearchProps() {
-    const { searchSource } = this.savedSearch;
+    const { searchSource } = this.savedExplore;
     const indexPattern = searchSource.getField('index');
     if (!indexPattern) return;
     this.searchProps = {
       inspectorAdapters: this.inspectorAdaptors,
       rows: [],
-      description: this.savedSearch.description,
+      description: this.savedExplore.description,
       services: this.services,
       indexPattern,
       isLoading: false,
@@ -139,11 +139,15 @@ export class ExploreEmbeddable
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);
     searchSource.setParent(this.filtersSearchSource);
-    const currentQuery = this.services.data.query.queryString.getQuery();
-    this.services.data.query.queryString.setQuery(this.savedSearch.searchSource.getField('query'));
+    // NOTE: src/plugins/data/public/search/search_service.ts#start#search, search only honors global language
+    // Use this way for PPL search
+    // TODO: confirm to update search source language strategy
+    this.services.data.query.queryString.setQuery(
+      this.savedExplore.searchSource.getField('query')!
+    );
     searchSource.setFields({
       index: indexPattern,
-      query: this.savedSearch.searchSource.getField('query'),
+      query: this.savedExplore.searchSource.getField('query'),
       highlightAll: true,
       version: true,
     });
@@ -171,7 +175,7 @@ export class ExploreEmbeddable
 
   private fetch = async () => {
     if (!this.searchProps) return;
-    const { searchSource } = this.savedSearch;
+    const { searchSource } = this.savedExplore;
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
     searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
@@ -181,7 +185,7 @@ export class ExploreEmbeddable
       defaultMessage: 'Data',
     });
     const description = i18n.translate('explore.embeddable.inspectorRequestDescription', {
-      defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
+      defaultMessage: 'This request queries OpenSearch to fetch the data for the explore.',
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
@@ -237,7 +241,7 @@ export class ExploreEmbeddable
         timeRange: this.input.timeRange,
       };
       this.searchProps.searchContext = searchContext;
-      const indexPattern = this.savedSearch.searchSource.getField('index');
+      const indexPattern = this.savedExplore.searchSource.getField('index');
       const styleOptions = visualizationData?.visualizationType?.ui.style.defaults;
       const exp = await toExpression(
         searchContext,
