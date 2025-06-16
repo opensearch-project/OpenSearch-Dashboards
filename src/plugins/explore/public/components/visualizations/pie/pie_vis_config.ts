@@ -6,7 +6,7 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 
-import { PieVisStyleControls, PieChartStyleControlsProps } from './pie_vis_options';
+import { PieVisStyleControls, PieVisStyleControlsProps } from './pie_vis_options';
 import { Positions } from '../types';
 
 export interface PieExclusiveStyleControl {
@@ -46,8 +46,8 @@ export const createPieConfig = (): VisualizationType => ({
   ui: {
     style: {
       defaults: defaultPieChartStyles,
-      render: (props: PieChartStyleControlsProps) =>
-        React.createElement(PieVisStyleControls, props),
+      render: (props) =>
+        React.createElement(PieVisStyleControls, props as PieVisStyleControlsProps),
     },
   },
 });

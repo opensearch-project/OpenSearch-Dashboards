@@ -112,11 +112,9 @@ export const createRegularHeatmap = (
       color: {
         field: colorFieldColumn.column,
         type: 'quantitative',
-        // log doesn't support bin, delete log or disable bin when scale type is log?
-        bin:
-          !styles.exclusive?.useCustomRanges && styles.exclusive?.colorScaleType !== ScaleType.LOG
-            ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
-            : false,
+        bin: !styles.exclusive?.useCustomRanges
+          ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
+          : false,
         scale: {
           type: styles.exclusive?.colorScaleType,
           scheme: styles.exclusive?.colorSchema,

@@ -10,12 +10,14 @@ import {
   EuiRange,
   EuiSwitch,
   EuiFormRow,
-  EuiSpacer,
+  EuiTitle,
+  EuiPanel,
   EuiSelect,
 } from '@elastic/eui';
 import React from 'react';
 import { ScatterChartStyleControls } from './scatter_vis_config';
 import { PointShape } from '../types';
+import { getPointShapes } from '../utils/collections';
 
 interface ScatterVisOptionsProps {
   styles: ScatterChartStyleControls['exclusive'];
@@ -33,10 +35,19 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
     });
   };
 
+  const pointShapes = getPointShapes();
   return (
-    <>
-      <EuiSpacer />
+    <EuiPanel data-test-subj="scatterExclusivePanel" paddingSize="s">
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('explore.stylePanel.scatter.label.labelSettings', {
+                defaultMessage: 'Exclusive Settings',
+              })}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate('explore.vis.scatter.shape', {
@@ -44,12 +55,7 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
             })}
           >
             <EuiSelect
-              options={[
-                { value: 'circle', text: 'Circle' },
-                { value: 'square', text: 'Square' },
-                { value: 'cross', text: 'Cross' },
-                { value: 'diamond', text: 'Diamond' },
-              ]}
+              options={pointShapes}
               value={styles.pointShape}
               onChange={(e) => updateStyle('pointShape', e.target.value as PointShape)}
             />
@@ -80,6 +86,6 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </EuiPanel>
   );
 };

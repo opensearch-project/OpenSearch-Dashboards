@@ -147,7 +147,7 @@ export const VisualizationContainer = ({ rows, fieldSchema }: Props) => {
 
   const handleStyleChange = (newOptions: Partial<AllChartStyleControls>) => {
     if (styleOptions) {
-      setStyleOptions({ ...styleOptions, ...newOptions });
+      setStyleOptions({ ...styleOptions, ...newOptions } as AllChartStyleControls);
     }
   };
 

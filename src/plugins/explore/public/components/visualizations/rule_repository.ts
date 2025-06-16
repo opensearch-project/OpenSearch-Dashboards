@@ -211,7 +211,7 @@ const threeMetricsRule: VisualizationRule = {
   },
 };
 
-// TODO: when stack bar is implemented, heatmap map only matches group by field > 7
+// TODO: when stack bar is implemented, heatmap map only matches group by field >= 7
 const oneMetricTwoCateRule: VisualizationRule = {
   id: 'one-metric-two-category',
   name: 'one metric and two category',
@@ -238,8 +238,9 @@ const oneMetricOneCateRule: VisualizationRule = {
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && date.length === 0 && categorical.length === 1,
   chartTypes: [
-    { type: 'pie', priority: 100, name: 'pie' },
-    { type: 'bar', priority: 80, name: 'Bar Chart' },
+    // TODO: when bar is implemented, bar will take higher priority
+    // { type: 'bar', priority: 100, name: 'Bar Chart' },
+    { type: 'pie', priority: 80, name: 'Pie Chart' },
     { type: 'line', priority: 60, name: 'Line Chart' },
     { type: 'area', priority: 40, name: 'Area Chart' },
   ],
@@ -270,6 +271,7 @@ const oneMetricOneCateRule: VisualizationRule = {
         // TODO: Implement bar chart creation
         return;
       default:
+        // TODO: when bar is implemented, bar will take higher priority
         return createPieSpec(
           transformedData,
           numericalColumns,

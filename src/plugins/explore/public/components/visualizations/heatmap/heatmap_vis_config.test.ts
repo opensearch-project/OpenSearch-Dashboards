@@ -68,7 +68,7 @@ describe('createHeatmapeConfig', () => {
     const yAxis = defaults.StandardAxes.find((axis) => axis.axisRole === AxisRole.Y);
     expect(yAxis).toHaveProperty('position', Positions.LEFT);
   });
-  it('should render the LineVisStyleControls component with the provided props', () => {
+  it('should render the HeatmapVisStyleControls component with the provided props', () => {
     const config = createHeatmapConfig();
     const renderFunction = config.ui.style.render;
     // Mock props

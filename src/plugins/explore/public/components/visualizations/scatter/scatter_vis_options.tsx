@@ -36,6 +36,9 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
     onStyleChange({ [key]: value });
   };
 
+  // if it is 2 metrics, then it should not show legend
+  const notShowLegend = numericalColumns.length === 2 && categoricalColumns.length === 0;
+
   useEffect(() => {
     const { x, y } = inferAxesFromColumns(numericalColumns, categoricalColumns);
     const axesWithFields = styleOptions.StandardAxes.map((axis) => {
@@ -65,6 +68,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
       }),
       content: (
         <GeneralVisOptions
+          shouldShowLegend={!notShowLegend}
           addTooltip={styleOptions.addTooltip}
           addLegend={styleOptions.addLegend}
           legendPosition={styleOptions.legendPosition}

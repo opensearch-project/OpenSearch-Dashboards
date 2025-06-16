@@ -24,6 +24,7 @@ export interface GeneralVisOptionsProps {
   onAddTooltipChange: (addTooltip: boolean) => void;
   onAddLegendChange: (addLegend: boolean) => void;
   onLegendPositionChange: (legendPosition: Positions) => void;
+  shouldShowLegend?: boolean;
 }
 
 export const GeneralVisOptions = ({
@@ -33,6 +34,7 @@ export const GeneralVisOptions = ({
   onAddTooltipChange,
   onAddLegendChange,
   onLegendPositionChange,
+  shouldShowLegend = true,
 }: GeneralVisOptionsProps) => {
   const legendPositions = getPositions();
 
@@ -48,16 +50,19 @@ export const GeneralVisOptions = ({
             </h4>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSwitch
-            label={i18n.translate('explore.stylePanel.general.showLegend', {
-              defaultMessage: 'Show legend',
-            })}
-            checked={addLegend}
-            onChange={(e) => onAddLegendChange(e.target.checked)}
-          />
-        </EuiFlexItem>
-        {addLegend && (
+        {shouldShowLegend && (
+          <EuiFlexItem>
+            <EuiSwitch
+              label={i18n.translate('explore.stylePanel.general.showLegend', {
+                defaultMessage: 'Show legend',
+              })}
+              checked={addLegend}
+              onChange={(e) => onAddLegendChange(e.target.checked)}
+              data-test-subj="showLegendSwitch"
+            />
+          </EuiFlexItem>
+        )}
+        {addLegend && shouldShowLegend && (
           <EuiFlexItem>
             <EuiFormRow
               label={i18n.translate('explore.stylePanel.general.legendPosition', {
@@ -68,6 +73,7 @@ export const GeneralVisOptions = ({
                 value={legendPosition}
                 onChange={(e) => onLegendPositionChange(e.target.value as Positions)}
                 options={legendPositions}
+                data-test-subj="legendPositionSelect"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -79,6 +85,7 @@ export const GeneralVisOptions = ({
             })}
             checked={addTooltip}
             onChange={(e) => onAddTooltipChange(e.target.checked)}
+            data-test-subj="showTooltipSwitch"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

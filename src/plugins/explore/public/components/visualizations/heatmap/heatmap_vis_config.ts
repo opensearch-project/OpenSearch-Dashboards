@@ -33,7 +33,7 @@ export interface ExclusiveHeatmapConfig {
   useCustomRanges: boolean;
   customRanges?: RangeValue[];
 }
-// Complete line chart style controls interface
+// Complete heatmap chart style controls interface
 export interface HeatmapChartStyleControls {
   // Basic controls
   addTooltip: boolean;
@@ -71,7 +71,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     color: 'black',
   },
 
-  // Value axes
+  // Standard axes
   StandardAxes: [
     {
       id: 'Axis-1',
@@ -120,8 +120,8 @@ export const createHeatmapConfig = (): VisualizationType => ({
   ui: {
     style: {
       defaults: defaultHeatmapChartStyles,
-      render: (props: HeatmapVisStyleControlsProps) =>
-        React.createElement(HeatmapVisStyleControls, props),
+      render: (props) =>
+        React.createElement(HeatmapVisStyleControls, props as HeatmapVisStyleControlsProps),
     },
   },
 });

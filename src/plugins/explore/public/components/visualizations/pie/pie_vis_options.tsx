@@ -11,7 +11,7 @@ import { PieChartStyleControls } from './pie_vis_config';
 import { PieExclusiveVisOptions } from './pie_exclusive_vis_options';
 import { VisColumn } from '../types';
 
-export interface PieChartStyleControlsProps {
+export interface PieVisStyleControlsProps {
   styleOptions: PieChartStyleControls;
   onStyleChange: (newOptions: Partial<PieChartStyleControls>) => void;
   numericalColumns?: VisColumn[];
@@ -19,7 +19,7 @@ export interface PieChartStyleControlsProps {
   dateColumns?: VisColumn[];
 }
 
-export const PieVisStyleControls: React.FC<PieChartStyleControlsProps> = ({
+export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
   styleOptions,
   onStyleChange,
   numericalColumns = [],

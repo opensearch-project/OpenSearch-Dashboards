@@ -7,7 +7,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { VisualizationTypeResult, AllChartStyleControls } from './utils/use_visualization_types';
-import { LineChartStyleControls } from './line/line_vis_config';
 
 export interface VisualizationProps {
   expression: string;

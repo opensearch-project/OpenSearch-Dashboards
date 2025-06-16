@@ -54,7 +54,7 @@ describe('BasicVisOptions', () => {
 
   it('renders basic settings title', () => {
     render(<BasicVisOptions {...defaultProps} />);
-    expect(screen.getByText('Basic Settings')).toBeInTheDocument();
+    expect(screen.getByText('Exclusive Settings')).toBeInTheDocument();
   });
 
   it('calls onShowLineChange when show line switch is toggled', () => {
@@ -107,15 +107,5 @@ describe('BasicVisOptions', () => {
 
     expect(lineModeSelect).toBeDisabled();
     expect(lineWidthInput).toBeDisabled();
-  });
-
-  it('hides legend position select when show legend is false', () => {
-    const props = {
-      ...defaultProps,
-      addLegend: false,
-    };
-    render(<BasicVisOptions {...props} />);
-
-    expect(screen.queryByText('Legend position')).not.toBeInTheDocument();
   });
 });

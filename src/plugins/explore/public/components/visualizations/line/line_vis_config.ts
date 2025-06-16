@@ -108,8 +108,8 @@ export const createLineConfig = (): VisualizationType => ({
   ui: {
     style: {
       defaults: defaultLineChartStyles,
-      render: (props: LineVisStyleControlsProps) =>
-        React.createElement(LineVisStyleControls, props),
+      render: (props) =>
+        React.createElement(LineVisStyleControls, props as LineVisStyleControlsProps),
     },
   },
 });

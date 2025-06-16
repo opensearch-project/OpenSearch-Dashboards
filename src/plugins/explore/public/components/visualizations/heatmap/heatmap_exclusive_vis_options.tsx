@@ -10,6 +10,7 @@ import {
   EuiText,
   EuiSwitch,
   EuiFieldNumber,
+  EuiTitle,
   EuiColorPicker,
   EuiFormRow,
   EuiPanel,
@@ -59,6 +60,15 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
   return (
     <EuiPanel paddingSize="s" data-test-subj="heatmapExclusivePanel">
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('explore.stylePanel.heatmap.exclusive.exclusiveSettings', {
+                defaultMessage: 'Exclusive Settings',
+              })}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.heatmap.exclusive.colorSchema', {
@@ -182,6 +192,15 @@ export const HeatmapLabelVisOptions = ({
   return (
     <EuiPanel paddingSize="s" data-test-subj="heatmapLabelPanel">
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('explore.stylePanel.heatmap.label.labelSettings', {
+                defaultMessage: 'Label Settings',
+              })}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
             label={i18n.translate('explore.stylePanel.heatmap.label.show', {

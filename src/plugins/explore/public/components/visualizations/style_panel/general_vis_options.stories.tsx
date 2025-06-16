@@ -25,6 +25,7 @@ const Template: ComponentStory<typeof GeneralVisOptions> = (args) => {
     <div style={{ maxWidth: '800px', padding: '16px' }}>
       <GeneralVisOptions
         {...args}
+        shouldShowLegend={true}
         addTooltip={addTooltip}
         addLegend={addLegend}
         legendPosition={legendPosition}

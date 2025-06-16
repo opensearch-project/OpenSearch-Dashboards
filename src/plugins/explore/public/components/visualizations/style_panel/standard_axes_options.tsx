@@ -272,7 +272,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('explore.vis.standardAxes.title', {
-                defaultMessage: 'Axes',
+                defaultMessage: 'Axes Settings',
               })}
             </h3>
           </EuiTitle>

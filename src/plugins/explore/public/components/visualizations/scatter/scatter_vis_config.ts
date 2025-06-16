@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../utils/use_visualization_types';
+import { VisualizationType, StyleControlsProps } from '../utils/use_visualization_types';
 import { ScatterVisStyleControls, ScatterVisStyleControlsProps } from './scatter_vis_options';
 import { StandardAxes, PointShape, AxisRole, Positions } from '../types';
 
@@ -39,6 +39,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
     filled: false,
   },
 
+  // Standard axes
   StandardAxes: [
     {
       id: 'Axis-1',
@@ -83,8 +84,8 @@ export const createScatterConfig = (): VisualizationType => ({
   ui: {
     style: {
       defaults: defaultScatterChartStyles,
-      render: (props: ScatterVisStyleControlsProps) =>
-        React.createElement(ScatterVisStyleControls, props),
+      render: (props) =>
+        React.createElement(ScatterVisStyleControls, props as ScatterVisStyleControlsProps),
     },
   },
 });

@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { PieChartStyleControls } from './pie_vis_config';
 import { DebouncedTruncateField } from '../style_panel/utils';
@@ -25,8 +25,17 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
   };
 
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel paddingSize="s" data-test-subj="pieExclusivePanel">
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('explore.stylePanel.pie.exclusive.exclusiveSettings', {
+                defaultMessage: 'Exclusive Settings',
+              })}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
             label={i18n.translate('explore.vis.pie.exclusive.donut', {

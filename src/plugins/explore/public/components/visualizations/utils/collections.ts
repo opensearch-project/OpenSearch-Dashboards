@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { ColorSchemas, ScaleType, Positions, LabelAggregationType } from '../types';
+import { ColorSchemas, ScaleType, Positions, LabelAggregationType, PointShape } from '../types';
 
 export const getPositions = () => [
   {
@@ -125,5 +125,32 @@ export const getLabelType = () => [
       defaultMessage: 'None',
     }),
     value: LabelAggregationType.NONE,
+  },
+];
+
+export const getPointShapes = () => [
+  {
+    text: i18n.translate('explore.vis.scatter.pointShape.circle', {
+      defaultMessage: 'Circle',
+    }),
+    value: PointShape.CIRCLE,
+  },
+  {
+    text: i18n.translate('explore.vis.scatter.pointShape.square', {
+      defaultMessage: 'Square',
+    }),
+    value: PointShape.SQUARE,
+  },
+  {
+    text: i18n.translate('explore.vis.scatter.pointShape.cross', {
+      defaultMessage: 'Cross',
+    }),
+    value: PointShape.CROSS,
+  },
+  {
+    text: i18n.translate('explore.vis.scatter.pointShape.diamond', {
+      defaultMessage: 'Diamond',
+    }),
+    value: PointShape.DIAMOND,
   },
 ];

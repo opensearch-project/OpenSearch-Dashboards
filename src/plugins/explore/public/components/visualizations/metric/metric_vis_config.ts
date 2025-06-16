@@ -31,8 +31,8 @@ export const createMetricConfig = (): VisualizationType => ({
   ui: {
     style: {
       defaults: defaultMetricChartStyles,
-      render: (props: MetricVisStyleControlsProps) =>
-        React.createElement(MetricVisStyleControls, props),
+      render: (props) =>
+        React.createElement(MetricVisStyleControls, props as MetricVisStyleControlsProps),
     },
   },
 });

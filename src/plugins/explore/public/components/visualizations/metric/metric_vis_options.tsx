@@ -63,13 +63,13 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
         defaultMessage: 'Exclusive',
       }),
       content: (
-        <EuiPanel paddingSize="s">
+        <EuiPanel paddingSize="s" data-test-subj="metricExclusivePanel">
           <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h4>
                   {i18n.translate('explore.vis.metric.settings', {
-                    defaultMessage: 'Metric Settings',
+                    defaultMessage: 'Exclusive Settings',
                   })}
                 </h4>
               </EuiTitle>
@@ -79,6 +79,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                 label="Show title"
                 checked={styleOptions.showTitle}
                 onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
+                data-test-subj="showTitleButton"
               />
             </EuiFlexItem>
             {styleOptions.showTitle && (

@@ -63,8 +63,8 @@ export const BasicVisOptions = ({
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
         <h4>
-          {i18n.translate('explore.vis.gridOptions.basicSettings', {
-            defaultMessage: 'Basic Settings',
+          {i18n.translate('explore.vis.gridOptions.exclusiveSettings', {
+            defaultMessage: 'Exclusive Settings',
           })}
         </h4>
       </EuiTitle>
