@@ -36,6 +36,9 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
+  // if it is 1 metric and 1 date, then it should not show legend
+  const notShowLegend =
+    numericalColumns.length === 1 && categoricalColumns.length === 0 && dateColumns.length === 0;
   const tabs: EuiTabbedContentTab[] = [
     {
       id: 'basic',
@@ -44,6 +47,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
       }),
       content: (
         <GeneralVisOptions
+          shouldShowLegend={!notShowLegend}
           addTooltip={styleOptions.addTooltip}
           addLegend={styleOptions.addLegend}
           legendPosition={styleOptions.legendPosition}

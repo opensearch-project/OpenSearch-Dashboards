@@ -234,7 +234,7 @@ const oneMetricTwoCateRule: VisualizationRule = {
 const oneMetricOneCateRule: VisualizationRule = {
   id: 'one-metric-one-category',
   name: 'one metric and one category',
-  description: 'Heatmap for one metric and one category',
+  description: 'Multiple visualizations for one metric and one category',
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && date.length === 0 && categorical.length === 1,
   chartTypes: [
@@ -288,7 +288,10 @@ const oneMetricRule: VisualizationRule = {
   name: 'one metric',
   description: 'Metric for one metric',
   matches: (numerical, categorical, date) =>
-    numerical.length === 1 && date.length === 0 && categorical.length === 0,
+    numerical.length === 1 &&
+    date.length === 0 &&
+    categorical.length === 0 &&
+    numerical[0].validValuesCount === 1,
   chartTypes: [{ type: 'metric', priority: 100, name: 'metric' }],
   toExpression: (
     transformedData,

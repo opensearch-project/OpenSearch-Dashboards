@@ -69,7 +69,7 @@ export const addTransform = (styles: Partial<HeatmapChartStyleControls>, numeric
         joinaggregate: [{ op: 'max', field: numericFields, as: 'max_value' }],
       },
       {
-        calculate: `(datum["${numericFields}"] / datum.max_value)`,
+        calculate: `(datum.max_value === 0 ? datum["${numericFields}"] : datum["${numericFields}"] / datum.max_value)`,
         as: numericFields,
       },
     ];

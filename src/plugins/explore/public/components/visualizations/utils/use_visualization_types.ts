@@ -115,6 +115,8 @@ export const getVisualizationType = <T = unknown>(
       schema: getFieldTypeFromSchema(field.type),
       name: field.name || '',
       column: `field-${index}`,
+      validValuesCount: 0,
+      uniqueValuesCount: 0,
     };
   });
   const transformedData = rows.map((row: OpenSearchSearchHit) => {
@@ -127,8 +129,20 @@ export const getVisualizationType = <T = unknown>(
     return transformedRow;
   });
 
+  // count validValues and uniqueValues
+  const fieldStats = columns.map((column) => {
+    const values = transformedData.map((row) => row[column.column]);
+    const validValues = values.filter((v) => v !== null && v !== undefined);
+    const uniqueValues = new Set(validValues);
+    return {
+      ...column,
+      validValuesCount: validValues.length,
+      uniqueValuesCount: uniqueValues.size,
+    };
+  });
+
   return {
-    ...registry.getVisualizationType(columns),
+    ...registry.getVisualizationType(fieldStats),
     transformedData,
   };
 };

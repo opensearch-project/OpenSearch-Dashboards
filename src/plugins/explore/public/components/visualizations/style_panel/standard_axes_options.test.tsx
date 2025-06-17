@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AllAxesOptions } from './standard_axes_options';
-import { StandardAxes, VisColumn, VisFieldType, Positions, AxisRole } from '../types';
+import { StandardAxes, Positions, AxisRole } from '../types';
 
 describe('AxesOptions', () => {
   const mockStandardAxes: StandardAxes[] = [

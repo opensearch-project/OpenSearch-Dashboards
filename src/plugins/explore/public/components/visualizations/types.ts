@@ -39,6 +39,8 @@ export interface VisColumn {
   name: string;
   schema: VisFieldType;
   column: string;
+  validValuesCount: number;
+  uniqueValuesCount: number;
 }
 
 export enum VisFieldType {

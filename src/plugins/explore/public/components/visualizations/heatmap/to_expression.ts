@@ -4,7 +4,7 @@
  */
 
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { VisColumn, ScaleType, AxisRole, VEGASCHEMA } from '../types';
+import { VisColumn, AxisRole, VEGASCHEMA } from '../types';
 import { applyAxisStyling, getAxisByRole } from '../utils/utils';
 import { createlabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
 
@@ -43,10 +43,10 @@ export const createHeatmapWithBin = (
       color: {
         field: colorFieldColumn.column,
         type: 'quantitative',
-        bin:
-          !styles.exclusive?.useCustomRanges && styles.exclusive?.colorScaleType !== ScaleType.LOG
-            ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
-            : false,
+        // TODO: a dedicate method to handle scale type is log especially in percentage mode
+        bin: !styles.exclusive?.useCustomRanges
+          ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
+          : false,
         scale: {
           type: styles.exclusive?.colorScaleType,
           scheme: styles.exclusive?.colorSchema,
@@ -112,6 +112,7 @@ export const createRegularHeatmap = (
       color: {
         field: colorFieldColumn.column,
         type: 'quantitative',
+        // TODO: a dedicate method to handle scale type is log especially in percentage mode
         bin: !styles.exclusive?.useCustomRanges
           ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
           : false,

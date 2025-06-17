@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { VisualizationType, StyleControlsProps } from '../utils/use_visualization_types';
+import { VisualizationType } from '../utils/use_visualization_types';
 import { ScatterVisStyleControls, ScatterVisStyleControlsProps } from './scatter_vis_options';
 import { StandardAxes, PointShape, AxisRole, Positions } from '../types';
 
