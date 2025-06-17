@@ -20,7 +20,7 @@ import {
   UI_SETTINGS,
 } from '../../../data/public';
 import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
-import { SearchInput, SearchOutput } from './types';
+import { ExploreInput, ExploreOutput } from './types';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -33,7 +33,7 @@ import { SortOrder } from '../types/saved_explore_types';
 import { SavedExplore } from '../saved_explore';
 import { SAMPLE_SIZE_SETTING } from '../../common/legacy/discover';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
-import { DiscoverServices } from '../application/legacy/discover/build_services';
+import { ExploreServices } from '../types';
 import { ExpressionRenderError } from '../../../expressions/public';
 import { getVisualizationType } from '../components/visualizations/utils/use_visualization_types';
 import { VisColumn } from '../components/visualizations/types';
@@ -47,7 +47,7 @@ export interface SearchProps {
   indexPattern?: IndexPattern;
   hits?: number;
   isLoading?: boolean;
-  services: DiscoverServices;
+  services: ExploreServices;
   expression?: string;
   searchContext?: {
     query: Query | undefined;
@@ -56,19 +56,19 @@ export interface SearchProps {
   };
 }
 
-interface SearchEmbeddableConfig {
+interface ExploreEmbeddableConfig {
   savedExplore: SavedExplore;
   editUrl: string;
   editPath: string;
   indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
-  services: DiscoverServices;
+  services: ExploreServices;
 }
 
 export class ExploreEmbeddable
-  extends Embeddable<SearchInput, SearchOutput>
-  implements IEmbeddable<SearchInput, SearchOutput> {
+  extends Embeddable<ExploreInput, ExploreOutput>
+  implements IEmbeddable<ExploreInput, ExploreOutput> {
   private abortController?: AbortController;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
@@ -77,7 +77,7 @@ export class ExploreEmbeddable
   private subscription: Subscription;
   private autoRefreshFetchSubscription?: Subscription;
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
-  private services: DiscoverServices;
+  private services: ExploreServices;
   private prevState = {
     filters: undefined as Filter[] | undefined,
     query: undefined as Query | undefined,
@@ -86,8 +86,8 @@ export class ExploreEmbeddable
   private node?: HTMLElement;
 
   constructor(
-    { savedExplore, editUrl, editPath, indexPatterns, editable, services }: SearchEmbeddableConfig,
-    initialInput: SearchInput,
+    { savedExplore, editUrl, editPath, indexPatterns, editable, services }: ExploreEmbeddableConfig,
+    initialInput: ExploreInput,
     parent?: Container
   ) {
     super(
@@ -96,7 +96,7 @@ export class ExploreEmbeddable
         defaultTitle: savedExplore.title,
         editUrl,
         editPath,
-        editApp: 'discover',
+        editApp: 'explore',
         indexPatterns,
         editable,
       },

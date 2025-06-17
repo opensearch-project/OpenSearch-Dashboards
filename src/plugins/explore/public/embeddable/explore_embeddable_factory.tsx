@@ -12,7 +12,7 @@ import {
   ErrorEmbeddable,
 } from '../../../embeddable/public';
 import { TimeRange } from '../../../data/public';
-import { SearchInput, SearchOutput } from './types';
+import { ExploreInput, ExploreOutput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { ExploreEmbeddable } from './explore_embeddable';
 
@@ -22,7 +22,7 @@ interface StartServices {
 }
 
 export class ExploreEmbeddableFactory
-  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, ExploreEmbeddable> {
+  implements EmbeddableFactoryDefinition<ExploreInput, ExploreOutput, ExploreEmbeddable> {
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
     name: i18n.translate('explore.savedExplore.savedObjectName', {
@@ -51,7 +51,7 @@ export class ExploreEmbeddableFactory
 
   public createFromSavedObject = async (
     savedObjectId: string,
-    input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
+    input: Partial<ExploreInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<ExploreEmbeddable | ErrorEmbeddable> => {
     const services = getServices();
@@ -85,7 +85,7 @@ export class ExploreEmbeddableFactory
     }
   };
 
-  public async create(input: SearchInput) {
+  public async create(input: ExploreInput) {
     return new ErrorEmbeddable('Saved explores can only be created from a saved object', input);
   }
 }

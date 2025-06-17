@@ -7,7 +7,7 @@ import { Embeddable, EmbeddableInput, EmbeddableOutput } from '../../../embeddab
 import { Filter, IIndexPattern, TimeRange, Query } from '../../../data/public';
 import { SortOrder } from '../types/saved_explore_types';
 
-export interface SearchInput extends EmbeddableInput {
+export interface ExploreInput extends EmbeddableInput {
   timeRange: TimeRange;
   query?: Query;
   filters?: Filter[];
@@ -16,12 +16,12 @@ export interface SearchInput extends EmbeddableInput {
   sort?: SortOrder[];
 }
 
-export interface SearchOutput extends EmbeddableOutput {
+export interface ExploreOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: IIndexPattern[];
   editable: boolean;
 }
 
-export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
+export interface ExploreEmbeddable extends Embeddable<ExploreInput, ExploreOutput> {
   type: string;
 }

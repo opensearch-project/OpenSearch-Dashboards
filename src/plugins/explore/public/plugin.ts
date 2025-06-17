@@ -317,8 +317,9 @@ export class ExplorePlugin
         showInAllNavGroup: false,
       },
     ]);
+    this.registerEmbeddable(core, setupDeps);
 
-    setupDeps.urlForwarding.forwardApp('doc', 'discover', (path) => {
+    setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
       return `#${path}`;
     });
     setupDeps.urlForwarding.forwardApp('context', PLUGIN_ID, (path) => {
@@ -343,8 +344,6 @@ export class ExplorePlugin
     /* if (setupDeps.home) {
       registerFeature(setupDeps.home);
     } */
-
-    this.registerEmbeddable(core, setupDeps);
 
     return {
       docViews: {
