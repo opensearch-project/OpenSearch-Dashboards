@@ -3,14 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import { LogsTab } from '../components/tabs/logs_tab';
+import { VisualizationContainer } from '../components/visualizations/visualization_container';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
-
-// Import tab components
-const LogsTabComponent = React.lazy(() =>
-  import('./components/logs_tab').then((module) => ({ default: module.LogsTab }))
-);
-const VisualizationsTabComponent = React.lazy(() => import('./components/tabs/visualizations_tab'));
 
 /**
  * Registers built-in tabs with the tab registry
@@ -24,7 +19,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     order: 10,
     supportedLanguages: ['PPL'],
 
-    component: LogsTabComponent,
+    component: LogsTab,
 
     // Add lifecycle hooks
     onActive: () => {
@@ -39,8 +34,8 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
 
   // Register Visualizations Tab
   tabRegistry.registerTab({
-    id: 'visualizations',
-    label: 'Visualizations',
+    id: 'explore_visualization_tab',
+    label: 'Visualization',
     flavor: [],
     order: 20,
     supportedLanguages: ['PPL'],
@@ -51,7 +46,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
       return query;
     },
 
-    component: VisualizationsTabComponent,
+    component: VisualizationContainer,
 
     // Add lifecycle hooks
     onActive: () => {

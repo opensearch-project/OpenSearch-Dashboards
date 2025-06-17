@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -12,7 +12,7 @@ import {
 } from '../../../common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternField, opensearchFilters, UI_SETTINGS } from '../../../../data/public';
-import { DocViewFilterFn, OpenSearchSearchHit } from '../../types/doc_views_types';
+import { DocViewFilterFn } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
 import {
   useDispatch,
@@ -26,6 +26,7 @@ import { getDocViewsRegistry } from '../../application/legacy/discover/opensearc
 import { ExploreServices } from '../../types';
 import {
   selectColumns,
+  selectRows,
   selectSavedSearch,
 } from '../../application/utils/state_management/selectors';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
@@ -34,12 +35,7 @@ import {
   removeColumn,
 } from '../../application/utils/state_management/slices/legacy_slice';
 
-interface Props {
-  rows?: Array<OpenSearchSearchHit<Record<string, any>>>;
-  scrollToTop?: () => void;
-}
-
-export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
+export const ExploreDataTable = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const {
     uiSettings,
@@ -51,6 +47,7 @@ export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
   } = services;
 
   const savedSearch = useSelector(selectSavedSearch);
+  const rows = useSelector(selectRows);
   const columns = useSelector(selectColumns);
   const { indexPattern } = useIndexPatternContext();
 
@@ -81,6 +78,14 @@ export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
 
     return displayedColumns;
   }, [columns, indexPattern, uiSettings]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToTop = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  };
 
   const docViewsRegistry = getDocViewsRegistry();
 
@@ -135,6 +140,7 @@ export const ExploreDataTable = ({ rows, scrollToTop }: Props) => {
       data-test-subj="discoverTable"
       className="eui-xScrollWithShadows"
       style={{ height: '100%' }}
+      ref={containerRef}
     >
       <DataTable
         columns={tableColumns}

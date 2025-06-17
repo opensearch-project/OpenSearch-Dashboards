@@ -93,8 +93,8 @@ export const selectResults = createSelector(
 );
 
 export const selectRows = createSelector([selectResults], (results) => {
-  if ((results as any)?.hits?.hits) {
-    return (results as any).hits.hits;
+  if (results?.hits?.hits) {
+    return results.hits.hits;
   }
   return [];
 });
