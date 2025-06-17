@@ -1,0 +1,2 @@
+feat:
+- Add pie, scatter, heatmap, single metric auto visualization ([#9874](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9874))

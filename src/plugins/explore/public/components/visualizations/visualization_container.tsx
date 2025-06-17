@@ -7,12 +7,13 @@ import React, { useEffect, useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 import { IExpressionLoaderParams } from '../../../../expressions/public';
-import { LineChartStyleControls } from './line/line_vis_config';
+
 import { Visualization } from './visualization';
 import {
   getVisualizationType,
   VisualizationTypeResult,
   useVisualizationRegistry,
+  AllChartStyleControls,
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
@@ -43,7 +44,7 @@ export const VisualizationContainer = ({ rows, fieldSchema }: Props) => {
   );
 
   const [expression, setExpression] = useState<string>();
-  const [styleOptions, setStyleOptions] = useState<LineChartStyleControls | undefined>(undefined);
+  const [styleOptions, setStyleOptions] = useState<AllChartStyleControls | undefined>(undefined);
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -144,9 +145,9 @@ export const VisualizationContainer = ({ rows, fieldSchema }: Props) => {
     };
   }, [queryString, services.data.query.state$]);
 
-  const handleStyleChange = (newOptions: Partial<LineChartStyleControls>) => {
+  const handleStyleChange = (newOptions: Partial<AllChartStyleControls>) => {
     if (styleOptions) {
-      setStyleOptions({ ...styleOptions, ...newOptions });
+      setStyleOptions({ ...styleOptions, ...newOptions } as AllChartStyleControls);
     }
   };
 
