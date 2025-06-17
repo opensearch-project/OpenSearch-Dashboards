@@ -34,6 +34,7 @@ export function buildServices(
 
   return {
     addBasePath: core.http.basePath.prepend,
+    appName: 'explore',
     capabilities: core.application.capabilities,
     chrome: core.chrome,
     core,

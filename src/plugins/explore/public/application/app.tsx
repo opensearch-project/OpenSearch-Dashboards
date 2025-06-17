@@ -21,6 +21,7 @@ import {
 import { HeaderVariant } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../types';
+import { useIndexPatternContext } from './components/index_pattern_context';
 import { RootState } from './utils/state_management/store';
 import { ResultStatus } from './utils/state_management/types';
 import { TopNav } from './legacy/discover/application/view_components/canvas/top_nav';
@@ -46,6 +47,11 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const {
+    indexPattern,
+    isLoading: indexPatternLoading,
+    error: indexPatternError,
+  } = useIndexPatternContext();
   const showActionsInGroup = services.uiSettings.get('home:useNewHomePage', false);
 
   // Get status and rows for histogram and tab content
@@ -177,9 +183,21 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
               <NewExperienceBanner />
             </div>
 
-            {/* QueryPanel component */}
+            {/* QueryPanel component - only render when IndexPattern is loaded */}
             <div className="dscCanvas__queryPanel">
-              <QueryPanel datePickerRef={datePickerRef} />
+              {indexPatternLoading ? (
+                <div>Loading IndexPattern...</div>
+              ) : indexPatternError ? (
+                <div>Error loading IndexPattern: {indexPatternError}</div>
+              ) : indexPattern ? (
+                <QueryPanel
+                  datePickerRef={datePickerRef}
+                  services={services}
+                  indexPattern={indexPattern}
+                />
+              ) : (
+                <div>No IndexPattern available</div>
+              )}
             </div>
 
             {/* Main content area with resizable panels under QueryPanel */}
