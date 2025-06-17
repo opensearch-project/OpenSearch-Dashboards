@@ -4,8 +4,6 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { Query, TimeRange } from '../../../../../../../../data/common';
@@ -14,8 +12,6 @@ import {
   opensearchFilters,
   QueryStatus,
   useSyncQueryStateWithUrl,
-  DatasetSelector,
-  DatasetSelectorAppearance,
 } from '../../../../../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
@@ -24,7 +20,6 @@ import { PLUGIN_ID } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
-import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { useDispatch, useSelector } from '../../utils/state_management';
 import { setSavedQuery } from '../../../../../utils/state_management/slices/legacy_slice';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
@@ -68,12 +63,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     navigation: {
       ui: { TopNavMenu },
     },
-    core: {
-      application: { getUrlForApp },
-    },
     data,
-    chrome,
-    storage,
     uiSettings,
     history,
   } = services;
@@ -97,8 +87,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     services,
     inspectorAdapters,
     savedSearch || ({} as any), // Provide empty object if savedSearch is null
-    startSyncingQueryStateWithUrl,
-    isEnhancementsEnabled
+    startSyncingQueryStateWithUrl
   );
 
   const syncConfig = useMemo(() => {
@@ -150,55 +139,26 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     dispatch(setSavedQuery(newSavedQueryId));
   };
 
-  const displayToNavLinkInPortal =
-    isEnhancementsEnabled && !!opts?.optionalRef?.topLinkRef?.current && !showActionsInGroup;
-
   return (
-    <>
-      {displayToNavLinkInPortal &&
-        createPortal(
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            {topNavLinks.map((topNavLink) => (
-              <EuiFlexItem grow={false} key={(topNavLink as any).id}>
-                <EuiToolTip position="bottom" content={(topNavLink as any).label}>
-                  <EuiButtonIcon
-                    onClick={(event: any) => {
-                      if (topNavLink.run) {
-                        (topNavLink.run as any)(event.currentTarget);
-                      }
-                    }}
-                    iconType={(topNavLink as any).iconType}
-                    aria-label={(topNavLink as any).ariaLabel}
-                    size="s"
-                    color="text"
-                    data-test-subj={`${(topNavLink as any).id}Button`}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>,
-          opts.optionalRef!.topLinkRef.current!
-        )}
-      <TopNavMenu
-        appName={PLUGIN_ID}
-        config={displayToNavLinkInPortal ? [] : topNavLinks}
-        data={data}
-        showSearchBar={false}
-        showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
-        showSaveQuery={showSaveQuery}
-        useDefaultBehaviors
-        setMenuMountPoint={opts.setHeaderActionMenu}
-        indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
-        onQuerySubmit={opts.onQuerySubmit}
-        savedQueryId={legacyState.savedQuery}
-        onSavedQueryIdChange={updateSavedQueryId}
-        datasetSelectorRef={opts?.optionalRef?.datasetSelectorRef}
-        datePickerRef={opts?.optionalRef?.datePickerRef}
-        groupActions={showActionsInGroup}
-        screenTitle={screenTitle}
-        queryStatus={queryStatus}
-        showQueryBar={false}
-      />
-    </>
+    <TopNavMenu
+      appName={PLUGIN_ID}
+      config={topNavLinks}
+      data={data}
+      showSearchBar={false}
+      showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
+      showSaveQuery={showSaveQuery}
+      useDefaultBehaviors
+      setMenuMountPoint={opts.setHeaderActionMenu}
+      indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
+      onQuerySubmit={opts.onQuerySubmit}
+      savedQueryId={legacyState.savedQuery}
+      onSavedQueryIdChange={updateSavedQueryId}
+      datasetSelectorRef={opts?.optionalRef?.datasetSelectorRef}
+      datePickerRef={opts?.optionalRef?.datePickerRef}
+      groupActions={showActionsInGroup}
+      screenTitle={screenTitle}
+      queryStatus={queryStatus}
+      showQueryBar={false}
+    />
   );
 };
