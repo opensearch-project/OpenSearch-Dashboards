@@ -81,8 +81,8 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id?: string) => Promise<SavedExplore>;
-  getSavedSearchUrlById: (id: string) => Promise<string>;
+  getSavedExploreById: (id?: string) => Promise<SavedExplore>;
+  getSavedExploreUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
   storage: Storage;
@@ -114,8 +114,8 @@ export function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
-    getSavedSearchById: async (id?: string) => savedObjectService.get(id),
-    getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
+    getSavedExploreById: async (id?: string) => savedObjectService.get(id),
+    getSavedExploreUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,

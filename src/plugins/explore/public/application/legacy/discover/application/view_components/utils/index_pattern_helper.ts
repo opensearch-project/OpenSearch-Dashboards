@@ -38,7 +38,7 @@ export const fetchSavedSearch = async (
   toastNotifications
 ) => {
   try {
-    const savedSearch = await services.getSavedSearchById(savedSearchId);
+    const savedSearch = await services.getSavedExploreById(savedSearchId);
     return savedSearch;
   } catch (error) {
     // TODO: handle redirect with Data Explorer

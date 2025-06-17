@@ -43,7 +43,7 @@ export function buildServices(
     filterManager: plugins.data.query.filterManager,
     indexPatterns: plugins.data.indexPatterns, // Direct access for convenience
     getSavedExploreById: async (id?: string) => {
-      return getSavedExploreByIdFromClient(services.savedObjectsClient, id);
+      return getSavedExploreByIdFromClient(services.savedObjectsClient, savedObjectService, id);
     },
     getSavedExploreUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,

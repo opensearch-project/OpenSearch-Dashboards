@@ -56,11 +56,14 @@ export class ExploreEmbeddableFactory
   ): Promise<ExploreEmbeddable | ErrorEmbeddable> => {
     const services = getServices();
     const filterManager = services.filterManager;
-    const url = await services.getSavedSearchUrlById(savedObjectId);
+    const url = await services.getSavedExploreUrlById(savedObjectId);
     const editUrl = services.addBasePath(`/app/explorer/discover${url}`);
 
     try {
-      const savedObject = await services.getSavedSearchById(savedObjectId);
+      const savedObject = await services.getSavedExploreById(savedObjectId);
+      if (!savedObject) {
+        throw new Error('Saved object not found');
+      }
       const indexPattern = savedObject.searchSource.getField('index');
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
       return new ExploreEmbeddableClass(
