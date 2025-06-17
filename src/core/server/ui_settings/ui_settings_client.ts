@@ -335,13 +335,14 @@ export class UiSettingsClient implements IUiSettingsClient {
 
     Object.entries(changes).forEach(([key, val]) => {
       if (Array.isArray(this.defaults[key]?.scope) && (this.defaults[key].scope?.length ?? 0) > 1) {
+        const keyScope: UiSettingScope[] = this.defaults[key].scope;
         // If this setting applies to multiple scopes including global
         // categorize it as global to maintain backward compatibility.
-        if (this.defaults[key].scope?.includes(UiSettingScope.GLOBAL)) {
+        if (keyScope.includes(UiSettingScope.GLOBAL)) {
           groupedChanges[UiSettingScope.GLOBAL][key] = val;
         } else {
           // else we use first scope as fallback
-          groupedChanges[this.defaults[key].scope?.[0]][key] = val;
+          groupedChanges[keyScope[0]][key] = val;
         }
 
         this.log.warn(
