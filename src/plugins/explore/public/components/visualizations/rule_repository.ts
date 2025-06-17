@@ -11,6 +11,15 @@ import {
   createFacetedMultiLineChart,
 } from './line/to_expression';
 
+import { createHeatmapWithBin, createRegularHeatmap } from './heatmap/to_expression';
+import { createPieSpec } from './pie/to_expression';
+import {
+  createTwoMetricScatter,
+  createTwoMetricOneCateScatter,
+  createThreeMetricOneCateScatter,
+} from './scatter/to_expression';
+import { createSingleMetric } from './metric/to_expression';
+
 // The file contains visualization rules for different scenarios solely based on the number of metrics, categories, and dates fields.
 // Each rule can be mapped to multiple chart types with different priorities.
 // We take the highest priority chart type for default visualization type.
@@ -183,6 +192,200 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
   },
 };
 
+const threeMetricsRule: VisualizationRule = {
+  id: 'three-metric',
+  name: '3 Metric',
+  description: 'Heatmap with bin for three metric',
+  matches: (numerical, categorical, date) =>
+    numerical.length === 3 && date.length === 0 && categorical.length === 0,
+  chartTypes: [{ type: 'heatmap', priority: 100, name: 'Heatmap' }],
+  toExpression: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'heatmap'
+  ) => {
+    return createHeatmapWithBin(transformedData, numericalColumns, styleOptions);
+  },
+};
+
+// TODO: when stack bar is implemented, heatmap map only matches group by field >= 7
+const oneMetricTwoCateRule: VisualizationRule = {
+  id: 'one-metric-two-category',
+  name: 'one metric and two category',
+  description: 'Heatmap for one metric and two category',
+  matches: (numerical, categorical, date) =>
+    numerical.length === 1 && date.length === 0 && categorical.length === 2,
+  chartTypes: [{ type: 'heatmap', priority: 100, name: 'Heatmap' }],
+  toExpression: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'heatmap'
+  ) => {
+    return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+  },
+};
+
+const oneMetricOneCateRule: VisualizationRule = {
+  id: 'one-metric-one-category',
+  name: 'one metric and one category',
+  description: 'Multiple visualizations for one metric and one category',
+  matches: (numerical, categorical, date) =>
+    numerical.length === 1 && date.length === 0 && categorical.length === 1,
+  chartTypes: [
+    // TODO: when bar is implemented, bar will take higher priority
+    // { type: 'bar', priority: 100, name: 'Bar Chart' },
+    { type: 'pie', priority: 80, name: 'Pie Chart' },
+    { type: 'line', priority: 60, name: 'Line Chart' },
+    { type: 'area', priority: 40, name: 'Area Chart' },
+  ],
+  toExpression: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'pie'
+  ) => {
+    switch (chartType) {
+      case 'pie':
+        return createPieSpec(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
+      case 'bar':
+        // TODO: Implement bar chart creation
+        return;
+      case 'line':
+        // TODO: Implement area chart creation
+        return;
+      case 'area':
+        // TODO: Implement bar chart creation
+        return;
+      default:
+        // TODO: when bar is implemented, bar will take higher priority
+        return createPieSpec(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
+    }
+  },
+};
+
+const oneMetricRule: VisualizationRule = {
+  id: 'one-metric',
+  name: 'one metric',
+  description: 'Metric for one metric',
+  matches: (numerical, categorical, date) =>
+    numerical.length === 1 &&
+    date.length === 0 &&
+    categorical.length === 0 &&
+    numerical[0].validValuesCount === 1,
+  chartTypes: [{ type: 'metric', priority: 100, name: 'metric' }],
+  toExpression: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'metric'
+  ) => {
+    return createSingleMetric(
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styleOptions
+    );
+  },
+};
+
+const twoMetricRule: VisualizationRule = {
+  id: 'two-metric',
+  name: 'two metric',
+  description: 'Scatter for two metric',
+  matches: (numerical, categorical, date) =>
+    numerical.length === 2 && date.length === 0 && categorical.length === 0,
+  chartTypes: [{ type: 'scatter', priority: 100, name: 'scatter' }],
+  toExpression: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'scatter'
+  ) => {
+    return createTwoMetricScatter(
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styleOptions
+    );
+  },
+};
+
+const twoMetricOneCateRule: VisualizationRule = {
+  id: 'two-metric-one-category',
+  name: 'two metric and one category',
+  description: 'Scatter for two metric and one category',
+  matches: (numerical, categorical, date) =>
+    numerical.length === 2 && date.length === 0 && categorical.length === 1,
+  chartTypes: [{ type: 'scatter', priority: 100, name: 'scatter' }],
+  toExpression: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'scatter'
+  ) => {
+    return createTwoMetricOneCateScatter(
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styleOptions
+    );
+  },
+};
+
+const threeMetricOneCateRule: VisualizationRule = {
+  id: 'three-metric-one-category',
+  name: 'three metric and one category',
+  description: 'Scatter for three metric and one category',
+  matches: (numerical, categorical, date) =>
+    numerical.length === 3 && date.length === 0 && categorical.length === 1,
+  chartTypes: [{ type: 'scatter', priority: 100, name: 'scatter' }],
+  toExpression: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'scatter'
+  ) => {
+    return createThreeMetricOneCateScatter(
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styleOptions
+    );
+  },
+};
+
 // TODO: add more rules here as needed
 
 // Export all rules
@@ -191,4 +394,11 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   twoMetricOneDateRule,
   oneMetricOneCateOneDateRule,
   oneMetricTwoCateOneDateRule,
+  threeMetricsRule,
+  oneMetricTwoCateRule,
+  oneMetricOneCateRule,
+  twoMetricRule,
+  twoMetricOneCateRule,
+  threeMetricOneCateRule,
+  oneMetricRule,
 ];
