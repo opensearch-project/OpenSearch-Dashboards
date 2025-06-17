@@ -1,0 +1,2 @@
+feat:
+- Consume tab registry service and related state in explore tabs ([#9901](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9901))

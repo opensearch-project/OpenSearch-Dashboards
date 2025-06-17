@@ -2,16 +2,16 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import './visualization_container.scss';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 
 import { Visualization } from './visualization';
 import {
   getVisualizationType,
-  VisualizationTypeResult,
   useVisualizationRegistry,
   AllChartStyleControls,
 } from './utils/use_visualization_types';
@@ -19,17 +19,12 @@ import {
 import './visualization_container.scss';
 import { VisColumn } from './types';
 import { toExpression } from './utils/to_expression';
-import { OpenSearchSearchHit } from '../../types/doc_views_types';
-import { IFieldType } from '../../../../data/common';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
+import { RootState } from '../../application/utils/state_management/store';
+import { selectRows } from '../../application/utils/state_management/selectors';
 
-interface Props {
-  rows?: Array<OpenSearchSearchHit<Record<string, any>>>;
-  fieldSchema?: Array<Partial<IFieldType>>;
-}
-
-export const VisualizationContainer = ({ rows, fieldSchema }: Props) => {
+export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const {
     data: {
@@ -39,11 +34,32 @@ export const VisualizationContainer = ({ rows, fieldSchema }: Props) => {
   } = services;
   const { indexPattern } = useIndexPatternContext();
 
-  const [visualizationData, setVisualizationData] = useState<VisualizationTypeResult | undefined>(
-    undefined
-  );
+  const rows = useSelector(selectRows);
+  const fieldSchema = useSelector((state: RootState) => {
+    const executionCacheKeys = state.ui?.executionCacheKeys || [];
+    if (executionCacheKeys.length === 0) {
+      return [];
+    }
 
-  const [expression, setExpression] = useState<string>();
+    // Try all available cache keys to find one with field schema
+    for (const cacheKey of executionCacheKeys) {
+      const results = state.results[cacheKey];
+      if (results && results.fieldSchema) {
+        return results.fieldSchema;
+      }
+    }
+
+    return [];
+  });
+
+  const visualizationData = useMemo(() => {
+    if (fieldSchema.length === 0 || rows.length === 0) {
+      return null;
+    }
+
+    return getVisualizationType(rows, fieldSchema);
+  }, [fieldSchema, rows]);
+
   const [styleOptions, setStyleOptions] = useState<AllChartStyleControls | undefined>(undefined);
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
@@ -54,79 +70,61 @@ export const VisualizationContainer = ({ rows, fieldSchema }: Props) => {
   // Hook to get the visualization type based on the rows and field schema
   // This will be called every time the rows or fieldSchema changes
   useEffect(() => {
-    if (fieldSchema) {
-      const result = getVisualizationType(rows, fieldSchema);
-      if (result) {
-        setVisualizationData({ ...result });
-
-        // TODO: everytime the fields change, do we reset the chart type and its style options? P1: we will implement chart type selection persistence
-        setStyleOptions(result.visualizationType?.ui.style.defaults);
-      }
+    if (visualizationData) {
+      // TODO: everytime the fields change, do we reset the chart type and its style options? P1: we will implement chart type selection persistence
+      setStyleOptions(visualizationData.visualizationType?.ui.style.defaults);
     }
-  }, [fieldSchema, rows]);
+  }, [visualizationData]);
 
   // Get the visualization registry
   const visualizationRegistry = useVisualizationRegistry();
 
   // Hook to generate the expression based on the visualization type and data
-  useEffect(() => {
-    async function loadExpression() {
-      if (!rows || !indexPattern || !visualizationData || !visualizationData.ruleId) {
-        return;
-      }
-
-      // Get the selected chart type
-      const selectedChartType = visualizationData.visualizationType?.type || 'line';
-
-      // Get the selected rule id
-      const rule = visualizationRegistry.getRules().find((r) => r.id === visualizationData.ruleId);
-
-      if (!rule || !rule.toExpression) {
-        return;
-      }
-
-      // Create a function that call the specific rule's toExpression method
-      const ruleBasedToExpressionFn = (
-        transformedData: Array<Record<string, any>>,
-        numericalColumns: VisColumn[],
-        categoricalColumns: VisColumn[],
-        dateColumns: VisColumn[],
-        styleOpts: any
-      ) => {
-        return rule.toExpression!(
-          transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          styleOpts,
-          selectedChartType
-        );
-      };
-
-      // Create a complete expression using the toExpression function including the OpenSearch Dashboards context and the Vega spec
-      const exp = await toExpression(
-        searchContext,
-        indexPattern,
-        ruleBasedToExpressionFn,
-        visualizationData.transformedData,
-        visualizationData.numericalColumns,
-        visualizationData.categoricalColumns,
-        visualizationData.dateColumns,
-        styleOptions
-      );
-      setExpression(exp);
+  const expression = useMemo(() => {
+    if (!rows || !indexPattern || !visualizationData || !visualizationData.ruleId) {
+      return null;
     }
 
-    loadExpression();
-  }, [
-    searchContext,
-    rows,
-    indexPattern,
-    services,
-    styleOptions,
-    visualizationData,
-    visualizationRegistry,
-  ]);
+    // Get the selected chart type
+    const selectedChartType = visualizationData.visualizationType?.type || 'line';
+
+    // Get the selected rule id
+    const rule = visualizationRegistry.getRules().find((r) => r.id === visualizationData.ruleId);
+
+    if (!rule || !rule.toExpression) {
+      return null;
+    }
+
+    // Create a function that call the specific rule's toExpression method
+    const ruleBasedToExpressionFn = (
+      transformedData: Array<Record<string, any>>,
+      numericalColumns: VisColumn[],
+      categoricalColumns: VisColumn[],
+      dateColumns: VisColumn[],
+      styleOpts: any
+    ) => {
+      return rule.toExpression!(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOpts,
+        selectedChartType
+      );
+    };
+
+    // Create a complete expression using the toExpression function including the OpenSearch Dashboards context and the Vega spec
+    return toExpression(
+      searchContext,
+      indexPattern,
+      ruleBasedToExpressionFn,
+      visualizationData.transformedData,
+      visualizationData.numericalColumns,
+      visualizationData.categoricalColumns,
+      visualizationData.dateColumns,
+      styleOptions
+    );
+  }, [searchContext, rows, indexPattern, styleOptions, visualizationData, visualizationRegistry]);
 
   // Hook to update the search context whenever the query state changes
   // This will ensure that the visualization is always up-to-date with the latest query and filters
