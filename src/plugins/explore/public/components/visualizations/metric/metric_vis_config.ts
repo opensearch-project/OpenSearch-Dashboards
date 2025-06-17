@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
-import { MetricVisStyleControlsProps, MetricVisStyleControls } from './metric_vis_options';
+import { MetricVisStyleControls } from './metric_vis_options';
 import { RangeValue, ColorSchemas } from '../types';
 
 export interface MetricChartStyleControls {
@@ -25,14 +25,13 @@ export const defaultMetricChartStyles: MetricChartStyleControls = {
   colorSchema: ColorSchemas.BLUES,
 };
 
-export const createMetricConfig = (): VisualizationType => ({
+export const createMetricConfig = (): VisualizationType<'metric'> => ({
   name: 'metric',
   type: 'metric',
   ui: {
     style: {
       defaults: defaultMetricChartStyles,
-      render: (props) =>
-        React.createElement(MetricVisStyleControls, props as MetricVisStyleControlsProps),
+      render: (props) => React.createElement(MetricVisStyleControls, props),
     },
   },
 });

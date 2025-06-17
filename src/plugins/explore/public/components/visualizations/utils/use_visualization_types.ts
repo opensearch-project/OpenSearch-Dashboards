@@ -15,7 +15,17 @@ import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/com
 import { ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DiscoverViewServices } from '../../../application/legacy/discover/build_services';
+import { ExploreServices } from '../../../types';
+
+export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter';
+
+export interface ChartStyleControlMap {
+  line: LineChartStyleControls;
+  pie: PieChartStyleControls;
+  metric: MetricChartStyleControls;
+  heatmap: HeatmapChartStyleControls;
+  scatter: ScatterChartStyleControls;
+}
 
 export type AllChartStyleControls =
   | LineChartStyleControls
@@ -24,27 +34,21 @@ export type AllChartStyleControls =
   | HeatmapChartStyleControls
   | ScatterChartStyleControls;
 
-export interface StyleControlsProps {
-  styleOptions: AllChartStyleControls;
-  onStyleChange: (newStyle: Partial<AllChartStyleControls>) => void;
+export interface StyleControlsProps<T extends AllChartStyleControls> {
+  styleOptions: T;
+  onStyleChange: (newStyle: Partial<T>) => void;
   numericalColumns?: VisColumn[];
   categoricalColumns?: VisColumn[];
   dateColumns?: VisColumn[];
 }
 
-export interface VisualizationType {
+export interface VisualizationType<T extends ChartType> {
   readonly name: string;
-  readonly type: string;
+  readonly type: T;
   readonly ui: {
     style: {
-      defaults: AllChartStyleControls;
-      render: ({
-        styleOptions,
-        onStyleChange,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-      }: StyleControlsProps) => JSX.Element;
+      defaults: ChartStyleControlMap[T];
+      render: (props: StyleControlsProps<ChartStyleControlMap[T]>) => JSX.Element;
     };
   };
 }
@@ -78,8 +82,8 @@ const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [OPENSEARCH_FIELD_TYPES.WILDCARD]: VisFieldType.Categorical,
 };
 
-export interface VisualizationTypeResult {
-  visualizationType?: VisualizationType;
+export interface VisualizationTypeResult<T extends ChartType> {
+  visualizationType?: VisualizationType<T>;
   numericalColumns?: VisColumn[];
   categoricalColumns?: VisColumn[];
   dateColumns?: VisColumn[];
@@ -104,7 +108,7 @@ export const getVisualizationType = <T = unknown>(
   rows?: Array<OpenSearchSearchHit<T>>,
   fieldSchema?: Array<Partial<IFieldType>>,
   registry = visualizationRegistry
-): VisualizationTypeResult | undefined => {
+) => {
   if (!fieldSchema || !rows) {
     return;
   }
@@ -151,7 +155,7 @@ export const getVisualizationType = <T = unknown>(
  * Hook to get the visualization registry from the service
  */
 export const useVisualizationRegistry = () => {
-  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
 
   // If the service is available, use it, otherwise fall back to the singleton
   return services.visualizationRegistry?.getRegistry() || visualizationRegistry;

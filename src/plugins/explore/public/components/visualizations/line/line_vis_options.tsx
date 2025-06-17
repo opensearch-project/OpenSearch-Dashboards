@@ -11,16 +11,10 @@ import { BasicVisOptions } from '../style_panel/basic_vis_options';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
-import { VisColumn } from '../types';
 import { AxesOptions } from '../style_panel/axes_options';
+import { StyleControlsProps } from '../utils/use_visualization_types';
 
-export interface LineVisStyleControlsProps {
-  styleOptions: LineChartStyleControls;
-  onStyleChange: (newOptions: Partial<LineChartStyleControls>) => void;
-  numericalColumns?: VisColumn[];
-  categoricalColumns?: VisColumn[];
-  dateColumns?: VisColumn[];
-}
+export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
 export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   styleOptions,

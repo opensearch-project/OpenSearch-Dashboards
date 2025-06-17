@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
+import { LineVisStyleControls } from './line_vis_options';
 import { VisualizationType } from '../utils/use_visualization_types';
 import {
   CategoryAxis,
@@ -102,14 +102,13 @@ const defaultLineChartStyles: LineChartStyleControls = {
   ],
 };
 
-export const createLineConfig = (): VisualizationType => ({
+export const createLineConfig = (): VisualizationType<'line'> => ({
   name: 'line',
   type: 'line',
   ui: {
     style: {
       defaults: defaultLineChartStyles,
-      render: (props) =>
-        React.createElement(LineVisStyleControls, props as LineVisStyleControlsProps),
+      render: (props) => React.createElement(LineVisStyleControls, props),
     },
   },
 });
