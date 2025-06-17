@@ -137,20 +137,38 @@ describe('ui settings', () => {
       );
     });
 
-    it('shall throw error when trying to update multi-scope settings without passing a scope', async () => {
+    it('shall give deprecation warnings when trying to update multi-scope settings without passing a scope', async () => {
       const value = chance.word();
       const defaults = {
         user: { value, scope: 'user' },
         workspace: { value, scope: ['workspace', 'user'] },
+        globalAndWorkspace: { value, scope: ['workspace', 'global'] },
       };
-      const { uiSettings } = setup({ defaults });
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
 
       await expect(
-        async () => await uiSettings.setMany({ one: 'value', user: 'val', workspace: 'value' })
-      ).not.toThrow();
+        uiSettings.setMany({
+          one: 'value',
+          user: 'val',
+          workspace: 'value',
+          globalAndWorkspace: 'value',
+        })
+      ).resolves.not.toThrow();
+
+      expect(savedObjectsClient.update).toBeCalledWith('config', ID, {
+        globalAndWorkspace: 'value',
+        one: 'value',
+      });
+      expect(savedObjectsClient.update).toBeCalledWith('config', `<current_workspace>_${ID}`, {
+        workspace: 'value',
+      });
 
       expect(logger.warn).toBeCalledWith(
         'Deprecation warning: The setting "workspace" has multiple scopes. Please specify a scope when updating it.'
+      );
+
+      expect(logger.warn).toBeCalledWith(
+        'Deprecation warning: The setting "globalAndWorkspace" has multiple scopes. Please specify a scope when updating it.'
       );
     });
 
