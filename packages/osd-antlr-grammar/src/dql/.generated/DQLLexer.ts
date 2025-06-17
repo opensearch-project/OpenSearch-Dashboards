@@ -1,4 +1,4 @@
-// Generated from ./src/plugins/data/public/antlr/dql/grammar/DQLLexer.g4 by ANTLR 4.13.1
+// Generated from ./src/dql/grammar/DQLLexer.g4 by ANTLR 4.13.1
 
 import * as antlr from "antlr4ng";
 import { Token } from "antlr4ng";

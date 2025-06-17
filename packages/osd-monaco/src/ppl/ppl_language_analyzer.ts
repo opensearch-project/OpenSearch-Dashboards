@@ -4,8 +4,10 @@
  */
 
 import * as antlr from 'antlr4ng';
-import { OpenSearchPPLLexer } from './.generated/OpenSearchPPLLexer';
-import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
+import {
+  SimplifiedOpenSearchPPLLexer as OpenSearchPPLLexer,
+  SimplifiedOpenSearchPPLParser as OpenSearchPPLParser,
+} from '@osd/antlr-grammar';
 import { PPLSyntaxErrorListener, SyntaxError } from './ppl_error_listener';
 
 export interface PPLToken {

@@ -183,7 +183,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       },
       // Add special handling for ANTLR-generated JavaScript files in osd-monaco
       {
-        test: /[\/\\]osd-monaco[\/\\]target[\/\\].*\.generated[\/\\].*\.js$/,
+        test: /[\/\\]osd-antlr-grammar[\/\\]target[\/\\].*\.generated[\/\\].*\.js$/,
         use: {
           loader: 'babel-loader',
           options: {
