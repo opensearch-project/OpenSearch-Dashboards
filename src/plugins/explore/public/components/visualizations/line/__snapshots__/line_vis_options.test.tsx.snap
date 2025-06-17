@@ -13,6 +13,7 @@ exports[`LineVisStyleControls handles empty column arrays gracefully 1`] = `
         onAddLegendChange={[Function]}
         onAddTooltipChange={[Function]}
         onLegendPositionChange={[Function]}
+        shouldShowLegend={true}
       />,
       "id": "basic",
       "name": "Basic",
@@ -29,6 +30,7 @@ exports[`LineVisStyleControls handles empty column arrays gracefully 1`] = `
           onAddLegendChange={[Function]}
           onAddTooltipChange={[Function]}
           onLegendPositionChange={[Function]}
+          shouldShowLegend={true}
         />,
         "id": "basic",
         "name": "Basic",
@@ -146,6 +148,7 @@ exports[`LineVisStyleControls renders without crashing 1`] = `
         onAddLegendChange={[Function]}
         onAddTooltipChange={[Function]}
         onLegendPositionChange={[Function]}
+        shouldShowLegend={true}
       />,
       "id": "basic",
       "name": "Basic",
@@ -162,6 +165,7 @@ exports[`LineVisStyleControls renders without crashing 1`] = `
           onAddLegendChange={[Function]}
           onAddTooltipChange={[Function]}
           onLegendPositionChange={[Function]}
+          shouldShowLegend={true}
         />,
         "id": "basic",
         "name": "Basic",
