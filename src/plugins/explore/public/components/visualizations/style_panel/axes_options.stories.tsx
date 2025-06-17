@@ -7,8 +7,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { AxesOptions } from './axes_options';
-import { CategoryAxis, VisColumn, ValueAxis, VisFieldType } from '../types';
-import { Positions } from '../utils/collections';
+import { CategoryAxis, VisColumn, ValueAxis, VisFieldType, Positions } from '../types';
 
 export default {
   component: AxesOptions,

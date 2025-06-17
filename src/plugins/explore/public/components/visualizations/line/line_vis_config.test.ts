@@ -6,8 +6,7 @@
 import React from 'react';
 import { createLineConfig, LineChartStyleControls } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
-import { Positions } from '../utils/collections';
-import { CategoryAxis, GridOptions, ThresholdLineStyle, ValueAxis } from '../types';
+import { CategoryAxis, GridOptions, ThresholdLineStyle, ValueAxis, Positions } from '../types';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({

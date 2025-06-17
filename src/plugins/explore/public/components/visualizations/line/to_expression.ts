@@ -4,7 +4,7 @@
  */
 
 import { LineChartStyleControls } from './line_vis_config';
-import { VisColumn } from '../types';
+import { VisColumn, Positions, VEGASCHEMA } from '../types';
 import {
   buildMarkConfig,
   createThresholdLayer,
@@ -13,7 +13,6 @@ import {
   getStrokeDash,
   ValueAxisPosition,
 } from './line_chart_utils';
-import { Positions } from '../utils/collections';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -83,7 +82,7 @@ export const createSimpleLineChart = (
   }
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     title: `${metricName} Over Time`,
     data: { values: transformedData },
     layer: layers,
@@ -206,7 +205,7 @@ export const createLineBarChart = (
   }
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     title: `${metric1Name} (Bar) and ${metric2Name} (Line) Over Time`,
     data: { values: transformedData },
     layer: layers,
@@ -299,7 +298,7 @@ export const createMultiLineChart = (
   }
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     title: `${metricName} Over Time by ${categoryName}`,
     data: { values: transformedData },
     layer: layers,
@@ -335,7 +334,7 @@ export const createFacetedMultiLineChart = (
   const facetMarkConfig = buildMarkConfig(styles, 'line');
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     title: `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`,
     data: { values: transformedData },
     // Add a max width to the entire visualization and make it scrollable
