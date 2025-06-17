@@ -4,6 +4,10 @@
  */
 
 import { createLineConfig } from './line/line_vis_config';
+import { createHeatmapConfig } from './heatmap/heatmap_vis_config';
+import { createScatterConfig } from './scatter/scatter_vis_config';
+import { createMetricConfig } from './metric/metric_vis_config';
+import { createPieConfig } from './pie/pie_vis_config';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { ChartTypeMapping, VisColumn, VisFieldType, VisualizationRule } from './types';
 
@@ -81,6 +85,14 @@ export class VisualizationRegistry {
     switch (type) {
       case 'line':
         return createLineConfig();
+      case 'heatmap':
+        return createHeatmapConfig();
+      case 'pie':
+        return createPieConfig();
+      case 'scatter':
+        return createScatterConfig();
+      case 'metric':
+        return createMetricConfig();
       // TODO: Add other chart types' configs here
       default:
         return;
