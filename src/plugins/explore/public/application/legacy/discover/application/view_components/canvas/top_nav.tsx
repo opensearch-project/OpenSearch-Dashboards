@@ -7,12 +7,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { Query, TimeRange } from '../../../../../../../../data/common';
-import {
-  useConnectStorageToQueryState,
-  opensearchFilters,
-  QueryStatus,
-  useSyncQueryStateWithUrl,
-} from '../../../../../../../../data/public';
+import { QueryStatus, useSyncQueryStateWithUrl } from '../../../../../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { RequestAdapter } from '../../../../../../../../inspector/public';
@@ -89,15 +84,6 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     savedSearch || ({} as any), // Provide empty object if savedSearch is null
     startSyncingQueryStateWithUrl
   );
-
-  const syncConfig = useMemo(() => {
-    return {
-      filters: opensearchFilters.FilterStateStore.APP_STATE,
-      query: true,
-    };
-  }, []);
-
-  useConnectStorageToQueryState(services.data.query, osdUrlStateStorage, syncConfig);
 
   // Replace data$ subscription with Redux state-based queryStatus
   useEffect(() => {
