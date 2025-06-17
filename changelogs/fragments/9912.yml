@@ -1,0 +1,2 @@
+refactor:
+- Refactor TS types of explore visualization related interfaces ([#9912](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9912))
