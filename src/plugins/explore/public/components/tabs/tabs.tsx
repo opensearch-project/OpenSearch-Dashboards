@@ -20,6 +20,7 @@ import { selectQuery } from '../../application/utils/state_management/selectors'
 import { createCacheKey } from '../../application/utils/state_management/handlers/query_handler';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
+import { RootState } from '../../application/utils/state_management/store';
 
 /**
  * Rendering tabs with different views of 1 OpenSearch hit in Discover.
@@ -34,7 +35,7 @@ export const ExploreTabs = () => {
   const registryTabs = services.tabRegistry.getAllTabs();
 
   const query = useSelector(selectQuery);
-  const results = useSelector((state: any) => state.results);
+  const results = useSelector((state: RootState) => state.results);
 
   const onTabsClick = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
@@ -60,7 +61,7 @@ export const ExploreTabs = () => {
 
         if (needsActiveTabQuery || needsDefaultQuery) {
           // NO clearResults() - preserve existing cache
-          dispatch(executeQueries({ services }) as any);
+          dispatch(executeQueries({ services }));
         }
       } finally {
         dispatch(finishTransaction());
