@@ -74,6 +74,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
  - Bump version to 3.1.0 ([#9789](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9789))
  - Add package resolutions to fix braces CVE-2024-4068 ([#9846](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9846))
+ - Fix CVE 2025-5889 braces-expansion ([#9903](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9903))
 
 ### 🪛 Refactoring
 
