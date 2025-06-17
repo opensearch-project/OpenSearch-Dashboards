@@ -4,7 +4,7 @@
  */
 
 import { TokenStream } from 'antlr4ng';
-import { SimplifiedOpenSearchPPLParser as OpenSearchPPLParser } from '@osd/antlr-grammar';
+import { OpenSearchPPLParser } from '@osd/antlr-grammar';
 import {
   enrichAutocompleteResult,
   getParseTree,
