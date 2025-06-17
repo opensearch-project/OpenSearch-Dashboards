@@ -12,8 +12,7 @@ import {
   applyAxisStyling,
   ValueAxisPosition,
 } from './line_chart_utils';
-import { ThresholdLineStyle, VisColumn, VisFieldType } from '../types';
-import { Positions } from '../utils/collections';
+import { ThresholdLineStyle, VisColumn, VisFieldType, Positions } from '../types';
 
 describe('Line Chart Utils', () => {
   describe('getStrokeDash', () => {
