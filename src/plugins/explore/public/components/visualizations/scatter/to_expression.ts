@@ -106,11 +106,11 @@ export const createThreeMetricOneCateScatter = (
   dateColumns: VisColumn[],
   styles: Partial<ScatterChartStyleControls>
 ): any => {
-  const categoryFields = categoricalColumns?.map((item) => item.column);
-  const categoryNames = categoricalColumns?.map((item) => item.name);
+  const categoryFields = categoricalColumns.map((item) => item.column);
+  const categoryNames = categoricalColumns.map((item) => item.name);
   const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
-  const numericalSize = numericalColumns?.filter(
+  const numericalSize = numericalColumns.filter(
     (f) => f.column !== xAxis?.field?.default.column && f.column !== yAxis?.field?.default.column
   )[0];
   const markLayer = {
@@ -144,7 +144,7 @@ export const createThreeMetricOneCateScatter = (
           : null,
       },
       size: {
-        field: numericalSize?.column,
+        field: numericalSize.column,
         type: 'quantitative',
         legend: styles?.addLegend
           ? {

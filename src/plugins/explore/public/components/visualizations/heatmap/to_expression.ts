@@ -16,7 +16,7 @@ export const createHeatmapWithBin = (
   const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
 
-  const colorFieldColumn = numericalColumns?.filter(
+  const colorFieldColumn = numericalColumns.filter(
     (f) => f.column !== xAxis?.field?.default.column && f.column !== yAxis?.field?.default.column
   )[0];
 
@@ -90,7 +90,7 @@ export const createRegularHeatmap = (
   const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
 
-  const colorFieldColumn = numericalColumns![0];
+  const colorFieldColumn = numericalColumns[0];
   const markLayer: any = {
     mark: {
       type: 'rect',
