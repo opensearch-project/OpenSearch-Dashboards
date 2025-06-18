@@ -71,7 +71,6 @@ export function registerResolveIndexRoute(router: IRouter): void {
             queryString ? '?' + new URLSearchParams(queryString).toString() : ''
           }`,
         });
-        // @ts-expect-error TS2322 TODO(ts-error): fixme
         return res.ok({ body: result });
       } catch (err) {
         return res.customError({

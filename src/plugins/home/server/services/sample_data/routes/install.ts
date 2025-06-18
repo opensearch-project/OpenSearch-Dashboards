@@ -191,7 +191,6 @@ export function createInstallRoute(
             dataIndexConfig,
             index,
             nowReference,
-            // @ts-expect-error TS2345 TODO(ts-error): fixme
             caller,
             logger
           );
