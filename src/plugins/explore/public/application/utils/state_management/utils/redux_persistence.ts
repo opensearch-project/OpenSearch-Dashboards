@@ -201,6 +201,7 @@ const getPreloadedLegacyState = async (services: any) => {
 
   return {
     // Fields that exist in data_explorer + discover
+    // TODO: load saved explore by id
     savedSearch: undefined, // Matches discover format - string ID, not object
     columns: defaultColumns,
     sort: [],

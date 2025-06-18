@@ -128,6 +128,11 @@ export const selectSavedSearch = createSelector(
   (legacyState) => legacyState.savedSearch
 );
 
+export const selectSavedQuery = createSelector(
+  [selectLegacyState],
+  (legacyState) => legacyState.savedQuery
+);
+
 /**
  * Transaction selectors
  */

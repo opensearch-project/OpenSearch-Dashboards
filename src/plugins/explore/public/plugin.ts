@@ -295,6 +295,7 @@ export class ExplorePlugin
 
         // Instantiate the store
         const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(services);
+        services.store = store;
 
         appMounted();
 
