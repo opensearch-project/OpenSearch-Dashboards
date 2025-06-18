@@ -187,21 +187,13 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     startTime: Date.now(),
   };
 
-  const onQueryStringChange = React.useCallback((value: string, isPrompt: boolean) => {
-    if (isPrompt) {
-      setLocalPrompt(value);
-    } else {
-      setLocalQuery(value);
-    }
-  }, []);
-
   const detectLanguageType = useMemo(
     () =>
       debounce((query: string) => {
         const detector = new QueryTypeDetector();
         const result = detector.detect(query);
         setEditorLanguageType(result.type);
-      }, 500),
+      }, 300),
     []
   ); // Adjust debounce time as needed
 
@@ -209,17 +201,28 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     return () => detectLanguageType.cancel();
   }, [detectLanguageType]);
 
-  const onPromptChange = React.useCallback(
-    (value: string) => {
-      detectLanguageType(value);
-      onQueryStringChange(value, true);
-    },
-    [detectLanguageType, onQueryStringChange]
-  );
-
   const handleQueryChange = useCallback((value: string) => {
     setLocalQuery(value);
   }, []);
+
+  const handlePromptChange = useCallback(
+    (value: string) => {
+      detectLanguageType(value);
+
+      // eslint-disable-next-line no-console
+      console.log(`Detected language type: ${editorLanguageType}`);
+
+      if (editorLanguageType === LanguageType.Natural) {
+        // If detected as Natural Language, update prompt and set dual editor mode off
+        setLocalPrompt(value);
+      } else {
+        // If detected as PPL, update query and set dual editor mode off
+        handleQueryChange(value);
+        setIsDualEditor(false);
+      }
+    },
+    [detectLanguageType, handleQueryChange, editorLanguageType]
+  );
 
   const handleQueryRun = () => {
     handleRun();
@@ -235,6 +238,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
 
   const handlePromptRun = async (_?: string | { [key: string]: any }) => {
     // TODO: Implement the NL API call to generate PPL query
+
     const detectedLang = editorLanguageType;
 
     if (detectedLang === LanguageType.Natural) {
@@ -293,12 +297,12 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
             isLoading={isLoading}
             showDatePicker={showDatePicker}
             languageType={editorLanguageType}
-            onRunClick={handleRunClick}
-            onRecentClick={handleRecentClick}
             noInput={noInput}
             datePickerRef={datePickerRef}
             services={services}
             timefilter={timefilter}
+            onRunClick={handleRunClick}
+            onRecentClick={handleRecentClick}
             onTimeChange={handleTimeChange}
             onRunQuery={handleRun}
             oneRefreshChange={handleRefreshChange}
@@ -312,7 +316,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
           queryString={typeof localQuery === 'string' ? localQuery : ''}
           languageType={editorLanguageType}
           prompt={localPrompt || ''}
-          onPromptChange={onPromptChange}
+          onPromptChange={handlePromptChange}
           onQueryChange={handleQueryChange}
           onPromptEdit={handlePromptEdit}
           onQueryEdit={handleQueryEdit}
