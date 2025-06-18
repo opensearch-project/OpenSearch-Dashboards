@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, fireEvent, screen, act } from '@testing-library/react';
-import { QueryPanel } from './index';
+import { QueryPanel } from './query_panel';
 
 // TODO: Add more test cases once api and services integrated.
 

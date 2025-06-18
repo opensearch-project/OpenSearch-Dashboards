@@ -49,7 +49,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
             { open: "'", close: "'" },
           ],
         },
-        triggerSuggestOnFocus: false,
+        triggerSuggestOnFocus: true,
       };
     case LanguageType.Natural:
     default:
@@ -84,7 +84,15 @@ export const getEditorConfig = (languageType: LanguageType) => {
           hideCursorInOverviewRuler: true,
           cursorStyle: 'line-thin' as const,
           cursorBlinking: 'blink' as const,
-          languageConfiguration: {},
+          languageConfiguration: {
+            autoClosingPairs: [
+              { open: '(', close: ')' },
+              { open: '[', close: ']' },
+              { open: '{', close: '}' },
+              { open: '"', close: '"' },
+              { open: "'", close: "'" },
+            ],
+          },
           triggerSuggestOnFocus: false,
         },
       };

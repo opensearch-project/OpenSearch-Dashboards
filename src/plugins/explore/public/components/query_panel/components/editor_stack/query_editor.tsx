@@ -18,10 +18,11 @@ export interface QueryEditorProps {
   onQueryRun: (queryString?: string) => void;
   onQueryEdit: () => void;
   onClearEditor: () => void;
+  provideCompletionItems?: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
 // TODO: Move this dynamic comment once the actual query is loaded
-const FIXED_COMMENT = '// AI Generated PPL at 00.03.33pm';
+// const FIXED_COMMENT = '// AI Generated PPL at 00.03.33pm';
 
 export const QueryEditor: React.FC<QueryEditorProps> = ({
   queryString,
@@ -31,17 +32,18 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   onQueryRun,
   onQueryEdit,
   onClearEditor,
+  provideCompletionItems,
 }) => {
   const editorConfig = getEditorConfig(languageType);
   const [decorated, setDecorated] = useState(false);
 
   // Inject comment only once when content is loaded
   // TODO: UPDATE THIS WTH DYNAMIC DECODED STRING ONCE API INTEGRATED
-  useEffect(() => {
-    if (queryString?.startsWith && !queryString.startsWith(FIXED_COMMENT)) {
-      onChange(`${FIXED_COMMENT}\n${queryString}`);
-    }
-  }, [queryString, onChange]);
+  // useEffect(() => {
+  //   if (queryString?.startsWith && !queryString.startsWith(FIXED_COMMENT)) {
+  //     onChange(`${FIXED_COMMENT}\n${queryString}`);
+  //   }
+  // }, [queryString, onChange]);
 
   const onEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     // Decorate the first line with a comment style if not already decorated
@@ -77,6 +79,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
       onEdit={onQueryEdit}
       onClear={onClearEditor}
       onEditorDidMount={onEditorDidMount}
+      provideCompletionItems={provideCompletionItems}
     />
   );
 };

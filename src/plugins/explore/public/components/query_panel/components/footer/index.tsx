@@ -15,6 +15,7 @@ import { ShowInputType } from './show_input_type';
 import { LanguageType } from '../../types';
 import { QueryError } from './query_error';
 import { ResultStatus } from '../../types';
+import { ExploreServices } from '../../../../types';
 
 import './index.scss';
 
@@ -29,6 +30,13 @@ interface QueryPanelFooterProps {
   isDualEditor: boolean;
   isLoading: boolean;
   noInput: boolean;
+  showDatePicker: boolean;
+  datePickerRef?: React.RefObject<HTMLDivElement>;
+  services: ExploreServices;
+  timefilter: any;
+  handleTimeChange: (time: { start: string; end: string }) => void;
+  handleRunQuery: () => void;
+  handleRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
@@ -37,7 +45,14 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   onRecentClick,
   isDualEditor,
   isLoading,
+  showDatePicker,
   noInput,
+  datePickerRef,
+  services,
+  timefilter,
+  handleTimeChange,
+  handleRunQuery,
+  handleRefreshChange,
 }) => {
   return (
     <div className="queryPanel__footer">
@@ -111,9 +126,18 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
             <EuiFlexItem grow={false} className="queryPanel__footer__minWidth0">
               <Actions />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} className="queryPanel__footer__dateTimeRangePickerWrapper">
-              <DateTimeRangePicker />
-            </EuiFlexItem>
+            {showDatePicker && (
+              <EuiFlexItem grow={false} className="queryPanel__footer__dateTimeRangePickerWrapper">
+                <DateTimeRangePicker
+                  datePickerRef={datePickerRef}
+                  services={services}
+                  timefilter={timefilter}
+                  handleTimeChange={handleTimeChange}
+                  handleRunQuery={handleRunQuery}
+                  handleRefreshChange={handleRefreshChange}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false} className="queryPanel__footer__minWidth0">
               <RunQueryButton onClick={onRunClick} isDisabled={noInput} isLoading={isLoading} />
             </EuiFlexItem>
