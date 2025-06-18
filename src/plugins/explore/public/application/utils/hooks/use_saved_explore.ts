@@ -14,7 +14,7 @@ import { setState } from '../state_management/slices/legacy_slice';
 import { setQuery } from '../state_management/slices/query_slice';
 import { Query } from '../../../../../data/common';
 import { ISearchSource } from '../../../../../data/public';
-
+import { SavedObjectLoader } from '../../../../../saved_objects/public';
 /**
  * Hook for loading saved explore objects (following vis_builder pattern)
  * This handles saved object loading AFTER store creation, not during getPreloadedState
@@ -144,19 +144,21 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
  */
 export const getSavedExploreById = async (
   savedObjectsClient: SavedObjectsClientContract,
+  savedObjectService: SavedObjectLoader,
   exploreId?: string
 ): Promise<SavedExplore | undefined> => {
   if (!exploreId) return undefined;
 
   try {
     const savedObject = await savedObjectsClient.get<SavedExploreAttributes>('explore', exploreId);
+    const { searchSource }: SavedExplore = await savedObjectService.get(exploreId);
     const { title, description } = getStateFromSavedObject(savedObject.attributes);
 
     return {
       id: savedObject.id,
       title,
       description,
-      searchSource: {} as ISearchSource,
+      searchSource,
       legacyState: savedObject.attributes.legacyState,
       uiState: savedObject.attributes.uiState,
       queryState: savedObject.attributes.queryState,
