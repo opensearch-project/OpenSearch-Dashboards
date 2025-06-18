@@ -31,23 +31,20 @@ export const fetchIndexPattern = async (data, config) => {
   return ip;
 };
 
-export const fetchSavedSearch = async (
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
+export const fetchSavedExplore = async (
   core,
   // @ts-expect-error TS7006 TODO(ts-error): fixme
   basePath,
   // @ts-expect-error TS7006 TODO(ts-error): fixme
   history,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
-  savedSearchId,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
+  savedExploreId,
   services,
   // @ts-expect-error TS7006 TODO(ts-error): fixme
   toastNotifications
 ) => {
   try {
-    const savedSearch = await services.getSavedSearchById(savedSearchId);
-    return savedSearch;
+    const savedExplore = await services.getSavedExploreById(savedExploreId);
+    return savedExplore;
   } catch (error) {
     // TODO: handle redirect with Data Explorer
     redirectWhenMissing({
@@ -58,7 +55,7 @@ export const fetchSavedSearch = async (
         search: '/',
         'index-pattern': {
           app: 'management',
-          path: `opensearch-dashboards/objects/savedSearches/${savedSearchId}`,
+          path: `opensearch-dashboards/objects/savedExplores/${savedExploreId}`,
         },
       },
       toastNotifications,
