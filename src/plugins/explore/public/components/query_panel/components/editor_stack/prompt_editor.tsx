@@ -63,7 +63,6 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
       height={editorConfig.height}
       editorType={editorType}
       provideCompletionItems={provideCompletionItems}
-      // provideCompletionItems={editorType === EditorType.Query ? provideCompletionItems : undefined}
     />
   );
 };
