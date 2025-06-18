@@ -326,10 +326,10 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
           ? this.setBrowserStoredSettings(key, newVal)
           : (await this.selectedApi(scope).batchSet(key, newVal)) || {};
 
-        this.mergeSettingsIntoCache(key, defaults, true, settings, scope);
+        this.mergeSettingsIntoCache(key, defaults, true, settings);
       } else {
         const { settings } = (await this.selectedApi(scope).batchSet(key, newVal)) || {};
-        this.mergeSettingsIntoCache(key, defaults, false, settings, scope);
+        this.mergeSettingsIntoCache(key, defaults, false, settings);
       }
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
