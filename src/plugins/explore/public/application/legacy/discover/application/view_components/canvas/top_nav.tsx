@@ -22,6 +22,11 @@ import { useIndexPatternContext } from '../../../../../components/index_pattern_
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
 import { ResultStatus } from '../utils';
+import {
+  selectSavedQuery,
+  selectSavedSearch,
+} from '../../../../../utils/state_management/selectors';
+import { SavedExplore } from '../../../../../../saved_explore';
 
 export interface TopNavProps {
   opts: {
@@ -37,22 +42,24 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
 
-  const legacyState = useSelector((state: any) => state.legacy);
+  const savedExploreId = useSelector(selectSavedSearch);
+  const savedQueryId = useSelector(selectSavedQuery);
   const isLoading = useSelector((state: any) => state.ui.status === ResultStatus.LOADING);
 
   // Replace inspectorAdapters
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
   // Replace savedSearch - use legacy state
-  const savedSearch = useMemo(() => {
-    return legacyState.savedSearch;
-  }, [legacyState.savedSearch]);
+  // const savedSearch = useMemo(() => {
+  //   return legacyState?.savedSearch;
+  // }, [legacyState?.savedSearch]);
 
   // Get IndexPattern from centralized context
   const { indexPattern } = useIndexPatternContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
   const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
+  const [savedExplore, setSavedExplore] = useState<SavedExplore>();
 
   const {
     navigation: {
@@ -61,7 +68,16 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     data,
     uiSettings,
     history,
+    getSavedExploreById,
   } = services;
+
+  useEffect(() => {
+    const loadSavedExplore = async () => {
+      const savedObject = await getSavedExploreById(savedExploreId);
+      setSavedExplore(savedObject);
+    };
+    loadSavedExplore();
+  }, [savedExploreId, getSavedExploreById]);
 
   // Create osdUrlStateStorage from storage
   const osdUrlStateStorage = useMemo(() => {
@@ -81,8 +97,8 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const topNavLinks = getTopNavLinks(
     services,
     inspectorAdapters,
-    savedSearch || ({} as any), // Provide empty object if savedSearch is null
-    startSyncingQueryStateWithUrl
+    startSyncingQueryStateWithUrl,
+    savedExplore // Provide empty object if savedSearch is null
   );
 
   // Replace data$ subscription with Redux state-based queryStatus
@@ -110,12 +126,12 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
 
   useEffect(() => {
     setScreenTitle(
-      savedSearch?.title ||
+      savedExplore?.title ||
         i18n.translate('explore.discover.savedSearch.newTitle', {
           defaultMessage: 'New search',
         })
     );
-  }, [savedSearch?.title]);
+  }, [savedExplore?.title]);
 
   const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
     indexPattern,
@@ -137,7 +153,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
       setMenuMountPoint={opts.setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
       onQuerySubmit={opts.onQuerySubmit}
-      savedQueryId={legacyState.savedQuery}
+      savedQueryId={savedQueryId}
       onSavedQueryIdChange={updateSavedQueryId}
       datasetSelectorRef={opts?.optionalRef?.datasetSelectorRef}
       datePickerRef={opts?.optionalRef?.datePickerRef}
