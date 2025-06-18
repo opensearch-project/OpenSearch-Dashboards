@@ -8,7 +8,7 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { VisColumn, StandardAxes, AxisRole } from '../types';
+import { StandardAxes, AxisRole } from '../types';
 import {
   HeatmapLabelVisOptions,
   HeatmapExclusiveVisOptions,
@@ -16,14 +16,9 @@ import {
 import { inferAxesFromColumns } from './heatmap_chart_utils';
 import { AllAxesOptions } from '../style_panel/standard_axes_options';
 import { swapAxes } from '../utils/utils';
+import { StyleControlsProps } from '../utils/use_visualization_types';
 
-export interface HeatmapVisStyleControlsProps {
-  styleOptions: HeatmapChartStyleControls;
-  onStyleChange: (newOptions: Partial<HeatmapChartStyleControls>) => void;
-  numericalColumns?: VisColumn[];
-  categoricalColumns?: VisColumn[];
-  dateColumns?: VisColumn[];
-}
+export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyleControls>;
 
 export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = ({
   styleOptions,

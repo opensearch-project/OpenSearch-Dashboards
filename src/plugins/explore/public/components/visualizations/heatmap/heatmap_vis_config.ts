@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
-import { HeatmapVisStyleControls, HeatmapVisStyleControlsProps } from './heatmap_vis_options';
+import { HeatmapVisStyleControls } from './heatmap_vis_options';
 import {
   StandardAxes,
   RangeValue,
@@ -114,14 +114,13 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
   ],
 };
 
-export const createHeatmapConfig = (): VisualizationType => ({
+export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
   name: 'heatmap',
   type: 'heatmap',
   ui: {
     style: {
       defaults: defaultHeatmapChartStyles,
-      render: (props) =>
-        React.createElement(HeatmapVisStyleControls, props as HeatmapVisStyleControlsProps),
+      render: (props) => React.createElement(HeatmapVisStyleControls, props),
     },
   },
 });
