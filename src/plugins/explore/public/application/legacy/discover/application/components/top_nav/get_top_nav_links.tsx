@@ -36,8 +36,8 @@ import { OpenSearchPanel } from './open_search_panel';
 export const getTopNavLinks = (
   services: ExploreServices,
   inspectorAdapters: Adapters,
-  savedExplore: SavedExplore,
-  startSyncingQueryStateWithUrl: () => void
+  startSyncingQueryStateWithUrl: () => void,
+  savedExplore?: SavedExplore
 ) => {
   const {
     history,
@@ -111,6 +111,7 @@ export const getTopNavLinks = (
         defaultMessage: `Save search`,
       }),
       run: async () => {
+        if (!savedExplore) return;
         const onSave = async ({
           newTitle,
           newCopyOnSave,
@@ -190,7 +191,7 @@ export const getTopNavLinks = (
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => {}}
-            title={savedExplore.title}
+            title={savedExplore.title ?? ''}
             showCopyOnSave={!!savedExplore.id}
             objectType="search"
             description={i18n.translate(
@@ -222,6 +223,7 @@ export const getTopNavLinks = (
         defaultMessage: `Share search`,
       }),
       run: async (anchorElement) => {
+        if (!savedExplore) return;
         // @ts-expect-error TODO: Fix me
         const state: LegacyState = store!.getState().legacy; // store is defined before the view is loaded
         const sharingData = await getSharingData({

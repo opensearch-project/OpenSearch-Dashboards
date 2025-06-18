@@ -36,7 +36,7 @@ export interface TabDefinition {
   resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;
 
   // UI Components
-  component: React.ComponentType<TabComponentProps>;
+  component: () => React.JSX.Element | null;
 
   // Optional lifecycle hooks
   onActive?: () => void;

@@ -29,17 +29,17 @@ export const fetchIndexPattern = async (data, config) => {
   return ip;
 };
 
-export const fetchSavedSearch = async (
+export const fetchSavedExplore = async (
   core,
   basePath,
   history,
-  savedSearchId,
+  savedExploreId,
   services,
   toastNotifications
 ) => {
   try {
-    const savedSearch = await services.getSavedSearchById(savedSearchId);
-    return savedSearch;
+    const savedExplore = await services.getSavedExploreById(savedExploreId);
+    return savedExplore;
   } catch (error) {
     // TODO: handle redirect with Data Explorer
     redirectWhenMissing({
@@ -50,7 +50,7 @@ export const fetchSavedSearch = async (
         search: '/',
         'index-pattern': {
           app: 'management',
-          path: `opensearch-dashboards/objects/savedSearches/${savedSearchId}`,
+          path: `opensearch-dashboards/objects/savedExplores/${savedExploreId}`,
         },
       },
       toastNotifications,

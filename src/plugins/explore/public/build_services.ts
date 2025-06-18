@@ -12,7 +12,6 @@ import { ExploreStartDependencies, ExploreServices } from './types';
 import { createSavedExploreLoader } from './saved_explore';
 import { getHistory } from './application/legacy/discover/opensearch_dashboards_services';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
-import { getSavedExploreById as getSavedExploreByIdFromClient } from './application/utils/hooks/use_saved_explore';
 import { VisualizationRegistryService } from './services/visualization_registry_service';
 
 export function buildServices(
@@ -34,6 +33,7 @@ export function buildServices(
 
   return {
     addBasePath: core.http.basePath.prepend,
+    appName: 'explore',
     capabilities: core.application.capabilities,
     chrome: core.chrome,
     core,
@@ -43,7 +43,7 @@ export function buildServices(
     filterManager: plugins.data.query.filterManager,
     indexPatterns: plugins.data.indexPatterns, // Direct access for convenience
     getSavedExploreById: async (id?: string) => {
-      return getSavedExploreByIdFromClient(services.savedObjectsClient, id);
+      return savedObjectService.get(id);
     },
     getSavedExploreUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,

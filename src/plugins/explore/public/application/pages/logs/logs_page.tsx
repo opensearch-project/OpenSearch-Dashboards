@@ -30,11 +30,10 @@ import { HeaderDatasetSelector } from '../../components/header_dataset_selector'
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
 import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
-import { ExploreDataTable } from '../../../components/data_table/explore_data_table';
 import { ExploreTabs } from '../../../components/tabs/tabs';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
-import { VisualizationContainer } from '../../../components/visualizations/visualization_container';
+import { useIndexPatternContext } from '../../components/index_pattern_context';
 
 /**
  * Main application component for the Explore plugin
@@ -43,6 +42,11 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const {
+    indexPattern,
+    isLoading: indexPatternLoading,
+    error: indexPatternError,
+  } = useIndexPatternContext();
   const showActionsInGroup = services.uiSettings.get('home:useNewHomePage', false);
 
   // Get status and rows for histogram and tab content
@@ -57,27 +61,11 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
 
     // Try all available cache keys to find one with results (same logic as TabContent)
     for (const cacheKey of executionCacheKeys) {
+      // why return first hit?
       const results = state.results[cacheKey];
       if (results) {
         const hits = results.hits?.hits || [];
         return hits;
-      }
-    }
-
-    return [];
-  });
-
-  const fieldSchema = useSelector((state: RootState) => {
-    const executionCacheKeys = state.ui?.executionCacheKeys || [];
-    if (executionCacheKeys.length === 0) {
-      return [];
-    }
-
-    // Try all available cache keys to find one with field schema
-    for (const cacheKey of executionCacheKeys) {
-      const results = state.results[cacheKey];
-      if (results && results.fieldSchema) {
-        return results.fieldSchema;
       }
     }
 
@@ -121,20 +109,6 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     (status === ResultStatus.LOADING && !!rows?.length) ||
     (status === ResultStatus.ERROR && !!rows?.length);
 
-  const tabs = [
-    // TODO: Translate
-    {
-      id: 'explore_logs_tab',
-      name: 'Logs',
-      content: <ExploreDataTable rows={rows} />,
-    },
-    {
-      id: 'explore_visualization_tab',
-      name: 'Visualization',
-      content: <MemoizedVisualizationContainer rows={rows} fieldSchema={fieldSchema} />,
-    },
-  ];
-
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
@@ -174,9 +148,21 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
               <NewExperienceBanner />
             </div>
 
-            {/* QueryPanel component */}
+            {/* QueryPanel component - only render when IndexPattern is loaded */}
             <div className="dscCanvas__queryPanel">
-              <QueryPanel datePickerRef={datePickerRef} />
+              {indexPatternLoading ? (
+                <div>Loading IndexPattern...</div>
+              ) : indexPatternError ? (
+                <div>Error loading IndexPattern: {indexPatternError}</div>
+              ) : indexPattern ? (
+                <QueryPanel
+                  datePickerRef={datePickerRef}
+                  services={services}
+                  indexPattern={indexPattern}
+                />
+              ) : (
+                <div>No IndexPattern available</div>
+              )}
             </div>
 
             {/* Main content area with resizable panels under QueryPanel */}
@@ -217,7 +203,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                           </div>
                         )}
 
-                        <ExploreTabs tabs={tabs} />
+                        <ExploreTabs />
                       </EuiPanel>
                     </EuiPageBody>
                   </EuiResizablePanel>
@@ -230,5 +216,3 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     </EuiErrorBoundary>
   );
 };
-
-const MemoizedVisualizationContainer = React.memo(VisualizationContainer);

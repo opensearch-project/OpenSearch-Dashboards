@@ -6,4 +6,10 @@
   > div[role="tabpanel"] {
     min-height: 0;
   }
+
+  .tab-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
 }

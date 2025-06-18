@@ -23,7 +23,7 @@ jest.mock('./utils/use_visualization_types', () => ({
 }));
 
 // Mock the visualization type
-const mockVisualizationType = {
+const mockVisualizationType: VisualizationType<'line'> = {
   name: 'line',
   type: 'line',
   ui: {
@@ -35,13 +35,13 @@ const mockVisualizationType = {
 };
 
 describe('Visualization', () => {
-  const defaultProps: VisualizationProps = {
+  const defaultProps: VisualizationProps<'line'> = {
     expression: 'mock-expression',
     searchContext: {},
     styleOptions: {} as LineChartStyleControls,
     visualizationData: {
       ruleId: 'test-rule',
-      visualizationType: mockVisualizationType as VisualizationType,
+      visualizationType: mockVisualizationType,
       transformedData: [{ x: 1, y: 2 }],
       numericalColumns: [{ id: 1, name: 'y', schema: VisFieldType.Numerical, column: 'y' }],
       categoricalColumns: [],
@@ -95,7 +95,7 @@ describe('Visualization', () => {
       },
     };
 
-    render(<Visualization {...props} />);
+    render(<Visualization<'line'> {...props} />);
 
     expect(mockStyleRender).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -143,7 +143,7 @@ describe('Visualization', () => {
       },
     };
 
-    render(<Visualization {...props} />);
+    render(<Visualization<'line'> {...props} />);
 
     expect(renderStyleMock).toHaveBeenCalledWith({
       styleOptions: props.styleOptions,

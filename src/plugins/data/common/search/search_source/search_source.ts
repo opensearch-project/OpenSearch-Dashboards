@@ -616,6 +616,16 @@ export class SearchSource {
    */
   private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }) {
     Object.entries(this.fields).forEach(([key, value]) => {
+      if (
+        key === 'query' &&
+        searchRequest.query &&
+        value.language !== searchRequest.query.language
+      ) {
+        // skip combining queries with its parent search source queries
+        // as currently dashboards do not support combining queries
+        // ex. adding PPL based saved explore to dashboard
+        return;
+      }
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
     if (this.parent) {

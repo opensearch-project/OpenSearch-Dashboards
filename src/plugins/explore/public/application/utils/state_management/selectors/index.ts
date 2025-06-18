@@ -93,8 +93,8 @@ export const selectResults = createSelector(
 );
 
 export const selectRows = createSelector([selectResults], (results) => {
-  if ((results as any)?.hits?.hits) {
-    return (results as any).hits.hits;
+  if (results?.hits?.hits) {
+    return results.hits.hits;
   }
   return [];
 });
@@ -126,6 +126,11 @@ export const selectSort = createSelector([selectLegacyState], (legacyState) => l
 export const selectSavedSearch = createSelector(
   [selectLegacyState],
   (legacyState) => legacyState.savedSearch
+);
+
+export const selectSavedQuery = createSelector(
+  [selectLegacyState],
+  (legacyState) => legacyState.savedQuery
 );
 
 /**

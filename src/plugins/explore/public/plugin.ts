@@ -38,6 +38,7 @@ import {
   setDocViewsRegistry,
   setServices as setLegacyServices,
   setUiActions,
+  setExpressionLoader,
 } from './application/legacy/discover/opensearch_dashboards_services';
 import { getPreloadedStore } from './application/utils/state_management/store';
 import { buildServices } from './build_services';
@@ -58,6 +59,7 @@ import {
   ExploreStartDependencies,
 } from './types';
 import { DocViewsRegistry } from './types/doc_views_types';
+import { ExploreEmbeddableFactory } from './embeddable';
 
 export class ExplorePlugin
   implements
@@ -301,6 +303,7 @@ export class ExplorePlugin
 
         // Instantiate the store
         const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(services);
+        services.store = store;
 
         appMounted();
 
@@ -362,9 +365,7 @@ export class ExplorePlugin
         parentNavLinkId: PLUGIN_ID,
       },
     ]);
-
-    // TODO: Register embeddable factory when ready
-    // this.registerEmbeddable(core, plugins);
+    this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
       return `#${path}`;
@@ -407,6 +408,10 @@ export class ExplorePlugin
   public start(core: CoreStart, plugins: ExploreStartDependencies): ExplorePluginStart {
     setUiActions(plugins.uiActions);
 
+    if (plugins.expressions) {
+      setExpressionLoader(plugins.expressions.ExpressionLoader);
+    }
+
     this.initializeServices = () => {
       if (this.servicesInitialized) {
         return { core, plugins };
@@ -418,7 +423,10 @@ export class ExplorePlugin
         this.tabRegistry,
         this.visualizationRegistryService
       );
-      setLegacyServices(services);
+      setLegacyServices({
+        ...services,
+        visualizationRegistry: this.visualizationRegistryService,
+      });
       this.servicesInitialized = true;
 
       return { core, plugins };
@@ -446,5 +454,21 @@ export class ExplorePlugin
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+  }
+
+  private registerEmbeddable(
+    core: CoreSetup<ExploreStartDependencies>,
+    plugins: ExploreSetupDependencies
+  ) {
+    const getStartServices = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return {
+        executeTriggerActions: deps.uiActions.executeTriggerActions,
+        isEditable: () => coreStart.application.capabilities.discover?.save as boolean,
+      };
+    };
+
+    const factory = new ExploreEmbeddableFactory(getStartServices);
+    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }

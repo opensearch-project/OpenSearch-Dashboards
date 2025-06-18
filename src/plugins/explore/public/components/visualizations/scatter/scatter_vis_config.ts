@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
-import { ScatterVisStyleControls, ScatterVisStyleControlsProps } from './scatter_vis_options';
+import { ScatterVisStyleControls } from './scatter_vis_options';
 import { StandardAxes, PointShape, AxisRole, Positions } from '../types';
 
 export interface ExclusiveScatterConfig {
@@ -78,14 +78,13 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
   ],
 };
 
-export const createScatterConfig = (): VisualizationType => ({
+export const createScatterConfig = (): VisualizationType<'scatter'> => ({
   name: 'scatter',
   type: 'scatter',
   ui: {
     style: {
       defaults: defaultScatterChartStyles,
-      render: (props) =>
-        React.createElement(ScatterVisStyleControls, props as ScatterVisStyleControlsProps),
+      render: (props) => React.createElement(ScatterVisStyleControls, props),
     },
   },
 });
