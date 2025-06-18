@@ -8,19 +8,14 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ScatterChartStyleControls } from './scatter_vis_config';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { VisColumn, AxisRole, StandardAxes } from '../types';
+import { AxisRole, StandardAxes } from '../types';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/standard_axes_options';
 import { swapAxes } from '../utils/utils';
 import { inferAxesFromColumns } from './scatter_chart_utils';
+import { StyleControlsProps } from '../utils/use_visualization_types';
 
-export interface ScatterVisStyleControlsProps {
-  styleOptions: ScatterChartStyleControls;
-  onStyleChange: (newOptions: Partial<ScatterChartStyleControls>) => void;
-  numericalColumns?: VisColumn[];
-  categoricalColumns?: VisColumn[];
-  dateColumns?: VisColumn[];
-}
+export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
 
 export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = ({
   styleOptions,
