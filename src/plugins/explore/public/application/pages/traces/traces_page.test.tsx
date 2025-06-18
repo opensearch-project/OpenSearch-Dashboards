@@ -52,13 +52,14 @@ jest.mock('../../../components/data_table/explore_data_table', () => ({
 }));
 
 jest.mock('../../../components/tabs/tabs', () => ({
-  ExploreTabs: ({ tabs }: { tabs: Array<{ id: string; content: React.ReactNode }> }) => (
+  ExploreTabs: () => (
     <div data-test-subj="explore-tabs">
-      {tabs.map((tab) => (
-        <div key={tab.id} data-test-subj={`tab-${tab.id}`}>
-          {tab.content}
-        </div>
-      ))}
+      <div data-test-subj="tab-explore_logs_tab">
+        <div data-test-subj="explore-data-table">Data Table</div>
+      </div>
+      <div data-test-subj="tab-explore_visualization_tab">
+        <div data-test-subj="visualization-container">Visualization Container</div>
+      </div>
     </div>
   ),
 }));
@@ -90,6 +91,14 @@ jest.mock('../../utils/hooks/use_url_state_sync', () => ({
 
 jest.mock('../../utils/hooks/use_timefilter_subscription', () => ({
   useTimefilterSubscription: jest.fn(),
+}));
+
+jest.mock('../../components/index_pattern_context', () => ({
+  useIndexPatternContext: jest.fn().mockReturnValue({
+    indexPattern: {},
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 describe('TracesPage', () => {
