@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { setStatus, setExecutionCacheKeys } from '../slices/ui_slice';
 import { ResultStatus } from '../types';
-import { setResults, clearResults } from '../slices/results_slice';
+import { setResults } from '../slices/results_slice';
 import { createCacheKey } from '../handlers/query_handler';
 import { ExploreServices } from '../../../../types';
 
