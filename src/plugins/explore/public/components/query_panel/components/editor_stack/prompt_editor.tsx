@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { monaco } from '@osd/monaco';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { getEditorConfig } from './shared';
@@ -18,6 +19,7 @@ export interface PromptEditorProps {
   onPromptRun: (queryString?: string) => void;
   onPromptEdit: () => void;
   onClearEditor: () => void;
+  provideCompletionItems?: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
 export const PromptEditor: React.FC<PromptEditorProps> = ({
@@ -28,6 +30,7 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
   onPromptRun,
   onPromptEdit,
   onClearEditor,
+  provideCompletionItems,
 }) => {
   const editorConfig = getEditorConfig(languageType);
 
@@ -59,6 +62,8 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
       })}
       height={editorConfig.height}
       editorType={editorType}
+      provideCompletionItems={provideCompletionItems}
+      // provideCompletionItems={editorType === EditorType.Query ? provideCompletionItems : undefined}
     />
   );
 };

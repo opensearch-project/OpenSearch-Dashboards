@@ -24,6 +24,7 @@ export interface ReusableEditorProps {
   placeholder?: React.ReactNode;
   editorType?: EditorType;
   height?: number;
+  provideCompletionItems?: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
 // Map EditorType enum to actual CSS class prefixes
@@ -52,6 +53,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   clearText,
   height = 32, // default height
   editorType = EditorType.Query,
+  provideCompletionItems,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
@@ -181,6 +183,14 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
           options={editorConfig.options}
           languageConfiguration={editorConfig.languageConfiguration}
           triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
+          suggestionProvider={{
+            provideCompletionItems: async (model, position, context, token) => {
+              if (provideCompletionItems) {
+                return provideCompletionItems(model, position, context, token);
+              }
+              return { suggestions: [] };
+            },
+          }}
         />
 
         {!value && !editorIsFocused && !isReadOnly && (
