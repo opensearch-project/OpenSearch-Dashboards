@@ -13,7 +13,9 @@ import { Visualization } from './visualization';
 import {
   getVisualizationType,
   useVisualizationRegistry,
-  AllChartStyleControls,
+  ChartType,
+  ChartStyleControlMap,
+  VisualizationTypeResult,
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
@@ -60,7 +62,9 @@ export const VisualizationContainer = () => {
     return getVisualizationType(rows, fieldSchema);
   }, [fieldSchema, rows]);
 
-  const [styleOptions, setStyleOptions] = useState<AllChartStyleControls | undefined>(undefined);
+  const [styleOptions, setStyleOptions] = useState<ChartStyleControlMap[ChartType] | undefined>(
+    undefined
+  );
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -143,9 +147,9 @@ export const VisualizationContainer = () => {
     };
   }, [queryString, services.data.query.state$]);
 
-  const handleStyleChange = (newOptions: Partial<AllChartStyleControls>) => {
+  const handleStyleChange = (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {
     if (styleOptions) {
-      setStyleOptions({ ...styleOptions, ...newOptions } as AllChartStyleControls);
+      setStyleOptions({ ...styleOptions, ...newOptions } as ChartStyleControlMap[ChartType]);
     }
   };
 
@@ -156,11 +160,11 @@ export const VisualizationContainer = () => {
 
   return (
     <div className="exploreVisContainer">
-      <Visualization
+      <Visualization<ChartType>
         expression={expression}
         searchContext={searchContext}
         styleOptions={styleOptions}
-        visualizationData={visualizationData}
+        visualizationData={visualizationData as VisualizationTypeResult<ChartType>}
         onStyleChange={handleStyleChange}
         ReactExpressionRenderer={ReactExpressionRenderer}
       />

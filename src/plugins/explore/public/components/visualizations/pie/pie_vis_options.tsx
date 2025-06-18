@@ -9,15 +9,9 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
 import { PieChartStyleControls } from './pie_vis_config';
 import { PieExclusiveVisOptions } from './pie_exclusive_vis_options';
-import { VisColumn } from '../types';
+import { StyleControlsProps } from '../utils/use_visualization_types';
 
-export interface PieVisStyleControlsProps {
-  styleOptions: PieChartStyleControls;
-  onStyleChange: (newOptions: Partial<PieChartStyleControls>) => void;
-  numericalColumns?: VisColumn[];
-  categoricalColumns?: VisColumn[];
-  dateColumns?: VisColumn[];
-}
+export type PieVisStyleControlsProps = StyleControlsProps<PieChartStyleControls>;
 
 export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
   styleOptions,

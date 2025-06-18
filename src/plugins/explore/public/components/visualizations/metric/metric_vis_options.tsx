@@ -18,19 +18,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { MetricChartStyleControls } from './metric_vis_config';
-import { VisColumn, RangeValue, ColorSchemas } from '../types';
+import { RangeValue, ColorSchemas } from '../types';
 import { CustomRange } from '../style_panel/custom_ranges';
 import { DebouncedText } from '../style_panel/utils';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { getColorSchemas } from '../utils/collections';
+import { StyleControlsProps } from '../utils/use_visualization_types';
 
-export interface MetricVisStyleControlsProps {
-  styleOptions: MetricChartStyleControls;
-  onStyleChange: (newOptions: Partial<MetricChartStyleControls>) => void;
-  numericalColumns?: VisColumn[];
-  categoricalColumns?: VisColumn[];
-  dateColumns?: VisColumn[];
-}
+export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
 
 export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   styleOptions,
