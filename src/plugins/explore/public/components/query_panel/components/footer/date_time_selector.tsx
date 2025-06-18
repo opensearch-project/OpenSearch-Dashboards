@@ -32,7 +32,6 @@ export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
     <div
       ref={datePickerRef}
       key="datePicker"
-      // style={{ display: 'inline-flex', alignItems: 'center', marginRight: '8px' }}
     >
       <EuiSuperDatePicker
         key="datePicker"
