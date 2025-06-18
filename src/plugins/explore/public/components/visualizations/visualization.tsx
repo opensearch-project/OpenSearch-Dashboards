@@ -6,28 +6,32 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
-import { VisualizationTypeResult, AllChartStyleControls } from './utils/use_visualization_types';
+import {
+  VisualizationTypeResult,
+  ChartType,
+  ChartStyleControlMap,
+} from './utils/use_visualization_types';
 
-export interface VisualizationProps {
+export interface VisualizationProps<T extends ChartType> {
   expression: string;
   searchContext: IExpressionLoaderParams['searchContext'];
-  styleOptions: AllChartStyleControls;
-  visualizationData: VisualizationTypeResult;
-  onStyleChange: (newOptions: Partial<AllChartStyleControls>) => void;
+  styleOptions: ChartStyleControlMap[T];
+  visualizationData: VisualizationTypeResult<T>;
+  onStyleChange: (newOptions: Partial<ChartStyleControlMap[T]>) => void;
   ReactExpressionRenderer: React.ComponentType<{
     expression: string;
     searchContext: IExpressionLoaderParams['searchContext'];
   }>;
 }
 
-export const Visualization: React.FC<VisualizationProps> = ({
+export const Visualization = <T extends ChartType>({
   expression,
   searchContext,
   styleOptions,
   visualizationData,
   onStyleChange,
   ReactExpressionRenderer,
-}) => {
+}: VisualizationProps<T>) => {
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
