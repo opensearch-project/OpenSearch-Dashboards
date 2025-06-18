@@ -34,9 +34,9 @@ interface QueryPanelFooterProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
   services: ExploreServices;
   timefilter: any;
-  handleTimeChange: (time: { start: string; end: string }) => void;
-  handleRunQuery: () => void;
-  handleRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
+  onTimeChange: (time: { start: string; end: string }) => void;
+  onRunQuery: () => void;
+  oneRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
@@ -50,9 +50,9 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   datePickerRef,
   services,
   timefilter,
-  handleTimeChange,
-  handleRunQuery,
-  handleRefreshChange,
+  onTimeChange,
+  onRunQuery,
+  oneRefreshChange,
 }) => {
   return (
     <div className="queryPanel__footer">
@@ -132,9 +132,9 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                   datePickerRef={datePickerRef}
                   services={services}
                   timefilter={timefilter}
-                  handleTimeChange={handleTimeChange}
-                  handleRunQuery={handleRunQuery}
-                  handleRefreshChange={handleRefreshChange}
+                  onTimeChange={onTimeChange}
+                  onRunQuery={onRunQuery}
+                  oneRefreshChange={oneRefreshChange}
                 />
               </EuiFlexItem>
             )}
