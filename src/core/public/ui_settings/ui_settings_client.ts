@@ -141,7 +141,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   }
 
   private validateScope(key: string, scope: UiSettingScope) {
-    const definition = this.cache[key];
+    const definition = this.cache[key] || {};
     const validScopes = Array.isArray(definition.scope)
       ? definition.scope
       : [definition.scope || UiSettingScope.GLOBAL];
@@ -157,7 +157,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       .getAll()
       .then((response: any) => {
         const value = response.settings[key]?.userValue;
-        const type = this.cache[key].type;
+        const type = this.cache[key]?.type;
         return this.resolveValue(value, type);
       });
   }
@@ -277,8 +277,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     key: string,
     defaults: Record<string, any>,
     enableUserControl: boolean,
-    settings: Record<string, any> = {},
-    scope: UiSettingScope | undefined
+    settings: Record<string, any> = {}
   ) {
     const hasMultipleScopes =
       Array.isArray(this.cache[key]?.scope) && (this.cache[key].scope?.length ?? 0) > 1;

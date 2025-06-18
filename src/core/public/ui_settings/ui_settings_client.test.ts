@@ -261,6 +261,12 @@ describe('#set', () => {
     await client.set('defaultIndex', 'index', UiSettingScope.USER);
     expect(getAll).toHaveBeenCalled();
   });
+
+  it('should not throw error if the key does not exist', async () => {
+    const { client } = setup();
+
+    await expect(client.set('not_exist', UiSettingScope.GLOBAL)).resolves.not.toThrowError();
+  });
 });
 
 describe('#getUserProvidedWithScope', () => {
@@ -286,6 +292,13 @@ describe('#getUserProvidedWithScope', () => {
     await expect(
       client.getUserProvidedWithScope('defaultDatasource', UiSettingScope.WORKSPACE)
     ).resolves.toBe('ds');
+  });
+
+  it('should not throw error if the key does not exist', async () => {
+    const { client } = setup();
+    const notExistSettingKey = 'not_exist';
+
+    await client.getUserProvidedWithScope(notExistSettingKey, UiSettingScope.GLOBAL);
   });
 });
 
@@ -321,6 +334,11 @@ describe('#remove', () => {
     expect(() =>
       client.remove('defaultDatasource', UiSettingScope.USER)
     ).rejects.toThrowErrorMatchingSnapshot();
+  });
+  it('should not throw error if the key does not exist', () => {
+    const { client } = setup();
+
+    expect(() => client.remove('not_exist')).not.toThrowError();
   });
 });
 
