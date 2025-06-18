@@ -7,6 +7,7 @@ import { AppCategory, HttpStart } from 'opensearch-dashboards/public';
 import { ChromeNavLink } from './nav_links';
 import { ChromeRegistrationNavLink, NavGroupItemInMap } from './nav_group';
 import { NavGroupStatus } from '../../../core/types';
+import { SparseSearch } from '../../utils/sparse_search';
 type KeyOf<T> = keyof T;
 
 export const sortBy = <T>(key: KeyOf<T>) => {
@@ -273,21 +274,23 @@ export async function searchNavigationLinks(
       });
   });
 
+  let searcher = null;
+
   try {
-    console.log('All links:', allSearchAbleLinks);
-    const linksContext = allSearchAbleLinks.map((link) => ({
-      id: link.id,
-      title: link.title,
-      description: link.description ?? link.title,
-    }));
-    const semanticSearchResult = await http?.post('/api/workspaces/_semantic_search', {
-      body: JSON.stringify({
-        query: query,
-        links: linksContext,
-      }),
+    const { default: docVectors } = await import(
+      /* webpackChunkName: "docVectors" */ '../../utils/doc_vectors'
+    );
+    searcher = new SparseSearch(docVectors);
+    console.time('SearchQueryTime');
+    const results = searcher.search(query);
+    console.timeEnd('SearchQueryTime');
+
+    console.log(`---------- Neural Sparse Search: ${query} -----------`);
+    results.forEach((result) => {
+      console.log(`Score: ${result.score.toFixed(2)} | ${result.text}`);
     });
 
-    const finalResult = semanticSearchResult
+    const finalResult = results
       .map((link: any) => {
         const originalFullLink = allSearchAbleLinks.find((fullLink) => fullLink.id === link.id);
         return originalFullLink || null;
