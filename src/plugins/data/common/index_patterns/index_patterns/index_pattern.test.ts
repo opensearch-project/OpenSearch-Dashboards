@@ -96,6 +96,7 @@ function createWithDataSource(id: string) {
     version,
     attributes: { timeFieldName, fields, title },
     reference,
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
   } = stubbedSavedObjectIndexPattern(id, true);
 
   const dataSourceRef = { id: reference[0].id, type: reference[0].type };

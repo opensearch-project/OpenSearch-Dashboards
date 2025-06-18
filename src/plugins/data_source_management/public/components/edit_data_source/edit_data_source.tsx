@@ -9,6 +9,7 @@ import { useEffectOnce } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { c } from 'tar';
 import { UiSettingScope } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -32,6 +33,7 @@ import { LoadingMask } from '../loading_mask';
 import { AuthType, DataSourceAttributes } from '../../types';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 
+// @ts-expect-error TS2741 TODO(ts-error): fixme
 const defaultDataSource: DataSourceAttributes = {
   title: '',
   description: '',
@@ -101,7 +103,9 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
       const fetchDataSourceById = await getDataSourceById(dataSourceID, savedObjects.client);
       const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjects.client);
       if (fetchDataSourceById) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         setDataSource(fetchDataSourceById);
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         setBreadcrumbs(getEditBreadcrumbs(fetchDataSourceById));
       }
       if (Array.isArray(listOfDataSources) && listOfDataSources.length) {

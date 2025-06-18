@@ -33,6 +33,7 @@ describe('DuplicateResultFlyout', () => {
     onCopy: onCopyMock,
     targetWorkspace: 'target-workspace',
     useUpdatedUX: true,
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     targetWorkspaceDataSourceUrl: '',
   };
 

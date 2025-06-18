@@ -47,6 +47,7 @@ const SQLReference = () => {
   );
 };
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const sqlLanguageReference = (selectedLanguage) => {
   const hasSeenInfoBox = localStorage.getItem('hasSeenInfoBox_SQL') === 'true';
   const shouldAutoShow = selectedLanguage === 'SQL' && !hasSeenInfoBox;

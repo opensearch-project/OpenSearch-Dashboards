@@ -126,6 +126,7 @@ export class DatasetService {
           type!
             .fetchFields(dataset, services)
             .then((fields) => {
+              // @ts-expect-error TS2345 TODO(ts-error): fixme
               temporaryIndexPattern.fields.replaceAll([...fields]);
               this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
             })

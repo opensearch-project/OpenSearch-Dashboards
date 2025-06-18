@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { DocViewerTab, DocViewerTabProps } from './doc_viewer_tab';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 

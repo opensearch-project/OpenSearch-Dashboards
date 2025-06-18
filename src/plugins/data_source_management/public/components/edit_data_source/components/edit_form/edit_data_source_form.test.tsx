@@ -36,6 +36,7 @@ const usernameFormRowIdentifier = '[data-test-subj="editDatasourceUsernameFormRo
 const passwordFieldIdentifier = '[data-test-subj="updateDataSourceFormPasswordField"]';
 const updatePasswordBtnIdentifier = '[data-test-subj="editDatasourceUpdatePasswordBtn"]';
 const updateAwsCredsBtnIdentifier = '[data-test-subj="editDatasourceUpdateAwsCredentialBtn"]';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 const regionFieldIdentifier = 'dataSourceRegion';
 const accessKeyFieldIdentifier = 'dataSourceAccessKey';
 const accessKeyFormRowIdentifier = '[data-test-subj="editDataSourceFormAccessKeyField"]';
@@ -81,6 +82,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
     beforeEach(() => {
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <EditDataSourceForm
             existingDataSource={mockDataSourceAttributesWithAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
@@ -193,6 +195,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -212,6 +215,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             .find('[data-test-subj="datasource-edit-cancelButton"]')
             .first()
             .simulate('click');
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -226,6 +230,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -243,6 +248,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
           );
           component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
           expect(mockFn).toHaveBeenCalled();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -254,6 +260,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
       component = mount(
         wrapWithIntl(
           <EditDataSourceForm
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             existingDataSource={mockDataSourceAttributesWithNoAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
             isDefault={false}
@@ -330,6 +337,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -347,6 +355,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
           );
           component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
           expect(mockFn).toHaveBeenCalled();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -367,6 +376,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
       component = mount(
         wrapWithIntl(
           <EditDataSourceForm
+            // @ts-expect-error TS2741 TODO(ts-error): fixme
             existingDataSource={mockDataSourceAttributesWithSigV4Auth}
             existingDatasourceNamesList={existingDatasourceNamesList}
             isDefault={false}
@@ -493,6 +503,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -512,6 +523,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             .find('[data-test-subj="datasource-edit-cancelButton"]')
             .first()
             .simulate('click');
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -526,6 +538,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -543,6 +556,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
           );
           component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
           expect(mockFn).toHaveBeenCalled();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -554,6 +568,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
       component = mount(
         wrapWithIntl(
           <EditDataSourceForm
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             existingDataSource={mockDataSourceAttributesWithNoAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
             isDefault={false}
@@ -607,6 +622,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
       component = mount(
         wrapWithIntl(
           <EditDataSourceForm
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             existingDataSource={mockDataSourceAttributesWithNoAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
             isDefault={false}
@@ -633,6 +649,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
       component = mount(
         wrapWithIntl(
           <EditDataSourceForm
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             existingDataSource={mockDataSourceAttributesWithNoAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
             isDefault={false}
@@ -697,6 +714,7 @@ describe('With Registered Authentication', () => {
     component = mount(
       wrapWithIntl(
         <EditDataSourceForm
+          // @ts-expect-error TS2741 TODO(ts-error): fixme
           existingDataSource={mockDataSourceAttributesWithNoAuth}
           existingDatasourceNamesList={existingDatasourceNamesList}
           isDefault={false}
@@ -738,6 +756,7 @@ describe('With Registered Authentication', () => {
 
     component = mount(
       wrapWithIntl(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <EditDataSourceForm
           existingDataSource={mockDataSourceAttributesWithRegisteredAuth}
           existingDatasourceNamesList={existingDatasourceNamesList}
@@ -762,8 +781,10 @@ describe('With Registered Authentication', () => {
       setTimeout(() => {
         updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
         expect(
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           component.find(descriptionFormRowIdentifier).first().props().isInvalid
         ).toBeUndefined();
+        // @ts-expect-error TS2794 TODO(ts-error): fixme
         resolve();
       }, 100)
     );
@@ -772,12 +793,14 @@ describe('With Registered Authentication', () => {
         /* Updated description*/
         updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');
         expect(
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           component.find(descriptionFormRowIdentifier).first().props().isInvalid
         ).toBeUndefined();
 
         expect(component.find('[data-test-subj="datasource-edit-saveButton"]').exists()).toBe(true);
         component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
         expect(mockedSubmitHandler).toHaveBeenCalled();
+        // @ts-expect-error TS2794 TODO(ts-error): fixme
         resolve();
       }, 100)
     );

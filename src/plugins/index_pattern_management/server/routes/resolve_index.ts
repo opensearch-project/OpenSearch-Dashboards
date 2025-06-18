@@ -29,6 +29,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { IRouter, LegacyAPICaller } from 'src/core/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {
@@ -70,6 +71,7 @@ export function registerResolveIndexRoute(router: IRouter): void {
             queryString ? '?' + new URLSearchParams(queryString).toString() : ''
           }`,
         });
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         return res.ok({ body: result });
       } catch (err) {
         return res.customError({

@@ -25,8 +25,10 @@ describe('NameRow', () => {
     },
   };
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const renderWithProviders = (ui) => {
     return render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <OpenSearchDashboardsContextProvider value={contextValues}>
         {ui}
       </OpenSearchDashboardsContextProvider>

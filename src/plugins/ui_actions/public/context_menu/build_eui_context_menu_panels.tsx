@@ -218,9 +218,11 @@ export async function buildContextMenuForActions({
       _title: action.getDisplayName(context),
     };
     if (typeof action?.getTooltip === 'function') {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       contextItem.toolTipContent = action.getTooltip(context);
     }
     if (typeof action?.isDisabled === 'function') {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       contextItem.disabled = action?.isDisabled(context);
     }
     panels[parentGroupId || 'mainMenu'].items!.push(contextItem);
@@ -259,13 +261,16 @@ export async function buildContextMenuForActions({
     // looping through all panels.
     if (panel._category) {
       // Create array to store category items
+      // @ts-expect-error TS7053 TODO(ts-error): fixme
       if (!categories[panel._category]) {
+        // @ts-expect-error TS7053 TODO(ts-error): fixme
         categories[panel._category] = [];
       }
 
       // If multiple items in the panel, store a link to this panel into the category.
       // Otherwise, just store the single item into the category.
       if (panel.items.length > 1) {
+        // @ts-expect-error TS7053 TODO(ts-error): fixme
         categories[panel._category].push({
           order: panel._order,
           items: [
@@ -277,6 +282,7 @@ export async function buildContextMenuForActions({
           ],
         });
       } else {
+        // @ts-expect-error TS7053 TODO(ts-error): fixme
         categories[panel._category].push({
           order: panel._order || 0,
           items: panel.items,
@@ -311,8 +317,10 @@ export async function buildContextMenuForActions({
     // Get the items sorted by group order, allowing for groups within categories
     // to be ordered. A category consists of an order and its items.
     // Higher orders are sorted to the top.
+    // @ts-expect-error TS7053, TS7006 TODO(ts-error): fixme
     const sortedEntries = categories[key].sort((a, b) => b.order - a.order);
     const sortedItems = sortedEntries.reduce(
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
       (items, category) => [...items, ...category.items],
       []
     );

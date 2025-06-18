@@ -333,10 +333,13 @@ export const parseQuery = <
           if (Array.isArray(value)) {
             // combine arrays
             const combined = [
+              // @ts-expect-error TS2352 TODO(ts-error): fixme
               ...((result[field as keyof A] as any[]) ?? []),
+              // @ts-expect-error TS2352 TODO(ts-error): fixme
               ...((nextResult[field as keyof A] as any[]) ?? []),
             ];
             // ES6 magic to filter out duplicate objects based on id field
+            // @ts-expect-error TS2352 TODO(ts-error): fixme
             (result[field as keyof A] as any[]) = combined.filter(
               (item, index, self) => index === self.findIndex((other) => other.id === item.id)
             );

@@ -9,6 +9,7 @@
  * GitHub history for details.
  */
 
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { SavedObjectsManagementNamespace } from './types';
 
 export interface SavedObjectsManagementNamespaceServiceSetup {
@@ -29,6 +30,7 @@ export interface SavedObjectsManagementNamespaceServiceStart {
 
 export class SavedObjectsManagementNamespaceService {
   private readonly namespaces = new Map<string, SavedObjectsManagementNamespace<unknown>>();
+  // @ts-expect-error TS7008 TODO(ts-error): fixme
   private readonly alias;
 
   setup(): SavedObjectsManagementNamespaceServiceSetup {
@@ -45,6 +47,7 @@ export class SavedObjectsManagementNamespaceService {
             `An alias has already been registered. Cannot register more than one alias.`
           );
         }
+        // @ts-expect-error TS2540 TODO(ts-error): fixme
         this.alias = alias;
       },
     };

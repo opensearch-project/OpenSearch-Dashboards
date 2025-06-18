@@ -29,6 +29,7 @@
  */
 
 import * as chokidar from 'chokidar';
+// @ts-expect-error TS2614 TODO(ts-error): fixme
 import { isMaster as isClusterManager } from 'cluster';
 import fs from 'fs';
 import { Server } from '@hapi/hapi';

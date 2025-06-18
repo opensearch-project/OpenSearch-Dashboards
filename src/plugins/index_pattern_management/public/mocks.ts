@@ -58,6 +58,7 @@ const createSetupContract = (): IndexPatternManagementSetup => ({
   },
 });
 
+// @ts-expect-error TS2741 TODO(ts-error): fixme
 const createStartContract = (): IndexPatternManagementStart => ({
   creation: {
     getType: jest.fn(),
@@ -82,6 +83,7 @@ const createInstance = async () => {
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
   });
   const doStart = () =>
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
     });

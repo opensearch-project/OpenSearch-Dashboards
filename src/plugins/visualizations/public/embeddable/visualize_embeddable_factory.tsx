@@ -120,6 +120,7 @@ export class VisualizeEmbeddableFactory
   constructor(private readonly deps: VisualizeEmbeddableFactoryDeps) {}
 
   public async isEditable() {
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     return getCapabilities().visualize.save as boolean;
   }
 

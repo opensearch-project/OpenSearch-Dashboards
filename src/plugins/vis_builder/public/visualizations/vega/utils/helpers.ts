@@ -96,6 +96,7 @@ export interface FlattenHierarchyResult {
  * @param {any[]} group - The group data (rows or columns) if split dimensions exist
  * @returns {FlattenedSliceItem[]} Flattened array of data points
  */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const flattenHierarchy = (data, group): FlattenHierarchyResult => {
   const flattenedData: FlattenedSliceItem[] = [];
   const levelSet = new Set<string>();
@@ -143,6 +144,7 @@ const flattenHierarchy = (data, group): FlattenHierarchyResult => {
  * @param {'series' | 'slices'} handlerType - The type of chart data to handle
  * @returns {any} Converted and flattened data suitable for visualization
  */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const flattenDataHandler = (context, dimensions, handlerType = 'series') => {
   // TODO: Update this func if more types are added in the future.
   const handler =
@@ -176,6 +178,7 @@ export const flattenDataHandler = (context, dimensions, handlerType = 'series') 
  * @param {string} fieldType - The OpenSearch field type
  * @returns {string} The corresponding Vega data type
  */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const mapFieldTypeToVegaType = (fieldType) => {
   const typeMap = {
     number: 'quantitative',
@@ -189,6 +192,7 @@ export const mapFieldTypeToVegaType = (fieldType) => {
   };
 
   // Default to 'nominal' if the field type is not recognized
+  // @ts-expect-error TS7053 TODO(ts-error): fixme
   return typeMap[fieldType] || 'nominal';
 };
 
@@ -197,5 +201,6 @@ export const mapFieldTypeToVegaType = (fieldType) => {
  * @param {string} chartType - The chart type
  * @returns {string} The corresponding Vega mark type
  */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const mapChartTypeToVegaType = (chartType) =>
   chartType === 'histogram' ? 'bar' : chartType;

@@ -19,6 +19,7 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
 
 describe('useGenerateQuery', () => {
   const uiActionsStartMock = uiActionsPluginMock.createStartContract();
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   uiActionsStartMock.getTrigger.mockReturnValue({
     id: '',
     exec: jest.fn(),

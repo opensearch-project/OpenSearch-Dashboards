@@ -76,6 +76,7 @@ describe('Console Proxy Route', () => {
 
           const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise('foo');
           opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mockResolvedValueOnce(
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             mockResponse
           );
 
@@ -96,6 +97,7 @@ describe('Console Proxy Route', () => {
 
           const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise('foo');
           opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mockResolvedValueOnce(
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             mockResponse
           );
 

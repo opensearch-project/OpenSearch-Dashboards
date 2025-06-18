@@ -50,6 +50,7 @@ export class GithubApi {
     headers: {
       Accept: 'application/vnd.github.v3+json',
       'User-Agent': 'opensearch-dashboards/update_prs_cli',
+      // @ts-expect-error TS2729 TODO(ts-error): fixme
       ...(this.accessToken ? { Authorization: `token ${this.accessToken} ` } : {}),
     },
   });
