@@ -101,7 +101,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   );
 
   // Execute query when run button is clicked
-  const handleRunQuery = useCallback(async () => {
+  const handleRun = useCallback(async () => {
     dispatch(beginTransaction());
     try {
       // Update query string in Redux
@@ -222,7 +222,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   }, []);
 
   const handleQueryRun = () => {
-    handleRunQuery();
+    handleRun();
     setIsPromptReadOnly(true);
   };
 
@@ -261,7 +261,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
 
   const handleRunClick = () => {
     if (isDualEditor) {
-      handleRunQuery();
+      handleRun();
     } else {
       handlePromptRun();
     }
@@ -299,9 +299,9 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
             datePickerRef={datePickerRef}
             services={services}
             timefilter={timefilter}
-            handleTimeChange={handleTimeChange}
-            handleRunQuery={handleRunQuery}
-            handleRefreshChange={handleRefreshChange}
+            onTimeChange={handleTimeChange}
+            onRunQuery={handleRun}
+            oneRefreshChange={handleRefreshChange}
           />
         }
       >
@@ -309,7 +309,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
           isDualEditor={isDualEditor}
           isPromptReadOnly={isPromptReadOnly}
           isEditorReadOnly={isEditorReadOnly}
-          queryString={typeof queryString === 'string' ? queryString : ''}
+          queryString={typeof localQuery === 'string' ? localQuery : ''}
           languageType={editorLanguageType}
           prompt={localPrompt || ''}
           onPromptChange={onPromptChange}

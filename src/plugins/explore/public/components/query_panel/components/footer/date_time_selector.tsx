@@ -6,7 +6,7 @@
 // TODO: Move this to  already configured datetime range picker
 // This component will be fully functional once integrated with query services.
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { UI_SETTINGS } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
@@ -15,33 +15,30 @@ export interface DatePickerProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
   services: ExploreServices;
   timefilter: any;
-  handleTimeChange: (time: { start: string; end: string }) => void;
-  handleRunQuery: () => void;
-  handleRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
+  onTimeChange: (time: { start: string; end: string }) => void;
+  onRunQuery: () => void;
+  oneRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
   datePickerRef,
   services,
   timefilter,
-  handleTimeChange,
-  handleRunQuery,
-  handleRefreshChange,
+  onTimeChange,
+  onRunQuery,
+  oneRefreshChange,
 }) => {
   return (
-    <div
-      ref={datePickerRef}
-      key="datePicker"
-    >
+    <div ref={datePickerRef} key="datePicker">
       <EuiSuperDatePicker
         key="datePicker"
         start={timefilter?.getTime().from}
         end={timefilter?.getTime().to}
         isPaused={timefilter?.getRefreshInterval().pause}
         refreshInterval={timefilter?.getRefreshInterval().value}
-        onTimeChange={handleTimeChange}
-        onRefresh={handleRunQuery}
-        onRefreshChange={handleRefreshChange}
+        onTimeChange={onTimeChange}
+        onRefresh={onRunQuery}
+        onRefreshChange={oneRefreshChange}
         showUpdateButton={false}
         commonlyUsedRanges={services?.uiSettings
           ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
