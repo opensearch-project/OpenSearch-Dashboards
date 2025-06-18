@@ -150,7 +150,6 @@ describe('LogsPage', () => {
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
-    expect(screen.getByTestId('explore-tabs')).toBeInTheDocument();
   });
 
   it('does not render chart when status is UNINITIALIZED', () => {

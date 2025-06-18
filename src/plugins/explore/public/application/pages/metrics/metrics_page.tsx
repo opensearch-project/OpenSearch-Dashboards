@@ -6,7 +6,7 @@
 import './metrics_page.scss';
 
 import React, { useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   EuiErrorBoundary,
   EuiPanel,
@@ -15,6 +15,7 @@ import {
   EuiResizableContainer,
   EuiPage,
   EuiPageBody,
+  EuiSpacer,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
@@ -34,6 +35,11 @@ import { ExploreTabs } from '../../../components/tabs/tabs';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
 import { useIndexPatternContext } from '../../components/index_pattern_context';
+import { DiscoverNoIndexPatterns } from '../../legacy/discover/application/components/no_index_patterns/no_index_patterns';
+import { DiscoverUninitialized } from '../../legacy/discover/application/components/uninitialized/uninitialized';
+import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';
+import { DiscoverNoResults } from '../../legacy/discover/application/components/no_results/no_results';
+import { executeQueries } from '../../utils/state_management/actions/query_actions';
 
 /**
  * Main application component for the Explore plugin
@@ -42,6 +48,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const dispatch = useDispatch();
   const {
     indexPattern,
     isLoading: indexPatternLoading,
@@ -49,7 +56,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
   } = useIndexPatternContext();
   const showActionsInGroup = services.uiSettings.get('home:useNewHomePage', false);
 
-  // Get status and rows for histogram and tab content
+  // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
     return state.ui?.status || ResultStatus.UNINITIALIZED;
   });
@@ -104,10 +111,12 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
     showSaveQuery: true,
   };
 
-  const showChart =
-    status === ResultStatus.READY ||
-    (status === ResultStatus.LOADING && !!rows?.length) ||
-    (status === ResultStatus.ERROR && !!rows?.length);
+  // Function to refresh data (for uninitialized state)
+  const onRefresh = () => {
+    if (services) {
+      dispatch(executeQueries({ services }) as any);
+    }
+  };
 
   return (
     <EuiErrorBoundary>
@@ -184,7 +193,6 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
 
                   <EuiResizableButton />
 
-                  {/* Right Panel: Chart and Tab Content */}
                   <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
                     <EuiPageBody className="deLayout__canvas">
                       <EuiPanel
@@ -196,14 +204,51 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
                         borderRadius="l"
                       >
                         <TopNav {...topNavProps} />
-                        {/* Chart container from legacy - show above tabs when there are results */}
-                        {showChart && (
-                          <div className="dscCanvas__chart">
-                            <DiscoverChartContainer />
-                          </div>
-                        )}
 
-                        <ExploreTabs />
+                        {/* Handle different states following Discover's pattern */}
+                        {indexPattern ? (
+                          <>
+                            {/* NO_RESULTS state */}
+                            {status === ResultStatus.NO_RESULTS && (
+                              <DiscoverNoResults
+                                queryString={services?.data?.query?.queryString}
+                                query={services?.data?.query?.queryString?.getQuery()}
+                                savedQuery={services?.data?.query?.savedQueries}
+                                timeFieldName={indexPattern.timeFieldName}
+                              />
+                            )}
+
+                            {/* UNINITIALIZED state */}
+                            {status === ResultStatus.UNINITIALIZED && (
+                              <DiscoverUninitialized onRefresh={onRefresh} />
+                            )}
+
+                            {/* LOADING state with no existing data */}
+                            {status === ResultStatus.LOADING && !rows?.length && <LoadingSpinner />}
+
+                            {/* ERROR state with no existing data */}
+                            {status === ResultStatus.ERROR && !rows?.length && (
+                              <DiscoverUninitialized onRefresh={onRefresh} />
+                            )}
+
+                            {/* READY state or LOADING/ERROR with existing data */}
+                            {(status === ResultStatus.READY ||
+                              (status === ResultStatus.LOADING && !!rows?.length) ||
+                              (status === ResultStatus.ERROR && !!rows?.length)) && (
+                              <>
+                                <div className="dscCanvas__chart">
+                                  <DiscoverChartContainer />
+                                </div>
+                                <ExploreTabs />
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <EuiSpacer size="xxl" />
+                            <DiscoverNoIndexPatterns />
+                          </>
+                        )}
                       </EuiPanel>
                     </EuiPageBody>
                   </EuiResizablePanel>
