@@ -4,6 +4,7 @@
  */
 
 import { RootState } from '../store';
+import { ResultStatus } from '../types';
 
 /**
  * Persists Redux state to URL
@@ -168,7 +169,7 @@ const getPreloadedQueryState = async (services: any) => {
 const getPreloadedUIState = async (services: any) => {
   return {
     activeTabId: 'logs',
-    status: 'uninitialized',
+    status: ResultStatus.UNINITIALIZED,
     error: null,
     abortController: null,
     transaction: {
