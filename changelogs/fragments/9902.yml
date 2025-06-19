@@ -1,0 +1,2 @@
+feat:
+- Support logs, traces, metrics flavor for explore plugin ([#9902](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9902))
