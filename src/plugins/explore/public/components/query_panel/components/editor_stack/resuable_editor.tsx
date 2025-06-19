@@ -150,8 +150,22 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
 
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
-        setEditorHeight(contentHeight);
-        editor.layout({ width: editor.getLayoutInfo().width, height: contentHeight });
+        const maxHeight = 100;
+        const finalHeight = Math.min(contentHeight, maxHeight);
+
+        setEditorHeight(finalHeight);
+
+        editor.layout({
+          width: editor.getLayoutInfo().width,
+          height: finalHeight,
+        });
+
+        editor.updateOptions({
+          scrollBeyondLastLine: false,
+          scrollbar: {
+            vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
+          },
+        });
       });
 
       onEditorDidMount?.(editor);
