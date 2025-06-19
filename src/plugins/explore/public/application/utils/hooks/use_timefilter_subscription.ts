@@ -11,25 +11,20 @@ import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults } from '../state_management/slices/results_slice';
 
 /**
- * Hook to handle timefilter subscription and re-execute queries on time range changes
- * Follows discover pattern for time range change handling
+ * Hook to handle auto-refresh subscription only
  */
 export const useTimefilterSubscription = (services: ExploreServices) => {
   const dispatch = useDispatch();
-  const queryState = useSelector((state: RootState) => state.query);
+  const query = useSelector((state: RootState) => state.query);
 
-  // TimeFilter Changes: Manual subscription to trigger Redux actions
   useEffect(() => {
     if (!services?.data?.query?.timefilter?.timefilter) return;
 
     const subscription = services.data.query.timefilter.timefilter
-      .getTimeUpdate$()
+      .getAutoRefreshFetch$()
       .subscribe(() => {
-        // Only execute if we have a query and dataset
-        if (queryState.query && queryState.dataset) {
-          // EXPLICIT cache clear - separate cache logic
+        if (query.query && query.dataset) {
           dispatch(clearResults());
-          // Execute queries - cache already cleared
           dispatch(executeQueries({ services }) as unknown);
         }
       });
@@ -37,5 +32,5 @@ export const useTimefilterSubscription = (services: ExploreServices) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [services, dispatch, queryState.query, queryState.dataset]);
+  }, [services, dispatch, query]);
 };
