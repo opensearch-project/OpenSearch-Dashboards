@@ -72,13 +72,16 @@ export const histogramResultsProcessor = (
 ) => {
   const result = defaultResultsProcessor(rawResults, indexPattern);
   const histogramConfigs = createHistogramConfigs(indexPattern, interval, data);
-  const bucketAggConfig = histogramConfigs!.aggs[1] as IBucketDateHistogramAggConfig;
-  const tabifiedData = search.tabifyAggResponse(histogramConfigs!, rawResults);
-  const dimensions = getDimensions(histogramConfigs!, data);
 
-  result.bucketInterval = bucketAggConfig.buckets?.getInterval();
-  // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
-  result.chartData = buildPointSeriesData(tabifiedData, dimensions);
+  if (histogramConfigs) {
+    const bucketAggConfig = histogramConfigs.aggs[1] as IBucketDateHistogramAggConfig;
+    const tabifiedData = search.tabifyAggResponse(histogramConfigs, rawResults);
+    const dimensions = getDimensions(histogramConfigs, data);
+
+    result.bucketInterval = bucketAggConfig.buckets?.getInterval();
+    // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
+    result.chartData = buildPointSeriesData(tabifiedData, dimensions);
+  }
 
   return result;
 };
@@ -378,10 +381,14 @@ const createSearchSourceWithQuery = async (
     })
     .setField('filter', timeRangeFilter ? [timeRangeFilter] : []);
 
+  if (!includeHistogram || !indexPattern.timeFieldName || !customInterval) {
+    return searchSource;
+  }
+
   // Add histogram aggregations if requested and time-based
-  if (includeHistogram && indexPattern.timeFieldName && customInterval) {
-    const dslAggs = createHistogramConfigs(indexPattern, customInterval, services.data)!.toDsl();
-    searchSource.setField('aggs', dslAggs);
+  const histogramConfigs = createHistogramConfigs(indexPattern, customInterval, services.data);
+  if (histogramConfigs) {
+    searchSource.setField('aggs', histogramConfigs.toDsl());
     // TODO: Do we want to hard code it to 500?
     searchSource.setField('size', 500);
   }
