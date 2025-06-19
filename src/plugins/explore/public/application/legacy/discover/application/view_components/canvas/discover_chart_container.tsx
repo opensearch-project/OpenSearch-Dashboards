@@ -10,25 +10,22 @@ import { ExploreServices } from '../../../../../../types';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DiscoverChart } from '../../components/chart/chart';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
-import { defaultResultsProcessor } from '../../../../../utils/state_management/actions/query_actions';
+import { histogramResultsProcessor } from '../../../../../utils/state_management/actions/query_actions';
+import { RootState } from '../../../../../utils/state_management/store';
 
 export const DiscoverChartContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { uiSettings, data } = services;
 
-  const dataset = useSelector((state: any) => state.query?.dataset);
-  const executionCacheKeys = useSelector((state: any) => state.ui?.executionCacheKeys || []);
+  const { interval } = useSelector((state: RootState) => state.legacy);
+  const executionCacheKeys = useSelector((state: RootState) => state.ui?.executionCacheKeys || []);
 
   // Get the first cache key for histogram data (or could be made configurable)
   const cacheKey = executionCacheKeys.length > 0 ? executionCacheKeys[0] : '';
-  const rawResults = useSelector((state: any) => (cacheKey ? state.results[cacheKey] : null));
+  const rawResults = useSelector((state: RootState) => (cacheKey ? state.results[cacheKey] : null));
 
   // Get IndexPattern from centralized context
-  const {
-    indexPattern,
-    isLoading: indexPatternLoading,
-    error: indexPatternError,
-  } = useIndexPatternContext();
+  const { indexPattern } = useIndexPatternContext();
 
   const isTimeBased = useMemo(() => {
     return indexPattern ? indexPattern.isTimeBased() : false;
@@ -41,16 +38,16 @@ export const DiscoverChartContainer = () => {
     }
 
     // Use defaultResultsProcessor with histogram enabled
-    const processed = defaultResultsProcessor(rawResults, indexPattern, true);
+    const processed = histogramResultsProcessor(rawResults, indexPattern, data, interval);
     return processed;
-  }, [rawResults, indexPattern]);
+  }, [rawResults, indexPattern, data, interval]);
 
   if (!isTimeBased) {
     return null;
   }
 
   // Return null if no processed results or no chart data
-  if (!processedResults || !processedResults.chartData) {
+  if (!processedResults || !processedResults.chartData || !processedResults.hits.total) {
     return null;
   }
 

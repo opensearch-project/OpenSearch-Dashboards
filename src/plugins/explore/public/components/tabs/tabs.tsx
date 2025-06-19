@@ -4,7 +4,7 @@
  */
 
 import './tabs.scss';
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -28,7 +28,7 @@ import { RootState } from '../../application/utils/state_management/store';
  * A view can contain a React `component`, or any JS framework by using
  * a `render` function.
  */
-export const ExploreTabs = () => {
+export const ExploreTabsComponent = () => {
   const dispatch = useDispatch();
   // Get services from context
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -88,3 +88,5 @@ export const ExploreTabs = () => {
     />
   );
 };
+
+export const ExploreTabs = memo(ExploreTabsComponent);

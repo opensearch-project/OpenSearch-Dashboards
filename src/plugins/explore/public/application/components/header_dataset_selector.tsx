@@ -14,7 +14,7 @@ import {
   beginTransaction,
   finishTransaction,
 } from '../utils/state_management/actions/transaction_actions';
-import { setDataset, setQuery } from '../utils/state_management/slices/query_slice';
+import { setQuery } from '../utils/state_management/slices/query_slice';
 
 export interface HeaderDatasetSelectorProps {
   datasetSelectorRef: React.RefObject<HTMLDivElement>;
@@ -46,13 +46,8 @@ export const HeaderDatasetSelector: React.FC<HeaderDatasetSelectorProps> = ({
 
       dispatch(beginTransaction());
       try {
-        // EXPLICIT cache clear - separate cache logic
         dispatch(clearResults());
-
-        // Update dataset
         dispatch(setQuery(queryStringState));
-
-        // Execute queries - cache already cleared
         dispatch(executeQueries({ services }) as any);
       } finally {
         dispatch(finishTransaction());

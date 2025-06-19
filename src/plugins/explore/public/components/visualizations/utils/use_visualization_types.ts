@@ -16,8 +16,9 @@ import { ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
+import { BarChartStyleControls } from '../bar/bar_vis_config';
 
-export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter';
+export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar';
 
 export interface ChartStyleControlMap {
   line: LineChartStyleControls;
@@ -25,11 +26,13 @@ export interface ChartStyleControlMap {
   metric: MetricChartStyleControls;
   heatmap: HeatmapChartStyleControls;
   scatter: ScatterChartStyleControls;
+  bar: BarChartStyleControls;
 }
 
 export type AllChartStyleControls =
   | LineChartStyleControls
   | PieChartStyleControls
+  | BarChartStyleControls
   | MetricChartStyleControls
   | HeatmapChartStyleControls
   | ScatterChartStyleControls;
@@ -140,8 +143,8 @@ export const getVisualizationType = <T = unknown>(
     const uniqueValues = new Set(validValues);
     return {
       ...column,
-      validValuesCount: validValues.length,
-      uniqueValuesCount: uniqueValues.size,
+      validValuesCount: validValues.length ?? 0,
+      uniqueValuesCount: uniqueValues.size ?? 0,
     };
   });
 
