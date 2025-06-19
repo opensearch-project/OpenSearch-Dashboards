@@ -4,6 +4,7 @@
  */
 
 import { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { PatternItem } from '../patterns_table';
 
 export const PATTERNS_FIELD = 'patterns_field';
@@ -12,7 +13,9 @@ export const COUNT_FIELD = 'count';
 export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
   {
     field: 'ratio',
-    name: 'Event ratio',
+    name: i18n.translate('explore.patterns.table.column.eventRatio', {
+      defaultMessage: 'Event ratio',
+    }),
     render: (val: number) => {
       // Check if value is a valid, finite number before formatting
       if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) {
@@ -24,12 +27,16 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
   },
   {
     field: 'pattern',
-    name: 'Pattern',
+    name: i18n.translate('explore.patterns.table.column.pattern', {
+      defaultMessage: 'Pattern',
+    }),
     render: (pattern: string) => pattern || '—',
   },
   {
     field: 'count',
-    name: 'Event count',
+    name: i18n.translate('explore.patterns.table.column.eventCount', {
+      defaultMessage: 'Event count',
+    }),
     render: (val: number) => {
       // Check if value is a valid, finite number
       if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) {
