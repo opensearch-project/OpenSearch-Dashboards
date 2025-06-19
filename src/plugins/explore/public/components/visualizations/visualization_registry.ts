@@ -10,6 +10,7 @@ import { createMetricConfig } from './metric/metric_vis_config';
 import { createPieConfig } from './pie/pie_vis_config';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { ChartTypeMapping, VisColumn, VisFieldType, VisualizationRule } from './types';
+import { createBarConfig } from './bar/bar_vis_config';
 
 /**
  * Registry for visualization rules and configurations.
@@ -65,6 +66,11 @@ export class VisualizationRegistry {
 
     for (const rule of this.rules) {
       if (rule.matches(numericalColumns, categoricalColumns, dateColumns)) {
+        // If the rule has a getChartTypes function, use it to get dynamic chart types
+        if (rule.getChartTypes) {
+          rule.chartTypes = rule.getChartTypes(numericalColumns, categoricalColumns, dateColumns);
+        }
+
         // Get the highest priority chart type from this rule
         const topChartType = rule.chartTypes[0];
 
@@ -93,6 +99,8 @@ export class VisualizationRegistry {
         return createScatterConfig();
       case 'metric':
         return createMetricConfig();
+      case 'bar':
+        return createBarConfig();
       // TODO: Add other chart types' configs here
       default:
         return;

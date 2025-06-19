@@ -85,7 +85,13 @@ export const VisualizationContainer = () => {
 
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
-    if (!rows || !indexPattern || !visualizationData || !visualizationData.ruleId) {
+    if (
+      !rows ||
+      !indexPattern ||
+      !visualizationData ||
+      !visualizationData.ruleId ||
+      !styleOptions
+    ) {
       return null;
     }
 
