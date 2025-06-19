@@ -13,27 +13,10 @@ import { ResultStatus } from '../types';
 export const persistReduxState = (state: RootState, services: any) => {
   if (state.ui.transaction?.inProgress) return;
   try {
-    // Update QueryStringManager to match Redux state
-    if (state.query.dataset && services.data?.query?.queryString) {
-      const queryStringQuery = services.data.query.queryString.getQuery();
-      const isEqual = (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b);
-
-      if (!isEqual(queryStringQuery, state.query)) {
-        services.data.query.queryString.setQuery(state.query);
-
-        // Set language if it changed
-        if (state.query.language !== queryStringQuery.language) {
-          services.data.query.queryString
-            .getLanguageService()
-            .setUserQueryLanguage(state.query.language);
-        }
-      }
-    }
-
-    // Persist _q (Query state)
+    // Sync up _q (Query state) to URL state
     services.osdUrlStateStorage.set('_q', state.query, { replace: true });
 
-    // Persist _a (Application state)
+    // Sync up _a (Application state) to URL state
     services.osdUrlStateStorage.set(
       '_a',
       {
