@@ -49,6 +49,7 @@ const EditorStack: React.FC<EditorStackProps> = ({
         onChange={onPromptChange}
         languageType={languageType}
         prompt={prompt}
+        queryString={queryString}
         isPromptReadOnly={isPromptReadOnly}
         onPromptRun={onPromptRun}
         onPromptEdit={onPromptEdit}

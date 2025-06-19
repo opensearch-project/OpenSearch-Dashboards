@@ -11,16 +11,20 @@ export const getEditorConfig = (languageType: LanguageType) => {
     case LanguageType.KeyValue:
       return {
         languageId: LanguageType.PPL,
-        height: 100,
+        height: 32,
         options: {
           minimap: { enabled: false },
           automaticLayout: true,
           scrollBeyondLastLine: false,
-          fontSize: 13,
-          lineHeight: 20,
+          lineHeight: 18,
+          fontSize: 14,
           fontFamily: 'var(--font-code)',
           lineNumbers: 'on' as const,
           folding: true,
+          padding: {
+            top: 7,
+            bottom: 7,
+          },
           wordWrap: 'on' as const,
           wrappingIndent: 'same' as const,
           lineDecorationsWidth: 0,
@@ -63,7 +67,6 @@ export const getEditorConfig = (languageType: LanguageType) => {
           fixedOverflowWidgets: true,
           lineHeight: 18,
           fontSize: 14,
-          fontFamily: 'Roboto Mono',
           minimap: {
             enabled: false,
           },

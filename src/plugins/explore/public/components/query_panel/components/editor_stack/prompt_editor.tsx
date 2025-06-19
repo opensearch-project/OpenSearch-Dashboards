@@ -14,6 +14,7 @@ import { EditorType, LanguageType } from './types';
 export interface PromptEditorProps {
   languageType: LanguageType;
   prompt: string;
+  queryString?: string; // Optional for prompt editor
   isPromptReadOnly: boolean;
   onChange: (value: string) => void;
   onPromptRun: (queryString?: string) => void;
@@ -25,6 +26,7 @@ export interface PromptEditorProps {
 export const PromptEditor: React.FC<PromptEditorProps> = ({
   languageType,
   prompt,
+  queryString,
   isPromptReadOnly,
   onChange,
   onPromptRun,
@@ -36,13 +38,18 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
 
   const editorType = languageType !== LanguageType.Natural ? EditorType.Query : EditorType.Prompt;
 
+  const value = editorType === EditorType.Prompt ? prompt : queryString;
+
   const placeholderText = i18n.translate('explore.queryPanel.promptEditor.placeholder', {
     defaultMessage: 'Ask a question or search using PPL',
   });
 
+  // eslint-disable-next-line no-console
+  console.log(editorType, 'editorType');
+
   return (
     <ReusableEditor
-      value={prompt}
+      value={value || ''}
       onChange={onChange}
       onRun={onPromptRun}
       isReadOnly={isPromptReadOnly}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { debounce } from 'lodash';
@@ -14,11 +14,11 @@ import { IndexPattern } from '../../../../data/common/index_patterns';
 import { EditorStack } from './components/editor_stack';
 import { QueryPanelFooter } from './components/footer';
 import { RecentQueriesTable } from './components/footer/recent_query/table';
+import { useEditorMode } from './hooks/useEditorMode';
 import { QueryTypeDetector } from './utils/type_detection';
 import { Query, TimeRange, LanguageType } from './types';
 
 import {
-  selectQueryString,
   selectQueryLanguage,
   selectIsLoading,
   selectDataset,
@@ -45,19 +45,26 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   const dispatch = useDispatch();
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
 
-  // We use useRef to track the latest detected language type immediately,
-  // since setState is async and we're using a debounced detector.
-  // This ensures accurate access to languageTypeRef.current without waiting for re-renders
-
-  const [isDualEditor, setIsDualEditor] = useState(false);
-  const [isPromptReadOnly, setIsPromptReadOnly] = useState(false);
-  const [isEditorReadOnly, setIsEditorReadOnly] = useState(false);
+  const {
+    isDualEditor,
+    isEditorReadOnly,
+    isPromptReadOnly,
+    queryString,
+    prompt,
+    editorLanguageType,
+    setEditorLanguageType,
+    setIsDualEditor,
+    setIsEditorReadOnly,
+    setIsPromptReadOnly,
+    resetEditorState,
+  } = useEditorMode();
 
   // Use selectors to get state from Redux
-  const queryString = useSelector(selectQueryString);
-  const queryLanguage = useSelector(selectQueryLanguage);
-  const isLoading = useSelector(selectIsLoading);
-  const dataset = useSelector(selectDataset);
+  const { queryLanguage, isLoading, dataset } = useSelector((state: any) => ({
+    queryLanguage: selectQueryLanguage(state),
+    isLoading: selectIsLoading(state),
+    dataset: selectDataset(state),
+  }));
 
   // Determine if DatePicker should be shown
   const showDatePicker = Boolean(indexPattern?.timeFieldName);
@@ -67,8 +74,10 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
 
   // Local state for editor
   const [localQuery, setLocalQuery] = useState(queryString);
-  const [localPrompt, setLocalPrompt] = useState('');
-  const [editorLanguageType, setEditorLanguageType] = useState(LanguageType.Natural); // Default to Natural
+  const [localPrompt, setLocalPrompt] = useState(prompt);
+  const languageTypeRef = React.useRef<LanguageType>(
+    queryLanguage ? LanguageType.PPL : LanguageType.Natural
+  ); // Default to Natural
 
   // Update local state when Redux state changes
   useEffect(() => {
@@ -193,8 +202,9 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
         const detector = new QueryTypeDetector();
         const result = detector.detect(query);
         setEditorLanguageType(result.type);
+        languageTypeRef.current = result.type;
       }, 300),
-    []
+    [setEditorLanguageType, languageTypeRef]
   ); // Adjust debounce time as needed
 
   useEffect(() => {
@@ -209,48 +219,62 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     (value: string) => {
       detectLanguageType(value);
 
-      // eslint-disable-next-line no-console
-      console.log(`Detected language type: ${editorLanguageType}`);
-
-      if (editorLanguageType === LanguageType.Natural) {
+      if (languageTypeRef.current === LanguageType.Natural) {
+        // eslint-disable-next-line no-console
+        console.log(value, 'nl value');
         // If detected as Natural Language, update prompt and set dual editor mode off
         setLocalPrompt(value);
+        // languageTypeRef.current = LanguageType.Natural;
       } else {
         // If detected as PPL, update query and set dual editor mode off
-        handleQueryChange(value);
+        // eslint-disable-next-line no-console
+        console.log(value, 'ppl value');
+        setLocalPrompt('');
+        setLocalQuery(value);
         setIsDualEditor(false);
+        // languageTypeRef.current = LanguageType.PPL;
       }
     },
-    [detectLanguageType, handleQueryChange, editorLanguageType]
+    [detectLanguageType, setIsDualEditor]
   );
 
   const handleQueryRun = () => {
+    // eslint-disable-next-line no-console
+    console.log('Running query:', localQuery);
+
     handleRun();
     setIsPromptReadOnly(true);
-  };
-
-  const handleClearEditor = () => {
-    setIsDualEditor(false);
-    setIsEditorReadOnly(false);
-    setIsPromptReadOnly(false);
-    setEditorLanguageType(LanguageType.Natural);
   };
 
   const handlePromptRun = async (_?: string | { [key: string]: any }) => {
     // TODO: Implement the NL API call to generate PPL query
 
-    const detectedLang = editorLanguageType;
+    const detectedLang = languageTypeRef.current;
+
+    // eslint-disable-next-line no-console
+    console.log(detectedLang, 'detectedLang');
 
     if (detectedLang === LanguageType.Natural) {
-      handleQueryRun(); // TODO: Call NL API to generate PPL query and uopdate
+      setLocalQuery('source = opensearch_dashboards_sample_data_ecommerce'); // TODO: Example query, Remove this once actual NL API intg
+      // eslint-disable-next-line no-console
+      console.log('nl call');
+      handleRun(); // TODO: Call NL API to generate PPL query and uopdate
 
       setIsDualEditor(true);
       setIsEditorReadOnly(true);
-      setLocalQuery(queryString); // TODO: remove this once NL updates redux state for querystring
+      // setLocalQuery((prev) => prev ?? queryString); // TODO: update this once NL updates redux state for querystring
     } else {
-      handleQueryRun();
+      // eslint-disable-next-line no-console
+      console.log('nppl call');
+      handleRun();
       setIsDualEditor(false);
     }
+  };
+
+  const handleClearEditor = () => {
+    resetEditorState();
+    languageTypeRef.current = LanguageType.Natural; // Reset to Natural Language
+    setEditorLanguageType(LanguageType.Natural);
   };
 
   const handlePromptEdit = () => {
@@ -283,10 +307,9 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     handleQueryRun();
   };
 
-  const noInput = React.useMemo(() => !(localQuery ?? '').trim() && !(localPrompt ?? '').trim(), [
-    localQuery,
-    localPrompt,
-  ]);
+  const noInput = useMemo(() => {
+    return !localQuery?.trim() && !localPrompt?.trim();
+  }, [localQuery, localPrompt]);
 
   return (
     <EuiPanel paddingSize="s" className="queryPanel__container">
@@ -314,7 +337,9 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
           isPromptReadOnly={isPromptReadOnly}
           isEditorReadOnly={isEditorReadOnly}
           queryString={typeof localQuery === 'string' ? localQuery : ''}
-          languageType={editorLanguageType}
+          languageType={
+            languageTypeRef.current === LanguageType.PPL ? LanguageType.PPL : LanguageType.Natural
+          }
           prompt={localPrompt || ''}
           onPromptChange={handlePromptChange}
           onQueryChange={handleQueryChange}
