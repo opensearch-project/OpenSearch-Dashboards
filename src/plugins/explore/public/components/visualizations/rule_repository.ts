@@ -19,6 +19,7 @@ import {
   createThreeMetricOneCateScatter,
 } from './scatter/to_expression';
 import { createSingleMetric } from './metric/to_expression';
+import { createBarSpec, createStackedBarSpec } from './bar/to_expression';
 
 // The file contains visualization rules for different scenarios solely based on the number of metrics, categories, and dates fields.
 // Each rule can be mapped to multiple chart types with different priorities.
@@ -211,14 +212,22 @@ const threeMetricsRule: VisualizationRule = {
   },
 };
 
-// TODO: when stack bar is implemented, heatmap map only matches group by field >= 7
-const oneMetricTwoCateRule: VisualizationRule = {
-  id: 'one-metric-two-category',
+const oneMetricTwoCateHighCardRule: VisualizationRule = {
+  id: 'one-metric-two-category-high-cardinality',
   name: 'one metric and two category',
-  description: 'Heatmap for one metric and two category',
+  description: 'Heatmap for one metric and two category with high cardinality',
   matches: (numerical, categorical, date) =>
-    numerical.length === 1 && date.length === 0 && categorical.length === 2,
-  chartTypes: [{ type: 'heatmap', priority: 100, name: 'Heatmap' }],
+    numerical.length === 1 &&
+    date.length === 0 &&
+    categorical.length === 2 &&
+    (numerical[0].uniqueValuesCount >= 7 ||
+      categorical[0].uniqueValuesCount >= 7 ||
+      categorical[1].uniqueValuesCount >= 7),
+  chartTypes: [
+    { type: 'heatmap', priority: 100, name: 'Heatmap' },
+    { type: 'bar', priority: 80, name: 'Bar Chart' },
+    { type: 'area', priority: 60, name: 'Area Chart' },
+  ],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -227,7 +236,67 @@ const oneMetricTwoCateRule: VisualizationRule = {
     styleOptions,
     chartType = 'heatmap'
   ) => {
-    return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+    switch (chartType) {
+      case 'heatmap':
+        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+      case 'bar':
+        return createStackedBarSpec(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
+      case 'area':
+        // TODO: Implement stack area chart creation
+        return;
+      default:
+        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+    }
+  },
+};
+
+const oneMetricTwoCateLowCardRule: VisualizationRule = {
+  id: 'one-metric-two-category-low-cardinality',
+  name: 'one metric and two category',
+  description: 'Heatmap for one metric and two category with low cardinality',
+  matches: (numerical, categorical, date) =>
+    numerical.length === 1 &&
+    date.length === 0 &&
+    categorical.length === 2 &&
+    numerical[0].uniqueValuesCount < 7 &&
+    categorical[0].uniqueValuesCount < 7 &&
+    categorical[1].uniqueValuesCount < 7,
+  chartTypes: [
+    { type: 'bar', priority: 100, name: 'Bar Chart' },
+    { type: 'heatmap', priority: 80, name: 'Heatmap' },
+    { type: 'area', priority: 60, name: 'Area Chart' },
+  ],
+  toExpression: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'bar'
+  ) => {
+    switch (chartType) {
+      case 'heatmap':
+        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+      case 'bar':
+        return createStackedBarSpec(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
+      case 'area':
+        // TODO: Implement stack area chart creation
+        return;
+      default:
+        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+    }
   },
 };
 
@@ -238,8 +307,7 @@ const oneMetricOneCateRule: VisualizationRule = {
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && date.length === 0 && categorical.length === 1,
   chartTypes: [
-    // TODO: when bar is implemented, bar will take higher priority
-    // { type: 'bar', priority: 100, name: 'Bar Chart' },
+    { type: 'bar', priority: 100, name: 'Bar Chart' },
     { type: 'pie', priority: 80, name: 'Pie Chart' },
     { type: 'line', priority: 60, name: 'Line Chart' },
     { type: 'area', priority: 40, name: 'Area Chart' },
@@ -262,8 +330,13 @@ const oneMetricOneCateRule: VisualizationRule = {
           styleOptions
         );
       case 'bar':
-        // TODO: Implement bar chart creation
-        return;
+        return createBarSpec(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
       case 'line':
         // TODO: Implement area chart creation
         return;
@@ -395,7 +468,8 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   oneMetricOneCateOneDateRule,
   oneMetricTwoCateOneDateRule,
   threeMetricsRule,
-  oneMetricTwoCateRule,
+  oneMetricTwoCateHighCardRule,
+  oneMetricTwoCateLowCardRule,
   oneMetricOneCateRule,
   twoMetricRule,
   twoMetricOneCateRule,
