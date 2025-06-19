@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiPanel, EuiButton, EuiSuperDatePicker } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
@@ -14,7 +14,7 @@ import {
   getEffectiveLanguageForAutoComplete,
 } from '../../../../data/public';
 import { IndexPattern } from '../../../../data/common/index_patterns';
-import { setQueryString } from '../utils/state_management/slices/query_slice';
+import { setQuery } from '../utils/state_management/slices/query_slice';
 
 import { RecentQuerySelector } from './recent_query_selector';
 import {
@@ -22,12 +22,7 @@ import {
   finishTransaction,
 } from '../utils/state_management/actions/transaction_actions';
 import { clearResults } from '../utils/state_management/slices/results_slice';
-import {
-  selectQueryString,
-  selectQueryLanguage,
-  selectIsLoading,
-  selectDataset,
-} from '../utils/state_management/selectors';
+import { selectIsLoading, selectDataset, selectQuery } from '../utils/state_management/selectors';
 import { ResultStatus, QueryStatus } from '../utils/state_management/types';
 import { executeQueries } from '../utils/state_management/actions/query_actions';
 
@@ -56,12 +51,9 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
   const dispatch = useDispatch();
 
   // Use selectors to get state from Redux
-  const queryString = useSelector(selectQueryString);
-  const queryLanguage = useSelector(selectQueryLanguage);
+  const query = useSelector(selectQuery);
   const isLoading = useSelector(selectIsLoading);
   const dataset = useSelector(selectDataset);
-
-  // IndexPattern is now passed directly from props (from app.tsx after loading)
 
   // Determine if DatePicker should be shown
   const showDatePicker = Boolean(indexPattern?.timeFieldName);
@@ -70,14 +62,9 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
   const timefilter = services?.data?.query?.timefilter?.timefilter;
 
   // Local state for editor
-  const [localQuery, setLocalQuery] = useState(queryString);
+  const [localQuery, setLocalQuery] = useState(query.query);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-
-  // Update local state when Redux state changes
-  useEffect(() => {
-    setLocalQuery(queryString);
-  }, [queryString]);
 
   // Handle query change
   const handleQueryChange = useCallback((value: string) => {
@@ -113,18 +100,13 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
   const handleRunQuery = useCallback(async () => {
     dispatch(beginTransaction());
     try {
-      // Update query string in Redux
-      dispatch(setQueryString(localQuery));
-
-      // EXPLICIT cache clear - separate cache logic
+      dispatch(setQuery({ ...query, query: localQuery }));
       dispatch(clearResults());
-
-      // Execute queries - cache already cleared
       await dispatch(executeQueries({ services }) as any);
     } finally {
       dispatch(finishTransaction());
     }
-  }, [dispatch, localQuery, services]);
+  }, [dispatch, localQuery, query, services]);
 
   // Handle editor mount
   const handleEditorDidMount = useCallback(
@@ -157,7 +139,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
 
       try {
         // Get the effective language for autocomplete (PPL -> PPL_Simplified for explore app)
-        const effectiveLanguage = getEffectiveLanguageForAutoComplete(queryLanguage, 'explore');
+        const effectiveLanguage = getEffectiveLanguageForAutoComplete(query.language, 'explore');
 
         // Use centralized IndexPattern from context
         const suggestions = await services?.data?.autocomplete?.getQuerySuggestions({
@@ -203,7 +185,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
         return { suggestions: [], incomplete: false };
       }
     },
-    [services, queryLanguage, indexPattern, dataset?.type]
+    [services, query, indexPattern, dataset?.type]
   );
 
   // Create query status object for progress indicator
@@ -217,7 +199,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
     <>
       <EuiPanel paddingSize="s" hasBorder>
         <DefaultInput
-          languageId={queryLanguage}
+          languageId={query.language}
           value={localQuery}
           onChange={handleQueryChange}
           editorDidMount={handleEditorDidMount}
