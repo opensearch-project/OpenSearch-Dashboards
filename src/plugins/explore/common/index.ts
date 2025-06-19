@@ -5,7 +5,6 @@
 
 export const PLUGIN_ID = 'explore';
 export const PLUGIN_NAME = 'Discover';
-export const LOGS_VIEW_ID = 'logs';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';
@@ -18,3 +17,9 @@ export const CONTEXT_STEP_SETTING = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
 export const QUERY_ENHANCEMENT_ENABLED_SETTING = 'query:enhancements:enabled';
+
+export enum ExploreFlavor {
+  Logs = 'logs',
+  Traces = 'traces',
+  Metrics = 'metrics',
+}

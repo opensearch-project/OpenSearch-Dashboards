@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './app.scss';
+import './traces_page.scss';
 
 import React, { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -18,33 +18,33 @@ import {
   EuiSpacer,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { HeaderVariant } from 'opensearch-dashboards/public';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { ExploreServices } from '../types';
-import { useIndexPatternContext } from './components/index_pattern_context';
-import { RootState } from './utils/state_management/store';
-import { ResultStatus } from './utils/state_management/types';
-import { TopNav } from './legacy/discover/application/view_components/canvas/top_nav';
-import { DiscoverChartContainer } from './legacy/discover/application/view_components/canvas/discover_chart_container';
-import { QueryPanel } from './components/query_panel';
-import { DiscoverPanel } from './legacy/discover/application/view_components/panel';
-import { HeaderDatasetSelector } from './components/header_dataset_selector';
-import { useInitialQueryExecution } from './utils/hooks/use_initial_query_execution';
-import { useUrlStateSync } from './utils/hooks/use_url_state_sync';
-import { useTimefilterSubscription } from './utils/hooks/use_timefilter_subscription';
-import { ExploreTabs } from '../components/tabs/tabs';
-import { useHeaderVariants } from './utils/hooks/use_header_variants';
-import { NewExperienceBanner } from '../components/experience_banners/new_experience_banner';
-import { DiscoverNoResults } from './legacy/discover/application/components/no_results/no_results';
-import { DiscoverNoIndexPatterns } from './legacy/discover/application/components/no_index_patterns/no_index_patterns';
-import { DiscoverUninitialized } from './legacy/discover/application/components/uninitialized/uninitialized';
-import { LoadingSpinner } from './legacy/discover/application/components/loading_spinner/loading_spinner';
-import { executeQueries } from './utils/state_management/actions/query_actions';
+import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../../types';
+import { RootState } from '../../utils/state_management/store';
+import { ResultStatus } from '../../utils/state_management/types';
+import { TopNav } from '../../legacy/discover/application/view_components/canvas/top_nav';
+import { DiscoverChartContainer } from '../../legacy/discover/application/view_components/canvas/discover_chart_container';
+import { QueryPanel } from '../../components/query_panel';
+import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
+import { HeaderDatasetSelector } from '../../components/header_dataset_selector';
+import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
+import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
+import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
+import { ExploreTabs } from '../../../components/tabs/tabs';
+import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
+import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
+import { useIndexPatternContext } from '../../components/index_pattern_context';
+import { DiscoverNoIndexPatterns } from '../../legacy/discover/application/components/no_index_patterns/no_index_patterns';
+import { DiscoverUninitialized } from '../../legacy/discover/application/components/uninitialized/uninitialized';
+import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';
+import { DiscoverNoResults } from '../../legacy/discover/application/components/no_results/no_results';
+import { executeQueries } from '../../utils/state_management/actions/query_actions';
 
 /**
  * Main application component for the Explore plugin
  */
-export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => void }> = ({
+export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>> = ({
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -68,7 +68,7 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
 
     // Try all available cache keys to find one with results (same logic as TabContent)
     for (const cacheKey of executionCacheKeys) {
-      // TODO: why return first hit?
+      // why return first hit?
       const results = state.results[cacheKey];
       if (results) {
         const hits = results.hits?.hits || [];
