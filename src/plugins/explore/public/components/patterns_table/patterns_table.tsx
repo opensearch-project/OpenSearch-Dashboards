@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
-import { patternsTableColumns } from './constants';
+import { patternsTableColumns } from './utils/constants';
 
 export interface PatternsTableProps {
   items: PatternItem[];

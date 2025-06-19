@@ -6,8 +6,7 @@
 import React from 'react';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { PatternsTable } from './patterns_table';
-import { mockPatternItems } from './constants';
-import { generateLargeDataset } from './utils';
+import { mockPatternItems, generateLargeDataset } from './utils/patterns_table.stubs';
 
 export default {
   component: PatternsTable,

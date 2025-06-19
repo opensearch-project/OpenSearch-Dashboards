@@ -7,7 +7,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectRows, selectTotalHits } from '../../application/utils/state_management/selectors';
 import { PatternItem, PatternsTable } from './patterns_table';
-import { COUNT_FIELD, PATTERNS_FIELD } from './constants';
+import { COUNT_FIELD, PATTERNS_FIELD } from './utils/constants';
 
 export const PatternsContainer = () => {
   const rows = useSelector(selectRows); // TODO: use rows from patterns-appended query

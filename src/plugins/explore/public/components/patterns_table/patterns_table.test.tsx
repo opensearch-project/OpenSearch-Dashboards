@@ -7,8 +7,7 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PatternsTable, PatternItem } from './patterns_table';
-import { mockPatternItems } from './constants';
-import { generateLargeDataset } from './utils';
+import { mockPatternItems, generateLargeDataset } from './utils/patterns_table.stubs';
 
 describe('PatternsTable', () => {
   // Standard test cases
