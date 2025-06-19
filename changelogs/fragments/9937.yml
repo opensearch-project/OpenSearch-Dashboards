@@ -1,2 +1,0 @@
-fix:
-- Make UI setting client more robust when the setting key not exists ([#9937](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9937))
