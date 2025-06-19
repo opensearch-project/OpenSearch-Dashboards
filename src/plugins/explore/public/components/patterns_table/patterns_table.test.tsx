@@ -103,14 +103,14 @@ describe('PatternsTable', () => {
       const rows = container.querySelectorAll('tbody tr');
       expect(rows.length).toBe(2);
 
-      // Check if NaN values are displayed as '-'
+      // Check if NaN values are displayed as '—'
       const cells = container.querySelectorAll('td');
 
-      // First row: NaN ratio should be displayed as '-'
-      expect(within(cells[0]).getByText('-')).toBeInTheDocument();
+      // First row: NaN ratio should be displayed as '—'
+      expect(within(cells[0]).getByText('—')).toBeInTheDocument();
 
-      // Second row: NaN count should be displayed as '-'
-      expect(within(cells[5]).getByText('-')).toBeInTheDocument();
+      // Second row: NaN count should be displayed as '—'
+      expect(within(cells[5]).getByText('—')).toBeInTheDocument();
     });
 
     it('should handle Infinity values correctly', () => {
@@ -133,14 +133,14 @@ describe('PatternsTable', () => {
       const rows = container.querySelectorAll('tbody tr');
       expect(rows.length).toBe(2);
 
-      // Check if Infinity values are displayed as '-'
+      // Check if Infinity values are displayed as '—'
       const cells = container.querySelectorAll('td');
 
-      // First row: Infinity ratio should be displayed as '-'
-      expect(within(cells[0]).getByText('-')).toBeInTheDocument();
+      // First row: Infinity ratio should be displayed as '—'
+      expect(within(cells[0]).getByText('—')).toBeInTheDocument();
 
-      // Second row: Infinity count should be displayed as '-'
-      expect(within(cells[5]).getByText('-')).toBeInTheDocument();
+      // Second row: Infinity count should be displayed as '—'
+      expect(within(cells[5]).getByText('—')).toBeInTheDocument();
     });
 
     it('should handle empty pattern strings correctly', () => {
@@ -168,17 +168,17 @@ describe('PatternsTable', () => {
       const rows = container.querySelectorAll('tbody tr');
       expect(rows.length).toBe(3);
 
-      // Check if empty patterns are displayed as '-'
+      // Check if empty patterns are displayed as '—'
       const cells = container.querySelectorAll('td');
 
-      // Empty string pattern should be displayed as '-'
-      expect(within(cells[1]).getByText('-')).toBeInTheDocument();
+      // Empty string pattern should be displayed as '—'
+      expect(within(cells[1]).getByText('—')).toBeInTheDocument();
 
-      // Null pattern should be displayed as '-'
-      expect(within(cells[4]).getByText('-')).toBeInTheDocument();
+      // Null pattern should be displayed as '—'
+      expect(within(cells[4]).getByText('—')).toBeInTheDocument();
 
-      // Undefined pattern should be displayed as '-'
-      expect(within(cells[7]).getByText('-')).toBeInTheDocument();
+      // Undefined pattern should be displayed as '—'
+      expect(within(cells[7]).getByText('—')).toBeInTheDocument();
     });
 
     it('should handle extremely long pattern strings correctly', () => {
