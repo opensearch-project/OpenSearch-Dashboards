@@ -3,39 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { filter, map, take } from 'rxjs/operators';
-import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import rison from 'rison-node';
 import { stringify } from 'query-string';
-import { VisualizationRegistryService } from './services/visualization_registry_service';
+import rison from 'rison-node';
+import { BehaviorSubject } from 'rxjs';
+import { filter, map, take } from 'rxjs/operators';
 import {
-  createOsdUrlStateStorage,
-  createOsdUrlTracker,
-  url,
-  withNotifyOnErrors,
-} from '../../opensearch_dashboards_utils/public';
-import {
+  App,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   DEFAULT_NAV_GROUPS,
+  isNavGroupInFeatureConfigs,
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { ConfigSchema } from '../common/config';
 import {
-  ExplorePluginSetup,
-  ExplorePluginStart,
-  ExploreSetupDependencies,
-  ExploreStartDependencies,
-} from './types';
-import { DocViewsRegistry } from './types/doc_views_types';
+  createOsdUrlStateStorage,
+  createOsdUrlTracker,
+  url,
+  withNotifyOnErrors,
+} from '../../opensearch_dashboards_utils/public';
+import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { ConfigSchema } from '../common/config';
+import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
   getServices,
@@ -45,19 +40,25 @@ import {
   setUiActions,
   setExpressionLoader,
 } from './application/legacy/discover/opensearch_dashboards_services';
-import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
-import { isNavGroupInFeatureConfigs } from '../../../core/public';
+import { getPreloadedStore } from './application/utils/state_management/store';
+import { buildServices } from './build_services';
+import { DocViewTable } from './components/doc_viewer/doc_viewer_table/table';
+import { JsonCodeBlock } from './components/doc_viewer/json_code_block/json_code_block';
 import {
   createQueryEditorExtensionConfig,
   SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY,
 } from './components/experience_banners';
-import { DocViewTable } from './components/doc_viewer/doc_viewer_table/table';
-import { JsonCodeBlock } from './components/doc_viewer/json_code_block/json_code_block';
+import { createSavedExploreLoader } from './saved_explore';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { setUsageCollector } from './services/usage_collector';
-import { createSavedExploreLoader } from './saved_explore';
-import { getPreloadedStore } from './application/utils/state_management/store';
-import { buildServices } from './build_services';
+import { VisualizationRegistryService } from './services/visualization_registry_service';
+import {
+  ExplorePluginSetup,
+  ExplorePluginStart,
+  ExploreSetupDependencies,
+  ExploreStartDependencies,
+} from './types';
+import { DocViewsRegistry } from './types/doc_views_types';
 import { ExploreEmbeddableFactory } from './embeddable';
 
 export class ExplorePlugin
@@ -213,8 +214,7 @@ export class ExplorePlugin
       },
     });
 
-    // Register an application into the side navigation menu
-    core.application.register({
+    const createExploreApp = (flavor?: ExploreFlavor, options: Partial<App> = {}): App => ({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       updater$: this.appStateUpdater.asObservable(),
@@ -247,6 +247,14 @@ export class ExplorePlugin
           !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
         ) {
           coreStart.application.navigateToApp('discover', { replace: true });
+          return () => {};
+        }
+
+        // If there's no flavor id, by default redirect to the logs flavor.
+        if (!flavor) {
+          coreStart.application.navigateToApp(`${PLUGIN_ID}/${ExploreFlavor.Logs}`, {
+            replace: true,
+          });
           return () => {};
         }
 
@@ -300,7 +308,7 @@ export class ExplorePlugin
         appMounted();
 
         // Call renderApp with params, services, and store
-        const unmount = renderApp(params, services, store);
+        const unmount = renderApp(params, services, store, flavor);
 
         return () => {
           appUnMounted();
@@ -308,14 +316,53 @@ export class ExplorePlugin
           unsubscribeStore();
         };
       },
+      ...options,
     });
+
+    // Register applications into the side navigation menu
+    core.application.register(
+      createExploreApp(ExploreFlavor.Logs, {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
+        title: 'Logs',
+      })
+    );
+    core.application.register(
+      createExploreApp(ExploreFlavor.Traces, {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
+        title: 'Traces',
+      })
+    );
+    core.application.register(
+      createExploreApp(ExploreFlavor.Metrics, {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+        title: 'Metrics',
+      })
+    );
+    core.application.register(createExploreApp());
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
-        showInAllNavGroup: false,
+      },
+      {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
+        category: undefined,
+        order: 300,
+        parentNavLinkId: PLUGIN_ID,
+      },
+      {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
+        category: undefined,
+        order: 300,
+        parentNavLinkId: PLUGIN_ID,
+      },
+      {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+        category: undefined,
+        order: 300,
+        parentNavLinkId: PLUGIN_ID,
       },
     ]);
     this.registerEmbeddable(core, setupDeps);
