@@ -6,6 +6,7 @@
 import { LogsTab } from '../components/tabs/logs_tab';
 import { VisualizationContainer } from '../components/visualizations/visualization_container';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
+import { ExploreServices } from '../types';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -62,7 +63,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
  * Register tabs in the application
  * This is the main entry point for tab registration
  */
-export const registerTabs = (services: import('../types').ExploreServices) => {
+export const registerTabs = (services: ExploreServices) => {
   // Register built-in tabs
   registerBuiltInTabs(services.tabRegistry);
 

@@ -13,8 +13,6 @@ import { legacyReducer } from './slices/legacy_slice';
 import { persistReduxState, loadReduxState } from './utils/redux_persistence';
 import { createQuerySyncMiddleware } from './middleware/query_sync_middleware';
 import { ExploreServices } from '../../../types';
-// Note: Query execution is handled by Redux Thunk actions, not store subscriptions
-// This follows the design requirement for "Middleware-Driven: Query execution via Redux middleware"
 
 const rootReducer = combineReducers({
   query: queryReducer,
@@ -25,9 +23,8 @@ const rootReducer = combineReducers({
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
-
-// Timefilter subscriptions are handled in components, not in store
-// This follows the design requirement for component-driven timefilter handling
+export type AppStore = ReturnType<typeof configurePreloadedStore>;
+export type AppDispatch = AppStore['dispatch'];
 
 export const configurePreloadedStore = (
   preloadedState: PreloadedState<RootState>,
@@ -62,5 +59,3 @@ export const getPreloadedStore = async (services: ExploreServices) => {
 
   return { store, unsubscribe };
 };
-
-export type AppDispatch = ReturnType<typeof configureStore>['dispatch'];

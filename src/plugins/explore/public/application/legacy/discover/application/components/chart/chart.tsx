@@ -53,7 +53,7 @@ export const DiscoverChart = ({
     dispatch(clearResults());
 
     // Execute queries - interval will be picked up from Redux state
-    dispatch(executeQueries({ services }) as any);
+    dispatch(executeQueries({ services }));
   };
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
