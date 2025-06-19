@@ -6,6 +6,7 @@
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { PatternItem } from '../patterns_table';
+import { isValidFiniteNumber } from './utils';
 
 export const PATTERNS_FIELD = 'patterns_field';
 export const COUNT_FIELD = 'count';
@@ -17,8 +18,7 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
       defaultMessage: 'Event ratio',
     }),
     render: (val: number) => {
-      // Check if value is a valid, finite number before formatting
-      if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) {
+      if (!isValidFiniteNumber(val)) {
         return '—';
       }
       return `${(val * 100).toFixed(2)}%`;
@@ -38,8 +38,7 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
       defaultMessage: 'Event count',
     }),
     render: (val: number) => {
-      // Check if value is a valid, finite number
-      if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) {
+      if (!isValidFiniteNumber(val)) {
         return '—';
       }
       return val;
