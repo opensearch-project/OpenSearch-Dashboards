@@ -8,9 +8,17 @@ import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { setStatus, setExecutionCacheKeys } from '../slices/ui_slice';
 import { ResultStatus } from '../types';
-import { setResults } from '../slices/results_slice';
+import { setResults, ISearchResult } from '../slices/results_slice';
 import { createCacheKey } from '../handlers/query_handler';
 import { ExploreServices } from '../../../../types';
+import { IndexPattern } from '../../../legacy/discover/opensearch_dashboards_services';
+import { DataPublicPluginStart, search } from '../../../../../../data/public';
+import {
+  createHistogramConfigs,
+  getDimensions,
+  buildPointSeriesData,
+} from '../../../legacy/discover/application/components/chart/utils';
+import { IBucketDateHistogramAggConfig } from '../../../../../../data/common';
 
 /**
  * Default query preparation for tabs (removes stats pipe for histogram compatibility)
@@ -29,7 +37,7 @@ export const defaultPrepareQuery = (query: any) => {
  * Default results processor for tabs
  * Processes raw hits to calculate field counts and optionally includes histogram data
  */
-export const defaultResultsProcessor = (rawResults: any, indexPattern: any) => {
+export const defaultResultsProcessor = (rawResults: ISearchResult, indexPattern: IndexPattern) => {
   const fieldCounts: Record<string, number> = {};
   if (rawResults.hits && rawResults.hits.hits && indexPattern) {
     for (const hit of rawResults.hits.hits) {
@@ -51,6 +59,28 @@ export const defaultResultsProcessor = (rawResults: any, indexPattern: any) => {
   if (rawResults.aggregations && indexPattern) {
     result.chartData = transformAggregationToChartData(rawResults, indexPattern);
     result.bucketInterval = { interval: 'auto', scale: 1 };
+  }
+
+  return result;
+};
+
+export const histogramResultsProcessor = (
+  rawResults: ISearchResult,
+  indexPattern: IndexPattern,
+  data: DataPublicPluginStart,
+  interval: string
+) => {
+  const result = defaultResultsProcessor(rawResults, indexPattern);
+  const histogramConfigs = createHistogramConfigs(indexPattern, interval, data);
+
+  if (histogramConfigs) {
+    const bucketAggConfig = histogramConfigs.aggs[1] as IBucketDateHistogramAggConfig;
+    const tabifiedData = search.tabifyAggResponse(histogramConfigs, rawResults);
+    const dimensions = getDimensions(histogramConfigs, data);
+
+    result.bucketInterval = bucketAggConfig.buckets?.getInterval();
+    // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
+    result.chartData = buildPointSeriesData(tabifiedData, dimensions);
   }
 
   return result;
@@ -351,28 +381,16 @@ const createSearchSourceWithQuery = async (
     })
     .setField('filter', timeRangeFilter ? [timeRangeFilter] : []);
 
-  // Add histogram aggregations if requested and time-based
-  if (includeHistogram && indexPattern.timeFieldName) {
-    const timeRange = services.data.query.timefilter.timefilter.getTime();
-    const aggConfig = {
-      aggs: {
-        histogram: {
-          date_histogram: {
-            field: indexPattern.timeFieldName,
-            interval: customInterval || 'auto',
-            min_doc_count: 0,
-            extended_bounds: {
-              min: timeRange.from,
-              max: timeRange.to,
-            },
-          },
-        },
-      },
-      size: 500, // Limit hits for performance
-    };
+  if (!includeHistogram || !indexPattern.timeFieldName || !customInterval) {
+    return searchSource;
+  }
 
-    searchSource.setField('aggs', aggConfig.aggs);
-    searchSource.setField('size', aggConfig.size);
+  // Add histogram aggregations if requested and time-based
+  const histogramConfigs = createHistogramConfigs(indexPattern, customInterval, services.data);
+  if (histogramConfigs) {
+    searchSource.setField('aggs', histogramConfigs.toDsl());
+    // TODO: Do we want to hard code it to 500?
+    searchSource.setField('size', 500);
   }
 
   return searchSource;
