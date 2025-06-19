@@ -63,7 +63,7 @@ export function DiscoverPanel() {
     }
 
     // Use defaultResultsProcessor without histogram (DiscoverPanel doesn't need chart data)
-    const processed = defaultResultsProcessor(rawResults, indexPattern, false);
+    const processed = defaultResultsProcessor(rawResults, indexPattern);
     return processed;
   }, [rawResults, indexPattern]);
 
