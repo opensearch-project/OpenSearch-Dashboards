@@ -125,6 +125,7 @@ export const exportMaxSizeCsv = (
         .setField('query', {
           query: preparedQuery.query,
           language: preparedQuery.language,
+          dataset: preparedQuery.dataset,
         })
         .setField('filter', timeRangeFilter ? [timeRangeFilter] : [])
         .setField('size', options.maxSize || 500);

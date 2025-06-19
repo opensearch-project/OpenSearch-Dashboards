@@ -26,20 +26,8 @@ const querySlice = createSlice({
         ...action.payload,
       };
     },
-    setQueryString: (state, action: PayloadAction<string>) => {
-      // Update just the query string
-      state.query = action.payload;
-    },
-    setLanguage: (state, action: PayloadAction<string>) => {
-      // Update just the language
-      state.language = action.payload;
-    },
-    setDataset: (state, action: PayloadAction<Dataset | undefined>) => {
-      // Update just the dataset
-      state.dataset = action.payload;
-    },
   },
 });
 
-export const { setQuery, setQueryString, setLanguage, setDataset } = querySlice.actions;
+export const { setQuery } = querySlice.actions;
 export const queryReducer = querySlice.reducer;

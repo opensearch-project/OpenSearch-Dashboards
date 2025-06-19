@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IndexPattern, useQueryStringManager } from '../../../../../../../../data/public';
 import { ExploreServices } from '../../../../../../types';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';

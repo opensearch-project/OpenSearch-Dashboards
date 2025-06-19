@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+import React, { memo } from 'react';
 import { DiscoverResultsActionBar } from '../../../application/legacy/discover/application/components/results_action_bar/results_action_bar';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -19,7 +19,7 @@ import { LOGS_VIEW_ID } from '../../../../common';
  * Logs tab component for displaying log entries
  * Uses legacy components from discover and handles all content states
  */
-export const ActionBar = () => {
+const ActionBarComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { indexPattern } = useIndexPatternContext();
   const { core } = services;
@@ -42,3 +42,5 @@ export const ActionBar = () => {
     />
   );
 };
+
+export const ActionBar = memo(ActionBarComponent);
