@@ -30,6 +30,7 @@ export interface ChartStyleControlMap {
 export type AllChartStyleControls =
   | LineChartStyleControls
   | PieChartStyleControls
+  | BarChartStyleControls
   | MetricChartStyleControls
   | HeatmapChartStyleControls
   | ScatterChartStyleControls;
@@ -140,8 +141,8 @@ export const getVisualizationType = <T = unknown>(
     const uniqueValues = new Set(validValues);
     return {
       ...column,
-      validValuesCount: validValues.length,
-      uniqueValuesCount: uniqueValues.size,
+      validValuesCount: validValues.length ?? 0,
+      uniqueValuesCount: uniqueValues.size ?? 0,
     };
   });
 
