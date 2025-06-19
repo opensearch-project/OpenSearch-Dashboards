@@ -68,7 +68,7 @@ export const ExploreApp: React.FC<{ setHeaderActionMenu?: (menuMount: any) => vo
 
     // Try all available cache keys to find one with results (same logic as TabContent)
     for (const cacheKey of executionCacheKeys) {
-      // why return first hit?
+      // TODO: why return first hit?
       const results = state.results[cacheKey];
       if (results) {
         const hits = results.hits?.hits || [];
