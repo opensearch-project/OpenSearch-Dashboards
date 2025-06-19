@@ -5,8 +5,9 @@
 
 import React from 'react';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
-import { PatternsTable, PatternItem } from './patterns_table';
+import { PatternsTable } from './patterns_table';
 import { mockPatternItems } from './constants';
+import { generateLargeDataset } from './utils';
 
 export default {
   component: PatternsTable,
@@ -14,22 +15,6 @@ export default {
 } as ComponentMeta<typeof PatternsTable>;
 
 const Template: ComponentStory<typeof PatternsTable> = (args) => <PatternsTable {...args} />;
-
-// Create a larger dataset for pagination testing
-const generateLargeDataset = (baseItems: PatternItem[], count: number): PatternItem[] => {
-  const result: PatternItem[] = [...baseItems];
-
-  for (let i = 0; i < count; i++) {
-    const baseItem = baseItems[i % baseItems.length];
-    result.push({
-      pattern: `${baseItem.pattern} (variant ${Math.floor(i / baseItems.length) + 1})`,
-      ratio: baseItem.ratio / (Math.floor(i / baseItems.length) + 2), // divides the canon num by 2 every iter.
-      count: Math.floor(baseItem.count / (Math.floor(i / baseItems.length) + 2)), // same as above
-    });
-  }
-
-  return result;
-};
 
 export const Default = Template.bind({});
 Default.args = {

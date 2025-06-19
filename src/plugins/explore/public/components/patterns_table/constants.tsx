@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HorizontalAlignment } from '@elastic/charts';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { PatternItem } from './patterns_table';
 
 export const PATTERNS_FIELD = 'patterns_field';
 export const COUNT_FIELD = 'count';
 
-export const patternsTableColumns = [
+export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
   {
     field: 'ratio',
     name: 'Event ratio',
@@ -37,7 +37,7 @@ export const patternsTableColumns = [
       }
       return val;
     },
-    align: HorizontalAlignment.Right,
+    align: 'right',
   },
 ];
 
