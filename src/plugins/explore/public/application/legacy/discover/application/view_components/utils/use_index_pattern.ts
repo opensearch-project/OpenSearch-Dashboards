@@ -7,8 +7,7 @@ import { i18n } from '@osd/i18n';
 import { useCallback, useEffect, useState } from 'react';
 import { IndexPattern, useQueryStringManager } from '../../../../../../../../data/public';
 import { ExploreServices } from '../../../../../../types';
-import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { updateIndexPattern, useSelector } from '../../utils/state_management';
+import { useSelector } from '../../utils/state_management';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -40,7 +39,7 @@ export const useIndexPattern = (services: ExploreServices) => {
     let isMounted = true;
 
     const handleIndexPattern = async () => {
-      if (isQueryEnhancementEnabled && query.dataset) {
+      if (query.dataset) {
         let pattern = await data.indexPatterns.get(
           query.dataset.id,
           query.dataset.type !== 'INDEX_PATTERN'
@@ -62,24 +61,10 @@ export const useIndexPattern = (services: ExploreServices) => {
         if (isMounted && pattern) {
           setIndexPattern(pattern);
         }
-      } else if (!isQueryEnhancementEnabled) {
-        if (!indexPatternIdFromState) {
-          const indexPatternList = await data.indexPatterns.getCache();
-          const newId = getIndexPatternId(
-            '',
-            // @ts-expect-error TS2345 TODO(ts-error): fixme
-            indexPatternList || [],
-            uiSettings.get('defaultIndex')
-          );
-          if (isMounted && newId) {
-            store!.dispatch(updateIndexPattern(newId));
-            handleIndexPattern();
-          }
-        } else {
-          const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
-          if (isMounted) {
-            setIndexPattern(ip);
-          }
+      } else {
+        const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
+        if (isMounted) {
+          setIndexPattern(ip);
         }
       }
     };

@@ -102,7 +102,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
     try {
       dispatch(setQuery({ ...query, query: localQuery }));
       dispatch(clearResults());
-      await dispatch(executeQueries({ services }) as any);
+      await dispatch(executeQueries({ services }));
     } finally {
       dispatch(finishTransaction());
     }
@@ -150,7 +150,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
           indexPattern: indexPattern as any,
           datasetType: dataset?.type,
           position,
-          services: services as any, // ExploreServices now includes appName, compatible with IDataPluginServices
+          services: services as any, // ExploreServices storage type incompatible with IDataPluginServices.DataStorage
         });
 
         // current completion item range being given as last 'word' at pos
