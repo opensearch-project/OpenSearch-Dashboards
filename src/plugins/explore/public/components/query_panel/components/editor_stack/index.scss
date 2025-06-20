@@ -173,11 +173,6 @@ $customSize10: 10px;
       .view-lines {
         font-size: $euiFontSizeXS;
       }
-
-      .comment-line span {
-        /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
-        color: $euiColorSuccess;
-      }
     }
 
     .monaco-editor,
