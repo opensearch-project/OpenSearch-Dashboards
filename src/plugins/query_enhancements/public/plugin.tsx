@@ -70,7 +70,7 @@ export class QueryEnhancementsPlugin
       getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
       fields: {
         sortable: false,
-        filterable: false,
+        filterable: true,
         visualizable: false,
         formatter: (value: string, type: OSD_FIELD_TYPES) => {
           switch (type) {
