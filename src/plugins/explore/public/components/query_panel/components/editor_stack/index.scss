@@ -17,8 +17,11 @@ $customSize10: 10px;
     position: relative;
 
     .promptEditor {
-      border: 1px solid $euiBorderColor;
       border-radius: $euiBorderRadiusSmall;
+
+      .monaco-editor .overflow-guard {
+        border: $euiBorderThin;
+      }
 
       .monaco-editor .view-overlays .current-line {
         border: none;
