@@ -1,4 +1,4 @@
-// Generated from ./src/plugins/data/public/antlr/opensearch_ppl/grammar/OpenSearchPPLLexer.g4 by ANTLR 4.13.1
+// Generated from ./src/opensearch_ppl/grammar/OpenSearchPPLLexer.g4 by ANTLR 4.13.1
 
 import * as antlr from "antlr4ng";
 // @ts-expect-error TS6133 TODO(ts-error): fixme

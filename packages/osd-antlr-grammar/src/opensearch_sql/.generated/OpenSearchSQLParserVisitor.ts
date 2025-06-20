@@ -1,4 +1,4 @@
-// Generated from ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLParser.g4 by ANTLR 4.13.1
+// Generated from ./src/opensearch_sql/grammar/OpenSearchSQLParser.g4 by ANTLR 4.13.1
 
 import { AbstractParseTreeVisitor } from "antlr4ng";
 
