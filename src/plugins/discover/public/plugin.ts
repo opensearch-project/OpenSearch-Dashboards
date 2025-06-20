@@ -279,11 +279,9 @@ export class DiscoverPlugin
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
-        const {
-          core: {
-            application: { navigateToApp },
-          },
-        } = await this.initializeServices();
+        const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
+
+        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
         // This is for instances where the user navigates to the app from the application nav menu
         const path = window.location.hash;
@@ -295,7 +293,7 @@ export class DiscoverPlugin
             unmount();
           };
         } else {
-          navigateToApp('data-explorer', {
+          coreStart.application.navigateToApp('data-explorer', {
             replace: true,
             path: `/${PLUGIN_ID}${newPath}`,
           });
