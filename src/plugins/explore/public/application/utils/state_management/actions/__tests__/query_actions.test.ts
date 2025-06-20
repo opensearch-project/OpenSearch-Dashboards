@@ -8,6 +8,7 @@ import thunk from 'redux-thunk';
 import { executeTabQuery, executeHistogramQuery, executeQueries } from '../query_actions';
 import { setLoading, setError } from '../../slices/ui_slice';
 import { setResults, clearResults } from '../../slices/results_slice';
+import { ExploreServices } from '../../../../types';
 
 // Configure mock store with middleware
 const middlewares = [thunk];
@@ -16,7 +17,7 @@ const mockStore = configureMockStore(middlewares);
 describe('Query Actions', () => {
   let store: any;
   let mockSearchSource: any;
-  let mockServices: any;
+  let mockServices: Partial<ExploreServices>;
   let mockTimeRange: any;
 
   beforeEach(() => {
