@@ -11,17 +11,30 @@
 
 import { monaco } from '@osd/monaco';
 import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
-import {
-  fetchColumnValues,
-  formatFieldsToSuggestions,
-  formatValuesToSuggestions,
-  parseQuery,
-} from '../shared/utils';
+import { fetchColumnValues, formatValuesToSuggestions, parseQuery } from '../shared/utils';
 import { openSearchPplAutocompleteData as simplifiedPplAutocompleteData } from './simplified_ppl_grammar/opensearch_ppl_autocomplete';
 import { openSearchPplAutocompleteData as defaultPplAutocompleteData } from './default_ppl_grammar/opensearch_ppl_autocomplete';
+import { getAvailableFieldsForAutocomplete } from './simplified_ppl_grammar/symbol_table_parser';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 import { PPL_AGGREGATE_FUNCTIONS, PPL_SUGGESTION_IMPORTANCE } from './constants';
+
+/**
+ * Convert symbol table fields to query suggestions
+ */
+const formatSymbolTableFieldsToSuggestions = (
+  availableFields: string[],
+  formatter: (field: string) => string,
+  sortText: string
+): QuerySuggestion[] => {
+  return availableFields.map((field) => ({
+    text: field,
+    type: monaco.languages.CompletionItemKind.Field,
+    insertText: formatter(field),
+    detail: SuggestionItemDetailsTags.Field,
+    sortText: sortText + field,
+  }));
+};
 
 export const getDefaultSuggestions = async ({
   selectionStart,
@@ -44,7 +57,21 @@ export const getDefaultSuggestions = async ({
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
-      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '3'));
+      // Get all initial fields from index pattern
+      const initialFields = indexPattern.fields.map((field: any) => field.name);
+
+      // Get available fields from symbol table based on current query context
+      const cursorPosition = position?.column || selectionEnd;
+      const availableFields = getAvailableFieldsForAutocomplete(
+        query,
+        cursorPosition,
+        initialFields
+      );
+
+      // Use symbol table fields instead of all index pattern fields
+      finalSuggestions.push(
+        ...formatSymbolTableFieldsToSuggestions(availableFields, (f: string) => `${f} `, '3')
+      );
     }
 
     if (suggestions.suggestValuesForColumn) {
@@ -132,7 +159,21 @@ export const getSimplifiedPPLSuggestions = async ({
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
-      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '3'));
+      // Get all initial fields from index pattern
+      const initialFields = indexPattern.fields.map((field: any) => field.name);
+
+      // Get available fields from symbol table based on current query context
+      const cursorPosition = position?.column || selectionEnd;
+      const availableFields = getAvailableFieldsForAutocomplete(
+        query,
+        cursorPosition,
+        initialFields
+      );
+
+      // Use symbol table fields instead of all index pattern fields
+      finalSuggestions.push(
+        ...formatSymbolTableFieldsToSuggestions(availableFields, (f: string) => `${f} `, '3')
+      );
     }
 
     if (suggestions.suggestValuesForColumn) {
