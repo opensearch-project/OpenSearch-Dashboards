@@ -66,14 +66,12 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       return [];
     }
 
-    // Try all available cache keys to find one with results (same logic as TabContent)
-    for (const cacheKey of executionCacheKeys) {
-      // TODO: why return first hit?
-      const results = state.results[cacheKey];
-      if (results) {
-        const hits = results.hits?.hits || [];
-        return hits;
-      }
+    // Use default query cacheKey
+    const cacheKey = executionCacheKeys[0];
+    const results = state.results[cacheKey];
+    if (results) {
+      const hits = results.hits?.hits || [];
+      return hits;
     }
 
     return [];

@@ -16,7 +16,7 @@ import {
   defaultPrepareQuery,
   executeQueries,
 } from '../../application/utils/state_management/actions/query_actions';
-import { selectQuery } from '../../application/utils/state_management/selectors';
+import { selectActiveTab, selectQuery } from '../../application/utils/state_management/selectors';
 import { createCacheKey } from '../../application/utils/state_management/utils/query_utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
@@ -35,6 +35,7 @@ export const ExploreTabsComponent = () => {
   const registryTabs = services.tabRegistry.getAllTabs();
 
   const query = useSelector(selectQuery);
+  const activeTabId = useSelector(selectActiveTab);
   const results = useSelector((state: RootState) => state.results);
 
   const onTabsClick = useCallback(
@@ -78,6 +79,10 @@ export const ExploreTabsComponent = () => {
     };
   });
 
+  const activeTab = tabs.find((tab) => {
+    return tab.id === activeTabId;
+  });
+
   return (
     <EuiTabbedContent
       className="exploreTabs"
@@ -85,6 +90,7 @@ export const ExploreTabsComponent = () => {
       tabs={tabs}
       size="s"
       onTabClick={onTabsClick}
+      selectedTab={activeTab}
     />
   );
 };

@@ -135,14 +135,15 @@ export const executeQueries = createAsyncThunk<
   { services: ExploreServices },
   { state: RootState }
 >('query/executeQueries', async ({ services }, { getState, dispatch }) => {
-  if (!services) {
-    return { cacheKeys: [] };
-  }
-
   const state = getState();
   const query = state.query;
   const activeTabId = state.ui.activeTabId || 'logs';
   const results = state.results;
+  const cacheKeys = state.ui.executionCacheKeys ? [...state.ui.executionCacheKeys] : [];
+
+  if (!services) {
+    return { cacheKeys };
+  }
 
   const {
     defaultQuery,
@@ -157,7 +158,6 @@ export const executeQueries = createAsyncThunk<
   const needsActiveTabQuery = !results[activeTabCacheKey];
 
   const promises = [];
-  const cacheKeys = [];
 
   // ALWAYS execute histogram query (for defaultQuery) if needed
   if (needsDefaultQuery) {
@@ -174,7 +174,7 @@ export const executeQueries = createAsyncThunk<
         })
       )
     );
-    cacheKeys.push(defaultCacheKey);
+    cacheKeys[0] = defaultCacheKey;
   }
 
   // CONDITIONALLY execute tab query (only if queries are different and needed)
@@ -188,15 +188,14 @@ export const executeQueries = createAsyncThunk<
         })
       )
     );
-    cacheKeys.push(activeTabCacheKey);
-  }
 
+    cacheKeys[1] = defaultCacheKey;
+  }
   await Promise.all(promises);
 
   // Store appropriate cache keys for UI components
-  const finalCacheKeys = queriesEqual ? [defaultCacheKey] : cacheKeys;
-  dispatch(setExecutionCacheKeys(finalCacheKeys));
-  return { cacheKeys: finalCacheKeys };
+  dispatch(setExecutionCacheKeys(cacheKeys));
+  return { cacheKeys };
 });
 
 /**
@@ -250,8 +249,6 @@ const createSearchSourceWithQuery = async (
   const histogramConfigs = createHistogramConfigs(indexPattern, customInterval, services.data);
   if (histogramConfigs) {
     searchSource.setField('aggs', histogramConfigs.toDsl());
-    // TODO: Do we want to hard code it to 500?
-    searchSource.setField('size', 500);
   }
 
   return searchSource;
@@ -477,6 +474,7 @@ export const executeTabQuery = createAsyncThunk<
     const rawResultsWithMeta = {
       ...rawResults,
       elapsedMs: inspectorRequest.getTime(),
+      fieldSchema: searchSource.getDataFrame()?.schema,
     };
 
     dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
