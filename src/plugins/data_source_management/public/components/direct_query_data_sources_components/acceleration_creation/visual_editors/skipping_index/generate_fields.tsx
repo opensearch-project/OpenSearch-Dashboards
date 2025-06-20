@@ -94,6 +94,7 @@ export const GenerateFields = ({
       )}`,
       datasource: accelerationFormData.dataSource,
     };
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     startLoading(requestPayload, dataSourceMDSId);
     setIsSkippingtableLoading(true);
     setIsGenerateRun(true);

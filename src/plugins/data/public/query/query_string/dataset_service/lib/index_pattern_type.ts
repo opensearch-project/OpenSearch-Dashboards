@@ -71,6 +71,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     return ['kuery', 'lucene', 'PPL', 'SQL'];
   },
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   getSampleQueries: (dataset: Dataset, language: string) => {
     switch (language) {
       case 'PPL':

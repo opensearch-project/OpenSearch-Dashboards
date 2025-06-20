@@ -153,12 +153,17 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         createPortal(
           <EuiFlexGroup gutterSize="m">
             {topNavLinks.map((topNavLink) => (
+              // @ts-expect-error TS2339 TODO(ts-error): fixme
               <EuiFlexItem grow={false} key={topNavLink.id}>
+                {/* @ts-expect-error TS2339 TODO(ts-error): fixme */}
                 <EuiToolTip position="bottom" content={topNavLink.label}>
                   <EuiButtonIcon
+                    // @ts-expect-error TS7006 TODO(ts-error): fixme
                     onClick={(event) => {
+                      // @ts-expect-error TS2722, TS2554 TODO(ts-error): fixme
                       topNavLink.run(event.currentTarget);
                     }}
+                    // @ts-expect-error TS2339 TODO(ts-error): fixme
                     iconType={topNavLink.iconType}
                     aria-label={topNavLink.ariaLabel}
                   />
@@ -166,6 +171,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>,
+          // @ts-expect-error TS2532, TS2345 TODO(ts-error): fixme
           opts.optionalRef.topLinkRef.current
         )}
       <TopNavMenu

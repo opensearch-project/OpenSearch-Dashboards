@@ -172,6 +172,7 @@ const WorkspaceCreator = ({
 
   return (
     <Provider>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <WorkspaceCreatorComponent {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );

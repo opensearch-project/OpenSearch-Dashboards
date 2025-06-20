@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { Filter, IndexPatternsContract, IndexPattern } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';

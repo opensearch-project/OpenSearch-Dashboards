@@ -1,6 +1,7 @@
 // Generated from ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLLexer.g4 by ANTLR 4.13.1
 
 import * as antlr from "antlr4ng";
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { Token } from "antlr4ng";
 
 

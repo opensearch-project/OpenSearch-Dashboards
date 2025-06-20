@@ -27,6 +27,7 @@ describe('<SearchUseCaseOverviewApp />', () => {
   const FunctionComponent = (props: TopNavControlsProps) => (
     <div>
       {props.controls?.map((control, idx) => (
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         <div key={idx}>{control.renderComponent}</div>
       ))}
     </div>

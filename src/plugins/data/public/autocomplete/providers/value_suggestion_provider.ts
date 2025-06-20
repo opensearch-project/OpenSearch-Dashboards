@@ -92,6 +92,7 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
       query,
       boolFilter,
       signal,
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       indexPattern.dataSourceRef?.id
     );
   };

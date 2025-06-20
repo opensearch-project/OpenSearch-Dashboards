@@ -30,6 +30,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+// @ts-expect-error TS2306 TODO(ts-error): fixme
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keys } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
@@ -40,6 +41,7 @@ import { Table, TableProps } from './table';
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { render } from '@testing-library/react';
 
+// @ts-expect-error TS2739 TODO(ts-error): fixme
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
   actionRegistry: actionServiceMock.createStart(),

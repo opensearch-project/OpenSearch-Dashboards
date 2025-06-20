@@ -26,6 +26,7 @@ import {
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState } from 'react';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DATA_SOURCE_TYPES } from '../../../../framework/constants';
 import {
   AssociatedObject,
@@ -153,6 +154,7 @@ export const AssociatedObjectsDetailsFlyout = ({
     );
   };
 
+  // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
   const accelerationData = tableDetail.accelerations.map((acc, index) => ({
     ...acc,
     id: index,
@@ -164,6 +166,7 @@ export const AssociatedObjectsDetailsFlyout = ({
       name: 'Name',
       'data-test-subj': 'accelerationName',
       render: (_: string, item: CachedAcceleration) => {
+        // @ts-expect-error TS2554 TODO(ts-error): fixme
         const name = getAccelerationName(item, datasourceName);
         return (
           <EuiLink

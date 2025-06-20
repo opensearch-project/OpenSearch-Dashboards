@@ -74,6 +74,7 @@ describe('DatasetSelector', () => {
       services: mockServices,
     };
 
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const wrapper = mount(<DatasetSelector {...props} />);
 
     await nextTick();

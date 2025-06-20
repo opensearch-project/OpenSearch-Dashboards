@@ -42,6 +42,7 @@ const config = new Map<string, any>();
 describe('Mapped Colors', () => {
   const mockUiSettings = coreMock.createSetup().uiSettings;
   mockUiSettings.get.mockImplementation((a) => config.get(a));
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   mockUiSettings.set.mockImplementation((...a) => config.set(...a) as any);
 
   const mappedColors = new MappedColors(mockUiSettings);

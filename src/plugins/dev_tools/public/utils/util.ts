@@ -17,6 +17,7 @@ export function addHelpMenuToAppChrome(
     links: [
       {
         linkType: 'documentation',
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         href: `${docLinks.links.opensearchDashboards.devTools}`,
       },
     ],

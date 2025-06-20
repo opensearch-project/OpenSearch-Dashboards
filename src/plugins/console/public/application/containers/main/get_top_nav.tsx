@@ -86,6 +86,7 @@ export function getTopNavConfig({
       onClickSettings();
     },
     testId: 'consoleSettingsButton',
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     render: (commonProps) => (
       <EuiToolTip
         content={i18n.translate('console.topNav.settingsToolTipContent', {

@@ -214,6 +214,7 @@ class SavedObjectFinderUi extends React.Component<
           return result;
         } else if (obj.type === 'search') {
           const sourceObject = JSON.parse(
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             obj.attributes?.kibanaSavedObjectMeta?.searchSourceJSON ?? null
           );
           const languageId = sourceObject?.query?.language;
@@ -226,12 +227,14 @@ class SavedObjectFinderUi extends React.Component<
       })
     );
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     resp.savedObjects = savedObjects.filter((savedObject) => {
       if (!savedObject) {
         return false;
       }
       const metaData = metaDataMap[savedObject.type];
       if (metaData.showSavedObject) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         return metaData.showSavedObject(savedObject);
       } else {
         return true;

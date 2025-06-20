@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import dns from 'dns-sync';
 import IPCIDR from 'ip-cidr';
 

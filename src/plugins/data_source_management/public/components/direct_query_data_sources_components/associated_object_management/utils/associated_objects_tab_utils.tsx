@@ -5,11 +5,13 @@
 
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { DirectQueryLoadingStatus } from '../../../../../framework/types';
+// @ts-expect-error TS6192 TODO(ts-error): fixme
 import {
   DATA_SOURCE_TYPES,
   DEFAULT_DATA_SOURCE_NAME,
   DEFAULT_DATA_SOURCE_TYPE,
 } from '../../../../../framework/constants';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { observabilityLogsID } from '../../../../../framework/utils/shared';
 
 export const ASSC_OBJ_TABLE_SUBJ = 'associatedObjectsTable';

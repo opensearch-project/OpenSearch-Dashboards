@@ -57,6 +57,7 @@ const branding = {
 describe('SolutionPanel', () => {
   test('renders the solution panel for the given solution', () => {
     const component = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <SolutionPanel addBasePath={addBasePathMock} solution={solutionEntry} branding={branding} />
     );
     expect(component).toMatchSnapshot();

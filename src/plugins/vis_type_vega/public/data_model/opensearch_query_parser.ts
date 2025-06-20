@@ -238,6 +238,7 @@ export class OpenSearchQueryParser {
 
       if (requestObject) {
         requestObject.dataObject.url = requestObject.url;
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         requestObject.dataObject.values = data.rawResponse;
       }
     });

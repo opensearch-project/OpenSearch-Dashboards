@@ -75,6 +75,7 @@ export const AuthDetails = (props: AuthDetailProps) => {
               placeholder="us-west-2"
               value={region}
               onBlur={(e) => {
+                // @ts-expect-error TS2722 TODO(ts-error): fixme
                 setRegionForRequest(e.target.value);
               }}
               onChange={(e) => {
@@ -87,6 +88,7 @@ export const AuthDetails = (props: AuthDetailProps) => {
               placeholder={'Access key placeholder'}
               value={accessKey}
               onChange={(e) => setAccessKey(e.target.value)}
+              // @ts-expect-error TS2722 TODO(ts-error): fixme
               onBlur={(e) => setAccessKeyForRequest(e.target.value)}
             />
           </EuiCompressedFormRow>
@@ -95,6 +97,7 @@ export const AuthDetails = (props: AuthDetailProps) => {
               type={'dual'}
               value={secretKey}
               onChange={(e) => setSecretKey(e.target.value)}
+              // @ts-expect-error TS2722 TODO(ts-error): fixme
               onBlur={(e) => setSecretKeyForRequest(e.target.value)}
             />
           </EuiCompressedFormRow>

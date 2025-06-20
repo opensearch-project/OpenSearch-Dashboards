@@ -37,6 +37,7 @@ describe('SearchSource service', () => {
 
   beforeEach(() => {
     jest.resetModules();
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     dependencies = {
       getConfig: jest.fn(),
       search: jest.fn(),

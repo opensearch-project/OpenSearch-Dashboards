@@ -88,6 +88,7 @@ describe('IndexAdvancedSettings', () => {
     );
 
     await act(async () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       wrapper.find(EuiFieldNumber).at(0).prop('onChange')!({ target: { value: '5' } });
     });
 
@@ -107,6 +108,7 @@ describe('IndexAdvancedSettings', () => {
     );
 
     await act(async () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       wrapper.find(EuiFieldNumber).at(1).prop('onChange')!({ target: { value: '3' } });
     });
 

@@ -57,6 +57,7 @@ export function createCspRulesPreResponseHandler(
 
       const currentDest = request.headers['sec-fetch-dest'];
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       if (!shouldCheckDest.includes(currentDest)) {
         return toolkit.next({});
       }
@@ -108,6 +109,7 @@ function updateDirectivesFromDefault(parsedCspHeader: Map<string, string[]>) {
   });
 }
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 function addDirectiveWhenMissing(parsedCspHeader: Map<string, string[]>, directive) {
   if (parsedCspHeader.has(directive.directiveName)) {
     return;

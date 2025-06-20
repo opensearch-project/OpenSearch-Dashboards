@@ -14,6 +14,7 @@ test('it should throw error if with invalid url object', () => {
     })),
   };
   const timeCache = new TimeCache(timefilterServiceMock.createStartContract().timefilter, 100);
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   const parser = new PPLQueryParser(timeCache, searchApiMock);
   expect(() => parser.parseUrl({}, {})).toThrowError();
   expect(() => parser.parseUrl({}, { body: {} })).toThrowError();
@@ -27,6 +28,7 @@ test('it should parse url object', () => {
     })),
   };
   const timeCache = new TimeCache(timefilterServiceMock.createStartContract().timefilter, 100);
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   const parser = new PPLQueryParser(timeCache, searchApiMock);
   const result = parser.parseUrl({}, { body: { query: 'source=test_index' } });
   expect(result.dataObject).toEqual({});
@@ -52,6 +54,7 @@ test('it should parse url object with %timefield% with injecting time filter to 
     mode: 'absolute',
   });
 
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   const parser = new PPLQueryParser(timeCache, searchApiMock);
   const result1 = parser.parseUrl(
     {},
@@ -88,6 +91,7 @@ test('it should populate data to request', async () => {
     })),
   };
   const timeCache = new TimeCache(timefilterServiceMock.createStartContract().timefilter, 100);
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   const parser = new PPLQueryParser(timeCache, searchApiMock);
   const request = {
     url: { body: { query: 'source=test_index' } },
@@ -95,6 +99,8 @@ test('it should populate data to request', async () => {
       name: 'request name',
     },
   };
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   await parser.populateData([request]);
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   expect(request.dataObject.values).toEqual([{ id: 'id1' }]);
 });

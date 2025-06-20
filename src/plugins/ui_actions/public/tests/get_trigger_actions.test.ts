@@ -45,7 +45,9 @@ const action2: Action = {
 
 test('returns actions set on trigger', () => {
   const { setup, doStart } = uiActionsPluginMock.createPlugin();
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   setup.registerAction(action1);
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   setup.registerAction(action2);
   setup.registerTrigger({
     description: 'foo',

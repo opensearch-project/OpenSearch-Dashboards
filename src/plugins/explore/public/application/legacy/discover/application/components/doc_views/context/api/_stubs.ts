@@ -68,6 +68,7 @@ export function createSearchSourceStub(hits: OpenSearchHitRecordList, timeField?
     _stubHits: hits,
     _stubTimeField: timeField,
     _createStubHit: (timestamp: number, tiebreaker = 0) => ({
+      // @ts-expect-error TS2464 TODO(ts-error): fixme
       [searchSourceStub._stubTimeField]: timestamp,
       sort: [timestamp, tiebreaker],
     }),
@@ -85,6 +86,7 @@ export function createSearchSourceStub(hits: OpenSearchHitRecordList, timeField?
     Promise.resolve({
       hits: {
         hits: searchSourceStub._stubHits,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         total: searchSourceStub._stubHits.length,
       },
     })

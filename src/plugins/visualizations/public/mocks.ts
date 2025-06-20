@@ -74,6 +74,7 @@ const createInstance = async () => {
     usageCollection: usageCollectionPluginMock.createSetupContract(),
   });
   const doStart = () =>
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),

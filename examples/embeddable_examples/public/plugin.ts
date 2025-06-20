@@ -180,14 +180,17 @@ export class EmbeddableExamplesPlugin
       openModal: (await core.getStartServices())[0].overlays.openModal,
       savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
     }));
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     deps.uiActions.registerAction(editBookAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);
 
     const addBookToLibraryAction = createAddBookToLibraryAction();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     deps.uiActions.registerAction(addBookToLibraryAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, addBookToLibraryAction.id);
 
     const unlinkBookFromLibraryAction = createUnlinkBookFromLibraryAction();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     deps.uiActions.registerAction(unlinkBookFromLibraryAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkBookFromLibraryAction.id);
   }

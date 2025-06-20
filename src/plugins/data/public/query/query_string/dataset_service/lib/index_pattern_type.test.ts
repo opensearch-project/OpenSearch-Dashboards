@@ -20,6 +20,7 @@ jest.mock('./utils', () => ({
 
 describe('indexPatternTypeConfig', () => {
   const mockSavedObjectsClient = {} as SavedObjectsClientContract;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const mockServices = {
     savedObjects: { client: mockSavedObjectsClient },
   };

@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 import { convertOpenSearchError } from './errors';
 import { FieldCapsResponse } from './field_capabilities';

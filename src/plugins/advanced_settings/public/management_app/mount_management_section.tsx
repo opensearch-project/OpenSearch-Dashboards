@@ -69,6 +69,7 @@ export async function mountManagementSection(
     { navigation },
   ] = await getStartServices();
 
+  // @ts-expect-error TS2532 TODO(ts-error): fixme
   const canSave = application.capabilities.advancedSettings.save as boolean;
 
   if (!canSave) {

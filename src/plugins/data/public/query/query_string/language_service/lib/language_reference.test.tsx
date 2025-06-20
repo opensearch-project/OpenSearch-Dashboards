@@ -10,6 +10,7 @@ import { LanguageReference } from './language_reference';
 import { IntlProvider } from 'react-intl';
 
 // Helper to wrap component with IntlProvider
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const renderWithIntl = (ui) => {
   return render(<IntlProvider locale="en">{ui}</IntlProvider>);
 };

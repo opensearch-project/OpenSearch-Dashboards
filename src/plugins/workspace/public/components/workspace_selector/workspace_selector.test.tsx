@@ -48,6 +48,7 @@ describe('<WorkspaceSelector />', () => {
   const WorkspaceSelectorCreatorComponent = () => {
     return (
       <I18nProvider>
+        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceSelector coreStart={coreStartMock} registeredUseCases$={registeredUseCases$} />
       </I18nProvider>
     );

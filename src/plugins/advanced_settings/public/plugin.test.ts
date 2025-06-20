@@ -13,6 +13,7 @@ describe('AdvancedSettingsPlugin', () => {
     const pluginInstance = new AdvancedSettingsPlugin();
     const setupMock = coreMock.createSetup();
     expect(() =>
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       pluginInstance.setup(setupMock, {
         management: managementPluginMock.createSetupContract(),
         home: homePluginMock.createSetupContract(),
@@ -36,6 +37,7 @@ describe('UserSettingsPlugin', () => {
       },
     };
     expect(() =>
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       pluginInstance.setup(setupMock, {
         management: managementPluginMock.createSetupContract(),
         home: homePluginMock.createSetupContract(),

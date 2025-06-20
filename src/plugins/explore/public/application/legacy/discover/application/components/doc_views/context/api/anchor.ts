@@ -56,6 +56,7 @@ export async function fetchAnchor(
     );
   }
 
+  // @ts-expect-error TS2352 TODO(ts-error): fixme
   return {
     ...doc,
     isAnchor: true,

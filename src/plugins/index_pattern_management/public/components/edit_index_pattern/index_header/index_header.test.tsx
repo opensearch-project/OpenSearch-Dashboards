@@ -70,6 +70,7 @@ describe('IndexHeader at new home page', () => {
   });
 
   it('renders the set default button when index is not default and workspace is disabled', () => {
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
     };
@@ -85,6 +86,7 @@ describe('IndexHeader at new home page', () => {
   });
 
   it('does not render the set default button when index is default and workspace is disabled', () => {
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
     };
@@ -100,6 +102,7 @@ describe('IndexHeader at new home page', () => {
   });
 
   it('renders the set default button when index is not default and user is in workspace', () => {
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
     };
@@ -116,6 +119,7 @@ describe('IndexHeader at new home page', () => {
   });
 
   it('does not render the set default button when index is default and user is in workspace', () => {
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
     };
@@ -132,6 +136,7 @@ describe('IndexHeader at new home page', () => {
   });
 
   it('does not render the set default button when index is not default and user is not in workspace', () => {
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
     };
@@ -147,6 +152,7 @@ describe('IndexHeader at new home page', () => {
   });
 
   it('does not render the set default button when index is default and user is not in workspace', () => {
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
     };

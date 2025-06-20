@@ -4,6 +4,7 @@
  */
 
 import { ShallowWrapper, shallow, mount } from 'enzyme';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { i18n } from '@osd/i18n';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
@@ -13,10 +14,15 @@ import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
+// @ts-expect-error TS6192 TODO(ts-error): fixme
 import {
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   NO_DATASOURCES_CONNECTED_MESSAGE,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   CONNECT_DATASOURCES_MESSAGE,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   ADD_COMPATIBLE_DATASOURCES_MESSAGE,
 } from '../constants';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
@@ -47,6 +53,7 @@ describe('DataSourceSelectable', () => {
 
   it('should render normally when local cluster is not hidden', () => {
     component = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -67,6 +74,7 @@ describe('DataSourceSelectable', () => {
 
   it('should render normally when local cluster is hidden', () => {
     component = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -87,6 +95,7 @@ describe('DataSourceSelectable', () => {
 
   it('should filter options if configured', async () => {
     component = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -106,6 +115,7 @@ describe('DataSourceSelectable', () => {
   it('should show popover with button click', async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -130,6 +140,7 @@ describe('DataSourceSelectable', () => {
     const onSelectedDataSource = jest.fn();
     spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
     const container = mount(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -144,6 +155,7 @@ describe('DataSourceSelectable', () => {
 
     const containerInstance = container.instance();
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     containerInstance.onChange([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toBeCalledTimes(1);
     expect(containerInstance.state).toEqual({
@@ -167,6 +179,7 @@ describe('DataSourceSelectable', () => {
       incompatibleDataSourcesExist: false,
     });
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     expect(containerInstance.state).toEqual({
       componentId: mockGeneratedComponentId,
@@ -199,6 +212,7 @@ describe('DataSourceSelectable', () => {
   it(`should display selectedOption[0]'s label when available`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -219,6 +233,7 @@ describe('DataSourceSelectable', () => {
   it(`should display selectedOption[0]'s id when label is not available`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -245,6 +260,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         selectedOption={[{ id: undefined }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -265,6 +281,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         selectedOption={[{}]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -276,6 +293,7 @@ describe('DataSourceSelectable', () => {
   });
   it(`should display a warning when selectedOption[0] is missing id but has a label`, async () => {
     const onSelectedDataSource = jest.fn();
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const container = render(
       <DataSourceSelectable
         savedObjectsClient={client}
@@ -284,6 +302,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         selectedOption={[{ label: 'test-label' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -301,6 +320,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         selectedOption={[{ label: '' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -312,6 +332,7 @@ describe('DataSourceSelectable', () => {
   it(`should display a warning when selectedOption is an empty array`, async () => {
     const onSelectedDataSource = jest.fn();
     render(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -329,6 +350,7 @@ describe('DataSourceSelectable', () => {
   it(`should render the selected option when selectedOption[0]'s id is found`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = mount(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -376,6 +398,7 @@ describe('DataSourceSelectable', () => {
     const onSelectedDataSource = jest.fn();
     spyOn(utils, 'getDefaultDataSource').and.returnValue(undefined);
     const container = mount(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -402,6 +425,7 @@ describe('DataSourceSelectable', () => {
       incompatibleDataSourcesExist: false,
     });
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     expect(containerInstance.state).toEqual({
       componentId: mockGeneratedComponentId,
@@ -457,6 +481,7 @@ describe('DataSourceSelectable', () => {
       client.find = findFunc;
       const onSelectedDataSource = jest.fn();
       render(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <DataSourceSelectable
           savedObjectsClient={client}
           notifications={toasts}
@@ -488,6 +513,7 @@ describe('DataSourceSelectable', () => {
     jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelectionMock);
     jest.spyOn(utils, 'generateComponentId').mockReturnValue(componentId);
     mount(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}

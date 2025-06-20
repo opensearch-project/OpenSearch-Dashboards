@@ -22,7 +22,9 @@ const makeProps = () => {
   };
 };
 
+// @ts-expect-error TS7031 TODO(ts-error): fixme
 const setup = async ({ props, services }) => {
+  // @ts-expect-error TS7031 TODO(ts-error): fixme
   const mockHeaderControl = ({ controls }) => {
     return controls?.[0].description ?? controls?.[0].renderComponent ?? null;
   };
@@ -59,12 +61,14 @@ describe('<TutorialDirectory />', () => {
   let currentService: ReturnType<typeof getMockedServices>;
   beforeEach(() => {
     currentService = getMockedServices();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     setServices(currentService);
   });
   it('should render home breadcrumbs when withoutHomeBreadCrumb is undefined', async () => {
     currentService.http.get.mockResolvedValueOnce([]);
     spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelectionService());
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await setup({ services: currentService });
     expect(currentService.chrome.setBreadcrumbs).toBeCalledWith([
       {
@@ -94,6 +98,7 @@ describe('<TutorialDirectory />', () => {
 
   it('should call setBreadcrumbs with "Sample data" when usedUpdatedUX', async () => {
     currentService.http.get.mockResolvedValueOnce([]);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     currentService.uiSettings.get.mockResolvedValueOnce(true);
     spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelectionService());
 
@@ -110,6 +115,7 @@ describe('<TutorialDirectory />', () => {
 
   it('should render description and call setHeaderActionMenu when usedUpdatedUX', async () => {
     currentService.http.get.mockResolvedValueOnce([]);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     currentService.uiSettings.get.mockResolvedValueOnce(true);
     spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelectionService());
 

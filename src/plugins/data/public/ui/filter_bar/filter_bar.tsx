@@ -205,6 +205,7 @@ function FilterBarUI(props: Props) {
           <FilterOptions
             filters={props.filters!}
             onFiltersUpdated={props.onFiltersUpdated}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             intl={props.intl}
             indexPatterns={props.indexPatterns}
           />

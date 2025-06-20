@@ -103,6 +103,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
       anchorPosition="downLeft"
       data-test-subj={'dataSourceEmptyStatePopover'}
     >
+      {/* @ts-expect-error TS2741 TODO(ts-error): fixme */}
       <DataSourceDropDownHeader totalDataSourceCount={0} application={application} />
       <EuiPanel
         hasBorder={false}

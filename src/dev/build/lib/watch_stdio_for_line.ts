@@ -80,12 +80,14 @@ export async function watchStdioForLine(
       }
     }),
     createPromiseFromStreams([
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       proc.stdout,
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),
     ]),
     createPromiseFromStreams([
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       proc.stderr,
       createSplitStream('\n'),
       skipLastEmptyLineStream(),

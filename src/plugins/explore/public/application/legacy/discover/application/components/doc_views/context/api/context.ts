@@ -30,6 +30,7 @@
 
 import {
   Filter,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   IndexPatternsContract,
   IndexPattern,
 } from '../../../../../../../../../../data/public';

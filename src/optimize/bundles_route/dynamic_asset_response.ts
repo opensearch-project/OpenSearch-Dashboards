@@ -63,6 +63,7 @@ async function selectCompressedFile(acceptEncodingHeader: string | undefined, pa
   let fd: number | undefined;
   let fileEncoding: 'gzip' | 'br' | undefined;
 
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   const supportedEncodings = Accept.encodings(acceptEncodingHeader, ['br', 'gzip']);
 
   if (supportedEncodings[0] === 'br') {

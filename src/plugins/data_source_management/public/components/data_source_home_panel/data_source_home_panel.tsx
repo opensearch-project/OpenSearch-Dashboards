@@ -70,6 +70,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
     } as TopNavControlButtonData,
   ];
 
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const connectionTypeButton = [
     {
       renderComponent: (
@@ -175,6 +176,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
                 <EuiPageHeader>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                     <EuiFlexItem grow={false}>
+                      {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
                       <DataSourceHeader
                         history={props.history}
                         featureFlagStatus={featureFlagStatus}

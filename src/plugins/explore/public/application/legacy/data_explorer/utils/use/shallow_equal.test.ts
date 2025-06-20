@@ -9,24 +9,30 @@ describe('shallowEqual', () => {
   it('should return true for equal objects without ignored keys', () => {
     const obj1 = { a: 1, b: 2, c: 3 };
     const obj2 = { a: 1, b: 2, c: 3 };
+    // @ts-expect-error TS7034 TODO(ts-error): fixme
     const ignoreKeys = [];
 
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(shallowEqual(obj1, obj2, ignoreKeys)).toBe(true);
   });
 
   it('should return false for objects with different values', () => {
     const obj1 = { a: 1, b: 2, c: 3 };
     const obj2 = { a: 1, b: 2, c: 4 };
+    // @ts-expect-error TS7034 TODO(ts-error): fixme
     const ignoreKeys = [];
 
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(shallowEqual(obj1, obj2, ignoreKeys)).toBe(false);
   });
 
   it('should return false for objects with different keys', () => {
     const obj1 = { a: 1, b: 2 };
     const obj2 = { a: 1, b: 2, c: 3 };
+    // @ts-expect-error TS7034 TODO(ts-error): fixme
     const ignoreKeys = [];
 
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(shallowEqual(obj1, obj2, ignoreKeys)).toBe(false);
   });
 

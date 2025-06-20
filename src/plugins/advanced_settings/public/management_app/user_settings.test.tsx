@@ -28,6 +28,7 @@ describe('UserSettings', () => {
     renderPage: renderPageMock,
   };
 
+  // @ts-expect-error TS7031 TODO(ts-error): fixme
   const mockHeaderControl = ({ controls }) => {
     return controls?.[0].description ?? controls?.[0].renderComponent ?? null;
   };

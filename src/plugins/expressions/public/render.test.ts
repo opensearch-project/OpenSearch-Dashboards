@@ -143,6 +143,7 @@ describe('ExpressionRenderHandler', () => {
       return new Promise((resolve) => {
         expressionRenderHandler.render$.subscribe((renderCount) => {
           expect(renderCount).toBe(1);
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         });
 

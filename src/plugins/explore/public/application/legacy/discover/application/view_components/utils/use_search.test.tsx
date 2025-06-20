@@ -115,6 +115,7 @@ const mockStore = {
 };
 const wrapper: React.FC = ({ children }) => {
   return (
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <Provider store={mockStore}>
       <Router history={history}>{children}</Router>
     </Provider>

@@ -10,6 +10,7 @@
  * @param {boolean} hasSplit - Indicates whether we have split data.
  * @returns {Object} An object containing a single group mark configuration.
  */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const buildSlicesMarkForVega = (levels: string[], hasSplit: boolean, addTooltip) => {
   return {
     type: 'group',
@@ -83,6 +84,7 @@ export const buildPieMarks = (levels: string[], hasSplit: boolean) => {
  * @param {string[]} levels - The array of hierarchy levels.
  * @returns {Object[]} An array of arc mark configurations for each level.
  */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const buildArcMarks = (levels: string[], addTooltip) => {
   return levels.map((level, index) => ({
     type: 'arc',

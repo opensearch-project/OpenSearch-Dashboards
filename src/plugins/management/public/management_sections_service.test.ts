@@ -49,6 +49,7 @@ describe('ManagementService', () => {
 
   test('Provides default sections', () => {
     managementService.setup();
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     managementService.start({ capabilities });
     const start = getSectionsServiceStartPrivate();
 
@@ -63,6 +64,7 @@ describe('ManagementService', () => {
     expect(testSection).not.toBeUndefined();
 
     // Start phase:
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     managementService.start({ capabilities });
     const start = getSectionsServiceStartPrivate();
 
@@ -85,6 +87,7 @@ describe('ManagementService', () => {
 
     // Start phase:
     managementService.start({
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       capabilities: {
         navLinks: {},
         catalogue: {},
@@ -126,6 +129,7 @@ describe('ManagementService', () => {
     // the dataSources app registered in opensearchDashboards section
     DEFAULT_MANAGEMENT_CAPABILITIES.management.opensearchDashboards.dataSources = false;
 
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     managementService.start({ capabilities: DEFAULT_MANAGEMENT_CAPABILITIES });
     expect(
       setup.section.opensearchDashboards.apps.find((app) => app.id === 'dataSources')?.enabled

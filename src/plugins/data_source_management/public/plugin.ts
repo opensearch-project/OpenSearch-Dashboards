@@ -123,6 +123,7 @@ export class DataSourceManagementPlugin
     this.config = initializerContext.config.get();
   }
 
+  // @ts-expect-error TS2416 TODO(ts-error): fixme
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
     { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
@@ -148,10 +149,12 @@ export class DataSourceManagementPlugin
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
       order: 1,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
 
         return mountManagementSection(
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           core.getStartServices,
           params,
           this.authMethodsRegistry,
@@ -173,6 +176,7 @@ export class DataSourceManagementPlugin
           const [coreStart] = await core.getStartServices();
 
           return mountManagementSection(
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             core.getStartServices,
             {
               ...params,
@@ -198,6 +202,7 @@ export class DataSourceManagementPlugin
 
     // when the feature flag is disabled, we don't need to register any of the mds components
     if (!this.featureFlagStatus) {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       return undefined;
     }
 
@@ -207,6 +212,7 @@ export class DataSourceManagementPlugin
           'cannot call `registerAuthenticationMethod` after data source management startup.'
         );
       }
+      // @ts-expect-error TS2551 TODO(ts-error): fixme
       this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
     };
 

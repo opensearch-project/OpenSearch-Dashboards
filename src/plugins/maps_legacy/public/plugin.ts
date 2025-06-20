@@ -41,6 +41,7 @@ import {
   setUiSettings,
   setOpenSearchDashboardsVersion,
   setMapsLegacyConfig,
+  // @ts-expect-error TS7016 TODO(ts-error): fixme
 } from './opensearch_dashboards_services';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';

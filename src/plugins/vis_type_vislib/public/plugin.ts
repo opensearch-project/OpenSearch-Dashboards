@@ -118,6 +118,7 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
     // Register non-converted types
     vislibFns.forEach(expressions.registerFunction);
     vislibTypes.forEach((vis) =>
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       visualizations.createBaseVisualization(vis(visualizationDependencies))
     );
   }

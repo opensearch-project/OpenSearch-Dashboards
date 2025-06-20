@@ -55,6 +55,7 @@ export const render: ExpressionTypeDefinition<'render', ExpressionValueRender<un
   name: 'render',
   from: {
     '*': <T>(v: T): ExpressionValueRender<T> => ({
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       type: name,
       as: 'debug',
       value: v,

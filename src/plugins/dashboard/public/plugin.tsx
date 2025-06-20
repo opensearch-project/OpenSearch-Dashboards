@@ -426,6 +426,7 @@ export class DashboardPlugin
           uiSettings: coreStart.uiSettings,
           savedQueryService: dataStart.query.savedQueries,
           embeddable: embeddableStart,
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
           embeddableCapabilities: {
             visualizeCapabilities: coreStart.application.capabilities.visualize,

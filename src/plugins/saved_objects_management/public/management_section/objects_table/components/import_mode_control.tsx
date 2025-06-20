@@ -118,6 +118,7 @@ const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
   </EuiFlexGroup>
 );
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const overwriteRadio = (disabled: boolean, overwrite: boolean, onChange) => {
   return (
     <EuiCompressedRadioGroup

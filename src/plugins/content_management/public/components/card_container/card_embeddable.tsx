@@ -34,6 +34,7 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
     }
     this.node = node;
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const cardProps: EuiCardProps = {
       ...this.input.cardProps,
       title: this.input?.getTitle?.() || this.input?.title || '',

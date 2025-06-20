@@ -168,10 +168,15 @@ export const getTopNavConfig = (
 };
 
 export const getOnSave = (
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   savedVisBuilderVis,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   originatingApp,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   visualizationIdFromUrl,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   dispatch,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   services
 ) => {
   const onSave = async ({
@@ -321,6 +326,7 @@ export const getNavActions = (
   };
   navActions.saveAndReturn = saveAndReturnNavAction;
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const saveNavAction = (_anchorElement) => {
     const saveModal = (
       <SavedObjectSaveModalOrigin

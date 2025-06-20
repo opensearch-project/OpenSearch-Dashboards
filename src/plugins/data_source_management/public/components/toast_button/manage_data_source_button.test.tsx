@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import React from 'react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { shallow } from 'enzyme';
 import { getManageDataSourceButton } from './manage_data_source_button';
 import { coreMock } from '../../../../../core/public/mocks';

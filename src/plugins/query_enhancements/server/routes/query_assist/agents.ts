@@ -39,10 +39,12 @@ export const getAgentIdByConfig = async (
     })) as ApiResponse<{ type: string; configuration: { agent_id?: string } }>;
     if (
       !response ||
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       !(response.body.ml_configuration?.agent_id || response.body.configuration?.agent_id)
     ) {
       throw new Error('cannot find any agent by configuration: ' + configName);
     }
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     return response.body.ml_configuration?.agent_id || response.body.configuration.agent_id;
   } catch (error) {
     const errorMessage = JSON.stringify(error.meta?.body) || error;
@@ -58,6 +60,7 @@ export const requestAgentByConfig = async (options: {
 }): Promise<AgentResponse> => {
   const { context, configName, body, dataSourceId } = options;
   const client =
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     context.query_assist.dataSourceEnabled && dataSourceId
       ? await context.dataSource.opensearch.getClient(dataSourceId)
       : context.core.opensearch.client.asCurrentUser;

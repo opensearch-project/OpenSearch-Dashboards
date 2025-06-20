@@ -200,6 +200,7 @@ export function registerDataSourceConnectionsRoutes(
             requestTimeout: 5000, // Enforce timeout to avoid hanging requests
           }
         );
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
         const indexes = result.body.indices.map((index) => index.name);
         return response.ok({ body: indexes });
       } catch (error) {

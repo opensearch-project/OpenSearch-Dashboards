@@ -82,6 +82,7 @@ export async function scanDelete(options: Options) {
     }
 
     return getStat$(path).pipe(
+      // @ts-expect-error TS2571 TODO(ts-error): fixme
       mergeMap((stat) => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
       mergeMap(getPathsToDelete$)
     );

@@ -50,6 +50,7 @@ interface HomeServerPluginSetupDependencies {
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
   constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly tutorialsRegistry = new TutorialsRegistry();
+  // @ts-expect-error TS2729 TODO(ts-error): fixme
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {

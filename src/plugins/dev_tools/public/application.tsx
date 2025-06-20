@@ -112,6 +112,7 @@ function DevToolsWrapper({
       history: {} as any,
       dataSourceId,
     };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const unmountHandler = await activeDevTool.mount(params);
 
     mountedTool.current = {
@@ -142,6 +143,7 @@ function DevToolsWrapper({
     const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector;
     return (
       <div className="devAppDataSourceSelector">
+        {/* @ts-expect-error TS2604 TODO(ts-error): fixme */}
         <DataSourceSelector
           savedObjectsClient={savedObjects.client}
           notifications={toasts}
@@ -200,6 +202,7 @@ function DevToolsWrapper({
 }
 
 function redirectOnMissingCapabilities(application: ApplicationStart) {
+  // @ts-expect-error TS2532 TODO(ts-error): fixme
   if (!application.capabilities.dev_tools.show) {
     application.navigateToApp('home');
     return true;
@@ -208,6 +211,7 @@ function redirectOnMissingCapabilities(application: ApplicationStart) {
 }
 
 function setBadge(application: ApplicationStart, chrome: ChromeStart) {
+  // @ts-expect-error TS2532 TODO(ts-error): fixme
   if (application.capabilities.dev_tools.save) {
     return;
   }
@@ -326,6 +330,7 @@ export function renderApp(
   setTitle(chrome);
 
   ReactDOM.render(
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     <MainApp
       devTools={devTools}
       dataSourceEnabled={dataSourceEnabled}

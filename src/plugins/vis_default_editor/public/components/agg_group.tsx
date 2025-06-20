@@ -86,9 +86,11 @@ function DefaultEditorAggGroup({
   const schemaNames = schemas.map((s) => s.name);
   const group: IAggConfig[] = useMemo(
     () =>
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       state.data.aggs!.aggs.filter(
         (agg: IAggConfig) => agg.schema && schemaNames.includes(agg.schema)
       ) || [],
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     [state.data.aggs, schemaNames]
   );
 

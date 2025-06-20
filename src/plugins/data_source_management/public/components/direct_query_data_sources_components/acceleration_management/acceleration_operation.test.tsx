@@ -63,6 +63,7 @@ describe('useAccelerationOperation', () => {
     );
 
     act(() => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       result.current.performOperation(mockAcceleration, 'delete', false);
     });
 
@@ -83,6 +84,7 @@ describe('useAccelerationOperation', () => {
     );
 
     act(() => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       result.current.performOperation(mockAcceleration, 'delete', false);
     });
 
@@ -106,6 +108,7 @@ describe('useAccelerationOperation', () => {
     );
 
     act(() => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       result.current.performOperation(mockAcceleration, 'delete', false);
     });
 

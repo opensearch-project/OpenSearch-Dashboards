@@ -91,6 +91,7 @@ export const WatchCommand: ICommand = {
 
     await parallelizeBatches(batchedProjects, async (pkg) => {
       const completionHint = await waitUntilWatchIsReady(
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         pkg.runScriptStreaming(watchScriptName, {
           debug: false,
         }).stdout

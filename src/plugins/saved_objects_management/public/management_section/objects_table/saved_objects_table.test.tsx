@@ -152,6 +152,7 @@ describe('SavedObjectsTable', () => {
       },
     });
 
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     defaultProps = {
       allowedTypes,
       serviceRegistry: serviceRegistryMock.create(),
@@ -604,6 +605,7 @@ describe('SavedObjectsTable', () => {
       const table = component.find('EuiInMemoryTable');
       const columns = table.prop('columns');
 
+      // @ts-expect-error TS2571, TS7006 TODO(ts-error): fixme
       const typeField = columns.find((col) => col.field === 'type');
       mockSelectedSavedObjects.forEach((savedObject) => {
         const renderedContent = typeField.render(savedObject.type, savedObject);
@@ -753,11 +755,17 @@ describe('SavedObjectsTable', () => {
 
       const props = component.find('Table').props() as TableProps;
       const filters = props.filters;
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       expect(filters.length).toBe(2);
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       expect(filters[0].field).toBe('type');
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       expect(filters[1].field).toBe('workspaces');
+      // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
       expect(filters[1].options.length).toBe(2);
+      // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
       expect(filters[1].options[0].value).toBe('foo');
+      // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
       expect(filters[1].options[1].value).toBe('bar');
     });
 
@@ -800,6 +808,7 @@ describe('SavedObjectsTable', () => {
 
       const props = component.find('Table').props() as TableProps;
       const filters = props.filters;
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       const wsFilter = filters.filter((f) => f.field === 'workspaces');
       expect(wsFilter.length).toBe(0);
     });
@@ -939,6 +948,7 @@ describe('SavedObjectsTable', () => {
 
     it('should duplicate selected objects', async () => {
       const mockCopy = jest.fn().mockResolvedValue({ success: true });
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       workspaces.client$.next({ copy: mockCopy });
       const client = workspaces.client$.getValue();
 
@@ -971,6 +981,7 @@ describe('SavedObjectsTable', () => {
 
     it('should duplicate single object', async () => {
       const mockCopy = jest.fn().mockResolvedValue({ success: true });
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       workspaces.client$.next({ copy: mockCopy });
       const client = workspaces.client$.getValue();
 
@@ -1004,6 +1015,7 @@ describe('SavedObjectsTable', () => {
         successResults: [{ id: '1' }],
         errors: [{ id: '2' }],
       }));
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       workspaces.client$.next({ copy: mockCopy });
       const client = workspaces.client$.getValue();
       const component = shallowRender({ applications, workspaces });
@@ -1052,6 +1064,7 @@ describe('SavedObjectsTable', () => {
       component.setState({ isShowingDuplicateModal: true });
 
       const mockCopy = jest.fn().mockRejectedValue(() => new Error('Copy operation failed'));
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       workspaces.client$.next({ copy: mockCopy });
       const client = workspaces.client$.getValue();
 

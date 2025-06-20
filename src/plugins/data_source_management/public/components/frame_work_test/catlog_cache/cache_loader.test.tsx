@@ -16,6 +16,7 @@ import {
   updateDatabasesToCache,
   updateTablesToCache,
   updateToCache,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   updateTableColumnsToCache,
   useLoadDatabasesToCache,
   useLoadTablesToCache,
@@ -354,6 +355,7 @@ describe('loadCacheTests', () => {
       const loadCacheType = '';
       const dataSourceName = 'TestDataSource';
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       updateToCache(pollResults, loadCacheType, dataSourceName);
 
       // Verify that no update function is called
@@ -389,6 +391,7 @@ describe('loadCacheTests', () => {
     it('should return an empty string for unknown loadCacheType', () => {
       const loadCacheType = 'unknownType';
       const dataSourceName = 'example';
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       expect(createLoadQuery(loadCacheType, dataSourceName)).toEqual('');
     });
 

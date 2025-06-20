@@ -79,6 +79,7 @@ _.each(collapsingTests.split(/^=+$/m), function (fixture) {
   if (fixture.trim() === '') {
     return;
   }
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   fixture = fixture.split(/^-+$/m);
   const name = fixture[0].trim();
   const expanded = fixture[1].trim();
@@ -93,6 +94,7 @@ _.each(expandingTests.split(/^=+$/m), function (fixture) {
   if (fixture.trim() === '') {
     return;
   }
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   fixture = fixture.split(/^-+$/m);
   const name = fixture[0].trim();
   const collapsed = fixture[1].trim();

@@ -31,7 +31,9 @@
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
 import { TypeOf, schema } from '@osd/config-schema';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { RecursiveReadonly } from '@osd/utility-types';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { deepFreeze } from '@osd/std';
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
@@ -63,6 +65,7 @@ export interface TimelinePluginStartDeps {
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
+  // @ts-expect-error TS1064 TODO(ts-error): fixme
   public async setup(core: CoreSetup, { dataSource }: TimelinePluginSetupDeps): void {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof configSchema>>()

@@ -4,6 +4,7 @@
  */
 
 import { configure, mount, shallow } from 'enzyme';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { SetupIntegrationForm, SetupBottomBar, LoadingPage } from './setup_integration';
@@ -28,11 +29,13 @@ describe('SetupIntegrationForm tests', () => {
   };
 
   it('renders SetupIntegrationForm', () => {
+    // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
     const wrapper = shallow(<SetupIntegrationForm {...setupProps} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('displays loading page when showLoading is true', () => {
+    // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
     const wrapper = mount(<SetupIntegrationForm {...setupProps} />);
     const setupBottomBar = wrapper.find(SetupBottomBar).first();
 
@@ -45,6 +48,7 @@ describe('SetupIntegrationForm tests', () => {
   });
 
   it('renders SetupBottomBar with correct props', () => {
+    // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
     const wrapper = mount(<SetupIntegrationForm {...setupProps} />);
 
     act(() => {
@@ -76,6 +80,7 @@ describe('SetupIntegrationForm tests', () => {
 
   // New snapshot test
   it('renders SetupIntegrationForm and matches snapshot', () => {
+    // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
     const wrapper = mount(<SetupIntegrationForm {...setupProps} />);
     expect(wrapper).toMatchSnapshot();
   });

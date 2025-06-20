@@ -211,6 +211,7 @@ describe('useVisualizeAppState', () => {
       renderHook(() => useVisualizeAppState(mockServices, eventEmitter, savedVisInstance));
 
       await new Promise((res) => {
+        // @ts-expect-error TS2794 TODO(ts-error): fixme
         setTimeout(() => res());
       });
 

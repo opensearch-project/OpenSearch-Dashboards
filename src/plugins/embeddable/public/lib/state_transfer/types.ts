@@ -63,6 +63,7 @@ export function isEmbeddablePackageState(state: unknown): state is EmbeddablePac
 }
 
 function ensureFieldOfTypeExists(key: string, obj: unknown, type?: string): boolean {
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return (
     obj &&
     key in (obj as { [key: string]: unknown }) &&

@@ -55,6 +55,7 @@ describe('AccelerationActionOverlay', () => {
 
   test('displays the correct title and description for vacuum action', () => {
     const props = { ...defaultProps, actionType: 'vacuum' };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const wrapper = shallowComponent(props);
     expect(wrapper.find(EuiConfirmModal).prop('title')).toEqual(
       `Vacuum acceleration ${mockAcceleration.indexName} on ${defaultProps.dataSourceName}.${mockAcceleration.database}.${mockAcceleration.table} ?`
@@ -64,6 +65,7 @@ describe('AccelerationActionOverlay', () => {
 
   test('displays the correct title and description for sync action', () => {
     const props = { ...defaultProps, actionType: 'sync' };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const wrapper = shallowComponent(props);
     expect(wrapper.find(EuiConfirmModal).prop('title')).toEqual('Manual sync data?');
     expect(wrapper.find(EuiConfirmModal).find('p').text()).toEqual(ACC_SYNC_MSG);
@@ -77,12 +79,14 @@ describe('AccelerationActionOverlay', () => {
 
   test('calls onConfirm when confirm button is clicked', () => {
     const wrapper = mountComponent();
+    // @ts-expect-error TS2722, TS2554 TODO(ts-error): fixme
     wrapper.find(EuiConfirmModal).prop('onConfirm')();
     expect(defaultProps.onConfirm).toHaveBeenCalled();
   });
 
   test('disables confirm button when confirmation input does not match for vacuum action', () => {
     const props = { ...defaultProps, actionType: 'vacuum' };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const wrapper = mountComponent(props);
     const confirmButton = wrapper
       .find(EuiConfirmModal)
@@ -92,6 +96,7 @@ describe('AccelerationActionOverlay', () => {
 
   test('enables confirm button when confirmation input matches for vacuum action', async () => {
     const props = { ...defaultProps, actionType: 'vacuum' };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const wrapper = mountComponent(props);
 
     await act(async () => {

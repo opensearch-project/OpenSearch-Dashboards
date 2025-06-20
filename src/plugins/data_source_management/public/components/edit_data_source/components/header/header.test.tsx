@@ -26,6 +26,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
     beforeEach(() => {
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <Header
             isFormValid={true}
             showDeleteIcon={true}
@@ -80,6 +81,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
     beforeEach(() => {
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <Header
             isFormValid={false}
             showDeleteIcon={false}
@@ -110,6 +112,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
     beforeEach(() => {
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <Header
             isFormValid={true}
             showDeleteIcon={true}
@@ -168,6 +171,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
     beforeEach(() => {
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <Header
             isFormValid={true}
             showDeleteIcon={true}
@@ -203,6 +207,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
     beforeEach(() => {
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <Header
             isFormValid={true}
             showDeleteIcon={true}

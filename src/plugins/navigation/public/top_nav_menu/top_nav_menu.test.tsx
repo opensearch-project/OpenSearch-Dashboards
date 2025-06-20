@@ -137,6 +137,7 @@ describe('TopNavMenu', () => {
             fullWidth: true,
             activeOption: [{ label: 'what', id: '1' }],
           },
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           dataSourceSelection,
         }}
       />
@@ -163,6 +164,7 @@ describe('TopNavMenu', () => {
             fullWidth: true,
             activeOption: [{ label: 'what', id: '1' }],
           },
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           dataSourceSelection: new DataSourceSelectionService(),
         }}
       />
@@ -244,6 +246,7 @@ describe('TopNavMenu', () => {
               fullWidth: true,
               activeOption: [{ label: 'what', id: '1' }],
             },
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             dataSourceSelection: new DataSourceSelectionService(),
           }}
           groupActions={true}

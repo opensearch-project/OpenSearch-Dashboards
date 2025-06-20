@@ -162,6 +162,7 @@ function generateReleaseNote(changelogSections: string[]) {
 }
 
 (async () => {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const { sections, fragmentPaths, failedFragments } = await readFragments();
 
   // Only proceed if we have some valid fragments

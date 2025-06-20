@@ -117,6 +117,7 @@ const branding = {
 describe('SolutionsSection', () => {
   test('only renders a spacer if no solutions are available', () => {
     const component = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <SolutionsSection
         addBasePath={addBasePathMock}
         solutions={[]}
@@ -129,6 +130,7 @@ describe('SolutionsSection', () => {
 
   test('renders a single solution', () => {
     const component = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <SolutionsSection
         addBasePath={addBasePathMock}
         solutions={[solutionEntry1]}
@@ -141,6 +143,7 @@ describe('SolutionsSection', () => {
 
   test('renders multiple solutions in two columns with OpenSearch Dashboards in its own column', () => {
     const component = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <SolutionsSection
         addBasePath={addBasePathMock}
         solutions={[solutionEntry1, solutionEntry2, solutionEntry3, solutionEntry4]}
@@ -152,6 +155,7 @@ describe('SolutionsSection', () => {
   });
   test('renders multiple solutions in a single column when OpenSearch Dashboards apps are not enabled', () => {
     const component = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <SolutionsSection
         addBasePath={addBasePathMock}
         solutions={[solutionEntry2, solutionEntry3, solutionEntry4]}

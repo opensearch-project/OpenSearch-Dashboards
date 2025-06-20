@@ -49,6 +49,7 @@ describe('InactiveDataConnectionCallout', () => {
   };
 
   const shallowComponent = (props = defaultProps) =>
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     shallow(<InactiveDataConnectionCallout {...props} />);
 
   test('renders correctly', () => {

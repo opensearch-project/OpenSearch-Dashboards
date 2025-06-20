@@ -67,6 +67,7 @@ export class ContactCardEmbeddableFactory
           <ContactCardInitializer
             onCancel={() => {
               modalSession.close();
+              // @ts-expect-error TS2345 TODO(ts-error): fixme
               resolve(undefined);
             }}
             onCreate={(input: { firstName: string; lastName?: string }) => {

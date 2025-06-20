@@ -38,7 +38,9 @@ import { i18n } from '@osd/i18n';
 // @ts-ignore
 import { Signal } from 'vega';
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { HttpSetup } from 'opensearch-dashboards/public';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import { vega, vegaLite } from '../lib/vega';
 import { OpenSearchQueryParser } from './opensearch_query_parser';
 import { Utils } from './utils';

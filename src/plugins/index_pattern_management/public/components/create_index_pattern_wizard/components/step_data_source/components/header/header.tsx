@@ -81,6 +81,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
           // filter out data sources which does NOT have the required backend plugins installed
           if (pluginManifest.hasOwnProperty('requiredOSDataSourcePlugins')) {
             fetchedDataSources = fetchedDataSources.filter((dataSource) =>
+              // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
               pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
                 dataSource.installedplugins.includes(plugin)
               )
@@ -150,11 +151,13 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
     );
   };
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onChangeDefaultChecked = (e) => {
     setDefaultChecked(e.target.checked);
     setDataSourceChecked(!e.target.checked);
   };
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onChangeDataSourceChecked = (e) => {
     setDataSourceChecked(e.target.checked);
     setDefaultChecked(!e.target.checked);
@@ -232,6 +235,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
                 ),
               }}
               singleSelection={'always'}
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
               options={dataSources}
               onChange={(newOptions) => onSelectedDataSource(newOptions)}
             >

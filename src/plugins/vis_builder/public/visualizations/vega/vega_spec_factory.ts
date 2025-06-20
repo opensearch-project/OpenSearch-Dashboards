@@ -34,6 +34,7 @@ export const createVegaSpec = (
     : createVegaSpecForSlicesData(dimensions, transformedData, visConfig, style);
 };
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const createVegaSpecForSeriesData = (dimensions, transformedData, visConfig, style) => {
   // Determine whether to use Vega or Vega-Lite based on the presence of split dimensions
   // TODO: Summarize the cases to use Vega. Change this to a better determine function.
@@ -46,6 +47,7 @@ const createVegaSpecForSeriesData = (dimensions, transformedData, visConfig, sty
   }
 };
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const createVegaSpecForSlicesData = (dimensions, transformedData, visConfig, style) => {
   return generateVegaSpecForSlices(transformedData, visConfig, style);
 };

@@ -43,6 +43,7 @@ describe('test getIndexPatternTitle', () => {
   const dataSourceMock: SavedObject<DataSourceAttributes> = {
     id: 'dataSourceId',
     type: 'data-source',
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     attributes: {
       title: 'dataSourceMockTitle',
       endpoint: 'https://fakeendpoint.com',

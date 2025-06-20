@@ -29,6 +29,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { IRouter, LegacyAPICaller } from 'src/core/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {

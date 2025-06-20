@@ -265,6 +265,7 @@ export class ClusterManager {
     let clearTimer: number | undefined;
     const clearSoon = () => {
       clearSoon.cancel();
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       clearTimer = setTimeout(() => {
         clearTimer = undefined;
         clear();

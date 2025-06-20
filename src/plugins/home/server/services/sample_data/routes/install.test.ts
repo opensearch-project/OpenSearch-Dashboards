@@ -17,7 +17,9 @@ const sampleDatasets: SampleDatasetSchema[] = [flightsSampleDataset];
 
 describe('sample data install route', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
+  // @ts-expect-error TS7034 TODO(ts-error): fixme
   let mockLogger;
+  // @ts-expect-error TS7034 TODO(ts-error): fixme
   let mockUsageTracker;
 
   beforeEach(() => {
@@ -68,7 +70,9 @@ describe('sample data install route', () => {
     createInstallRoute(
       mockCoreSetup.http.createRouter(),
       sampleDatasets,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockLogger,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockUsageTracker
     );
 
@@ -115,6 +119,7 @@ describe('sample data install route', () => {
       dataSource: {
         opensearch: {
           legacy: {
+            // @ts-expect-error TS7006 TODO(ts-error): fixme
             getClient: (id) => {
               return {
                 callAPI: mockClient,
@@ -138,7 +143,9 @@ describe('sample data install route', () => {
     createInstallRoute(
       mockCoreSetup.http.createRouter(),
       sampleDatasets,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockLogger,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockUsageTracker
     );
 
@@ -202,7 +209,9 @@ describe('sample data install route', () => {
     createInstallRoute(
       mockCoreSetup.http.createRouter(),
       sampleDatasets,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockLogger,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockUsageTracker
     );
 
@@ -270,7 +279,9 @@ describe('sample data install route', () => {
     createInstallRoute(
       mockCoreSetup.http.createRouter(),
       sampleDatasets,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockLogger,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockUsageTracker
     );
 
@@ -324,7 +335,9 @@ describe('sample data install route', () => {
     createInstallRoute(
       mockCoreSetup.http.createRouter(),
       sampleDatasets,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockLogger,
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       mockUsageTracker
     );
 

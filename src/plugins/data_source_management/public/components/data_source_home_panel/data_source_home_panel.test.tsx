@@ -28,6 +28,7 @@ jest.mock(
   })
 );
 jest.mock('../create_button', () => ({
+  // @ts-expect-error TS7031 TODO(ts-error): fixme
   CreateButton: ({ history, dataTestSubj }) => (
     <button data-test-subj={dataTestSubj} onClick={() => history.push('/create')}>
       Create Data Source
@@ -107,6 +108,7 @@ describe('DataSourceHomePanel', () => {
 
   test('calls history.push when CreateButton is clicked', () => {
     const historyMock = { push: jest.fn() };
+    // @ts-expect-error TS2740 TODO(ts-error): fixme
     const wrapper = mountComponent({ ...defaultProps, history: historyMock });
     wrapper.find('button[data-test-subj="createDataSourceButton"]').simulate('click');
     expect(historyMock.push).toHaveBeenCalledWith('/create');

@@ -50,6 +50,7 @@ export const getValidAggTypes = ({
   const aggTypes = aggService.types.getAll();
   // `types` can be either a Bucket or Metric aggType, but both types have the name property.
   const allowedAggTypes = filterByName(
+    // @ts-expect-error TS7053 TODO(ts-error): fixme
     aggTypes[destinationSchema.group] as BucketAggType[],
     destinationSchema.aggFilter
   );

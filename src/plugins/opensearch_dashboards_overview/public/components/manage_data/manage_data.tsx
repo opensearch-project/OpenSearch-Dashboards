@@ -94,6 +94,7 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
 };
 
 ManageData.propTypes = {
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   features: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

@@ -71,6 +71,7 @@ export async function fetchNodesUsage(
   const { body } = await opensearchClient.nodes.usage<NodesFeatureUsageResponse>({
     timeout: TIMEOUT,
   });
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return body;
 }
 

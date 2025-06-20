@@ -109,6 +109,7 @@ describe('IndexSettingOptions', () => {
     );
 
     act(() => {
+      // @ts-expect-error TS2722 TODO(ts-error): fixme
       wrapper.find(EuiFieldNumber).at(0).prop('onChange')({
         target: { value: '20' },
       } as React.ChangeEvent<HTMLInputElement>);
@@ -144,6 +145,7 @@ describe('IndexSettingOptions', () => {
 
     const wrapper = mount(
       <IndexSettingOptions
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         accelerationFormData={materializedViewFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
@@ -185,6 +187,7 @@ describe('IndexSettingOptions', () => {
 
     const wrapper = mount(
       <IndexSettingOptions
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         accelerationFormData={materializedViewFormData}
         setAccelerationFormData={setAccelerationFormData}
       />

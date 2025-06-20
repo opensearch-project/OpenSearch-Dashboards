@@ -51,6 +51,7 @@ const refreshAutocompleteSettings = (
   selectedSettings: any,
   dataSourceId?: string
 ) => {
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   retrieveAutoCompleteInfo(http, settings, selectedSettings, dataSourceId);
 };
 
@@ -80,9 +81,11 @@ const fetchAutocompleteSettingsIfNeeded = (
         },
         {}
       );
+      // @ts-expect-error TS2304 TODO(ts-error): fixme
       retrieveAutoCompleteInfo(http, settings, changedSettings, dataSourceId);
     } else if (isPollingChanged && newSettings.polling) {
       // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
+      // @ts-expect-error TS2304 TODO(ts-error): fixme
       retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete(), dataSourceId);
     }
   }

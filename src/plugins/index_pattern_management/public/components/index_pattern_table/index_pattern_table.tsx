@@ -38,6 +38,7 @@ import {
   EuiText,
   EuiBadgeGroup,
   EuiPageContent,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -116,6 +117,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(!dataSourceEnabled);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const [isColumnDataLoaded, setIsColumnDataLoaded] = useState(false);
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
@@ -330,6 +332,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           itemId="id"
           isSelectable={false}
           items={indexPatterns}
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           columns={columns}
           pagination={pagination}
           sorting={sorting}

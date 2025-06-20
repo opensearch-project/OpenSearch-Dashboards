@@ -35,7 +35,9 @@ const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: strin
 
   // update reference
   if (savedObject.type === 'visualization' || savedObject.type === 'search') {
+    // @ts-expect-error TS2571 TODO(ts-error): fixme
     const searchSourceString = savedObject.attributes?.kibanaSavedObjectMeta?.searchSourceJSON;
+    // @ts-expect-error TS2571 TODO(ts-error): fixme
     const visStateString = savedObject.attributes?.visState;
 
     if (searchSourceString) {
@@ -43,12 +45,14 @@ const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: strin
       if (searchSource.index) {
         searchSource.index = idGenerator(searchSource.index);
         if (Array.isArray(searchSource.filter)) {
+          // @ts-expect-error TS7006 TODO(ts-error): fixme
           searchSource.filter.forEach((item) => {
             if (item.meta?.index) {
               item.meta.index = idGenerator(item.meta.index);
             }
           });
         }
+        // @ts-expect-error TS2571 TODO(ts-error): fixme
         savedObject.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
           searchSource
         );
@@ -59,12 +63,14 @@ const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: strin
       const visState = JSON.parse(visStateString);
       const controlList = visState.params?.controls;
       if (controlList) {
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
         controlList.map((control) => {
           if (control.indexPattern) {
             control.indexPattern = idGenerator(control.indexPattern);
           }
         });
       }
+      // @ts-expect-error TS2571 TODO(ts-error): fixme
       savedObject.attributes.visState = JSON.stringify(visState);
     }
   }
@@ -98,6 +104,7 @@ export const getSavedObjectsWithDataSource = (
           saveObject.type === 'search' ||
           saveObject.type === 'visualization-visbuilder'
         ) {
+          // @ts-expect-error TS2571 TODO(ts-error): fixme
           saveObject.attributes.title = saveObject.attributes.title + `_${dataSourceTitle}`;
         }
 

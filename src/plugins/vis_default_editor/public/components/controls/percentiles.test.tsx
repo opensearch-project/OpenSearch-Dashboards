@@ -31,6 +31,7 @@
 import React from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
 import { IAggConfig } from 'src/plugins/data/public';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { mount } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { PercentilesEditor } from './percentiles';

@@ -56,6 +56,7 @@ export interface EmbeddableFactory<
     TEmbeddableOutput
   >,
   TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
 > extends PersistableState<EmbeddableInput> {
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.

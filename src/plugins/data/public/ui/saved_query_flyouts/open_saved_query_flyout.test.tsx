@@ -19,6 +19,7 @@ const savedQueryAttributesWithTemplate: SavedQueryAttributes = {
   query: {
     language: 'kuery',
     query: 'response:200',
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     dataset: 'my_dataset',
   },
 };
@@ -47,7 +48,9 @@ jest.mock('./saved_query_card', () => ({
       id: 'foo1',
       attributes: savedQueryAttributesWithTemplate,
     },
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     onSelect,
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     handleQueryDelete,
   }) => (
     <div>
@@ -179,6 +182,7 @@ describe('OpenSavedQueryFlyout', () => {
   });
 
   it('should call handleQueryDelete when deleting a query', async () => {
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     mockHandleQueryDelete.mockResolvedValueOnce();
     render(
       <OpenSavedQueryFlyout

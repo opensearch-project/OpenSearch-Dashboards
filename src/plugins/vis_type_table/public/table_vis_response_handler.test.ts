@@ -17,6 +17,7 @@ jest.mock('./services', () => {
   };
 });
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const createTableGroup = (title, rows) => ({
   title,
   table: {
@@ -105,6 +106,7 @@ describe('tableVisResponseHandler', () => {
       direction: 'row',
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = tableVisResponseHandler(input, visConfig);
     expect(result).toEqual(expected);
   });
@@ -121,6 +123,7 @@ describe('tableVisResponseHandler', () => {
       direction: 'column',
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = tableVisResponseHandler(input, visConfig);
     expect(result).toEqual(expected);
   });
@@ -151,6 +154,7 @@ describe('tableVisResponseHandler', () => {
       direction: undefined,
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = tableVisResponseHandler(input, visConfig);
     expect(result).toEqual(expected);
   });

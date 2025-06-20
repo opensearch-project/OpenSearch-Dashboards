@@ -153,7 +153,9 @@ describe('UiActionsService', () => {
     test('returns actions set on trigger', () => {
       const service = new UiActionsService();
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service.registerAction(action1);
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service.registerAction(action2);
       service.registerTrigger({
         description: 'foo',
@@ -188,6 +190,7 @@ describe('UiActionsService', () => {
       const helloWorldAction = createHelloWorldAction({} as any);
       const length = actions.size;
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service.registerAction(helloWorldAction);
 
       expect(actions.size - length).toBe(1);
@@ -198,6 +201,7 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
       const helloWorldAction = createHelloWorldAction({} as any);
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service.registerAction(helloWorldAction);
 
       const testTrigger: Trigger = {
@@ -223,6 +227,7 @@ describe('UiActionsService', () => {
         execute: () => Promise.resolve(),
       });
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service.registerAction(action);
 
       const testTrigger: Trigger = {
@@ -314,6 +319,7 @@ describe('UiActionsService', () => {
       service1.registerTrigger({
         id: FOO_TRIGGER,
       });
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service1.registerAction(testAction1);
       service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
@@ -334,7 +340,9 @@ describe('UiActionsService', () => {
       service1.registerTrigger({
         id: FOO_TRIGGER,
       });
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service1.registerAction(testAction1);
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service1.registerAction(testAction2);
       service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
@@ -355,7 +363,9 @@ describe('UiActionsService', () => {
       service1.registerTrigger({
         id: FOO_TRIGGER,
       });
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service1.registerAction(testAction1);
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       service1.registerAction(testAction2);
       service1.addTriggerAction(FOO_TRIGGER, testAction1);
 

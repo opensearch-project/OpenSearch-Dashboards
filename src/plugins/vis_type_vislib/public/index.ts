@@ -38,7 +38,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { getConfigCollections } from './utils/collections';
 export {
   vislibSeriesResponseHandler,
-  vislibSlicesResponseHandler,
+  vislibSlicesResponseHandler, // @ts-expect-error TS7016 TODO(ts-error): fixme
 } from './vislib/response_handler';
 
 export * from './types';

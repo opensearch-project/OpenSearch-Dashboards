@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { mount, configure, render } from 'enzyme';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import Adapter from 'enzyme-adapter-react-16';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AccelerationTable } from './acceleration_table';
@@ -99,6 +100,7 @@ describe('AccelerationTable Component', () => {
   });
 
   it('shows loading spinner when refreshing accelerations', async () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     jest.spyOn(cacheLoader, 'useLoadAccelerationsToCache').mockReturnValue({
       loadStatus: DirectQueryLoadingStatus.RUNNING,
       startLoading: jest.fn(),
@@ -107,6 +109,7 @@ describe('AccelerationTable Component', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mount(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <AccelerationTable
           dataSourceName="testDataSource"
           cacheLoadingHooks={mockCacheLoadingHooks}
@@ -129,6 +132,7 @@ describe('AccelerationTable Component', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mount(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <AccelerationTable
           dataSourceName="testDataSource"
           cacheLoadingHooks={mockCacheLoadingHooks}
@@ -145,6 +149,7 @@ describe('AccelerationTable Component', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mount(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <AccelerationTable
           dataSourceName="testDataSource"
           cacheLoadingHooks={mockCacheLoadingHooks}
@@ -167,6 +172,7 @@ describe('AccelerationTable Component', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mount(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <AccelerationTable
           dataSourceName="testDataSource"
           cacheLoadingHooks={mockCacheLoadingHooks}
@@ -183,6 +189,7 @@ describe('AccelerationTable Component', () => {
   it('render result matches snapshot', async () => {
     expect(
       render(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <AccelerationTable
           dataSourceName="testDataSource"
           cacheLoadingHooks={mockCacheLoadingHooks}

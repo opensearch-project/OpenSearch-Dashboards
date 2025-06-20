@@ -92,6 +92,7 @@ export function getCallMsearchWithOpenSearchClient(
     const promise = shimAbortSignal(
       opensearchClient.msearch(
         {
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           body,
         },
         {
@@ -100,6 +101,7 @@ export function getCallMsearchWithOpenSearchClient(
       ),
       params.signal
     );
+    // @ts-expect-error TS2352 TODO(ts-error): fixme
     const response = (await promise) as ApiResponse<{ responses: Array<SearchResponse<any>> }>;
 
     return {

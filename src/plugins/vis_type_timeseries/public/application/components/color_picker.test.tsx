@@ -33,6 +33,7 @@ import { ColorPicker, ColorPickerProps } from './color_picker';
 import { mount } from 'enzyme';
 import { ReactWrapper } from 'enzyme';
 import { EuiColorPicker, EuiIconTip } from '@elastic/eui';
+// @ts-expect-error TS2306 TODO(ts-error): fixme
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('ColorPicker', () => {

@@ -41,6 +41,7 @@ describe('axes.ts', () => {
         x: { format: { id: 'number' } },
         y: [{ label: 'Y Axis' }],
       };
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const result = buildAxes(dimensions, 'X', 'Y');
 
       expect(result[0]).not.toHaveProperty('format');
@@ -51,6 +52,7 @@ describe('axes.ts', () => {
         x: {},
         y: [{ label: 'Default Y' }],
       };
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const result = buildAxes(dimensions, '', '');
 
       expect(result[0].title).toBe('_all');

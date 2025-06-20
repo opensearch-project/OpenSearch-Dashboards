@@ -299,7 +299,9 @@ describe('doExistingDataSourceValidation', () => {
 
   it('Catches data stream fetch errors', async () => {
     (checkDataSourceName as jest.Mock).mockReturnValue({ ok: true });
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockHttp.post.mockRejectedValueOnce(new Error('Error'));
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockHttp.get.mockResolvedValueOnce({
       data: { mappings: { logs: { template: { mappings: { properties: { test: true } } } } } },
       statusCode: 200,
@@ -316,7 +318,9 @@ describe('doExistingDataSourceValidation', () => {
 
   it('Catches integration fetch errors', async () => {
     (checkDataSourceName as jest.Mock).mockReturnValue({ ok: true });
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockHttp.post.mockResolvedValueOnce({ logs: { mappings: { properties: { test: true } } } });
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockHttp.get.mockRejectedValueOnce(new Error('Error'));
 
     const result = await doExistingDataSourceValidation(
@@ -333,7 +337,9 @@ describe('doExistingDataSourceValidation', () => {
 
   it('Catches type validation issues', async () => {
     (checkDataSourceName as jest.Mock).mockReturnValue({ ok: true });
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockHttp.post.mockResolvedValueOnce({ logs: { mappings: { properties: { test: true } } } });
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockHttp.get.mockResolvedValueOnce({
       data: { mappings: { logs: { template: { mappings: { properties: { test2: true } } } } } },
       statusCode: 200,
@@ -350,7 +356,9 @@ describe('doExistingDataSourceValidation', () => {
 
   it('Returns no errors if everything passes', async () => {
     (checkDataSourceName as jest.Mock).mockReturnValue({ ok: true });
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockHttp.post.mockResolvedValueOnce({ logs: { mappings: { properties: { test: true } } } });
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockHttp.get.mockResolvedValueOnce({
       data: { mappings: { logs: { template: { mappings: { properties: { test: true } } } } } },
       statusCode: 200,

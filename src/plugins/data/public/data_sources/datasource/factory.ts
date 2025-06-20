@@ -16,6 +16,7 @@ type DataSourceClass<
   DataSet = any,
   QueryParams = any,
   QueryResult = any
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
 > = new (config: any) => DataSource<MetaData, SetParams, DataSet, QueryParams, QueryResult>;
 
 export class DataSourceFactory {

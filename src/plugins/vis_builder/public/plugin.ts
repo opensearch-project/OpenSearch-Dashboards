@@ -202,12 +202,14 @@ export class VisBuilderPlugin
         visualizations: {
           docTypes: [VISBUILDER_SAVED_OBJECT],
           toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             description: attributes?.description,
             editApp: PLUGIN_ID,
             editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
             icon: 'visBuilder',
             id,
             savedObjectType: VISBUILDER_SAVED_OBJECT,
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             title: attributes?.title,
             typeTitle: VIS_BUILDER_CHART_TYPE,
             updated_at: updatedAt,

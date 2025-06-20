@@ -5,6 +5,7 @@
 
 import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { i18n } from '@osd/i18n';
 import { DataSourceAggregatedView } from './data_source_aggregated_view';
 import { IToasts, SavedObject, SavedObjectsClientContract } from '../../../../../core/public';
@@ -22,10 +23,15 @@ import {
 import * as utils from '../utils';
 import { EuiSelectable, EuiSwitch } from '@elastic/eui';
 import { DataSourceAttributes } from '../../types';
+// @ts-expect-error TS6192 TODO(ts-error): fixme
 import {
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   ADD_COMPATIBLE_DATASOURCES_MESSAGE,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   CONNECT_DATASOURCES_MESSAGE,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   NO_DATASOURCES_CONNECTED_MESSAGE,
 } from '../constants';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
@@ -256,6 +262,7 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
       // Should render only active options
       const euiSwitch = component.find(EuiSwitch);
       expect(euiSwitch.exists()).toBeTruthy();
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       euiSwitch.prop('onChange')({ target: { checked: true } });
       const expectedOptions = activeDataSourceIds.length
         ? [

@@ -77,6 +77,7 @@ export const generateVegaSpecForSlices = (
         }
       : null,
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     marks: [buildSlicesMarkForVega(levels, hasSplit, addTooltip)],
   };
 

@@ -97,6 +97,7 @@ async function callResolveImportErrorsApi(
   formData.append('retries', JSON.stringify(retries));
   const query = createNewCopies ? { createNewCopies } : {};
   if (selectedDataSourceId) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     query.dataSourceId = selectedDataSourceId;
   }
   return http.post<any>('/api/saved_objects/_resolve_import_errors', {
@@ -280,6 +281,7 @@ export async function resolveImportErrors({
     importCount = response.successCount; // reset the success count since we retry all successful results each time
     failedImports = [];
     for (const { error, ...obj } of response.errors || []) {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       failedImports.push({ error, obj });
     }
     successfulImports = response.successResults || [];

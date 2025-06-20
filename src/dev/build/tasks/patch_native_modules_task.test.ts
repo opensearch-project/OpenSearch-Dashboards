@@ -34,6 +34,7 @@ async function setup() {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: false,
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     targetPlatforms: {
       linux: false,
       linuxArm: false,
@@ -76,6 +77,7 @@ const mockPackage = {
 describe('patch native modules task', () => {
   it('patch native modules task downloads the correct platform package', async () => {
     const { config, build } = await setup();
+    // @ts-expect-error TS2341 TODO(ts-error): fixme
     config.targetPlatforms.linuxArm = true;
     const PatchNativeModulesWithMock = createPatchNativeModulesTask([mockPackage]);
     await PatchNativeModulesWithMock.run(config, log, build);
@@ -97,6 +99,7 @@ describe('patch native modules task', () => {
 
   it('for .tar.gz artifact, patch native modules task unzip it via untar', async () => {
     const { config, build } = await setup();
+    // @ts-expect-error TS2341 TODO(ts-error): fixme
     config.targetPlatforms.linuxArm = true;
     const PatchNativeModulesWithMock = createPatchNativeModulesTask([mockPackage]);
     await PatchNativeModulesWithMock.run(config, log, build);
@@ -110,6 +113,7 @@ describe('patch native modules task', () => {
       extractMethod: 'gunzip',
     };
     const { config, build } = await setup();
+    // @ts-expect-error TS2341 TODO(ts-error): fixme
     config.targetPlatforms.linux = true;
     const PatchNativeModulesWithMock = createPatchNativeModulesTask([mockPackageGZ]);
     await PatchNativeModulesWithMock.run(config, log, build);
@@ -123,6 +127,7 @@ describe('patch native modules task', () => {
       extractMethod: 'unsupported',
     };
     const { config, build } = await setup();
+    // @ts-expect-error TS2341 TODO(ts-error): fixme
     config.targetPlatforms.linux = true;
     const PatchNativeModulesWithMock = createPatchNativeModulesTask([mockPackageUnsupported]);
     await expect(PatchNativeModulesWithMock.run(config, log, build)).rejects.toThrow(

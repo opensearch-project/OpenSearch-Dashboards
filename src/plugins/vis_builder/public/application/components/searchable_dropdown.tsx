@@ -24,6 +24,7 @@ export interface SearchableDropdownOption {
 
 interface SearchableDropdownProps {
   selected?: SearchableDropdownOption;
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   onChange: (selection) => void;
   options: SearchableDropdownOption[];
   loading: boolean;
@@ -31,6 +32,7 @@ interface SearchableDropdownProps {
   prepend: string;
   // not just the first time!
   onOpen?: () => void;
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   equality: (A, B) => boolean;
 }
 
@@ -60,11 +62,13 @@ export const SearchableDropdown = ({
   };
   const closePopover = () => setIsPopoverOpen(false);
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   function selectNewOption(newOptions) {
     // alright, the EUI Selectable is pretty ratchet
     // this is as smarmy as it is because it needs to be
 
     // first go through and count all the "checked" options
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const selectedCount = newOptions.filter((o) => o.checked === 'on').length;
 
     // if the count is 0, the user just "unchecked" our selection and we can just do nothing
@@ -82,6 +86,7 @@ export const SearchableDropdown = ({
     }
 
     // finally, we can pick the checked option as the actual selection
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const newSelection = newOptions.filter((o) => o.checked === 'on')[0];
 
     setLocalOptions(newOptions);
@@ -98,6 +103,7 @@ export const SearchableDropdown = ({
     );
   }, [selected, options, equality]);
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const listDisplay = (list, search) =>
     loading ? (
       <div style={{ textAlign: 'center' }}>

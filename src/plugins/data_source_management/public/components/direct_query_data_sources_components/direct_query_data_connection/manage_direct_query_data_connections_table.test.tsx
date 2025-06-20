@@ -310,6 +310,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
           capabilities: {
             ...mockedContext.application.capabilities,
             dashboards: {
+              // @ts-expect-error TS2339 TODO(ts-error): fixme
               ...mockedContext.application.capabilities.dashboards,
               isDashboardAdmin: true,
             },

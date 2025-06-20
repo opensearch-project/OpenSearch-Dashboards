@@ -6,6 +6,7 @@
 import { ViewDefinition } from './types';
 import { ViewService } from './view_service';
 
+// @ts-expect-error TS2739 TODO(ts-error): fixme
 const DEFAULT_VIEW: ViewDefinition = {
   id: 'my-view',
   title: 'My view',

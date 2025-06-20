@@ -30,6 +30,7 @@
 
 import './empty_state.scss';
 import React from 'react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DocLinksStart, ApplicationStart } from 'opensearch-dashboards/public';

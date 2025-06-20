@@ -380,6 +380,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
     const euiComboBox = component.find(EuiComboBox);
     expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
     expect(euiComboBox.prop('options')).toEqual(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       expect.arrayContaining(getMockedDataSourceOptions().concat([LocalCluster]))
     );
   });

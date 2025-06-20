@@ -1,12 +1,14 @@
 // Generated from ./src/plugins/data/public/antlr/dql/grammar/DQLParser.g4 by ANTLR 4.13.1
 
 import * as antlr from "antlr4ng";
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { Token } from "antlr4ng";
 
 import { DQLParserVisitor } from "./DQLParserVisitor.js";
 
 // for running tests with parameters, TODO: discuss strategy for typed parameters in CI
 // eslint-disable-next-line no-unused-vars
+// @ts-expect-error TS6196 TODO(ts-error): fixme
 type int = number;
 
 

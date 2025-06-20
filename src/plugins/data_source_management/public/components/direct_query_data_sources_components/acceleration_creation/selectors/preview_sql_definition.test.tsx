@@ -42,6 +42,7 @@ describe('PreviewSQLDefinition', () => {
   const mountComponent = async () => {
     const wrapper = mount(
       <PreviewSQLDefinition
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         accelerationFormData={mockAccelerationFormData}
         setAccelerationFormData={mockSetAccelerationFormData}
         resetFlyout={mockResetFlyout}

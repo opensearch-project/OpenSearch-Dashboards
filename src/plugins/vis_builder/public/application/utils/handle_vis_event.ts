@@ -12,6 +12,7 @@ export const handleVisEvent = async (
   uiActions: UiActionsStart,
   timeFieldName?: string
 ) => {
+  // @ts-expect-error TS7053 TODO(ts-error): fixme
   const triggerId = VIS_EVENT_TO_TRIGGER[event.name] ?? VIS_EVENT_TO_TRIGGER.filter;
   const isApplyFilter = triggerId === VIS_EVENT_TO_TRIGGER.applyFilter;
   const dataContext = {

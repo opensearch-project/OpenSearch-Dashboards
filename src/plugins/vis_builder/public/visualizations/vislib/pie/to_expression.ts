@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { buildVislibDimensions, getVisSchemas } from '../../../../../visualizations/public';
 import {
   buildExpression,

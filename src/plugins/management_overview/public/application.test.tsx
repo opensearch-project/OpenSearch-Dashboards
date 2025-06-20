@@ -18,6 +18,7 @@ const applicationStartMock = (apps: Map<string, PublicAppInfo>): jest.Mocked<App
   return {
     applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(apps),
     currentAppId$: currentAppId$.asObservable(),
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     capabilities: deepFreeze({
       catalogue: {},
       management: {},

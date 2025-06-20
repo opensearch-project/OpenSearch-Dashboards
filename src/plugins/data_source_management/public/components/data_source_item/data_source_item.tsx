@@ -16,8 +16,10 @@ export const DataSourceItem = ({ className, option, defaultDataSource }: DataSou
   return (
     <EuiFlexGroup justifyContent="spaceBetween" className={`${className}OuiFlexGroup`}>
       <EuiFlexItem className={`${className}OuiFlexItem`} grow={false}>
+        {/* @ts-expect-error TS2339 TODO(ts-error): fixme */}
         {option.label || ''}
       </EuiFlexItem>
+      {/* @ts-expect-error TS2339 TODO(ts-error): fixme */}
       {option.id === defaultDataSource && (
         <EuiFlexItem grow={false}>
           <EuiBadge iconSide="left">Default</EuiBadge>

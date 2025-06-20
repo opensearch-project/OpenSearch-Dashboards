@@ -50,6 +50,7 @@ describe('OpenSearch Configuration Client', () => {
 
       const cache = {};
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.getConfig();
@@ -82,6 +83,7 @@ describe('OpenSearch Configuration Client', () => {
 
       const cache = {};
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.getConfig()).rejects.toThrowError(ERROR_MESSAGE);
@@ -109,6 +111,7 @@ describe('OpenSearch Configuration Client', () => {
         set: jest.fn(),
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.getEntityConfig('config1');
@@ -137,6 +140,7 @@ describe('OpenSearch Configuration Client', () => {
         get: jest.fn().mockReturnValue('cachedValue'),
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.getEntityConfig('config1');
@@ -162,6 +166,7 @@ describe('OpenSearch Configuration Client', () => {
 
       const cache = {};
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.getEntityConfig(EMPTY_INPUT)).rejects.toThrowError(
@@ -197,6 +202,7 @@ describe('OpenSearch Configuration Client', () => {
         set: jest.fn(),
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.getEntityConfig('config1')).rejects.toThrowError(ERROR_MESSAGE);
@@ -219,6 +225,7 @@ describe('OpenSearch Configuration Client', () => {
         del: jest.fn(),
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.deleteEntityConfig('config1');
@@ -238,6 +245,7 @@ describe('OpenSearch Configuration Client', () => {
 
       const cache = {};
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.deleteEntityConfig(EMPTY_INPUT)).rejects.toThrowError(
@@ -272,6 +280,7 @@ describe('OpenSearch Configuration Client', () => {
         del: jest.fn(),
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.deleteEntityConfig('config1');
@@ -305,6 +314,7 @@ describe('OpenSearch Configuration Client', () => {
         del: jest.fn(),
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.deleteEntityConfig('config1');
@@ -338,6 +348,7 @@ describe('OpenSearch Configuration Client', () => {
 
       const cache = {};
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.deleteEntityConfig('config1')).rejects.toThrowError(ERROR_MESSAGE);
@@ -358,6 +369,7 @@ describe('OpenSearch Configuration Client', () => {
         set: jest.fn(),
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.updateEntityConfig('config1', 'newValue1');
@@ -377,6 +389,7 @@ describe('OpenSearch Configuration Client', () => {
 
       const cache = {};
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.updateEntityConfig(EMPTY_INPUT, 'newValue1')).rejects.toThrowError(
@@ -395,6 +408,7 @@ describe('OpenSearch Configuration Client', () => {
 
       const cache = {};
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.updateEntityConfig('config1', EMPTY_INPUT)).rejects.toThrowError(
@@ -427,6 +441,7 @@ describe('OpenSearch Configuration Client', () => {
 
       const cache = {};
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.updateEntityConfig('config1', 'newValue1')).rejects.toThrowError(

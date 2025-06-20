@@ -22,14 +22,17 @@ export function registerQueryAssistRoutes(router: IRouter) {
       },
     },
     async (context, request, response) => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const config = await context.query_assist.configPromise;
       const client =
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         context.query_assist.dataSourceEnabled && request.query.dataSourceId
           ? await context.dataSource.opensearch.getClient(request.query.dataSourceId)
           : context.core.opensearch.client.asCurrentUser;
       const configuredLanguages: string[] = [];
       try {
         await Promise.allSettled(
+          // @ts-expect-error TS7006 TODO(ts-error): fixme
           config.queryAssist.supportedLanguages.map((languageConfig) =>
             // if the call does not throw any error, then the agent is properly configured
             getAgentIdByConfig(client, languageConfig.agentConfig).then(() =>
@@ -57,8 +60,10 @@ export function registerQueryAssistRoutes(router: IRouter) {
       },
     },
     async (context, request, response) => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const config = await context.query_assist.configPromise;
       const languageConfig = config.queryAssist.supportedLanguages.find(
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
         (c) => c.language === request.body.language
       );
       if (!languageConfig) return response.badRequest({ body: 'Unsupported language' });

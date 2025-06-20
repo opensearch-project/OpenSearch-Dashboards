@@ -25,6 +25,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -91,6 +92,7 @@ export interface EditDataSourceState {
 
 export class EditDataSourceForm extends React.Component<EditDataSourceProps, EditDataSourceState> {
   static contextType = contextType;
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: DataSourceManagementContextValue;
   maskedPassword: string = '********';
   authOptions: Array<EuiSuperSelectOption<string>> = [];
@@ -114,6 +116,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       description: '',
       endpoint: '',
       auth: {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: initialSelectedAuthMethod?.name,
         credentials: {
           ...initialSelectedAuthMethod?.credentialFormField,
@@ -235,6 +238,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateUsername = () => {
+    // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.username?.trim().length;
     this.setState({
       formErrorsByField: {
@@ -248,6 +252,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validatePassword = () => {
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.password;
     this.setState({
       formErrorsByField: {
@@ -294,6 +299,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateRegion = () => {
+    // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.region?.trim().length;
     this.setState({
       formErrorsByField: {
@@ -353,6 +359,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   onClickUpdateDataSource = async () => {
     if (this.isFormValid()) {
       // update data source endpoint is currently not supported/allowed
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       const formValues: DataSourceAttributes = {
         title: this.state.title,
         description: this.state.description,
@@ -457,6 +464,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         break;
     }
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const formValues: DataSourceAttributes = {
       title: this.state.title,
       description: this.state.description,
@@ -507,6 +515,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     const updateAttributes: DataSourceAttributes = {
       title,
       description,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       endpoint: undefined,
       auth: {
         type: auth.type,
@@ -541,6 +550,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     const updateAttributes: DataSourceAttributes = {
       title,
       description,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       endpoint: undefined,
       auth: {
         type: auth.type,
@@ -616,6 +626,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         {this.state.showUpdatePasswordModal ? (
           <UpdatePasswordModal
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             username={this.state.auth?.credentials?.username || ''}
             handleUpdatePassword={this.updatePassword}
             closeUpdatePasswordModal={this.closePasswordModal}
@@ -644,7 +655,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         {this.state.showUpdateAwsCredentialModal ? (
           <UpdateAwsCredentialModal
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             region={this.state.auth.credentials!.region}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             service={this.state.auth.credentials!.service}
             handleUpdateAwsCredential={this.updateAwsCredential}
             closeUpdateAwsCredentialModal={this.closeAwsCredentialModal}
@@ -921,6 +934,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           <EuiCompressedSuperSelect
             options={this.authOptions}
             valueOfSelected={this.state.auth.type}
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             onChange={(value) => this.onChangeAuthType(value)}
             disabled={this.authOptions.length <= 1 || !this.props.canManageDataSource}
             name="Credential"
@@ -929,6 +943,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         </EuiCompressedFormRow>
 
         <EuiSpacer />
+        {/* @ts-expect-error TS2345 TODO(ts-error): fixme */}
         {this.renderSelectedAuthType(this.state.auth.type)}
       </>
     );
@@ -965,6 +980,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               }
             )}
             isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             value={this.state.auth.credentials?.region || ''}
             onChange={this.onChangeRegion}
             onBlur={this.validateRegion}
@@ -980,8 +996,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         >
           <EuiCompressedSuperSelect
             options={sigV4ServiceOptions}
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             valueOfSelected={this.state.auth.credentials?.service}
             disabled={!this.props.canManageDataSource}
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             onChange={(value) => this.onChangeSigV4ServiceName(value)}
             name="ServiceName"
             data-test-subj="editDataSourceFormSigV4ServiceTypeSelect"
@@ -1003,6 +1021,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               }
             )}
             type={'dual'}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             value={
               this.props.existingDataSource.auth.type === AuthType.SigV4
                 ? this.maskedPassword
@@ -1032,6 +1051,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               }
             )}
             type={'dual'}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             value={
               this.props.existingDataSource.auth.type === AuthType.SigV4
                 ? this.maskedPassword
@@ -1072,6 +1092,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 defaultMessage: 'Username to connect to data source',
               }
             )}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             value={this.state.auth.credentials?.username || ''}
             isInvalid={!!this.state.formErrorsByField.createCredential?.username?.length}
             onChange={this.onChangeUsername}
@@ -1097,6 +1118,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                   }
                 )}
                 type={'dual'}
+                // @ts-expect-error TS2322 TODO(ts-error): fixme
                 value={
                   this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType
                     ? this.maskedPassword
@@ -1123,6 +1145,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   didFormValuesChange = () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const formValues: DataSourceAttributes = {
       title: this.state.title,
       description: this.state.description,

@@ -51,6 +51,7 @@ describe('DataSourceMultiSelectable', () => {
         />
       );
     });
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
@@ -75,6 +76,7 @@ describe('DataSourceMultiSelectable', () => {
         />
       );
     });
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
@@ -149,10 +151,12 @@ describe('DataSourceMultiSelectable', () => {
         />
       );
     });
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     wrapper.update();
 
     expect(getDefaultDataSourceIdMock).toHaveBeenCalledWith(uiSettings);
 
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     const instance = wrapper.instance();
     expect(instance.state.defaultDataSource).toEqual('test1');
     expect(instance.state.selectedOptions).toHaveLength(3);

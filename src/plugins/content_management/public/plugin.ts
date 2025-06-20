@@ -31,6 +31,7 @@ export class ContentManagementPublicPlugin
     > {
   private readonly contentManagementService = new ContentManagementService();
 
+  // @ts-expect-error TS6138 TODO(ts-error): fixme
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(

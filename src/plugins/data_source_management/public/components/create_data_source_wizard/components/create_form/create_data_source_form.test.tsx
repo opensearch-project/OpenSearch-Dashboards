@@ -74,6 +74,7 @@ describe('Datasource Management: Create Datasource form', () => {
   beforeEach(() => {
     component = mount(
       wrapWithIntl(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <CreateDataSourceForm
           handleTestConnection={mockTestConnectionHandler}
           handleSubmit={mockSubmitHandler}
@@ -288,6 +289,7 @@ describe('Datasource Management: Create Datasource form with different authType 
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -327,6 +329,7 @@ describe('Datasource Management: Create Datasource form with different authType 
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -366,6 +369,7 @@ describe('Datasource Management: Create Datasource form with different authType 
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -429,6 +433,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -482,6 +487,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -529,6 +535,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -569,6 +576,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
     component = mount(
       wrapWithIntl(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <CreateDataSourceForm
           handleTestConnection={mockTestConnectionHandler}
           handleSubmit={mockSubmitHandler}

@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { buildBufferedBodyMock, getProxyRouteHandlerDeps } from './mocks';
 
 import expect from '@osd/expect';
@@ -51,6 +52,7 @@ describe('Console Proxy Route', () => {
       opensearchClient = requestHandlerContextMock.opensearch.client;
 
       opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mockResolvedValueOnce(
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         mockResponse
       );
       const handler = createHandler(getProxyRouteHandlerDeps({}));

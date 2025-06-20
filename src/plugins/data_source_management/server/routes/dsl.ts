@@ -5,6 +5,7 @@
 
 /* eslint-disable no-console*/
 import { schema } from '@osd/config-schema';
+// @ts-expect-error TS2307 TODO(ts-error): fixme
 import { RequestParams } from '@elastic/elasticsearch';
 import { IRouter } from '../../../../core/server';
 import { DSLFacet } from '../services/facets/dsl_facet';

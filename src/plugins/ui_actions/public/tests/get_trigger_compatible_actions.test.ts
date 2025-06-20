@@ -43,6 +43,7 @@ beforeEach(() => {
     execute: () => Promise.resolve(),
   });
 
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   uiActions.setup.registerAction(action);
   uiActions.setup.registerTrigger({
     id: 'trigger' as TriggerId,
@@ -55,6 +56,7 @@ test('can register action', async () => {
   const { setup } = uiActions;
   const helloWorldAction = createHelloWorldAction({} as any);
 
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   setup.registerAction(helloWorldAction);
 });
 
@@ -62,6 +64,7 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = uiActions;
   const helloWorldAction = createHelloWorldAction({} as any);
 
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   setup.registerAction(helloWorldAction);
 
   const testTrigger: Trigger = {
@@ -94,6 +97,7 @@ test('filters out actions not applicable based on the context', async () => {
   };
 
   setup.registerTrigger(testTrigger);
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   setup.registerAction(action1);
   setup.addTriggerAction(testTrigger.id, action1);
 

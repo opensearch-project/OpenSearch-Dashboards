@@ -36,6 +36,7 @@ export const convertResult = ({
   fields?: SearchSourceFields;
   options?: ISearchOptions;
 }): SearchResponse<any> => {
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const body = response.body;
   if (body.hasOwnProperty('error')) {
     return response;

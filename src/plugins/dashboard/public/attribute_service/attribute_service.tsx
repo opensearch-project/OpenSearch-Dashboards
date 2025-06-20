@@ -169,6 +169,7 @@ export class AttributeService<
         try {
           const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
+          // @ts-expect-error TS2352 TODO(ts-error): fixme
           const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
 
           // Remove unneeded attributes from the original input.

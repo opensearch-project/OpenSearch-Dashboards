@@ -30,6 +30,7 @@
 
 import { resolve } from 'path';
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { standardize, REPO_ROOT } from '@osd/cross-platform';
 import { createAbsolutePathSerializer } from '@osd/dev-utils';
 

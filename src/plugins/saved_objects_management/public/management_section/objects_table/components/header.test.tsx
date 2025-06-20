@@ -53,6 +53,7 @@ describe('Header', () => {
       showDuplicateAll: false,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const component = shallow(<Header {...props} />);
 
     expect(component).toMatchSnapshot();
@@ -64,6 +65,7 @@ describe('Header', () => {
       showDuplicateAll: undefined,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const component = shallow(<Header {...props} />);
 
     expect(component).toMatchSnapshot();
@@ -76,6 +78,7 @@ describe('Header', () => {
       useUpdatedUX: true,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const component = shallow(<Header {...props} />);
 
     expect(component).toMatchSnapshot();
@@ -89,6 +92,7 @@ describe('Header - workspace enabled', () => {
       showDuplicateAll: true,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const component = shallow(<Header {...props} />);
 
     expect(component.find('EuiButtonEmpty[data-test-subj="duplicateObjects"]').exists()).toBe(true);
@@ -100,6 +104,7 @@ describe('Header - workspace enabled', () => {
       showImportButton: true,
     };
 
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const component = shallow(<Header {...props} />);
 
     expect(component.find('EuiButtonEmpty[data-test-subj="importObjects"]').exists()).toBe(true);
@@ -110,6 +115,7 @@ describe('Header - workspace enabled', () => {
       useUpdatedUX: true,
     };
 
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const newUxComponent = shallow(<Header {...newUxProps} />);
 
     expect(newUxComponent).toMatchSnapshot();
@@ -121,6 +127,7 @@ describe('Header - workspace enabled', () => {
       showImportButton: false,
     };
 
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const component = shallow(<Header {...props} />);
 
     expect(component.find('EuiButtonEmpty[data-test-subj="importObjects"]').exists()).toBe(false);
@@ -131,6 +138,7 @@ describe('Header - workspace enabled', () => {
       useUpdatedUX: false,
     };
 
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const newUxComponent = shallow(<Header {...newUxProps} />);
 
     expect(newUxComponent.find('EuiButtonEmpty[data-test-subj="importObjects"]').exists()).toBe(

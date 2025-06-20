@@ -111,6 +111,7 @@ export const SolutionsSection: FC<Props> = ({
 
 SolutionsSection.propTypes = {
   addBasePath: PropTypes.func.isRequired,
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   directories: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -125,6 +126,7 @@ SolutionsSection.propTypes = {
       solutionId: PropTypes.string,
     })
   ),
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   solutions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

@@ -19,6 +19,7 @@ export const enum QUERY_LANGUAGE {
   DQL = 'DQL',
 }
 export enum DATA_SOURCE_TYPES {
+  // @ts-expect-error TS2553 TODO(ts-error): fixme
   DEFAULT_CLUSTER_TYPE = DEFAULT_DATA_SOURCE_TYPE,
   SPARK = 'spark',
   S3Glue = 's3glue',

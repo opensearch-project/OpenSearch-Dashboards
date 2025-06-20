@@ -33,6 +33,7 @@ describe('DefaultDslDataSource', () => {
   });
 
   it('should return an empty dataset if getCache returns an empty array', async () => {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     indexPatternsMock.getCache.mockResolvedValue([]);
     const dataSource = new DefaultDslDataSource({
       id: 'testId',
@@ -51,6 +52,7 @@ describe('DefaultDslDataSource', () => {
       { id: '1', attributes: { title: 'Index1' }, references: [] },
       { id: '2', attributes: { title: 'Index2' }, references: [] },
     ];
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     indexPatternsMock.getCache.mockResolvedValue(mockSavedObjects);
     const dataSource = new DefaultDslDataSource({
       id: 'testId',
@@ -68,6 +70,7 @@ describe('DefaultDslDataSource', () => {
   });
 
   it('should handle errors thrown by getCache', async () => {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     indexPatternsMock.getCache.mockRejectedValue(new Error('Cache fetch failed'));
     const dataSource = new DefaultDslDataSource({
       id: 'testId',

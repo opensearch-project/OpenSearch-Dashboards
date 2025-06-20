@@ -296,6 +296,7 @@ function DefaultEditorAgg({
         {SchemaComponent && (
           <SchemaComponent
             agg={agg}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             editorStateParams={state.params}
             setAggParamValue={setAggParamValue}
             setStateParamValue={setStateParamValue}

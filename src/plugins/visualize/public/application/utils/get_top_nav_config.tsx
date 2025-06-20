@@ -99,6 +99,7 @@ export const getLegacyTopNavConfig = (
   }: VisualizeServices,
   navActions: VisualizeNavActionMap
 ) => {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const { vis, embeddableHandler } = visInstance;
   const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
 
@@ -491,6 +492,7 @@ export const getTopNavConfig = (
   }: VisualizeServices,
   navActions: VisualizeNavActionMap
 ) => {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const { vis, embeddableHandler } = visInstance;
   const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
 

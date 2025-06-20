@@ -5,6 +5,7 @@
 
 import { waitFor } from '@testing-library/dom';
 import { configure, mount } from 'enzyme';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import Adapter from 'enzyme-adapter-react-16';
 import toJson from 'enzyme-to-json';
 import React from 'react';

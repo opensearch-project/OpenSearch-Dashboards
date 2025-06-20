@@ -5,6 +5,7 @@
 
 import * as React from 'react';
 import { RegionMapOptions } from './region_map_options';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import renderer, { act } from 'react-test-renderer';
 
 describe('region_map_options', () => {
@@ -55,9 +56,12 @@ describe('region_map_options', () => {
 
     let tree;
     await act(async () => {
+      // @ts-expect-error TS2740 TODO(ts-error): fixme
       tree = renderer.create(<RegionMapOptions stateParams={stateParams} vis={vis} {...props} />);
     });
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     expect(tree.toJSON().props.id).toBe('defaultMapOption');
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     expect(tree.toJSON()).toMatchSnapshot();
   });
 
@@ -108,9 +112,12 @@ describe('region_map_options', () => {
 
     let tree;
     await act(async () => {
+      // @ts-expect-error TS2740 TODO(ts-error): fixme
       tree = renderer.create(<RegionMapOptions stateParams={stateParams} vis={vis} {...props} />);
     });
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     expect(tree.toJSON().props.id).toBe('customMapOption');
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     expect(tree.toJSON()).toMatchSnapshot();
   });
 });

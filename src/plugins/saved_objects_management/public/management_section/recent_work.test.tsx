@@ -232,6 +232,7 @@ describe('<RecentWork />', () => {
 
     await waitFor(() => expect(queryByText('Search')).toBeInTheDocument());
     const allCardsAfterSort = await findAllByTestId('recentlyCard');
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     expect(allCardsAfterSort[0].querySelector('.euiCard__titleAnchor')?.href).toEqual(
       'http://localhost/w/foo/app/search#/search-in-workspace'
     );

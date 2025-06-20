@@ -542,6 +542,7 @@ export class VisualizeEmbeddable
       );
 
       if (!isEmpty(augmentVisSavedObjs) && !aborted && isEligibleForVisLayers(this.vis)) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
         // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
         // expression functions are ran, they will incrementally append their generated VisLayers to it.
@@ -567,6 +568,7 @@ export class VisualizeEmbeddable
          * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4499
          */
         getUiActions().getTrigger(PLUGIN_RESOURCE_DELETE_TRIGGER).exec({
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           savedObjs: augmentVisSavedObjs,
           visLayers,
         });

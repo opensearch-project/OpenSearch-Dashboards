@@ -153,6 +153,7 @@ export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
               style={itemStyle}
             >
               <DataSourceItem
+                // @ts-expect-error TS2740 TODO(ts-error): fixme
                 option={item}
                 defaultDataSource={defaultDataSource}
                 className={'dataSourceFilterGroup'}

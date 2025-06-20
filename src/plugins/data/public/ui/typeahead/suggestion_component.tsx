@@ -88,6 +88,7 @@ export function SuggestionComponent(props: Props) {
     >
       <div className={'osdSuggestionItem osdSuggestionItem--' + props.suggestion.type}>
         <div className="osdSuggestionItem__type" data-test-subj="osdSuggestionType">
+          {/* @ts-expect-error TS2345 TODO(ts-error): fixme */}
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
         <div className="osdSuggestionItem__text" data-test-subj="autoCompleteSuggestionText">

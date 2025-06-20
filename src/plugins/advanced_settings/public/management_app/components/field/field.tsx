@@ -274,6 +274,7 @@ export class Field extends PureComponent<FieldProps> {
 
     return new Promise((resolve, reject) => {
       reader.onload = () => {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         resolve(reader.result || undefined);
       };
       reader.onerror = (err) => {

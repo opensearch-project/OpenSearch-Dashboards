@@ -211,6 +211,7 @@ describe('getFinalSavedObjects()', () => {
       getDataSourceIntegratedSavedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
         getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
       getWorkspaceIntegratedSavedObjects: (workspaceId?: string) =>
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
         getSavedObjects().map((item) => ({
           ...item,
           ...(workspaceId ? { id: `${workspaceId}_${item.id}` } : {}),
@@ -286,6 +287,7 @@ describe('getFinalSavedObjects()', () => {
         attributes: {
           title: 'Saved object 1',
           kibanaSavedObjectMeta: {
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             searchSourceJSON: JSON.stringify({
               index: 'index-pattern',
               filter: [{ meta: { index: 'index-pattern' } }],
@@ -301,6 +303,7 @@ describe('getFinalSavedObjects()', () => {
         attributes: {
           title: 'Saved object 2',
           kibanaSavedObjectMeta: {
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             searchSourceJSON: JSON.stringify({
               index: 'index-pattern',
               filter: [{ meta: { index: 'index-pattern' } }],

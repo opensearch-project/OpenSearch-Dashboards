@@ -27,6 +27,7 @@ const mountComponent = (props = {}) => {
   const combinedProps = { ...defaultProps, ...props };
   return mount(
     <MemoryRouter>
+      {/* @ts-expect-error TS2741 TODO(ts-error): fixme */}
       <ReviewPrometheusDatasource {...combinedProps} />
     </MemoryRouter>
   );
@@ -39,6 +40,7 @@ jest.mock('history', () => {
     ...originalModule,
     createMemoryHistory: () => {
       const history = originalModule.createMemoryHistory();
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
       history.entries.forEach((entry) => {
         entry.key = 'consistentKey';
       });
