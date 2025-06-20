@@ -39,6 +39,17 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
     // Call the original editorDidMount function
     editorDidMount(editor);
 
+    // Add command to retrigger suggestions after Tab completion
+    editor.addCommand(monaco.KeyCode.Tab, () => {
+      // First let the default Tab behavior happen
+      editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
+
+      // Then retrigger suggestions after a short delay
+      setTimeout(() => {
+        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      }, 100);
+    });
+
     // Return the original editor instance
     return editor;
   };
@@ -71,6 +82,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
             showWords: false, // Disable word-based suggestions
           },
           acceptSuggestionOnEnter: 'off',
+          tabCompletion: 'on', // Enable Tab for suggestion acceptance
         }}
         suggestionProvider={{
           triggerCharacters: [' '],

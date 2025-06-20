@@ -11,7 +11,7 @@ import {
   Logger,
 } from '../../../core/server';
 import { capabilitiesProvider } from './capabilities_provider';
-import { searchSavedObjectType } from './saved_objects';
+import { exploreSavedObjectType } from './saved_objects';
 
 import { ExplorePluginSetup, ExplorePluginStart } from './types';
 
@@ -37,7 +37,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
       });
     });
     // core.uiSettings.register(uiSettings);
-    core.savedObjects.registerType(searchSavedObjectType);
+    core.savedObjects.registerType(exploreSavedObjectType);
 
     return {};
   }

@@ -8,8 +8,7 @@ import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { LineVisStyleControls } from './line_vis_options';
 import { LineChartStyleControls } from './line_vis_config';
-import { Positions } from '../utils/collections';
-import { ThresholdLineStyle, VisColumn, VisFieldType } from '../types';
+import { ThresholdLineStyle, VisColumn, VisFieldType, Positions } from '../types';
 
 export default {
   component: LineVisStyleControls,

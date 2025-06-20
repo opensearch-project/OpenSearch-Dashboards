@@ -4,10 +4,16 @@
  */
 
 import React from 'react';
-import { Positions } from '../utils/collections';
-import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
+import { LineVisStyleControls } from './line_vis_options';
 import { VisualizationType } from '../utils/use_visualization_types';
-import { CategoryAxis, GridOptions, ThresholdLine, ThresholdLineStyle, ValueAxis } from '../types';
+import {
+  CategoryAxis,
+  GridOptions,
+  ThresholdLine,
+  ThresholdLineStyle,
+  ValueAxis,
+  Positions,
+} from '../types';
 
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
@@ -96,14 +102,13 @@ const defaultLineChartStyles: LineChartStyleControls = {
   ],
 };
 
-export const createLineConfig = (): VisualizationType => ({
+export const createLineConfig = (): VisualizationType<'line'> => ({
   name: 'line',
   type: 'line',
   ui: {
     style: {
       defaults: defaultLineChartStyles,
-      render: (props: LineVisStyleControlsProps) =>
-        React.createElement(LineVisStyleControls, props),
+      render: (props) => React.createElement(LineVisStyleControls, props),
     },
   },
 });

@@ -6,17 +6,18 @@
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { monaco } from '@osd/monaco';
-import { DQLLexer } from './.generated/DQLLexer';
 import {
+  DQLLexer,
   DQLParser,
   GroupContentContext,
   GroupExpressionContext,
   KeyValueExpressionContext,
-} from './.generated/DQLParser';
+  DQLParserVisitor,
+} from '@osd/antlr-grammar';
+
 import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 import { IDataPluginServices } from '../..';
 import { formatFieldsToSuggestions } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';

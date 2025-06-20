@@ -1,0 +1,449 @@
+Option 1. Streamlined Redux Approach
+
+Use Redux actions and middleware to handle query execution.
+
+* Timefilter subscriptions are handled directly in the plugin setup
+* All query execution logic is in one place (the middleware)
+* Each user action maps to specific Redux actions
+* Components only need to dispatch actions
+
+0.Setup
+
+redux store
+
+// State types
+interface QueryState {
+  pplQuery: string; // will change to use the query state object in queryStringManager to follow same contract 
+}
+
+interface UIState {
+  activeTabId: string;
+  isLoading: boolean;
+}
+
+interface ResultsState {
+  [transformedQuery: string]: any;
+}
+
+// Root state
+interface RootState {
+  query: QueryState;
+  ui: UIState;
+  results: ResultsState;
+}
+
+actions
+
+// Action types
+const SET_QUERY = 'query/setQuery';
+const SET_ACTIVE_TAB = 'ui/setActiveTab';
+const TIME_RANGE_CHANGED = 'trigger/timeRangeChanged'; // Just a trigger, doesn't store data
+const SET_LOADING = 'ui/setLoading';
+const QUERY_SUCCESS = 'results/querySuccess';
+const QUERY_ERROR = 'ui/queryError';
+const CLEAR_RESULTS = 'results/clearResults';
+const EXECUTE_QUERY = 'query/executeQuery';
+
+1. Initialize Timefilter Subscriptions in Plugin Setup
+
+Instead of using a separate React component, we can subscribe to timefilter changes directly in the plugin's setup or start method:
+
+// In plugin.ts file
+public start(core, plugins) {
+  const { data } = plugins;
+  const { timefilter } = data.query.timefilter;
+  
+  // Subscribe to time filter changes
+  const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(() => {
+    // Dispatch action to Redux store
+    store.dispatch({ type: 'EXECUTE_QUERY', payload: { clearCache: true } });
+  });
+  
+  
+  // Clean up subscriptions when plugin stops
+  this.onStop.add(() => {
+    timeUpdateSubscription.unsubscribe();
+  });
+  
+  // Return plugin API
+  return {
+    // ...
+  };
+}
+
+This approach centralizes the subscription logic in the plugin itself, rather than spreading it across components.
+
+Note: While the data service is available in the start method, the timefilter might not be fully initialized or configured yet. The timefilter often gets its initial state from URL parameters, which happens during application mounting. If above does not work,  we will subscribe at the component level, not in the plugin start method. This ensures that the subscription happens after the application is mounted and the timefilter is fully initialized.
+
+
+function ExploreApp() {
+  const dispatch = useDispatch();
+  const { data } = useOpenSearchDashboards<ExploreServices>();
+  
+  // Subscribe to timefilter changes
+  useEffect(() => {
+    const subscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe(() => {
+      dispatch({ type: 'EXECUTE_QUERY', payload: { clearCache: true } });
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [data.query.timefilter.timefilter, dispatch]);
+
+  
+  // Rest of component...
+}
+
+
+
+2. Query Middleware
+
+// Query middleware
+const queryMiddleware = ({ getState, dispatch }) => {
+  let searchSource = null;
+  
+  // Initialize SearchSource
+  const initSearchSource = async () => {
+    if (!searchSource) {
+      searchSource = await data.search.searchSource.create();
+    }
+    return searchSource;
+  };
+  
+  return next => async action => {
+    // Let the action go through first
+    const result = next(action);
+    
+    // Handle actions that should trigger query execution
+    if (
+      action.type === 'EXECUTE_QUERY' || 
+      action.type === 'SET_ACTIVE_TAB' || 
+      action.type === 'TIME_RANGE_CHANGED'
+    ) {
+      const state = getState();
+      const { pplQuery } = state.query;
+      const { activeTabId } = state.ui;
+      
+      // Get current time range directly from timefilter service
+      const timeRange = data.query.timefilter.timefilter.getTime();
+      
+      // Get tab definition
+      const tabDefinition = tabRegistry.getTab(activeTabId);
+      if (!tabDefinition) return result;
+      
+      // Transform query based on active tab
+      const transformedQuery = tabDefinition.transformQuery(pplQuery);
+      
+      // Initialize SearchSource if needed
+      const searchSource = await initSearchSource();
+      
+      // Update SearchSource
+      const timeRangeFilter = data.query.timefilter.timefilter.createFilter(indexPattern);
+      searchSource
+        .setField('index', indexPattern)
+        .setField('query', { query: transformedQuery, language: 'ppl' })
+        .setField('filter', timeRangeFilter ? [timeRangeFilter] : []);
+      
+      // Create cache key
+      const cacheKey = createCacheKey(transformedQuery, timeRange);
+      
+      // Clear cache if requested or if time range changed
+      if (
+        (action.type === 'EXECUTE_QUERY' && action.payload.clearCache) ||
+        action.type === 'TIME_RANGE_CHANGED'
+      ) {
+        dispatch({ type: 'CLEAR_RESULTS' });
+      }
+      
+      // Check cache for tab switches
+      if (action.type === 'SET_ACTIVE_TAB') {
+        const resultsState = state.results;
+        if (resultsState[cacheKey]) {
+          // Use cached results
+          return result;
+        }
+      }
+      
+      // Execute query
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
+      try {
+        const results = await searchSource.fetch();
+        dispatch({ 
+          type: 'QUERY_SUCCESS', 
+          payload: { 
+            cacheKey, 
+            results 
+          } 
+        });
+      } catch (error) {
+        dispatch({ type: 'QUERY_ERROR', payload: error });
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+    }
+    
+    return result;
+  };
+};
+
+// Helper function to create cache key
+function createCacheKey(transformedQuery, timeRange) {
+  return JSON.stringify({
+    query: transformedQuery,
+    timeRange,
+  });
+}
+
+
+
+3. Component Usage
+
+function ExploreApp() {
+  const dispatch = useDispatch();
+  
+  // Handle run button click
+  const handleRunQuery = useCallback((query) => {
+    dispatch({ type: 'SET_QUERY', payload: query });
+    dispatch({ type: 'EXECUTE_QUERY', payload: { clearCache: true } });
+  }, [dispatch]);
+  
+  // Handle tab switch
+  const handleTabSwitch = useCallback((tabId) => {
+    dispatch({ type: 'SET_ACTIVE_TAB', payload: tabId });
+    // No need to dispatch executeQuery - the middleware will handle it
+  }, [dispatch]);
+  
+  return (
+    <>
+      <QueryPanel onRunQuery={handleRunQuery} />
+      <TabBar onTabSwitch={handleTabSwitch} />
+      {/* ... */}
+    </>
+  );
+}
+
+4.Detailed Scenarios
+
+Scenario 1: Fire a Query When TimeFilter is Updated
+
+1. TimeFilter Changes: User changes time range in UI
+2. TimeFilter Service Updates: Core timefilter service updates its internal state
+3. Subscription Triggers: Our subscription in the plugin setup dispatches: store.dispatch({ type: 'TIME_RANGE_CHANGED' });
+4. Middleware Intercepts: The queryMiddleware intercepts the TIME_RANGE_CHANGED action
+5. Get Current Time Range: The middleware gets the current time range directly from the timefilter service
+6. Cache Cleared: The middleware dispatches CLEAR_RESULTS
+7. SearchSource Updated: The middleware updates the SearchSource with:
+    1. The transformed query based on active tab
+    2. The current time range filter from the timefilter service
+8. Query Executed: The middleware executes the query and dispatches:
+    1. SET_LOADING with true before execution
+    2. QUERY_SUCCESS with results after execution 
+    3. SET_LOADING with false after execution
+
+Scenario 2: Fire a Query When User Clicks Run Button
+
+1. User Clicks Run: handleRunQuery is called with the new query
+2. Actions Dispatched: The handler dispatches:
+    1. dispatch({ type: 'SET_QUERY', payload: query });
+    2. dispatch({ type: 'EXECUTE_QUERY', payload: { clearCache: true } });
+3. Middleware Intercepts: The queryMiddleware intercepts the EXECUTE_QUERY action
+4. 4-8 same as scenario 1
+
+Scenario 3: Switch Tab
+
+1. User Clicks Tab: handleTabSwitch is called with the new tab ID
+2. Action Dispatched: The handler dispatches:dispatch({ type: 'SET_ACTIVE_TAB', payload: tabId });
+3. Middleware Intercepts: The queryMiddleware intercepts the SET_ACTIVE_TAB action
+4. Get Current Time Range: The middleware gets the current time range directly from the timefilter service
+5. SearchSource Updated: The middleware updates the SearchSource with:
+    1. The transformed query based on the new active tab
+    2. The current time range filter from the timefilter service
+6. Cache Checked: The middleware checks if results exist for the cache key:
+    1. If results exist, it does nothing (uses cached results)
+    2. If no results exist, it executes the query as in steps 8 of Scenario 1
+
+
+State Transaction Manager Implementation Discussion (5/15/25)
+
+Summary
+
+Implementing a coordinated state management solution in OSD to prevent race conditions when multiple state updates happen simultaneously, particularly when loading saved searches or switching datasets. A transaction-based middleware approach was evaluated to ensure atomicity of related state changes. This doc was discussed State Trx Mngr for Saved Search.
+
+Details
+
+Challenges
+
+OSD currently splits state across three independent stores, leading to potential race conditions:
+
+// Three separate state stores that update independently
+const _g = { time: { from: 'now-2y', to: 'now' } };            // Global state
+const _q = { query: 'source = issues', dataset: 'issues' };    // Query state
+const _a = { columns: ['_source'], sort: [] };                 // Application state
+
+
+When these stores update asynchronously (like when loading a saved search), the UI can show inconsistent states and multiple redundant queries may execute.
+
+Language-Agnostic
+
+We should consider when we added more languages in the future creating a language-agnostic solution that doesn't assume PPL as the only query language:
+
+// Query middleware with transaction logic
+const queryMiddleware = ({ getState, dispatch }) => {
+  return next => async action => {
+    const result = next(action);     // Let action update the state first
+    if (action.type === 'COMMIT_STATE_TRANSACTION') {
+      const state = getState();
+
+      // Create search source with all current state
+      // Note: We don't transform the query - we assume it's already properly formatted
+      const searchSource = await initSearchSource();
+      searchSource
+        .setField('index', state.query.dataset)
+        .setField('query', state.query.query) // Use query as-is without language assumptions
+        .setField('filter', getTimeRangeFilter(state));
+        
+      // Execute a single query with the complete state
+      executeQuery(searchSource);
+    }
+    
+    return result;
+  };
+};
+
+Making language-specific assumptions would create technical debt:
+
+* Would require middleware modifications for each new query language
+* Limits extensibility for plugins with specialized query languages
+* Complicates testing as language options grow
+
+State Transition Flow
+
+The transaction approach batches related state changes before executing a single query:
+
+Stage	Current	Transaction
+Load saved search	Multiple async updates to _g, _q, and _a	Start transaction → Collect all updates
+During transition	Race condition between dataset and query updates	Updates stored but not yet applied
+Complete transition	Multiple queries executed in unpredictable order	Commit transaction → Execute single query
+Result	Potential UI inconsistency	Consistent, coordinated state
+
+Example: Loading a Saved Explorer
+
+When loading a saved explorer, multiple state changes must happen atomically:
+
+Without Transaction Management
+
+function loadSavedExplorer(id) {
+  const savedExplorer = await getSavedExplorer(id);
+  
+  // These dispatches happen in sequence but resolve asynchronously
+  dispatch(setDataset(savedExplorer.dataset));        // Triggers query #1
+  dispatch(setQuery(savedExplorer.query));            // Triggers query #2
+  dispatch(setTimeRange(savedExplorer.timeRange));    // Triggers query #3
+  dispatch(setColumns(savedExplorer.columns));        // No query
+}
+
+
+Result: Three separate queries execute, UI may show inconsistent state during loading, final state depends on which query completes last.
+
+With Transaction Management
+
+function loadSavedExplorer(id) {
+  const savedExplorer = await getSavedExplorer(id);
+  
+  // Start a transaction to batch state updates
+  dispatch(startTransaction());
+  
+  // Updates collected but don't trigger queries yet
+  dispatch(setDataset(savedExplorer.dataset));
+  dispatch(setQuery(savedExplorer.query));
+  dispatch(setTimeRange(savedExplorer.timeRange));
+  dispatch(setColumns(savedExplorer.columns));
+  
+  // Apply all updates and execute a single query
+  dispatch(commitTransaction());
+}
+
+
+Result: Single query executes with complete, consistent state; UI updates all at once; better performance.
+
+Cache Management
+
+The team discussed cache invalidation rules for different state changes:
+
+State Change	Cache Behavior	Reason
+Dataset change	Clear cache	Different data source means previous results aren't relevant
+Query change	Clear cache	Different selection criteria means new results needed
+Time range change	Clear cache	Different time window requires new data
+Column change	Reuse cache	Same data, just displayed differently
+Tab switch	Check cache by query+time key	May be able to reuse cached results
+
+Requirements
+
+* Coordinated State Updates: 
+    * Group related state changes together to prevent inconsistency
+    * Ensure only one query executes after all state changes are complete
+* Language-Agnostic Design: 
+    * Don't assume specific query language in middleware
+    * Support current and future query languages (PPL, SQL, PromQL, etc.)
+* Effective Caching: 
+    * Cache results based on query + time range + dataset
+    * Clear cache appropriately when relevant state changes
+* Plugin Extensibility: 
+    * Allow plugins to register custom state transition handlers
+    * Support different query languages and data sources
+
+Action Items
+
+* Implement transaction-based middleware to batch state updates
+* Create language-agnostic query handling mechanism
+* Develop caching with appropriate invalidation rules
+* Test implementation with saved search loading scenarios
+* Support different query languages without middleware changes
+* Document component responsibility for query transformation
+
+Questions
+
+* "What happens if a user changes dataset during a transaction?"
+* "How can we detect if a relative time range actually changed?"
+* "Should we clear the cache when switching tabs but not changing the state?"
+* "How do we handle different query languages in the same transaction framework?"
+* "What's the best way to communicate transaction state to the UI to prevent user confusion?"
+
+Updates: New decisions
+* Middleware Approach: Use Redux middleware to centralize query execution logic.
+* Redux with Four-Slice Architecture: Implement Redux store with query, UI, results, and tab slices.
+    * Query slice should use same type as queryStringManager used and defined in src/plugins/data/common/query/types.ts
+```
+export type Query = {
+  query: string | { [key: string]: any };
+  language: string;
+  dataset?: Dataset;
+};
+
+```
+    * promptQuery if needed should be saved under uiSlice 
+        * uiState:{queryPanel: {promptQuery : string}, other states }
+* Composite Cache Keys: Cache query results using keys that include both transformed query and time filter to avoid using incorrect cache for relative time filters.
+* skipInitialFetch Support (new): Support skipInitialFetch in the middleware by adding a flag in the tab state that indicates whether to skip the initial fetch. When switching tabs, check this flag before executing a query.
+* Query Execution Behavior
+    * Modify query: Does not auto-run query. Only click run will dispatch action to update query state and run query.
+    * Click run: Dispatches action to update query state, clears cache, and runs query for current tab only
+    * Switch dataset: Dispatches action to update query state, clears cache, and runs query for current tab only
+    * Tab switch after query modification:
+        * Gets current time range and transformed query to construct the composite key
+        * Checks cache for this key
+        * If no cache exists, dispatches action to run query
+* OSD splits state across three independent stores and we should follow the same:
+    * Global state (_g): Contains time range settings
+    * Query state (_q): Contains query string and dataset
+    * Application state (_a): Contains UI-specific settings and other application states
+    * Race Condition Issue: When these stores update asynchronously (like when loading a saved search):
+        * Multiple queries execute redundantly (one for dataset change, one for query change, one for time range change)
+        * The UI shows inconsistent intermediate states
+        * The final state depends on which query completes last
+        * Proposed Solution: A transaction-based middleware approach to batch related state changes (separate state dispatch and action to run query):
+            * Start a transaction to collect all state updates
+            * Apply all updates atomically
+            * Execute a single query with the complete, consistent state
+    * Check discussion.txt for implementation examples
+* Language-Agnostic Middleware

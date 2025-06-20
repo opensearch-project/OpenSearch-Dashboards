@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { BasicVisOptions } from './basic_vis_options';
-import { Positions } from '../utils/collections';
 
 export default {
   component: BasicVisOptions,
@@ -17,9 +16,6 @@ export default {
 // Template for the story
 const Template: ComponentStory<typeof BasicVisOptions> = (args) => {
   // Use state to track changes
-  const [addTooltip, setAddTooltip] = useState<boolean>(args.addTooltip);
-  const [addLegend, setAddLegend] = useState<boolean>(args.addLegend);
-  const [legendPosition, setLegendPosition] = useState<string>(args.legendPosition);
   const [addTimeMarker, setAddTimeMarker] = useState<boolean>(args.addTimeMarker);
   const [showLine, setShowLine] = useState<boolean>(args.showLine);
   const [lineMode, setLineMode] = useState<string>(args.lineMode);
@@ -30,26 +26,11 @@ const Template: ComponentStory<typeof BasicVisOptions> = (args) => {
     <div style={{ maxWidth: '800px', padding: '16px' }}>
       <BasicVisOptions
         {...args}
-        addTooltip={addTooltip}
-        addLegend={addLegend}
-        legendPosition={legendPosition}
         addTimeMarker={addTimeMarker}
         showLine={showLine}
         lineMode={lineMode}
         lineWidth={lineWidth}
         showDots={showDots}
-        onAddTooltipChange={(value) => {
-          setAddTooltip(value);
-          action('onAddTooltipChange')(value);
-        }}
-        onAddLegendChange={(value) => {
-          setAddLegend(value);
-          action('onAddLegendChange')(value);
-        }}
-        onLegendPositionChange={(value) => {
-          setLegendPosition(value);
-          action('onLegendPositionChange')(value);
-        }}
         onAddTimeMarkerChange={(value) => {
           setAddTimeMarker(value);
           action('onAddTimeMarkerChange')(value);
@@ -78,17 +59,11 @@ const Template: ComponentStory<typeof BasicVisOptions> = (args) => {
 // Primary story
 export const Primary = Template.bind({});
 Primary.args = {
-  addTooltip: true,
-  addLegend: true,
-  legendPosition: Positions.RIGHT,
   addTimeMarker: false,
   showLine: true,
   lineMode: 'smooth',
   lineWidth: 2,
   showDots: true,
-  onAddTooltipChange: () => {},
-  onAddLegendChange: () => {},
-  onLegendPositionChange: () => {},
   onAddTimeMarkerChange: () => {},
   onShowLineChange: () => {},
   onLineModeChange: () => {},
@@ -101,13 +76,6 @@ export const NoLine = Template.bind({});
 NoLine.args = {
   ...Primary.args,
   showLine: false,
-};
-
-// Story with no legend
-export const NoLegend = Template.bind({});
-NoLegend.args = {
-  ...Primary.args,
-  addLegend: false,
 };
 
 // Story with time marker

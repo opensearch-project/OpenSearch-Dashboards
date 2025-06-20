@@ -4,12 +4,10 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IndexPattern, useQueryStringManager } from '../../../../../../../../data/public';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../../../../common/legacy/discover';
-import { DiscoverViewServices } from '../../../build_services';
-import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { updateIndexPattern, useSelector } from '../../utils/state_management';
+import { ExploreServices } from '../../../../../../types';
+import { useSelector } from '../../utils/state_management';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -22,20 +20,16 @@ import { updateIndexPattern, useSelector } from '../../utils/state_management';
  * 4. If there's any error fetching the index pattern details, a warning notification is shown.
  *
  * @param services - The services needed to fetch the index patterns and show notifications.
- * @param store - The redux store in data_explorer to dispatch actions.
  * @returns - The fetched index pattern.
  */
-export const useIndexPattern = (services: DiscoverViewServices) => {
+export const useIndexPattern = (services: ExploreServices) => {
   const { data, toastNotifications, uiSettings, store } = services;
   const { query } = useQueryStringManager({
     queryString: data.query.queryString,
   });
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  const isQueryEnhancementEnabled = useMemo(
-    () => uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING),
-    [uiSettings]
-  );
+  const isQueryEnhancementEnabled = true;
 
   const fetchIndexPatternDetails = useCallback((id: string) => data.indexPatterns.get(id), [
     data.indexPatterns,
@@ -45,7 +39,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     let isMounted = true;
 
     const handleIndexPattern = async () => {
-      if (isQueryEnhancementEnabled && query.dataset) {
+      if (query.dataset) {
         let pattern = await data.indexPatterns.get(
           query.dataset.id,
           query.dataset.type !== 'INDEX_PATTERN'
@@ -67,23 +61,10 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
         if (isMounted && pattern) {
           setIndexPattern(pattern);
         }
-      } else if (!isQueryEnhancementEnabled) {
-        if (!indexPatternIdFromState) {
-          const indexPatternList = await data.indexPatterns.getCache();
-          const newId = getIndexPatternId(
-            '',
-            indexPatternList || [],
-            uiSettings.get('defaultIndex')
-          );
-          if (isMounted && newId) {
-            store!.dispatch(updateIndexPattern(newId));
-            handleIndexPattern();
-          }
-        } else {
-          const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
-          if (isMounted) {
-            setIndexPattern(ip);
-          }
+      } else {
+        const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
+        if (isMounted) {
+          setIndexPattern(ip);
         }
       }
     };

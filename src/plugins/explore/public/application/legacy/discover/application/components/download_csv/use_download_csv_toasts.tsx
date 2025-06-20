@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSmallButtonEmpty } from '@elastic/eui';
 import { getServices } from '../../../opensearch_dashboards_services';
-import { useDiscoverContext } from '../../view_components/context';
 
 export enum DiscoverDownloadCsvToastId {
   Cancelled = 'csvDownloadCancelled',
@@ -17,12 +16,13 @@ export enum DiscoverDownloadCsvToastId {
 }
 
 export const useDiscoverDownloadCsvToasts = () => {
-  const { fetchForMaxCsvStateRef } = useDiscoverContext();
+  const abortControllerRef = useRef<AbortController | null>(null);
   const { toastNotifications } = getServices();
 
   const onAbort = () => {
-    if (fetchForMaxCsvStateRef.current.abortController) {
-      fetchForMaxCsvStateRef.current.abortController.abort();
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
       toastNotifications.remove(DiscoverDownloadCsvToastId.Loading);
       toastNotifications.addWarning({
         id: DiscoverDownloadCsvToastId.Cancelled,
@@ -90,10 +90,21 @@ export const useDiscoverDownloadCsvToasts = () => {
     });
   }, [toastNotifications]);
 
+  // Provide access to the abort controller ref for external use
+  const setAbortController = useCallback((controller: AbortController | null) => {
+    abortControllerRef.current = controller;
+  }, []);
+
+  const getAbortController = useCallback(() => {
+    return abortControllerRef.current;
+  }, []);
+
   return {
     onAbort,
     onSuccess,
     onError,
     onLoading,
+    setAbortController,
+    getAbortController,
   };
 };

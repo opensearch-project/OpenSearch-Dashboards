@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Positions } from './collections';
+import { Positions } from '../types';
 
 describe('Collections', () => {
   describe('Positions enum', () => {

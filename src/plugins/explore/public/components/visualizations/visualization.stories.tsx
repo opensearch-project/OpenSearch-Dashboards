@@ -5,11 +5,10 @@
 
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Visualization } from './visualization';
-import { Positions } from './utils/collections';
+import { Visualization, VisualizationProps } from './visualization';
 import { LineVisStyleControls } from './line/line_vis_options';
 import { VisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
-import { ThresholdLineStyle, VisFieldType } from './types';
+import { ThresholdLineStyle, VisFieldType, Positions } from './types';
 import { LineChartStyleControls } from './line/line_vis_config';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 
@@ -116,13 +115,13 @@ const mockStyleOptions: LineChartStyleControls = {
 };
 
 // Mock the line configuration to avoid importing toExpression
-const mockLineConfig: VisualizationType = {
+const mockLineConfig: VisualizationType<'line'> = {
   name: 'line',
   type: 'line',
   ui: {
     style: {
       defaults: mockStyleOptions,
-      render: (props: any) => {
+      render: (props) => {
         return <LineVisStyleControls {...props} />;
       },
     },
@@ -130,7 +129,7 @@ const mockLineConfig: VisualizationType = {
 };
 
 // Create mock data
-const mockVisualizationData: VisualizationTypeResult = {
+const mockVisualizationData: VisualizationTypeResult<'line'> = {
   visualizationType: mockLineConfig,
   transformedData: [
     { date: '2024-01-01', value: 100, category: 'A' },
@@ -155,7 +154,9 @@ const mockSearchContext: IExpressionLoaderParams['searchContext'] = {
   timeRange: { from: 'now-7d', to: 'now' },
 };
 
-const Template: ComponentStory<typeof Visualization> = (args) => <Visualization {...args} />;
+const Template: ComponentStory<(props: VisualizationProps<'line'>) => JSX.Element> = (args) => (
+  <Visualization<'line'> {...args} />
+);
 
 export const Default = Template.bind({});
 Default.args = {

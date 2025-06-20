@@ -42,10 +42,10 @@ import {
   EuiFlyoutBody,
   EuiText,
 } from '@elastic/eui';
-import { LOGS_VIEW_ID } from '../../../../../../../common';
+import { ExploreFlavor } from '../../../../../../../common';
 import { SavedObjectFinderUi } from '../../../../../../../../saved_objects/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { DiscoverViewServices } from '../../../build_services';
+import { ExploreServices } from '../../../../../../types';
 import { SAVED_OBJECT_TYPE } from '../../../../../../saved_explore/_saved_explore';
 
 interface Props {
@@ -62,7 +62,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
       filterManager,
       store,
     },
-  } = useOpenSearchDashboards<DiscoverViewServices>();
+  } = useOpenSearchDashboards<ExploreServices>();
 
   return (
     <EuiFlyout ownFocus onClose={onClose} data-test-subj="loadSearchForm">
@@ -119,7 +119,9 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
               // appId change and no new store created, so we need to dispatch
               // the state change.
               store!.dispatch({ type: 'logs/incrementSaveExploreLoadCount' });
-              application.navigateToApp('explore', { path: `${LOGS_VIEW_ID}#/view/${id}` });
+              application.navigateToApp('explore', {
+                path: `${ExploreFlavor.Logs}#/view/${id}`,
+              });
             }
             onClose();
           }}

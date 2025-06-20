@@ -24,7 +24,7 @@ import { VisColumn } from '../types';
  * @param toExpressionFn Specific function to create the Vega spec based on the rule
  * @returns The expression string
  */
-export const toExpression = async (
+export const toExpression = (
   searchContext: IExpressionLoaderParams['searchContext'],
   indexPattern: IndexPattern,
   toExpressionFn: (
@@ -40,7 +40,7 @@ export const toExpression = async (
   categoricalColumns?: VisColumn[],
   dateColumns?: VisColumn[],
   styleOptions?: any
-): Promise<string> => {
+) => {
   if (!indexPattern || !searchContext) {
     return '';
   }

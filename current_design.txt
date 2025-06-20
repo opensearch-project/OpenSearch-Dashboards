@@ -1,0 +1,184 @@
+# OpenSearch Dashboards Explore Plugin - Updated Design Document
+
+## Overview
+The explore plugin is a next-generation data exploration interface forked from the Discover plugin, focusing on PPL (Piped Processing Language) queries with a Redux-based architecture and multi-tab support.
+
+## Updated Architecture (Hybrid Query Strategy)
+
+### Core Components
+
+#### 1. State Management (Redux)
+- **Query Slice**: Stores current query, dataset, timeRange
+- **UI Slice**: Manages activeTabId (default: 'logs'), loading states, errors
+- **Results Slice**: Cache for query results using cache keys
+- **Legacy Slice**: Compatibility layer for discover components
+
+#### 2. Tab System
+- **Tab Registry**: Service for registering and managing tabs
+- **Built-in Tabs**:
+  - **Logs Tab**: Default tab, removes `| stats` from PPL queries
+  - **Visualizations Tab**: No query transformation
+- **Tab Definitions**: Include prepareQuery, dataProcessor, component
+
+#### 3. Query Execution Strategy (Hybrid Approach)
+
+##### Strategy A: Single Query (activeTabId = "logs")
+```
+When: activeTabId === "logs" AND (Run button clicked OR timefilter changed OR query updated)
+Flow:
+1. Clear all caches in results slice
+2. Get logs tab prepareQuery (removes | stats from PPL)
+3. Execute ONE query with histogram aggregations
+4. Process results with ENHANCED defaultResultsProcessor:
+   - Extract hits for logs tab (fieldCounts, rows)
+   - Extract aggregations for histogram (chartData, bucketInterval)
+5. Save processed result to results slice with logs cache key
+6. Both logs tab and histogram use same cached result
+```
+
+##### Strategy B: Dual Query (activeTabId ≠ "logs")
+```
+When: activeTabId !== "logs" AND (Run button clicked OR timefilter changed OR query updated)
+Flow:
+1. Clear all caches in results slice
+2. Prepare two queries:
+   - Logs query: logs tab prepareQuery (for histogram)
+   - Active tab query: active tab prepareQuery (for tab content)
+3. Execute TWO queries simultaneously:
+   - executeTabQuery for logs (with histogram aggregations)
+   - executeTabQuery for active tab (tab-specific processing)
+4. Process and save both results separately to results slice
+5. Histogram uses logs result, active tab uses its own result
+```
+
+##### Strategy C: Tab Switching (No Re-execution)
+```
+When: User switches tabs (setActiveTab action)
+Flow:
+1. Set activeTabId in UI slice
+2. Check results slice cache for target tab's cache key
+3. If cached: Use existing result
+4. If not cached: Execute executeTabQuery for that tab only
+5. No histogram re-execution (histogram always uses logs cache)
+```
+
+### Cache Key Structure
+```
+Format: `${preparedQuery.query}_${timeRange.from}_${timeRange.to}`
+Examples:
+- Logs: "source = dataset | head 100_now-15m_now"
+- Visualizations: "source = dataset | stats count() by field_now-15m_now"
+```
+
+### Data Processing
+
+#### Enhanced defaultResultsProcessor
+```typescript
+export const defaultResultsProcessor = (rawResults: any, indexPattern: any) => {
+  const fieldCounts: Record<string, number> = {};
+  
+  // Process hits for tab data
+  if (rawResults.hits && rawResults.hits.hits) {
+    for (const hit of rawResults.hits.hits) {
+      const fields = Object.keys(indexPattern.flattenHit(hit));
+      for (const fieldName of fields) {
+        fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
+      }
+    }
+  }
+  
+  // Process aggregations for histogram (if present)
+  let chartData = null;
+  let bucketInterval = {};
+  if (rawResults.aggregations && rawResults.aggregations.histogram) {
+    chartData = transformAggregationToChartData(rawResults, indexPattern);
+    bucketInterval = { interval: 'auto', scale: 1 }; // Extract from agg config
+  }
+  
+  return {
+    hits: rawResults.hits,
+    fieldCounts,
+    chartData,        // NEW: For histogram
+    bucketInterval,   // NEW: For histogram
+  };
+};
+```
+
+### Trigger Mechanisms
+
+#### 1. Query Re-execution Triggers (Clear Cache)
+- **Run Button**: User clicks Run in QueryPanel
+- **Timefilter Changes**: User changes time range
+- **Query Updates**: User modifies query in QueryPanel
+- **Dataset Changes**: User selects different dataset
+
+#### 2. Tab Switch Triggers (Use Cache)
+- **setActiveTab**: User clicks different tab
+- **URL Navigation**: Direct navigation to tab
+
+### Component Integration
+
+#### DiscoverChartContainer
+```typescript
+// Updated to use histogram data from results slice
+const DiscoverChartContainer = () => {
+  const logsTabCacheKey = useSelector(getLogsTabCacheKey);
+  const logsResult = useSelector(state => state.results[logsTabCacheKey]);
+  
+  return (
+    <DiscoverChart
+      chartData={logsResult?.chartData}
+      bucketInterval={logsResult?.bucketInterval}
+      rows={logsResult?.hits?.hits || []}
+      // ... other props
+    />
+  );
+};
+```
+
+#### TabContent
+```typescript
+// Updated to use tab-specific cached data
+const TabContent = () => {
+  const activeTabId = useSelector(state => state.ui.activeTabId);
+  const tabCacheKey = useSelector(getActiveTabCacheKey);
+  const tabResult = useSelector(state => state.results[tabCacheKey]);
+  
+  // Render active tab with its cached data
+};
+```
+
+### Performance Optimizations
+
+1. **Smart Caching**: Results cached by query + timeRange
+2. **Query Deduplication**: Logs and histogram share same query when possible
+3. **Lazy Tab Loading**: Only execute queries for tabs when needed
+4. **Histogram Stability**: Histogram doesn't re-execute on tab switches
+
+### Error Handling
+
+1. **Independent Failures**: Tab query failure doesn't affect histogram
+2. **Graceful Degradation**: Missing histogram data doesn't break tab functionality
+3. **Cache Invalidation**: Errors clear relevant cache entries
+
+### Debug Integration
+
+- Add `debug=true` URL parameter for enhanced logging
+- Console logs for query execution strategy decisions
+- Cache hit/miss logging
+- Query timing and performance metrics
+
+## Benefits of Hybrid Approach
+
+1. **Performance**: Single query for most common case (logs tab)
+2. **Flexibility**: Dual queries for complex tabs with different requirements
+3. **User Experience**: Stable histogram when switching tabs
+4. **Scalability**: Easy to add new tabs with custom query logic
+5. **Backward Compatibility**: Maintains discover plugin behavior for logs
+
+## Migration Path
+
+1. **Phase 1**: Enhance defaultResultsProcessor for histogram support
+2. **Phase 2**: Update executeQueries with hybrid strategy logic
+3. **Phase 3**: Integrate histogram data flow in DiscoverChartContainer
+4. **Phase 4**: Add debug logging and performance monitoring

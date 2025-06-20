@@ -6,23 +6,14 @@ exports[`LineVisStyleControls handles empty column arrays gracefully 1`] = `
   expand={false}
   initialSelectedTab={
     Object {
-      "content": <BasicVisOptions
+      "content": <GeneralVisOptions
         addLegend={true}
-        addTimeMarker={false}
         addTooltip={true}
         legendPosition="right"
-        lineMode="smooth"
-        lineWidth={2}
         onAddLegendChange={[Function]}
-        onAddTimeMarkerChange={[Function]}
         onAddTooltipChange={[Function]}
         onLegendPositionChange={[Function]}
-        onLineModeChange={[Function]}
-        onLineWidthChange={[Function]}
-        onShowDotsChange={[Function]}
-        onShowLineChange={[Function]}
-        showDots={true}
-        showLine={true}
+        shouldShowLegend={true}
       />,
       "id": "basic",
       "name": "Basic",
@@ -32,17 +23,24 @@ exports[`LineVisStyleControls handles empty column arrays gracefully 1`] = `
   tabs={
     Array [
       Object {
-        "content": <BasicVisOptions
+        "content": <GeneralVisOptions
           addLegend={true}
-          addTimeMarker={false}
           addTooltip={true}
           legendPosition="right"
-          lineMode="smooth"
-          lineWidth={2}
           onAddLegendChange={[Function]}
-          onAddTimeMarkerChange={[Function]}
           onAddTooltipChange={[Function]}
           onLegendPositionChange={[Function]}
+          shouldShowLegend={true}
+        />,
+        "id": "basic",
+        "name": "Basic",
+      },
+      Object {
+        "content": <BasicVisOptions
+          addTimeMarker={false}
+          lineMode="smooth"
+          lineWidth={2}
+          onAddTimeMarkerChange={[Function]}
           onLineModeChange={[Function]}
           onLineWidthChange={[Function]}
           onShowDotsChange={[Function]}
@@ -50,8 +48,8 @@ exports[`LineVisStyleControls handles empty column arrays gracefully 1`] = `
           showDots={true}
           showLine={true}
         />,
-        "id": "basic",
-        "name": "Basic",
+        "id": "exclusive",
+        "name": "Exclusive",
       },
       Object {
         "content": <ThresholdOptions
@@ -143,23 +141,14 @@ exports[`LineVisStyleControls renders without crashing 1`] = `
   expand={false}
   initialSelectedTab={
     Object {
-      "content": <BasicVisOptions
+      "content": <GeneralVisOptions
         addLegend={true}
-        addTimeMarker={false}
         addTooltip={true}
         legendPosition="right"
-        lineMode="smooth"
-        lineWidth={2}
         onAddLegendChange={[Function]}
-        onAddTimeMarkerChange={[Function]}
         onAddTooltipChange={[Function]}
         onLegendPositionChange={[Function]}
-        onLineModeChange={[Function]}
-        onLineWidthChange={[Function]}
-        onShowDotsChange={[Function]}
-        onShowLineChange={[Function]}
-        showDots={true}
-        showLine={true}
+        shouldShowLegend={true}
       />,
       "id": "basic",
       "name": "Basic",
@@ -169,17 +158,24 @@ exports[`LineVisStyleControls renders without crashing 1`] = `
   tabs={
     Array [
       Object {
-        "content": <BasicVisOptions
+        "content": <GeneralVisOptions
           addLegend={true}
-          addTimeMarker={false}
           addTooltip={true}
           legendPosition="right"
-          lineMode="smooth"
-          lineWidth={2}
           onAddLegendChange={[Function]}
-          onAddTimeMarkerChange={[Function]}
           onAddTooltipChange={[Function]}
           onLegendPositionChange={[Function]}
+          shouldShowLegend={true}
+        />,
+        "id": "basic",
+        "name": "Basic",
+      },
+      Object {
+        "content": <BasicVisOptions
+          addTimeMarker={false}
+          lineMode="smooth"
+          lineWidth={2}
+          onAddTimeMarkerChange={[Function]}
           onLineModeChange={[Function]}
           onLineWidthChange={[Function]}
           onShowDotsChange={[Function]}
@@ -187,8 +183,8 @@ exports[`LineVisStyleControls renders without crashing 1`] = `
           showDots={true}
           showLine={true}
         />,
-        "id": "basic",
-        "name": "Basic",
+        "id": "exclusive",
+        "name": "Exclusive",
       },
       Object {
         "content": <ThresholdOptions

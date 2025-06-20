@@ -8,18 +8,13 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
 import { BasicVisOptions } from '../style_panel/basic_vis_options';
+import { GeneralVisOptions } from '../style_panel/general_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
-import { VisColumn } from '../types';
 import { AxesOptions } from '../style_panel/axes_options';
+import { StyleControlsProps } from '../utils/use_visualization_types';
 
-export interface LineVisStyleControlsProps {
-  styleOptions: LineChartStyleControls;
-  onStyleChange: (newOptions: Partial<LineChartStyleControls>) => void;
-  numericalColumns?: VisColumn[];
-  categoricalColumns?: VisColumn[];
-  dateColumns?: VisColumn[];
-}
+export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
 export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   styleOptions,
@@ -35,27 +30,41 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
+  // if it is 1 metric and 1 date, then it should not show legend
+  const notShowLegend =
+    numericalColumns.length === 1 && categoricalColumns.length === 0 && dateColumns.length === 1;
   const tabs: EuiTabbedContentTab[] = [
     {
       id: 'basic',
-      name: i18n.translate('explore.vis.lineChart.tabs.basic', {
+      name: i18n.translate('explore.vis.lineChart.tabs.general', {
         defaultMessage: 'Basic',
       }),
       content: (
-        <BasicVisOptions
+        <GeneralVisOptions
+          shouldShowLegend={!notShowLegend}
           addTooltip={styleOptions.addTooltip}
           addLegend={styleOptions.addLegend}
           legendPosition={styleOptions.legendPosition}
-          addTimeMarker={styleOptions.addTimeMarker}
-          showLine={styleOptions.showLine}
-          lineMode={styleOptions.lineMode}
-          lineWidth={styleOptions.lineWidth}
-          showDots={styleOptions.showDots}
           onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
           onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
           onLegendPositionChange={(legendPosition) =>
             updateStyleOption('legendPosition', legendPosition)
           }
+        />
+      ),
+    },
+    {
+      id: 'exclusive',
+      name: i18n.translate('explore.vis.lineChart.tabs.exclusive', {
+        defaultMessage: 'Exclusive',
+      }),
+      content: (
+        <BasicVisOptions
+          addTimeMarker={styleOptions.addTimeMarker}
+          showLine={styleOptions.showLine}
+          lineMode={styleOptions.lineMode}
+          lineWidth={styleOptions.lineWidth}
+          showDots={styleOptions.showDots}
           onAddTimeMarkerChange={(addTimeMarker) =>
             updateStyleOption('addTimeMarker', addTimeMarker)
           }

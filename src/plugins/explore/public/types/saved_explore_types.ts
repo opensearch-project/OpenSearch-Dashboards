@@ -22,8 +22,23 @@ export interface SavedExplore
   > {
   searchSource: ISearchSource; // This is optional in SavedObject, but required for SavedSearch
   description?: string;
-  columns: string[];
-  sort: SortOrder[];
+  legacyState?: string; // Serialized legacy state (columns, sort, interval, etc.)
+  uiState?: string; // Serialized UI state
+  queryState?: string; // Serialized query state
+  version?: number;
+}
+
+export interface SavedExploreAttributes {
+  id?: string;
+  title: string;
+  description?: string;
+  legacyState: string; // Serialized legacy state
+  uiState: string; // Serialized UI state
+  queryState: string; // Serialized query state
+  version: number;
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: string;
+  };
 }
 export interface SavedExploreLoader {
   get: (id: string) => Promise<SavedExplore>;

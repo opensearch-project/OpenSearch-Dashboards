@@ -109,25 +109,32 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
 
   const datePickerRef = useRef<HTMLDivElement>(null);
 
-  if (
+  // DEBUG: Check early return condition
+  const shouldReturnNull =
     (!config || config.length === 0) &&
     (!showSearchBar || !props.data) &&
-    (!showDataSourceMenu || !dataSourceMenuConfig)
-  ) {
+    (!showDataSourceMenu || !dataSourceMenuConfig);
+
+  if (shouldReturnNull) {
     return null;
   }
 
   function renderItems(): ReactElement | ReactElement[] | null {
-    if (!config || config.length === 0) return null;
+    if (!config || config.length === 0) {
+      return null;
+    }
+
     const renderedItems = config.map((menuItem: TopNavMenuData, i: number) => {
       return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
     });
 
-    return groupActions ? (
+    const result = groupActions ? (
       <div className="osdTopNavMenuGroupedActions">{renderedItems}</div>
     ) : (
       renderedItems
     );
+
+    return result;
   }
 
   function renderMenu(className: string, spreadSections: boolean = false): ReactElement | null {
@@ -173,7 +180,10 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     const { setMenuMountPoint } = props;
     const menuClassName = classNames('osdTopNavMenu', props.className);
 
-    if (setMenuMountPoint) {
+    // Check if setMenuMountPoint is a meaningful function (not just an empty function)
+    const hasValidMountPoint = setMenuMountPoint && setMenuMountPoint.toString() !== '() => {}';
+
+    if (hasValidMountPoint) {
       if (groupActions) {
         switch (showSearchBar) {
           case TopNavMenuItemRenderType.IN_PORTAL:
@@ -232,7 +242,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                     <EuiFlexItem grow={false} className="osdTopNavMenu">
                       {renderMenu(menuClassName)}
                     </EuiFlexItem>
-                    <EuiFlexItem className="globalDatePicker">
+                    <EuiFlexItem grow={false} className="globalDatePicker">
                       <div ref={datePickerRef} />
                     </EuiFlexItem>
                   </EuiFlexGroup>

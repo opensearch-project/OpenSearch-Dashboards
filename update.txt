@@ -1,0 +1,578 @@
+* Middleware Approach: Use Redux thunk (middleware) to centralize query execution logic.
+* Redux with Four-Slice Architecture: Implement Redux store with query, UI, results, and tab slices. We might need another slice for legacy states for transform period.
+    * Query slice should use same type as queryStringManager used and defined in src/plugins/data/common/query/types.ts
+```
+export type Query = {
+  query: string | { [key: string]: any };
+  language: string;
+  dataset?: Dataset;
+};
+
+```
+    * promptQuery if needed should be saved under uiSlice 
+        * uiState:{queryPanel: {promptQuery : string}, other states }
+* Composite Cache Keys: Cache query results using keys that include both transformed query and time filter to avoid using incorrect cache for relative time filters.
+* skipInitialFetch Support (new): Support skipInitialFetch in the middleware by adding a flag in the tab state that indicates whether to skip the initial fetch. When switching tabs, check this flag before executing a query.
+* Query Execution Behavior
+    * Modify query: Does not auto-run query. Only click run will dispatch action to update query state and run query.
+    * Click run: Dispatches action to update query state, clears cache, and runs query for current tab only
+    * Switch dataset: Dispatches action to update query state, clears cache, and runs query for current tab only
+    * Tab switch after query modification:
+        * Gets current time range and transformed query to construct the composite key
+        * Checks cache for this key
+        * If no cache exists, dispatches action to run query
+* OSD splits state across three independent stores and we should follow the same:
+    * Global state (_g): Contains time range settings
+    * Query state (_q): Contains query string and dataset
+    * Application state (_a): Contains UI-specific settings and other application states
+    * Race Condition Issue: When these stores update asynchronously (like when loading a saved search):
+        * Multiple queries execute redundantly (one for dataset change, one for query change, one for time range change)
+        * The UI shows inconsistent intermediate states
+        * The final state depends on which query completes last
+        * Proposed Solution: A transaction-based middleware approach to batch related state changes (separate state dispatch and action to run query):
+            * Start a transaction to collect all state updates
+            * Apply all updates atomically
+            * Execute a single query with the complete, consistent state
+    * Check discussion.txt for implementation examples
+* Language-Agnostic Middleware
+
+1. Enhanced Tab Contract
+Modify the TabDefinition interface to be language-aware and handle complete query objects:
+```
+export interface TabDefinition {
+  id: string;
+  label: string;
+  flavor: string[];
+  order?: number;
+  
+  // Language-aware query handling
+  supportedLanguages: string[];  // Languages this tab supports
+  
+  // Transform complete query object instead of just string
+  prepareQuery: (queryState: {
+    query: string;
+    language: string;
+    dataset?: string;
+  }) => {
+    query: string;
+    language: string;
+    dataset?: string;
+  };
+  
+  // UI Components
+  component: React.ComponentType<TabComponentProps>;
+  
+  // Optional lifecycle hooks
+  onActive?: () => void;
+  onInactive?: () => void;
+}
+```
+Key improvements:
+* 		supportedLanguages array declares which languages the tab can handle
+* 		prepareQuery replaces transformQuery and works with complete query objects
+* 		Returns the full query object with language information
+
+2. Language-Agnostic Middleware
+Redesign the middleware to be completely language-agnostic:
+
+
+
+Addressing Implementation Questions for Explore Middleware
+Let me address your questions about the middleware implementation and how it compares to vis_builder:
+1. Transaction Slice Purpose
+The transaction slice serves multiple purposes, not just rollback:
+* 		Primary Purpose: Track transaction state (inProgress) to coordinate state updates
+* 		Secondary Purposes:
+    * 		Store previous state for potential rollback (optional)
+    * 		Track transaction errors
+    * 		Enable middleware to block/queue actions during transactions
+You're right that we might not need to roll back to re-send a query. A simpler approach could be:
+const transactionSlice = createSlice({
+  name: 'transaction',
+  initialState: { inProgress: false },
+  reducers: {
+    startTransaction: (state) => {
+      state.inProgress = true;
+    },
+    commitTransaction: (state) => {
+      state.inProgress = false;
+    }
+  },
+});
+
+This would still provide the core benefit of batching state updates without the complexity of rollback.
+2. SearchSource Management
+You raise an important point about SearchSource reuse. Let's clarify:
+Current Implementation Issue
+In the code I provided, we're storing a single SearchSource instance in a closure variable:
+export const queryMiddleware: Middleware = ({ getState, dispatch }) => {
+  let searchSource = null;  // Closure variable
+  
+  const initSearchSource = async (services) => {
+    if (!searchSource) {
+      searchSource = await services.data.search.searchSource.create();
+    }
+    return searchSource;
+  };
+  // ...
+}
+
+
+This approach has limitations:
+* 		It reuses the same SearchSource for all queries
+* 		It doesn't align with the caching strategy in explore_architecture.txt
+Better Approach Following vis_builder
+In vis_builder, SearchSource instances are created as needed and not stored in middleware. Instead:
+* 		Cache Results, Not SearchSource: Store query results keyed by transformed query + time range
+* 		Create New SearchSource Per Query: Create a fresh SearchSource for each query execution
+* 		Check Cache Before Creating SearchSource: Only create a SearchSource if no cached results exist
+// Better implementation
+if (action.type === COMMIT_STATE_TRANSACTION) {
+  const state = getState();
+  const { query } = state.query;
+  const { activeTabId } = state.ui;
+  const services = state.services;
+  
+  // Get tab definition
+  const tabDefinition = services.tabRegistry.getTab(activeTabId);
+  if (!tabDefinition) return result;
+  
+  // Prepare query
+  const preparedQuery = tabDefinition.prepareQuery(query);
+  
+  // Get current time range
+  const timeRange = services.data.query.timefilter.timefilter.getTime();
+  
+  // Create cache key
+  const cacheKey = createCacheKey(preparedQuery, timeRange);
+  
+  // Check cache first
+  if (state.results[cacheKey]) {
+    console.log('Using cached results');
+    return result;
+  }
+  
+  // Create new SearchSource for this query
+  const searchSource = await services.data.search.searchSource.create();
+  
+  // Configure SearchSource
+  const indexPattern = preparedQuery.dataset || services.indexPattern;
+  const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(indexPattern);
+  
+  searchSource
+    .setField('index', indexPattern)
+    .setField('query', { 
+      query: preparedQuery.query, 
+      language: preparedQuery.language
+    })
+    .setField('filter', timeRangeFilter ? [timeRangeFilter] : []);
+  
+  // Execute query
+  dispatch(setLoading(true));
+  
+  try {
+    const results = await searchSource.fetch();
+    dispatch(setResults({ cacheKey, results }));
+  } catch (error) {
+    dispatch(setError(error));
+  } finally {
+    dispatch(setLoading(false));
+  }
+}
+
+This aligns better with explore_architecture.txt's caching strategy.
+3. Differences from vis_builder Setup
+My implementation differs from vis_builder in several ways:
+vis_builder Approach:
+// From vis_builder's store.ts
+export const getPreloadedStore = async (services: VisBuilderServices) => {
+  const preloadedState = await loadReduxState(services);
+  const store = configurePreloadedStore(preloadedState);
+
+  let previousState = store.getState();
+
+  // Listen to changes
+  const handleChange = () => {
+    const state = store.getState();
+    persistReduxState(state, services);
+
+    if (isEqual(state, previousState)) return;
+
+    // Side effects to apply after changes to the store are made
+    handlerEditorState(store, state, previousState);
+    handlerParentAggs(store, state, services);
+
+    previousState = state;
+  };
+
+  // the store subscriber will automatically detect changes and call handleChange function
+  const unsubscribe = store.subscribe(handleChange);
+
+  return { store, unsubscribe };
+};
+
+vis_builder:
+* 		Uses a store subscriber to detect changes
+* 		Applies side effects after store changes through handlers
+* 		Doesn't use middleware for query execution
+* 		Persists state to URL after changes
+To better follow vis_builder, we should:
+* 		Use Store Subscriber: Replace middleware with a store subscriber for side effects
+* 		Use Handlers for Side Effects: Create handlers for different types of state changes
+* 		Simplify Transaction Management: Use Redux Thunk for transaction actions
+// More vis_builder-like approach
+export const getExploreStore = async (services) => {
+  const preloadedState = await loadReduxState(services);
+  const store = configureStore({
+    reducer: rootReducer,
+    middleware: getDefaultMiddleware => getDefaultMiddleware().concat(thunk),
+    preloadedState
+  });
+
+  let previousState = store.getState();
+
+  // Listen to changes
+  const handleChange = () => {
+    const state = store.getState();
+    persistReduxState(state, services);
+
+    if (isEqual(state, previousState)) return;
+
+    // Apply side effects based on what changed
+    if (state.ui.activeTabId !== previousState.ui.activeTabId) {
+      handleTabChange(store, state, previousState);
+    }
+
+    if (state.query.query !== previousState.query.query) {
+      handleQueryChange(store, state, previousState);
+    }
+
+    if (!isEqual(state.transaction, previousState.transaction)) {
+      handleTransactionChange(store, state, previousState);
+    }
+
+    previousState = state;
+  };
+
+  const unsubscribe = store.subscribe(handleChange);
+  return { store, unsubscribe };
+};
+
+
+4. Redux Thunk vs. Custom Middleware
+Using Redux Thunk instead of custom middleware is a good suggestion:
+Benefits of Redux Thunk:
+* 		Simpler Implementation: No need to write custom middleware
+* 		Standard Pattern: More familiar to developers
+* 		Better Testability: Easier to test thunks than middleware
+* 		Composition: Can compose multiple thunks together
+Implementation with Redux Thunk:
+// Transaction actions with Redux Thunk
+export const beginTransaction = () => (dispatch, getState) => {
+  dispatch({ type: 'transaction/startTransaction' });
+};
+
+export const finishTransaction = () => async (dispatch, getState) => {
+  const state = getState();
+  const { query } = state.query;
+  const { activeTabId } = state.ui;
+  const services = state.services;
+  
+  // Mark transaction as complete
+  dispatch({ type: 'transaction/commitTransaction' });
+  
+  // Get tab definition
+  const tabDefinition = services.tabRegistry.getTab(activeTabId);
+  if (!tabDefinition) return;
+  
+  // Prepare query
+  const preparedQuery = tabDefinition.prepareQuery(query);
+  
+  // Get time range
+  const timeRange = services.data.query.timefilter.timefilter.getTime();
+  
+  // Create cache key
+  const cacheKey = createCacheKey(preparedQuery, timeRange);
+  
+  // Check cache
+  if (state.results[cacheKey]) return;
+  
+  // Execute query
+  dispatch(setLoading(true));
+  
+  try {
+    // Create new SearchSource
+    const searchSource = await services.data.search.searchSource.create();
+    
+    // Configure SearchSource
+    const indexPattern = preparedQuery.dataset || services.indexPattern;
+    const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(indexPattern);
+    
+    searchSource
+      .setField('index', indexPattern)
+      .setField('query', { 
+        query: preparedQuery.query, 
+        language: preparedQuery.language
+      })
+      .setField('filter', timeRangeFilter ? [timeRangeFilter] : []);
+    
+    // Execute query
+    const results = await searchSource.fetch();
+    dispatch(setResults({ cacheKey, results }));
+  } catch (error) {
+    dispatch(setError(error));
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+
+
+This approach:
+* 		Uses Redux Thunk for async actions
+* 		Follows vis_builder's pattern more closely
+* 		Simplifies the implementation by removing custom middleware
+* 		Still provides transaction-like behavior
+Revised Recommendation
+Based on your feedback, I recommend:
+* 		Use Redux Thunk: For transaction management and async actions
+* 		Simplify Transaction State: Focus on tracking inProgress, not rollback
+* 		Create New SearchSource Per Query: Don't reuse SearchSource instances
+* 		Cache Results by Key: Use composite keys with query + time range
+This approach combines the best of both worlds: vis_builder's proven architecture with the transaction-based coordination from discussion.txt.
+
+
+## Discussion for _a,_g,_q states
+We still need _a,_g,_q. _q should still be query state. But we should not use connectStorageToQueryState as vis_builder since
+our query state is from local redux slice. Here are some discussions.
+
+For `// In redux_persistence.ts
+export const persistReduxState = (
+  { query, ui, tab }: RootState,
+  services: any
+) => {
+  try {
+    services.osdUrlStateStorage.set(
+      '_a',
+      {
+        query: query.query,
+        ui: {
+          activeTabId: ui.activeTabId,
+          flavor: ui.flavor,
+        },
+        tab,
+      },
+      { replace: true }
+    );
+  } catch (err) {
+    console.error('Error persisting state to URL:', err);
+  }
+};
+`, I think we should not persist query slice to _a right? since we are going to persist it to _q. 2) For _q, I think load state from url into redux should be in preload right? Then can we reuse persistReduxState for _q?
+
+
+
+The user has provided two important pieces of feedback:
+
+We should not persist the query slice to _a since we're going to persist it to _q. This makes sense - we want to avoid duplicating state across different URL parameters.
+
+For _q, loading state from the URL into Redux should be done during preload, and they're asking if we can reuse persistReduxState for _q.
+
+Let me address these points:
+
+Yes, we should modify the persistReduxState function to not include the query state in _a since it will be in _q.
+
+Yes, loading state from the URL into Redux should ideally be done during preload. We can create a similar function to loadReduxState for loading from _q, or modify loadReduxState to also load from _q.
+
+We can create a similar function to persistReduxState for _q, or modify persistReduxState to handle both _a and _q.
+
+Let me revise my solution based on this feedback.
+
+
+Task Completed
+Revised URL State Persistence for Explore Plugin
+Based on your feedback, I'll revise the approach to properly separate concerns between _a, _g, and _q parameters.
+
+1. For _a (Application State)
+Modify persistReduxState to exclude query state since it will be in _q:
+
+// In redux_persistence.ts
+export const persistReduxState = (
+  { ui, tab }: RootState, // Remove query from destructuring
+  services: any
+) => {
+  try {
+    // Update application state in URL
+    services.osdUrlStateStorage.set(
+      '_a',
+      {
+        // Remove query from here
+        ui: {
+          activeTabId: ui.activeTabId,
+          flavor: ui.flavor,
+        },
+        tab,
+      },
+      { replace: true }
+    );
+  } catch (err) {
+    console.error('Error persisting state to URL:', err);
+  }
+};
+
+typescript
+
+
+2. For _q (Query State)
+Create dedicated functions for loading and persisting query state:
+
+// In redux_persistence.ts
+
+/**
+ * Loads query state from URL parameters during preload
+ */
+export const loadQueryState = async (services: any) => {
+  try {
+    // Load query state from URL
+    const serializedState = services.osdUrlStateStorage.get('_q');
+    if (serializedState !== null && serializedState.query) {
+      return serializedState.query;
+    }
+  } catch (err) {
+    console.error('Error loading query state from URL:', err);
+  }
+
+  // Return default query if nothing in URL
+  return {
+    query: '',
+    language: 'ppl',
+  };
+};
+
+/**
+ * Persists query state to URL parameters
+ */
+export const persistQueryState = (
+  { query }: RootState,
+  services: any
+) => {
+  try {
+    // Update query state in URL
+    services.osdUrlStateStorage.set(
+      '_q',
+      {
+        query: query.query,
+        filters: [], // Empty array since you don't have filters
+      },
+      { replace: true }
+    );
+  } catch (err) {
+    console.error('Error persisting query state to URL:', err);
+  }
+};
+
+typescript
+
+
+
+3. Modify Store Initialization
+Update the store initialization to load query state during preload:
+
+// In store.ts or wherever you initialize your store
+export const getExploreStore = async (services: any, preloadedState?: any) => {
+  // Load state from URL
+  const appState = await loadReduxState(services);
+  const queryState = await loadQueryState(services);
+  
+  // Create store with preloaded state
+  const store = configureStore({
+    reducer: rootReducer,
+    preloadedState: {
+      ...preloadedState,
+      ...appState,
+      query: {
+        query: queryState,
+      },
+      services,
+    },
+  });
+
+  // Keep track of previous state for change detection
+  let previousState = store.getState();
+
+  // Set up store subscriber for side effects
+  const unsubscribe = store.subscribe(() => {
+    const currentState = store.getState();
+    
+    // Skip if state hasn't changed
+    if (isEqual(currentState, previousState)) return;
+    
+    // Persist application state to URL
+    persistReduxState(currentState, services);
+    
+    // Persist query state to URL
+    persistQueryState(currentState, services);
+    
+    // Apply side effects based on what changed
+    // ... (rest of your existing code)
+    
+    // Update previous state reference
+    previousState = { ...currentState };
+  });
+
+  return { store, unsubscribe };
+};
+
+typescript
+
+
+
+4. For _g (Global State)
+Keep the approach with syncQueryStateWithUrl as described before:
+
+// In your main app component
+useEffect(() => {
+  // Create an adapter that provides the interface expected by syncQueryStateWithUrl
+  const queryServiceAdapter = {
+    timefilter: {
+      timefilter: services.data.query.timefilter.timefilter
+    },
+    filterManager: {
+      getGlobalFilters: () => [] // Empty array since you don't have filters
+    },
+    state$: services.data.query.state$
+  };
+
+  // Use syncQueryStateWithUrl with your adapter
+  const { stop } = syncQueryStateWithUrl(
+    queryServiceAdapter, 
+    services.osdUrlStateStorage,
+    services.uiSettings
+  );
+
+  return () => stop();
+}, [services.data.query.timefilter, services.osdUrlStateStorage, pathname, services.uiSettings]);
+
+typescript
+
+
+Complete Implementation
+This approach:
+
+Properly separates concerns:
+
+_a contains UI and tab state
+_q contains query state
+_g contains timefilter state
+Loads state during preload:
+
+Application state from _a
+Query state from _q
+Persists state when it changes:
+
+Application state to _a
+Query state to _q
+Timefilter state to _g
+Reuses your existing Redux architecture and persistence mechanisms
+
+This implementation aligns with how other plugins handle URL state while maintaining your Redux-based approach.

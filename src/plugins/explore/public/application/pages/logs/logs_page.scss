@@ -1,0 +1,128 @@
+$osdHeaderOffset: $euiHeaderHeightCompensation;
+
+.deSidebar {
+  height: 100%;
+
+  @include ouiBreakpoint("xs", "s", "m") {
+    max-width: initial;
+    width: 100%;
+  }
+}
+
+.deLayout {
+  height: calc(100vh - #{$osdHeaderOffset * 1});
+  padding: $euiSizeS;
+
+  &.dsc--next {
+    height: calc(100vh - #{$osdHeaderOffset * 2});
+  }
+
+  &__canvas {
+    height: 100%;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > .euiResizableContainer {
+    gap: $euiSizeXS;
+  }
+
+  .globalQueryBar {
+    padding: 0;
+  }
+}
+
+.headerIsExpanded .deLayout {
+  height: calc(100vh - #{$osdHeaderOffset * 2});
+
+  &.dsc--next {
+    height: calc(100vh - #{$osdHeaderOffset * 3});
+  }
+}
+
+.mainPage {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .navBar {
+    padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSizeM;
+    border-bottom: $euiBorderThin;
+  }
+}
+
+.dscCanvas {
+  // Ensure proper spacing and layout
+  .dscCanvas__queryPanel {
+    margin-bottom: $euiSizeS;
+  }
+
+  .dscCanvas__tabBar {
+    margin-bottom: $euiSizeS;
+  }
+
+  .dscCanvas__chart {
+    margin-bottom: $euiSizeS;
+  }
+
+  @include euiYScroll;
+
+  /* stylelint-disable-next-line */
+  container-type: inline-size; // containment context
+  /* stylelint-disable-next-line */
+  container-name: canvas;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &_results {
+    border: none;
+    border-top: $ouiBorderThin;
+    margin-left: $euiSizeM;
+    position: relative;
+  }
+
+  &_options {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  &__experienceBannerWrapper {
+    margin-bottom: $euiSizeS;
+    margin-top: $euiSizeS;
+  }
+}
+
+// TopNav styles for the Discover
+/* stylelint-disable-next-line */
+@container canvas (max-width: 900px) {
+  .globalQueryBar {
+    .osdQueryBar--withDatePicker {
+      flex-wrap: wrap;
+
+      /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+      & > .euiFlexItem {
+        width: 100% !important;
+
+        &:first-child {
+          order: 1;
+        }
+      }
+
+      .osdQueryBar__datePickerWrapper {
+        max-width: initial;
+        width: 100%;
+
+        /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+        .euiSuperDatePicker__flexWrapper {
+          width: auto;
+        }
+      }
+    }
+  }
+}
+
+.topNav {
+  .hidden {
+    display: none;
+  }
+}

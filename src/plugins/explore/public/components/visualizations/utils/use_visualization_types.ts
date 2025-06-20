@@ -4,28 +4,54 @@
  */
 
 import { LineChartStyleControls } from '../line/line_vis_config';
+import { PieChartStyleControls } from '../pie/pie_vis_config';
+import { MetricChartStyleControls } from '../metric/metric_vis_config';
+import { HeatmapChartStyleControls } from '../heatmap/heatmap_vis_config';
+import { ScatterChartStyleControls } from '../scatter/scatter_vis_config';
 import { IFieldType } from '../../../application/legacy/discover/opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
-import { LineVisStyleControlsProps } from '../line/line_vis_options';
+
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
 import { ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DiscoverViewServices } from '../../../application/legacy/discover/build_services';
+import { ExploreServices } from '../../../types';
+import { BarChartStyleControls } from '../bar/bar_vis_config';
 
-export interface VisualizationType {
+export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar';
+
+export interface ChartStyleControlMap {
+  line: LineChartStyleControls;
+  pie: PieChartStyleControls;
+  metric: MetricChartStyleControls;
+  heatmap: HeatmapChartStyleControls;
+  scatter: ScatterChartStyleControls;
+  bar: BarChartStyleControls;
+}
+
+export type AllChartStyleControls =
+  | LineChartStyleControls
+  | PieChartStyleControls
+  | BarChartStyleControls
+  | MetricChartStyleControls
+  | HeatmapChartStyleControls
+  | ScatterChartStyleControls;
+
+export interface StyleControlsProps<T extends AllChartStyleControls> {
+  styleOptions: T;
+  onStyleChange: (newStyle: Partial<T>) => void;
+  numericalColumns?: VisColumn[];
+  categoricalColumns?: VisColumn[];
+  dateColumns?: VisColumn[];
+}
+
+export interface VisualizationType<T extends ChartType> {
   readonly name: string;
-  readonly type: string;
+  readonly type: T;
   readonly ui: {
     style: {
-      defaults: LineChartStyleControls;
-      render: ({
-        styleOptions,
-        onStyleChange,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-      }: LineVisStyleControlsProps) => JSX.Element;
+      defaults: ChartStyleControlMap[T];
+      render: (props: StyleControlsProps<ChartStyleControlMap[T]>) => JSX.Element;
     };
   };
 }
@@ -59,8 +85,8 @@ const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [OPENSEARCH_FIELD_TYPES.WILDCARD]: VisFieldType.Categorical,
 };
 
-export interface VisualizationTypeResult {
-  visualizationType?: VisualizationType;
+export interface VisualizationTypeResult<T extends ChartType> {
+  visualizationType?: VisualizationType<T>;
   numericalColumns?: VisColumn[];
   categoricalColumns?: VisColumn[];
   dateColumns?: VisColumn[];
@@ -85,7 +111,7 @@ export const getVisualizationType = <T = unknown>(
   rows?: Array<OpenSearchSearchHit<T>>,
   fieldSchema?: Array<Partial<IFieldType>>,
   registry = visualizationRegistry
-): VisualizationTypeResult | undefined => {
+) => {
   if (!fieldSchema || !rows) {
     return;
   }
@@ -96,6 +122,8 @@ export const getVisualizationType = <T = unknown>(
       schema: getFieldTypeFromSchema(field.type),
       name: field.name || '',
       column: `field-${index}`,
+      validValuesCount: 0,
+      uniqueValuesCount: 0,
     };
   });
   const transformedData = rows.map((row: OpenSearchSearchHit) => {
@@ -108,8 +136,20 @@ export const getVisualizationType = <T = unknown>(
     return transformedRow;
   });
 
+  // count validValues and uniqueValues
+  const fieldStats = columns.map((column) => {
+    const values = transformedData.map((row) => row[column.column]);
+    const validValues = values.filter((v) => v !== null && v !== undefined);
+    const uniqueValues = new Set(validValues);
+    return {
+      ...column,
+      validValuesCount: validValues.length ?? 0,
+      uniqueValuesCount: uniqueValues.size ?? 0,
+    };
+  });
+
   return {
-    ...registry.getVisualizationType(columns),
+    ...registry.getVisualizationType(fieldStats),
     transformedData,
   };
 };
@@ -118,7 +158,7 @@ export const getVisualizationType = <T = unknown>(
  * Hook to get the visualization registry from the service
  */
 export const useVisualizationRegistry = () => {
-  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
 
   // If the service is available, use it, otherwise fall back to the singleton
   return services.visualizationRegistry?.getRegistry() || visualizationRegistry;
