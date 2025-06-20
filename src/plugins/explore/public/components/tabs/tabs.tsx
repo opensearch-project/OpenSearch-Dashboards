@@ -17,7 +17,7 @@ import {
   executeQueries,
 } from '../../application/utils/state_management/actions/query_actions';
 import { selectQuery } from '../../application/utils/state_management/selectors';
-import { createCacheKey } from '../../application/utils/state_management/handlers/query_handler';
+import { createCacheKey } from '../../application/utils/state_management/utils/query_utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
 import { RootState } from '../../application/utils/state_management/store';

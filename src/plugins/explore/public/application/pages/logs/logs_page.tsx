@@ -114,7 +114,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   // Function to refresh data (for uninitialized state)
   const onRefresh = () => {
     if (services) {
-      dispatch(executeQueries({ services }) as any);
+      dispatch(executeQueries({ services }));
     }
   };
 

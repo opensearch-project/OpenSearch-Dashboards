@@ -15,10 +15,8 @@ import { ExploreServices } from '../../../../types';
  */
 export const createQuerySyncMiddleware = (services: ExploreServices): Middleware<{}, RootState> => {
   return (store) => (next) => (action) => {
-    // Let the action go through first
     const result = next(action);
 
-    // Check if this action affects query state
     if (action.type === 'query/setQuery') {
       const state = store.getState();
       const query = state.query;

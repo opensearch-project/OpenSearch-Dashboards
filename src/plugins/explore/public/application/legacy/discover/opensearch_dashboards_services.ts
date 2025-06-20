@@ -49,7 +49,7 @@ export function getServices(): ExploreServices {
   return services;
 }
 
-export function setServices(newServices: any) {
+export function setServices(newServices: ExploreServices) {
   services = newServices;
 }
 

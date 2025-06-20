@@ -48,7 +48,7 @@ export const HeaderDatasetSelector: React.FC<HeaderDatasetSelectorProps> = ({
       try {
         dispatch(clearResults());
         dispatch(setQuery(queryStringState));
-        dispatch(executeQueries({ services }) as any);
+        dispatch(executeQueries({ services }));
       } finally {
         dispatch(finishTransaction());
       }

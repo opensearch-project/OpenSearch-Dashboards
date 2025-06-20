@@ -4,7 +4,8 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Query, Dataset } from '../../../../../../data/common';
+import { Query } from '../../../../../../data/common';
+import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
 
 // QueryState now directly extends Query interface - no nesting
 export type QueryState = Query;
@@ -12,7 +13,7 @@ export type QueryState = Query;
 // Flattened structure - no nested query object
 const initialState: QueryState = {
   query: '',
-  language: 'PPL', // Default to PPL as mentioned in requirements
+  language: EXPLORE_DEFAULT_LANGUAGE,
   dataset: undefined, // Store dataset here
 };
 
