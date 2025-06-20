@@ -6,6 +6,7 @@
 import './traces_page.scss';
 
 import React, { useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   EuiErrorBoundary,
@@ -40,6 +41,7 @@ import { DiscoverUninitialized } from '../../legacy/discover/application/compone
 import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';
 import { DiscoverNoResults } from '../../legacy/discover/application/components/no_results/no_results';
 import { executeQueries } from '../../utils/state_management/actions/query_actions';
+import { TraceDetails } from './trace_details/trace_view';
 
 /**
  * Main application component for the Explore plugin
@@ -49,6 +51,8 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
+  const location = useLocation();
+  const isTraceDetailsPage = location.hash.startsWith('#/traceDetails');
   const {
     indexPattern,
     isLoading: indexPatternLoading,
@@ -120,144 +124,155 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
 
   return (
     <EuiErrorBoundary>
-      <div className="mainPage">
-        {/* Nav bar structure exactly like data_explorer */}
-        <EuiFlexGroup
-          direction="row"
-          className={showActionsInGroup ? '' : 'mainPage navBar'}
-          gutterSize="none"
-          alignItems="center"
-          justifyContent="spaceBetween"
-        >
-          {!showActionsInGroup && (
+      {isTraceDetailsPage ? (
+        <TraceDetails setMenuMountPoint={setHeaderActionMenu} />
+      ) : (
+        <div className="mainPage">
+          {/* Nav bar structure exactly like data_explorer */}
+          <EuiFlexGroup
+            direction="row"
+            className={showActionsInGroup ? '' : 'mainPage navBar'}
+            gutterSize="none"
+            alignItems="center"
+            justifyContent="spaceBetween"
+          >
+            {!showActionsInGroup && (
+              <EuiFlexItem grow={false}>
+                <div ref={topLinkRef} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
-              <div ref={topLinkRef} />
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <div ref={datasetSelectorRef} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <div ref={datePickerRef} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <div ref={datasetSelectorRef} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div ref={datePickerRef} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiFlexGroup>
 
-        <EuiPage className="deLayout" paddingSize="none" grow={false}>
-          <EuiPageBody>
-            {/* TopNav component - configured like discover */}
+          <EuiPage className="deLayout" paddingSize="none" grow={false}>
+            <EuiPageBody>
+              {/* TopNav component - configured like discover */}
 
-            {/* HeaderDatasetSelector component - renders dataset selector in portal */}
-            <HeaderDatasetSelector datasetSelectorRef={datasetSelectorRef} />
+              {/* HeaderDatasetSelector component - renders dataset selector in portal */}
+              <HeaderDatasetSelector datasetSelectorRef={datasetSelectorRef} />
 
-            <div className="dscCanvas__experienceBannerWrapper">
-              <NewExperienceBanner />
-            </div>
+              <div className="dscCanvas__experienceBannerWrapper">
+                <NewExperienceBanner />
+              </div>
 
-            {/* QueryPanel component - only render when IndexPattern is loaded */}
-            <div className="dscCanvas__queryPanel">
-              {indexPatternLoading ? (
-                <div>Loading IndexPattern...</div>
-              ) : indexPatternError ? (
-                <div>Error loading IndexPattern: {indexPatternError}</div>
-              ) : indexPattern ? (
-                <QueryPanel
-                  datePickerRef={datePickerRef}
-                  services={services}
-                  indexPattern={indexPattern}
-                />
-              ) : (
-                <div>No IndexPattern available</div>
-              )}
-            </div>
+              {/* QueryPanel component - only render when IndexPattern is loaded */}
+              <div className="dscCanvas__queryPanel">
+                {indexPatternLoading ? (
+                  <div>Loading IndexPattern...</div>
+                ) : indexPatternError ? (
+                  <div>Error loading IndexPattern: {indexPatternError}</div>
+                ) : indexPattern ? (
+                  <QueryPanel
+                    datePickerRef={datePickerRef}
+                    services={services}
+                    indexPattern={indexPattern}
+                  />
+                ) : (
+                  <div>No IndexPattern available</div>
+                )}
+              </div>
 
-            {/* Main content area with resizable panels under QueryPanel */}
-            <EuiResizableContainer
-              direction={isMobile ? 'vertical' : 'horizontal'}
-              style={{ flex: 1, minHeight: 0 }}
-            >
-              {(EuiResizablePanel, EuiResizableButton) => (
-                <>
-                  {/* Left Panel: DiscoverPanel (Fields) */}
-                  <EuiResizablePanel
-                    initialSize={20}
-                    minSize="260px"
-                    mode={['collapsible', { position: 'top' }]}
-                    paddingSize="none"
-                  >
-                    <DiscoverPanel />
-                  </EuiResizablePanel>
+              {/* Main content area with resizable panels under QueryPanel */}
+              <EuiResizableContainer
+                direction={isMobile ? 'vertical' : 'horizontal'}
+                style={{ flex: 1, minHeight: 0 }}
+              >
+                {(EuiResizablePanel, EuiResizableButton) => (
+                  <>
+                    {/* Left Panel: DiscoverPanel (Fields) */}
+                    <EuiResizablePanel
+                      initialSize={20}
+                      minSize="260px"
+                      mode={['collapsible', { position: 'top' }]}
+                      paddingSize="none"
+                    >
+                      <DiscoverPanel />
+                    </EuiResizablePanel>
 
-                  <EuiResizableButton />
+                    <EuiResizableButton />
 
-                  <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
-                    <EuiPageBody className="deLayout__canvas">
-                      <EuiPanel
-                        hasBorder={true}
-                        hasShadow={false}
-                        paddingSize="s"
-                        className="dscCanvas"
-                        data-test-subj="dscCanvas"
-                        borderRadius="l"
-                      >
-                        <TopNav {...topNavProps} />
+                    <EuiResizablePanel
+                      initialSize={80}
+                      minSize="65%"
+                      mode="main"
+                      paddingSize="none"
+                    >
+                      <EuiPageBody className="deLayout__canvas">
+                        <EuiPanel
+                          hasBorder={true}
+                          hasShadow={false}
+                          paddingSize="s"
+                          className="dscCanvas"
+                          data-test-subj="dscCanvas"
+                          borderRadius="l"
+                        >
+                          <TopNav {...topNavProps} />
 
-                        {/* Handle different states following Discover's pattern */}
-                        {indexPattern ? (
-                          <>
-                            {/* NO_RESULTS state */}
-                            {status === ResultStatus.NO_RESULTS && (
-                              <DiscoverNoResults
-                                queryString={services?.data?.query?.queryString}
-                                query={services?.data?.query?.queryString?.getQuery()}
-                                savedQuery={services?.data?.query?.savedQueries}
-                                timeFieldName={indexPattern.timeFieldName}
-                              />
-                            )}
+                          {/* Handle different states following Discover's pattern */}
+                          {indexPattern ? (
+                            <>
+                              {/* NO_RESULTS state */}
+                              {status === ResultStatus.NO_RESULTS && (
+                                <DiscoverNoResults
+                                  queryString={services?.data?.query?.queryString}
+                                  query={services?.data?.query?.queryString?.getQuery()}
+                                  savedQuery={services?.data?.query?.savedQueries}
+                                  timeFieldName={indexPattern.timeFieldName}
+                                />
+                              )}
 
-                            {/* UNINITIALIZED state */}
-                            {status === ResultStatus.UNINITIALIZED && (
-                              <DiscoverUninitialized onRefresh={onRefresh} />
-                            )}
+                              {/* UNINITIALIZED state */}
+                              {status === ResultStatus.UNINITIALIZED && (
+                                <DiscoverUninitialized onRefresh={onRefresh} />
+                              )}
 
-                            {/* LOADING state with no existing data */}
-                            {status === ResultStatus.LOADING && !rows?.length && <LoadingSpinner />}
+                              {/* LOADING state with no existing data */}
+                              {status === ResultStatus.LOADING && !rows?.length && (
+                                <LoadingSpinner />
+                              )}
 
-                            {/* ERROR state with no existing data */}
-                            {status === ResultStatus.ERROR && !rows?.length && (
-                              <DiscoverUninitialized onRefresh={onRefresh} />
-                            )}
+                              {/* ERROR state with no existing data */}
+                              {status === ResultStatus.ERROR && !rows?.length && (
+                                <DiscoverUninitialized onRefresh={onRefresh} />
+                              )}
 
-                            {/* READY state or LOADING/ERROR with existing data */}
-                            {(status === ResultStatus.READY ||
-                              (status === ResultStatus.LOADING && !!rows?.length) ||
-                              (status === ResultStatus.ERROR && !!rows?.length)) && (
-                              <>
-                                <div className="dscCanvas__chart">
-                                  <DiscoverChartContainer />
-                                </div>
-                                <ExploreTabs />
-                              </>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <EuiSpacer size="xxl" />
-                            <DiscoverNoIndexPatterns />
-                          </>
-                        )}
-                      </EuiPanel>
-                    </EuiPageBody>
-                  </EuiResizablePanel>
-                </>
-              )}
-            </EuiResizableContainer>
-          </EuiPageBody>
-        </EuiPage>
-      </div>
+                              {/* READY state or LOADING/ERROR with existing data */}
+                              {(status === ResultStatus.READY ||
+                                (status === ResultStatus.LOADING && !!rows?.length) ||
+                                (status === ResultStatus.ERROR && !!rows?.length)) && (
+                                <>
+                                  <div className="dscCanvas__chart">
+                                    <DiscoverChartContainer />
+                                  </div>
+                                  <ExploreTabs />
+                                </>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <EuiSpacer size="xxl" />
+                              <DiscoverNoIndexPatterns />
+                            </>
+                          )}
+                        </EuiPanel>
+                      </EuiPageBody>
+                    </EuiResizablePanel>
+                  </>
+                )}
+              </EuiResizableContainer>
+            </EuiPageBody>
+          </EuiPage>
+        </div>
+      )}
     </EuiErrorBoundary>
   );
 };
