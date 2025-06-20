@@ -71,6 +71,7 @@ jest.mock('../associated_object_management/utils/associated_objects_tab_utils', 
 
 const mockApplication = coreMock.createSetup().application;
 const mockUiSettings = coreMock.createSetup().uiSettings;
+const mockWorkspaces = coreMock.createSetup().workspaces;
 const mockdataSourceSelection = new DataSourceSelectionService();
 
 jest.mock('../../utils', () => ({
@@ -78,6 +79,7 @@ jest.mock('../../utils', () => ({
   getDataSourcesWithFields: jest.fn(),
   getApplication: () => mockApplication,
   getUiSettings: () => mockUiSettings,
+  getWorkspaces: () => mockWorkspaces,
   getHideLocalCluster: () => ({ enabled: true }),
   getDataSourceSelection: () => mockdataSourceSelection,
 }));

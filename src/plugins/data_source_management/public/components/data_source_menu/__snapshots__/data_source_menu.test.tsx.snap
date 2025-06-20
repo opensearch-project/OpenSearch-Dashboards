@@ -21,6 +21,7 @@ exports[`DataSourceMenu can render data source view when only pass id in the act
       "find": [MockFunction],
     }
   }
+  scope="workspace"
   selectedOption={
     Array [
       Object {
@@ -52,6 +53,7 @@ exports[`DataSourceMenu can render data source view when provide activeOption 1`
       "find": [MockFunction],
     }
   }
+  scope="workspace"
   selectedOption={
     Array [
       Object {
@@ -349,6 +351,7 @@ exports[`DataSourceMenu should render data source selectable only with local clu
       "find": [MockFunction],
     }
   }
+  scope="workspace"
 />
 `;
 
@@ -376,6 +379,7 @@ exports[`DataSourceMenu should render data source selectable only with local clu
       "find": [MockFunction],
     }
   }
+  scope="workspace"
 />
 `;
 
@@ -395,6 +399,7 @@ exports[`DataSourceMenu should render data source view if not pass saved object 
       "remove": [MockFunction],
     }
   }
+  scope="workspace"
 />
 `;
 
@@ -419,6 +424,7 @@ exports[`DataSourceMenu should render data source view only 1`] = `
       "find": [MockFunction],
     }
   }
+  scope="workspace"
 />
 `;
 
