@@ -19,12 +19,12 @@ import {
   DATASET,
   EnhancedFetchContext,
   fetch,
-  formatDate,
   isPPLSearchQuery,
   QueryAggConfig,
   SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
+import { convertFiltersToClause, getTimeFilterClause } from './filters/parser';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
@@ -55,7 +55,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       },
     };
 
-    const query = this.buildQuery();
+    const query = this.buildQuery(request);
 
     return fetch(context, query, this.getAggConfig(searchRequest, query));
   }
@@ -75,6 +75,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
         dataset?.timeFieldName &&
         datasetTypeConfig?.languageOverrides?.PPL?.hideDatePicker === false
       ) {
+        // If hideDatePicker is false, pass time filters to search strategy to insert them.
         request.params = {
           ...request.params,
           body: {
@@ -88,21 +89,33 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return this.runSearch(request, options.abortSignal, strategy);
   }
 
-  private buildQuery() {
-    const { queryString } = this.queryService;
-    const query: Query = queryString.getQuery();
-    const dataset = query.dataset;
-    if (!dataset || !dataset.timeFieldName) return query;
-    const datasetService = queryString.getDatasetService();
-    if (datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker === false)
-      return query;
-    // Only append time range if query is running search command
+  private buildQuery(request: IOpenSearchDashboardsSearchRequest) {
+    const query: Query = request.params.body.query.queries[0];
+    // Only append filters if query is running search command (e.g. not describe command)
     if (!isPPLSearchQuery(query)) return query;
 
-    const [baseQuery, ...afterPipeParts] = query.query.split('|');
-    const afterPipe = afterPipeParts.length > 0 ? ` | ${afterPipeParts.join('|').trim()}` : '';
-    const timeFilter = this.getTimeFilter(dataset.timeFieldName);
-    return { ...query, query: baseQuery + timeFilter + afterPipe };
+    const filters = this.queryService.filterManager.getFilters();
+    const commands = query.query.split('|');
+    const filterClause = convertFiltersToClause(filters);
+    if (filterClause) {
+      commands.splice(1, 0, filterClause);
+    }
+
+    const dataset = this.queryService.queryString.getQuery().dataset;
+    const datasetService = this.queryService.queryString.getDatasetService();
+    if (
+      dataset &&
+      dataset.timeFieldName &&
+      // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
+      datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
+    ) {
+      const timeFilter = getTimeFilterClause(
+        dataset.timeFieldName,
+        this.queryService.timefilter.timefilter.getTime()
+      );
+      commands.splice(1, 0, timeFilter);
+    }
+    return { ...query, query: commands.map((cmd) => cmd.trim()).join(' | ') };
   }
 
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
@@ -138,15 +151,5 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     });
 
     return aggsConfig;
-  }
-
-  private getTimeFilter(timeFieldName: string) {
-    const { fromDate, toDate } = formatTimePickerDate(
-      this.queryService.timefilter.timefilter.getTime(),
-      'YYYY-MM-DD HH:mm:ss.SSS'
-    );
-    return ` | where \`${timeFieldName}\` >= '${formatDate(
-      fromDate
-    )}' and \`${timeFieldName}\` <= '${formatDate(toDate)}'`;
   }
 }
