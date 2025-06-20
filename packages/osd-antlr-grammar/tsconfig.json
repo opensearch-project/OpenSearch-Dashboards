@@ -19,13 +19,6 @@
   ],
   "exclude": [
     "node_modules",
-    "src/ppl/.generated/**/*",
-    "src/sql/.generated/**/*",
-    "**/*.generated.ts"
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "skipLibCheck": true
-    }
-  }
+    "target"
+  ]
 }

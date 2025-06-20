@@ -5,6 +5,8 @@
 
 import * as c3 from 'antlr4-c3';
 import { ParseTree, Token, TokenStream } from 'antlr4ng';
+import { OpenSearchPPLLexer, OpenSearchPPLParser } from '@osd/antlr-grammar';
+
 import {
   AutocompleteData,
   AutocompleteResultBase,
@@ -14,8 +16,6 @@ import {
   SourceOrTableSuggestion,
   TableContextSuggestion,
 } from '../../shared/types';
-import { OpenSearchPPLLexer } from './.generated/OpenSearchPPLLexer';
-import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
 import { removePotentialBackticks } from '../../shared/utils';
 
 // These are keywords that we do not want to show in autocomplete
