@@ -7,6 +7,7 @@ import { LogsTab } from '../components/tabs/logs_tab';
 import { VisualizationContainer } from '../components/visualizations/visualization_container';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
+import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -18,7 +19,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     label: 'Logs',
     flavor: [],
     order: 10,
-    supportedLanguages: ['PPL'],
+    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
     component: LogsTab,
 
@@ -39,7 +40,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     label: 'Visualization',
     flavor: [],
     order: 20,
-    supportedLanguages: ['PPL'],
+    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
     prepareQuery: (query) => {
       // No query transformation for visualizations tab

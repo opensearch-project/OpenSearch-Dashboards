@@ -8,7 +8,8 @@ import { ResultStatus, AppState } from '../types';
 import { ExploreServices } from '../../../../types';
 import { QueryState } from '../slices/query_slice';
 import { Dataset, DataStructure } from '../../../../../../data/common';
-import { DatasetTypeConfig } from '../../../../../../data/public';
+import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
+import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
 
 /**
  * Persists Redux state to URL
@@ -97,10 +98,46 @@ export const getPreloadedState = async (services: ExploreServices): Promise<any>
 };
 
 /**
- * Get preloaded query state with dataset initialization
- * Uses the same approach as DatasetSelector to get default dataset
+ * Fetches the first available dataset using the data plugin's dataset service
  */
-const getPreloadedQueryState = async (services: ExploreServices) => {
+const fetchFirstAvailableDataset = async (
+  services: ExploreServices
+): Promise<Dataset | undefined> => {
+  try {
+    const datasetService = services.data?.query?.queryString?.getDatasetService();
+    if (!datasetService) {
+      return undefined;
+    }
+
+    const typeConfig: DatasetTypeConfig | undefined = datasetService.getType('INDEX_PATTERN');
+    if (!typeConfig) {
+      return undefined;
+    }
+
+    const dataPluginServices: IDataPluginServices = {
+      ...services,
+      storage: services.storage as any,
+    };
+
+    const fetchedIndexPatternDataStructures: DataStructure = await typeConfig.fetch(
+      dataPluginServices,
+      []
+    );
+    const fetchedDatasets: Dataset[] =
+      fetchedIndexPatternDataStructures.children?.map((pattern: DataStructure) =>
+        typeConfig.toDataset([pattern])
+      ) ?? [];
+
+    return fetchedDatasets.length > 0 ? fetchedDatasets[0] : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+/**
+ * Resolves the dataset to use for the initial query state
+ */
+const resolveDataset = async (services: ExploreServices): Promise<Dataset | undefined> => {
   // First, try to get dataset from QueryStringManager (same as ConnectedDatasetSelector)
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
   const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
@@ -109,45 +146,29 @@ const getPreloadedQueryState = async (services: ExploreServices) => {
 
   // If no dataset found, fetch available datasets and select first one (same as DatasetSelector)
   if (!selectedDataset) {
-    try {
-      const datasetService = services.data?.query?.queryString?.getDatasetService();
-      if (datasetService) {
-        const typeConfig: DatasetTypeConfig | undefined = datasetService.getType('INDEX_PATTERN');
-        if (typeConfig) {
-          // Fetch index pattern data structures
-          const fetchedIndexPatternDataStructures: DataStructure = await typeConfig.fetch(
-            services.data as any,
-            []
-          );
-          const fetchedDatasets: Dataset[] =
-            fetchedIndexPatternDataStructures.children?.map((pattern: DataStructure) =>
-              typeConfig.toDataset([pattern])
-            ) ?? [];
-
-          if (fetchedDatasets.length > 0) {
-            selectedDataset = fetchedDatasets[0];
-          }
-        }
-      }
-    } catch (error) {
-      // Ignore errors when parsing URL state
-    }
+    selectedDataset = await fetchFirstAvailableDataset(services);
   }
 
-  // If we have a dataset, generate query with PPL language
-  if (selectedDataset) {
-    // Currently set default language to PPL for explore
-    const datasetWithPPL = { ...selectedDataset, language: 'PPL' };
-    const queryWithDefaults = services.data.query.queryString.getInitialQueryByDataset(
-      datasetWithPPL
-    );
+  return selectedDataset;
+};
 
-    return queryWithDefaults;
+/**
+ * Get preloaded query state with dataset initialization
+ */
+const getPreloadedQueryState = async (services: ExploreServices) => {
+  // Resolve the dataset to use for the initial query state
+  const selectedDataset = await resolveDataset(services);
+
+  if (selectedDataset) {
+    return services.data.query.queryString.getInitialQueryByDataset({
+      ...selectedDataset,
+      language: EXPLORE_DEFAULT_LANGUAGE,
+    });
   } else {
     return {
       query: '',
-      language: 'PPL',
-      dataset: undefined,
+      language: EXPLORE_DEFAULT_LANGUAGE,
+      dataset: selectedDataset,
     };
   }
 };
