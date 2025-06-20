@@ -6,7 +6,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { ResultStatus } from '../../../legacy/discover/application/view_components/utils/use_search';
-import { createCacheKey } from '../handlers/query_handler';
+import { createCacheKey } from '../utils/query_utils';
 
 /**
  * Basic selectors
