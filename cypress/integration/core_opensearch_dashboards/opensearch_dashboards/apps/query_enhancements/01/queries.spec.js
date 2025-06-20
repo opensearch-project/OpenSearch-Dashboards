@@ -85,7 +85,7 @@ const queriesTestSuite = () => {
         // Use the more robust verifyDiscoverPageState function
         verifyDiscoverPageState({
           dataset: `${INDEX_WITH_TIME_1}*`,
-          queryString: `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`,
+          queryString: `SELECT * FROM ${INDEX_WITH_TIME_1}`,
           language: 'OpenSearch SQL',
         });
 
@@ -134,7 +134,7 @@ const queriesTestSuite = () => {
         // This handles Monaco editor's special whitespace characters better
         verifyDiscoverPageState({
           dataset: `${INDEX_WITH_TIME_1}*`,
-          queryString: `source = ${INDEX_WITH_TIME_1}*`,
+          queryString: `source = ${INDEX_WITH_TIME_1}* | head 500`,
           language: 'PPL',
           hitCount: '10,000',
         });
