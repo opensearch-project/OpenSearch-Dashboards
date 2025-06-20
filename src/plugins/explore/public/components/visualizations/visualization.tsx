@@ -47,7 +47,7 @@ export const Visualization = <T extends ChartType>({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel className="exploreVisStylePanel" data-test-subj="exploreStylePanel">
-          <div className="exploreVisStylePanel__inner">
+          <div>
             {visualizationData.visualizationType?.ui.style.render({
               styleOptions,
               onStyleChange,
