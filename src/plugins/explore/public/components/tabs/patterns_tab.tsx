@@ -12,8 +12,8 @@ import { PatternsContainer } from '../patterns_table/patterns_container';
 export const PatternsTab = () => {
   return (
     <div className="explore-logs-tab tab-container">
-      <ActionBar />
-      <PatternsContainer />
+      <ActionBar data-test-subj="patternsTabActionBar" />
+      <PatternsContainer data-test-subj="patternsTabContainer" />
     </div>
   );
 };
