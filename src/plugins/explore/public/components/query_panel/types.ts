@@ -21,9 +21,9 @@ export interface TimeRangeBounds {
 }
 
 export enum LanguageType {
-  Natural = 'natural',
-  KeyValue = 'keyvalue',
-  PPL = 'ppl',
+  Natural = 'plaintext',
+  KeyValue = 'PPL',
+  PPL = 'PPL',
 }
 
 // eslint-disable-next-line

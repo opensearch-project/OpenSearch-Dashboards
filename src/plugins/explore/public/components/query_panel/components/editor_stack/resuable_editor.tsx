@@ -105,7 +105,8 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         label: i18n.translate('explore.queryPanel.reusableEditor.run', {
           defaultMessage: 'Run',
         }),
-        keybindings: [monaco.KeyCode.Enter],
+        // eslint-disable-next-line no-bitwise
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1.5,
         run: () => {
@@ -189,6 +190,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         data-test-subj={`explore${editorClassPrefix}__multiLine`}
       >
         <CodeEditor
+          key={editorType}
           height={editorHeight}
           languageId={editorConfig.languageId}
           value={value}
@@ -198,7 +200,9 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
           languageConfiguration={editorConfig.languageConfiguration}
           triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
           suggestionProvider={{
+            triggerCharacters: [' '],
             provideCompletionItems: async (model, position, context, token) => {
+              // If a custom completion provider is provided
               if (provideCompletionItems) {
                 return provideCompletionItems(model, position, context, token);
               }
@@ -207,7 +211,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
           }}
         />
 
-        {!value && !editorIsFocused && !isReadOnly && (
+        {!value && !editorIsFocused && !isReadOnly && placeholder && (
           <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
         )}
 
