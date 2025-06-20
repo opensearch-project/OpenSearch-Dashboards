@@ -29,11 +29,11 @@ export const getEditorConfig = (languageType: LanguageType) => {
           wrappingIndent: 'same' as const,
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 1,
-          // scrollbar: { // TODO: Enable scrollbar with max height logic
-          //   vertical: 'visible' as const,
-          //   horizontalScrollbarSize: 1,
-          // },
-          // overviewRulerLanes: 0,
+          scrollbar: {
+            vertical: 'visible' as const,
+            horizontalScrollbarSize: 1,
+          },
+          overviewRulerLanes: 0,
           hideCursorInOverviewRuler: true,
           cursorStyle: 'line',
           suggest: {
@@ -77,10 +77,10 @@ export const getEditorConfig = (languageType: LanguageType) => {
           automaticLayout: true,
           scrollBeyondLastLine: false,
           wrappingIndent: 'indent' as const, // No indent since wrapping is off
-          glyphMargin: false,
+          glyphMargin: true,
           lineDecorationsWidth: 0,
           scrollbar: {
-            vertical: 'hidden' as const,
+            vertical: 'visible' as const,
             horizontalScrollbarSize: 1,
           },
           overviewRulerLanes: 0,

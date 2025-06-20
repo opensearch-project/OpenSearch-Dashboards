@@ -127,67 +127,63 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   }, [dispatch, localQuery, services]);
 
   // Real autocomplete implementation using the data plugin's autocomplete service
-  const provideCompletionItems = useCallback(
-    async (
-      model: monaco.editor.ITextModel,
-      position: monaco.Position,
-      context: monaco.languages.CompletionContext,
-      token: monaco.CancellationToken
-    ): Promise<monaco.languages.CompletionList> => {
-      if (token.isCancellationRequested) {
-        return { suggestions: [], incomplete: false };
-      }
+  const provideCompletionItems = async (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
+  ): Promise<monaco.languages.CompletionList> => {
+    if (token.isCancellationRequested) {
+      return { suggestions: [], incomplete: false };
+    }
+    try {
+      // Get the effective language for autocomplete (PPL -> PPL_Simplified for explore app)
+      const effectiveLanguage = getEffectiveLanguageForAutoComplete(queryLanguage, 'explore');
 
-      try {
-        // Get the effective language for autocomplete (PPL -> PPL_Simplified for explore app)
-        const effectiveLanguage = getEffectiveLanguageForAutoComplete(queryLanguage, 'explore');
+      // Use centralized IndexPattern from context
+      const suggestions = await services?.data?.autocomplete?.getQuerySuggestions({
+        query: queryString ?? '',
+        selectionStart: model.getOffsetAt(position),
+        selectionEnd: model.getOffsetAt(position),
+        language: effectiveLanguage,
+        indexPattern: indexPattern as any,
+        datasetType: dataset?.type,
+        position,
+        services: services as any, // ExploreServices now includes appName, compatible with IDataPluginServices
+      });
 
-        // Use centralized IndexPattern from context
-        const suggestions = await services?.data?.autocomplete?.getQuerySuggestions({
-          query: queryString ?? '',
-          selectionStart: model.getOffsetAt(position),
-          selectionEnd: model.getOffsetAt(position),
-          language: effectiveLanguage,
-          indexPattern: indexPattern as any,
-          datasetType: dataset?.type,
-          position,
-          services: services as any, // ExploreServices now includes appName, compatible with IDataPluginServices
-        });
+      // current completion item range being given as last 'word' at pos
+      const wordUntil = model.getWordUntilPosition(position);
 
-        // current completion item range being given as last 'word' at pos
-        const wordUntil = model.getWordUntilPosition(position);
+      const defaultRange = new monaco.Range(
+        position.lineNumber,
+        wordUntil.startColumn,
+        position.lineNumber,
+        wordUntil.endColumn
+      );
 
-        const defaultRange = new monaco.Range(
-          position.lineNumber,
-          wordUntil.startColumn,
-          position.lineNumber,
-          wordUntil.endColumn
-        );
+      const filteredSuggestions = suggestions?.filter((s) => 'detail' in s) || [];
 
-        const filteredSuggestions = suggestions?.filter((s) => 'detail' in s) || [];
+      const monacoSuggestions = filteredSuggestions.map((s: any) => ({
+        label: s.text,
+        kind: s.type as monaco.languages.CompletionItemKind,
+        insertText: s.insertText ?? s.text,
+        insertTextRules: s.insertTextRules ?? undefined,
+        range: defaultRange,
+        detail: s.detail,
+        sortText: s.sortText,
+      }));
 
-        const monacoSuggestions = filteredSuggestions.map((s: any) => ({
-          label: s.text,
-          kind: s.type as monaco.languages.CompletionItemKind,
-          insertText: s.insertText ?? s.text,
-          insertTextRules: s.insertTextRules ?? undefined,
-          range: defaultRange,
-          detail: s.detail,
-          sortText: s.sortText,
-        }));
+      const result = {
+        suggestions: monacoSuggestions,
+        incomplete: false,
+      };
 
-        const result = {
-          suggestions: monacoSuggestions,
-          incomplete: false,
-        };
-
-        return result;
-      } catch (autocompleteError) {
-        return { suggestions: [], incomplete: false };
-      }
-    },
-    [services, queryLanguage, indexPattern, dataset?.type, queryString]
-  );
+      return result;
+    } catch (autocompleteError) {
+      return { suggestions: [], incomplete: false };
+    }
+  };
 
   // TODO: Create query status overlay for progress indicator
   const queryStatus: QueryStatus = {
@@ -220,15 +216,11 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
       detectLanguageType(value);
 
       if (languageTypeRef.current === LanguageType.Natural) {
-        // eslint-disable-next-line no-console
-        console.log(value, 'nl value');
         // If detected as Natural Language, update prompt and set dual editor mode off
         setLocalPrompt(value);
         // languageTypeRef.current = LanguageType.Natural;
       } else {
         // If detected as PPL, update query and set dual editor mode off
-        // eslint-disable-next-line no-console
-        console.log(value, 'ppl value');
         setLocalPrompt('');
         setLocalQuery(value);
         setIsDualEditor(false);
@@ -239,9 +231,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   );
 
   const handleQueryRun = () => {
-    // eslint-disable-next-line no-console
-    console.log('Running query:', localQuery);
-
     handleRun();
     setIsPromptReadOnly(true);
   };
@@ -251,21 +240,14 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
 
     const detectedLang = languageTypeRef.current;
 
-    // eslint-disable-next-line no-console
-    console.log(detectedLang, 'detectedLang');
-
     if (detectedLang === LanguageType.Natural) {
       setLocalQuery('source = opensearch_dashboards_sample_data_ecommerce'); // TODO: Example query, Remove this once actual NL API intg
-      // eslint-disable-next-line no-console
-      console.log('nl call');
       handleRun(); // TODO: Call NL API to generate PPL query and uopdate
 
       setIsDualEditor(true);
       setIsEditorReadOnly(true);
       // setLocalQuery((prev) => prev ?? queryString); // TODO: update this once NL updates redux state for querystring
     } else {
-      // eslint-disable-next-line no-console
-      console.log('nppl call');
       handleRun();
       setIsDualEditor(false);
     }
@@ -273,6 +255,8 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
 
   const handleClearEditor = () => {
     resetEditorState();
+    setLocalPrompt('');
+    setLocalQuery('');
     languageTypeRef.current = LanguageType.Natural; // Reset to Natural Language
     setEditorLanguageType(LanguageType.Natural);
   };
@@ -338,6 +322,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
           isEditorReadOnly={isEditorReadOnly}
           queryString={typeof localQuery === 'string' ? localQuery : ''}
           languageType={
+            // editorLanguageType
             languageTypeRef.current === LanguageType.PPL ? LanguageType.PPL : LanguageType.Natural
           }
           prompt={localPrompt || ''}
