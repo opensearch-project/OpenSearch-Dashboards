@@ -6,6 +6,7 @@
 import { LogsTab } from '../components/tabs/logs_tab';
 import { VisualizationContainer } from '../components/visualizations/visualization_container';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
+import { PatternsTab } from '../components/tabs/patterns_tab';
 import { ExploreServices } from '../types';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
 
@@ -33,6 +34,29 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
   };
 
   tabRegistry.registerTab(logsTabDefinition);
+
+  // Register Patterns Tab
+  tabRegistry.registerTab({
+    id: 'explore_patterns_tab',
+    label: 'Patterns',
+    flavor: [],
+    order: 15,
+    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+
+    prepareQuery: (query) => {
+      return query;
+    },
+
+    component: PatternsTab,
+
+    // Add lifecycle hooks
+    onActive: () => {
+      // Tab activated
+    },
+    onInactive: () => {
+      // Tab deactivated
+    },
+  });
 
   // Register Visualizations Tab
   tabRegistry.registerTab({
