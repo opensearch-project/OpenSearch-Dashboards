@@ -16,7 +16,6 @@ import { IndexPatternProvider } from './components/index_pattern_context';
 import { ExploreFlavor } from '../../common';
 import { TracesPage } from './pages/traces';
 import { MetricsPage } from './pages/metrics';
-import { NoFlavor } from './components/no_view';
 
 // Route component props interface
 interface ExploreRouteProps {

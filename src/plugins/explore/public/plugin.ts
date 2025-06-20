@@ -60,6 +60,7 @@ import {
 } from './types';
 import { DocViewsRegistry } from './types/doc_views_types';
 import { ExploreEmbeddableFactory } from './embeddable';
+import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
 
 export class ExplorePlugin
   implements
@@ -98,6 +99,7 @@ export class ExplorePlugin
   ): ExplorePluginSetup {
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
+    this.registerExploreVisualization(setupDeps);
     const visualizationRegistryService = this.visualizationRegistryService.setup();
 
     this.docViewsRegistry = new DocViewsRegistry();
@@ -470,5 +472,44 @@ export class ExplorePlugin
 
     const factory = new ExploreEmbeddableFactory(getStartServices);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+  }
+
+  private registerExploreVisualization(setupDeps: ExploreSetupDependencies) {
+    const DISCOVER_VISUALIZATION_NAME = 'DiscoverVisualization';
+    setupDeps.visualizations.registerAlias({
+      name: DISCOVER_VISUALIZATION_NAME,
+      aliasPath: '#/',
+      aliasApp: PLUGIN_ID,
+      title: i18n.translate('explore.visualization.title', {
+        defaultMessage: 'Discover Visualization',
+      }),
+      description: i18n.translate('explore.visualization.title', {
+        defaultMessage: 'Create visualization with Discover',
+      }),
+      icon: 'visualizeApp',
+      stage: 'production',
+      hidden: true,
+      appExtensions: {
+        visualizations: {
+          docTypes: [SAVED_OBJECT_TYPE],
+          toListItem: ({ id, attributes, updated_at: updatedAt }) => {
+            return {
+              description: `${attributes?.description || ''}`,
+              // TODO: it should navigate to different explore flavor based on the `attributes`
+              editApp: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
+              editUrl: `/view/${encodeURIComponent(id)}`,
+              // TODO: the icon should be dynamic based on the discover visualization chart type
+              icon: 'visualizeApp',
+              id,
+              savedObjectType: SAVED_OBJECT_TYPE,
+              title: `${attributes?.title || ''}`,
+              typeTitle: 'Discover visualization',
+              updated_at: updatedAt,
+              stage: 'production',
+            };
+          },
+        },
+      },
+    });
   }
 }
