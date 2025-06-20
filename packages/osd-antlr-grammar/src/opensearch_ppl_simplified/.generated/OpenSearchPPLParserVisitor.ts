@@ -1,4 +1,4 @@
-// Generated from ./src/plugins/data/public/antlr/opensearch_ppl/grammar/OpenSearchPPLParser.g4 by ANTLR 4.13.1
+// Generated from ./src/opensearch_ppl_simplified/grammar/OpenSearchPPLParser.g4 by ANTLR 4.13.1
 
 import { AbstractParseTreeVisitor } from "antlr4ng";
 
@@ -9,9 +9,11 @@ import { DmlStatementContext } from "./OpenSearchPPLParser.js";
 import { QueryStatementContext } from "./OpenSearchPPLParser.js";
 import { PplCommandsContext } from "./OpenSearchPPLParser.js";
 import { CommandsContext } from "./OpenSearchPPLParser.js";
-import { SearchFromContext } from "./OpenSearchPPLParser.js";
 import { SearchFromFilterContext } from "./OpenSearchPPLParser.js";
 import { SearchFilterFromContext } from "./OpenSearchPPLParser.js";
+import { SearchFromContext } from "./OpenSearchPPLParser.js";
+import { SearchFilterOnlyContext } from "./OpenSearchPPLParser.js";
+import { SearchEmptyContext } from "./OpenSearchPPLParser.js";
 import { DescribeCommandContext } from "./OpenSearchPPLParser.js";
 import { ShowDataSourcesCommandContext } from "./OpenSearchPPLParser.js";
 import { WhereCommandContext } from "./OpenSearchPPLParser.js";
@@ -54,13 +56,12 @@ import { StatsFunctionNameContext } from "./OpenSearchPPLParser.js";
 import { TakeAggFunctionContext } from "./OpenSearchPPLParser.js";
 import { PercentileAggFunctionContext } from "./OpenSearchPPLParser.js";
 import { ExpressionContext } from "./OpenSearchPPLParser.js";
-import { RelevanceExprContext } from "./OpenSearchPPLParser.js";
-import { LogicalNotContext } from "./OpenSearchPPLParser.js";
-import { BooleanExprContext } from "./OpenSearchPPLParser.js";
-import { LogicalAndContext } from "./OpenSearchPPLParser.js";
-import { ComparsionContext } from "./OpenSearchPPLParser.js";
-import { LogicalXorContext } from "./OpenSearchPPLParser.js";
-import { LogicalOrContext } from "./OpenSearchPPLParser.js";
+import { LogicalExpressionContext } from "./OpenSearchPPLParser.js";
+import { LogicalOrExpressionContext } from "./OpenSearchPPLParser.js";
+import { LogicalXorExpressionContext } from "./OpenSearchPPLParser.js";
+import { LogicalAndExpressionContext } from "./OpenSearchPPLParser.js";
+import { LogicalNotExpressionContext } from "./OpenSearchPPLParser.js";
+import { PrimaryLogicalExpressionContext } from "./OpenSearchPPLParser.js";
 import { CompareExprContext } from "./OpenSearchPPLParser.js";
 import { InExprContext } from "./OpenSearchPPLParser.js";
 import { PositionFunctionCallContext } from "./OpenSearchPPLParser.js";
@@ -183,13 +184,6 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitCommands?: (ctx: CommandsContext) => Result;
     /**
-     * Visit a parse tree produced by the `searchFrom`
-     * labeled alternative in `OpenSearchPPLParser.searchCommand`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitSearchFrom?: (ctx: SearchFromContext) => Result;
-    /**
      * Visit a parse tree produced by the `searchFromFilter`
      * labeled alternative in `OpenSearchPPLParser.searchCommand`.
      * @param ctx the parse tree
@@ -203,6 +197,27 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitSearchFilterFrom?: (ctx: SearchFilterFromContext) => Result;
+    /**
+     * Visit a parse tree produced by the `searchFrom`
+     * labeled alternative in `OpenSearchPPLParser.searchCommand`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitSearchFrom?: (ctx: SearchFromContext) => Result;
+    /**
+     * Visit a parse tree produced by the `searchFilterOnly`
+     * labeled alternative in `OpenSearchPPLParser.searchCommand`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitSearchFilterOnly?: (ctx: SearchFilterOnlyContext) => Result;
+    /**
+     * Visit a parse tree produced by the `searchEmpty`
+     * labeled alternative in `OpenSearchPPLParser.searchCommand`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitSearchEmpty?: (ctx: SearchEmptyContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchPPLParser.describeCommand`.
      * @param ctx the parse tree
@@ -461,54 +476,41 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitExpression?: (ctx: ExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by the `relevanceExpr`
-     * labeled alternative in `OpenSearchPPLParser.logicalExpression`.
+     * Visit a parse tree produced by `OpenSearchPPLParser.logicalExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitRelevanceExpr?: (ctx: RelevanceExprContext) => Result;
+    visitLogicalExpression?: (ctx: LogicalExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by the `logicalNot`
-     * labeled alternative in `OpenSearchPPLParser.logicalExpression`.
+     * Visit a parse tree produced by `OpenSearchPPLParser.logicalOrExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitLogicalNot?: (ctx: LogicalNotContext) => Result;
+    visitLogicalOrExpression?: (ctx: LogicalOrExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by the `booleanExpr`
-     * labeled alternative in `OpenSearchPPLParser.logicalExpression`.
+     * Visit a parse tree produced by `OpenSearchPPLParser.logicalXorExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitBooleanExpr?: (ctx: BooleanExprContext) => Result;
+    visitLogicalXorExpression?: (ctx: LogicalXorExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by the `logicalAnd`
-     * labeled alternative in `OpenSearchPPLParser.logicalExpression`.
+     * Visit a parse tree produced by `OpenSearchPPLParser.logicalAndExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitLogicalAnd?: (ctx: LogicalAndContext) => Result;
+    visitLogicalAndExpression?: (ctx: LogicalAndExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by the `comparsion`
-     * labeled alternative in `OpenSearchPPLParser.logicalExpression`.
+     * Visit a parse tree produced by `OpenSearchPPLParser.logicalNotExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitComparsion?: (ctx: ComparsionContext) => Result;
+    visitLogicalNotExpression?: (ctx: LogicalNotExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by the `logicalXor`
-     * labeled alternative in `OpenSearchPPLParser.logicalExpression`.
+     * Visit a parse tree produced by `OpenSearchPPLParser.primaryLogicalExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitLogicalXor?: (ctx: LogicalXorContext) => Result;
-    /**
-     * Visit a parse tree produced by the `logicalOr`
-     * labeled alternative in `OpenSearchPPLParser.logicalExpression`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitLogicalOr?: (ctx: LogicalOrContext) => Result;
+    visitPrimaryLogicalExpression?: (ctx: PrimaryLogicalExpressionContext) => Result;
     /**
      * Visit a parse tree produced by the `compareExpr`
      * labeled alternative in `OpenSearchPPLParser.comparisonExpression`.
