@@ -39,7 +39,7 @@ $customSize10: 10px;
 
       .monaco-scrollable-element {
         border-radius: 0 $euiSizeXS 0 0;
-        left: 10px !important;
+        left: 10px !important; // Adjust left position to account for glyph margin
       }
     }
 
