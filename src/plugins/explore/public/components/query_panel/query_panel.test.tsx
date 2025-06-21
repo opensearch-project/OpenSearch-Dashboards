@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, fireEvent, screen, act } from '@testing-library/react';
-import { QueryPanel } from './index';
+import { QueryPanel } from './query_panel';
 
 // TODO: Add more test cases once api and services integrated.
 
@@ -59,21 +59,30 @@ jest.mock('./components/footer/recent_query/table', () => ({
   ),
 }));
 
+// Provide minimal mocks for required props
+const mockServices = {
+  data: {
+    autocomplete: { getQuerySuggestions: jest.fn().mockResolvedValue([]) },
+    query: { timefilter: { timefilter: { setTime: jest.fn(), setRefreshInterval: jest.fn() } } },
+  },
+};
+const mockIndexPattern = { timeFieldName: 'timestamp' };
+
 describe('QueryPanel', () => {
   it('renders QueryPanel with footer and editor stack', () => {
-    render(<QueryPanel />);
+    render(<QueryPanel services={mockServices as any} indexPattern={mockIndexPattern as any} />);
     expect(screen.queryByTestId('footer')).toBeInTheDocument();
     expect(screen.queryByTestId('editor-stack')).toBeInTheDocument();
   });
 
   it('shows recent queries table when Recent Queries is clicked', () => {
-    render(<QueryPanel />);
+    render(<QueryPanel services={mockServices as any} indexPattern={mockIndexPattern as any} />);
     fireEvent.click(screen.getByText('Recent Queries'));
     expect(screen.getByTestId('recent-queries-table')).toBeInTheDocument();
   });
 
   it('updates editor with recent query when a recent query is selected', async () => {
-    render(<QueryPanel />);
+    render(<QueryPanel services={mockServices as any} indexPattern={mockIndexPattern as any} />);
     fireEvent.click(screen.getByText('Recent Queries'));
     fireEvent.click(screen.getByText('Use Recent Query'));
     // After selecting, the recent queries table should close
@@ -82,7 +91,7 @@ describe('QueryPanel', () => {
 
   it('sets loading state when running a query', async () => {
     jest.useFakeTimers();
-    render(<QueryPanel />);
+    render(<QueryPanel services={mockServices as any} indexPattern={mockIndexPattern as any} />);
     fireEvent.click(screen.getByText('Run query'));
     act(() => {
       jest.advanceTimersByTime(3000);

@@ -24,6 +24,7 @@ export interface ReusableEditorProps {
   placeholder?: React.ReactNode;
   editorType?: EditorType;
   height?: number;
+  provideCompletionItems?: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
 // Map EditorType enum to actual CSS class prefixes
@@ -52,6 +53,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   clearText,
   height = 32, // default height
   editorType = EditorType.Query,
+  provideCompletionItems,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
@@ -103,7 +105,8 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         label: i18n.translate('explore.queryPanel.reusableEditor.run', {
           defaultMessage: 'Run',
         }),
-        keybindings: [monaco.KeyCode.Enter],
+        // eslint-disable-next-line no-bitwise
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1.5,
         run: () => {
@@ -148,8 +151,22 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
 
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
-        setEditorHeight(contentHeight);
-        editor.layout({ width: editor.getLayoutInfo().width, height: contentHeight });
+        const maxHeight = 100;
+        const finalHeight = Math.min(contentHeight, maxHeight);
+
+        setEditorHeight(finalHeight);
+
+        editor.layout({
+          width: editor.getLayoutInfo().width,
+          height: finalHeight,
+        });
+
+        editor.updateOptions({
+          scrollBeyondLastLine: false,
+          scrollbar: {
+            vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
+          },
+        });
       });
 
       onEditorDidMount?.(editor);
@@ -173,6 +190,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         data-test-subj={`explore${editorClassPrefix}__multiLine`}
       >
         <CodeEditor
+          key={editorType}
           height={editorHeight}
           languageId={editorConfig.languageId}
           value={value}
@@ -181,11 +199,25 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
           options={editorConfig.options}
           languageConfiguration={editorConfig.languageConfiguration}
           triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
+          suggestionProvider={{
+            triggerCharacters: [' '],
+            provideCompletionItems: async (model, position, context, token) => {
+              // If a custom completion provider is provided
+              if (provideCompletionItems) {
+                return provideCompletionItems(model, position, context, token);
+              }
+              return { suggestions: [] };
+            },
+          }}
         />
 
-        {!value && !editorIsFocused && !isReadOnly && (
-          <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
-        )}
+        {!value &&
+          !editorIsFocused &&
+          !isReadOnly &&
+          placeholder &&
+          editorType !== EditorType.Query && (
+            <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
+          )}
 
         {isReadOnly && (
           <EditToolbar

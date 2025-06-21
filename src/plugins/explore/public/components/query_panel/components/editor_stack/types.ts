@@ -9,7 +9,7 @@ export enum EditorType {
 }
 
 export enum LanguageType {
-  Natural = 'natural',
-  KeyValue = 'keyvalue',
-  PPL = 'ppl',
+  Natural = 'plaintext',
+  KeyValue = 'PPL',
+  PPL = 'PPL',
 }

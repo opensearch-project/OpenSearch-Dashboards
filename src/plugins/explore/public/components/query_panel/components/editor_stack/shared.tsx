@@ -11,25 +11,29 @@ export const getEditorConfig = (languageType: LanguageType) => {
     case LanguageType.KeyValue:
       return {
         languageId: LanguageType.PPL,
-        height: 100,
+        height: 32,
         options: {
           minimap: { enabled: false },
           automaticLayout: true,
           scrollBeyondLastLine: false,
-          fontSize: 13,
-          lineHeight: 20,
+          lineHeight: 18,
+          fontSize: 14,
           fontFamily: 'var(--font-code)',
           lineNumbers: 'on' as const,
           folding: true,
+          padding: {
+            top: 7,
+            bottom: 7,
+          },
           wordWrap: 'on' as const,
           wrappingIndent: 'same' as const,
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 1,
-          // scrollbar: { // TODO: Enable scrollbar with max height logic
-          //   vertical: 'visible' as const,
-          //   horizontalScrollbarSize: 1,
-          // },
-          // overviewRulerLanes: 0,
+          scrollbar: {
+            vertical: 'visible' as const,
+            horizontalScrollbarSize: 1,
+          },
+          overviewRulerLanes: 0,
           hideCursorInOverviewRuler: true,
           cursorStyle: 'line',
           suggest: {
@@ -49,7 +53,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
             { open: "'", close: "'" },
           ],
         },
-        triggerSuggestOnFocus: false,
+        triggerSuggestOnFocus: true,
       };
     case LanguageType.Natural:
     default:
@@ -63,7 +67,6 @@ export const getEditorConfig = (languageType: LanguageType) => {
           fixedOverflowWidgets: true,
           lineHeight: 18,
           fontSize: 14,
-          fontFamily: 'Roboto Mono',
           minimap: {
             enabled: false,
           },
@@ -74,17 +77,25 @@ export const getEditorConfig = (languageType: LanguageType) => {
           automaticLayout: true,
           scrollBeyondLastLine: false,
           wrappingIndent: 'indent' as const, // No indent since wrapping is off
-          glyphMargin: false,
+          glyphMargin: true,
           lineDecorationsWidth: 0,
           scrollbar: {
-            vertical: 'hidden' as const,
+            vertical: 'visible' as const,
             horizontalScrollbarSize: 1,
           },
           overviewRulerLanes: 0,
           hideCursorInOverviewRuler: true,
           cursorStyle: 'line-thin' as const,
           cursorBlinking: 'blink' as const,
-          languageConfiguration: {},
+          languageConfiguration: {
+            autoClosingPairs: [
+              { open: '(', close: ')' },
+              { open: '[', close: ']' },
+              { open: '{', close: '}' },
+              { open: '"', close: '"' },
+              { open: "'", close: "'" },
+            ],
+          },
           triggerSuggestOnFocus: false,
         },
       };

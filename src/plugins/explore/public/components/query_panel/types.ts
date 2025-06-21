@@ -21,9 +21,9 @@ export interface TimeRangeBounds {
 }
 
 export enum LanguageType {
-  Natural = 'natural',
-  KeyValue = 'keyvalue',
-  PPL = 'ppl',
+  Natural = 'plaintext',
+  KeyValue = 'PPL',
+  PPL = 'PPL',
 }
 
 // eslint-disable-next-line
@@ -50,7 +50,7 @@ export interface RecentQueryTableItem {
 export interface RecentQueriesTableProps {
   onClickRecentQuery: (query: Query, timeRange?: TimeRange) => void;
   isVisible: boolean;
-  languageType: LanguageType;
+  languageType: string;
 }
 
 export enum ResultStatus {

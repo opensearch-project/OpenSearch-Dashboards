@@ -23,7 +23,7 @@ export const Actions: React.FC = () => {
   const items = actions.map((action, index) => (
     <EuiContextMenuItem
       key={index}
-      icon={<EuiIcon type={action.iconType} />}
+      icon={<EuiIcon type={action.iconType ?? 'empty'} />}
       onClick={action.onClick}
       data-test-subj={`queryPanelFooterActionMenuItem-${index}`}
     >
@@ -32,20 +32,24 @@ export const Actions: React.FC = () => {
   ));
 
   return (
-    <EuiPopover
-      button={
-        <EuiButtonEmpty onClick={() => setIsOpen(!isOpen)}>
-          {i18n.translate('explore.queryPanel.actions.buttonLabel', {
-            defaultMessage: 'Actions',
-          })}
-          <EuiIcon type="arrowDown" className="queryPanel__footer__actionsButtonIcon" />
-        </EuiButtonEmpty>
-      }
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel items={items} />
-    </EuiPopover>
+    <>
+      {items && items.length > 0 && (
+        <EuiPopover
+          button={
+            <EuiButtonEmpty onClick={() => setIsOpen(!isOpen)}>
+              {i18n.translate('explore.queryPanel.actions.buttonLabel', {
+                defaultMessage: 'Actions',
+              })}
+              <EuiIcon type="arrowDown" className="queryPanel__footer__actionsButtonIcon" />
+            </EuiButtonEmpty>
+          }
+          isOpen={isOpen}
+          closePopover={() => setIsOpen(false)}
+          panelPaddingSize="none"
+        >
+          <EuiContextMenuPanel items={items} />
+        </EuiPopover>
+      )}
+    </>
   );
 };

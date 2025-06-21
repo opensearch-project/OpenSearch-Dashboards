@@ -15,6 +15,7 @@ export interface UIState {
     inProgress: boolean;
     pendingActions: string[];
   };
+  prompt?: string; // Optional prompt for query panel
 }
 
 const initialState: UIState = {
@@ -26,6 +27,7 @@ const initialState: UIState = {
     inProgress: false,
     pendingActions: [],
   },
+  prompt: '', // Initialize prompt as empty string
 };
 
 const uiSlice = createSlice({
@@ -43,6 +45,9 @@ const uiSlice = createSlice({
     },
     setExecutionCacheKeys: (state, action: PayloadAction<string[]>) => {
       state.executionCacheKeys = action.payload;
+    },
+    setQueryPrompt: (state, action: PayloadAction<string>) => {
+      state.prompt = action.payload;
     },
     // Transaction actions
     startTransaction: (

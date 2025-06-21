@@ -52,17 +52,23 @@ export class QueryTypeDetector {
       };
     }
 
-    const scores: Record<LanguageType, ScoreResult> = {
+    const scores = {
       ppl: this._checkPpl(normalizedQuery),
       keyvalue: this._checkKeyValue(normalizedQuery),
-      natural: this._checkNaturalLanguage(normalizedQuery),
+      plaintext: this._checkNaturalLanguage(normalizedQuery),
+    };
+
+    const keyToLanguageType: Record<string, LanguageType> = {
+      ppl: LanguageType.PPL,
+      keyvalue: LanguageType.KeyValue,
+      plaintext: LanguageType.Natural,
     };
 
     const sorted = (Object.keys(scores) as Array<keyof typeof scores>).sort(
       (a, b) => scores[b].score - scores[a].score
     );
     const best = sorted[0];
-    const fallback = scores[best].score < 0.4 ? LanguageType.Natural : best;
+    const fallback = scores[best].score < 0.4 ? LanguageType.Natural : keyToLanguageType[best];
 
     return {
       type: fallback,

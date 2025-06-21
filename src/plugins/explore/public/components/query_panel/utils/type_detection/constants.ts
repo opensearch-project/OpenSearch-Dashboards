@@ -7,7 +7,7 @@
 export const MAX_QUERY_LENGTH = 1000;
 
 // PPL Keywords and Patterns
-export const PPL_START_KEYWORDS = ['source', 'from', 'search'] as const;
+export const PPL_START_KEYWORDS = ['source', '_source', 'from', 'search'] as const;
 
 export const PPL_PIPE_COMMANDS = [
   'where',
@@ -78,6 +78,7 @@ export const NATURAL_LANGUAGE_STARTERS = [
 // Safe RegExp patterns (no backtracking)
 export const PPL_START_PATTERNS = [
   /^source$/i,
+  /^_source$/i,
   /^source=/i,
   /^from [a-zA-Z_][a-zA-Z0-9_]*$/i,
   /^search index=/i,
