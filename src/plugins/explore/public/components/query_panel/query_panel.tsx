@@ -7,8 +7,11 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiPanel } from '@elastic/eui';
+
+import { useGenerateQuery } from '../../../../query_enhancements/public';
 import { QueryPanelLayout } from './layout';
 import { ExploreServices } from '../../types';
+
 import { IndexPattern } from '../../../../data/common/index_patterns';
 import { EditorStack } from './components/editor_stack';
 import { QueryPanelFooter } from './components/footer';
@@ -35,6 +38,8 @@ import {
 import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 import { setSavedQuery } from '../../application/utils/state_management/slices';
+import { AgentError, ProhibitedQueryError } from './utils/error';
+import { PromptParameters } from './components/editor_stack/types';
 
 export interface QueryPanelProps {
   services: ExploreServices;
@@ -67,11 +72,16 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
 
   // Get timefilter directly from services
   const timefilter = services?.data?.query?.timefilter?.timefilter;
+  // Retrieve the current dataset from Query Service
+  const dataset = services?.data?.query?.queryString?.getQuery()?.dataset;
 
   // Local state for editor
   const [localQuery, setLocalQuery] = useState(query.query);
   const [localPrompt, setLocalPrompt] = useState(prompt);
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
+
+  const { generateQuery, loading } = useGenerateQuery(services.uiActions);
+  const [agentError, setAgentError] = useState<AgentError>();
 
   // Handle time range changes
   const handleTimeChange = useCallback(
@@ -238,16 +248,58 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     setIsPromptReadOnly(true);
   };
 
-  const handlePromptRun = async (_?: string | { [key: string]: any }) => {
-    // TODO: Implement the NL API call to generate PPL query
+  const handleAgentCall = async () => {
+    const promptParam = localPrompt?.trim();
+    if (!promptParam) {
+      services.notifications.toasts.addWarning(
+        'Enter a natural language question to automatically generate a query to view results'
+      );
+      return;
+    }
+    if (!dataset) {
+      services.notifications.toasts.addWarning('Select a data source or index to ask a question');
+      return;
+    }
 
-    if (editorLanguageType === LanguageType.Natural) {
-      setLocalQuery('source = opensearch_dashboards_sample_data_ecommerce'); // TODO: Example query, Remove this once actual NL API intg
-      handleRun(); // TODO: Call NL API to generate PPL query and uopdate
+    // Prepare parameters for the API
+    const params: PromptParameters = {
+      question: promptParam,
+      index: dataset.title,
+      language: query.language,
+      dataSourceId: dataset?.dataSource?.id,
+    };
+    const { response, error } = await generateQuery(params);
 
+    if (error) {
+      if (error instanceof ProhibitedQueryError) {
+        services.notifications.toasts.addError(error, {
+          title: 'I am unable to respond to this query. Try another question',
+        });
+      } else if (error instanceof AgentError) {
+        services.notifications.toasts.addError(error, {
+          title: 'I am unable to respond to this query. Try another question',
+        });
+        setAgentError(error);
+      } else {
+        services.notifications.toasts.addError(error, { title: 'Failed to generate results' });
+      }
+
+      setLocalQuery(''); // Clear query on error
+    } else if (response) {
+      // Update local state with the generated query
+
+      setLocalQuery(response.query);
+      handleRun(response.query);
       setIsDualEditor(true);
       setIsEditorReadOnly(true);
-      // setLocalQuery((prev) => prev ?? queryString); // TODO: update this once NL updates redux state for querystring
+
+      if (response.timeRange) services.data.query.timefilter.timefilter.setTime(response.timeRange);
+    }
+  };
+
+  const handlePromptRun = async () => {
+    if (editorLanguageType === LanguageType.Natural) {
+      handleAgentCall();
     } else {
       handleRun();
       setIsDualEditor(false);
