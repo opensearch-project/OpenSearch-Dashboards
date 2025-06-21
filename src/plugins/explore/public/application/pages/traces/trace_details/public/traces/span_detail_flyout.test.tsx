@@ -11,11 +11,6 @@ import { TracePPLService } from '../../server/ppl_request_trace';
 // Mock the PPL service
 jest.mock('../../server/ppl_request_trace');
 
-// Mock the helper functions
-jest.mock('../utils/helper_functions', () => ({
-  nanoToMilliSec: jest.fn((nanos: number) => 1),
-}));
-
 describe('SpanDetailFlyout', () => {
   const mockPPLResponse = {
     type: 'data_frame',
@@ -131,7 +126,7 @@ describe('SpanDetailFlyout', () => {
     expect(within(operationItem).getByText('test-operation')).toBeInTheDocument();
 
     const durationItem = screen.getByTestId('DurationDescriptionList');
-    expect(within(durationItem).getByText('1 ms')).toBeInTheDocument();
+    expect(within(durationItem).getByText('1000 ms')).toBeInTheDocument();
 
     expect(screen.getByText('Event')).toBeInTheDocument();
     expect(screen.getByText(/test-event/)).toBeInTheDocument();
