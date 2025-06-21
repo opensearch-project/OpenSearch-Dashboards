@@ -7,8 +7,11 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiPanel } from '@elastic/eui';
+
+import { useGenerateQuery } from '../../../../query_enhancements/public';
 import { QueryPanelLayout } from './layout';
 import { ExploreServices } from '../../types';
+
 import { IndexPattern } from '../../../../data/common/index_patterns';
 import { EditorStack } from './components/editor_stack';
 import { QueryPanelFooter } from './components/footer';
@@ -29,6 +32,9 @@ import {
 } from '../../application/utils/state_management/actions/transaction_actions';
 import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
+import { AgentError, ProhibitedQueryError } from './utils/error';
+import { PromptParameters } from './components/editor_stack/types';
+import { QueryAssistCallOutType } from './components/editor_stack/call_outs';
 
 export interface QueryPanelProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
@@ -68,6 +74,11 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   const [localQuery, setLocalQuery] = useState(query.query);
   const [localPrompt, setLocalPrompt] = useState(prompt);
 
+  const { generateQuery, loading } = useGenerateQuery(services.uiActions);
+  const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
+  const dismissCallout = () => setCallOutType(undefined);
+  const [agentError, setAgentError] = useState<AgentError>();
+
   // Handle time range changes
   const handleTimeChange = useCallback(
     ({ start, end }: { start: string; end: string }) => {
@@ -94,21 +105,24 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   );
 
   // Execute query when run button is clicked
-  const handleRun = useCallback(async () => {
-    dispatch(beginTransaction());
-    try {
-      // Update query string in Redux
-      dispatch(setQuery({ ...query, query: localQuery }));
+  const handleRun = useCallback(
+    async (paramQuery?: string) => {
+      const queryToRun = paramQuery ?? localQuery;
+      try {
+        // Update query string in Redux
+        dispatch(setQuery({ ...query, query: queryToRun }));
 
-      // EXPLICIT cache clear - separate cache logic
-      dispatch(clearResults());
+        // EXPLICIT cache clear - separate cache logic
+        dispatch(clearResults());
 
-      // Execute queries - cache already cleared
-      await dispatch(executeQueries({ services }));
-    } finally {
-      dispatch(finishTransaction());
-    }
-  }, [dispatch, localQuery, query, services]);
+        // Execute queries - cache already cleared
+        await dispatch(executeQueries({ services }));
+      } finally {
+        dispatch(finishTransaction());
+      }
+    },
+    [dispatch, localQuery, query, services]
+  );
 
   // Real autocomplete implementation using the data plugin's autocomplete service
   const provideCompletionItems = useCallback(
@@ -212,16 +226,53 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     setIsPromptReadOnly(true);
   };
 
-  const handlePromptRun = async (_?: string | { [key: string]: any }) => {
-    // TODO: Implement the NL API call to generate PPL query
+  const handleAgentCall = async () => {
+    const promptParam = localPrompt?.trim();
+    if (!promptParam) {
+      setCallOutType('empty_query');
+      return;
+    }
+    if (!dataset) {
+      setCallOutType('empty_index');
+      return;
+    }
 
-    if (editorLanguageType === LanguageType.Natural) {
-      setLocalQuery('source = opensearch_dashboards_sample_data_ecommerce'); // TODO: Example query, Remove this once actual NL API intg
-      handleRun(); // TODO: Call NL API to generate PPL query and uopdate
+    // Prepare parameters for the API
+    const params: PromptParameters = {
+      question: promptParam,
+      index: dataset.title,
+      language: query.language,
+      dataSourceId: dataset?.dataSource?.id,
+    };
+    const { response, error } = await generateQuery(params);
 
+    if (error) {
+      if (error instanceof ProhibitedQueryError) {
+        setCallOutType('invalid_query');
+      } else if (error instanceof AgentError) {
+        setCallOutType('invalid_query');
+        setAgentError(error);
+      } else {
+        services.notifications.toasts.addError(error, { title: 'Failed to generate results' });
+      }
+
+      setLocalQuery(''); // Clear query on error
+    } else if (response) {
+      // Update local state with the generated query
+
+      setLocalQuery(response.query);
+      handleRun(response.query);
       setIsDualEditor(true);
       setIsEditorReadOnly(true);
-      // setLocalQuery((prev) => prev ?? queryString); // TODO: update this once NL updates redux state for querystring
+
+      if (response.timeRange) services.data.query.timefilter.timefilter.setTime(response.timeRange);
+      setCallOutType('query_generated');
+    }
+  };
+
+  const handlePromptRun = async () => {
+    if (editorLanguageType === LanguageType.Natural) {
+      handleAgentCall();
     } else {
       handleRun();
       setIsDualEditor(false);
