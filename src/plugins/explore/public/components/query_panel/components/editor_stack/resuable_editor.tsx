@@ -211,9 +211,13 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
           }}
         />
 
-        {!value && !editorIsFocused && !isReadOnly && placeholder && (
-          <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
-        )}
+        {!value &&
+          !editorIsFocused &&
+          !isReadOnly &&
+          placeholder &&
+          editorType !== EditorType.Query && (
+            <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
+          )}
 
         {isReadOnly && (
           <EditToolbar

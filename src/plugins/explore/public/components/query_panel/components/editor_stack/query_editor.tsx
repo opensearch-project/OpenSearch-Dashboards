@@ -35,7 +35,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
 
   const onEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     // Optionally, you can add more editor setup logic here
-    // editor.focus();
+    editor.focus();
   };
 
   return (
