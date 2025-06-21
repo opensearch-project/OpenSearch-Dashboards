@@ -7,12 +7,12 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { LanguageType } from '../types';
 import {
-  selectQueryString,
+  selectQuery,
   selectQueryPrompt,
 } from '../../../application/utils/state_management/selectors';
 
 export function useEditorMode() {
-  const queryString = useSelector(selectQueryString);
+  const query = useSelector(selectQuery);
   const prompt = useSelector(selectQueryPrompt);
 
   const [isDualEditor, setIsDualEditor] = useState(false);
@@ -22,7 +22,7 @@ export function useEditorMode() {
 
   // Automatically decide editor states based on presence of prompt/query
   useEffect(() => {
-    const hasQuery = (queryString ?? '').trim().length > 0;
+    const hasQuery = (query.query ?? '').trim().length > 0;
     const hasPrompt = (prompt ?? '').trim().length > 0;
 
     if (hasQuery && hasPrompt) {
@@ -60,7 +60,7 @@ export function useEditorMode() {
     isEditorReadOnly,
     isPromptReadOnly,
     editorLanguageType,
-    queryString,
+    query,
     prompt,
     setIsDualEditor,
     setIsEditorReadOnly,
