@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
-import { debounce } from 'lodash';
 import { EuiPanel } from '@elastic/eui';
 import { QueryPanelLayout } from './layout';
 import { ExploreServices } from '../../types';
@@ -18,11 +17,7 @@ import { useEditorMode } from './hooks/useEditorMode';
 import { QueryTypeDetector } from './utils/type_detection';
 import { Query, TimeRange, LanguageType } from './types';
 
-import {
-  selectIsLoading,
-  selectDataset,
-  selectQuery,
-} from '../../application/utils/state_management/selectors';
+import { selectIsLoading, selectDataset } from '../../application/utils/state_management/selectors';
 import './index.scss';
 
 import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
@@ -60,11 +55,8 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   } = useEditorMode();
 
   // Use selectors to get state from Redux
-  const { queryLanguage, isLoading, dataset } = useSelector((state: any) => ({
-    queryLanguage: selectQuery(state),
-    isLoading: selectIsLoading(state),
-    dataset: selectDataset(state),
-  }));
+  const isLoading = useSelector(selectIsLoading);
+  const dataset = useSelector(selectDataset);
 
   // Determine if DatePicker should be shown
   const showDatePicker = Boolean(indexPattern?.timeFieldName);
@@ -75,14 +67,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   // Local state for editor
   const [localQuery, setLocalQuery] = useState(query.query);
   const [localPrompt, setLocalPrompt] = useState(prompt);
-  const languageTypeRef = React.useRef<LanguageType>(
-    queryLanguage ? LanguageType.PPL : LanguageType.Natural
-  ); // Default to Natural
-
-  // Update local state when Redux state changes
-  // useEffect(() => {
-  //   setLocalQuery(query.query);
-  // }, [query.query]);
 
   // Handle time range changes
   const handleTimeChange = useCallback(
@@ -195,20 +179,16 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     startTime: Date.now(),
   };
 
-  const detectLanguageType = useMemo(
-    () =>
-      debounce((inputQuery: string) => {
-        const detector = new QueryTypeDetector();
-        const result = detector.detect(inputQuery);
-        setEditorLanguageType(result.type);
-        languageTypeRef.current = result.type;
-      }, 300),
-    [setEditorLanguageType, languageTypeRef]
-  ); // Adjust debounce time as needed
+  const detectLanguageType = useCallback(
+    (inputQuery: string) => {
+      const detector = new QueryTypeDetector();
+      const result = detector.detect(inputQuery);
+      setEditorLanguageType(result.type);
 
-  useEffect(() => {
-    return () => detectLanguageType.cancel();
-  }, [detectLanguageType]);
+      return result.type;
+    },
+    [setEditorLanguageType]
+  );
 
   const handleQueryChange = useCallback((value: string) => {
     setLocalQuery(value);
@@ -216,21 +196,15 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
 
   const handlePromptChange = useCallback(
     (value: string) => {
-      detectLanguageType(value);
+      const isPPLQuery = detectLanguageType(value) === LanguageType.PPL;
 
-      if (languageTypeRef.current === LanguageType.Natural) {
-        // If detected as Natural Language, update prompt and set dual editor mode off
-        setLocalPrompt(value);
-        // languageTypeRef.current = LanguageType.Natural;
-      } else {
-        // If detected as PPL, update query and set dual editor mode off
-        setLocalPrompt('');
+      if (isPPLQuery) {
         setLocalQuery(value);
-        setIsDualEditor(false);
-        // languageTypeRef.current = LanguageType.PPL;
+      } else {
+        setLocalPrompt(value);
       }
     },
-    [detectLanguageType, setIsDualEditor]
+    [detectLanguageType]
   );
 
   const handleQueryRun = () => {
@@ -241,9 +215,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   const handlePromptRun = async (_?: string | { [key: string]: any }) => {
     // TODO: Implement the NL API call to generate PPL query
 
-    const detectedLang = languageTypeRef.current;
-
-    if (detectedLang === LanguageType.Natural) {
+    if (editorLanguageType === LanguageType.Natural) {
       setLocalQuery('source = opensearch_dashboards_sample_data_ecommerce'); // TODO: Example query, Remove this once actual NL API intg
       handleRun(); // TODO: Call NL API to generate PPL query and uopdate
 
@@ -260,7 +232,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     resetEditorState();
     setLocalPrompt('');
     setLocalQuery('');
-    languageTypeRef.current = LanguageType.Natural; // Reset to Natural Language
     setEditorLanguageType(LanguageType.Natural);
   };
 
@@ -324,10 +295,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
           isPromptReadOnly={isPromptReadOnly}
           isEditorReadOnly={isEditorReadOnly}
           queryString={typeof localQuery === 'string' ? localQuery : ''}
-          languageType={
-            // editorLanguageType
-            languageTypeRef.current === LanguageType.PPL ? LanguageType.PPL : LanguageType.Natural
-          }
+          languageType={editorLanguageType}
           prompt={localPrompt || ''}
           onPromptChange={handlePromptChange}
           onQueryChange={handleQueryChange}
@@ -344,7 +312,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
           <RecentQueriesTable
             isVisible={isRecentQueryVisible}
             onClickRecentQuery={onClickRecentQuery}
-            languageType={editorLanguageType}
+            languageType={query.language}
           />
         </div>
       )}

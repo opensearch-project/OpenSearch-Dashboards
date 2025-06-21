@@ -50,7 +50,7 @@ export interface RecentQueryTableItem {
 export interface RecentQueriesTableProps {
   onClickRecentQuery: (query: Query, timeRange?: TimeRange) => void;
   isVisible: boolean;
-  languageType: LanguageType;
+  languageType: string;
 }
 
 export enum ResultStatus {
