@@ -44,9 +44,6 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
     defaultMessage: 'Ask a question or search using PPL',
   });
 
-  // eslint-disable-next-line no-console
-  console.log(editorType, 'editorType');
-
   return (
     <ReusableEditor
       value={value || ''}
