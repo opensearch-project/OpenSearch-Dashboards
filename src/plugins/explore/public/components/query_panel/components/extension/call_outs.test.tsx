@@ -6,9 +6,9 @@
 import { render } from '@testing-library/react';
 import React, { ComponentProps, PropsWithChildren } from 'react';
 import { IntlProvider } from 'react-intl';
-import { QueryAssistCallOut } from './call_outs';
+import { PromptCallOut } from './call_outs';
 
-type Props = ComponentProps<typeof QueryAssistCallOut>;
+type Props = ComponentProps<typeof PromptCallOut>;
 
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -23,7 +23,7 @@ const renderCallOut = (overrideProps: Partial<Props> = {}) => {
     },
     overrideProps
   );
-  const component = render(<QueryAssistCallOut {...props} />, {
+  const component = render(<PromptCallOut {...props} />, {
     wrapper: IntlWrapper,
   });
   return { component, props: props as jest.MockedObjectDeep<Props> };

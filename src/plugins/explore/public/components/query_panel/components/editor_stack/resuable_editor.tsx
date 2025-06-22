@@ -19,6 +19,7 @@ export interface ReusableEditorProps {
   onEditorDidMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onEdit: () => void;
   onClear: () => void;
+  isLoading?: boolean;
   isReadOnly: boolean;
   editorConfig: any;
   placeholder?: React.ReactNode;
@@ -43,6 +44,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   value,
   onChange,
   onRun,
+  isLoading,
   isReadOnly,
   onEdit,
   onClear,
@@ -196,7 +198,9 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
           value={value}
           onChange={onChange}
           editorDidMount={handleEditorDidMount}
-          options={editorConfig.options}
+          options={{
+            ...editorConfig.options,
+          }}
           languageConfiguration={editorConfig.languageConfiguration}
           triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
           suggestionProvider={{

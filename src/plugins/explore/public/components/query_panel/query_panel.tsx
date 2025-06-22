@@ -18,11 +18,12 @@ import { QueryPanelFooter } from './components/footer';
 import { RecentQueriesTable } from './components/footer/recent_query/table';
 import { useEditorMode } from './hooks/useEditorMode';
 import { QueryTypeDetector } from './utils/type_detection';
-import { Query, TimeRange, LanguageType } from './types';
+import { Query, LanguageType } from './types';
 
 import { selectIsLoading, selectDataset } from '../../application/utils/state_management/selectors';
 import './index.scss';
 
+import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
 import { setQuery } from '../../application/utils/state_management/slices/query_slice';
 import { clearResults } from '../../application/utils/state_management/slices/results_slice';
@@ -30,11 +31,11 @@ import {
   beginTransaction,
   finishTransaction,
 } from '../../application/utils/state_management/actions/transaction_actions';
-import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
+
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 import { AgentError, ProhibitedQueryError } from './utils/error';
 import { PromptParameters } from './components/editor_stack/types';
-import { QueryAssistCallOutType } from './components/editor_stack/call_outs';
+import { PromptCallOut, PromptCallOutType } from './components/extension/call_outs';
 
 export interface QueryPanelProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
@@ -74,10 +75,10 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   const [localQuery, setLocalQuery] = useState(query.query);
   const [localPrompt, setLocalPrompt] = useState(prompt);
 
-  const { generateQuery, loading } = useGenerateQuery(services.uiActions);
-  const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
+  const { generateQuery, loading: isPromptLoading } = useGenerateQuery(services.uiActions);
+  const [callOutType, setCallOutType] = useState<PromptCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const [agentError, setAgentError] = useState<AgentError>();
+  // const [agentError, setAgentError] = useState<AgentError>(); TODO: Handle agent error display
 
   // Handle time range changes
   const handleTimeChange = useCallback(
@@ -104,10 +105,17 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     [timefilter]
   );
 
+  const queryStatus: QueryStatus = {
+    status: isLoading ? ResultStatus.LOADING : ResultStatus.READY,
+    elapsedMs: 0,
+    startTime: Date.now(),
+  };
+
   // Execute query when run button is clicked
   const handleRun = useCallback(
     async (paramQuery?: string) => {
       const queryToRun = paramQuery ?? localQuery;
+      dispatch(beginTransaction());
       try {
         // Update query string in Redux
         dispatch(setQuery({ ...query, query: queryToRun }));
@@ -186,13 +194,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     [query, services, localQuery, indexPattern, dataset]
   );
 
-  // TODO: Create query status overlay for progress indicator
-  const queryStatus: QueryStatus = {
-    status: isLoading ? ResultStatus.LOADING : ResultStatus.READY,
-    elapsedMs: 0,
-    startTime: Date.now(),
-  };
-
   const detectLanguageType = useCallback(
     (inputQuery: string) => {
       const detector = new QueryTypeDetector();
@@ -236,6 +237,8 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
       setCallOutType('empty_index');
       return;
     }
+    dismissCallout();
+    // setAgentError(undefined); TODO: Handle agent error display
 
     // Prepare parameters for the API
     const params: PromptParameters = {
@@ -244,14 +247,14 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
       language: query.language,
       dataSourceId: dataset?.dataSource?.id,
     };
-    const { response, error } = await generateQuery(params);
+    const { response, error } = await generateQuery(params); // Call the NL API
 
     if (error) {
       if (error instanceof ProhibitedQueryError) {
         setCallOutType('invalid_query');
       } else if (error instanceof AgentError) {
         setCallOutType('invalid_query');
-        setAgentError(error);
+        // setAgentError(error); TODO: Handle agent error display
       } else {
         services.notifications.toasts.addError(error, { title: 'Failed to generate results' });
       }
@@ -259,13 +262,15 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
       setLocalQuery(''); // Clear query on error
     } else if (response) {
       // Update local state with the generated query
-
       setLocalQuery(response.query);
+
+      // Run the generated query
       handleRun(response.query);
+
       setIsDualEditor(true);
       setIsEditorReadOnly(true);
 
-      if (response.timeRange) services.data.query.timefilter.timefilter.setTime(response.timeRange);
+      if (response.timeRange) timefilter.setTime(response.timeRange);
       setCallOutType('query_generated');
     }
   };
@@ -308,7 +313,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     setIsRecentQueryVisible(!isRecentQueryVisible);
   };
 
-  const onClickRecentQuery = (recentQuery: Query, timeRange?: TimeRange) => {
+  const onClickRecentQuery = (recentQuery: Query) => {
     setIsRecentQueryVisible(false);
     setLocalQuery(typeof recentQuery.query === 'string' ? recentQuery.query : '');
     setLocalPrompt(recentQuery.prompt ?? '');
@@ -343,6 +348,8 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
       >
         <EditorStack
           isDualEditor={isDualEditor}
+          isPromptLoading={isPromptLoading}
+          isQueryLoading={isLoading}
           isPromptReadOnly={isPromptReadOnly}
           isEditorReadOnly={isEditorReadOnly}
           queryString={typeof localQuery === 'string' ? localQuery : ''}
@@ -358,6 +365,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
           provideCompletionItems={provideCompletionItems}
         />
       </QueryPanelLayout>
+      <PromptCallOut language={query.language} type={callOutType} onDismiss={dismissCallout} />
       {isRecentQueryVisible && (
         <div className="queryPanel__recentQueries">
           <RecentQueriesTable
