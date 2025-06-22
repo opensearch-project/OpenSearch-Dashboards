@@ -25,6 +25,8 @@ import {
   selectShowDataSetFields,
 } from '../../application/utils/state_management/selectors';
 import './index.scss';
+
+import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
 import {
   setQuery,
@@ -35,7 +37,7 @@ import {
   beginTransaction,
   finishTransaction,
 } from '../../application/utils/state_management/actions/transaction_actions';
-import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
+
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 import { setSavedQuery } from '../../application/utils/state_management/slices';
 import { AgentError, ProhibitedQueryError } from './utils/error';
@@ -80,7 +82,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   const [localPrompt, setLocalPrompt] = useState(prompt);
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
 
-  const { generateQuery, loading } = useGenerateQuery(services.uiActions);
+  const { generateQuery, loading: isPromptLoading } = useGenerateQuery(services.uiActions);
   const [agentError, setAgentError] = useState<AgentError>();
 
   // Handle time range changes
@@ -107,6 +109,12 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     },
     [timefilter]
   );
+
+  const queryStatus: QueryStatus = {
+    status: isLoading ? ResultStatus.LOADING : ResultStatus.READY,
+    elapsedMs: 0,
+    startTime: Date.now(),
+  };
 
   // Execute query when run button is clicked
   const handleRun = useCallback(
@@ -208,13 +216,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     [query, services, indexPattern]
   );
 
-  // TODO: Create query status overlay for progress indicator
-  const queryStatus: QueryStatus = {
-    status: isLoading ? ResultStatus.LOADING : ResultStatus.READY,
-    elapsedMs: 0,
-    startTime: Date.now(),
-  };
-
   const detectLanguageType = useCallback(
     (inputQuery: string) => {
       const detector = new QueryTypeDetector();
@@ -260,6 +261,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
       services.notifications.toasts.addWarning('Select a data source or index to ask a question');
       return;
     }
+    // setAgentError(undefined); TODO: Handle agent error display
 
     // Prepare parameters for the API
     const params: PromptParameters = {
@@ -268,7 +270,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
       language: query.language,
       dataSourceId: dataset?.dataSource?.id,
     };
-    const { response, error } = await generateQuery(params);
+    const { response, error } = await generateQuery(params); // Call the NL API
 
     if (error) {
       if (error instanceof ProhibitedQueryError) {
@@ -287,9 +289,11 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
       setLocalQuery(''); // Clear query on error
     } else if (response) {
       // Update local state with the generated query
-
       setLocalQuery(response.query);
+
+      // Run the generated query
       handleRun(response.query);
+
       setIsDualEditor(true);
       setIsEditorReadOnly(true);
 
@@ -399,6 +403,8 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
       >
         <EditorStack
           isDualEditor={isDualEditor}
+          isPromptLoading={isPromptLoading}
+          isQueryLoading={isLoading}
           isPromptReadOnly={isPromptReadOnly}
           isEditorReadOnly={isEditorReadOnly}
           queryString={typeof localQuery === 'string' ? localQuery : ''}

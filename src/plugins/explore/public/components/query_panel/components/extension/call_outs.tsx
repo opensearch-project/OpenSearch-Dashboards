@@ -7,12 +7,12 @@ import { EuiCallOut, EuiCallOutProps } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
 
-interface QueryAssistCallOutProps extends Required<Pick<EuiCallOutProps, 'onDismiss'>> {
+interface PromptCallOutProps extends Required<Pick<EuiCallOutProps, 'onDismiss'>> {
   language: string;
-  type: QueryAssistCallOutType;
+  type: PromptCallOutType;
 }
 
-export type QueryAssistCallOutType =
+export type PromptCallOutType =
   | undefined
   | 'invalid_query'
   | 'prohibited_query'
@@ -20,13 +20,13 @@ export type QueryAssistCallOutType =
   | 'empty_index'
   | 'query_generated';
 
-const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
+const EmptyIndexCallOut: React.FC<PromptCallOutProps> = (props) => (
   <EuiCallOut
-    className="queryAssist queryAssist__callout"
-    data-test-subj="query-assist-empty-index-callout"
+    className="queryPanel__callout"
+    data-test-subj="query-panel-empty-index-callout"
     title={
       <FormattedMessage
-        id="queryEnhancements.callOut.emptyIndex.title"
+        id="queryPanel.callOut.emptyIndex.title"
         defaultMessage="Select a data source or index to ask a question."
       />
     }
@@ -38,13 +38,13 @@ const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   />
 );
 
-const ProhibitedQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
+const ProhibitedQueryCallOut: React.FC<PromptCallOutProps> = (props) => (
   <EuiCallOut
-    className="queryAssist queryAssist__callout"
-    data-test-subj="query-assist-guard-callout"
+    className="queryPanel__callout"
+    data-test-subj="query-panel-guard-callout"
     title={
       <FormattedMessage
-        id="queryEnhancements.callOut.prohibitedQuery.title"
+        id="queryPanel.callOut.prohibitedQuery.title"
         defaultMessage="I am unable to respond to this query. Try another question."
       />
     }
@@ -56,13 +56,13 @@ const ProhibitedQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   />
 );
 
-const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
+const EmptyQueryCallOut: React.FC<PromptCallOutProps> = (props) => (
   <EuiCallOut
-    className="queryAssist queryAssist__callout"
-    data-test-subj="query-assist-empty-query-callout"
+    className="queryPanel__callout"
+    data-test-subj="query-panel-empty-query-callout"
     title={
       <FormattedMessage
-        id="queryEnhancements.callOut.emptyQuery.title"
+        id="queryPanel.callOut.emptyQuery.title"
         defaultMessage="Enter a natural language question to automatically generate a query to view results."
       />
     }
@@ -74,13 +74,13 @@ const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   />
 );
 
-const QueryGeneratedCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
+const QueryGeneratedCallOut: React.FC<PromptCallOutProps> = (props) => (
   <EuiCallOut
-    className="queryAssist queryAssist__callout"
-    data-test-subj="query-assist-query-generated-callout"
+    className="queryPanel__callout"
+    data-test-subj="query-panel-query-generated-callout"
     title={
       <FormattedMessage
-        id="queryEnhancements.callOut.queryGenerated.title"
+        id="queryPanel.callOut.queryGenerated.title"
         defaultMessage="{language} query generated. If there are any issues with the response, try adding more context to the question or a new question to submit."
         values={{ language: props.language }}
       />
@@ -93,7 +93,7 @@ const QueryGeneratedCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   />
 );
 
-export const QueryAssistCallOut: React.FC<QueryAssistCallOutProps> = (props) => {
+export const PromptCallOut: React.FC<PromptCallOutProps> = (props) => {
   switch (props.type) {
     case 'empty_query':
       return <EmptyQueryCallOut {...props} />;
