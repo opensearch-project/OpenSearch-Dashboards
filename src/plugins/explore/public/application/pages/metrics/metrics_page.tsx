@@ -25,7 +25,7 @@ import { RootState } from '../../utils/state_management/store';
 import { ResultStatus } from '../../utils/state_management/types';
 import { TopNav } from '../../legacy/discover/application/view_components/canvas/top_nav';
 import { DiscoverChartContainer } from '../../legacy/discover/application/view_components/canvas/discover_chart_container';
-import { QueryPanel } from '../../components/query_panel';
+import { QueryPanel } from '../../../components/query_panel';
 import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
 import { HeaderDatasetSelector } from '../../components/header_dataset_selector';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';

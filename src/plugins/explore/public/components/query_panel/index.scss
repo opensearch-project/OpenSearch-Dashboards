@@ -7,22 +7,16 @@
   position: relative;
 
   .queryPanel__layout {
-    /* stylelint-disable  @osd/stylelint/no_restricted_values */
-    padding: 8px;
-    border-radius: $euiBorderRadius;
-    border: 1px solid #d7d9dd;
-    background-color: white;
     display: flex;
     flex-direction: column;
     height: 100%;
     gap: 8px;
     box-sizing: border-box;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 5%), 0 1px 5px 0 rgba(0, 0, 0, 5%);
 
     .queryPanel__verticalSeparator {
       width: 1px;
       height: $euiSize;
-      background: #d9d9d9;
+      background: $euiColorLightestShade;
       margin: 0 4px;
     }
   }
@@ -31,7 +25,8 @@
     position: absolute;
     top: 100%;
     right: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 10%);
+    /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+    box-shadow: 0 2px 4px $euiShadowColor;
     z-index: 1000;
 
     .queryPanel__recentQuery__table {

@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { monaco } from '@osd/monaco';
 import { PromptEditor } from './prompt_editor';
 import { QueryEditor } from './query_editor';
 import { LanguageType } from './types';
@@ -23,6 +24,7 @@ interface EditorStackProps {
   onClearEditor: () => void;
   queryString: string;
   prompt: string;
+  provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
 const EditorStack: React.FC<EditorStackProps> = ({
@@ -39,6 +41,7 @@ const EditorStack: React.FC<EditorStackProps> = ({
   onQueryRun,
   onPromptRun,
   onClearEditor,
+  provideCompletionItems,
 }) => {
   return (
     <div className="queryPanel__editorStack" data-test-subj="queryPanelEditorStack">
@@ -46,10 +49,12 @@ const EditorStack: React.FC<EditorStackProps> = ({
         onChange={onPromptChange}
         languageType={languageType}
         prompt={prompt}
+        queryString={queryString}
         isPromptReadOnly={isPromptReadOnly}
         onPromptRun={onPromptRun}
         onPromptEdit={onPromptEdit}
         onClearEditor={onClearEditor}
+        provideCompletionItems={provideCompletionItems}
       />
       {isDualEditor && (
         <QueryEditor
@@ -60,6 +65,7 @@ const EditorStack: React.FC<EditorStackProps> = ({
           onQueryRun={onQueryRun}
           onQueryEdit={onQueryEdit}
           onClearEditor={onClearEditor}
+          provideCompletionItems={provideCompletionItems}
         />
       )}
     </div>
