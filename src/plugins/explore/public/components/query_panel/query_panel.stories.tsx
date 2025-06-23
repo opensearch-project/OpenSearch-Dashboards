@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { QueryPanel } from './index';
+import { QueryPanel } from './query_panel';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 
 const mockUiSettings = {
