@@ -149,6 +149,37 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         },
       });
 
+      // Add Tab key handling to trigger next autosuggestions after selection
+      editor.addCommand(monaco.KeyCode.Tab, () => {
+        // First accept the selected suggestion
+        editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
+
+        // Then retrigger suggestions after a short delay
+        setTimeout(() => {
+          editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        }, 100);
+      });
+
+      // Add Enter key handling for suggestions
+      editor.addCommand(monaco.KeyCode.Enter, () => {
+        // Check if suggestion widget is visible by checking for any suggestion context
+        const contextKeyService = (editor as any)._contextKeyService;
+        const suggestWidgetVisible = contextKeyService?.getContextKeyValue('suggestWidgetVisible');
+
+        if (suggestWidgetVisible) {
+          // Accept the selected suggestion and trigger next suggestions
+          editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
+          setTimeout(() => {
+            editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+          }, 100);
+        } else {
+          // Run the query if no suggestions are visible
+          const val = editor.getValue();
+          onRun(val);
+          onEdit();
+        }
+      });
+
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
         const maxHeight = 100;

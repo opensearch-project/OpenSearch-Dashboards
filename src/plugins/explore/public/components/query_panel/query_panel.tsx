@@ -127,7 +127,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
 
         // Use centralized IndexPattern from context
         const suggestions = await services?.data?.autocomplete?.getQuerySuggestions({
-          query: typeof localQuery === 'string' ? localQuery : '',
+          query: model.getValue(), // Use the current editor content, using the local query results in a race condition where we can get stale query data
           selectionStart: model.getOffsetAt(position),
           selectionEnd: model.getOffsetAt(position),
           language: effectiveLanguage,
@@ -169,7 +169,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
         return { suggestions: [], incomplete: false };
       }
     },
-    [query, services, localQuery, indexPattern, dataset]
+    [query, services, indexPattern, dataset]
   );
 
   // TODO: Create query status overlay for progress indicator
