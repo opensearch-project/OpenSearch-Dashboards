@@ -1,0 +1,2 @@
+feat:
+- Add a new feature flag under data plugin for the new dataset experience ([#9958](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9958))
