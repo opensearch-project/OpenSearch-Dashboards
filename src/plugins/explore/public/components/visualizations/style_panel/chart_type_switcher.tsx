@@ -5,16 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import React, { useState, useEffect } from 'react';
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiSwitch,
-  EuiSelect,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
-import { getPositions } from '../utils/collections';
+import { EuiPanel, EuiSelect } from '@elastic/eui';
 import { ChartTypeMapping } from '../types';
 
 export interface ChartTypeSwitcherProps {
@@ -67,7 +58,7 @@ export const ChartTypeSwitcher = ({
   };
 
   return (
-    <EuiPanel color="subdued" paddingSize="m">
+    <EuiPanel color="subdued" paddingSize="s">
       <div style={{ fontSize: '16px', marginBottom: '8px' }}>
         {i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
           defaultMessage: 'Visualization Type',

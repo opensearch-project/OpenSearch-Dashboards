@@ -39,47 +39,49 @@ export const GeneralVisOptions = ({
   const legendPositions = getPositions();
 
   return (
-    <EuiFlexItem grow={true} data-test-subj="generalSettingsPanel">
-      <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
-        {shouldShowLegend && (
+    <EuiPanel color="subdued" paddingSize="m">
+      <EuiFlexItem grow={true} data-test-subj="generalSettingsPanel">
+        <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
+          {shouldShowLegend && (
+            <EuiFlexItem>
+              <EuiSwitch
+                label={i18n.translate('explore.stylePanel.general.showLegend', {
+                  defaultMessage: 'Show legend',
+                })}
+                checked={addLegend}
+                onChange={(e) => onAddLegendChange(e.target.checked)}
+                data-test-subj="showLegendSwitch"
+              />
+            </EuiFlexItem>
+          )}
+          {addLegend && shouldShowLegend && (
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate('explore.stylePanel.general.legendPosition', {
+                  defaultMessage: 'Legend position',
+                })}
+              >
+                <EuiSelect
+                  value={legendPosition}
+                  onChange={(e) => onLegendPositionChange(e.target.value as Positions)}
+                  options={legendPositions}
+                  data-test-subj="legendPositionSelect"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiSwitch
-              label={i18n.translate('explore.stylePanel.general.showLegend', {
-                defaultMessage: 'Show legend',
+              label={i18n.translate('explore.stylePanel.general.showTooltip', {
+                defaultMessage: 'Show tooltip',
               })}
-              checked={addLegend}
-              onChange={(e) => onAddLegendChange(e.target.checked)}
-              data-test-subj="showLegendSwitch"
+              checked={addTooltip}
+              onChange={(e) => onAddTooltipChange(e.target.checked)}
+              data-test-subj="showTooltipSwitch"
             />
           </EuiFlexItem>
-        )}
-        {addLegend && shouldShowLegend && (
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.general.legendPosition', {
-                defaultMessage: 'Legend position',
-              })}
-            >
-              <EuiSelect
-                value={legendPosition}
-                onChange={(e) => onLegendPositionChange(e.target.value as Positions)}
-                options={legendPositions}
-                data-test-subj="legendPositionSelect"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          <EuiSwitch
-            label={i18n.translate('explore.stylePanel.general.showTooltip', {
-              defaultMessage: 'Show tooltip',
-            })}
-            checked={addTooltip}
-            onChange={(e) => onAddTooltipChange(e.target.checked)}
-            data-test-subj="showTooltipSwitch"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiPanel>
   );
 };
