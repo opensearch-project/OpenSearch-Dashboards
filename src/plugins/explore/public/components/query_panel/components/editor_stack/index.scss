@@ -32,19 +32,19 @@ $customSize10: 10px;
         .margin {
           .glyph-margin {
             background: white;
-            width: 10px !important;
+            width: $customSize10 !important;
           }
         }
       }
 
       .monaco-scrollable-element {
         border-radius: 0 $euiSizeXS 0 0;
-        left: 10px !important; // Adjust left position to account for glyph margin
+        left: $customSize10 !important; // Adjust left position to account for glyph margin
       }
 
       .monaco-editor .margin .glyph-margin {
         background: white;
-        width: 10px;
+        width: $customSize10;
       }
 
       .monaco-editor,
