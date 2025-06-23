@@ -17,11 +17,16 @@ import { useEditorMode } from './hooks/useEditorMode';
 import { QueryTypeDetector } from './utils/type_detection';
 import { Query, TimeRange, LanguageType } from './types';
 
-import { selectIsLoading, selectDataset } from '../../application/utils/state_management/selectors';
+import {
+  selectIsLoading,
+  selectDataset,
+  selectShowDataSetFields,
+} from '../../application/utils/state_management/selectors';
 import './index.scss';
 
 import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
 import { setQuery } from '../../application/utils/state_management/slices/query_slice';
+import { setShowDatasetFields } from '../../application/utils/state_management/slices/ui_slice';
 import { clearResults } from '../../application/utils/state_management/slices/results_slice';
 import {
   beginTransaction,
@@ -57,6 +62,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   // Use selectors to get state from Redux
   const isLoading = useSelector(selectIsLoading);
   const dataset = useSelector(selectDataset);
+  const showDatasetFields = useSelector(selectShowDataSetFields);
 
   // Determine if DatePicker should be shown
   const showDatePicker = Boolean(indexPattern?.timeFieldName);
@@ -265,6 +271,10 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     handleQueryRun();
   };
 
+  const handleShowFieldsToggle = (showField: boolean) => {
+    dispatch(setShowDatasetFields(showField));
+  };
+
   const noInput = useMemo(() => {
     return !localQuery?.trim() && !localPrompt?.trim();
   }, [localQuery, localPrompt]);
@@ -279,6 +289,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
             showDatePicker={showDatePicker}
             languageType={editorLanguageType}
             noInput={noInput}
+            showDatasetFields={showDatasetFields}
             datePickerRef={datePickerRef}
             services={services}
             timefilter={timefilter}
@@ -287,6 +298,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
             onTimeChange={handleTimeChange}
             onRunQuery={handleRun}
             oneRefreshChange={handleRefreshChange}
+            onShowFieldsToggle={handleShowFieldsToggle}
           />
         }
       >
