@@ -39,17 +39,14 @@ export const GeneralVisOptions = ({
   const legendPositions = getPositions();
 
   return (
-    <EuiPanel paddingSize="s" data-test-subj="generalSettingsPanel">
+    <EuiPanel
+      paddingSize="s"
+      hasBorder={false}
+      hasShadow={true}
+      borderRadius="none"
+      data-test-subj="generalSettingsPanel"
+    >
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('explore.stylePanel.general.basicSettings', {
-                defaultMessage: 'Basic Settings',
-              })}
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
         {shouldShowLegend && (
           <EuiFlexItem>
             <EuiSwitch
