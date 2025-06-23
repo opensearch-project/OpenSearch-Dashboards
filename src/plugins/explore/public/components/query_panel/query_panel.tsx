@@ -237,11 +237,12 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
 
       if (isPPLQuery) {
         setLocalQuery(value);
+        setIsDualEditor(false);
       } else {
         setLocalPrompt(value);
       }
     },
-    [detectLanguageType]
+    [detectLanguageType, setIsDualEditor]
   );
 
   const handleQueryRun = () => {
