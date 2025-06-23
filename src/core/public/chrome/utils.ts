@@ -296,6 +296,19 @@ export async function searchNavigationLinks(
       .filter(Boolean) as Array<ChromeRegistrationNavLink & ChromeNavLink>;
 
     console.log('Final Semantic Search Result (from backend): ', finalResult);
+
+    if (finalResult.length === 0) {
+      console.log('No semantic results found, falling back to keyword matching');
+      return allSearchAbleLinks.filter((link) => {
+        const title = link.title;
+        const parentNavLinkTitle = link.parentNavLinkTitle;
+        const titleMatch = title && title.toLowerCase().includes(query.toLowerCase());
+        const parentTitleMatch =
+          parentNavLinkTitle && parentNavLinkTitle.toLowerCase().includes(query.toLowerCase());
+
+        return titleMatch || parentTitleMatch;
+      });
+    }
     return finalResult;
   } catch (error) {
     console.error('Frontend API call error for semantic search:', error);
