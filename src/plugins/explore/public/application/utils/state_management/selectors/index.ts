@@ -38,6 +38,8 @@ export const selectDataset = createSelector([selectQueryState], (queryState) => 
  */
 export const selectActiveTabId = createSelector([selectUIState], (uiState) => uiState.activeTabId);
 
+export const selectQueryPrompt = createSelector([selectUIState], (uiState) => uiState.prompt);
+
 export const selectExecutionCacheKeys = createSelector(
   [selectUIState],
   (uiState) => uiState?.executionCacheKeys || []
