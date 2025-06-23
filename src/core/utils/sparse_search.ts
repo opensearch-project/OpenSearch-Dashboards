@@ -5,7 +5,7 @@
 
 import { BertWordPieceTokenizer } from './tokenizer';
 
-export type SparseVector = Record<number, number>;
+export type SparseVector = Record<string, number>;
 
 export interface Document {
   id: string;
@@ -52,8 +52,7 @@ export class SparseSearch {
 
   private calScore(queryVec: SparseVector, docVec: SparseVector): number {
     let score = 0;
-    for (const dimStr of Object.keys(queryVec)) {
-      const dim = parseInt(dimStr);
+    for (const dim of Object.keys(queryVec)) {
       if (docVec[dim] !== undefined) {
         score += queryVec[dim] * docVec[dim];
       }

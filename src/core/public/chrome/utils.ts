@@ -277,9 +277,7 @@ export async function searchNavigationLinks(
   let searcher = null;
 
   try {
-    const { default: docVectors } = await import(
-      /* webpackChunkName: "docVectors" */ '../../utils/doc_vectors'
-    );
+    const { default: docVectors } = await import('../../utils/doc_vectors');
     searcher = new SparseSearch(docVectors);
     console.time('SearchQueryTime');
     const results = searcher.search(query);
