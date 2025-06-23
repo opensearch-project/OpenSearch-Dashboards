@@ -36,24 +36,4 @@ export class QueryBarActionsRegistry {
   }
 }
 
-// export const queryBarActionsRegistry = new QueryBarActionsRegistry();
-
-// TODO: This is mock data for storybook demo, replace this above line commented.
-export const queryBarActionsRegistry = {
-  getAll: () => [
-    {
-      id: 'alert',
-      label: 'Set up an alert from query',
-      iconType: 'bell', // Icon for alert
-      onClick: () => {},
-      order: 1,
-    },
-    {
-      id: 'anomalyDetection',
-      label: 'Suggest anomaly detection',
-      iconType: 'anomalyDetection', // Icon for anomaly detection
-      onClick: () => {},
-      order: 2,
-    },
-  ],
-};
+export const queryBarActionsRegistry = new QueryBarActionsRegistry();
