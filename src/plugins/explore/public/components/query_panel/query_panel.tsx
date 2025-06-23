@@ -215,11 +215,12 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
 
       if (isPPLQuery) {
         setLocalQuery(value);
+        setIsDualEditor(false);
       } else {
         setLocalPrompt(value);
       }
     },
-    [detectLanguageType]
+    [detectLanguageType, setIsDualEditor]
   );
 
   const handleQueryRun = () => {
