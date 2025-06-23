@@ -13,6 +13,7 @@ import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { AxesOptions } from '../style_panel/axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
+import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
@@ -22,9 +23,13 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
+  availableChartTypes = [],
+  selectedChartType,
+  onChartTypeChange,
 }) => {
   // State to track expanded/collapsed state of each panel
   const [expandedPanels, setExpandedPanels] = useState({
+    general: false,
     basic: false,
     exclusive: false,
     threshold: false,
@@ -56,12 +61,34 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
         <EuiButtonEmpty
           iconSide="left"
           color="text"
+          iconType={expandedPanels.exclusive ? 'arrowDown' : 'arrowRight'}
+          onClick={() => togglePanel('general')}
+          size="xs"
+          data-test-subj="lineVisGeneralButton"
+        >
+          {i18n.translate('explore.vis.lineChart.tabs.general', {
+            defaultMessage: 'General',
+          })}
+        </EuiButtonEmpty>
+        {expandedPanels.general && (
+          <ChartTypeSwitcher
+            availableChartTypes={availableChartTypes}
+            selectedChartType={selectedChartType}
+            onChartTypeChange={onChartTypeChange}
+          />
+        )}
+      </EuiSplitPanel.Inner>
+
+      <EuiSplitPanel.Inner paddingSize="s">
+        <EuiButtonEmpty
+          iconSide="left"
+          color="text"
           iconType={expandedPanels.basic ? 'arrowDown' : 'arrowRight'}
           onClick={() => togglePanel('basic')}
           size="xs"
           data-test-subj="lineVisBasicButton"
         >
-          {i18n.translate('explore.vis.lineChart.tabs.general', {
+          {i18n.translate('explore.vis.lineChart.tabs.basic', {
             defaultMessage: 'Basic',
           })}
         </EuiButtonEmpty>

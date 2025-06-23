@@ -39,13 +39,7 @@ export const GeneralVisOptions = ({
   const legendPositions = getPositions();
 
   return (
-    <EuiPanel
-      paddingSize="s"
-      hasBorder={false}
-      hasShadow={true}
-      borderRadius="none"
-      data-test-subj="generalSettingsPanel"
-    >
+    <EuiFlexItem grow={true} data-test-subj="generalSettingsPanel">
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
         {shouldShowLegend && (
           <EuiFlexItem>
@@ -86,6 +80,6 @@ export const GeneralVisOptions = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiFlexItem>
   );
 };
