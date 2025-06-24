@@ -44,6 +44,12 @@ const operatorsToInclude = [
   OpenSearchPPLParser.IN,
 ];
 
+const fieldRuleList = [
+  OpenSearchPPLParser.RULE_fieldList,
+  OpenSearchPPLParser.RULE_wcFieldList,
+  OpenSearchPPLParser.RULE_sortField,
+];
+
 export function getIgnoredTokens(): number[] {
   // const tokens = [OpenSearchPPLParser.SPACE, OpenSearchPPLParser.EOF];
   const tokens = [];
@@ -134,13 +140,20 @@ export function processVisitedRules(
         if (lastTokenResult?.token.type === tokenDictionary.SOURCE) {
           break;
         }
-        // In case we have a command with a field list for example source = abc | fields field1, field2, ... . Always suggest a column Don't evaluate other conditions
+        // In case we have a command with a field list for example source = abc | fields field1, field2, ... .
+        // Suggest a fieldname only if the lastCharacter is not a fieldName. eg: source = abc | fields field1 -> should suggest | and , but source = abc | fields field1, -> should suggest fields
+        if ((parentRuleList ?? []).some((parentRule) => fieldRuleList.includes(parentRule))) {
+          const lastNonSpaceToken = findLastNonSpaceToken(tokenStream, cursorTokenIndex);
+          if (lastNonSpaceToken?.token.type === tokenDictionary.ID) {
+            break;
+          } else {
+            shouldSuggestColumns = true;
+            break;
+          }
+        }
+
         // handling the scenario if the last Token is ID, we Don't suggest Column except in the case the second last token is Source to handle the scenario source = tablename fieldname suggestions
-        if (
-          !(parentRuleList ?? []).includes(OpenSearchPPLParser.RULE_fieldList) &&
-          lastTokenResult &&
-          lastTokenResult?.token.type === tokenDictionary.ID
-        ) {
+        if (lastTokenResult && lastTokenResult?.token.type === tokenDictionary.ID) {
           const secondLastTokenResult = findLastNonSpaceOperatorToken(
             tokenStream,
             lastTokenResult.index
@@ -258,10 +271,24 @@ function findLastNonSpaceOperatorToken(
   for (let i = currentIndex - 1; i >= 0; i--) {
     const token = tokenStream.get(i);
     if (
-      token.type !== tokenDictionary.SPACE &&
-      token.type !== tokenDictionary.EOF &&
+      token.type !== OpenSearchPPLParser.SPACE &&
+      token.type !== OpenSearchPPLParser.EOF &&
       !operatorsToInclude.includes(token.type)
     ) {
+      return { token, index: i };
+    }
+  }
+  return null;
+}
+
+// Helper functions for implicit where expression detection
+function findLastNonSpaceToken(
+  tokenStream: TokenStream,
+  currentIndex: number
+): { token: Token; index: number } | null {
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const token = tokenStream.get(i);
+    if (token.type !== OpenSearchPPLParser.SPACE && token.type !== OpenSearchPPLParser.EOF) {
       return { token, index: i };
     }
   }
