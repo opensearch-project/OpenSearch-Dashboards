@@ -274,6 +274,16 @@ export async function searchNavigationLinks(
       });
   });
 
+  const keywordMatchResult = allSearchAbleLinks.filter((link) => {
+    const title = link.title;
+    const parentNavLinkTitle = link.parentNavLinkTitle;
+    const titleMatch = title && title.toLowerCase().includes(query.toLowerCase());
+    const parentTitleMatch =
+      parentNavLinkTitle && parentNavLinkTitle.toLowerCase().includes(query.toLowerCase());
+
+    return titleMatch || parentTitleMatch;
+  });
+
   let searcher = null;
 
   try {
@@ -288,30 +298,30 @@ export async function searchNavigationLinks(
       console.log(`Score: ${result.score.toFixed(2)} | ${result.text}`);
     });
 
-    const finalResult = results
+    const sparseResult = results
       .map((link: any) => {
         const originalFullLink = allSearchAbleLinks.find((fullLink) => fullLink.id === link.id);
         return originalFullLink || null;
       })
       .filter(Boolean) as Array<ChromeRegistrationNavLink & ChromeNavLink>;
 
-    console.log('Final Semantic Search Result (from backend): ', finalResult);
+    const mergeResult = new Map();
 
-    if (finalResult.length === 0) {
-      console.log('No semantic results found, falling back to keyword matching');
-      return allSearchAbleLinks.filter((link) => {
-        const title = link.title;
-        const parentNavLinkTitle = link.parentNavLinkTitle;
-        const titleMatch = title && title.toLowerCase().includes(query.toLowerCase());
-        const parentTitleMatch =
-          parentNavLinkTitle && parentNavLinkTitle.toLowerCase().includes(query.toLowerCase());
+    keywordMatchResult.forEach((link) => {
+      mergeResult.set(link.id, link);
+    });
 
-        return titleMatch || parentTitleMatch;
-      });
-    }
+    sparseResult.forEach((link) => {
+      if (!mergeResult.has(link.id)) {
+        mergeResult.set(link.id, link);
+      }
+    });
+
+    const finalResult = Array.from(mergeResult.values());
+
     return finalResult;
   } catch (error) {
     console.error('Frontend API call error for semantic search:', error);
-    throw error;
+    return keywordMatchResult;
   }
 }
