@@ -46,6 +46,10 @@ export const selectExecutionCacheKeys = createSelector(
 );
 
 export const selectStatus = createSelector([selectUIState], (uiState) => uiState.status);
+export const selectShowDataSetFields = createSelector(
+  [selectUIState],
+  (uiState) => uiState.showDatasetFields
+);
 
 // Backward compatibility selector for components that still check isLoading
 export const selectIsLoading = createSelector(
