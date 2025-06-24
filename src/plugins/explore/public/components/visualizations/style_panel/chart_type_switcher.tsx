@@ -25,30 +25,25 @@ export const ChartTypeSwitcher = ({
       ? [...availableChartTypes].sort((a, b) => b.priority - a.priority)
       : [];
 
-  // Default to the highest priority chart type if no selection is provided
   const [currentChartType, setCurrentChartType] = useState<string>(
     selectedChartType || (sortedChartTypes.length > 0 ? sortedChartTypes[0].type : '')
   );
 
-  // Update internal state when prop changes
   useEffect(() => {
     if (selectedChartType && selectedChartType !== currentChartType) {
       setCurrentChartType(selectedChartType);
     }
   }, [selectedChartType, currentChartType]);
 
-  // If no chart types are available, don't render anything
   if (!availableChartTypes || availableChartTypes.length === 0) {
     return null;
   }
 
-  // Create options for the select dropdown
   const chartTypeOptions = sortedChartTypes.map((chartType) => ({
     value: chartType.type,
     text: chartType.name,
   }));
 
-  // Handle chart type change
   const handleChartTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newChartType = e.target.value;
     setCurrentChartType(newChartType);
