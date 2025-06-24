@@ -64,6 +64,7 @@ export const VisualizationContainer = () => {
   const [styleOptions, setStyleOptions] = useState<ChartStyleControlMap[ChartType] | undefined>(
     undefined
   );
+  const [selectedChartType, setSelectedChartType] = useState<string | undefined>(undefined);
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -82,6 +83,18 @@ export const VisualizationContainer = () => {
   // Get the visualization registry
   const visualizationRegistry = useVisualizationRegistry();
 
+  // Initialize selectedChartType when visualizationData changes
+  useEffect(() => {
+    if (visualizationData && visualizationData.visualizationType) {
+      setSelectedChartType(visualizationData.visualizationType.type);
+    }
+  }, [visualizationData]);
+
+  // Handle chart type change
+  const handleChartTypeChange = (chartType: string) => {
+    setSelectedChartType(chartType);
+  };
+
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
     if (
@@ -93,9 +106,6 @@ export const VisualizationContainer = () => {
     ) {
       return null;
     }
-
-    // Get the selected chart type
-    const selectedChartType = visualizationData.visualizationType?.type || 'line';
 
     // Get the selected rule id
     const rule = visualizationRegistry.getRules().find((r) => r.id === visualizationData.ruleId);
@@ -133,7 +143,15 @@ export const VisualizationContainer = () => {
       visualizationData.dateColumns,
       styleOptions
     );
-  }, [searchContext, rows, indexPattern, styleOptions, visualizationData, visualizationRegistry]);
+  }, [
+    searchContext,
+    rows,
+    indexPattern,
+    styleOptions,
+    visualizationData,
+    visualizationRegistry,
+    selectedChartType,
+  ]);
 
   // Hook to update the search context whenever the query state changes
   // This will ensure that the visualization is always up-to-date with the latest query and filters
@@ -171,6 +189,8 @@ export const VisualizationContainer = () => {
         styleOptions={styleOptions}
         visualizationData={visualizationData as VisualizationTypeResult<ChartType>}
         onStyleChange={handleStyleChange}
+        selectedChartType={selectedChartType}
+        onChartTypeChange={handleChartTypeChange}
         ReactExpressionRenderer={ReactExpressionRenderer}
       />
     </div>

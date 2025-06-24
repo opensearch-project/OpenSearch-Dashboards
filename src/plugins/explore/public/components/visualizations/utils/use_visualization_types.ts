@@ -43,6 +43,9 @@ export interface StyleControlsProps<T extends AllChartStyleControls> {
   numericalColumns?: VisColumn[];
   categoricalColumns?: VisColumn[];
   dateColumns?: VisColumn[];
+  availableChartTypes?: ChartTypeMapping[];
+  selectedChartType?: string;
+  onChartTypeChange?: (chartType: string) => void;
 }
 
 export interface VisualizationType<T extends ChartType> {
