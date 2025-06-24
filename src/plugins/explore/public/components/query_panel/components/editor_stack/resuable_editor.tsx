@@ -87,6 +87,19 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
 
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
+      // Focus on mount
+      editor.focus();
+      setEditorIsFocused(true);
+
+      // set cursor to the end of the document
+      const model = editor.getModel();
+      if (model) {
+        const lastLine = model.getLineCount();
+        const lastColumn = model.getLineMaxColumn(lastLine);
+        editor.setPosition({ lineNumber: lastLine, column: lastColumn });
+        editor.revealPositionInCenter({ lineNumber: lastLine, column: lastColumn });
+      }
+
       const focusDisposable = editor.onDidFocusEditorText(() => {
         clearTimeout(blurTimeoutRef.current);
         setEditorIsFocused(true);
