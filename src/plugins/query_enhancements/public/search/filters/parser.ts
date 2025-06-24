@@ -26,7 +26,6 @@ export const convertFiltersToWhereClause = (
   if (!filters) return '';
   const predicates = filters
     .filter((filter) => filter && !isFilterDisabled(filter))
-    .filter((filter) => filter)
     .filter((filter) => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
     .map(toPredicate)
     .filter(Boolean);
@@ -40,7 +39,7 @@ const escapeQuotes = (value: string) => value.replaceAll("'", "''");
 
 const toPredicate = (filter: Filter): string | undefined => {
   const meta = filter.meta;
-  // SQL/PPL does not accept .keyword and will automatically append it
+  // SQL/PPL does not accept .keyword and will automatically append it if needed
   const field = getFilterField(filter)?.replace(/.keyword$/, '');
   if (!field) return;
   if (!meta.negate) {
