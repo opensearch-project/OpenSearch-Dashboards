@@ -248,9 +248,24 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
       language: query.language,
       dataSourceId: dataset?.dataSource?.id,
     };
-    const { response, error } = await generateQuery(params); // Call the NL API
+    try {
+      const response = await services.http.post('/api/assistant/assist/generate', {
+        body: JSON.stringify(params),
+      });
+      if (response?.query) {
+        // Update local state with the generated query
+        setLocalQuery(response.query);
 
-    if (error) {
+        // Run the generated query
+        handleRun(response.query);
+
+        setIsDualEditor(true);
+        setIsEditorReadOnly(true);
+
+        if (response.timeRange) timefilter.setTime(response.timeRange);
+        setCallOutType('query_generated');
+      }
+    } catch (error) {
       if (error instanceof ProhibitedQueryError) {
         setCallOutType('invalid_query');
       } else if (error instanceof AgentError) {
@@ -261,18 +276,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
       }
 
       setLocalQuery(''); // Clear query on error
-    } else if (response) {
-      // Update local state with the generated query
-      setLocalQuery(response.query);
-
-      // Run the generated query
-      handleRun(response.query);
-
-      setIsDualEditor(true);
-      setIsEditorReadOnly(true);
-
-      if (response.timeRange) timefilter.setTime(response.timeRange);
-      setCallOutType('query_generated');
     }
   };
 
