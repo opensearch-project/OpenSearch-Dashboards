@@ -6,36 +6,51 @@
 // TODO: Move this to  already configured datetime range picker
 // This component will be fully functional once integrated with query services.
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
+import { UI_SETTINGS } from '../../../../../../data/public';
+import { ExploreServices } from '../../../../types';
 
-export const DateTimeRangePicker: React.FC = () => {
-  const [start, setStart] = useState('now-15m');
-  const [end, setEnd] = useState('now');
-  const [isLoading, setIsLoading] = useState(false);
+export interface DatePickerProps {
+  datePickerRef?: React.RefObject<HTMLDivElement>;
+  services: ExploreServices;
+  timefilter: any;
+  onTimeChange: (time: { start: string; end: string }) => void;
+  onRunQuery: () => void;
+  oneRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
+}
 
-  const onTimeChange = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
-    setStart(newStart);
-    setEnd(newEnd);
-  };
-
-  const onRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000); // Simulate a refresh delay
-  };
-
+export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
+  datePickerRef,
+  services,
+  timefilter,
+  onTimeChange,
+  onRunQuery,
+  oneRefreshChange,
+}) => {
   return (
-    <EuiSuperDatePicker
-      start={start}
-      end={end}
-      onTimeChange={onTimeChange}
-      onRefresh={onRefresh}
-      showUpdateButton={false}
-      isLoading={isLoading}
-      data-test-subj="queryPanelFooterDateTimeRangePicker"
-      compressed={true}
-    />
+    <div ref={datePickerRef} key="datePicker">
+      <EuiSuperDatePicker
+        key="datePicker"
+        start={timefilter?.getTime().from}
+        end={timefilter?.getTime().to}
+        isPaused={timefilter?.getRefreshInterval().pause}
+        refreshInterval={timefilter?.getRefreshInterval().value}
+        onTimeChange={onTimeChange}
+        onRefresh={onRunQuery}
+        onRefreshChange={oneRefreshChange}
+        showUpdateButton={false}
+        commonlyUsedRanges={services?.uiSettings
+          ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
+          ?.map(({ from, to, display }: { from: string; to: string; display: string }) => ({
+            start: from,
+            end: to,
+            label: display,
+          }))}
+        dateFormat={services?.uiSettings?.get('dateFormat')}
+        compressed={true}
+        data-test-subj="queryPanelFooterDateTimeRangePicker"
+      />
+    </div>
   );
 };

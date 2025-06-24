@@ -25,7 +25,7 @@ import { RootState } from '../../utils/state_management/store';
 import { ResultStatus } from '../../utils/state_management/types';
 import { TopNav } from '../../legacy/discover/application/view_components/canvas/top_nav';
 import { DiscoverChartContainer } from '../../legacy/discover/application/view_components/canvas/discover_chart_container';
-import { QueryPanel } from '../../components/query_panel';
+import { QueryPanel } from '../../../components/query_panel/query_panel';
 import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
 import { HeaderDatasetSelector } from '../../components/header_dataset_selector';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
@@ -66,14 +66,12 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
       return [];
     }
 
-    // Try all available cache keys to find one with results (same logic as TabContent)
-    for (const cacheKey of executionCacheKeys) {
-      // why return first hit?
-      const results = state.results[cacheKey];
-      if (results) {
-        const hits = results.hits?.hits || [];
-        return hits;
-      }
+    // Use default query cacheKey
+    const cacheKey = executionCacheKeys[0];
+    const results = state.results[cacheKey];
+    if (results) {
+      const hits = results.hits?.hits || [];
+      return hits;
     }
 
     return [];

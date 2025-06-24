@@ -38,12 +38,18 @@ export const selectDataset = createSelector([selectQueryState], (queryState) => 
  */
 export const selectActiveTabId = createSelector([selectUIState], (uiState) => uiState.activeTabId);
 
+export const selectQueryPrompt = createSelector([selectUIState], (uiState) => uiState.prompt);
+
 export const selectExecutionCacheKeys = createSelector(
   [selectUIState],
   (uiState) => uiState?.executionCacheKeys || []
 );
 
 export const selectStatus = createSelector([selectUIState], (uiState) => uiState.status);
+export const selectShowDataSetFields = createSelector(
+  [selectUIState],
+  (uiState) => uiState.showDatasetFields
+);
 
 // Backward compatibility selector for components that still check isLoading
 export const selectIsLoading = createSelector(

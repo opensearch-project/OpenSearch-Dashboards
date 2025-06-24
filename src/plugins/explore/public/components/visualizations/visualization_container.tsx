@@ -43,12 +43,11 @@ export const VisualizationContainer = () => {
       return [];
     }
 
-    // Try all available cache keys to find one with field schema
-    for (const cacheKey of executionCacheKeys) {
-      const results = state.results[cacheKey];
-      if (results && results.fieldSchema) {
-        return results.fieldSchema;
-      }
+    // Use tab specific cacheKey
+    const cacheKey = executionCacheKeys[1];
+    const results = state.results[cacheKey];
+    if (results && results.fieldSchema) {
+      return results.fieldSchema;
     }
 
     return [];
