@@ -49,6 +49,7 @@ describe('LanguageService', () => {
 
   test('getDefaultLanguage returns DQL by default', () => {
     const defaultLanguage = service.getDefaultLanguage();
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     expect(defaultLanguage.id).toBe('kuery');
   });
 
@@ -148,6 +149,7 @@ describe('LanguageService', () => {
 
   test('__enhance adds query editor extensions', () => {
     const mockExtension = { id: 'test-extension' };
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     service.__enhance({ queryEditorExtension: mockExtension });
     expect(service.getQueryEditorExtensionMap()).toEqual({ 'test-extension': mockExtension });
   });

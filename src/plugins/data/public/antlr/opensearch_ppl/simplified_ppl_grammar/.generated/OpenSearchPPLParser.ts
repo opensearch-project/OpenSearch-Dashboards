@@ -7,6 +7,7 @@ import { OpenSearchPPLParserVisitor } from "./OpenSearchPPLParserVisitor.js";
 
 // for running tests with parameters, TODO: discuss strategy for typed parameters in CI
 // eslint-disable-next-line no-unused-vars
+// @ts-expect-error TS6196 TODO(ts-error): fixme
 type int = number;
 
 

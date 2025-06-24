@@ -22,6 +22,7 @@ describe('usePagination', () => {
       ...visParams,
       perPage: '',
     };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const { result } = renderHook(() => usePagination(params, 20));
     expect(result.current).toEqual(undefined);
   });

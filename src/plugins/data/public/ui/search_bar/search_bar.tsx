@@ -451,6 +451,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           <FilterOptions
             filters={this.props.filters!}
             onFiltersUpdated={this.props.onFiltersUpdated}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             intl={this.props.intl}
             indexPatterns={this.props.indexPatterns!}
             showSaveQuery={this.props.showSaveQuery}

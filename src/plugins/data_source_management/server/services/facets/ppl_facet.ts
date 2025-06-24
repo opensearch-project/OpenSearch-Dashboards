@@ -24,6 +24,7 @@ export class PPLFacet {
         },
       };
       if (request.body.format !== 'jdbc') {
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         params.format = request.body.format;
       }
       const queryRes = await this.client.asScoped(request).callAsCurrentUser(format, params);

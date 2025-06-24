@@ -93,6 +93,7 @@ jest.mock('history', () => {
     ...originalModule,
     createMemoryHistory: () => {
       const history = originalModule.createMemoryHistory();
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
       history.entries.forEach((entry) => {
         entry.key = 'consistentKey';
       });
@@ -104,6 +105,7 @@ jest.mock('history', () => {
 const mountComponent = () => {
   return mount(
     <MemoryRouter>
+      {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
       <ConfigurePrometheusDatasourcePanel {...defaultProps} />
     </MemoryRouter>
   );

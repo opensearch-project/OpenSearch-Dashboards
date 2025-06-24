@@ -237,6 +237,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
     },
   ] as Array<EuiTableFieldDataColumnType<AssociatedObject>>;
 
+  // @ts-expect-error TS7031 TODO(ts-error): fixme
   const onSearchChange = ({ query, error }) => {
     if (error) {
       // eslint-disable-next-line no-console
@@ -252,6 +253,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
 
       return clauses.some((clause) => {
         if (clause.field !== ASSC_OBJ_TABLE_ACC_COLUMN_NAME) {
+          // @ts-expect-error TS7053 TODO(ts-error): fixme
           return associatedObject[clause.field] === clause.value;
         } else if (clause.field === ASSC_OBJ_TABLE_ACC_COLUMN_NAME) {
           return associatedObject.type !== 'table' && associatedObject.name === clause.value;
@@ -329,6 +331,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
       columns={columns}
       search={tableSearch}
       pagination={pagination}
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       sorting={sorting}
       hasActions={true}
       tableLayout="auto"

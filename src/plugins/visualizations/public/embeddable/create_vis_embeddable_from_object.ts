@@ -87,6 +87,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
       indexPatterns = [vis.data.indexPattern];
     }
 
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     const editable = getCapabilities().visualize.save as boolean;
 
     const savedAugmentVisLoader = getSavedAugmentVisLoader();

@@ -10,8 +10,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { EuiFieldText, EuiTextArea, EuiSelect } from '@elastic/eui';
 import { ConfigureS3DatasourcePanelWithRouter } from './configure_amazon_s3_data_source';
 import { AuthMethod } from '../../../constants';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { QueryPermissionsConfiguration } from '../query_permissions';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { NameRow } from '../name_row';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { AuthDetails } from '../direct_query_data_source_auth_details';
 
 // Mock fetchDataSources function
@@ -90,6 +93,7 @@ jest.mock('history', () => {
     ...originalModule,
     createMemoryHistory: () => {
       const history = originalModule.createMemoryHistory();
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
       history.entries.forEach((entry) => {
         entry.key = 'consistentKey';
       });
@@ -101,6 +105,7 @@ jest.mock('history', () => {
 const mountComponent = () => {
   return mount(
     <MemoryRouter>
+      {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
       <ConfigureS3DatasourcePanelWithRouter {...defaultProps} />
     </MemoryRouter>
   );

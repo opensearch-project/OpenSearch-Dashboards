@@ -108,22 +108,28 @@ describe('SelectorLoadObjects', () => {
       stopLoading: stopLoadingAccelerations,
     });
 
+    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let wrapper;
     await act(async () => {
       wrapper = mount(<SelectorLoadObjects {...defaultProps} />);
       wrapper.find(EuiButtonIcon).simulate('click');
     });
 
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     await act(async () => {
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.setProps({}); // Trigger re-render
     });
 
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     expect(defaultProps.loadTables).toHaveBeenCalled();
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiLoadingSpinner).exists()).toBe(false);
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiButtonIcon).exists()).toBe(true);
   });
 

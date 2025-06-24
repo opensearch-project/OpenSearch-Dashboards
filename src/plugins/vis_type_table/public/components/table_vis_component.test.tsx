@@ -157,6 +157,7 @@ describe('TableVisComponent', function () {
   });
 
   it('should set sort if sort column', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockGetDataGridColumns.mockReturnValueOnce(dataGridColumnsValue);
     const comp = shallow(<TableVisComponent {...props} />);
     const { onSort } = comp.find('EuiDataGrid').prop('sorting') as any;
@@ -199,6 +200,7 @@ describe('TableVisComponent', function () {
       { 'col-0-2': 'Timmy', 'col-1-1': 1 },
       { 'col-0-2': 'Alice', 'col-1-1': 3 },
     ];
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockGetDataGridColumns.mockReturnValueOnce(dataGridColumnsValue);
     shallow(<TableVisComponent {...props} uiState={uiStateProps} />);
     expect(getTableVisCellValue).toHaveBeenCalledWith(sortedRows, table.formattedColumns);

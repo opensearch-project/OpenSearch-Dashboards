@@ -60,6 +60,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     setSelectedDatabase,
     notifications,
     application,
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     http,
     dataSourceMDSId,
   } = props;
@@ -363,6 +364,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         columns: table.columns,
       };
     });
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const accelerationObjects: AssociatedObject[] = cachedAccelerations
       .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
       .map((acceleration: CachedAcceleration) => ({
@@ -412,6 +414,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                       searchable={true}
                       singleSelection="always"
                       searchProps={{ placeholder: 'Search for databases' }}
+                      // @ts-expect-error TS2322 TODO(ts-error): fixme
                       options={databaseSelectorOptions}
                       onChange={(newOptions) => setDatabaseSelectorOptions(newOptions)}
                     >

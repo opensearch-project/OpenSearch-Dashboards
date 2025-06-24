@@ -137,6 +137,7 @@ function getWrapWorkspaceListInContext(
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>
+        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceList registeredUseCases$={createMockedRegisteredUseCases$()} />
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>

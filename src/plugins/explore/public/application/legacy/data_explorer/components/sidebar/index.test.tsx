@@ -79,6 +79,7 @@ describe('Sidebar Component', () => {
   it('renders without crashing', () => {
     const { container, getByTestId } = render(
       <Provider store={store}>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
         <Sidebar />
       </Provider>
     );
@@ -89,6 +90,7 @@ describe('Sidebar Component', () => {
   it('shows title extensions on the non-index pattern data source', () => {
     const { getByText, getByTestId } = render(
       <Provider store={store}>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
         <Sidebar />
       </Provider>
     );
@@ -104,6 +106,7 @@ describe('Sidebar Component', () => {
     const { getByText, getByTestId } = render(
       <Provider store={store}>
         <Router history={history}>
+          {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
           <Sidebar />
         </Router>
       </Provider>

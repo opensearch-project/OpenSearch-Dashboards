@@ -31,6 +31,7 @@ describe('duplicate mode utils', () => {
   });
 
   it('should get correct target workspace options in a workspace', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const workspaces: WorkspacesStart = {
       currentWorkspaceId$: new BehaviorSubject<string>('1'),
       currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>({
@@ -58,6 +59,7 @@ describe('duplicate mode utils', () => {
   });
 
   it('should get correct target workspace options not in a workspace', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const workspaces: WorkspacesStart = {
       currentWorkspaceId$: new BehaviorSubject<string>(''),
       currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>({

@@ -11,7 +11,9 @@ import {
   redirectToDiscoverOSIdx,
 } from './associated_objects_tab_utils';
 import {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   DEFAULT_DATA_SOURCE_NAME,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   DEFAULT_DATA_SOURCE_TYPE,
   DATA_SOURCE_TYPES,
 } from '../../../../../framework/constants';
@@ -26,15 +28,19 @@ describe('AssociatedObjectsTab utils', () => {
     });
 
     it('returns false if no status is fetching', () => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(isCatalogCacheFetching(DirectQueryLoadingStatus.FINISHED)).toBe(false);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(isCatalogCacheFetching(DirectQueryLoadingStatus.ERROR)).toBe(false);
     });
 
     it('returns true if mixed statuses and at least one is fetching', () => {
       expect(
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         isCatalogCacheFetching(DirectQueryLoadingStatus.FINISHED, DirectQueryLoadingStatus.RUNNING)
       ).toBe(true);
       expect(
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         isCatalogCacheFetching(DirectQueryLoadingStatus.ERROR, DirectQueryLoadingStatus.WAITING)
       ).toBe(true);
     });
@@ -77,6 +83,7 @@ describe('AssociatedObjectsTab utils', () => {
   describe.skip('redirectToExplorerS3', () => {
     it('navigates to the explorer with the correct state', () => {
       const mockNavigateToApp = jest.fn();
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
       // TODO: test when redirection to discover accepts only datasource

@@ -36,6 +36,7 @@ describe('createAbortDataQueryAction', () => {
   });
 
   it('should abort the query when execute is called with valid abort controller', async () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await action.execute(mockContext);
     expect(refs[0].current.abortController?.abort).toHaveBeenCalledWith('test abort');
   });
@@ -50,6 +51,7 @@ describe('createAbortDataQueryAction', () => {
       });
     }
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await action.execute(mockContext);
 
     expect(consoleSpy).toHaveBeenCalledWith(
@@ -61,6 +63,7 @@ describe('createAbortDataQueryAction', () => {
 
   it('should not throw when abort controller is undefined', async () => {
     refs[0].current.abortController = undefined;
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await expect(action.execute(mockContext)).resolves.not.toThrow();
   });
 
@@ -77,8 +80,10 @@ describe('createAbortDataQueryAction', () => {
     };
 
     refs.push(secondRef);
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     action = createAbortDataQueryAction(refs);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await action.execute(mockContext);
 
     expect(refs[0].current.abortController?.abort).toHaveBeenCalledWith('test abort');

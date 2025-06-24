@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { MapChoiceOptions } from './map_choice_options';
 import { screen, render } from '@testing-library/react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { fireEvent, getByTestId } from '@testing-library/dom';
 import '@testing-library/jest-dom';
 
@@ -70,6 +71,7 @@ describe('map_choice_options', () => {
         description: 'description',
       },
     };
+    // @ts-expect-error TS2740 TODO(ts-error): fixme
     render(<MapChoiceOptions stateParams={stateParams} vis={vis} {...props} />);
     const defaultVectorSelection = screen.getByTestId('defaultVectorMap');
     const customVectorSelection = screen.getByTestId('customVectorMap');
@@ -138,6 +140,7 @@ describe('map_choice_options', () => {
         description: 'description',
       },
     };
+    // @ts-expect-error TS2740 TODO(ts-error): fixme
     render(<MapChoiceOptions stateParams={stateParams} vis={vis} {...props} />);
     const defaultVectorSelection = screen.getByTestId('defaultVectorMap');
     const customVectorSelection = screen.getByTestId('customVectorMap');

@@ -23,6 +23,7 @@ import { extractUserName } from '../utils';
  */
 export class UserUISettingsClientWrapper {
   constructor(
+    // @ts-expect-error TS6138 TODO(ts-error): fixme
     private readonly logger: Logger,
     private readonly savedObjectsPermissionEnabled: boolean
   ) {}

@@ -110,6 +110,7 @@ export const opensearchdsl = (): OpenSearchdslExpressionFunctionDefinition => ({
       if (!dsl.query) {
         dsl.query = query;
       } else {
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         query.bool.must.push(dsl.query);
         dsl.query = query;
       }

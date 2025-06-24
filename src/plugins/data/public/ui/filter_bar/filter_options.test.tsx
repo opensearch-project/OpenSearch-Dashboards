@@ -75,6 +75,7 @@ describe('Filter options menu', () => {
   });
 
   it('render menu panel', () => {
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...mockProps()} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
 
@@ -83,6 +84,7 @@ describe('Filter options menu', () => {
   });
 
   it("render filter options with 'Add filter' button", () => {
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...mockProps()} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');
@@ -93,6 +95,7 @@ describe('Filter options menu', () => {
   });
 
   it("render saved query panel with 'saved queries' button", () => {
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...mockProps()} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');
@@ -105,6 +108,7 @@ describe('Filter options menu', () => {
 
   it('should call onFiltersUpdated when enable all filters button is clicked', () => {
     const props = mockProps();
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...props} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');
@@ -116,6 +120,7 @@ describe('Filter options menu', () => {
 
   it('should call onFiltersUpdated when disable all filters button is clicked', () => {
     const props = mockProps();
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...props} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');
@@ -127,6 +132,7 @@ describe('Filter options menu', () => {
 
   it('should call onFiltersUpdated when pin all filters button is clicked', () => {
     const props = mockProps();
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...props} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');
@@ -138,6 +144,7 @@ describe('Filter options menu', () => {
 
   it('should call onFiltersUpdated when unpin all filters button is clicked', () => {
     const props = mockProps();
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...props} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');
@@ -149,6 +156,7 @@ describe('Filter options menu', () => {
 
   it('should call onFiltersUpdated when Invert all filters button is clicked', () => {
     const props = mockProps();
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...props} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');
@@ -162,6 +170,7 @@ describe('Filter options menu', () => {
 
   it('should call onFiltersUpdated when Invert enabled/disabled filters button is clicked', () => {
     const props = mockProps();
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...props} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');
@@ -175,6 +184,7 @@ describe('Filter options menu', () => {
 
   it('should call onFiltersUpdated when remove all filters button is clicked', () => {
     const props = mockProps();
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const wrapper = mountWithIntl(<FilterOptions {...props} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');

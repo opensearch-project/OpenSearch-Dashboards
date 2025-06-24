@@ -112,6 +112,7 @@ export function usePolling<T, P = void>(
       const result = await fetchFunction(params);
       setData(result);
       // Check the success condition and stop polling if it's met
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       if (onPollingSuccess && onPollingSuccess(result, configurations)) {
         stopPolling();
       }

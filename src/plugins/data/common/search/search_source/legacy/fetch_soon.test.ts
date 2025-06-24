@@ -57,6 +57,7 @@ const mockResponses: Record<string, SearchResponse<any>> = {
   } as SearchResponse<any>,
 };
 
+// @ts-expect-error TS2559 TODO(ts-error): fixme
 jest.useFakeTimers('legacy');
 setImmediate(() => {});
 

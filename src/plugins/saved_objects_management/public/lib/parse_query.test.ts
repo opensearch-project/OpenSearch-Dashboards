@@ -34,6 +34,7 @@ describe('getQueryText', () => {
   it('should know how to get the text out of the AST', () => {
     const ast = {
       getTermClauses: () => [{ value: 'foo' }, { value: 'bar' }],
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
       getFieldClauses: (field) => {
         if (field === 'type') {
           return [{ value: 'lala' }, { value: 'lolo' }];
@@ -45,6 +46,7 @@ describe('getQueryText', () => {
         return [];
       },
     };
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     expect(parseQuery({ ast } as any, ['type'])).toEqual({
       queryText: 'foo bar',
       visibleTypes: 'lala',

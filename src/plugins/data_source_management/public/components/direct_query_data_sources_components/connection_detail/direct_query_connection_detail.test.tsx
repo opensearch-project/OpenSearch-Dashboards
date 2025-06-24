@@ -105,9 +105,11 @@ const renderComponent = ({
         <DirectQueryDataConnectionDetail
           featureFlagStatus={featureFlagStatus}
           http={http as HttpStart}
+          // @ts-expect-error TS2352 TODO(ts-error): fixme
           notifications={notifications as NotificationsStart}
           application={application as ApplicationStart}
           setBreadcrumbs={setBreadcrumbs}
+          // @ts-expect-error TS2352 TODO(ts-error): fixme
           savedObjects={savedObjects as SavedObjectsStart}
           useNewUX={false}
           setHeaderActionMenu={setHeaderActionMenu}
