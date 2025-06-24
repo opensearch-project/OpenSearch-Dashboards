@@ -36,6 +36,7 @@ export const getEditorConfig = (languageType: LanguageType) => {
           overviewRulerLanes: 0,
           hideCursorInOverviewRuler: true,
           cursorStyle: 'line',
+          tabCompletion: 'on',
           suggest: {
             snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
             filterGraceful: false, // Don't filter suggestions
