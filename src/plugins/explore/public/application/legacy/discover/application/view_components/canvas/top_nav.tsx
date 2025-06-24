@@ -27,6 +27,7 @@ import {
   selectSavedSearch,
 } from '../../../../../utils/state_management/selectors';
 import { SavedExplore } from '../../../../../../saved_explore';
+import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
 
 export interface TopNavProps {
   opts: {
@@ -40,11 +41,29 @@ export interface TopNavProps {
 
 export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const {
+    data: {
+      query: { filterManager, queryString, timefilter },
+    },
+    navigation: {
+      ui: { TopNavMenu },
+    },
+    data,
+    uiSettings,
+    history,
+    getSavedExploreById,
+  } = services;
   const dispatch = useDispatch();
 
   const savedExploreId = useSelector(selectSavedSearch);
   const savedQueryId = useSelector(selectSavedQuery);
   const isLoading = useSelector((state: any) => state.ui.status === ResultStatus.LOADING);
+
+  const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
+    query: queryString.getQuery(),
+    filters: filterManager.getFilters(),
+    timeRange: timefilter.timefilter.getTime(),
+  });
 
   // Replace inspectorAdapters
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
@@ -61,15 +80,19 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
   const [savedExplore, setSavedExplore] = useState<SavedExplore>();
 
-  const {
-    navigation: {
-      ui: { TopNavMenu },
-    },
-    data,
-    uiSettings,
-    history,
-    getSavedExploreById,
-  } = services;
+  useEffect(() => {
+    const subscription = services.data.query.state$.subscribe(({ state }) => {
+      setSearchContext({
+        query: state.query,
+        timeRange: state.time,
+        filters: state.filters,
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [services.data.query.state$]);
 
   useEffect(() => {
     const loadSavedExplore = async () => {
@@ -98,6 +121,8 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     services,
     inspectorAdapters,
     startSyncingQueryStateWithUrl,
+    searchContext,
+    indexPattern,
     savedExplore // Provide empty object if savedSearch is null
   );
 
