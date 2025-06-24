@@ -102,7 +102,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
     try {
       dispatch(setQuery({ ...query, query: localQuery }));
       dispatch(clearResults());
-      await dispatch(executeQueries({ services }));
+      dispatch(executeQueries({ services }));
     } finally {
       dispatch(finishTransaction());
     }
