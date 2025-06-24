@@ -55,7 +55,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       },
     };
 
-    const query = this.buildQuery(request);
+    // Use query from request if available, otherwise fall back to queryStringManager
+    const requestQuery =
+      request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
+    const query = this.buildQuery(requestQuery);
 
     return fetch(context, query, this.getAggConfig(searchRequest, query));
   }
@@ -89,8 +92,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return this.runSearch(request, options.abortSignal, strategy);
   }
 
-  private buildQuery(request: IOpenSearchDashboardsSearchRequest) {
-    const query: Query = request.params.body.query.queries[0];
+  private buildQuery(query: Query) {
     // Only append filters if query is running search command (e.g. not describe command)
     if (!isPPLSearchQuery(query)) return query;
 
