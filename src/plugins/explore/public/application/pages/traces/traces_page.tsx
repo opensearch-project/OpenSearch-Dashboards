@@ -40,6 +40,7 @@ import { DiscoverUninitialized } from '../../legacy/discover/application/compone
 import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';
 import { DiscoverNoResults } from '../../legacy/discover/application/components/no_results/no_results';
 import { executeQueries } from '../../utils/state_management/actions/query_actions';
+import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
 
 /**
  * Main application component for the Explore plugin
@@ -116,6 +117,108 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
     }
   };
 
+  const renderBottomRightPanel = () => {
+    if (indexPattern == null) {
+      return (
+        <CanvasPanel>
+          <>
+            <EuiSpacer size="xxl" />
+            <DiscoverNoIndexPatterns />
+          </>
+        </CanvasPanel>
+      );
+    }
+
+    if (status === ResultStatus.NO_RESULTS) {
+      return (
+        <CanvasPanel>
+          <DiscoverNoResults
+            queryString={services?.data?.query?.queryString}
+            query={services?.data?.query?.queryString?.getQuery()}
+            savedQuery={services?.data?.query?.savedQueries}
+            timeFieldName={indexPattern.timeFieldName}
+          />
+        </CanvasPanel>
+      );
+    }
+
+    if (status === ResultStatus.UNINITIALIZED) {
+      return (
+        <CanvasPanel>
+          <DiscoverUninitialized onRefresh={onRefresh} />
+        </CanvasPanel>
+      );
+    }
+
+    if (status === ResultStatus.LOADING && !rows?.length) {
+      return (
+        <CanvasPanel>
+          <LoadingSpinner />
+        </CanvasPanel>
+      );
+    }
+
+    if (status === ResultStatus.ERROR && !rows?.length) {
+      return (
+        <CanvasPanel>
+          <DiscoverUninitialized onRefresh={onRefresh} />
+        </CanvasPanel>
+      );
+    }
+
+    if (
+      status === ResultStatus.READY ||
+      (status === ResultStatus.LOADING && !!rows?.length) ||
+      (status === ResultStatus.ERROR && !!rows?.length)
+    ) {
+      return (
+        <>
+          <CanvasPanel className="explore-chart-panel">
+            <div className="dscCanvas__chart">
+              <DiscoverChartContainer />
+            </div>
+          </CanvasPanel>
+          <CanvasPanel>
+            <ExploreTabs />
+          </CanvasPanel>
+        </>
+      );
+    }
+
+    return null;
+  };
+
+  const BottomPanel = (
+    <EuiResizableContainer
+      direction={isMobile ? 'vertical' : 'horizontal'}
+      style={{ flex: 1, minHeight: 0 }}
+    >
+      {(EuiResizablePanel, EuiResizableButton) => (
+        <>
+          <EuiResizablePanel
+            initialSize={20}
+            minSize="260px"
+            mode={['collapsible', { position: 'top' }]}
+            paddingSize="none"
+          >
+            <CanvasPanel testId="dscBottomLeftCanvas">
+              <DiscoverPanel />
+            </CanvasPanel>
+          </EuiResizablePanel>
+
+          <EuiResizableButton />
+
+          <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
+            <EuiPageBody className="deLayout__canvas">
+              <TopNav {...topNavProps} />
+              {renderBottomRightPanel()}
+            </EuiPageBody>
+          </EuiResizablePanel>
+        </>
+      )}
+    </EuiResizableContainer>
+  );
+
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
@@ -173,86 +276,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
             </div>
 
             {/* Main content area with resizable panels under QueryPanel */}
-            <EuiResizableContainer
-              direction={isMobile ? 'vertical' : 'horizontal'}
-              style={{ flex: 1, minHeight: 0 }}
-            >
-              {(EuiResizablePanel, EuiResizableButton) => (
-                <>
-                  {/* Left Panel: DiscoverPanel (Fields) */}
-                  <EuiResizablePanel
-                    initialSize={20}
-                    minSize="260px"
-                    mode={['collapsible', { position: 'top' }]}
-                    paddingSize="none"
-                  >
-                    <DiscoverPanel />
-                  </EuiResizablePanel>
-
-                  <EuiResizableButton />
-
-                  <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
-                    <EuiPageBody className="deLayout__canvas">
-                      <EuiPanel
-                        hasBorder={true}
-                        hasShadow={false}
-                        paddingSize="s"
-                        className="dscCanvas"
-                        data-test-subj="dscCanvas"
-                        borderRadius="l"
-                      >
-                        <TopNav {...topNavProps} />
-
-                        {/* Handle different states following Discover's pattern */}
-                        {indexPattern ? (
-                          <>
-                            {/* NO_RESULTS state */}
-                            {status === ResultStatus.NO_RESULTS && (
-                              <DiscoverNoResults
-                                queryString={services?.data?.query?.queryString}
-                                query={services?.data?.query?.queryString?.getQuery()}
-                                savedQuery={services?.data?.query?.savedQueries}
-                                timeFieldName={indexPattern.timeFieldName}
-                              />
-                            )}
-
-                            {/* UNINITIALIZED state */}
-                            {status === ResultStatus.UNINITIALIZED && (
-                              <DiscoverUninitialized onRefresh={onRefresh} />
-                            )}
-
-                            {/* LOADING state with no existing data */}
-                            {status === ResultStatus.LOADING && !rows?.length && <LoadingSpinner />}
-
-                            {/* ERROR state with no existing data */}
-                            {status === ResultStatus.ERROR && !rows?.length && (
-                              <DiscoverUninitialized onRefresh={onRefresh} />
-                            )}
-
-                            {/* READY state or LOADING/ERROR with existing data */}
-                            {(status === ResultStatus.READY ||
-                              (status === ResultStatus.LOADING && !!rows?.length) ||
-                              (status === ResultStatus.ERROR && !!rows?.length)) && (
-                              <>
-                                <div className="dscCanvas__chart">
-                                  <DiscoverChartContainer />
-                                </div>
-                                <ExploreTabs />
-                              </>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <EuiSpacer size="xxl" />
-                            <DiscoverNoIndexPatterns />
-                          </>
-                        )}
-                      </EuiPanel>
-                    </EuiPageBody>
-                  </EuiResizablePanel>
-                </>
-              )}
-            </EuiResizableContainer>
+            {BottomPanel}
           </EuiPageBody>
         </EuiPage>
       </div>

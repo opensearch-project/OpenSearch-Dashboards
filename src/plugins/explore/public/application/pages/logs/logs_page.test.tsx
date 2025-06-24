@@ -101,6 +101,10 @@ jest.mock('../../components/index_pattern_context', () => ({
   }),
 }));
 
+jest.mock('../../../components/query_panel', () => ({
+  QueryPanel: () => <div data-test-subj="query-panel">Mock Query Panel</div>,
+}));
+
 describe('LogsPage', () => {
   const createTestStore = (
     status = ResultStatus.UNINITIALIZED,
