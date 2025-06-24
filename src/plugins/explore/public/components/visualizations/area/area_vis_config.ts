@@ -23,13 +23,6 @@ export interface AreaChartStyleControls {
   legendPosition: Positions;
   addTimeMarker: boolean;
 
-  // Area specific controls
-  showLine: boolean;
-  lineMode: string;
-  lineWidth: number;
-  showDots: boolean;
-  areaOpacity: number;
-
   // Threshold and grid
   thresholdLine: ThresholdLine;
   grid: GridOptions;
@@ -45,13 +38,6 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
-
-  // Area specific controls
-  showLine: true,
-  lineMode: 'smooth',
-  lineWidth: 2,
-  showDots: false,
-  areaOpacity: 0.6,
 
   // Threshold and grid
   thresholdLine: {

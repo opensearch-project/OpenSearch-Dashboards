@@ -38,7 +38,6 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   const [expandedPanels, setExpandedPanels] = useState({
     general: false,
     basic: false,
-    exclusive: false,
     threshold: false,
     grid: false,
     axes: false,
@@ -111,67 +110,6 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               updateStyleOption('legendPosition', legendPosition)
             }
           />
-        )}
-      </EuiSplitPanel.Inner>
-
-      <EuiSplitPanel.Inner paddingSize="s">
-        <EuiButtonEmpty
-          iconSide="left"
-          color="text"
-          iconType={expandedPanels.exclusive ? 'arrowDown' : 'arrowRight'}
-          onClick={() => togglePanel('exclusive')}
-          size="xs"
-          data-test-subj="areaVisExclusiveButton"
-        >
-          {i18n.translate('explore.vis.areaChart.tabs.exclusive', {
-            defaultMessage: 'Area',
-          })}
-        </EuiButtonEmpty>
-        {expandedPanels.exclusive && (
-          <EuiPanel paddingSize="s">
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('explore.vis.areaChart.exclusiveSettings', {
-                  defaultMessage: 'Area Settings',
-                })}
-              </h4>
-            </EuiTitle>
-            <BasicVisOptions
-              addTimeMarker={styleOptions.addTimeMarker}
-              showLine={styleOptions.showLine}
-              lineMode={styleOptions.lineMode}
-              lineWidth={styleOptions.lineWidth}
-              showDots={styleOptions.showDots}
-              onAddTimeMarkerChange={(addTimeMarker) =>
-                updateStyleOption('addTimeMarker', addTimeMarker)
-              }
-              onShowLineChange={(showLine) => updateStyleOption('showLine', showLine)}
-              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
-              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
-              onShowDotsChange={(showDots) => updateStyleOption('showDots', showDots)}
-            />
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.area.areaOpacity', {
-                defaultMessage: 'Area opacity',
-              })}
-              helpText={i18n.translate('explore.stylePanel.area.areaOpacityHelp', {
-                defaultMessage: 'Value between 0 and 1',
-              })}
-            >
-              <EuiRange
-                min={0}
-                max={1}
-                step={0.1}
-                value={styleOptions.areaOpacity}
-                onChange={(e) =>
-                  updateStyleOption('areaOpacity', parseFloat(e.currentTarget.value))
-                }
-                showLabels
-                showValue
-                data-test-subj="areaOpacityRange"
-              />
-            </EuiFormRow>
-          </EuiPanel>
         )}
       </EuiSplitPanel.Inner>
 
