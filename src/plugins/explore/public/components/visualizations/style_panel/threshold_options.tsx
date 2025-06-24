@@ -57,16 +57,6 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
 
   return (
     <EuiPanel paddingSize="s">
-      <EuiTitle size="xs">
-        <h4>
-          {i18n.translate('explore.vis.gridOptions.threshold', {
-            defaultMessage: 'Threshold Settings',
-          })}
-        </h4>
-      </EuiTitle>
-
-      <EuiSpacer size="s" />
-
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.threshold.show', {
           defaultMessage: 'Show threshold line',

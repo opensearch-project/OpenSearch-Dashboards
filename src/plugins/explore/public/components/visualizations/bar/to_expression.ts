@@ -111,6 +111,359 @@ export const createBarSpec = (
   };
 };
 
+/**
+ * Create a time-based bar chart with one metric and one date
+ * @param transformedData The transformed data
+ * @param numericalColumns The numerical columns
+ * @param dateColumns The date columns
+ * @param styles The style options
+ * @returns The Vega spec for a time-based bar chart
+ */
+export const createTimeBarChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styles: Partial<BarChartStyleControls>
+): any => {
+  // Check if we have the required columns
+  if (numericalColumns.length === 0 || dateColumns.length === 0) {
+    throw new Error('Time bar chart requires at least one numerical column and one date column');
+  }
+
+  const metricField = numericalColumns[0].column;
+  const dateField = dateColumns[0].column;
+  const metricName = numericalColumns[0].name;
+  const dateName = dateColumns[0].name;
+  const layers: any[] = [];
+
+  // Configure bar mark
+  const barMark: any = {
+    type: 'bar',
+    tooltip: styles.addTooltip !== false,
+    size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
+    binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
+  };
+
+  // Add border if enabled
+  if (styles.showBarBorder) {
+    barMark.stroke = styles.barBorderColor || '#000000';
+    barMark.strokeWidth = styles.barBorderWidth || 1;
+  }
+
+  const mainLayer = {
+    mark: barMark,
+    encoding: {
+      x: {
+        field: dateField,
+        type: 'temporal',
+        axis: applyAxisStyling(
+          {
+            title: dateName,
+            labelAngle: -45,
+          },
+          styles,
+          'category',
+          numericalColumns,
+          [],
+          dateColumns
+        ),
+      },
+      y: {
+        field: metricField,
+        type: 'quantitative',
+        axis: applyAxisStyling(
+          { title: metricName },
+          styles,
+          'value',
+          numericalColumns,
+          [],
+          dateColumns
+        ),
+      },
+    },
+  };
+
+  layers.push(mainLayer);
+
+  // Add threshold line if enabled
+  if (styles.thresholdLine?.show) {
+    const thresholdLayer = {
+      mark: {
+        type: 'rule',
+        color: styles.thresholdLine.color || '#E7664C',
+        strokeWidth: styles.thresholdLine.width || 1,
+        strokeDash: getStrokeDash(styles.thresholdLine.style),
+        tooltip: false,
+      },
+      encoding: {
+        y: { value: styles.thresholdLine.value || 0 },
+      },
+    };
+    layers.push(thresholdLayer);
+  }
+
+  return {
+    $schema: VEGASCHEMA,
+    title: `${metricName} Over Time`,
+    data: { values: transformedData },
+    layer: layers,
+  };
+};
+
+/**
+ * Create a grouped time-based bar chart with one metric, one category, and one date
+ * @param transformedData The transformed data
+ * @param numericalColumns The numerical columns
+ * @param categoricalColumns The categorical columns
+ * @param dateColumns The date columns
+ * @param styles The style options
+ * @returns The Vega spec for a grouped time-based bar chart
+ */
+export const createGroupedTimeBarChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styles: Partial<BarChartStyleControls>
+): any => {
+  // Check if we have the required columns
+  if (
+    numericalColumns.length === 0 ||
+    categoricalColumns.length === 0 ||
+    dateColumns.length === 0
+  ) {
+    throw new Error(
+      'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
+    );
+  }
+
+  const metricField = numericalColumns[0].column;
+  const categoryField = categoricalColumns[0].column;
+  const dateField = dateColumns[0].column;
+  const metricName = numericalColumns[0].name;
+  const categoryName = categoricalColumns[0].name;
+  const dateName = dateColumns[0].name;
+
+  // Configure bar mark
+  const barMark: any = {
+    type: 'bar',
+    tooltip: styles.addTooltip !== false,
+    size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
+    binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
+  };
+
+  // Add border if enabled
+  if (styles.showBarBorder) {
+    barMark.stroke = styles.barBorderColor || '#000000';
+    barMark.strokeWidth = styles.barBorderWidth || 1;
+  }
+
+  const spec: any = {
+    $schema: VEGASCHEMA,
+    title: `${metricName} Over Time by ${categoryName}`,
+    data: { values: transformedData },
+    mark: barMark,
+    encoding: {
+      x: {
+        field: dateField,
+        type: 'temporal',
+        axis: applyAxisStyling(
+          {
+            title: dateName,
+            labelAngle: -45,
+          },
+          styles,
+          'category',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      y: {
+        field: metricField,
+        type: 'quantitative',
+        axis: applyAxisStyling(
+          { title: metricName },
+          styles,
+          'value',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      color: {
+        field: categoryField,
+        type: 'nominal',
+        legend: styles.addLegend
+          ? {
+              title: categoryName,
+              orient: styles.legendPosition?.toLowerCase() || 'right',
+            }
+          : null,
+      },
+      // Optional: Add tooltip with all information
+      tooltip: [
+        { field: dateField, type: 'temporal', title: dateName },
+        { field: categoryField, type: 'nominal', title: categoryName },
+        { field: metricField, type: 'quantitative', title: metricName },
+      ],
+    },
+  };
+
+  // Add threshold line if enabled
+  if (styles.thresholdLine?.show) {
+    spec.layer = [
+      { mark: barMark, encoding: spec.encoding },
+      {
+        mark: {
+          type: 'rule',
+          color: styles.thresholdLine.color || '#E7664C',
+          strokeWidth: styles.thresholdLine.width || 1,
+          strokeDash: getStrokeDash(styles.thresholdLine.style),
+          tooltip: false,
+        },
+        encoding: {
+          y: { value: styles.thresholdLine.value || 0 },
+        },
+      },
+    ];
+    delete spec.mark;
+    delete spec.encoding;
+  }
+
+  return spec;
+};
+
+/**
+ * Create a faceted time-based bar chart with one metric, two categories, and one date
+ * @param transformedData The transformed data
+ * @param numericalColumns The numerical columns
+ * @param categoricalColumns The categorical columns
+ * @param dateColumns The date columns
+ * @param styles The style options
+ * @returns The Vega spec for a faceted time-based bar chart
+ */
+export const createFacetedTimeBarChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styles: Partial<BarChartStyleControls>
+): any => {
+  // Check if we have the required columns
+  if (numericalColumns.length === 0 || categoricalColumns.length < 2 || dateColumns.length === 0) {
+    throw new Error(
+      'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
+    );
+  }
+
+  const metricField = numericalColumns[0].column;
+  const category1Field = categoricalColumns[0].column;
+  const category2Field = categoricalColumns[1].column;
+  const dateField = dateColumns[0].column;
+  const metricName = numericalColumns[0].name;
+  const category1Name = categoricalColumns[0].name;
+  const category2Name = categoricalColumns[1].name;
+  const dateName = dateColumns[0].name;
+
+  // Configure bar mark
+  const barMark: any = {
+    type: 'bar',
+    tooltip: styles.addTooltip !== false,
+    size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
+    binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
+  };
+
+  // Add border if enabled
+  if (styles.showBarBorder) {
+    barMark.stroke = styles.barBorderColor || '#000000';
+    barMark.strokeWidth = styles.barBorderWidth || 1;
+  }
+
+  return {
+    $schema: VEGASCHEMA,
+    title: `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`,
+    data: { values: transformedData },
+    // Add a max width to the entire visualization and make it scrollable
+    width: 'container',
+    autosize: {
+      type: 'fit-x',
+      contains: 'padding',
+    },
+    facet: {
+      field: category2Field,
+      type: 'nominal',
+      columns: 2,
+      header: { title: category2Name },
+    },
+    spec: {
+      width: 250, // Reduced from 300 to fit better
+      height: 200,
+      layer: [
+        {
+          mark: barMark,
+          encoding: {
+            x: {
+              field: dateField,
+              type: 'temporal',
+              axis: applyAxisStyling(
+                {
+                  title: dateName,
+                  labelAngle: -45,
+                },
+                styles,
+                'category',
+                numericalColumns,
+                categoricalColumns,
+                dateColumns
+              ),
+            },
+            y: {
+              field: metricField,
+              type: 'quantitative',
+              axis: applyAxisStyling(
+                { title: metricName },
+                styles,
+                'value',
+                numericalColumns,
+                categoricalColumns,
+                dateColumns
+              ),
+            },
+            color: {
+              field: category1Field,
+              type: 'nominal',
+              legend: styles.addLegend
+                ? {
+                    title: category1Name,
+                    orient: styles.legendPosition?.toLowerCase() || 'right',
+                  }
+                : null,
+            },
+          },
+        },
+        // Add threshold line to each facet if enabled
+        ...(styles.thresholdLine?.show
+          ? [
+              {
+                mark: {
+                  type: 'rule',
+                  color: styles.thresholdLine.color || '#E7664C',
+                  strokeWidth: styles.thresholdLine.width || 1,
+                  strokeDash: getStrokeDash(styles.thresholdLine.style),
+                  tooltip: false,
+                },
+                encoding: {
+                  y: { value: styles.thresholdLine.value || 0 },
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+  };
+};
+
 export const createStackedBarSpec = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
