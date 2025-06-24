@@ -274,6 +274,8 @@ export async function searchNavigationLinks(
       });
   });
 
+  const allSearchAbleLinkIds = new Set(allSearchAbleLinks.map((link) => link.id));
+
   const keywordMatchResult = allSearchAbleLinks.filter((link) => {
     const title = link.title;
     const parentNavLinkTitle = link.parentNavLinkTitle;
@@ -288,7 +290,11 @@ export async function searchNavigationLinks(
 
   try {
     const { default: docVectors } = await import('../../utils/doc_vectors');
-    searcher = new SparseSearch(docVectors);
+    const filteredDocVectors = {
+      ...docVectors,
+      documents: docVectors.documents.filter((doc) => allSearchAbleLinkIds.has(doc.id)),
+    };
+    searcher = new SparseSearch(filteredDocVectors);
     console.time('SearchQueryTime');
     const results = searcher.search(query);
     console.timeEnd('SearchQueryTime');
