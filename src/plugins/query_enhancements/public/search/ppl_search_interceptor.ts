@@ -5,9 +5,10 @@
 
 import { trimEnd } from 'lodash';
 import { Observable } from 'rxjs';
-import { formatTimePickerDate, Query } from '../../../data/common';
+import { formatTimePickerDate, Query, UI_SETTINGS } from '../../../data/common';
 import {
   DataPublicPluginStart,
+  IndexPatternsContract,
   IOpenSearchDashboardsSearchRequest,
   IOpenSearchDashboardsSearchResponse,
   ISearchOptions,
@@ -25,10 +26,13 @@ import {
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './filters/parser';
+import { IUiSettingsClient } from '../../../../core/public';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
+  private uiSettings!: IUiSettingsClient;
+  private indexPatterns!: IndexPatternsContract;
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -36,6 +40,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     deps.startServices.then(([coreStart, depsStart]) => {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
+      this.uiSettings = coreStart.uiSettings;
+      this.indexPatterns = (depsStart as QueryEnhancementsPluginStartDependencies).data.indexPatterns;
     });
   }
 
@@ -55,10 +61,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       },
     };
 
-    // Use query from request if available, otherwise fall back to queryStringManager
-    const requestQuery =
-      request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
-    const query = this.buildQuery(requestQuery);
+    const query = this.buildQuery(request);
 
     return fetch(context, query, this.getAggConfig(searchRequest, query));
   }
@@ -92,13 +95,20 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return this.runSearch(request, options.abortSignal, strategy);
   }
 
-  private buildQuery(query: Query) {
+  private buildQuery(request: IOpenSearchDashboardsSearchRequest) {
+    // Use query from request if available, otherwise fall back to queryStringManager
+    const query =
+      request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
     // Only append filters if query is running search command (e.g. not describe command)
     if (!isPPLSearchQuery(query)) return query;
 
     const filters = this.queryService.filterManager.getFilters();
+    const index = request.params?.body?.index && this.indexPatterns.get(request.params.body.index);
+    const ignoreFilterIfFieldNotInIndex = this.uiSettings.get(
+      UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
+    );
+    const filterClause = convertFiltersToWhereClause(filters, index, ignoreFilterIfFieldNotInIndex);
     const commands = query.query.split('|');
-    const filterClause = convertFiltersToWhereClause(filters);
     if (filterClause) {
       commands.splice(1, 0, filterClause);
     }

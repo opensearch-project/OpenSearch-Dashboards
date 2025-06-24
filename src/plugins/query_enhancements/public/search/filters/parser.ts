@@ -3,17 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Filter, formatTimePickerDate, getFilterField, TimeRange } from '../../../../data/common';
+import {
+  Filter,
+  filterMatchesIndex,
+  formatTimePickerDate,
+  getFilterField,
+  IIndexPattern,
+  isFilterDisabled,
+  TimeRange,
+} from '../../../../data/common';
 import { formatDate } from '../../../common';
 
 /**
  * Parse core {@link Filter} and convert to a PPL where clause. Only supports
  * non DSL filters.
  */
-export const convertFiltersToWhereClause = (filters?: Filter[]): string => {
+export const convertFiltersToWhereClause = (
+  filters: Filter[],
+  indexPattern: IIndexPattern | undefined,
+  ignoreFilterIfFieldNotInIndex: boolean = false
+): string => {
   if (!filters) return '';
   const predicates = filters
-    .filter((filter) => !filter.meta.disabled)
+    .filter((filter) => filter && !isFilterDisabled(filter))
+    .filter((filter) => filter)
+    .filter((filter) => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
     .map(toPredicate)
     .filter(Boolean);
   const predicate = (predicates.length > 1 ? predicates.map((p) => `(${p})`) : predicates).join(
