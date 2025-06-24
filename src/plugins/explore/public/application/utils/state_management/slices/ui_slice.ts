@@ -10,6 +10,7 @@ export interface UIState {
   activeTabId: string;
   flavor: string;
   status: ResultStatus;
+  showDatasetFields: boolean;
   executionCacheKeys: string[];
   transaction: {
     inProgress: boolean;
@@ -22,6 +23,7 @@ const initialState: UIState = {
   activeTabId: 'logs',
   flavor: 'log',
   status: ResultStatus.UNINITIALIZED,
+  showDatasetFields: true,
   executionCacheKeys: [],
   transaction: {
     inProgress: false,
@@ -42,6 +44,9 @@ const uiSlice = createSlice({
     },
     setStatus: (state, action: PayloadAction<ResultStatus>) => {
       state.status = action.payload;
+    },
+    setShowDatasetFields: (state, action: PayloadAction<boolean>) => {
+      state.showDatasetFields = action.payload;
     },
     setExecutionCacheKeys: (state, action: PayloadAction<string[]>) => {
       state.executionCacheKeys = action.payload;
@@ -72,6 +77,7 @@ export const {
   setActiveTab,
   setFlavor,
   setStatus,
+  setShowDatasetFields,
   setExecutionCacheKeys,
   startTransaction,
   commitTransaction,

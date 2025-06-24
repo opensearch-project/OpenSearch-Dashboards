@@ -30,6 +30,7 @@ interface QueryPanelFooterProps {
   isDualEditor: boolean;
   isLoading: boolean;
   noInput: boolean;
+  showDatasetFields: boolean;
   showDatePicker: boolean;
   datePickerRef?: React.RefObject<HTMLDivElement>;
   services: ExploreServices;
@@ -37,6 +38,7 @@ interface QueryPanelFooterProps {
   onTimeChange: (time: { start: string; end: string }) => void;
   onRunQuery: () => void;
   oneRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
+  onShowFieldsToggle: (enabled: boolean) => void;
 }
 
 export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
@@ -45,6 +47,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   onRecentClick,
   isDualEditor,
   isLoading,
+  showDatasetFields,
   showDatePicker,
   noInput,
   datePickerRef,
@@ -53,6 +56,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   onTimeChange,
   onRunQuery,
   oneRefreshChange,
+  onShowFieldsToggle,
 }) => {
   return (
     <div className="queryPanel__footer">
@@ -67,12 +71,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
         <EuiFlexItem grow={1} className="queryPanel__footer__minWidth0">
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={true} wrap>
             <EuiFlexItem grow={false}>
-              <ShowFieldToggle
-                isEnabled={true}
-                onToggle={(enabled) => {
-                  // Todo: Dispatch query action to update toggle value which can be used by field sidebar
-                }}
-              />
+              <ShowFieldToggle isEnabled={showDatasetFields} onToggle={onShowFieldsToggle} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div className="queryPanel__footer__verticalSeparator" />
