@@ -12,10 +12,10 @@ import { ExploreServices } from '../../types';
 import { IndexPattern } from '../../../../data/common/index_patterns';
 import { EditorStack } from './components/editor_stack';
 import { QueryPanelFooter } from './components/footer';
-import { RecentQueriesTable } from './components/footer/recent_query/table';
+import { RecentQueriesTable } from '../../../../data/public';
 import { useEditorMode } from './hooks/useEditorMode';
 import { QueryTypeDetector } from './utils/type_detection';
-import { Query, TimeRange, LanguageType } from './types';
+import { LanguageType, Query, TimeRange } from './types';
 
 import {
   selectIsLoading,
@@ -43,7 +43,6 @@ export interface QueryPanelProps {
 
 const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexPattern }) => {
   const dispatch = useDispatch();
-  const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
 
   const {
     isDualEditor,
@@ -73,6 +72,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   // Local state for editor
   const [localQuery, setLocalQuery] = useState(query.query);
   const [localPrompt, setLocalPrompt] = useState(prompt);
+  const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
 
   // Handle time range changes
   const handleTimeChange = useCallback(
@@ -100,21 +100,25 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   );
 
   // Execute query when run button is clicked
-  const handleRun = useCallback(async () => {
-    dispatch(beginTransaction());
-    try {
-      // Update query string in Redux
-      dispatch(setQuery({ ...query, query: localQuery }));
+  const handleRun = useCallback(
+    async (paramQuery?: string) => {
+      const queryToRun = paramQuery ?? localQuery;
+      const nextQuery = { ...query, query: queryToRun };
 
-      // EXPLICIT cache clear - separate cache logic
-      dispatch(clearResults());
+      dispatch(beginTransaction());
+      try {
+        dispatch(setQuery(nextQuery));
+        dispatch(clearResults());
+        await dispatch(executeQueries({ services }));
 
-      // Execute queries - cache already cleared
-      await dispatch(executeQueries({ services }));
-    } finally {
-      dispatch(finishTransaction());
-    }
-  }, [dispatch, localQuery, query, services]);
+        // Use nextQuery here, not query!
+        services.data.query.queryString.addToQueryHistory(nextQuery, timefilter.getTime());
+      } finally {
+        dispatch(finishTransaction());
+      }
+    },
+    [dispatch, localQuery, query, services, timefilter]
+  );
 
   // Real autocomplete implementation using the data plugin's autocomplete service
   const provideCompletionItems = useCallback(
@@ -263,12 +267,10 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     setIsRecentQueryVisible(!isRecentQueryVisible);
   };
 
-  const onClickRecentQuery = (recentQuery: Query, timeRange?: TimeRange) => {
+  const onClickRecentQuery = (currentQuery: Query, timeRange?: TimeRange) => {
     setIsRecentQueryVisible(false);
-    setLocalQuery(typeof recentQuery.query === 'string' ? recentQuery.query : '');
-    setLocalPrompt(recentQuery.prompt ?? '');
-    setIsDualEditor(true);
-    handleQueryRun();
+    handlePromptChange(typeof currentQuery.query === 'string' ? currentQuery.query : '');
+    handleRun();
   };
 
   const handleShowFieldsToggle = (showField: boolean) => {
@@ -323,8 +325,8 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
         <div className="queryPanel__recentQueries">
           <RecentQueriesTable
             isVisible={isRecentQueryVisible}
+            queryString={services.data.query.queryString}
             onClickRecentQuery={onClickRecentQuery}
-            languageType={query.language}
           />
         </div>
       )}
