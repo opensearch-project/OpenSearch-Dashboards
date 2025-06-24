@@ -242,7 +242,7 @@ export class ExploreEmbeddable
       };
       this.searchProps.searchContext = searchContext;
       const indexPattern = this.savedExplore.searchSource.getField('index');
-      const styleOptions = visualizationData?.visualizationType?.ui.style.defaults;
+      const styleOptions = JSON.parse(this.savedExplore.visualization || '{}').params;
       const exp = await toExpression(
         searchContext,
         indexPattern!,

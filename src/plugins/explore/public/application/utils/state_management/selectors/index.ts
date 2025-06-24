@@ -51,6 +51,11 @@ export const selectShowDataSetFields = createSelector(
   (uiState) => uiState.showDatasetFields
 );
 
+export const selectStyleOptions = createSelector(
+  [selectUIState],
+  (uiState) => uiState.styleOptions
+);
+
 // Backward compatibility selector for components that still check isLoading
 export const selectIsLoading = createSelector(
   [selectUIState],

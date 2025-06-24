@@ -5,7 +5,7 @@
 import './visualization_container.scss';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 
@@ -24,10 +24,12 @@ import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
 import { RootState } from '../../application/utils/state_management/store';
-import { selectRows } from '../../application/utils/state_management/selectors';
+import { selectRows, selectStyleOptions } from '../../application/utils/state_management/selectors';
+import { setStyleOptions } from '../../application/utils/state_management/slices/ui_slice';
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const dispatch = useDispatch();
   const {
     data: {
       query: { filterManager, queryString, timefilter },
@@ -37,6 +39,8 @@ export const VisualizationContainer = () => {
   const { indexPattern } = useIndexPatternContext();
 
   const rows = useSelector(selectRows);
+  const styleOptions = useSelector(selectStyleOptions);
+
   const fieldSchema = useSelector((state: RootState) => {
     const executionCacheKeys = state.ui?.executionCacheKeys || [];
     if (executionCacheKeys.length === 0) {
@@ -61,9 +65,6 @@ export const VisualizationContainer = () => {
     return getVisualizationType(rows, fieldSchema);
   }, [fieldSchema, rows]);
 
-  const [styleOptions, setStyleOptions] = useState<ChartStyleControlMap[ChartType] | undefined>(
-    undefined
-  );
   const [selectedChartType, setSelectedChartType] = useState<string | undefined>(undefined);
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
@@ -76,9 +77,9 @@ export const VisualizationContainer = () => {
   useEffect(() => {
     if (visualizationData) {
       // TODO: everytime the fields change, do we reset the chart type and its style options? P1: we will implement chart type selection persistence
-      setStyleOptions(visualizationData.visualizationType?.ui.style.defaults);
+      dispatch(setStyleOptions(visualizationData.visualizationType?.ui.style.defaults));
     }
-  }, [visualizationData]);
+  }, [visualizationData, dispatch]);
 
   const visualizationRegistry = useVisualizationRegistry();
 
@@ -165,7 +166,9 @@ export const VisualizationContainer = () => {
 
   const handleStyleChange = (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {
     if (styleOptions) {
-      setStyleOptions({ ...styleOptions, ...newOptions } as ChartStyleControlMap[ChartType]);
+      dispatch(
+        setStyleOptions({ ...styleOptions, ...newOptions } as ChartStyleControlMap[ChartType])
+      );
     }
   };
 

@@ -182,6 +182,7 @@ const getPreloadedUIState = async (services: ExploreServices) => {
     status: ResultStatus.UNINITIALIZED,
     error: null,
     abortController: null,
+    styleOptions: {},
     transaction: {
       inProgress: false,
       pendingActions: [],
