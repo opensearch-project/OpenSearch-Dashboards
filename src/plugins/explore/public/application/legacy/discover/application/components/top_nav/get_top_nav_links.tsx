@@ -32,11 +32,16 @@ import {
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { OpenSearchPanel } from './open_search_panel';
+import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
+import { IndexPattern } from '../../../../../../../../data/public';
+import { Query } from '../../../../../../../../data/public';
 
 export const getTopNavLinks = (
   services: ExploreServices,
   inspectorAdapters: Adapters,
   startSyncingQueryStateWithUrl: () => void,
+  searchContext: ExecutionContextSearch,
+  indexPattern: IndexPattern | undefined,
   savedExplore?: SavedExplore
 ) => {
   const {
@@ -48,6 +53,7 @@ export const getTopNavLinks = (
     toastNotifications,
     chrome,
     store,
+    data: { search },
   } = services;
 
   const topNavLinksMap = new Map<string, TopNavMenuData>();
@@ -138,6 +144,14 @@ export const getTopNavLinks = (
             columns: state.columns,
             sort: state.sort,
           });
+
+          // TODO: SearchSource should be saved in savedExplore instead of constructing it here
+          // Here constructing it for saving
+          const searchSource = search.searchSource.createEmpty();
+          searchSource.setField('query', searchContext.query as Query);
+          searchSource.setField('filter', searchContext.filters);
+          searchSource.setField('index', indexPattern);
+          savedExplore.searchSource = searchSource;
 
           try {
             const id = await savedExplore.save(saveOptions);
