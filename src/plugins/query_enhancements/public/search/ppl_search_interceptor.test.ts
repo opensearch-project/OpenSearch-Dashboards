@@ -15,7 +15,7 @@ import {
 import { dataPluginMock } from '../../../data/public/mocks';
 import { DATASET, SEARCH_STRATEGY } from '../../common';
 import * as fetchModule from '../../common/utils';
-import { convertFiltersToClause, getTimeFilterClause } from './filters/parser';
+import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './filters/parser';
 import { PPLSearchInterceptor } from './ppl_search_interceptor';
 
 jest.mock('../../common/utils', () => ({
@@ -41,11 +41,11 @@ describe('PPLSearchInterceptor', () => {
   const mockIsPPLSearchQuery = fetchModule.isPPLSearchQuery as jest.MockedFunction<
     typeof fetchModule.isPPLSearchQuery
   >;
-  const mockConvertFiltersToClause = convertFiltersToClause as jest.MockedFunction<
-    typeof convertFiltersToClause
+  const mockConvertFiltersToClause = convertFiltersToWhereClause as jest.MockedFunction<
+    typeof convertFiltersToWhereClause
   >;
-  const mockGetTimeFilterClause = getTimeFilterClause as jest.MockedFunction<
-    typeof getTimeFilterClause
+  const mockGetTimeFilterClause = getTimeFilterWhereClause as jest.MockedFunction<
+    typeof getTimeFilterWhereClause
   >;
 
   beforeEach(() => {

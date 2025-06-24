@@ -24,7 +24,7 @@ import {
   SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { convertFiltersToClause, getTimeFilterClause } from './filters/parser';
+import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './filters/parser';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
@@ -96,7 +96,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const filters = this.queryService.filterManager.getFilters();
     const commands = query.query.split('|');
-    const filterClause = convertFiltersToClause(filters);
+    const filterClause = convertFiltersToWhereClause(filters);
     if (filterClause) {
       commands.splice(1, 0, filterClause);
     }
@@ -109,7 +109,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
-      const timeFilter = getTimeFilterClause(
+      const timeFilter = getTimeFilterWhereClause(
         dataset.timeFieldName,
         this.queryService.timefilter.timefilter.getTime()
       );

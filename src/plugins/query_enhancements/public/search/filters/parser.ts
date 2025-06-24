@@ -10,7 +10,7 @@ import { formatDate } from '../../../common';
  * Parse core {@link Filter} and convert to a PPL where clause. Only supports
  * non DSL filters.
  */
-export const convertFiltersToClause = (filters?: Filter[]): string => {
+export const convertFiltersToWhereClause = (filters?: Filter[]): string => {
   if (!filters) return '';
   const predicates = filters
     .filter((filter) => !filter.meta.disabled)
@@ -24,10 +24,11 @@ export const convertFiltersToClause = (filters?: Filter[]): string => {
 
 const escapeQuotes = (value: string) => value.replaceAll("'", "''");
 
-const toPredicate = (filter: Filter): string => {
+const toPredicate = (filter: Filter): string | undefined => {
   const meta = filter.meta;
   // SQL/PPL does not accept .keyword and will automatically append it
-  const field = getFilterField(filter).replace(/.keyword$/, '');
+  const field = getFilterField(filter)?.replace(/.keyword$/, '');
+  if (!field) return;
   if (!meta.negate) {
     switch (meta.type) {
       case 'phrase':
@@ -61,16 +62,15 @@ const toPredicate = (filter: Filter): string => {
         return `ISNULL(\`${field}\`)`;
     }
   }
-  return '';
 };
 
 /**
- * Get time filter command for PPL query
+ * Get time filter where clause
  * @param timeFieldName Time field name
  * @param timeRange Time range from the time picker
- * @returns PPL where command with time range filter
+ * @returns where clause of the time range filter
  */
-export const getTimeFilterClause = (timeFieldName: string, timeRange: TimeRange) => {
+export const getTimeFilterWhereClause = (timeFieldName: string, timeRange: TimeRange): string => {
   const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
   return `WHERE \`${timeFieldName}\` >= '${formatDate(
     fromDate
