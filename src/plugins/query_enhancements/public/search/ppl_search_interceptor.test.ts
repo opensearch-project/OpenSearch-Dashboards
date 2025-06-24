@@ -25,8 +25,8 @@ jest.mock('../../common/utils', () => ({
 }));
 
 jest.mock('./filters/parser', () => ({
-  convertFiltersToClause: jest.fn(),
-  getTimeFilterClause: jest.fn(),
+  convertFiltersToWhereClause: jest.fn(),
+  getTimeFilterWhereClause: jest.fn(),
 }));
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
@@ -41,10 +41,10 @@ describe('PPLSearchInterceptor', () => {
   const mockIsPPLSearchQuery = fetchModule.isPPLSearchQuery as jest.MockedFunction<
     typeof fetchModule.isPPLSearchQuery
   >;
-  const mockConvertFiltersToClause = convertFiltersToWhereClause as jest.MockedFunction<
+  const mockConvertFiltersToWhereClause = convertFiltersToWhereClause as jest.MockedFunction<
     typeof convertFiltersToWhereClause
   >;
-  const mockGetTimeFilterClause = getTimeFilterWhereClause as jest.MockedFunction<
+  const mockGetTimeFilterWhereClause = getTimeFilterWhereClause as jest.MockedFunction<
     typeof getTimeFilterWhereClause
   >;
 
@@ -109,8 +109,8 @@ describe('PPLSearchInterceptor', () => {
     };
 
     beforeEach(() => {
-      mockConvertFiltersToClause.mockReturnValue('');
-      mockGetTimeFilterClause.mockReturnValue('WHERE @timestamp >= "2023-01-01"');
+      mockConvertFiltersToWhereClause.mockReturnValue('');
+      mockGetTimeFilterWhereClause.mockReturnValue('WHERE @timestamp >= "2023-01-01"');
 
       const mockDatasetService = {
         getType: jest.fn().mockReturnValue({
@@ -316,8 +316,8 @@ describe('PPLSearchInterceptor', () => {
     };
 
     beforeEach(() => {
-      mockConvertFiltersToClause.mockReturnValue('');
-      mockGetTimeFilterClause.mockReturnValue('WHERE @timestamp >= "2023-01-01"');
+      mockConvertFiltersToWhereClause.mockReturnValue('');
+      mockGetTimeFilterWhereClause.mockReturnValue('WHERE @timestamp >= "2023-01-01"');
 
       const mockDatasetService = {
         getType: jest.fn().mockReturnValue({
@@ -398,8 +398,8 @@ describe('PPLSearchInterceptor', () => {
 
   describe('buildQuery', () => {
     beforeEach(() => {
-      mockConvertFiltersToClause.mockReturnValue('');
-      mockGetTimeFilterClause.mockReturnValue('WHERE @timestamp >= "2023-01-01"');
+      mockConvertFiltersToWhereClause.mockReturnValue('');
+      mockGetTimeFilterWhereClause.mockReturnValue('WHERE @timestamp >= "2023-01-01"');
     });
 
     it('should return query as-is for non-PPL search queries', () => {
@@ -427,8 +427,8 @@ describe('PPLSearchInterceptor', () => {
       const result = (pplSearchInterceptor as any).buildQuery(mockRequest);
 
       expect(result).toEqual(mockQuery);
-      expect(mockConvertFiltersToClause).not.toHaveBeenCalled();
-      expect(mockGetTimeFilterClause).not.toHaveBeenCalled();
+      expect(mockConvertFiltersToWhereClause).not.toHaveBeenCalled();
+      expect(mockGetTimeFilterWhereClause).not.toHaveBeenCalled();
     });
 
     it('should append filter clause for PPL search queries', () => {
@@ -477,11 +477,17 @@ describe('PPLSearchInterceptor', () => {
         }),
       });
       mockIsPPLSearchQuery.mockReturnValue(true);
-      mockConvertFiltersToClause.mockReturnValue('WHERE field = "test"');
+      mockConvertFiltersToWhereClause.mockReturnValue('WHERE field = "test"');
+
+      // Add index to the request and mock UI settings
+      mockRequest.params.body.index = 'test_index';
+      const mockIndex = {};
+      (mockDataService.indexPatterns.get as jest.Mock).mockReturnValue(mockIndex);
+      (mockCoreStart.uiSettings.get as jest.Mock).mockReturnValue(true);
 
       const result = (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(mockConvertFiltersToClause).toHaveBeenCalledWith(mockFilters);
+      expect(mockConvertFiltersToWhereClause).toHaveBeenCalledWith(mockFilters, mockIndex, true);
       expect(result.query).toBe(
         'source=test_index | WHERE @timestamp >= "2023-01-01" | WHERE field = "test" | fields *'
       );
@@ -537,7 +543,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(mockGetTimeFilterClause).toHaveBeenCalledWith('@timestamp', mockTimeRange);
+      expect(mockGetTimeFilterWhereClause).toHaveBeenCalledWith('@timestamp', mockTimeRange);
       expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
     });
 
@@ -583,7 +589,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(mockGetTimeFilterClause).not.toHaveBeenCalled();
+      expect(mockGetTimeFilterWhereClause).not.toHaveBeenCalled();
       expect(result.query).toBe('source=test_index | fields *');
     });
 
@@ -614,7 +620,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(mockGetTimeFilterClause).not.toHaveBeenCalled();
+      expect(mockGetTimeFilterWhereClause).not.toHaveBeenCalled();
       expect(result.query).toBe('source=test_index | fields *');
     });
 
@@ -660,7 +666,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(mockGetTimeFilterClause).not.toHaveBeenCalled();
+      expect(mockGetTimeFilterWhereClause).not.toHaveBeenCalled();
       expect(result.query).toBe('source=test_index | fields *');
     });
 

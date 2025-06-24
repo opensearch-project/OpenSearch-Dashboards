@@ -6,6 +6,7 @@
 import {
   ExistsFilter,
   Filter,
+  IIndexPattern,
   PhrasesFilter,
   RangeFilter,
   RangeFilterParams,
@@ -86,33 +87,44 @@ const negate = (filter: Filter) => {
   return filter;
 };
 
+const mockIndexPattern: IIndexPattern = {
+  id: 'mock-index',
+  title: 'mock-index',
+  fields: {
+    getByName: jest.fn(),
+    getAll: () => [],
+    some: (predicate: (field: any) => boolean) => {
+      const fields = [{ name: 'field1' }, { name: 'range_field' }, { name: 'category' }];
+      return fields.some(predicate);
+    },
+  } as any,
+};
+
 describe('convertFiltersToClause', () => {
-  it('should return empty string for undefined filters', () => {
-    expect(convertFiltersToWhereClause(undefined)).toBe('');
-  });
+  beforeEach(() => {});
 
   it('should return empty string for empty filters array', () => {
-    expect(convertFiltersToWhereClause([])).toBe('');
+    expect(convertFiltersToWhereClause([], undefined)).toBe('');
   });
 
   it('should skip disabled filters', () => {
     const filters: Filter[] = [disable(getPhraseFilter())];
-    expect(convertFiltersToWhereClause(filters)).toBe('');
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe('');
   });
 
   it('should handle phrase filter', () => {
     const filters: Filter[] = [getPhraseFilter()];
-    expect(convertFiltersToWhereClause(filters)).toBe("WHERE `field1` = 'test'");
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe("WHERE `field1` = 'test'");
   });
 
   it('should handle negated phrase filter', () => {
     const filters: Filter[] = [negate(getPhraseFilter())];
-    expect(convertFiltersToWhereClause(filters)).toBe("WHERE `field1` != 'test'");
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe("WHERE `field1` != 'test'");
   });
 
   it('should handle phrases filter', () => {
     const filters: Filter[] = [negate(getPhrasesFilter()), getPhrasesFilter()];
-    expect(convertFiltersToWhereClause(filters)).toBe(
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe(
       "WHERE (`field1` != 'a' AND `field1` != 'b' AND `field1` != 'c') AND (`field1` = 'a' OR `field1` = 'b' OR `field1` = 'c')"
     );
   });
@@ -124,24 +136,24 @@ describe('convertFiltersToClause', () => {
       getRangeFilter({ gte: 4 }),
       getRangeFilter({ lt: 11 }),
     ];
-    expect(convertFiltersToWhereClause(filters)).toBe(
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe(
       'WHERE (`range_field` < 5 OR `range_field` >= 10) AND (`range_field` >= 5 AND `range_field` < 10) AND (`range_field` >= 4) AND (`range_field` < 11)'
     );
   });
 
   it('should handle exists filter', () => {
     const filters: Filter[] = [getExistsFilter()];
-    expect(convertFiltersToWhereClause(filters)).toBe('WHERE ISNOTNULL(`category`)');
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe('WHERE ISNOTNULL(`category`)');
   });
 
   it('should handle negated exists filter', () => {
     const filters: Filter[] = [negate(getExistsFilter())];
-    expect(convertFiltersToWhereClause(filters)).toBe('WHERE ISNULL(`category`)');
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe('WHERE ISNULL(`category`)');
   });
 
   it('should handle multiple filters', () => {
     const filters: Filter[] = [getPhraseFilter(), getRangeFilter({ gte: 1, lt: 10 })];
-    expect(convertFiltersToWhereClause(filters)).toBe(
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe(
       "WHERE (`field1` = 'test') AND (`range_field` >= 1 AND `range_field` < 10)"
     );
   });
@@ -152,7 +164,7 @@ describe('convertFiltersToClause', () => {
     filter.query.match_phrase.field1 = "test's";
     const filters: Filter[] = [filter];
 
-    expect(convertFiltersToWhereClause(filters)).toBe("WHERE `field1` = 'test''s'");
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe("WHERE `field1` = 'test''s'");
   });
 
   it('should remove .keyword suffix from field names', () => {
@@ -161,7 +173,7 @@ describe('convertFiltersToClause', () => {
     filter.query.match_phrase['field1.keyword'] = filter.query.match_phrase.field1;
     const filters: Filter[] = [filter];
 
-    expect(convertFiltersToWhereClause(filters)).toBe("WHERE `field1` = 'test'");
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe("WHERE `field1` = 'test'");
   });
 
   it('ignores custom DSL filters', () => {
@@ -180,7 +192,73 @@ describe('convertFiltersToClause', () => {
       },
     ];
 
-    expect(convertFiltersToWhereClause(filters)).toBe('');
+    expect(convertFiltersToWhereClause(filters, undefined)).toBe('');
+  });
+
+  it('should filter out fields not in index pattern when ignoreFilterIfFieldNotInIndex is true', () => {
+    const filters: Filter[] = [
+      getPhraseFilter(),
+      {
+        meta: {
+          alias: null,
+          disabled: false,
+          index: 'mock-index',
+          key: 'non_existent_field',
+          negate: false,
+          params: { query: 'test' },
+          type: 'phrase',
+        },
+        query: { match_phrase: { non_existent_field: 'test' } },
+      },
+    ];
+
+    expect(convertFiltersToWhereClause(filters, mockIndexPattern, true)).toBe(
+      "WHERE `field1` = 'test'"
+    );
+  });
+
+  it('should not filter out any fields when ignoreFilterIfFieldNotInIndex is false', () => {
+    const filters: Filter[] = [
+      getPhraseFilter(),
+      {
+        meta: {
+          alias: null,
+          disabled: false,
+          index: 'mock-index',
+          key: 'non_existent_field',
+          negate: false,
+          params: { query: 'test' },
+          type: 'phrase',
+        },
+        query: { match_phrase: { non_existent_field: 'test' } },
+      },
+    ];
+
+    expect(convertFiltersToWhereClause(filters, mockIndexPattern, false)).toBe(
+      "WHERE (`field1` = 'test') AND (`non_existent_field` = 'test')"
+    );
+  });
+
+  it('should include all fields when no indexPattern is provided even with ignoreFilterIfFieldNotInIndex=true', () => {
+    const filters: Filter[] = [
+      getPhraseFilter(),
+      {
+        meta: {
+          alias: null,
+          disabled: false,
+          index: 'mock-index',
+          key: 'non_existent_field',
+          negate: false,
+          params: { query: 'test' },
+          type: 'phrase',
+        },
+        query: { match_phrase: { non_existent_field: 'test' } },
+      },
+    ];
+
+    expect(convertFiltersToWhereClause(filters, undefined, true)).toBe(
+      "WHERE (`field1` = 'test') AND (`non_existent_field` = 'test')"
+    );
   });
 });
 
