@@ -481,7 +481,7 @@ export class ExplorePlugin
       aliasPath: '#/',
       aliasApp: PLUGIN_ID,
       title: i18n.translate('explore.visualization.title', {
-        defaultMessage: 'Discover Visualization',
+        defaultMessage: 'Visualize with Discover',
       }),
       description: i18n.translate('explore.visualization.title', {
         defaultMessage: 'Create visualization with Discover',
@@ -503,7 +503,7 @@ export class ExplorePlugin
               id,
               savedObjectType: SAVED_OBJECT_TYPE,
               title: `${attributes?.title || ''}`,
-              typeTitle: 'Discover visualization',
+              typeTitle: 'Visualize with Discover',
               updated_at: updatedAt,
               stage: 'production',
             };
