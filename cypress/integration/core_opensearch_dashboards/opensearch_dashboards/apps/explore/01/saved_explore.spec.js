@@ -10,22 +10,19 @@ import {
   DATASOURCE_NAME,
 } from '../../../../../../utils/constants';
 import {
+  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/explore/shared';
 import {
   setSearchConfigurations,
   verifyDiscoverPageState,
   verifySavedSearchInAssetsPage,
-  generateSavedTestConfiguration,
-} from '../../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
-import {
-  postRequestSaveExplore,
-  updateSavedSearchAndNotSaveAndVerify,
   updateSavedSearchAndSaveAndVerify,
+  generateSavedTestConfiguration,
+  updateSavedSearchAndNotSaveAndVerify,
 } from '../../../../../../utils/apps/explore/saved';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -53,7 +50,7 @@ const runSavedExploreTests = () => {
       ]);
     });
 
-    generateAllExploreTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
+    generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
       it(`create and load for ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
@@ -64,7 +61,6 @@ const runSavedExploreTests = () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
-        cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         // TODO: Figure out why we have to wait here sometimes. The query gets reset while typing without this wait

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { monaco } from '@osd/monaco';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -34,7 +34,7 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
   onClearEditor,
   provideCompletionItems,
 }) => {
-  const editorConfig = getEditorConfig(languageType);
+  const editorConfig = useMemo(() => getEditorConfig(languageType), [languageType]);
 
   const editorType = languageType !== LanguageType.Natural ? EditorType.Query : EditorType.Prompt;
 
