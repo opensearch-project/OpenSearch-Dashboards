@@ -5,6 +5,12 @@
 
 import { EuiIconProps } from '@elastic/eui';
 export * from './_structure_cache';
+import { ErrorToastOptions, ToastInputFields } from 'src/core/public/notifications';
+// eslint-disable-next-line
+import type { SavedObject } from 'src/core/server';
+import { FieldFormat, DatasetField, OSD_FIELD_TYPES } from '..';
+import { SerializedFieldFormat } from '../../../expressions/common';
+import { IDatasetFieldType } from './fields';
 
 /**
  * Describes a data source with its properties.
@@ -261,13 +267,194 @@ export interface Dataset extends BaseDataset {
   isRemoteDataset?: boolean;
 }
 
-export interface DatasetField {
-  name: string;
-  type: string;
-  displayName?: string;
-  // TODO:  osdFieldType?
-}
+// export interface DatasetField {
+//   name: string;
+//   type: string;
+//   displayName?: string;
+//   // TODO:  osdFieldType?
+// }
 
 export interface DatasetSearchOptions {
   strategy?: string;
+}
+
+export type DatasetFieldFormatMap = Record<string, SerializedFieldFormat>;
+
+export interface IDataset {
+  fields: IDatasetFieldType[];
+  title: string;
+  displayName?: string;
+  description?: string;
+  id?: string;
+  type?: string;
+  timeFieldName?: string;
+  intervalName?: string | null;
+  getTimeField?(): IDatasetFieldType | undefined;
+  fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
+  getFormatterForField?: (
+    field: DatasetField | DatasetField['spec'] | IDatasetFieldType
+  ) => FieldFormat;
+}
+
+export interface DatasetAttributes {
+  type: string;
+  fields: string;
+  title: string;
+  displayName?: string;
+  description?: string;
+  typeMeta: string;
+  timeFieldName?: string;
+  intervalName?: string;
+  sourceFilters?: string;
+  fieldFormatMap?: string;
+}
+
+export type DatasetOnNotification = (toastInputFields: ToastInputFields) => void;
+export type DatasetOnError = (error: Error, toastInputFields: ErrorToastOptions) => void;
+
+export type DatasetOnUnsupportedTimePattern = ({
+  id,
+  title,
+  index,
+}: {
+  id: string;
+  title: string;
+  index: string;
+}) => void;
+
+export interface DatasetUiSettingsCommon {
+  get: (key: string) => Promise<any>;
+  getAll: () => Promise<Record<string, any>>;
+  set: (key: string, value: any) => Promise<void>;
+  remove: (key: string) => Promise<void>;
+}
+
+export interface DatasetSavedObjectsClientCommonFindArgs {
+  type: string | string[];
+  fields?: string[];
+  perPage?: number;
+  search?: string;
+  searchFields?: string[];
+}
+
+export interface DatasetSavedObjectsClientCommon {
+  find: <T = unknown>(
+    options: DatasetSavedObjectsClientCommonFindArgs
+  ) => Promise<Array<SavedObject<T>>>;
+  get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
+  update: <T = unknown>(
+    type: string,
+    id: string,
+    attributes: Record<string, any>,
+    options: Record<string, any>
+  ) => Promise<SavedObject<T>>;
+  create: (
+    type: string,
+    attributes: Record<string, any>,
+    options: Record<string, any>
+  ) => Promise<SavedObject>;
+  delete: (type: string, id: string) => Promise<{}>;
+}
+
+export interface DatasetGetFieldsOptions {
+  pattern?: string;
+  type?: string;
+  params?: any;
+  lookBack?: boolean;
+  metaFields?: string[];
+  dataSourceId?: string;
+}
+
+export interface IDatasetsApiClient {
+  getFieldsForTimePattern: (options: DatasetGetFieldsOptions) => Promise<any>;
+  getFieldsForWildcard: (options: DatasetGetFieldsOptions) => Promise<any>;
+}
+
+export type { SavedObject };
+
+export type DatasetAggregationRestrictions = Record<
+  string,
+  {
+    agg?: string;
+    interval?: number;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    delay?: string;
+    time_zone?: string;
+  }
+>;
+
+export interface IDatasetFieldSubType {
+  multi?: { parent: string };
+  nested?: { path: string };
+}
+
+export interface DatasetTypeMeta {
+  aggs?: Record<string, DatasetAggregationRestrictions>;
+  [key: string]: any;
+}
+
+export type DatasetFieldSpecConflictDescriptions = Record<string, string[]>;
+
+// This should become DatasetFieldSpec once types are cleaned up
+export interface DatasetFieldSpecExportFmt {
+  count?: number;
+  script?: string;
+  lang?: string;
+  conflictDescriptions?: DatasetFieldSpecConflictDescriptions;
+  name: string;
+  type: OSD_FIELD_TYPES;
+  esTypes?: string[];
+  scripted: boolean;
+  searchable: boolean;
+  aggregatable: boolean;
+  readFromDocValues?: boolean;
+  subType?: IDatasetFieldSubType;
+  format?: SerializedFieldFormat;
+  indexed?: boolean;
+}
+
+export interface DatasetFieldSpec {
+  count?: number;
+  script?: string;
+  lang?: string;
+  conflictDescriptions?: Record<string, string[]>;
+  format?: SerializedFieldFormat;
+
+  name: string;
+  type: string;
+  esTypes?: string[];
+  scripted?: boolean;
+  searchable: boolean;
+  aggregatable: boolean;
+  readFromDocValues?: boolean;
+  subType?: IDatasetFieldSubType;
+  indexed?: boolean;
+}
+
+export type DatasetFieldMap = Record<string, DatasetFieldSpec>;
+
+export interface DatasetSavedObjectReference {
+  name?: string;
+  id: string;
+  type: string;
+}
+export interface DatasetSpec {
+  id?: string;
+  version?: string;
+  title?: string;
+  displayName?: string;
+  description?: string;
+  intervalName?: string;
+  timeFieldName?: string;
+  sourceFilters?: DatasetSourceFilter[];
+  fields?: DatasetFieldMap;
+  typeMeta?: DatasetTypeMeta;
+  type?: string;
+  dataSourceRef?: DatasetSavedObjectReference;
+  fieldsLoading?: boolean;
+}
+
+export interface DatasetSourceFilter {
+  value: string;
 }

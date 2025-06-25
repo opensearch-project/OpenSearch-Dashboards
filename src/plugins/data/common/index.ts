@@ -48,3 +48,4 @@ export * from './storage';
  */
 
 export { IndexPatternAttributes } from './types';
+export { DatasetAttributes } from './types';

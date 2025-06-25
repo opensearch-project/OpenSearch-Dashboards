@@ -234,6 +234,66 @@ export {
 } from '../common';
 
 /*
+ * Datasets:
+ */
+
+import {
+  isDatasetNestedField,
+  isDatasetFilterable,
+  setDatasetOverrides,
+  getDatasetOverrides,
+} from '../common';
+
+import {
+  ILLEGAL_CHARACTERS_KEY as DATASET_ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY as DATASET_CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE as DATASET_ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS as DATASET_ILLEGAL_CHARACTERS,
+  isDefault as isDatasetDefault,
+  validateDataset,
+  getFromSavedObject as getDatasetFromSavedObject,
+  flattenHitWrapper as flattenDatasetHitWrapper,
+  formatHitProvider as formatDatasetHitProvider,
+} from './datasets';
+
+export type { DatasetsService } from './datasets';
+
+// Datasets namespace:
+export const datasets = {
+  DATASET_ILLEGAL_CHARACTERS_KEY,
+  DATASET_CONTAINS_SPACES_KEY,
+  DATASET_ILLEGAL_CHARACTERS_VISIBLE,
+  DATASET_ILLEGAL_CHARACTERS,
+  isDatasetDefault,
+  isDatasetFilterable,
+  setDatasetOverrides,
+  getDatasetOverrides,
+  isDatasetNestedField,
+  validate: validateDataset,
+  getFromSavedObject: getDatasetFromSavedObject,
+  flattenHitWrapper: flattenDatasetHitWrapper,
+  formatHitProvider: formatDatasetHitProvider,
+};
+
+export { DatasetsContract, Dataset, IDatasetFieldList, DatasetField } from './datasets';
+
+export {
+  IDataset,
+  IDatasetFieldType,
+  IDatasetFieldSubType,
+  OPENSEARCH_FIELD_TYPES as DATASET_OPENSEARCH_FIELD_TYPES,
+  OSD_FIELD_TYPES as DATASET_OSD_FIELD_TYPES,
+  DatasetAttributes,
+  UI_SETTINGS as DATASET_UI_SETTINGS,
+  TypeMeta as DatasetTypeMeta,
+  AggregationRestrictions as DatasetAggRestrictions,
+  DatasetSpec,
+  datasetFieldList,
+} from '../common';
+
+export { DuplicateDatasetError } from '../common/datasets/errors';
+
+/*
  * Index patterns:
  */
 
@@ -443,6 +503,7 @@ export {
   SearchBar,
   SearchBarProps,
   StatefulSearchBarProps,
+  DatasetSelectProps,
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,

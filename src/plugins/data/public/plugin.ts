@@ -63,6 +63,7 @@ import {
   setSearchService,
   setUiService,
   setUiSettings,
+  setDatasets,
 } from './services';
 import { opensearchaggs } from './search/expressions';
 import {
@@ -97,7 +98,7 @@ import {
   getDefaultSuggestions as getPPLSuggestions,
   getSimplifiedPPLSuggestions,
 } from './antlr/opensearch_ppl/code_completion';
-import { createStorage, DataStorage, UI_SETTINGS } from '../common';
+import { createStorage, DatasetsService, DataStorage, UI_SETTINGS } from '../common';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -222,6 +223,33 @@ export class DataPublicPlugin
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
+    const datasets = new DatasetsService({
+      uiSettings: new UiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      apiClient: new IndexPatternsApiClient(http),
+      fieldFormats,
+      onNotification: (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
+      onError: notifications.toasts.addError.bind(notifications.toasts),
+      onRedirectNoDataset: onRedirectNoIndexPattern(
+        application.capabilities,
+        application.navigateToApp,
+        overlays
+      ),
+      onUnsupportedTimePattern: onUnsupportedTimePattern(
+        notifications.toasts,
+        application.navigateToApp
+      ),
+      // If workspace is enabled, only workspace owner/OSD admin can update ui setting.
+      ...(application.capabilities.workspaces.enabled && {
+        canUpdateUiSetting:
+          workspaces?.currentWorkspace$.getValue()?.owner ||
+          application.capabilities?.dashboards?.isDashboardAdmin !== false,
+      }),
+    });
+    setDatasets(datasets);
+
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
@@ -285,6 +313,7 @@ export class DataPublicPlugin
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,
+      datasets,
       indexPatterns,
       query,
       search,
