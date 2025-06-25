@@ -214,7 +214,8 @@ export class ExploreEmbeddable
     const visualizationData = getVisualizationType(rows, fieldSchema);
     const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
     if (displayVis) {
-      const selectedChartType = visualizationData?.visualizationType?.type || 'line';
+      const selectedChartType =
+        JSON.parse(this.savedExplore.visualization || '{}').chartType ?? 'line';
       const rule = this.services.visualizationRegistry
         .start()
         .getRules()
@@ -242,7 +243,7 @@ export class ExploreEmbeddable
       };
       this.searchProps.searchContext = searchContext;
       const indexPattern = this.savedExplore.searchSource.getField('index');
-      const styleOptions = visualizationData?.visualizationType?.ui.style.defaults;
+      const styleOptions = JSON.parse(this.savedExplore.visualization || '{}').params;
       const exp = await toExpression(
         searchContext,
         indexPattern!,
