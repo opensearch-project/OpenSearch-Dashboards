@@ -8,6 +8,7 @@ import { createHeatmapConfig } from './heatmap/heatmap_vis_config';
 import { createScatterConfig } from './scatter/scatter_vis_config';
 import { createMetricConfig } from './metric/metric_vis_config';
 import { createPieConfig } from './pie/pie_vis_config';
+import { createAreaConfig } from './area/area_vis_config';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { ChartTypeMapping, VisColumn, VisFieldType, VisualizationRule } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
@@ -66,10 +67,8 @@ export class VisualizationRegistry {
 
     for (const rule of this.rules) {
       if (rule.matches(numericalColumns, categoricalColumns, dateColumns)) {
-        // If the rule has a getChartTypes function, use it to get dynamic chart types
-        if (rule.getChartTypes) {
-          rule.chartTypes = rule.getChartTypes(numericalColumns, categoricalColumns, dateColumns);
-        }
+        // If the rule has a dynamic chart types function, we would handle it here
+        // This is a placeholder for future functionality
 
         // Get the highest priority chart type from this rule
         const topChartType = rule.chartTypes[0];
@@ -87,7 +86,7 @@ export class VisualizationRegistry {
   /**
    * Get visualization configuration
    */
-  private getVisualizationConfig(type: string) {
+  public getVisualizationConfig(type: string) {
     switch (type) {
       case 'line':
         return createLineConfig();
@@ -101,6 +100,8 @@ export class VisualizationRegistry {
         return createMetricConfig();
       case 'bar':
         return createBarConfig();
+      case 'area':
+        return createAreaConfig();
       // TODO: Add other chart types' configs here
       default:
         return;
