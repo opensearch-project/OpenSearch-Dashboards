@@ -78,7 +78,6 @@ export const getEditorConfig = (languageType: LanguageType) => {
           automaticLayout: true,
           scrollBeyondLastLine: false,
           wrappingIndent: 'indent' as const, // No indent since wrapping is off
-          glyphMargin: true,
           lineDecorationsWidth: 0,
           scrollbar: {
             vertical: 'visible' as const,

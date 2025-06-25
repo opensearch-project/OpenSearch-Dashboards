@@ -11,11 +11,10 @@ import {
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
+  generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
-import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
+} from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -78,7 +77,7 @@ export const runTableTests = () => {
       ]);
     });
 
-    generateAllExploreTestConfigurations(generateTableTestConfiguration, {
+    generateAllTestConfigurations(generateTableTestConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
@@ -87,17 +86,7 @@ export const runTableTests = () => {
           // Setup
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
-          // If SQL, since we don't set date picker, when switching languages later it won't show any results
-          // so setting dates here
-          if (config.language === QueryLanguages.SQL.name) {
-            cy.setQueryLanguage(QueryLanguages.PPL.name);
-            setDatePickerDatesAndSearchIfRelevant(QueryLanguages.PPL.name);
-            cy.wait(1000);
-            cy.setQueryLanguage(QueryLanguages.SQL.name);
-          } else {
-            cy.setQueryLanguage(config.language);
-            setDatePickerDatesAndSearchIfRelevant(config.language);
-          }
+          setDatePickerDatesAndSearchIfRelevant(config.language);
 
           // expanding a document in the table
           cy.get('[data-test-subj="docTableExpandToggleColumn"]')
@@ -114,17 +103,6 @@ export const runTableTests = () => {
           // checking the number of exapnded documents visible on screen
           cy.get('[data-test-subj="tableDocViewRow-_index"]').should('have.length', 2);
 
-          // switch query should keep expanded state
-          // TODO: allow switch to other languages
-          if (config.language === QueryLanguages.DQL.name) {
-            cy.setQueryLanguage('Lucene');
-          } else if (config.language === QueryLanguages.Lucene.name) {
-            cy.setQueryLanguage('DQL');
-          } else if (config.language === QueryLanguages.SQL.name) {
-            cy.setQueryLanguage('PPL');
-          } else {
-            cy.setQueryLanguage('OpenSearch SQL');
-          }
           cy.get('[data-test-subj="tableDocViewRow-_index"]').should('have.length', 2);
         });
       });

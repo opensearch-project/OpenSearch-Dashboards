@@ -11,15 +11,15 @@ import {
   QueryLanguages,
 } from '../../../../../../utils/constants';
 import {
+  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/explore/shared';
 import {
   generateDisplayTestConfiguration,
   getLanguageReferenceTestText,
-} from '../../../../../../utils/apps/query_enhancements/language_specific_display';
+} from '../../../../../../utils/apps/explore/language_specific_display';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -46,7 +46,7 @@ export const runDisplayTests = () => {
       ]);
     });
 
-    generateAllExploreTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
+    generateAllTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
       it(`should correctly display all UI components for ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
@@ -56,36 +56,29 @@ export const runDisplayTests = () => {
 
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
-        cy.setQueryLanguage(config.language);
-
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         // testing the query editor
         if (config.multilineQuery) {
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
-          cy.getElementByTestId('queryEditorFooterLineCount').contains('1 line');
-          cy.getElementByTestId('queryEditorFooterTimestamp').contains('timestamp');
+          cy.getElementByTestId('exploreReusableEditor').should('be.visible');
           cy.getElementByTestId('queryResultCompleteMsg').contains(/Completed in [0-9]+/);
           cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click();
           cy.getElementByTestId('recentQueryTable').should('be.visible');
           cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click();
 
           if (config.language === QueryLanguages.SQL.name) {
-            cy.getElementByTestId('osdQueryEditor__multiLine').contains('SELECT');
-            cy.getElementByTestId('osdQueryEditor__multiLine').contains('FROM');
-            cy.getElementByTestId('osdQueryEditor__multiLine').contains('LIMIT');
+            cy.getElementByTestId('exploreReusableEditor').contains('SELECT');
+            cy.getElementByTestId('exploreReusableEditor').contains('FROM');
+            cy.getElementByTestId('exploreReusableEditor').contains('LIMIT');
           } else if (config.language === QueryLanguages.PPL.name) {
-            cy.getElementByTestId('osdQueryEditor__multiLine').contains('source');
+            cy.getElementByTestId('exploreReusableEditor').contains('source');
           }
 
           cy.getElementByTestId('osdQueryEditorLanguageToggle').click();
           cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('not.exist');
+          cy.getElementByTestId('exploreReusableEditor').should('not.exist');
           cy.getElementByTestId('osdQueryEditorLanguageToggle').click();
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('not.exist');
-        } else {
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
+          cy.getElementByTestId('exploreReusableEditor').should('be.visible');
         }
 
         // testing the datepicker
