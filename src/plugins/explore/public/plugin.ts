@@ -73,6 +73,9 @@ export class ExplorePlugin
   // @ts-ignore
   private config: ConfigSchema;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  // FIXME set to false when integrate with dashboard assistant plugin
+  private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(true);
+
   private stopUrlTracking?: () => void;
   private currentHistory?: ScopedHistory;
 
@@ -287,7 +290,8 @@ export class ExplorePlugin
           pluginsStart,
           this.initializerContext,
           this.tabRegistry,
-          this.visualizationRegistryService
+          this.visualizationRegistryService,
+          this.isSummaryAgentAvailable$
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -310,7 +314,7 @@ export class ExplorePlugin
         appMounted();
 
         // Call renderApp with params, services, and store
-        const unmount = renderApp(params, services, store, flavor);
+        const unmount = renderApp(params, services, store, flavor, setupDeps);
 
         return () => {
           appUnMounted();
@@ -404,6 +408,7 @@ export class ExplorePlugin
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
       visualizationRegistry: visualizationRegistryService,
+      isSummaryAgentAvailable$: this.isSummaryAgentAvailable$,
     };
   }
 
@@ -423,7 +428,8 @@ export class ExplorePlugin
         plugins,
         this.initializerContext,
         this.tabRegistry,
-        this.visualizationRegistryService
+        this.visualizationRegistryService,
+        this.isSummaryAgentAvailable$
       );
       setLegacyServices({
         ...services,

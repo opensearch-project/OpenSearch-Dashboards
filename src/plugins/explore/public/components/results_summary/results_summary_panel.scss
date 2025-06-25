@@ -1,0 +1,77 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+
+.resultsSummary {
+  &.resultsSummary_accordion {
+    .euiAccordion__triggerWrapper {
+      /* stylelint-disable  @osd/stylelint/no_restricted_values */
+      background: lightOrDarkTheme(linear-gradient(to left, #edf7ff, #f9f4ff), $euiColorEmptyShade);
+      padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSizeS;
+      gap: $euiSizeS;
+
+      .euiAccordion__button {
+        min-height: $euiSizeXL;
+        width: unset;
+        flex-grow: 0;
+
+        .euiFlexGroup {
+          gap: $euiSizeXS;
+        }
+
+        .euiToolTipAnchor {
+          display: flex;
+        }
+      }
+
+      .euiAccordion__optionalAction {
+        flex-grow: 1;
+      }
+    }
+
+    .resultsSummary_emptyButton {
+      height: min-content;
+
+      .euiButtonEmpty__content {
+        padding: 0;
+        transform: translateY(-1px);
+      }
+    }
+
+    .resultsSummary_divider {
+      border-left: $euiBorderThin;
+      height: $euiSizeL;
+      margin: 0 2px;
+    }
+  }
+
+  &.resultsSummary__callout {
+    margin-top: $euiSizeS;
+  }
+
+  &.resultsSummary__banner {
+    margin-bottom: $euiSizeS;
+  }
+
+  &.resultsSummary__form {
+    margin-top: $euiSizeS;
+  }
+
+  .resultsSummary__popoverWrapper {
+    display: flex;
+    align-items: center;
+    padding-right: $euiSizeS;
+  }
+
+  // Hide the error badge when the input is focused
+  .resultsSummary__inputWrapper:has(.resultsSummary__input:focus) .resultsSummary__popoverWrapper {
+    display: none;
+  }
+
+  .resultsSummary__input {
+    text-overflow: ellipsis;
+  }
+}
