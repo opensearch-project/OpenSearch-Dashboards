@@ -8,17 +8,16 @@ import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME_1,
   INDEX_WITH_TIME_1,
-  QueryLanguages,
-} from '../../../../../../utils/apps/query_enhancements/constants';
+} from '../../../../../../utils/apps/explore/constants';
 import {
+  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
-import { getDocTableField } from '../../../../../../utils/apps/query_enhancements/doc_table';
-import * as sideBar from '../../../../../../utils/apps/query_enhancements/sidebar';
-import { generateSideBarTestConfiguration } from '../../../../../../utils/apps/query_enhancements/sidebar';
+} from '../../../../../../utils/apps/explore/shared';
+import { getDocTableField } from '../../../../../../utils/apps/explore/doc_table';
+import * as sideBar from '../../../../../../utils/apps/explore/sidebar';
+import { generateSideBarTestConfiguration } from '../../../../../../utils/apps/explore/sidebar';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -93,8 +92,7 @@ const addSidebarFieldsAndCheckDocTableColumns = (
   expectedValues,
   pplQuery,
   sqlQuery,
-  isIndexPattern,
-  config
+  isIndexPattern
 ) => {
   // Helper functions
   const getDocTableHeaderByIndex = (index) =>
@@ -141,31 +139,18 @@ const addSidebarFieldsAndCheckDocTableColumns = (
     },
   ]).each((fn) => fn());
 
-  if (isIndexPattern && config.language !== QueryLanguages.SQL.name) {
-    cy.getElementByTestId('discoverQueryHits').should('have.text', '10,000');
-  }
+  cy.getElementByTestId('discoverQueryHits').should('have.text', '10,000');
 
-  if (config.language === QueryLanguages.PPL.name) {
-    cy.wait(2000);
-    cy.intercept('**/api/enhancements/search/ppl').as('query');
-    cy.setQueryEditor(pplQuery);
-    cy.wait('@query').then(() => {
-      checkTableHeaders(testFields);
-      if (isIndexPattern) {
-        cy.getElementByTestId('discoverQueryHits').should('have.text', '1,125');
-      }
-      checkDocTableColumn(expectedValues, 2);
-    });
-  } else if (config.language === QueryLanguages.SQL.name) {
-    cy.intercept('**/api/enhancements/search/sql').as('query');
-    cy.setQueryEditor(sqlQuery);
-    cy.wait('@query').then(() => {
-      checkTableHeaders(testFields);
-      checkDocTableColumn(expectedValues, 2);
-    });
-  } else if (config.language === 'DQL' || config.language === 'Lucene') {
+  cy.wait(2000);
+  cy.intercept('**/api/enhancements/search/ppl').as('query');
+  cy.explore.setQueryEditor(pplQuery);
+  cy.wait('@query').then(() => {
     checkTableHeaders(testFields);
-  }
+    if (isIndexPattern) {
+      cy.getElementByTestId('discoverQueryHits').should('have.text', '1,125');
+    }
+    checkDocTableColumn(expectedValues, 2);
+  });
 };
 
 const checkFilteredFieldsForAllLanguages = () => {
@@ -184,7 +169,7 @@ const checkFilteredFieldsForAllLanguages = () => {
 
 const checkSidebarPanelBehavior = () => {
   const checkPanelVisibility = (shouldBeVisible) => {
-    cy.getElementByTestId('sidebarPanel').should(shouldBeVisible ? 'be.visible' : 'not.be.visible');
+    cy.getElementByTestId('dscBottomLeftCanvas').should(shouldBeVisible ? 'exist' : 'not.exist');
   };
 
   checkPanelVisibility(true);
@@ -261,7 +246,7 @@ export const runSideBarTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllExploreTestConfigurations(generateSideBarTestConfiguration, {
+    generateAllTestConfigurations(generateSideBarTestConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
@@ -273,7 +258,6 @@ export const runSideBarTests = () => {
             isEnhancement: true,
           });
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           sideBar.removeAllSelectedFields();
         });
@@ -328,7 +312,6 @@ export const runSideBarTests = () => {
           cy.getElementByTestId('discoverNewButton').click();
           // Setting the dataset and query language again to ensure the date picker is not missing
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
 
           nestedFieldsToTest.forEach((nestedField) => {
             verifyFieldShowDetailsShowsTopValuesAndViewVisualization(config, nestedField, false);
@@ -354,20 +337,6 @@ export const runSideBarTests = () => {
             );
           }
 
-          // TODO: Hide missing fields switch is not working for SQL and PPL.
-          // SQL and PPL add all mapped fields to the sidebar, including missing fields.
-          // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9342
-          if (
-            config.language === QueryLanguages.DQL.name ||
-            config.language === QueryLanguages.Lucene.name
-          ) {
-            cy.getElementByTestId('missingSwitch').click();
-            sidebarFields.missingFields.forEach((fieldName) => {
-              cy.getElementByTestId(`field-${fieldName}`).should('be.visible');
-            });
-            cy.getElementByTestId('missingSwitch').click();
-          }
-
           sideBar.verifyNumberOfActiveFilters(0);
           cy.getElementByTestId('aggregatable-true').parent().click();
           sideBar.verifyNumberOfActiveFilters(1);
@@ -378,7 +347,7 @@ export const runSideBarTests = () => {
             .concat(sidebarFields.aggregatableFields.nested)
             .filter((field) => sidebarFields.stringTypeFields.includes(field));
           intersectionAggregatableStringTypeSidebarFields.forEach((fieldName) => {
-            cy.getElementByTestId(`field-${fieldName}`).should('be.visible');
+            cy.getElementByTestId(`field-${fieldName}`).should('exist');
           });
         });
       });

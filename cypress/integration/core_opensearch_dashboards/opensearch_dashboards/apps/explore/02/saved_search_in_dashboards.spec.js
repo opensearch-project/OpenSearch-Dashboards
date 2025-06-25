@@ -15,21 +15,21 @@ import {
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/explore/shared';
 import {
-  postRequestSaveSearch,
+  postRequestSaveExplore,
   generateSavedTestConfiguration,
   getExpectedHitCount,
   loadSavedSearchFromDashboards,
   navigateToDashboardAndOpenSavedSearchPanel,
-} from '../../../../../../utils/apps/query_enhancements/saved';
+} from '../../../../../../utils/apps/explore/saved';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
 export const runSavedSearchTests = () => {
   describe('saved search in dashboards', () => {
-    // TODO: Currently we cannot convert this into a "before" and "after" due to us grabbing several aliases that are required by postRequestSaveSearch()
+    // TODO: Currently we cannot convert this into a "before" and "after" due to us grabbing several aliases that are required by postRequestSaveExplore()
     beforeEach(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,
@@ -60,7 +60,7 @@ export const runSavedSearchTests = () => {
         QueryLanguages.DQL
       );
       // using a POST request to create a saved search to load
-      postRequestSaveSearch(config);
+      postRequestSaveExplore(config);
 
       loadSavedSearchFromDashboards(config, workspaceName);
 
@@ -82,7 +82,7 @@ export const runSavedSearchTests = () => {
         QueryLanguages.DQL
       );
       // using a POST request to create a saved search to load
-      postRequestSaveSearch(config);
+      postRequestSaveExplore(config);
 
       loadSavedSearchFromDashboards(config, workspaceName);
 
@@ -121,10 +121,10 @@ export const runSavedSearchTests = () => {
         QueryLanguages.PPL
       );
       // using a POST request to create a saved search to load
-      postRequestSaveSearch(dqlConfig);
-      postRequestSaveSearch(luceneConfig);
-      postRequestSaveSearch(sqlConfig);
-      postRequestSaveSearch(pplConfig);
+      postRequestSaveExplore(dqlConfig);
+      postRequestSaveExplore(luceneConfig);
+      postRequestSaveExplore(sqlConfig);
+      postRequestSaveExplore(pplConfig);
 
       navigateToDashboardAndOpenSavedSearchPanel(workspaceName);
       cy.getElementByTestId(`savedObjectTitle${dqlConfig.saveName}`).should('exist');

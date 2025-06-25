@@ -12,14 +12,14 @@ import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateBaseConfiguration,
-} from '../../../../../../utils/apps/query_enhancements/shared';
-import { getDatasetName } from '../../../../../../utils/apps/query_enhancements/autocomplete';
+} from '../../../../../../utils/apps/explore/shared';
+import { getDatasetName } from '../../../../../../utils/apps/explore/autocomplete';
 import {
   generateQueryTestConfigurations,
   LanguageConfigs,
 } from '../../../../../../utils/apps/explore/queries';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { getDocTableField } from '../../../../../../utils/apps/query_enhancements/doc_table';
+import { getDocTableField } from '../../../../../../utils/apps/explore/doc_table';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -69,7 +69,6 @@ export const runQueryTests = () => {
       describe(`${config.testName}`, () => {
         it('should highlight filter and query field', () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const query = `unique_category:Caching`;
           cy.setQueryEditor(query);
@@ -87,7 +86,6 @@ export const runQueryTests = () => {
           // Get dataset names based on type
           const noTime = getDatasetName(INDEX_WITHOUT_TIME_1, config.datasetType);
           cy.setDataset(noTime, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           cy.setQueryEditor(query);
           cy.submitFilterFromDropDown('category', 'is', 'Database', true);
           getDocTableField(0, 0).within(() => {
