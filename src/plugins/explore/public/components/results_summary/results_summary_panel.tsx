@@ -14,9 +14,10 @@ import { of } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataPublicPluginSetup } from '../../../../data/public';
+import { DataPublicPluginSetup, ResultStatus } from '../../../../data/public';
 import { ExploreServices } from '../../types';
 import { ResultsSummary, FeedbackStatus } from './results_summary';
+import { RootState } from '../../application/utils/state_management/store';
 
 import './results_summary_panel.scss';
 
@@ -71,12 +72,17 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
   const [isEnabledBySetting, setIsEnabledBySetting] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
   const queryState = useSelector((state: any) => state.query);
+  const status = useSelector((state: RootState) => state.ui.status);
   const updateQueryState = useCallback((x: any) => {}, []); // FIXME
 
   const isQueryDirty =
     queryState.query && queryState.query !== props.data.query.queryString.getQuery().query;
 
-  const canGenerateSummary = Boolean(results.length) && Boolean(queryState.query) && !isQueryDirty;
+  const canGenerateSummary =
+    Boolean(results.length) &&
+    Boolean(queryState.query) &&
+    !isQueryDirty &&
+    status === ResultStatus.READY;
 
   // The visibility of panel action buttons: thumbs up/down and copy to clipboard buttons
   const actionButtonVisible = Boolean(summary) && !loading && !isQueryDirty;
@@ -207,6 +213,26 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
     },
     [http, reportCountMetric, errorPrompt]
   );
+
+  useEffect(() => {
+    if (accordionState === 'open' && canGenerateSummary && !summary && !loading) {
+      // TODO properly integrate with t2ppl
+      fetchSummary({
+        question: queryState.question,
+        query: queryState.query,
+        queryResults: results,
+      });
+    }
+  }, [
+    queryState.question,
+    queryState.query,
+    results,
+    fetchSummary,
+    accordionState,
+    canGenerateSummary,
+    summary,
+    loading,
+  ]);
 
   const onFeedback = useCallback(
     (satisfied: boolean) => {
