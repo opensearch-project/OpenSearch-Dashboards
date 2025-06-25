@@ -4,15 +4,15 @@
  */
 
 import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../../utils/apps/constants';
-import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
-import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../../utils/apps/query_enhancements/field_display_filtering.js';
+import * as docTable from '../../../../../../utils/apps/explore/doc_table.js';
+import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../../utils/apps/explore/field_display_filtering.js';
 import { BASE_PATH } from '../../../../../../utils/constants';
 import {
+  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspace = getRandomizedWorkspaceName();
 
@@ -44,13 +44,12 @@ const fieldDisplayFilteringTestSuite = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllExploreTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {
+    generateAllTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {
       index: INDEX_WITH_TIME_1,
       indexPattern: `${INDEX_WITH_TIME_1}*`,
     }).forEach((config) => {
       it(`filter actions in table field for ${config.testName}`, () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
@@ -172,7 +171,6 @@ const fieldDisplayFilteringTestSuite = () => {
         };
 
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.

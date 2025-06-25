@@ -10,18 +10,17 @@ import {
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
+  generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   setHistogramIntervalIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
-import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
-import { selectFieldFromSidebar } from '../../../../../../utils/apps/query_enhancements/sidebar';
+} from '../../../../../../utils/apps/explore/shared';
+import { selectFieldFromSidebar } from '../../../../../../utils/apps/explore/sidebar';
 import {
   verifyShareUrl,
   openShareMenuWithRetry,
-} from '../../../../../../utils/apps/query_enhancements/shared_links';
-import { setSort } from '../../../../../../utils/apps/query_enhancements/table';
+} from '../../../../../../utils/apps/explore/shared_links';
+import { setSort } from '../../../../../../utils/apps/explore/table';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -31,7 +30,7 @@ const generateShareUrlsTestConfiguration = (dataset, datasetType, language) => {
     datasetType,
     language: language.name,
     apiLanguage: language.apiName,
-    hasDocLinks: [QueryLanguages.DQL.name, QueryLanguages.Lucene.name].includes(language.name),
+    hasDocLinks: false,
     testName: `${language.name}-${datasetType}`,
     saveName: `${language.name}-${datasetType}`,
   };
@@ -42,15 +41,6 @@ const generateShareUrlsTestConfiguration = (dataset, datasetType, language) => {
 };
 
 const getQueryString = (config) => {
-  if (config.language === QueryLanguages.DQL.name) {
-    return 'bytes_transferred > 9950';
-  }
-  if (config.language === QueryLanguages.Lucene.name) {
-    return 'bytes_transferred: {9950 TO *}';
-  }
-  if (config.language === QueryLanguages.SQL.name) {
-    return `SELECT * FROM ${config.dataset} WHERE bytes_transferred > 9950`;
-  }
   return `source = ${config.dataset} | where bytes_transferred > 9950`;
 };
 
@@ -86,7 +76,7 @@ export const runSharedLinksTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllExploreTestConfigurations(generateShareUrlsTestConfiguration, {
+    generateAllTestConfigurations(generateShareUrlsTestConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
@@ -96,7 +86,6 @@ export const runSharedLinksTests = () => {
         it(`should handle shared document links correctly for ${config.testName}`, () => {
           // Setup
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
           if (config.hasDocLinks) {
@@ -141,17 +130,16 @@ export const runSharedLinksTests = () => {
         it(`should persist state in shared links for ${config.testName}`, () => {
           // Set dataset and language
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
           // Set interval
           setHistogramIntervalIfRelevant(config.language, testData.interval);
 
           // scroll to top
-          cy.getElementByTestId('dscCanvas').scrollTo('top', { ensureScrollable: false });
+          cy.getElementByTestId('discoverTable').scrollTo('top', { ensureScrollable: false });
 
           // Set query
-          cy.setQueryEditor(queryString, { parseSpecialCharSequences: false });
+          cy.explore.setQueryEditor(queryString, { parseSpecialCharSequences: false });
 
           // Set filter for DQL/Lucene
           if (config.hasDocLinks) {
