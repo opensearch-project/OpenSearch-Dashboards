@@ -64,6 +64,8 @@ export const exploreSavedObjectType: SavedObjectsType = {
       sort: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
       version: { type: 'integer' },
+      type: { type: 'text' },
+      visualization: { type: 'text', index: false },
     },
   },
 };
