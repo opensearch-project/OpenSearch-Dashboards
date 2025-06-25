@@ -470,7 +470,10 @@ export class ExplorePlugin
       };
     };
 
-    const factory = new ExploreEmbeddableFactory(getStartServices);
+    const factory = new ExploreEmbeddableFactory(
+      getStartServices,
+      this.visualizationRegistryService
+    );
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
