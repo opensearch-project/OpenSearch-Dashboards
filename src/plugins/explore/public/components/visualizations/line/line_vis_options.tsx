@@ -189,8 +189,8 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
           size="xs"
           data-test-subj="lineVisAxesButton"
         >
-          {i18n.translate('explore.vis.lineChart.tabs.axes', {
-            defaultMessage: 'Axes',
+          {i18n.translate('explore.vis.lineChart.tabs.axis', {
+            defaultMessage: 'Axis',
           })}
         </EuiButtonEmpty>
         {expandedPanels.axes && (

@@ -67,9 +67,6 @@ export class VisualizationRegistry {
 
     for (const rule of this.rules) {
       if (rule.matches(numericalColumns, categoricalColumns, dateColumns)) {
-        // If the rule has a dynamic chart types function, we would handle it here
-        // This is a placeholder for future functionality
-
         // Get the highest priority chart type from this rule
         const topChartType = rule.chartTypes[0];
 
