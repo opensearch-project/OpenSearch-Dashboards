@@ -31,7 +31,7 @@ import { SavedExplore } from '../../../../../../saved_explore';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
 import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
 import { selectUIState } from '../../../../../utils/state_management/selectors';
-import { getFlavorId } from '../../../../../../helpers/get_flavor_id';
+import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
 
 export interface TopNavProps {
   opts: {
@@ -45,6 +45,7 @@ export interface TopNavProps {
 
 export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const flavorId = useFlavorId();
   const {
     data: {
       query: { filterManager, queryString, timefilter },
@@ -166,9 +167,8 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   }, [data.indexPatterns, data.query]);
 
   useEffect(() => {
-    const flavor = getFlavorId();
     // capitalize first letter
-    const flavorPrefix = flavor ? `${flavor[0].toUpperCase()}${flavor.slice(1)}/ ` : '';
+    const flavorPrefix = flavorId ? `${flavorId[0].toUpperCase()}${flavorId.slice(1)}/ ` : '';
     setScreenTitle(
       flavorPrefix +
         (savedExplore?.title ||
@@ -176,7 +176,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
             defaultMessage: 'New search',
           }))
     );
-  }, [savedExplore?.title]);
+  }, [flavorId, savedExplore?.title]);
 
   const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
     indexPattern,

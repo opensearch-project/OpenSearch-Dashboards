@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './get_flavor_id';
+export * from './use_flavor_id';
