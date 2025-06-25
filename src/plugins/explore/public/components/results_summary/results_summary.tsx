@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@osd/i18n';
+import assistantMark from '../../assets/sparkle_mark.svg';
 
 export enum FeedbackStatus {
   NONE = 'none',
@@ -159,7 +160,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
             alignItems="center"
             data-test-subj="resultsSummary_summary_accordion_button"
           >
-            <EuiIcon type="radar" />
+            <EuiIcon type={assistantMark} />
             <EuiText size="s">
               <strong>
                 {`${brandingLabel ?? ''} `}
