@@ -8,6 +8,7 @@ import { PieChartStyleControls } from '../pie/pie_vis_config';
 import { MetricChartStyleControls } from '../metric/metric_vis_config';
 import { HeatmapChartStyleControls } from '../heatmap/heatmap_vis_config';
 import { ScatterChartStyleControls } from '../scatter/scatter_vis_config';
+import { AreaChartStyleControls } from '../area/area_vis_config';
 import { IFieldType } from '../../../application/legacy/discover/opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -18,7 +19,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
 
-export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar';
+export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar' | 'area';
 
 export interface ChartStyleControlMap {
   line: LineChartStyleControls;
@@ -27,6 +28,7 @@ export interface ChartStyleControlMap {
   heatmap: HeatmapChartStyleControls;
   scatter: ScatterChartStyleControls;
   bar: BarChartStyleControls;
+  area: AreaChartStyleControls;
 }
 
 export type AllChartStyleControls =
@@ -35,7 +37,8 @@ export type AllChartStyleControls =
   | BarChartStyleControls
   | MetricChartStyleControls
   | HeatmapChartStyleControls
-  | ScatterChartStyleControls;
+  | ScatterChartStyleControls
+  | AreaChartStyleControls;
 
 export interface StyleControlsProps<T extends AllChartStyleControls> {
   styleOptions: T;
