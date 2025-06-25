@@ -103,10 +103,13 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     if (!isPPLSearchQuery(query)) return query;
 
     const filters = this.queryService.filterManager.getFilters();
-    const index = request.params?.body?.index && this.indexPatterns.get(request.params.body.index);
+    const index = request.params?.index
+      ? this.indexPatterns.getByTitle(request.params.index)
+      : undefined;
     const ignoreFilterIfFieldNotInIndex = this.uiSettings.get(
       UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
     );
+
     const filterClause = convertFiltersToWhereClause(filters, index, ignoreFilterIfFieldNotInIndex);
     const commands = query.query.split('|');
     if (filterClause) {
@@ -115,6 +118,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const dataset = this.queryService.queryString.getQuery().dataset;
     const datasetService = this.queryService.queryString.getDatasetService();
+    // FIXME the time field is coming from global dataset
     if (
       dataset &&
       dataset.timeFieldName &&

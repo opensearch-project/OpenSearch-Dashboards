@@ -448,6 +448,7 @@ describe('PPLSearchInterceptor', () => {
               queries: [mockQuery],
             },
           },
+          index: 'mock-index',
         },
       };
 
@@ -482,7 +483,7 @@ describe('PPLSearchInterceptor', () => {
       // Add index to the request and mock UI settings
       mockRequest.params.body.index = 'test_index';
       const mockIndex = {};
-      (mockDataService.indexPatterns.get as jest.Mock).mockReturnValue(mockIndex);
+      (mockDataService.indexPatterns.getByTitle as jest.Mock).mockReturnValue(mockIndex);
       (mockCoreStart.uiSettings.get as jest.Mock).mockReturnValue(true);
 
       const result = (pplSearchInterceptor as any).buildQuery(mockRequest);
