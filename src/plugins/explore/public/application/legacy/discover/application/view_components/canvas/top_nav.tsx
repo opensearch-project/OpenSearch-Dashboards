@@ -63,11 +63,9 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
 
   const uiState = useNewStateSelector(selectUIState);
 
-  const savedExploreId = useSelector(selectSavedSearch);
   const savedQueryId = useSelector(selectSavedQuery);
   const isLoading = useSelector((state: any) => state.ui.status === ResultStatus.LOADING);
   const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
-  // useSavedExplore(savedExploreIdFromUrl);
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -87,7 +85,6 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
   const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
-  // const [savedExplore, setSavedExplore] = useState<SavedExplore>();
 
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
