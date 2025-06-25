@@ -510,10 +510,9 @@ export class ExplorePlugin
             }
             return {
               description: `${attributes?.description || ''}`,
-              // TODO: it should navigate to different explore flavor based on the `attributes`
+              // TODO: it should navigate to different explore flavor based on the `attributes.type`
               editApp: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
               editUrl: `/view/${encodeURIComponent(id)}`,
-              // TODO: the icon should be dynamic based on the discover visualization chart type
               icon: iconType,
               id,
               savedObjectType: SAVED_OBJECT_TYPE,
