@@ -17,16 +17,16 @@ import {
   updateAndVerifySavedQuery,
   SAVE_AS_NEW_QUERY_SUFFIX,
   validateSaveAsNewQueryMatchingNameHasError,
-} from '../../../../../../utils/apps/query_enhancements/saved_queries';
+} from '../../../../../../utils/apps/explore/saved_queries';
 
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+  generateAllTestConfigurations,
+} from '../../../../../../utils/apps/explore/shared';
 
-import { generateSavedTestConfiguration } from '../../../../../../utils/apps/query_enhancements/saved';
+import { generateSavedTestConfiguration } from '../../../../../../utils/apps/explore/saved';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -39,7 +39,6 @@ const createSavedQuery = (config) => {
 
   cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
-  cy.setQueryLanguage(config.language);
   setDatePickerDatesAndSearchIfRelevant(config.language);
 
   setQueryConfigurations(config);
@@ -58,7 +57,6 @@ const loadSavedQuery = (config) => {
   cy.getElementByTestId('discoverNewButton').click();
   // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
   cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-  cy.setQueryLanguage(config.language);
 
   setDatePickerDatesAndSearchIfRelevant(
     config.language,
@@ -131,7 +129,7 @@ const runSavedQueriesUITests = () => {
       ]);
     });
 
-    const testConfigurations = generateAllExploreTestConfigurations(generateSavedTestConfiguration);
+    const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
 
     testConfigurations.forEach((config) => {
       it(`should create, load, update, modify and delete the saved query: ${config.testName}`, () => {

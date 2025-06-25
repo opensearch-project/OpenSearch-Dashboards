@@ -231,10 +231,9 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         className={`${editorClassPrefix} ${isReadOnly ? `${editorClassPrefix}--readonly` : ''} ${
           editorIsFocused && !isReadOnly ? `${editorClassPrefix}--focused` : ''
         }`}
-        data-test-subj={`explore${editorClassPrefix}__multiLine`}
+        data-test-subj="exploreReusableEditor"
       >
         <CodeEditor
-          key={editorType}
           height={editorHeight}
           languageId={editorConfig.languageId}
           value={value}

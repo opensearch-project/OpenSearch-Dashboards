@@ -113,8 +113,8 @@ export const selectRows = createSelector([selectResults], (results) => {
 });
 
 export const selectTotalHits = createSelector([selectResults], (results) => {
-  if ((results as any)?.hits?.total?.value !== undefined) {
-    return (results as any).hits.total.value;
+  if (results?.hits?.total !== undefined) {
+    return results.hits.total;
   }
   return 0;
 });
