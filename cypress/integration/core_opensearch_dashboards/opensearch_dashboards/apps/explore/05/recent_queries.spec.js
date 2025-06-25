@@ -11,20 +11,20 @@ import {
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+  generateAllTestConfigurations,
+} from '../../../../../../utils/apps/explore/shared';
 import {
   generateRecentQueriesTestConfiguration,
   BaseQuery,
   TestQueries,
   //TODO: QueryRegex,
-} from '../../../../../../utils/apps/query_enhancements/recent_queries';
+} from '../../../../../../utils/apps/explore/recent_queries';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspace = getRandomizedWorkspaceName();
 const runRecentQueryTests = () => {
-  // TODO: refactor these tests to not navigate away so often
-  describe.skip('recent queries spec', () => {
+  // TODO: Recent queries the way it is written is currently broken beause we are switching languages. we must refactor these test completely.
+  describe('recent queries spec', () => {
     const index = INDEX_PATTERN_WITH_TIME.replace('*', '');
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
@@ -57,12 +57,11 @@ const runRecentQueryTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllExploreTestConfigurations(generateRecentQueriesTestConfiguration)
+    generateAllTestConfigurations(generateRecentQueriesTestConfiguration)
       .filter(Boolean) // removes undefined values
       .forEach((config) => {
         it(`check max queries for ${config.testName}`, () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const currentLang = BaseQuery[config.datasetType][config.language];
           const currentBaseQuery = currentLang.query;
@@ -88,8 +87,6 @@ const runRecentQueryTests = () => {
             {
               // check table after changing language and returning to the language under test
               action: () => {
-                cy.setQueryLanguage(config.oppositeLang);
-                cy.setQueryLanguage(config.language);
                 cy.wrap(null).then(() => {
                   // force Cypress to run this method in order
                   reverseList.unshift(config.defaultQuery);
@@ -147,7 +144,6 @@ const runRecentQueryTests = () => {
 
         it(`check duplicate query for ${config.testName}`, () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const currentLang = BaseQuery[config.datasetType][config.language];
           const currentBaseQuery = currentLang.query;
@@ -174,7 +170,6 @@ const runRecentQueryTests = () => {
         //Caveat: the commands for reading the system's clipboard is OS-dependent.
         it(`check running and copying recent queries for ${config.testName}`, () => {
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           // Precondition: run some queries first
           const currentLang = BaseQuery[config.datasetType][config.language];

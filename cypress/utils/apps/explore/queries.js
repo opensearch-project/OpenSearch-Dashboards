@@ -3,16 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_PATTERN_WITH_TIME_1, INDEX_WITH_TIME_1 } from '../query_enhancements/constants';
-import { QueryLanguagesExplore } from './constants';
+import { QueryLanguages, INDEX_PATTERN_WITH_TIME_1, INDEX_WITH_TIME_1 } from './constants';
+
+// =======================================
+// Test Configuration Generators
+// =======================================
 
 /**
  * Language configurations for different test scenarios
  */
 export const LanguageConfigs = {
   SQL_PPL: {
-    INDEX_PATTERN: [QueryLanguagesExplore.PPL],
-    INDEXES: [QueryLanguagesExplore.PPL],
+    INDEX_PATTERN: [QueryLanguages.PPL],
+    INDEXES: [QueryLanguages.PPL],
   },
 };
 
@@ -31,6 +34,12 @@ const createQueryDatasetTypes = (languageConfig = LanguageConfigs.SQL_PPL) => ({
     supportedLanguages: languageConfig.INDEXES,
   },
 });
+
+export const QueryDatasetTypes = createQueryDatasetTypes();
+
+// =======================================
+// Test Configuration Generators and other common utilities
+// =======================================
 
 /**
  * Generates test configurations for autocomplete tests across different dataset types

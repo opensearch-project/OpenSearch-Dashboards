@@ -8,8 +8,8 @@ import {
   DSM_API,
   S3_CLUSTER,
   JOBS_API,
-} from '../../../../../../utils/apps/query_enhancements/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/explore/constants';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
@@ -170,7 +170,7 @@ const s3DatasetTestSuite = () => {
           cy.wait(3000);
 
           cy.intercept('DELETE', `**/${JOBS_API.DELETE}*`).as('cancelRequest');
-          cy.getElementByTestId(`querySubmitButton`).click();
+          cy.getElementByTestId(`queryPanelFooterRunQueryButton`).click();
 
           cy.wait('@cancelRequest').then((interception) => {
             console.log('interception.request.url:', interception.request.url);
