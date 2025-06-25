@@ -3,22 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiSplitPanel,
+  EuiButtonEmpty,
+  EuiTitle,
+  EuiPanel,
+  EuiFormRow,
+  EuiRange,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ScatterChartStyleControls } from './scatter_vis_config';
+import { AreaChartStyleControls } from './area_vis_config';
+import { BasicVisOptions } from '../style_panel/basic_vis_options';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { AxisRole, StandardAxes } from '../types';
-import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
-import { AllAxesOptions } from '../style_panel/standard_axes_options';
-import { swapAxes } from '../utils/utils';
-import { inferAxesFromColumns } from './scatter_chart_utils';
+import { ThresholdOptions } from '../style_panel/threshold_options';
+import { GridOptionsPanel } from '../style_panel/grid_options';
+import { AxesOptions } from '../style_panel/axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
 
-export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
+export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyleControls>;
 
-export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = ({
+export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   styleOptions,
   onStyleChange,
   numericalColumns = [],
@@ -32,7 +38,8 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   const [expandedPanels, setExpandedPanels] = useState({
     general: false,
     basic: false,
-    exclusive: false,
+    threshold: false,
+    grid: false,
     axes: false,
   });
 
@@ -43,36 +50,16 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
     });
   };
 
-  const updateStyleOption = <K extends keyof ScatterChartStyleControls>(
+  const updateStyleOption = <K extends keyof AreaChartStyleControls>(
     key: K,
-    value: ScatterChartStyleControls[K]
+    value: AreaChartStyleControls[K]
   ) => {
     onStyleChange({ [key]: value });
   };
 
-  // if it is 2 metrics, then it should not show legend
-  const notShowLegend = numericalColumns.length === 2 && categoricalColumns.length === 0;
-
-  useEffect(() => {
-    const { x, y } = inferAxesFromColumns(numericalColumns, categoricalColumns);
-    const axesWithFields = styleOptions.StandardAxes.map((axis) => {
-      if (axis.axisRole === AxisRole.X) {
-        return { ...axis, field: x };
-      }
-      if (axis.axisRole === AxisRole.Y) {
-        return { ...axis, field: y };
-      }
-      return axis;
-    });
-
-    updateStyleOption('StandardAxes', axesWithFields);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numericalColumns, categoricalColumns, dateColumns]);
-
-  const handleSwitchAxes = (axes: StandardAxes[]) => {
-    const updateAxes = swapAxes(axes);
-    updateStyleOption('StandardAxes', updateAxes);
-  };
+  // if it is 1 metric and 1 date, then it should not show legend
+  const notShowLegend =
+    numericalColumns.length === 1 && categoricalColumns.length === 0 && dateColumns.length === 1;
 
   return (
     <EuiSplitPanel.Outer>
@@ -83,9 +70,9 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           iconType={expandedPanels.general ? 'arrowDown' : 'arrowRight'}
           onClick={() => togglePanel('general')}
           size="xs"
-          data-test-subj="scatterVisGeneralButton"
+          data-test-subj="areaVisGeneralButton"
         >
-          {i18n.translate('explore.vis.scatterChart.tabs.general', {
+          {i18n.translate('explore.vis.areaChart.tabs.general', {
             defaultMessage: 'General',
           })}
         </EuiButtonEmpty>
@@ -105,9 +92,9 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           iconType={expandedPanels.basic ? 'arrowDown' : 'arrowRight'}
           onClick={() => togglePanel('basic')}
           size="xs"
-          data-test-subj="scatterVisBasicButton"
+          data-test-subj="areaVisBasicButton"
         >
-          {i18n.translate('explore.vis.scatterChart.tabs.basic', {
+          {i18n.translate('explore.vis.areaChart.tabs.basic', {
             defaultMessage: 'Basic',
           })}
         </EuiButtonEmpty>
@@ -130,19 +117,40 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
         <EuiButtonEmpty
           iconSide="left"
           color="text"
-          iconType={expandedPanels.exclusive ? 'arrowDown' : 'arrowRight'}
-          onClick={() => togglePanel('exclusive')}
+          iconType={expandedPanels.threshold ? 'arrowDown' : 'arrowRight'}
+          onClick={() => togglePanel('threshold')}
           size="xs"
-          data-test-subj="scatterVisExclusiveButton"
+          data-test-subj="areaVisThresholdButton"
         >
-          {i18n.translate('explore.vis.scatterChart.tabs.exclusive', {
-            defaultMessage: 'Scatter',
+          {i18n.translate('explore.vis.areaChart.tabs.threshold', {
+            defaultMessage: 'Threshold',
           })}
         </EuiButtonEmpty>
-        {expandedPanels.exclusive && (
-          <ScatterExclusiveVisOptions
-            styles={styleOptions.exclusive}
-            onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+        {expandedPanels.threshold && (
+          <ThresholdOptions
+            thresholdLine={styleOptions.thresholdLine}
+            onThresholdChange={(thresholdLine) => updateStyleOption('thresholdLine', thresholdLine)}
+          />
+        )}
+      </EuiSplitPanel.Inner>
+
+      <EuiSplitPanel.Inner paddingSize="s">
+        <EuiButtonEmpty
+          iconSide="left"
+          color="text"
+          iconType={expandedPanels.grid ? 'arrowDown' : 'arrowRight'}
+          onClick={() => togglePanel('grid')}
+          size="xs"
+          data-test-subj="areaVisGridButton"
+        >
+          {i18n.translate('explore.vis.areaChart.tabs.grid', {
+            defaultMessage: 'Grid',
+          })}
+        </EuiButtonEmpty>
+        {expandedPanels.grid && (
+          <GridOptionsPanel
+            grid={styleOptions.grid}
+            onGridChange={(grid) => updateStyleOption('grid', grid)}
           />
         )}
       </EuiSplitPanel.Inner>
@@ -154,18 +162,21 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           iconType={expandedPanels.axes ? 'arrowDown' : 'arrowRight'}
           onClick={() => togglePanel('axes')}
           size="xs"
-          data-test-subj="scatterVisAxesButton"
+          data-test-subj="areaVisAxesButton"
         >
-          {i18n.translate('explore.vis.scatterChart.tabs.axes', {
+          {i18n.translate('explore.vis.areaChart.tabs.axes', {
             defaultMessage: 'Axes',
           })}
         </EuiButtonEmpty>
         {expandedPanels.axes && (
-          <AllAxesOptions
-            disableGrid={false}
-            standardAxes={styleOptions.StandardAxes}
-            onChangeSwitchAxes={handleSwitchAxes}
-            onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
+          <AxesOptions
+            categoryAxes={styleOptions.categoryAxes}
+            valueAxes={styleOptions.valueAxes}
+            onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
+            onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
+            numericalColumns={numericalColumns}
+            categoricalColumns={categoricalColumns}
+            dateColumns={dateColumns}
           />
         )}
       </EuiSplitPanel.Inner>

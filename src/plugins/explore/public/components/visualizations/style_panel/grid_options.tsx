@@ -30,17 +30,7 @@ export const GridOptionsPanel: React.FC<GridOptionsProps> = ({ grid, onGridChang
   };
 
   return (
-    <EuiPanel paddingSize="s">
-      <EuiTitle size="xs">
-        <h4>
-          {i18n.translate('explore.vis.gridOptions.gridSettings', {
-            defaultMessage: 'Grid Settings',
-          })}
-        </h4>
-      </EuiTitle>
-
-      <EuiSpacer size="s" />
-
+    <EuiPanel paddingSize="s" hasBorder={false} hasShadow={true}>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow>

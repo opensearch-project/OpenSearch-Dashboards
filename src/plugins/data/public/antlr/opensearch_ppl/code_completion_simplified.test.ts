@@ -57,6 +57,23 @@ describe('ppl code_completion', () => {
       ).toBeTruthy();
     };
 
+    const checkSuggestionsShouldNotContain = (
+      result: QuerySuggestion[],
+      expected: Partial<QuerySuggestion>
+    ) => {
+      if (expected.text && expected.type) {
+        expect(
+          result.some(
+            (suggestion) => suggestion.text === expected.text && suggestion.type === expected.type
+          )
+        ).toBeFalsy();
+      } else if (expected.text) {
+        expect(result.some((suggestion) => suggestion.text === expected.text)).toBeFalsy();
+      } else if (expected.type) {
+        expect(result.some((suggestion) => suggestion.type === expected.type)).toBeFalsy();
+      }
+    };
+
     it('should return empty array when services are missing', async () => {
       const result = await getSimplifiedPPLSuggestions({
         query: '',
@@ -204,6 +221,31 @@ describe('ppl code_completion', () => {
       checkSuggestionsContain(result, {
         text: 'as',
         type: monaco.languages.CompletionItemKind.Keyword,
+      });
+    });
+
+    it('should not suggest fieldName after a fieldName in fields command', async () => {
+      const result = await getSimpleSuggestions('source = test-index | fields field1 ');
+
+      checkSuggestionsShouldNotContain(result, {
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+    });
+
+    it('should not suggest fieldName after a fieldName in sort command', async () => {
+      const result = await getSimpleSuggestions('source = test-index | sort field1 ');
+
+      checkSuggestionsShouldNotContain(result, {
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+    });
+
+    it('should suggest fieldName after a fieldName and operator in sort command', async () => {
+      const result = await getSimpleSuggestions('source = test-index | sort field1 , ');
+
+      checkSuggestionsContain(result, {
+        text: 'field1',
+        type: monaco.languages.CompletionItemKind.Field,
       });
     });
   });

@@ -5,6 +5,10 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ResultStatus } from '../../../legacy/discover/application/view_components/utils/use_search';
+import {
+  ChartStyleControlMap,
+  ChartType,
+} from '../../../../components/visualizations/utils/use_visualization_types';
 
 export interface UIState {
   activeTabId: string;
@@ -17,6 +21,8 @@ export interface UIState {
     pendingActions: string[];
   };
   prompt?: string; // Optional prompt for query panel
+  styleOptions: ChartStyleControlMap[ChartType] | undefined;
+  chartType: ChartType;
 }
 
 const initialState: UIState = {
@@ -30,6 +36,8 @@ const initialState: UIState = {
     pendingActions: [],
   },
   prompt: '', // Initialize prompt as empty string
+  styleOptions: undefined,
+  chartType: 'line',
 };
 
 const uiSlice = createSlice({
@@ -53,6 +61,12 @@ const uiSlice = createSlice({
     },
     setQueryPrompt: (state, action: PayloadAction<string>) => {
       state.prompt = action.payload;
+    },
+    setStyleOptions: (state, action: PayloadAction<ChartStyleControlMap[ChartType]>) => {
+      state.styleOptions = action.payload;
+    },
+    setChartType: (state, action: PayloadAction<ChartType>) => {
+      state.chartType = action.payload;
     },
     // Transaction actions
     startTransaction: (
@@ -82,5 +96,7 @@ export const {
   startTransaction,
   commitTransaction,
   rollbackTransaction,
+  setStyleOptions,
+  setChartType,
 } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;

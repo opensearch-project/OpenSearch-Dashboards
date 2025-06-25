@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LineChartStyleControls } from './line_vis_config';
+import { AreaChartStyleControls } from './area_vis_config';
 import { VisColumn, Positions, VEGASCHEMA } from '../types';
 import {
   buildMarkConfig,
@@ -12,21 +12,21 @@ import {
   applyAxisStyling,
   getStrokeDash,
   ValueAxisPosition,
-} from './line_chart_utils';
+} from '../line/line_chart_utils';
 
 /**
- * Rule 1: Create a simple line chart with one metric and one date
+ * Create a simple area chart with one metric and one date
  * @param transformedData The transformed data
  * @param numericalColumns The numerical columns
  * @param dateColumns The date columns
  * @param styles The style options
- * @returns The Vega spec for a simple line chart
+ * @returns The Vega spec for a simple area chart
  */
-export const createSimpleLineChart = (
+export const createSimpleAreaChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>
+  styles: Partial<AreaChartStyleControls>
 ): any => {
   const metricField = numericalColumns[0].column;
   const dateField = dateColumns[0].column;
@@ -35,7 +35,11 @@ export const createSimpleLineChart = (
   const layers: any[] = [];
 
   const mainLayer = {
-    mark: buildMarkConfig(styles, 'line'),
+    mark: {
+      ...buildMarkConfig(styles, 'line'),
+      type: 'area',
+      opacity: styles.areaOpacity || 0.6,
+    },
     encoding: {
       x: {
         field: dateField,
@@ -90,146 +94,20 @@ export const createSimpleLineChart = (
 };
 
 /**
- * Rule 2: Create a combined line and bar chart with two metrics and one date
- * @param transformedData The transformed data
- * @param numericalColumns The numerical columns
- * @param dateColumns The date columns
- * @param styles The style options
- * @returns The Vega spec for a combined line and bar chart
- */
-export const createLineBarChart = (
-  transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>
-): any => {
-  const metric1Field = numericalColumns[0].column;
-  const metric2Field = numericalColumns[1].column;
-  const dateField = dateColumns[0].column;
-  const metric1Name = numericalColumns[0].name;
-  const metric2Name = numericalColumns[1].name;
-  const dateName = dateColumns[0].name;
-  const layers: any[] = [];
-
-  const barLayer = {
-    mark: buildMarkConfig(styles, 'bar'),
-    encoding: {
-      x: {
-        field: dateField,
-        type: 'temporal',
-        axis: applyAxisStyling(
-          {
-            title: dateName,
-            labelAngle: -45,
-          },
-          styles,
-          'category',
-          numericalColumns,
-          [],
-          dateColumns
-        ),
-      },
-      y: {
-        field: metric1Field,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metric1Name },
-          styles,
-          'value',
-          numericalColumns,
-          [],
-          dateColumns,
-          ValueAxisPosition.Left // First value axis which is on the left
-        ),
-      },
-      color: {
-        datum: metric1Name,
-        legend: styles.addLegend
-          ? {
-              title: 'Metrics',
-              orient: styles.legendPosition,
-            }
-          : null,
-      },
-    },
-  };
-
-  const lineLayer = {
-    mark: buildMarkConfig(styles, 'line'),
-    encoding: {
-      x: {
-        field: dateField,
-        type: 'temporal',
-      },
-      y: {
-        field: metric2Field,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          {
-            title: metric2Name,
-            orient: Positions.RIGHT,
-          },
-          styles,
-          'value',
-          numericalColumns,
-          [],
-          dateColumns,
-          ValueAxisPosition.Right // Second value axis which is on the right
-        ),
-        scale: { zero: false },
-      },
-      color: {
-        datum: metric2Name,
-        legend: styles.addLegend
-          ? {
-              title: 'Metrics',
-              orient: styles.legendPosition,
-            }
-          : null,
-      },
-    },
-  };
-
-  layers.push(barLayer, lineLayer);
-
-  // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles);
-  if (thresholdLayer) {
-    layers.push(thresholdLayer);
-  }
-
-  // Add time marker layer if enabled
-  const timeMarkerLayer = createTimeMarkerLayer(styles);
-  if (timeMarkerLayer) {
-    layers.push(timeMarkerLayer);
-  }
-
-  return {
-    $schema: VEGASCHEMA,
-    title: `${metric1Name} (Bar) and ${metric2Name} (Line) Over Time`,
-    data: { values: transformedData },
-    layer: layers,
-    resolve: {
-      scale: { y: 'independent' },
-    },
-  };
-};
-
-/**
- * Rule 3: Create a multi-line chart with one metric, one date, and one categorical column
+ * Create a multi-area chart with one metric, one date, and one categorical column
  * @param transformedData The transformed data
  * @param numericalColumns The numerical columns
  * @param categoricalColumns The categorical columns
  * @param dateColumns The date columns
  * @param styles The style options
- * @returns The Vega spec for a multi-line chart
+ * @returns The Vega spec for a multi-area chart
  */
-export const createMultiLineChart = (
+export const createMultiAreaChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>
+  styles: Partial<AreaChartStyleControls>
 ): any => {
   const metricField = numericalColumns[0].column;
   const dateField = dateColumns[0].column;
@@ -240,7 +118,11 @@ export const createMultiLineChart = (
   const layers: any[] = [];
 
   const mainLayer = {
-    mark: buildMarkConfig(styles, 'line'),
+    mark: {
+      ...buildMarkConfig(styles, 'line'),
+      type: 'area',
+      opacity: styles.areaOpacity || 0.6,
+    },
     encoding: {
       x: {
         field: dateField,
@@ -306,20 +188,20 @@ export const createMultiLineChart = (
 };
 
 /**
- * Rule 4: Create a faceted multi-line chart with one metric, one date, and two categorical columns
+ * Create a faceted multi-area chart with one metric, one date, and two categorical columns
  * @param transformedData The transformed data
  * @param numericalColumns The numerical columns
  * @param categoricalColumns The categorical columns
  * @param dateColumns The date columns
  * @param styles The style options
- * @returns The Vega spec for a faceted multi-line chart
+ * @returns The Vega spec for a faceted multi-area chart
  */
-export const createFacetedMultiLineChart = (
+export const createFacetedMultiAreaChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>
+  styles: Partial<AreaChartStyleControls>
 ): any => {
   const metricField = numericalColumns[0].column;
   const dateField = dateColumns[0].column;
@@ -329,9 +211,6 @@ export const createFacetedMultiLineChart = (
   const dateName = dateColumns[0].name;
   const category1Name = categoricalColumns[0].name;
   const category2Name = categoricalColumns[1].name;
-
-  // Create a mark config for the faceted spec
-  const facetMarkConfig = buildMarkConfig(styles, 'line');
 
   return {
     $schema: VEGASCHEMA,
@@ -354,7 +233,11 @@ export const createFacetedMultiLineChart = (
       height: 200,
       layer: [
         {
-          mark: facetMarkConfig,
+          mark: {
+            ...buildMarkConfig(styles, 'line'),
+            type: 'area',
+            opacity: styles.areaOpacity || 0.6,
+          },
           encoding: {
             x: {
               field: dateField,
@@ -452,25 +335,34 @@ export const createFacetedMultiLineChart = (
 };
 
 /**
- * Create a category-based line chart with one metric and one category
+ * Create a stacked area chart with one metric and two categories
  * @param transformedData The transformed data
  * @param numericalColumns The numerical columns
  * @param categoricalColumns The categorical columns
  * @param dateColumns The date columns
  * @param styles The style options
- * @returns The Vega spec for a category-based line chart
+ * @returns The Vega spec for a stacked area chart
  */
-export const createCategoryLineChart = (
+/**
+ * Create a category-based area chart with one metric and one category
+ * @param transformedData The transformed data
+ * @param numericalColumns The numerical columns
+ * @param categoricalColumns The categorical columns
+ * @param dateColumns The date columns
+ * @param styles The style options
+ * @returns The Vega spec for a category-based area chart
+ */
+export const createCategoryAreaChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>
+  styles: Partial<AreaChartStyleControls>
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
     throw new Error(
-      'Category line chart requires at least one numerical column and one categorical column'
+      'Category area chart requires at least one numerical column and one categorical column'
     );
   }
 
@@ -481,7 +373,11 @@ export const createCategoryLineChart = (
   const layers: any[] = [];
 
   const mainLayer = {
-    mark: buildMarkConfig(styles, 'line'),
+    mark: {
+      ...buildMarkConfig(styles, 'line'),
+      type: 'area',
+      opacity: styles.areaOpacity || 0.6,
+    },
     encoding: {
       x: {
         field: categoryField,
@@ -527,4 +423,106 @@ export const createCategoryLineChart = (
     data: { values: transformedData },
     layer: layers,
   };
+};
+
+export const createStackedAreaChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styles: Partial<AreaChartStyleControls>
+): any => {
+  // Check if we have the required columns
+  if (numericalColumns.length === 0 || categoricalColumns.length < 2) {
+    throw new Error(
+      'Stacked area chart requires at least one numerical column and two categorical columns'
+    );
+  }
+
+  const metricField = numericalColumns[0].column;
+  const categoryField1 = categoricalColumns[0].column; // X-axis (categories)
+  const categoryField2 = categoricalColumns[1].column; // Color (stacking)
+
+  const metricName = numericalColumns[0].name;
+  const categoryName1 = categoricalColumns[0].name;
+  const categoryName2 = categoricalColumns[1].name;
+
+  const spec: any = {
+    $schema: VEGASCHEMA,
+    title: `${metricName} by ${categoryName1} and ${categoryName2}`,
+    data: { values: transformedData },
+    mark: {
+      type: 'area',
+      opacity: styles.areaOpacity || 0.6,
+      tooltip: styles.addTooltip !== false,
+    },
+    encoding: {
+      x: {
+        field: categoryField1,
+        type: 'nominal',
+        axis: applyAxisStyling(
+          {
+            title: categoryName1,
+            labelAngle: -45,
+          },
+          styles,
+          'category',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      y: {
+        field: metricField,
+        type: 'quantitative',
+        axis: applyAxisStyling(
+          { title: metricName },
+          styles,
+          'value',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+        stack: 'normalize', // Can be 'zero', 'normalize', or 'center'
+      },
+      // Color: Second categorical field (stacking)
+      color: {
+        field: categoryField2,
+        type: 'nominal',
+        legend: {
+          title: categoryName2,
+          orient: styles.legendPosition?.toLowerCase() || 'bottom',
+        },
+      },
+      // Optional: Add tooltip with all information
+      tooltip: [
+        { field: categoryField1, type: 'nominal', title: categoryName1 },
+        { field: categoryField2, type: 'nominal', title: categoryName2 },
+        { field: metricField, type: 'quantitative', title: metricName },
+      ],
+    },
+  };
+
+  // Add threshold line if enabled
+  if (styles.thresholdLine?.show) {
+    spec.layer = [
+      { mark: spec.mark, encoding: spec.encoding },
+      {
+        mark: {
+          type: 'rule',
+          color: styles.thresholdLine.color || '#E7664C',
+          strokeWidth: styles.thresholdLine.width || 1,
+          strokeDash: getStrokeDash(styles.thresholdLine.style),
+          tooltip: false,
+        },
+        encoding: {
+          y: { value: styles.thresholdLine.value || 0 },
+        },
+      },
+    ];
+    delete spec.mark;
+    delete spec.encoding;
+  }
+
+  return spec;
 };

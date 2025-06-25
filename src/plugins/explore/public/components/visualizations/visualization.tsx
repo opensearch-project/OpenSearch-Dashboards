@@ -18,6 +18,8 @@ export interface VisualizationProps<T extends ChartType> {
   styleOptions: ChartStyleControlMap[T];
   visualizationData: VisualizationTypeResult<T>;
   onStyleChange: (newOptions: Partial<ChartStyleControlMap[T]>) => void;
+  selectedChartType?: string;
+  onChartTypeChange?: (chartType: ChartType) => void;
   ReactExpressionRenderer: React.ComponentType<{
     expression: string;
     searchContext: IExpressionLoaderParams['searchContext'];
@@ -30,8 +32,11 @@ export const Visualization = <T extends ChartType>({
   styleOptions,
   visualizationData,
   onStyleChange,
+  selectedChartType,
+  onChartTypeChange,
   ReactExpressionRenderer,
 }: VisualizationProps<T>) => {
+  const availableChartTypes = visualizationData.availableChartTypes;
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
@@ -46,17 +51,18 @@ export const Visualization = <T extends ChartType>({
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiPanel className="exploreVisStylePanel" data-test-subj="exploreStylePanel">
-          <div className="exploreVisStylePanel__inner">
-            {visualizationData.visualizationType?.ui.style.render({
-              styleOptions,
-              onStyleChange,
-              numericalColumns: visualizationData.numericalColumns,
-              categoricalColumns: visualizationData.categoricalColumns,
-              dateColumns: visualizationData.dateColumns,
-            })}
-          </div>
-        </EuiPanel>
+        <div data-test-subj="exploreStylePanel" className="exploreVisStylePanel">
+          {visualizationData.visualizationType?.ui.style.render({
+            styleOptions,
+            onStyleChange,
+            numericalColumns: visualizationData.numericalColumns,
+            categoricalColumns: visualizationData.categoricalColumns,
+            dateColumns: visualizationData.dateColumns,
+            availableChartTypes,
+            selectedChartType,
+            onChartTypeChange,
+          })}
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

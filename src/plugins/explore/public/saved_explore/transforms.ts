@@ -8,6 +8,7 @@ import { IndexPattern } from '../../../data/public';
 import { InvalidJSONProperty } from '../../../opensearch_dashboards_utils/public';
 import { LegacyState } from '../application/utils/state_management/slices/legacy_slice';
 import { SavedExplore, SavedExploreAttributes } from '../types/saved_explore_types';
+import { UIState } from '../application/utils/state_management/slices/ui_slice';
 
 export interface ExploreState {
   legacy: LegacyState;
@@ -17,13 +18,18 @@ export interface ExploreState {
 
 export const saveStateToSavedObject = (
   obj: SavedExplore,
-  state: ExploreState,
-  indexPattern: IndexPattern
+  uiState?: UIState,
+  indexPattern?: IndexPattern
 ): SavedExplore => {
   // Serialize the state into the saved object
-  obj.legacyState = JSON.stringify(state.legacy);
-  obj.uiState = JSON.stringify(state.ui || {});
-  obj.queryState = JSON.stringify(state.query || {});
+  // TODO: Add type to saved object
+  obj.type = '';
+  obj.visualization = JSON.stringify({
+    // TODO: Add title to saved object
+    title: '',
+    chartType: uiState?.chartType ?? 'line',
+    params: uiState?.styleOptions ?? {},
+  });
   obj.version = 1;
 
   return obj;
