@@ -19,7 +19,7 @@ export interface VisualizationProps<T extends ChartType> {
   visualizationData: VisualizationTypeResult<T>;
   onStyleChange: (newOptions: Partial<ChartStyleControlMap[T]>) => void;
   selectedChartType?: string;
-  onChartTypeChange?: (chartType: string) => void;
+  onChartTypeChange?: (chartType: ChartType) => void;
   ReactExpressionRenderer: React.ComponentType<{
     expression: string;
     searchContext: IExpressionLoaderParams['searchContext'];
