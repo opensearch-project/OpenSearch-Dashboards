@@ -153,6 +153,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   // the global language id, which won't work in dashboard with different
   // visualizations.
   private getLanguageId(request: Parameters<ISearchStart['search']>[0]): string | undefined {
+    // TODO verify should it be queries.at(-1)
     if (request.params?.body?.query?.queries?.[0]?.language)
       return request.params.body.query.queries[0].language;
     if (request.params?.body?.query?.bool) return 'kuery';

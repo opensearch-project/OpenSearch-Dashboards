@@ -67,7 +67,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    const dataset = this.queryService.queryString.getQuery().dataset;
+    const dataset = this.getQuery(request).dataset;
     const datasetType = dataset?.type;
     let strategy = datasetType === DATASET.S3 ? SEARCH_STRATEGY.PPL_ASYNC : SEARCH_STRATEGY.PPL;
 
@@ -95,16 +95,19 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return this.runSearch(request, options.abortSignal, strategy);
   }
 
-  private buildQuery(request: IOpenSearchDashboardsSearchRequest) {
+  private getQuery(request: IOpenSearchDashboardsSearchRequest): Query {
     // Use query from request if available, otherwise fall back to queryStringManager
-    const query =
-      request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
+    return request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
+  }
+
+  private buildQuery(request: IOpenSearchDashboardsSearchRequest) {
+    const query = this.getQuery(request);
     // Only append filters if query is running search command (e.g. not describe command)
     if (!isPPLSearchQuery(query)) return query;
 
     const filters = this.queryService.filterManager.getFilters();
     const index = request.params?.index
-      ? this.indexPatterns.getByTitle(request.params.index)
+      ? this.indexPatterns.getByTitle(request.params.index, true)
       : undefined;
     const ignoreFilterIfFieldNotInIndex = this.uiSettings.get(
       UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
@@ -116,9 +119,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       commands.splice(1, 0, filterClause);
     }
 
-    const dataset = this.queryService.queryString.getQuery().dataset;
     const datasetService = this.queryService.queryString.getDatasetService();
-    // FIXME the time field is coming from global dataset
+    const dataset = query.dataset;
     if (
       dataset &&
       dataset.timeFieldName &&
