@@ -29,9 +29,8 @@ import {
 } from '../../../../../utils/state_management/selectors';
 import { SavedExplore } from '../../../../../../saved_explore';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
-import { TopNavMenuData } from '../../../../../../../../navigation/public';
 import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
-import { selectStyleOptions } from '../../../../../utils/state_management/selectors';
+import { selectUIState } from '../../../../../utils/state_management/selectors';
 
 export interface TopNavProps {
   opts: {
@@ -59,9 +58,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   } = services;
   const dispatch = useDispatch();
 
-  const styleOptions = useNewStateSelector(selectStyleOptions);
-
-  const [topNavLinks, setTopNavLinks] = useState<TopNavMenuData[]>();
+  const uiState = useNewStateSelector(selectUIState);
 
   const savedExploreId = useSelector(selectSavedSearch);
   const savedQueryId = useSelector(selectSavedQuery);
@@ -125,22 +122,20 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const showActionsInGroup = uiSettings.get('home:useNewHomePage');
   // const showActionsInGroup = false; // Use portal approach to display actions in nav bar
 
-  useEffect(() => {
-    setTopNavLinks(
-      getTopNavLinks(
-        services,
-        inspectorAdapters,
-        startSyncingQueryStateWithUrl,
-        searchContext,
-        indexPattern,
-        savedExplore ? saveStateToSavedObject(savedExplore, styleOptions, indexPattern) : undefined
-      )
+  const topNavLinks = useMemo(() => {
+    return getTopNavLinks(
+      services,
+      inspectorAdapters,
+      startSyncingQueryStateWithUrl,
+      searchContext,
+      indexPattern,
+      savedExplore ? saveStateToSavedObject(savedExplore, uiState, indexPattern) : undefined
     );
   }, [
     savedExplore,
     indexPattern,
     searchContext,
-    styleOptions,
+    uiState,
     inspectorAdapters,
     services,
     startSyncingQueryStateWithUrl,

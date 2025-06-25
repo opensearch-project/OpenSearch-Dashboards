@@ -12,7 +12,7 @@ import { createCacheKey } from '../utils/query_utils';
  * Basic selectors
  */
 const selectQueryState = (state: RootState) => state.query;
-const selectUIState = (state: RootState) => state.ui;
+export const selectUIState = (state: RootState) => state.ui;
 const selectResultsState = (state: RootState) => state.results;
 const selectLegacyState = (state: RootState) => state.legacy;
 const selectTransactionState = (state: RootState) => state.ui.transaction;
@@ -55,6 +55,8 @@ export const selectStyleOptions = createSelector(
   [selectUIState],
   (uiState) => uiState.styleOptions
 );
+
+export const selectChartType = createSelector([selectUIState], (uiState) => uiState.chartType);
 
 // Backward compatibility selector for components that still check isLoading
 export const selectIsLoading = createSelector(

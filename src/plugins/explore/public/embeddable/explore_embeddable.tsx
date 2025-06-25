@@ -214,7 +214,8 @@ export class ExploreEmbeddable
     const visualizationData = getVisualizationType(rows, fieldSchema);
     const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
     if (displayVis) {
-      const selectedChartType = visualizationData?.visualizationType?.type || 'line';
+      const selectedChartType =
+        JSON.parse(this.savedExplore.visualization || '{}').chartType ?? 'line';
       const rule = this.services.visualizationRegistry
         .start()
         .getRules()

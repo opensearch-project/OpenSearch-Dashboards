@@ -24,8 +24,15 @@ import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
 import { RootState } from '../../application/utils/state_management/store';
-import { selectRows, selectStyleOptions } from '../../application/utils/state_management/selectors';
-import { setStyleOptions } from '../../application/utils/state_management/slices/ui_slice';
+import {
+  selectRows,
+  selectStyleOptions,
+  selectChartType,
+} from '../../application/utils/state_management/selectors';
+import {
+  setStyleOptions,
+  setChartType as setSelectedChartType,
+} from '../../application/utils/state_management/slices/ui_slice';
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -40,6 +47,7 @@ export const VisualizationContainer = () => {
 
   const rows = useSelector(selectRows);
   const styleOptions = useSelector(selectStyleOptions);
+  const selectedChartType = useSelector(selectChartType);
 
   const fieldSchema = useSelector((state: RootState) => {
     const executionCacheKeys = state.ui?.executionCacheKeys || [];
@@ -65,7 +73,6 @@ export const VisualizationContainer = () => {
     return getVisualizationType(rows, fieldSchema);
   }, [fieldSchema, rows]);
 
-  const [selectedChartType, setSelectedChartType] = useState<string | undefined>(undefined);
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -86,9 +93,9 @@ export const VisualizationContainer = () => {
   // Initialize selectedChartType when visualizationData changes
   useEffect(() => {
     if (visualizationData && visualizationData.visualizationType) {
-      setSelectedChartType(visualizationData.visualizationType.type);
+      dispatch(setSelectedChartType(visualizationData.visualizationType.type));
     }
-  }, [visualizationData]);
+  }, [visualizationData, dispatch]);
 
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
@@ -172,8 +179,8 @@ export const VisualizationContainer = () => {
     }
   };
 
-  const handleChartTypeChange = (chartType: string) => {
-    setSelectedChartType(chartType);
+  const handleChartTypeChange = (chartType: ChartType) => {
+    dispatch(setSelectedChartType(chartType));
 
     // Get the visualization configuration for the selected chart type
     const chartConfig = visualizationRegistry.getVisualizationConfig(chartType);

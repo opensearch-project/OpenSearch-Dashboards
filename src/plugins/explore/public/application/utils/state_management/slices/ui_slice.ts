@@ -22,6 +22,7 @@ export interface UIState {
   };
   prompt?: string; // Optional prompt for query panel
   styleOptions: ChartStyleControlMap[ChartType] | undefined;
+  chartType: ChartType;
 }
 
 const initialState: UIState = {
@@ -36,6 +37,7 @@ const initialState: UIState = {
   },
   prompt: '', // Initialize prompt as empty string
   styleOptions: undefined,
+  chartType: 'line',
 };
 
 const uiSlice = createSlice({
@@ -62,6 +64,9 @@ const uiSlice = createSlice({
     },
     setStyleOptions: (state, action: PayloadAction<ChartStyleControlMap[ChartType]>) => {
       state.styleOptions = action.payload;
+    },
+    setChartType: (state, action: PayloadAction<ChartType>) => {
+      state.chartType = action.payload;
     },
     // Transaction actions
     startTransaction: (
@@ -92,5 +97,6 @@ export const {
   commitTransaction,
   rollbackTransaction,
   setStyleOptions,
+  setChartType,
 } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
