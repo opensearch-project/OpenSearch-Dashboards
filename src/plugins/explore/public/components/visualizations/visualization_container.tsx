@@ -19,7 +19,7 @@ import {
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
-import { VisColumn } from './types';
+import { VisColumn, VisualizationRule } from './types';
 import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
@@ -80,7 +80,6 @@ export const VisualizationContainer = () => {
     }
   }, [visualizationData]);
 
-  // Get the visualization registry
   const visualizationRegistry = useVisualizationRegistry();
 
   // Initialize selectedChartType when visualizationData changes
@@ -89,11 +88,6 @@ export const VisualizationContainer = () => {
       setSelectedChartType(visualizationData.visualizationType.type);
     }
   }, [visualizationData]);
-
-  // Handle chart type change
-  const handleChartTypeChange = (chartType: string) => {
-    setSelectedChartType(chartType);
-  };
 
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
@@ -107,7 +101,6 @@ export const VisualizationContainer = () => {
       return null;
     }
 
-    // Get the selected rule id
     const rule = visualizationRegistry.getRules().find((r) => r.id === visualizationData.ruleId);
 
     if (!rule || !rule.toExpression) {
@@ -173,6 +166,23 @@ export const VisualizationContainer = () => {
   const handleStyleChange = (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {
     if (styleOptions) {
       setStyleOptions({ ...styleOptions, ...newOptions } as ChartStyleControlMap[ChartType]);
+    }
+  };
+
+  const handleChartTypeChange = (chartType: string) => {
+    setSelectedChartType(chartType);
+
+    // Get the visualization configuration for the selected chart type
+    const chartConfig = visualizationRegistry.getVisualizationConfig(chartType);
+
+    // Update the style options with the defaults for the selected chart type
+    if (chartConfig && chartConfig.ui && chartConfig.ui.style) {
+      setStyleOptions(chartConfig.ui.style.defaults);
+
+      // Update the visualizationData with the new visualization type
+      if (visualizationData) {
+        visualizationData.visualizationType = chartConfig;
+      }
     }
   };
 

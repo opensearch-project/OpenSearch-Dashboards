@@ -9,7 +9,16 @@ import {
   createLineBarChart,
   createMultiLineChart,
   createFacetedMultiLineChart,
+  createCategoryLineChart,
 } from './line/to_expression';
+
+import {
+  createSimpleAreaChart,
+  createMultiAreaChart,
+  createFacetedMultiAreaChart,
+  createStackedAreaChart,
+  createCategoryAreaChart,
+} from './area/to_expression';
 
 import { createHeatmapWithBin, createRegularHeatmap } from './heatmap/to_expression';
 import { createPieSpec } from './pie/to_expression';
@@ -56,8 +65,7 @@ const oneMetricOneDateRule: VisualizationRule = {
       case 'line':
         return createSimpleLineChart(transformedData, numericalColumns, dateColumns, styleOptions);
       case 'area':
-        // TODO: Implement area chart creation
-        return;
+        return createSimpleAreaChart(transformedData, numericalColumns, dateColumns, styleOptions);
       case 'bar':
         return createTimeBarChart(transformedData, numericalColumns, dateColumns, styleOptions);
       default:
@@ -123,8 +131,13 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           styleOptions
         );
       case 'area':
-        // TODO: Implement area chart creation
-        return;
+        return createMultiAreaChart(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
       case 'bar':
         return createGroupedTimeBarChart(
           transformedData,
@@ -176,8 +189,13 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           styleOptions
         );
       case 'area':
-        // TODO: Implement area chart creation
-        return;
+        return createFacetedMultiAreaChart(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
       case 'bar':
         return createFacetedTimeBarChart(
           transformedData,
@@ -253,8 +271,13 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
           styleOptions
         );
       case 'area':
-        // TODO: Implement stack area chart creation
-        return;
+        return createStackedAreaChart(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
       default:
         return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
     }
@@ -297,8 +320,13 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
           styleOptions
         );
       case 'area':
-        // TODO: Implement stack area chart creation
-        return;
+        return createStackedAreaChart(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
       default:
         return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
     }
@@ -326,14 +354,6 @@ const oneMetricOneCateRule: VisualizationRule = {
     chartType = 'pie'
   ) => {
     switch (chartType) {
-      case 'pie':
-        return createPieSpec(
-          transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          styleOptions
-        );
       case 'bar':
         return createBarSpec(
           transformedData,
@@ -342,15 +362,32 @@ const oneMetricOneCateRule: VisualizationRule = {
           dateColumns,
           styleOptions
         );
-      case 'line':
-        // TODO: Implement area chart creation
-        return;
-      case 'area':
-        // TODO: Implement bar chart creation
-        return;
-      default:
-        // TODO: when bar is implemented, bar will take higher priority
+      case 'pie':
         return createPieSpec(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
+      case 'line':
+        return createCategoryLineChart(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
+      case 'area':
+        return createCategoryAreaChart(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
+        );
+      default:
+        return createBarSpec(
           transformedData,
           numericalColumns,
           categoricalColumns,
