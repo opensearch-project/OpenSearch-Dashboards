@@ -493,17 +493,32 @@ export class ExplorePlugin
         visualizations: {
           docTypes: [SAVED_OBJECT_TYPE],
           toListItem: ({ id, attributes, updated_at: updatedAt }) => {
+            let iconType = '';
+            let chartName = '';
+            try {
+              const vis = JSON.parse(attributes.visualization as string);
+              const chart = this.visualizationRegistryService
+                .getRegistry()
+                .getAvailableChartTypes()
+                .find((t) => t.type === vis.chartType);
+              if (chart) {
+                iconType = chart.icon;
+                chartName = chart.name;
+              }
+            } catch (e) {
+              iconType = '';
+            }
             return {
               description: `${attributes?.description || ''}`,
               // TODO: it should navigate to different explore flavor based on the `attributes`
               editApp: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
               editUrl: `/view/${encodeURIComponent(id)}`,
               // TODO: the icon should be dynamic based on the discover visualization chart type
-              icon: 'visualizeApp',
+              icon: iconType,
               id,
               savedObjectType: SAVED_OBJECT_TYPE,
               title: `${attributes?.title || ''}`,
-              typeTitle: 'Visualize with Discover',
+              typeTitle: chartName,
               updated_at: updatedAt,
               stage: 'production',
             };
