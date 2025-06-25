@@ -434,6 +434,8 @@ export { CoreUsageDataStart } from './core_usage_data';
  * @public
  */
 export interface RequestHandlerContext {
+  query_panel: any;
+  query_assist: any;
   core: {
     savedObjects: {
       client: SavedObjectsClientContract;

@@ -8,7 +8,8 @@ import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiPanel } from '@elastic/eui';
 
-import { useGenerateQuery } from '../../../../query_enhancements/public';
+import { useGenerateQuery } from './hooks/useGenerateQuery';
+// import { useGenerateQuery } from '../../../../query_enhancements/public';
 import { QueryPanelLayout } from './layout';
 import { ExploreServices } from '../../types';
 
@@ -242,30 +243,15 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
     // setAgentError(undefined); TODO: Handle agent error display
 
     // Prepare parameters for the API
-    const params: PromptParameters = {
+    const params = {
       question: promptParam,
       index: dataset.title,
       language: query.language,
       dataSourceId: dataset?.dataSource?.id,
     };
-    try {
-      const response = await services.http.post('/api/assistant/assist/generate', {
-        body: JSON.stringify(params),
-      });
-      if (response?.query) {
-        // Update local state with the generated query
-        setLocalQuery(response.query);
+    const { response, error } = await generateQuery(params); // Call the NL API
 
-        // Run the generated query
-        handleRun(response.query);
-
-        setIsDualEditor(true);
-        setIsEditorReadOnly(true);
-
-        if (response.timeRange) timefilter.setTime(response.timeRange);
-        setCallOutType('query_generated');
-      }
-    } catch (error) {
+    if (error) {
       if (error instanceof ProhibitedQueryError) {
         setCallOutType('invalid_query');
       } else if (error instanceof AgentError) {
@@ -276,6 +262,18 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
       }
 
       setLocalQuery(''); // Clear query on error
+    } else if (response) {
+      // Update local state with the generated query
+      setLocalQuery(response.query);
+
+      // Run the generated query
+      handleRun(response.query);
+
+      setIsDualEditor(true);
+      setIsEditorReadOnly(true);
+
+      if (response.timeRange) timefilter.setTime(response.timeRange);
+      setCallOutType('query_generated');
     }
   };
 

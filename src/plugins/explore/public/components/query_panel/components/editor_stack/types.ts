@@ -24,7 +24,6 @@ export interface PromptParameters {
   question: string;
   index: string;
   language: string;
-  // for MDS
   dataSourceId?: string;
 }
 
