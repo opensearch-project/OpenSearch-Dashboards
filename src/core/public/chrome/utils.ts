@@ -274,6 +274,17 @@ export async function searchNavigationLinks(
       });
   });
 
+  console.log(
+    'allSearchAbleLinks: ',
+    allSearchAbleLinks.map((link) => {
+      return {
+        id: link.id,
+        title: link.title,
+        description: link.description,
+      };
+    })
+  );
+
   const allSearchAbleLinkIds = new Set(allSearchAbleLinks.map((link) => link.id));
 
   const keywordMatchResult = allSearchAbleLinks.filter((link) => {

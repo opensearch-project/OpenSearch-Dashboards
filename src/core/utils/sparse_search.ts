@@ -88,6 +88,6 @@ export class SparseSearch {
     return results
       .sort((a, b) => b.score - a.score)
       .slice(0, topK)
-      .filter((result) => result.score !== 0);
+      .filter((result) => result.score >= 1);
   }
 }
