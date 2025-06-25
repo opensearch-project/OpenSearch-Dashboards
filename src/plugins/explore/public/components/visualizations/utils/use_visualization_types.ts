@@ -48,7 +48,7 @@ export interface StyleControlsProps<T extends AllChartStyleControls> {
   dateColumns?: VisColumn[];
   availableChartTypes?: ChartTypeMapping[];
   selectedChartType?: string;
-  onChartTypeChange?: (chartType: string) => void;
+  onChartTypeChange?: (chartType: ChartType) => void;
 }
 
 export interface VisualizationType<T extends ChartType> {

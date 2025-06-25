@@ -6,6 +6,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
+import { useSelector as useNewStateSelector } from 'react-redux';
 import { Query, TimeRange } from '../../../../../../../../data/common';
 import { QueryStatus, useSyncQueryStateWithUrl } from '../../../../../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../../../../../opensearch_dashboards_utils/public';
@@ -28,6 +29,8 @@ import {
 } from '../../../../../utils/state_management/selectors';
 import { SavedExplore } from '../../../../../../saved_explore';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
+import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
+import { selectUIState } from '../../../../../utils/state_management/selectors';
 
 export interface TopNavProps {
   opts: {
@@ -54,6 +57,8 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     getSavedExploreById,
   } = services;
   const dispatch = useDispatch();
+
+  const uiState = useNewStateSelector(selectUIState);
 
   const savedExploreId = useSelector(selectSavedSearch);
   const savedQueryId = useSelector(selectSavedQuery);
@@ -117,14 +122,24 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const showActionsInGroup = uiSettings.get('home:useNewHomePage');
   // const showActionsInGroup = false; // Use portal approach to display actions in nav bar
 
-  const topNavLinks = getTopNavLinks(
-    services,
-    inspectorAdapters,
-    startSyncingQueryStateWithUrl,
-    searchContext,
+  const topNavLinks = useMemo(() => {
+    return getTopNavLinks(
+      services,
+      inspectorAdapters,
+      startSyncingQueryStateWithUrl,
+      searchContext,
+      indexPattern,
+      savedExplore ? saveStateToSavedObject(savedExplore, uiState, indexPattern) : undefined
+    );
+  }, [
+    savedExplore,
     indexPattern,
-    savedExplore // Provide empty object if savedSearch is null
-  );
+    searchContext,
+    uiState,
+    inspectorAdapters,
+    services,
+    startSyncingQueryStateWithUrl,
+  ]);
 
   // Replace data$ subscription with Redux state-based queryStatus
   useEffect(() => {
