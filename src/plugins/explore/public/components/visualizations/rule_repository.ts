@@ -48,6 +48,7 @@ const oneMetricOneDateRule: VisualizationRule = {
   description: 'Time series visualization for single metric',
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && date.length === 1 && categorical.length === 0,
+  matchIndex: [1, 0, 1],
   chartTypes: [
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
@@ -83,6 +84,7 @@ const twoMetricOneDateRule: VisualizationRule = {
   matches: (numerical, categorical, date) =>
     numerical.length === 2 && categorical.length === 0 && date.length === 1,
   chartTypes: [{ ...CHART_METADATA.line, priority: 100 }],
+  matchIndex: [2, 0, 1],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -108,6 +110,7 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
   description: 'Time series visualization with one metric and one category',
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && categorical.length === 1 && date.length === 1,
+  matchIndex: [1, 1, 1],
   chartTypes: [
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
@@ -166,6 +169,7 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
   description: 'Multiple time series visualizations',
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && categorical.length === 2 && date.length === 1,
+  matchIndex: [1, 2, 1],
   chartTypes: [
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
@@ -224,6 +228,7 @@ const threeMetricsRule: VisualizationRule = {
   matches: (numerical, categorical, date) =>
     numerical.length === 3 && date.length === 0 && categorical.length === 0,
   chartTypes: [{ ...CHART_METADATA.heatmap, priority: 100 }],
+  matchIndex: [3, 0, 0],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -247,6 +252,7 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
     (numerical[0].uniqueValuesCount >= 7 ||
       categorical[0].uniqueValuesCount >= 7 ||
       categorical[1].uniqueValuesCount >= 7),
+  matchIndex: [1, 2, 0],
   chartTypes: [
     { ...CHART_METADATA.heatmap, priority: 100 },
     { ...CHART_METADATA.bar, priority: 80 },
@@ -296,6 +302,7 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
     numerical[0].uniqueValuesCount < 7 &&
     categorical[0].uniqueValuesCount < 7 &&
     categorical[1].uniqueValuesCount < 7,
+  matchIndex: [1, 2, 0],
   chartTypes: [
     { ...CHART_METADATA.bar, priority: 100 },
     { ...CHART_METADATA.heatmap, priority: 80 },
@@ -340,6 +347,7 @@ const oneMetricOneCateRule: VisualizationRule = {
   description: 'Multiple visualizations for one metric and one category',
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && date.length === 0 && categorical.length === 1,
+  matchIndex: [1, 1, 0],
   chartTypes: [
     { ...CHART_METADATA.bar, priority: 100 },
     { ...CHART_METADATA.pie, priority: 80 },
@@ -409,6 +417,7 @@ const oneMetricRule: VisualizationRule = {
     categorical.length === 0 &&
     numerical[0].validValuesCount === 1,
   chartTypes: [{ ...CHART_METADATA.metric, priority: 100 }],
+  matchIndex: [1, 0, 0],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -434,6 +443,7 @@ const twoMetricRule: VisualizationRule = {
   matches: (numerical, categorical, date) =>
     numerical.length === 2 && date.length === 0 && categorical.length === 0,
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
+  matchIndex: [2, 0, 0],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -459,6 +469,7 @@ const twoMetricOneCateRule: VisualizationRule = {
   matches: (numerical, categorical, date) =>
     numerical.length === 2 && date.length === 0 && categorical.length === 1,
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
+  matchIndex: [2, 1, 0],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -484,6 +495,7 @@ const threeMetricOneCateRule: VisualizationRule = {
   matches: (numerical, categorical, date) =>
     numerical.length === 3 && date.length === 0 && categorical.length === 1,
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
+  matchIndex: [3, 1, 0],
   toExpression: (
     transformedData,
     numericalColumns,
