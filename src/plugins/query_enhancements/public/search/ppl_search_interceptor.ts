@@ -55,7 +55,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       },
     };
 
-    const query = this.buildQuery();
+    // Use query from request if available, otherwise fall back to queryStringManager
+    const requestQuery =
+      request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
+    const query = this.buildQuery(requestQuery);
 
     return fetch(context, query, this.getAggConfig(searchRequest, query));
   }
@@ -88,9 +91,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return this.runSearch(request, options.abortSignal, strategy);
   }
 
-  private buildQuery() {
+  private buildQuery(query: Query) {
     const { queryString } = this.queryService;
-    const query: Query = queryString.getQuery();
     const dataset = query.dataset;
     if (!dataset || !dataset.timeFieldName) return query;
     const datasetService = queryString.getDatasetService();
