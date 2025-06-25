@@ -27,11 +27,12 @@ import {
   selectSavedQuery,
   selectSavedSearch,
 } from '../../../../../utils/state_management/selectors';
-import { SavedExplore } from '../../../../../../saved_explore';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
 import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
 import { selectUIState } from '../../../../../utils/state_management/selectors';
 import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
+import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
+import { getSavedExploreIdFromUrl } from '../../../../../utils/state_management/utils/url';
 
 export interface TopNavProps {
   opts: {
@@ -56,16 +57,17 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     data,
     uiSettings,
     history,
-    getSavedExploreById,
   } = services;
   const dispatch = useDispatch();
+  const savedExploreIdFromUrl = getSavedExploreIdFromUrl();
 
   const uiState = useNewStateSelector(selectUIState);
 
   const savedExploreId = useSelector(selectSavedSearch);
   const savedQueryId = useSelector(selectSavedQuery);
   const isLoading = useSelector((state: any) => state.ui.status === ResultStatus.LOADING);
-
+  const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
+  // useSavedExplore(savedExploreIdFromUrl);
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -85,7 +87,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
   const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
-  const [savedExplore, setSavedExplore] = useState<SavedExplore>();
+  // const [savedExplore, setSavedExplore] = useState<SavedExplore>();
 
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
@@ -100,14 +102,6 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
       subscription.unsubscribe();
     };
   }, [services.data.query.state$]);
-
-  useEffect(() => {
-    const loadSavedExplore = async () => {
-      const savedObject = await getSavedExploreById(savedExploreId);
-      setSavedExplore(savedObject);
-    };
-    loadSavedExplore();
-  }, [savedExploreId, getSavedExploreById]);
 
   // Create osdUrlStateStorage from storage
   const osdUrlStateStorage = useMemo(() => {
