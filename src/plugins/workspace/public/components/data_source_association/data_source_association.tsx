@@ -152,7 +152,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
       fill
       iconType="arrowDown"
       iconSide="right"
-      onClick={openPopover}
+      onClick={() => setIsOpen((prevState) => !prevState)}
     >
       <EuiIcon type="plusInCircle" />{' '}
       {i18n.translate('workspace.dataSources.associationButton.label', {
