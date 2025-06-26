@@ -36,12 +36,11 @@ import { ResultStatus, QueryStatus } from '../../application/utils/state_managem
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 
 export interface QueryPanelProps {
-  datePickerRef?: React.RefObject<HTMLDivElement>;
   services: ExploreServices;
   indexPattern: IndexPattern;
 }
 
-const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexPattern }) => {
+const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   const dispatch = useDispatch();
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
 
@@ -290,7 +289,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
             languageType={editorLanguageType}
             noInput={noInput}
             showDatasetFields={showDatasetFields}
-            datePickerRef={datePickerRef}
             services={services}
             timefilter={timefilter}
             onRunClick={handleRunClick}

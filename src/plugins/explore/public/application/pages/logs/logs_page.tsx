@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './logs_page.scss';
+import '../explore_page.scss';
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   EuiErrorBoundary,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiResizableContainer,
   EuiPage,
   EuiPageBody,
@@ -61,7 +59,6 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     isLoading: indexPatternLoading,
     error: indexPatternError,
   } = useIndexPatternContext();
-  const showActionsInGroup = services.uiSettings.get('home:useNewHomePage', false);
 
   // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
@@ -93,11 +90,6 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   useTimefilterSubscription(services);
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 
-  // TODO: Clean out refs for portal positioning if not needed.
-  const topLinkRef = useRef<HTMLDivElement>(null);
-  const datasetSelectorRef = useRef<HTMLDivElement>(null);
-  const datePickerRef = useRef<HTMLDivElement>(null);
-
   // Create TopNav props - use portal approach for precise positioning
   const topNavProps: TopNavProps = {
     opts: {
@@ -107,11 +99,6 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
         if (dateRange && services?.data?.query?.timefilter?.timefilter) {
           services.data.query.timefilter.timefilter.setTime(dateRange);
         }
-      },
-      optionalRef: {
-        topLinkRef,
-        datasetSelectorRef,
-        datePickerRef,
       },
     },
     showSaveQuery: true,
@@ -233,35 +220,9 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
-        {/* Nav bar structure exactly like data_explorer */}
-        <EuiFlexGroup
-          direction="row"
-          className={showActionsInGroup ? '' : 'mainPage navBar'}
-          gutterSize="none"
-          alignItems="center"
-          justifyContent="spaceBetween"
-        >
-          {!showActionsInGroup && (
-            <EuiFlexItem grow={false}>
-              <div ref={topLinkRef} />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <div ref={datasetSelectorRef} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div ref={datePickerRef} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
-            {/* HeaderDatasetSelector component - renders dataset selector in portal */}
-            <HeaderDatasetSelector datasetSelectorRef={datasetSelectorRef} />
+            <HeaderDatasetSelector />
 
             <NewExperienceBanner />
 
@@ -272,11 +233,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
               ) : indexPatternError ? (
                 <div>Error loading IndexPattern: {indexPatternError}</div>
               ) : indexPattern ? (
-                <QueryPanel
-                  datePickerRef={datePickerRef}
-                  services={services}
-                  indexPattern={indexPattern}
-                />
+                <QueryPanel services={services} indexPattern={indexPattern} />
               ) : (
                 <div>No IndexPattern available</div>
               )}
