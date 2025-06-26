@@ -9,7 +9,6 @@ import React, { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   EuiErrorBoundary,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiResizableContainer,
@@ -39,7 +38,10 @@ import { DiscoverNoIndexPatterns } from '../../legacy/discover/application/compo
 import { DiscoverUninitialized } from '../../legacy/discover/application/components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';
 import { DiscoverNoResults } from '../../legacy/discover/application/components/no_results/no_results';
-import { executeQueries } from '../../utils/state_management/actions/query_actions';
+import {
+  executeQueries,
+  defaultPrepareQuery,
+} from '../../utils/state_management/actions/query_actions';
 import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
 
 /**
@@ -62,16 +64,16 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
     return state.ui?.status || ResultStatus.UNINITIALIZED;
   });
   const rows = useSelector((state: RootState) => {
-    const executionCacheKeys = state.ui?.executionCacheKeys || [];
-    if (executionCacheKeys.length === 0) {
-      return [];
-    }
+    const query = state.query;
+    const results = state.results;
 
-    // Use default query cacheKey
-    const cacheKey = executionCacheKeys[0];
-    const results = state.results[cacheKey];
-    if (results) {
-      const hits = results.hits?.hits || [];
+    // Use default cache key computation - pass query string only
+    const queryString = typeof query.query === 'string' ? query.query : '';
+    const cacheKey = defaultPrepareQuery(queryString);
+    const rawResults = cacheKey ? results[cacheKey] : null;
+
+    if (rawResults) {
+      const hits = rawResults.hits?.hits || [];
       return hits;
     }
 
