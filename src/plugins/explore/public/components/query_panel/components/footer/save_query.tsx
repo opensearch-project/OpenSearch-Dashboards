@@ -4,28 +4,31 @@
  */
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { cloneDeep } from 'lodash';
 import { EuiPopover, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import {
   SavedQueryManagementComponent,
   SaveQueryForm,
   SavedQueryMeta,
   SavedQuery,
-  SavedQueryService,
   TimefilterContract,
   // SavedQueryAttributes,
 } from '../../../../../../data/public';
+import { ExploreServices } from '../../../../types';
 import { Query } from '../../types';
 
 export const SaveQueryButton: React.FC<{
-  savedQueryService: SavedQueryService;
+  services: ExploreServices;
   showDatePicker: boolean;
   timeFilter: TimefilterContract;
   query: Query;
   onClearQuery: () => void;
   onLoadSavedQuery: (savedQuery: Query) => void;
-}> = ({ savedQueryService, showDatePicker, timeFilter, query, onClearQuery, onLoadSavedQuery }) => {
+}> = ({ services, showDatePicker, timeFilter, query, onClearQuery, onLoadSavedQuery }) => {
   // Saved Query UI state
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const savedQueryService = services.data.query.savedQueries;
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
@@ -76,11 +79,15 @@ export const SaveQueryButton: React.FC<{
 
   const handleSaveQuery = async (meta: SavedQueryMeta, saveAsNewParam?: boolean) => {
     try {
+      if (!query) return;
+      const clonedQuery = cloneDeep(query);
+      delete clonedQuery.dataset;
+
       // Compose the SavedQueryAttributes object
       const attributes: any = {
         title: meta.title,
         description: meta.description,
-        query: { ...query },
+        query: { ...clonedQuery },
       };
 
       if (meta.shouldIncludeTimeFilter && timeFilter && typeof timeFilter.getTime === 'function') {
@@ -103,11 +110,21 @@ export const SaveQueryButton: React.FC<{
       // Overwrite if editing, not if saving as new
       const overwrite = !(saveAsNewParam ?? saveAsNew);
       const savedQuery = await savedQueryService.saveQuery(attributes, { overwrite });
+      services.notifications.toasts.addSuccess(
+        `Your query "${savedQuery.attributes.title}" was saved`
+      );
+
       setLoadedSavedQuery(savedQuery);
       setIsSaveQueryFormOpen(false);
       // Optionally show a success notification
     } catch (error) {
-      // Optionally show an error notification
+      services.notifications.toasts.addDanger(
+        i18n.translate('data.search_bar.save_query.failedToSaveQuery', {
+          defaultMessage: 'An error occured while saving your query{errorMessage}',
+          values: { errorMessage: error.message ? `: ${error.message}` : '' },
+        })
+      );
+      throw error;
     }
   };
 
@@ -118,6 +135,9 @@ export const SaveQueryButton: React.FC<{
   const shouldRenderTimeFilterInSavedQueryForm = () => {
     return showDatePicker || (!showDatePicker && timeFilter.getTime() !== undefined);
   };
+
+  // eslint-disable-next-line no-console
+  console.log(loadedSavedQuery, 'loadedSavedQuery');
 
   return (
     <>

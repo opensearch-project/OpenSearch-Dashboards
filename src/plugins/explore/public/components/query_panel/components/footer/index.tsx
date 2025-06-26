@@ -99,7 +99,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SaveQueryButton
-                savedQueryService={services.data.query.savedQueries}
+                services={services}
                 showDatePicker={showDatePicker}
                 timeFilter={timefilter}
                 query={query}

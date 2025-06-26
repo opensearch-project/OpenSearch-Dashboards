@@ -215,6 +215,9 @@ export function SavedQueryManagementComponent({
     ));
   };
 
+  // eslint-disable-next-line no-console
+  console.log(savedQueries, 'savedqueryies');
+
   return useNewSavedQueryUI ? (
     <div
       className="osdSavedQueryManagement__popover"
