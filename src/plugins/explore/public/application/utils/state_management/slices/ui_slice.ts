@@ -15,7 +15,6 @@ export interface UIState {
   flavor: string;
   status: ResultStatus;
   showDatasetFields: boolean;
-  executionCacheKeys: string[];
   transaction: {
     inProgress: boolean;
     pendingActions: string[];
@@ -30,7 +29,6 @@ const initialState: UIState = {
   flavor: 'log',
   status: ResultStatus.UNINITIALIZED,
   showDatasetFields: true,
-  executionCacheKeys: [],
   transaction: {
     inProgress: false,
     pendingActions: [],
@@ -58,9 +56,6 @@ const uiSlice = createSlice({
     },
     setShowDatasetFields: (state, action: PayloadAction<boolean>) => {
       state.showDatasetFields = action.payload;
-    },
-    setExecutionCacheKeys: (state, action: PayloadAction<string[]>) => {
-      state.executionCacheKeys = action.payload;
     },
     setQueryPrompt: (state, action: PayloadAction<string>) => {
       state.prompt = action.payload;
@@ -95,7 +90,7 @@ export const {
   setFlavor,
   setStatus,
   setShowDatasetFields,
-  setExecutionCacheKeys,
+  setQueryPrompt,
   startTransaction,
   commitTransaction,
   rollbackTransaction,

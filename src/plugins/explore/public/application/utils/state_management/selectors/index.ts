@@ -6,7 +6,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { ResultStatus } from '../../../legacy/discover/application/view_components/utils/use_search';
-import { createCacheKey } from '../utils/query_utils';
 
 /**
  * Basic selectors
@@ -39,11 +38,6 @@ export const selectDataset = createSelector([selectQueryState], (queryState) => 
 export const selectActiveTabId = createSelector([selectUIState], (uiState) => uiState.activeTabId);
 
 export const selectQueryPrompt = createSelector([selectUIState], (uiState) => uiState.prompt);
-
-export const selectExecutionCacheKeys = createSelector(
-  [selectUIState],
-  (uiState) => uiState?.executionCacheKeys || []
-);
 
 export const selectStatus = createSelector([selectUIState], (uiState) => uiState.status);
 export const selectShowDataSetFields = createSelector(
@@ -84,47 +78,10 @@ export const selectActiveTab = createSelector(
   (activeTabId) => activeTabId // Return just the ID, components will resolve the tab via context
 );
 
-// These selectors are deprecated - use tabRegistry from context instead
-// export const selectAllTabs = ...
-// export const selectTabsForLanguage = ...
-
 /**
  * Results selectors
  */
-// Get the current cache key from executionCacheKeys (which uses real timeRange)
-export const selectCurrentCacheKey = createSelector([selectUIState], (uiState) => {
-  const executionCacheKeys = uiState?.executionCacheKeys || [];
-  return executionCacheKeys.length > 0 ? executionCacheKeys[0] : null;
-});
-
-export const selectResults = createSelector(
-  [selectResultsState, selectCurrentCacheKey],
-  (resultsState, cacheKey) => {
-    if (!cacheKey) return null;
-    return resultsState[cacheKey];
-  }
-);
-
-export const selectRows = createSelector([selectResults], (results) => {
-  if (results?.hits?.hits) {
-    return results.hits.hits;
-  }
-  return [];
-});
-
-export const selectTotalHits = createSelector([selectResults], (results) => {
-  if (results?.hits?.total !== undefined) {
-    return results.hits.total;
-  }
-  return 0;
-});
-
-export const selectFieldCounts = createSelector([selectResults], (results) => {
-  if ((results as any)?.fieldCounts) {
-    return (results as any).fieldCounts;
-  }
-  return {};
-});
+export const selectResults = createSelector([selectResultsState], (resultsState) => resultsState);
 
 /**
  * Legacy selectors
@@ -152,30 +109,4 @@ export const selectSavedQuery = createSelector(
 export const selectIsTransactionInProgress = createSelector(
   [selectTransactionState],
   (transactionState) => transactionState.inProgress
-);
-
-// Transaction error is now handled in UI state
-// Transaction error handling moved to toast notifications
-
-/**
- * Combined selectors
- * Note: These selectors are deprecated and should be replaced with context-based access
- */
-export const selectTabData = createSelector(
-  [selectActiveTabId, selectQuery, selectResults, selectStatus],
-  (activeTabId, query, results, status) => {
-    // Components should use tabRegistry from context to get tabDefinition
-    return {
-      tabId: activeTabId,
-      query,
-      results,
-      status,
-      preparedQuery: query, // Components should prepare query using tabDefinition from context
-    };
-  }
-);
-
-export const selectIndexPattern = createSelector(
-  [selectQueryState],
-  (queryState) => queryState.dataset // Components should get indexPattern from context if needed
 );
