@@ -1,0 +1,2 @@
+feat:
+- Support loading state from object ([#9978](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9978))
