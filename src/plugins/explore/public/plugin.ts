@@ -40,6 +40,8 @@ import {
   setServices as setLegacyServices,
   setUiActions,
   setExpressionLoader,
+  setDashboard,
+  setDashboardVersion,
 } from './application/legacy/discover/opensearch_dashboards_services';
 import { getPreloadedStore } from './application/utils/state_management/store';
 import { buildServices } from './build_services';
@@ -413,6 +415,9 @@ export class ExplorePlugin
 
   public start(core: CoreStart, plugins: ExploreStartDependencies): ExplorePluginStart {
     setUiActions(plugins.uiActions);
+    setDashboard(plugins.dashboard);
+    const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
+    setDashboardVersion({ version: opensearchDashboardsVersion });
 
     if (plugins.expressions) {
       setExpressionLoader(plugins.expressions.ExpressionLoader);

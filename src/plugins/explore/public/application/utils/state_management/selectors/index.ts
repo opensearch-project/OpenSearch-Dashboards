@@ -91,6 +91,11 @@ export const selectSavedSearch = createSelector(
   (legacyState) => legacyState.savedSearch
 );
 
+export const selectSavedSearchName = createSelector(
+  [selectLegacyState],
+  (legacyState) => legacyState.savedSearchName
+);
+
 export const selectSavedQuery = createSelector(
   [selectLegacyState],
   (legacyState) => legacyState.savedQuery
