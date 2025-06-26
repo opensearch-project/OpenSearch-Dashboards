@@ -10,7 +10,13 @@ import { createMetricConfig } from './metric/metric_vis_config';
 import { createPieConfig } from './pie/pie_vis_config';
 import { createAreaConfig } from './area/area_vis_config';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
-import { ChartTypeMapping, VisColumn, VisFieldType, VisualizationRule } from './types';
+import {
+  ChartMetadata,
+  ChartTypeMapping,
+  VisColumn,
+  VisFieldType,
+  VisualizationRule,
+} from './types';
 import { createBarConfig } from './bar/bar_vis_config';
 
 /**
@@ -52,6 +58,25 @@ export class VisualizationRegistry {
     // TODO: Handle the case where no rule matches, render empty state or default table visualization
     // No matching visualization type found
     return;
+  }
+
+  /**
+   * Get all available chart types based on registered rules
+   */
+  getAvailableChartTypes() {
+    const availableChartTypes: ChartMetadata[] = [];
+    for (const rule of this.rules) {
+      for (const chartType of rule.chartTypes) {
+        if (availableChartTypes.every((t) => t.type !== chartType.type)) {
+          availableChartTypes.push({
+            type: chartType.type,
+            name: chartType.name,
+            icon: chartType.icon,
+          });
+        }
+      }
+    }
+    return availableChartTypes;
   }
 
   /**
