@@ -53,11 +53,6 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 .mainPage {
   overflow-x: hidden;
   overflow-y: auto;
-
-  .navBar {
-    padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSizeM;
-    border-bottom: $euiBorderThin;
-  }
 }
 
 .dscCanvas {

@@ -34,7 +34,6 @@ export interface TopNavProps {
   opts: {
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-    optionalRef?: Record<string, React.RefObject<HTMLDivElement>>;
   };
   showSaveQuery: boolean;
 }
@@ -172,8 +171,6 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
       onQuerySubmit={opts.onQuerySubmit}
       savedQueryId={savedQueryId}
       onSavedQueryIdChange={updateSavedQueryId}
-      datasetSelectorRef={opts?.optionalRef?.datasetSelectorRef}
-      datePickerRef={opts?.optionalRef?.datePickerRef}
       groupActions={showActionsInGroup}
       screenTitle={screenTitle}
       queryStatus={queryStatus}
