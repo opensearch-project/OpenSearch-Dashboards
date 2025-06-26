@@ -32,7 +32,7 @@ let pplAnalyzer: ReturnType<typeof getPPLLanguageAnalyzer> | undefined;
 const mapPPLTokenToMonacoTokenType = (tokenType: string): string => {
   const type = tokenType.toUpperCase();
 
-  // Keywords (PPL commands, logical operators, etc.)
+  // PPL Command Keywords - Core query language commands
   if (
     [
       'SEARCH',
@@ -60,51 +60,112 @@ const mapPPLTokenToMonacoTokenType = (tokenType: string): string => {
       'KMEANS',
       'AD',
       'ML',
-      'AS',
-      'BY',
       'SOURCE',
-      'INDEX',
-      'D',
-      'DESC',
-      'DATASOURCES',
-      'SORTBY',
-      'AUTO',
-      'STR',
-      'IP',
-      'NUM',
-      'NOT',
-      'OR',
-      'AND',
-      'XOR',
-      'TRUE',
-      'FALSE',
-      'REGEXP',
-      'CASE',
-      'IN',
-      'INT',
-      'INTEGER',
-      'DOUBLE',
-      'LONG',
-      'FLOAT',
-      'STRING',
-      'BOOLEAN',
-      'DATAMODEL',
-      'LOOKUP',
-      'SAVEDSEARCH',
-      'SPAN',
-      'MS',
-      'S',
-      'M',
-      'H',
-      'W',
-      'Q',
-      'Y',
     ].includes(type)
   ) {
     return 'keyword';
   }
 
-  // Built-in functions (aggregations, math, date, string functions)
+  // Command Modifiers - Keywords that assist commands
+  if (
+    [
+      'AS',
+      'BY',
+      'INDEX',
+      'D',
+      'DESC',
+      'DATASOURCES',
+      'SORTBY',
+      'KEEPEMPTY',
+      'CONSECUTIVE',
+      'DEDUP_SPLITVALUES',
+      'PARTITIONS',
+      'ALLNUM',
+      'DELIM',
+      'CENTROIDS',
+      'ITERATIONS',
+      'DISTANCE_TYPE',
+      'NUMBER_OF_TREES',
+      'SHINGLE_SIZE',
+      'SAMPLE_SIZE',
+      'OUTPUT_AFTER',
+      'TIME_DECAY',
+      'ANOMALY_RATE',
+      'CATEGORY_FIELD',
+      'TIME_FIELD',
+      'TIME_ZONE',
+      'TRAINING_DATA_SIZE',
+      'ANOMALY_SCORE_THRESHOLD',
+    ].includes(type)
+  ) {
+    return 'attribute';
+  }
+
+  // Field Type Keywords - Field type specifiers
+  if (['AUTO', 'STR', 'IP', 'NUM'].includes(type)) {
+    return 'type';
+  }
+
+  // Logical & Comparison Keywords - Boolean logic and conditionals
+  if (['NOT', 'OR', 'AND', 'XOR', 'TRUE', 'FALSE', 'REGEXP', 'CASE', 'IN'].includes(type)) {
+    return 'keyword';
+  }
+
+  // Data Type Keywords - Type declarations
+  if (['INT', 'INTEGER', 'DOUBLE', 'LONG', 'FLOAT', 'STRING', 'BOOLEAN'].includes(type)) {
+    return 'type';
+  }
+
+  // Dataset Type Keywords - Special dataset types
+  if (['DATAMODEL', 'LOOKUP', 'SAVEDSEARCH'].includes(type)) {
+    return 'tag';
+  }
+
+  // Time Span Keywords - Time interval specifiers
+  if (['SPAN', 'MS', 'S', 'M', 'H', 'W', 'Q', 'Y'].includes(type)) {
+    return 'type';
+  }
+
+  // DateTime & Interval Keywords - Date/time related keywords
+  if (
+    [
+      'CONVERT_TZ',
+      'DATETIME',
+      'DAY',
+      'DAY_HOUR',
+      'DAY_MICROSECOND',
+      'DAY_MINUTE',
+      'DAY_OF_YEAR',
+      'DAY_SECOND',
+      'HOUR',
+      'HOUR_MICROSECOND',
+      'HOUR_MINUTE',
+      'HOUR_OF_DAY',
+      'HOUR_SECOND',
+      'INTERVAL',
+      'MICROSECOND',
+      'MILLISECOND',
+      'MINUTE',
+      'MINUTE_MICROSECOND',
+      'MINUTE_OF_DAY',
+      'MINUTE_OF_HOUR',
+      'MINUTE_SECOND',
+      'MONTH',
+      'MONTH_OF_YEAR',
+      'QUARTER',
+      'SECOND',
+      'SECOND_MICROSECOND',
+      'SECOND_OF_MINUTE',
+      'WEEK',
+      'WEEK_OF_YEAR',
+      'YEAR',
+      'YEAR_MONTH',
+    ].includes(type)
+  ) {
+    return 'type';
+  }
+
+  // Aggregate Functions - Statistical and aggregation functions
   if (
     [
       'AVG',
@@ -144,6 +205,14 @@ const mapPPLTokenToMonacoTokenType = (tokenType: string): string => {
       'SPARKLINE',
       'C',
       'DC',
+    ].includes(type)
+  ) {
+    return 'predefined.function';
+  }
+
+  // Mathematical Functions - Math and trigonometric functions
+  if (
+    [
       'ABS',
       'CBRT',
       'CEIL',
@@ -177,6 +246,14 @@ const mapPPLTokenToMonacoTokenType = (tokenType: string): string => {
       'RADIANS',
       'SIN',
       'TAN',
+    ].includes(type)
+  ) {
+    return 'predefined.function';
+  }
+
+  // Date/Time Functions - Date and time manipulation functions
+  if (
+    [
       'ADDDATE',
       'ADDTIME',
       'CURDATE',
@@ -228,6 +305,14 @@ const mapPPLTokenToMonacoTokenType = (tokenType: string): string => {
       'UTC_TIMESTAMP',
       'WEEKDAY',
       'YEARWEEK',
+    ].includes(type)
+  ) {
+    return 'predefined';
+  }
+
+  // String Functions - String manipulation functions
+  if (
+    [
       'SUBSTR',
       'SUBSTRING',
       'LTRIM',
@@ -247,13 +332,19 @@ const mapPPLTokenToMonacoTokenType = (tokenType: string): string => {
       'REPLACE',
       'REVERSE',
       'CAST',
-      'LIKE',
-      'ISNULL',
-      'ISNOTNULL',
-      'IFNULL',
-      'NULLIF',
-      'IF',
-      'TYPEOF',
+    ].includes(type)
+  ) {
+    return 'predefined';
+  }
+
+  // Boolean Functions - Boolean and null checking functions
+  if (['LIKE', 'ISNULL', 'ISNOTNULL', 'IFNULL', 'NULLIF', 'IF', 'TYPEOF'].includes(type)) {
+    return 'predefined';
+  }
+
+  // Relevance Functions - Elasticsearch/OpenSearch search functions
+  if (
+    [
       'MATCH',
       'MATCH_PHRASE',
       'MATCH_PHRASE_PREFIX',
@@ -264,6 +355,45 @@ const mapPPLTokenToMonacoTokenType = (tokenType: string): string => {
     ].includes(type)
   ) {
     return 'predefined';
+  }
+
+  // Relevance Function Parameters - Parameters for search functions
+  if (
+    [
+      'ALLOW_LEADING_WILDCARD',
+      'ANALYZE_WILDCARD',
+      'ANALYZER',
+      'AUTO_GENERATE_SYNONYMS_PHRASE_QUERY',
+      'BOOST',
+      'CUTOFF_FREQUENCY',
+      'DEFAULT_FIELD',
+      'DEFAULT_OPERATOR',
+      'ENABLE_POSITION_INCREMENTS',
+      'ESCAPE',
+      'FLAGS',
+      'FUZZY_MAX_EXPANSIONS',
+      'FUZZY_PREFIX_LENGTH',
+      'FUZZY_TRANSPOSITIONS',
+      'FUZZY_REWRITE',
+      'FUZZINESS',
+      'LENIENT',
+      'LOW_FREQ_OPERATOR',
+      'MAX_DETERMINIZED_STATES',
+      'MAX_EXPANSIONS',
+      'MINIMUM_SHOULD_MATCH',
+      'OPERATOR',
+      'PHRASE_SLOP',
+      'PREFIX_LENGTH',
+      'QUOTE_ANALYZER',
+      'QUOTE_FIELD_SUFFIX',
+      'REWRITE',
+      'SLOP',
+      'TIE_BREAKER',
+      'TYPE',
+      'ZERO_TERMS_QUERY',
+    ].includes(type)
+  ) {
+    return 'attribute';
   }
 
   // Operators

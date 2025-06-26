@@ -9,18 +9,10 @@ import {
   SimplifiedOpenSearchPPLParser as OpenSearchPPLParser,
   SimplifiedOpenSearchPPLParserVisitor,
 } from '@osd/antlr-grammar';
-import { FieldsCommandContext } from 'packages/osd-antlr-grammar/target/opensearch_ppl/.generated/OpenSearchPPLParser';
-
-export interface FieldInfo {
-  name: string;
-  originalName?: string;
-  isCalculated?: boolean;
-  expression?: string;
-}
+import { IFieldType } from '../../../../common/index_patterns/fields/types';
 
 export interface SymbolTableState {
-  availableFields: Set<string>;
-  fieldMappings: Map<string, FieldInfo>;
+  availableFields: Set<IFieldType>;
   errors: string[];
 }
 
@@ -37,12 +29,11 @@ export interface SymbolTableState {
 export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<SymbolTableState> {
   private symbolTable: SymbolTableState = {
     availableFields: new Set(),
-    fieldMappings: new Map(),
     errors: [],
   };
-  private initialFields: string[];
+  private initialFields: IFieldType[];
 
-  constructor(initialFields: string[] = []) {
+  constructor(initialFields: IFieldType[] = []) {
     super();
     this.initialFields = initialFields;
     this.resetSymbolTable();
@@ -51,13 +42,8 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
   private resetSymbolTable(): void {
     this.symbolTable = {
       availableFields: new Set(this.initialFields),
-      fieldMappings: new Map(),
       errors: [],
     };
-
-    this.initialFields.forEach((field) => {
-      this.symbolTable.fieldMappings.set(field, { name: field });
-    });
   }
 
   /**
@@ -79,24 +65,16 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
     } catch (error) {
       return {
         availableFields: new Set(this.initialFields),
-        fieldMappings: new Map(),
         errors: [error instanceof Error ? error.message : String(error)],
       };
     }
   }
 
   /**
-   * Get current available field names as array
+   * Get current available field objects as array
    */
-  public getAvailableFields(): string[] {
+  public getAvailableFields(): IFieldType[] {
     return Array.from(this.symbolTable.availableFields);
-  }
-
-  /**
-   * Get field info by current name
-   */
-  public getFieldInfo(fieldName: string): FieldInfo | undefined {
-    return this.symbolTable.fieldMappings.get(fieldName);
   }
 
   /**
@@ -110,26 +88,28 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
         const hasMinus = ctx.MINUS() !== null;
 
         if (hasMinus) {
-          fieldList.forEach((field) => {
-            this.symbolTable.availableFields.delete(field);
-            this.symbolTable.fieldMappings.delete(field);
+          fieldList.forEach((fieldName) => {
+            // Find and remove field objects by name
+            const fieldToRemove = Array.from(this.symbolTable.availableFields).find(
+              (f) => f.name === fieldName
+            );
+            if (fieldToRemove) {
+              this.symbolTable.availableFields.delete(fieldToRemove);
+            }
           });
         } else {
-          const newAvailableFields = new Set<string>();
-          const newFieldMappings = new Map<string, FieldInfo>();
+          const newAvailableFields = new Set<IFieldType>();
 
-          fieldList.forEach((field) => {
-            if (this.symbolTable.availableFields.has(field)) {
-              newAvailableFields.add(field);
-              const fieldInfo = this.symbolTable.fieldMappings.get(field);
-              if (fieldInfo) {
-                newFieldMappings.set(field, fieldInfo);
-              }
+          fieldList.forEach((fieldName) => {
+            const fieldObj = Array.from(this.symbolTable.availableFields).find(
+              (f) => f.name === fieldName
+            );
+            if (fieldObj) {
+              newAvailableFields.add(fieldObj);
             }
           });
 
           this.symbolTable.availableFields = newAvailableFields;
-          this.symbolTable.fieldMappings = newFieldMappings;
         }
       }
     } catch (error) {
@@ -151,19 +131,23 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
 
         clauses.forEach((clause: any) => {
           // In rename clause, orignalField and renamedField are wcFieldExpression contexts
-          const originalField = this.extractFieldName(clause._orignalField);
-          const newField = this.extractFieldName(clause._renamedField);
+          const originalFieldName = this.extractFieldName(clause._orignalField);
+          const newFieldName = this.extractFieldName(clause._renamedField);
 
-          if (this.symbolTable.availableFields.has(originalField)) {
-            this.symbolTable.availableFields.delete(originalField);
-            const originalFieldInfo = this.symbolTable.fieldMappings.get(originalField);
-            this.symbolTable.fieldMappings.delete(originalField);
+          const originalFieldObj = Array.from(this.symbolTable.availableFields).find(
+            (f) => f.name === originalFieldName
+          );
+          if (originalFieldObj) {
+            this.symbolTable.availableFields.delete(originalFieldObj);
 
-            this.symbolTable.availableFields.add(newField);
-            this.symbolTable.fieldMappings.set(newField, {
-              name: newField,
-              originalName: originalFieldInfo?.originalName || originalField,
-            });
+            // Create new field object with the new name
+            const newFieldObj: IFieldType = {
+              ...originalFieldObj,
+              name: newFieldName,
+              displayName: newFieldName,
+            };
+
+            this.symbolTable.availableFields.add(newFieldObj);
           }
         });
       }
@@ -179,8 +163,7 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
    */
   visitStatsCommand = (ctx: any): SymbolTableState => {
     try {
-      const newAvailableFields = new Set<string>();
-      const newFieldMappings = new Map<string, FieldInfo>();
+      const newAvailableFields = new Set<IFieldType>();
 
       // Process aggregation terms
       const statsAggTerms = ctx.statsAggTerm();
@@ -192,12 +175,21 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
 
           if (term._alias) {
             fieldName = this.extractFieldName(term._alias);
-            newAvailableFields.add(fieldName);
-            newFieldMappings.set(fieldName, {
+            // Create a calculated field object
+            const calculatedField: IFieldType = {
               name: fieldName,
-              isCalculated: true,
-              expression: this.extractStatsExpression(term),
-            });
+              type: 'number', // Stats usually return numbers
+              esTypes: ['long', 'double'],
+              aggregatable: true,
+              filterable: true,
+              searchable: false,
+              sortable: true,
+              visualizable: true,
+              readFromDocValues: false,
+              scripted: true,
+              displayName: fieldName,
+            };
+            newAvailableFields.add(calculatedField);
           }
         });
       }
@@ -205,21 +197,19 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
       // Process BY clause (grouping fields)
       const statsByClause = ctx.statsByClause();
       if (statsByClause) {
-        const groupFields = this.extractGroupByFields(statsByClause);
-        groupFields.forEach((field) => {
-          if (this.symbolTable.availableFields.has(field)) {
-            newAvailableFields.add(field);
-            const originalFieldInfo = this.symbolTable.fieldMappings.get(field);
-            if (originalFieldInfo) {
-              newFieldMappings.set(field, originalFieldInfo);
-            }
+        const groupFieldNames = this.extractGroupByFields(statsByClause);
+        groupFieldNames.forEach((fieldName) => {
+          const fieldObj = Array.from(this.symbolTable.availableFields).find(
+            (f) => f.name === fieldName
+          );
+          if (fieldObj) {
+            newAvailableFields.add(fieldObj);
           }
         });
       }
-      if (newAvailableFields) {
+      if (newAvailableFields.size > 0) {
         // Only update the newAvailableFields if we have newFields
         this.symbolTable.availableFields = newAvailableFields;
-        this.symbolTable.fieldMappings = newFieldMappings;
       }
     } catch (error) {
       this.symbolTable.errors.push(`Error processing stats command: ${error}`);
@@ -242,12 +232,22 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
           const fieldName = this.extractFieldName(clause.fieldExpression());
           const expression = this.extractExpression(clause.expression());
 
-          this.symbolTable.availableFields.add(fieldName);
-          this.symbolTable.fieldMappings.set(fieldName, {
+          // Create a calculated field object
+          const calculatedField: IFieldType = {
             name: fieldName,
-            isCalculated: true,
-            expression,
-          });
+            type: 'unknown', // Type will be determined at runtime
+            esTypes: ['keyword'],
+            aggregatable: false,
+            filterable: true,
+            searchable: true,
+            sortable: false,
+            visualizable: false,
+            readFromDocValues: false,
+            scripted: true,
+            displayName: fieldName,
+          };
+
+          this.symbolTable.availableFields.add(calculatedField);
         });
       }
     } catch (error) {
@@ -318,14 +318,6 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
     }
   }
 
-  private extractStatsExpression(statsAggTerm: any): string {
-    try {
-      return statsAggTerm.getText() || '';
-    } catch (error) {
-      return '';
-    }
-  }
-
   private extractExpression(expressionCtx: any): string {
     try {
       return expressionCtx.getText() || '';
@@ -344,7 +336,7 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
  */
 export function parsePPLSymbolTable(
   pplQuery: string,
-  initialFields: string[] = []
+  initialFields: IFieldType[] = []
 ): SymbolTableState {
   const parser = new PPLSymbolTableParser(initialFields);
   return parser.parseQuery(pplQuery);
@@ -355,10 +347,12 @@ export function parsePPLSymbolTable(
  */
 export function getAvailableFieldsFromPPL(
   pplQuery: string,
-  initialFields: string[] = []
-): string[] {
+  initialFields: IFieldType[] = [],
+  filterMethod?: (field: IFieldType) => boolean
+): IFieldType[] {
   const symbolTable = parsePPLSymbolTable(pplQuery, initialFields);
-  return Array.from(symbolTable.availableFields);
+  const availableFields = Array.from(symbolTable.availableFields);
+  return filterMethod ? availableFields.filter(filterMethod) : availableFields;
 }
 
 /**
@@ -368,8 +362,9 @@ export function getAvailableFieldsFromPPL(
 export function getAvailableFieldsForAutocomplete(
   fullQuery: string,
   cursorPosition: number,
-  initialFields: string[] = []
-): string[] {
+  initialFields: IFieldType[] = [],
+  filterMethod?: (field: IFieldType) => boolean
+): IFieldType[] {
   try {
     // Extract the query up to cursor position
     const queryToCursor = fullQuery.substring(0, cursorPosition);
@@ -388,12 +383,12 @@ export function getAvailableFieldsForAutocomplete(
 
     if (!queryToAnalyze) {
       // No complete commands yet, return all initial fields
-      return initialFields;
+      return filterMethod ? initialFields.filter(filterMethod) : initialFields;
     }
 
-    return getAvailableFieldsFromPPL(queryToAnalyze, initialFields);
+    return getAvailableFieldsFromPPL(queryToAnalyze, initialFields, filterMethod);
   } catch (error) {
     // On error, return initial fields as fallback
-    return initialFields;
+    return filterMethod ? initialFields.filter(filterMethod) : initialFields;
   }
 }
