@@ -12,7 +12,6 @@ import { UI_SETTINGS } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 
 export interface DatePickerProps {
-  datePickerRef?: React.RefObject<HTMLDivElement>;
   services: ExploreServices;
   timefilter: any;
   onTimeChange: (time: { start: string; end: string }) => void;
@@ -21,7 +20,6 @@ export interface DatePickerProps {
 }
 
 export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
-  datePickerRef,
   services,
   timefilter,
   onTimeChange,
@@ -29,7 +27,7 @@ export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
   oneRefreshChange,
 }) => {
   return (
-    <div ref={datePickerRef} key="datePicker">
+    <div key="datePicker">
       <EuiSuperDatePicker
         key="datePicker"
         start={timefilter?.getTime().from}
