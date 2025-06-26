@@ -3,75 +3,40 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
-
-.resultsSummary {
-  &.resultsSummary_accordion {
+.exploreResultsSummary {
+  &.exploreResultsSummary_accordion {
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
     .euiAccordion__triggerWrapper {
       /* stylelint-disable  @osd/stylelint/no_restricted_values */
       background: lightOrDarkTheme(linear-gradient(to left, #edf7ff, #f9f4ff), $euiColorEmptyShade);
       padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSizeS;
       gap: $euiSizeS;
 
-      .euiAccordion__button {
+      .exploreResultsSummary_accordion_button {
         min-height: $euiSizeXL;
         width: unset;
         flex-grow: 0;
 
-        .euiFlexGroup {
+        .exploreResultsSummary_accordion_actions {
           gap: $euiSizeXS;
         }
 
-        .euiToolTipAnchor {
+        .exploreResultsSummary_accordion_tooltip {
           display: flex;
+          padding-inline-start: 2px;
         }
       }
 
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
       .euiAccordion__optionalAction {
         flex-grow: 1;
       }
     }
 
-    .resultsSummary_emptyButton {
-      height: min-content;
-
-      .euiButtonEmpty__content {
-        padding: 0;
-        transform: translateY(-1px);
-      }
-    }
-
-    .resultsSummary_divider {
+    .exploreResultsSummary_divider {
       border-left: $euiBorderThin;
       height: $euiSizeL;
       margin: 0 2px;
     }
-  }
-
-  &.resultsSummary__callout {
-    margin-top: $euiSizeS;
-  }
-
-  &.resultsSummary__banner {
-    margin-bottom: $euiSizeS;
-  }
-
-  &.resultsSummary__form {
-    margin-top: $euiSizeS;
-  }
-
-  .resultsSummary__popoverWrapper {
-    display: flex;
-    align-items: center;
-    padding-right: $euiSizeS;
-  }
-
-  // Hide the error badge when the input is focused
-  .resultsSummary__inputWrapper:has(.resultsSummary__input:focus) .resultsSummary__popoverWrapper {
-    display: none;
-  }
-
-  .resultsSummary__input {
-    text-overflow: ellipsis;
   }
 }

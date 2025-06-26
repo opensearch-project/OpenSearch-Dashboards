@@ -64,22 +64,24 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
 
   return (
     <EuiPanel
-      className="resultsSummary"
-      data-test-subj="resultsSummary"
+      className="exploreResultsSummary"
+      data-test-subj="exploreResultsSummary"
       hasBorder={true}
       borderRadius="none"
       paddingSize="none"
     >
       <EuiAccordion
-        id="resultsSummarySummaryAccordion"
-        className="resultsSummary resultsSummary_accordion"
+        id="exploreResultsSummarySummaryAccordion"
+        className="exploreResultsSummary exploreResultsSummary_accordion"
+        buttonClassName="exploreResultsSummary_accordion_button"
         forceState={accordionState}
         onToggle={onClickAccordion}
         extraAction={
           accordionState === 'open' && (
             <EuiFlexGroup
               justifyContent="spaceBetween"
-              data-test-subj="resultsSummary_summary_buttons"
+              data-test-subj="exploreResultsSummary_accordion_actions"
+              className="exploreResultsSummary_accordion_actions"
             >
               <EuiFlexItem>
                 {actionButtonVisible && (
@@ -102,7 +104,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
                             : afterFeedbackTip
                         }
                         onClick={() => onFeedback(true)}
-                        data-test-subj="resultsSummary_summary_buttons_thumbup"
+                        data-test-subj="exploreResultsSummary_summary_buttons_thumbup"
                       />
                     )}
                     {feedback !== FeedbackStatus.THUMB_UP && (
@@ -118,10 +120,10 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
                         }
                         iconType="thumbsDown"
                         onClick={() => onFeedback(false)}
-                        data-test-subj="resultsSummary_summary_buttons_thumbdown"
+                        data-test-subj="exploreResultsSummary_summary_buttons_thumbdown"
                       />
                     )}
-                    <div className="resultsSummary_divider" />
+                    <div className="exploreResultsSummary_divider" />
                     <EuiCopy textToCopy={summary ?? ''}>
                       {(copy) => (
                         <EuiSmallButtonIcon
@@ -144,7 +146,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
                   isDisabled={!canGenerateSummary}
                   isLoading={loading}
                   onClick={onGenerateSummary}
-                  data-test-subj="resultsSummary_summary_buttons_generate"
+                  data-test-subj="exploreResultsSummary_summary_buttons_generate"
                 >
                   {i18n.translate('explore.resultsSummary.summary.generateSummary', {
                     defaultMessage: 'Generate summary',
@@ -158,7 +160,7 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
           <EuiFlexGroup
             gutterSize="none"
             alignItems="center"
-            data-test-subj="resultsSummary_summary_accordion_button"
+            data-test-subj="exploreResultsSummary_accordion_button"
           >
             <EuiIcon type={assistantMark} />
             <EuiText size="s">
@@ -169,7 +171,12 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
                 })}
               </strong>
             </EuiText>
-            <EuiIconTip type="iInCircle" content={infoIconTooltip} aria-label={infoIconTooltip} />
+            <EuiIconTip
+              type="iInCircle"
+              anchorClassName="exploreResultsSummary_accordion_tooltip"
+              content={infoIconTooltip}
+              aria-label={infoIconTooltip}
+            />
           </EuiFlexGroup>
         }
       >
