@@ -32,7 +32,6 @@ interface QueryPanelFooterProps {
   noInput: boolean;
   showDatasetFields: boolean;
   showDatePicker: boolean;
-  datePickerRef?: React.RefObject<HTMLDivElement>;
   services: ExploreServices;
   timefilter: any;
   onTimeChange: (time: { start: string; end: string }) => void;
@@ -50,7 +49,6 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   showDatasetFields,
   showDatePicker,
   noInput,
-  datePickerRef,
   services,
   timefilter,
   onTimeChange,
@@ -128,7 +126,6 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
             {showDatePicker && (
               <EuiFlexItem grow={false} className="queryPanel__footer__dateTimeRangePickerWrapper">
                 <DateTimeRangePicker
-                  datePickerRef={datePickerRef}
                   services={services}
                   timefilter={timefilter}
                   onTimeChange={onTimeChange}
