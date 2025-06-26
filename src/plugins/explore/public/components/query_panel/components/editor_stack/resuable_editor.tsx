@@ -123,6 +123,8 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1.5,
         run: () => {
+          // Close autocomplete if open
+          editor.trigger('keyboard', 'hideSuggestWidget', {});
           const val = editor.getValue();
           onRun(val);
           onEdit();
