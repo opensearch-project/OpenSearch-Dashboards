@@ -11,7 +11,6 @@ import { Query, TimeRange } from '../../../../../../../../data/common';
 import { QueryStatus, useSyncQueryStateWithUrl } from '../../../../../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { RequestAdapter } from '../../../../../../../../inspector/public';
 import { PLUGIN_ID } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
@@ -68,9 +67,6 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
     timeRange: timefilter.timefilter.getTime(),
   });
 
-  // Replace inspectorAdapters
-  const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
-
   // Replace savedSearch - use legacy state
   // const savedSearch = useMemo(() => {
   //   return legacyState?.savedSearch;
@@ -114,21 +110,12 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
   const topNavLinks = useMemo(() => {
     return getTopNavLinks(
       services,
-      inspectorAdapters,
       startSyncingQueryStateWithUrl,
       searchContext,
       indexPattern,
       savedExplore ? saveStateToSavedObject(savedExplore, uiState, indexPattern) : undefined
     );
-  }, [
-    savedExplore,
-    indexPattern,
-    searchContext,
-    uiState,
-    inspectorAdapters,
-    services,
-    startSyncingQueryStateWithUrl,
-  ]);
+  }, [savedExplore, indexPattern, searchContext, uiState, services, startSyncingQueryStateWithUrl]);
 
   // Replace data$ subscription with Redux state-based queryStatus
   useEffect(() => {
