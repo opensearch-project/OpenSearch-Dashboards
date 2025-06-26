@@ -9,10 +9,11 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import {
   CategoryAxis,
   GridOptions,
-  ThresholdLine,
+  ThresholdLines,
   ThresholdLineStyle,
   ValueAxis,
   Positions,
+  TooltipOptions,
 } from '../types';
 
 // Complete area chart style controls interface
@@ -22,9 +23,11 @@ export interface AreaChartStyleControls {
   addLegend: boolean;
   legendPosition: Positions;
   addTimeMarker: boolean;
+  areaOpacity: number;
+  tooltipOptions: TooltipOptions;
 
   // Threshold and grid
-  thresholdLine: ThresholdLine;
+  thresholdLines: ThresholdLines;
   grid: GridOptions;
 
   // Axes configuration
@@ -38,15 +41,23 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
+  areaOpacity: 0.6,
+  tooltipOptions: {
+    mode: 'all',
+  },
 
   // Threshold and grid
-  thresholdLine: {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-  },
+  thresholdLines: [
+    {
+      id: '1',
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+      name: '',
+    },
+  ],
   grid: {
     categoryLines: true,
     valueLines: true,

@@ -11,6 +11,7 @@ import {
   GridOptions,
   Positions,
   ThresholdLine,
+  ThresholdLines,
   ThresholdLineStyle,
   ValueAxis,
   TooltipOptions,
@@ -31,7 +32,7 @@ export interface BarChartStyleControls {
   barBorderColor: string;
 
   // Threshold and grid
-  thresholdLine: ThresholdLine;
+  thresholdLines: ThresholdLines;
   grid: GridOptions;
 
   // Axes configuration
@@ -57,13 +58,17 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   barBorderColor: '#000000',
 
   // Threshold and grid
-  thresholdLine: {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-  },
+  thresholdLines: [
+    {
+      id: '1',
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+      name: '',
+    },
+  ],
   grid: {
     categoryLines: true,
     valueLines: true,

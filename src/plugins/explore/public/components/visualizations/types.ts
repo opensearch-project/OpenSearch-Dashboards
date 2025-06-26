@@ -63,7 +63,12 @@ export interface ThresholdLine {
   style: ThresholdLineStyle;
   value: number;
   width: number;
+  name?: string;
+  id?: string; // Unique identifier for each threshold
 }
+
+// Array of threshold lines
+export type ThresholdLines = ThresholdLine[];
 
 // Styling: Grid configuration
 export interface GridOptions {

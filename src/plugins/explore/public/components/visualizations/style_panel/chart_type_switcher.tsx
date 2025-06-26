@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import React, { useState, useEffect } from 'react';
-import { EuiFormRow, EuiPanel, EuiSelect, EuiSuperSelect, EuiIcon } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSelect, EuiSuperSelect, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { ChartTypeMapping } from '../types';
 import { ChartType } from '../utils/use_visualization_types';
 
@@ -64,8 +64,8 @@ export const ChartTypeSwitcher = ({
     };
   });
 
-  const handleChartTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newChartType = e.target.value as ChartType;
+  const handleChartTypeChange = (value: string) => {
+    const newChartType = value as ChartType;
     setCurrentChartType(newChartType);
     if (onChartTypeChange) {
       onChartTypeChange(newChartType);
@@ -81,7 +81,7 @@ export const ChartTypeSwitcher = ({
       >
         <EuiSuperSelect
           valueOfSelected={currentChartType}
-          onChange={(handleChartTypeChange as unknown) as (value: string) => void}
+          onChange={handleChartTypeChange}
           options={chartTypeOptions.map((option) => {
             const chartType = ALL_CHART_TYPES.find((chart) => chart.type === option.value);
             return {

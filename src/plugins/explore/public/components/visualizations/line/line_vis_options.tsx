@@ -9,7 +9,7 @@ import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
 import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { ThresholdOptions } from '../style_panel/threshold_options';
+import { ThresholdOptions } from '../style_panel/threshold/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { AxesOptions } from '../style_panel/axes_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip_options';
@@ -30,7 +30,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
 }) => {
   // State to track expanded/collapsed state of each panel
   const [expandedPanels, setExpandedPanels] = useState({
-    general: false,
+    general: true,
     basic: false,
     exclusive: false,
     tooltip: false,
@@ -63,7 +63,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
         <EuiButtonEmpty
           iconSide="left"
           color="text"
-          iconType={expandedPanels.exclusive ? 'arrowDown' : 'arrowRight'}
+          iconType={expandedPanels.general ? 'arrowDown' : 'arrowRight'}
           onClick={() => togglePanel('general')}
           size="xs"
           data-test-subj="lineVisGeneralButton"
@@ -177,8 +177,10 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
         </EuiButtonEmpty>
         {expandedPanels.threshold && (
           <ThresholdOptions
-            thresholdLine={styleOptions.thresholdLine}
-            onThresholdChange={(thresholdLine) => updateStyleOption('thresholdLine', thresholdLine)}
+            thresholdLines={styleOptions.thresholdLines}
+            onThresholdLinesChange={(thresholdLines) =>
+              updateStyleOption('thresholdLines', thresholdLines)
+            }
           />
         )}
       </EuiSplitPanel.Inner>

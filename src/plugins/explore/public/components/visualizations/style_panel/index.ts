@@ -5,5 +5,5 @@
 
 export { Option } from './option';
 export { LineExclusiveVisOptions } from '../line/line_exclusive_vis_options';
-export { ThresholdOptions } from './threshold_options';
+export { ThresholdOptions } from './threshold/threshold_options';
 export { GridOptionsPanel } from './grid_options';

@@ -6,39 +6,37 @@
 import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
-import { BasicVisOptions } from './line_exclusive_vis_options';
+import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
+import { LineStyle } from './line_vis_config';
 
 export default {
-  component: BasicVisOptions,
-  title:
-    'src/plugins/explore/public/components/visualizations/style_panel/line_exclusive_vis_options',
-} as ComponentMeta<typeof BasicVisOptions>;
+  component: LineExclusiveVisOptions,
+  title: 'src/plugins/explore/public/components/visualizations/line/line_exclusive_vis_options',
+} as ComponentMeta<typeof LineExclusiveVisOptions>;
 
 // Template for the story
-const Template: ComponentStory<typeof BasicVisOptions> = (args) => {
+const Template: ComponentStory<typeof LineExclusiveVisOptions> = (args) => {
   // Use state to track changes
   const [addTimeMarker, setAddTimeMarker] = useState<boolean>(args.addTimeMarker);
-  const [showLine, setShowLine] = useState<boolean>(args.showLine);
+  const [lineStyle, setLineStyle] = useState<LineStyle>(args.lineStyle);
   const [lineMode, setLineMode] = useState<string>(args.lineMode);
   const [lineWidth, setLineWidth] = useState<number>(args.lineWidth);
-  const [showDots, setShowDots] = useState<boolean>(args.showDots);
 
   return (
     <div style={{ maxWidth: '800px', padding: '16px' }}>
-      <BasicVisOptions
+      <LineExclusiveVisOptions
         {...args}
         addTimeMarker={addTimeMarker}
-        showLine={showLine}
+        lineStyle={lineStyle}
         lineMode={lineMode}
         lineWidth={lineWidth}
-        showDots={showDots}
         onAddTimeMarkerChange={(value) => {
           setAddTimeMarker(value);
           action('onAddTimeMarkerChange')(value);
         }}
-        onShowLineChange={(value) => {
-          setShowLine(value);
-          action('onShowLineChange')(value);
+        onLineStyleChange={(value) => {
+          setLineStyle(value);
+          action('onLineStyleChange')(value);
         }}
         onLineModeChange={(value) => {
           setLineMode(value);
@@ -47,10 +45,6 @@ const Template: ComponentStory<typeof BasicVisOptions> = (args) => {
         onLineWidthChange={(value) => {
           setLineWidth(value);
           action('onLineWidthChange')(value);
-        }}
-        onShowDotsChange={(value) => {
-          setShowDots(value);
-          action('onShowDotsChange')(value);
         }}
       />
     </div>
@@ -61,22 +55,27 @@ const Template: ComponentStory<typeof BasicVisOptions> = (args) => {
 export const Primary = Template.bind({});
 Primary.args = {
   addTimeMarker: false,
-  showLine: true,
+  lineStyle: 'both' as LineStyle,
   lineMode: 'smooth',
   lineWidth: 2,
-  showDots: true,
   onAddTimeMarkerChange: () => {},
-  onShowLineChange: () => {},
+  onLineStyleChange: () => {},
   onLineModeChange: () => {},
   onLineWidthChange: () => {},
-  onShowDotsChange: () => {},
 };
 
-// Story with no line
-export const NoLine = Template.bind({});
-NoLine.args = {
+// Story with line only
+export const LineOnly = Template.bind({});
+LineOnly.args = {
   ...Primary.args,
-  showLine: false,
+  lineStyle: 'line' as LineStyle,
+};
+
+// Story with dots only
+export const DotsOnly = Template.bind({});
+DotsOnly.args = {
+  ...Primary.args,
+  lineStyle: 'dots' as LineStyle,
 };
 
 // Story with time marker

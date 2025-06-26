@@ -8,9 +8,10 @@ import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { AreaChartStyleControls } from './area_vis_config';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { ThresholdOptions } from '../style_panel/threshold_options';
+import { ThresholdOptions } from '../style_panel/threshold/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { AxesOptions } from '../style_panel/axes_options';
+import { TooltipOptionsPanel } from '../style_panel/tooltip_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
 
@@ -30,6 +31,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   const [expandedPanels, setExpandedPanels] = useState({
     general: false,
     basic: false,
+    tooltip: false,
     threshold: false,
     grid: false,
     axes: false,
@@ -81,6 +83,32 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
         <EuiButtonEmpty
           iconSide="left"
           color="text"
+          iconType={expandedPanels.tooltip ? 'arrowDown' : 'arrowRight'}
+          onClick={() => togglePanel('tooltip')}
+          size="xs"
+          data-test-subj="areaVisTooltipButton"
+        >
+          {i18n.translate('explore.vis.areaChart.tabs.tooltip', {
+            defaultMessage: 'Tooltip',
+          })}
+        </EuiButtonEmpty>
+        {expandedPanels.tooltip && (
+          <TooltipOptionsPanel
+            tooltipOptions={styleOptions.tooltipOptions}
+            onTooltipOptionsChange={(tooltipOptions) =>
+              updateStyleOption('tooltipOptions', {
+                ...styleOptions.tooltipOptions,
+                ...tooltipOptions,
+              })
+            }
+          />
+        )}
+      </EuiSplitPanel.Inner>
+
+      <EuiSplitPanel.Inner paddingSize="s">
+        <EuiButtonEmpty
+          iconSide="left"
+          color="text"
           iconType={expandedPanels.basic ? 'arrowDown' : 'arrowRight'}
           onClick={() => togglePanel('basic')}
           size="xs"
@@ -93,10 +121,8 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
         {expandedPanels.basic && (
           <GeneralVisOptions
             shouldShowLegend={!notShowLegend}
-            addTooltip={styleOptions.addTooltip}
             addLegend={styleOptions.addLegend}
             legendPosition={styleOptions.legendPosition}
-            onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
             onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
             onLegendPositionChange={(legendPosition) =>
               updateStyleOption('legendPosition', legendPosition)
@@ -120,8 +146,10 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
         </EuiButtonEmpty>
         {expandedPanels.threshold && (
           <ThresholdOptions
-            thresholdLine={styleOptions.thresholdLine}
-            onThresholdChange={(thresholdLine) => updateStyleOption('thresholdLine', thresholdLine)}
+            thresholdLines={styleOptions.thresholdLines}
+            onThresholdLinesChange={(thresholdLines) =>
+              updateStyleOption('thresholdLines', thresholdLines)
+            }
           />
         )}
       </EuiSplitPanel.Inner>

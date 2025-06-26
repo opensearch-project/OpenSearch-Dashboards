@@ -1,11 +1,11 @@
 .exploreVisContainer {
   display: flex;
-  min-height: 500px;
+  height: 600px;
   overflow: hidden;
 }
 
 .exploreVisPanel {
-  min-height: 500px;
+  height: 600px;
   display: flex;
   flex-direction: column;
 }
@@ -16,8 +16,9 @@
 }
 
 .exploreVisStylePanel {
-  min-height: 500px;
+  height: 600px;
   display: flex;
   flex-direction: column;
-  width: 300px;
+  width: 400px;
+  overflow-y: auto;
 }

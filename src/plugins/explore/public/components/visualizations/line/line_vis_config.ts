@@ -10,6 +10,7 @@ import {
   CategoryAxis,
   GridOptions,
   ThresholdLine,
+  ThresholdLines,
   ThresholdLineStyle,
   ValueAxis,
   Positions,
@@ -33,7 +34,7 @@ export interface LineChartStyleControls {
   tooltipOptions: TooltipOptions;
 
   // Threshold and grid
-  thresholdLine: ThresholdLine;
+  thresholdLines: ThresholdLines;
   grid: GridOptions;
 
   // Axes configuration
@@ -58,13 +59,17 @@ const defaultLineChartStyles: LineChartStyleControls = {
   },
 
   // Threshold and grid
-  thresholdLine: {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-  },
+  thresholdLines: [
+    {
+      id: '1',
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+      name: '',
+    },
+  ],
   grid: {
     categoryLines: true,
     valueLines: true,

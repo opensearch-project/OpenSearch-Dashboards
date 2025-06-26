@@ -5,24 +5,8 @@
 
 import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
-import { ThresholdLineStyle, VisColumn, Positions } from '../types';
-
-/**
- * Get stroke dash array for different line styles
- * @param style The line style ('dashed', 'dot-dashed', or 'full')
- * @returns The stroke dash array or undefined for solid lines
- */
-export const getStrokeDash = (style: string): number[] | undefined => {
-  switch (style) {
-    case ThresholdLineStyle.Dashed:
-      return [5, 5];
-    case ThresholdLineStyle.DotDashed:
-      return [5, 5, 1, 5];
-    case ThresholdLineStyle.Full:
-    default:
-      return undefined;
-  }
-};
+import { VisColumn, Positions } from '../types';
+import { getStrokeDash } from '../style_panel/threshold/threshold_utils';
 
 /**
  * Get Vega interpolation from UI lineMode
@@ -123,51 +107,6 @@ export const buildMarkConfig = (
       size: 0,
     };
   }
-};
-
-/**
- * Create threshold line layer
- * @param styles The style options
- * @returns The threshold layer configuration or null if disabled
- */
-export const createThresholdLayer = (styles: Partial<LineChartStyleControls> | undefined): any => {
-  if (!styles?.thresholdLine?.show) {
-    return null;
-  }
-
-  const thresholdLayer: any = {
-    mark: {
-      type: 'rule',
-      color: styles.thresholdLine.color,
-      strokeWidth: styles.thresholdLine.width,
-      strokeDash: getStrokeDash(styles.thresholdLine.style),
-      tooltip:
-        styles?.tooltipOptions?.mode !== 'hidden'
-          ? {
-              content: { signal: '' },
-              shared: true,
-            }
-          : false,
-    },
-    encoding: {
-      y: {
-        datum: styles.thresholdLine.value,
-        type: 'quantitative',
-      },
-    },
-  };
-
-  // Add tooltip content if enabled
-  if (styles?.tooltipOptions?.mode !== 'hidden') {
-    thresholdLayer.encoding.tooltip = {
-      value:
-        i18n.translate('explore.vis.thresholdValue', {
-          defaultMessage: 'Threshold: ',
-        }) + styles.thresholdLine.value,
-    };
-  }
-
-  return thresholdLayer;
 };
 
 /**

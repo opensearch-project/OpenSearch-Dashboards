@@ -7,12 +7,11 @@ import { LineChartStyleControls } from './line_vis_config';
 import { VisColumn, Positions, VEGASCHEMA } from '../types';
 import {
   buildMarkConfig,
-  createThresholdLayer,
   createTimeMarkerLayer,
   applyAxisStyling,
-  getStrokeDash,
   ValueAxisPosition,
 } from './line_chart_utils';
+import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/threshold_utils';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -70,7 +69,7 @@ export const createSimpleLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles);
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -193,7 +192,7 @@ export const createLineBarChart = (
   layers.push(barLayer, lineLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles);
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -286,7 +285,7 @@ export const createMultiLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles);
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -397,29 +396,31 @@ export const createFacetedMultiLineChart = (
           },
         },
         // Add threshold layer to each facet if enabled
-        ...(styles?.thresholdLine?.show
-          ? [
-              {
+        ...(styles?.thresholdLines && styles.thresholdLines.length > 0
+          ? styles.thresholdLines
+              .filter((threshold) => threshold.show)
+              .map((threshold) => ({
                 mark: {
                   type: 'rule',
-                  color: styles.thresholdLine.color,
-                  strokeWidth: styles.thresholdLine.width,
-                  strokeDash: getStrokeDash(styles.thresholdLine.style),
-                  tooltip: styles?.addTooltip !== false,
+                  color: threshold.color,
+                  strokeWidth: threshold.width,
+                  strokeDash: getStrokeDash(threshold.style),
+                  tooltip: styles?.tooltipOptions?.mode !== 'hidden',
                 },
                 encoding: {
                   y: {
-                    datum: styles.thresholdLine.value,
+                    datum: threshold.value,
                     type: 'quantitative',
                   },
-                  ...(styles?.addTooltip !== false && {
+                  ...(styles?.tooltipOptions?.mode !== 'hidden' && {
                     tooltip: {
-                      value: `Threshold: ${styles.thresholdLine.value}`,
+                      value: `${threshold.name ? threshold.name + ': ' : ''}Threshold: ${
+                        threshold.value
+                      }`,
                     },
                   }),
                 },
-              },
-            ]
+              }))
           : []),
         // Add time marker to each facet if enabled
         ...(styles?.addTimeMarker
@@ -430,14 +431,14 @@ export const createFacetedMultiLineChart = (
                   color: '#FF6B6B',
                   strokeWidth: 2,
                   strokeDash: [3, 3],
-                  tooltip: styles?.addTooltip !== false,
+                  tooltip: styles?.tooltipOptions?.mode !== 'hidden',
                 },
                 encoding: {
                   x: {
                     datum: { expr: 'now()' },
                     type: 'temporal',
                   },
-                  ...(styles?.addTooltip !== false && {
+                  ...(styles?.tooltipOptions?.mode !== 'hidden' && {
                     tooltip: {
                       value: 'Current Time',
                     },
@@ -516,7 +517,7 @@ export const createCategoryLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles);
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }

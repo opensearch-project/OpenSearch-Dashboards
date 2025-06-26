@@ -9,7 +9,7 @@ import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
 import { BarChartStyleControls } from './bar_vis_config';
 import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
-import { ThresholdOptions } from '../style_panel/threshold_options';
+import { ThresholdOptions } from '../style_panel/threshold/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { AxesOptions } from '../style_panel/axes_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip_options';
@@ -30,7 +30,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
 }) => {
   // State to track expanded/collapsed state of each panel
   const [expandedPanels, setExpandedPanels] = useState({
-    general: false,
+    general: true,
     basic: false,
     exclusive: false,
     tooltip: false,
@@ -183,8 +183,10 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
         </EuiButtonEmpty>
         {expandedPanels.threshold && (
           <ThresholdOptions
-            thresholdLine={styleOptions.thresholdLine}
-            onThresholdChange={(thresholdLine) => updateStyleOption('thresholdLine', thresholdLine)}
+            thresholdLines={styleOptions.thresholdLines}
+            onThresholdLinesChange={(thresholdLines) =>
+              updateStyleOption('thresholdLines', thresholdLines)
+            }
           />
         )}
       </EuiSplitPanel.Inner>

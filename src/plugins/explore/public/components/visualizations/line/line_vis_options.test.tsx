@@ -6,7 +6,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
 import {
   CategoryAxis,
   GridOptions,
@@ -15,12 +15,16 @@ import {
   ValueAxis,
   Positions,
   VisFieldType,
+  TooltipOptions,
 } from '../types';
 import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
-import { ThresholdOptions } from '../style_panel/threshold_options';
+import { ThresholdOptions } from '../style_panel/threshold/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { AxesOptions } from '../style_panel/axes_options';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
+import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
+import { TooltipOptionsPanel } from '../style_panel/tooltip_options';
+import { LineStyle } from './line_vis_config';
 
 // Mock the i18n module
 jest.mock('@osd/i18n', () => ({
@@ -30,13 +34,21 @@ jest.mock('@osd/i18n', () => ({
 }));
 
 describe('LineVisStyleControls', () => {
-  const defaultThresholdLine: ThresholdLine = {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
+  const defaultTooltipOptions: TooltipOptions = {
+    mode: 'all',
   };
+
+  const defaultThresholdLines: ThresholdLines = [
+    {
+      id: '1',
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+      name: '',
+    },
+  ];
 
   const defaultGrid: GridOptions = {
     categoryLines: true,
@@ -78,14 +90,13 @@ describe('LineVisStyleControls', () => {
 
   const mockProps: LineVisStyleControlsProps = {
     styleOptions: {
-      addTooltip: true,
       addLegend: true,
       legendPosition: Positions.RIGHT,
       addTimeMarker: false,
-      showLine: true,
+      lineStyle: 'both' as LineStyle,
       lineMode: 'smooth',
       lineWidth: 2,
-      showDots: true,
+      tooltipOptions: defaultTooltipOptions,
       thresholdLine: defaultThresholdLine,
       grid: defaultGrid,
       categoryAxes: [defaultCategoryAxis],
@@ -98,6 +109,8 @@ describe('LineVisStyleControls', () => {
         name: 'value',
         schema: VisFieldType.Numerical,
         column: 'field-1',
+        validValuesCount: 10,
+        uniqueValuesCount: 5,
       },
     ],
     categoricalColumns: [
@@ -106,6 +119,8 @@ describe('LineVisStyleControls', () => {
         name: 'category',
         schema: VisFieldType.Categorical,
         column: 'field-2',
+        validValuesCount: 10,
+        uniqueValuesCount: 3,
       },
     ],
     dateColumns: [
@@ -114,8 +129,16 @@ describe('LineVisStyleControls', () => {
         name: 'date',
         schema: VisFieldType.Date,
         column: 'field-0',
+        validValuesCount: 10,
+        uniqueValuesCount: 10,
       },
     ],
+    availableChartTypes: [
+      { type: 'line', priority: 100, name: 'Line Chart' },
+      { type: 'bar', priority: 80, name: 'Bar Chart' },
+    ],
+    selectedChartType: 'line',
+    onChartTypeChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -127,91 +150,84 @@ describe('LineVisStyleControls', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders a tabbed content component with the correct tabs', () => {
+  it('renders EuiSplitPanel with the correct panels', () => {
     const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const tabbedContent = wrapper.find(EuiTabbedContent);
+    const splitPanelOuter = wrapper.find(EuiSplitPanel.Outer);
+    const splitPanelInners = wrapper.find(EuiSplitPanel.Inner);
 
-    expect(tabbedContent.exists()).toBe(true);
-    expect(tabbedContent.prop('tabs')).toHaveLength(5);
-
-    const tabIds = tabbedContent.prop('tabs').map((tab) => tab.id);
-    expect(tabIds).toEqual(['basic', 'exclusive', 'threshold', 'grid', 'axes']);
-
-    const tabNames = tabbedContent.prop('tabs').map((tab) => tab.name);
-    expect(tabNames).toEqual(['Basic', 'Exclusive', 'Threshold', 'Grid', 'Axes']);
+    expect(splitPanelOuter.exists()).toBe(true);
+    expect(splitPanelInners).toHaveLength(7); // 7 panels: general, basic, exclusive, tooltip, threshold, grid, axes
   });
 
-  it('renders the GeneralVisOptions component in the first tab', () => {
+  it('renders buttons for each panel', () => {
     const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const generalTab = wrapper.find(EuiTabbedContent).prop('tabs')[0];
-    const generalTabContent = shallow(<div>{generalTab.content}</div>);
-    expect(generalTabContent.find(GeneralVisOptions).exists()).toBe(true);
-    expect(generalTabContent.find(GeneralVisOptions).props()).toMatchObject({
-      addTooltip: mockProps.styleOptions.addTooltip,
-      addLegend: mockProps.styleOptions.addLegend,
-      legendPosition: mockProps.styleOptions.legendPosition,
+    const buttons = wrapper.find(EuiButtonEmpty);
+
+    expect(buttons).toHaveLength(7); // 7 buttons for each panel
+
+    // Check button labels
+    const buttonLabels = buttons.map((button) => button.prop('children'));
+    expect(buttonLabels).toContain('General');
+    expect(buttonLabels).toContain('Basic');
+    expect(buttonLabels).toContain('Graph style');
+    expect(buttonLabels).toContain('Tooltip');
+    expect(buttonLabels).toContain('Threshold');
+    expect(buttonLabels).toContain('Grid');
+    expect(buttonLabels).toContain('Axis');
+  });
+
+  it('toggles panel visibility when button is clicked', () => {
+    const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
+
+    // Initially all panels should be collapsed
+    expect(wrapper.find(ChartTypeSwitcher).exists()).toBe(false);
+
+    // Click the general panel button
+    wrapper.find('[data-test-subj="lineVisGeneralButton"]').simulate('click');
+
+    // Now the ChartTypeSwitcher should be visible
+    expect(wrapper.find(ChartTypeSwitcher).exists()).toBe(true);
+  });
+
+  it('renders ChartTypeSwitcher with correct props when general panel is expanded', () => {
+    const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
+
+    // Expand the general panel
+    wrapper.find('[data-test-subj="lineVisGeneralButton"]').simulate('click');
+
+    const chartTypeSwitcher = wrapper.find(ChartTypeSwitcher);
+    expect(chartTypeSwitcher.exists()).toBe(true);
+    expect(chartTypeSwitcher.props()).toMatchObject({
+      availableChartTypes: mockProps.availableChartTypes,
+      selectedChartType: mockProps.selectedChartType,
+      onChartTypeChange: mockProps.onChartTypeChange,
     });
   });
 
-  it('renders the BasicVisOptions component in the second tab', () => {
+  it('renders LineExclusiveVisOptions with correct props when exclusive panel is expanded', () => {
     const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const basicTab = wrapper.find(EuiTabbedContent).prop('tabs')[1];
-    const basicTabContent = shallow(<div>{basicTab.content}</div>);
 
-    expect(basicTabContent.find(BasicVisOptions).exists()).toBe(true);
-    expect(basicTabContent.find(BasicVisOptions).props()).toMatchObject({
+    // Expand the exclusive panel
+    wrapper.find('[data-test-subj="lineVisExclusiveButton"]').simulate('click');
+
+    const lineExclusiveVisOptions = wrapper.find(LineExclusiveVisOptions);
+    expect(lineExclusiveVisOptions.exists()).toBe(true);
+    expect(lineExclusiveVisOptions.props()).toMatchObject({
       addTimeMarker: mockProps.styleOptions.addTimeMarker,
-      showLine: mockProps.styleOptions.showLine,
+      lineStyle: mockProps.styleOptions.lineStyle,
       lineMode: mockProps.styleOptions.lineMode,
       lineWidth: mockProps.styleOptions.lineWidth,
-      showDots: mockProps.styleOptions.showDots,
-    });
-  });
-
-  it('renders the ThresholdOptions component in the third tab', () => {
-    const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const thresholdTab = wrapper.find(EuiTabbedContent).prop('tabs')[2];
-    const thresholdTabContent = shallow(<div>{thresholdTab.content}</div>);
-
-    expect(thresholdTabContent.find(ThresholdOptions).exists()).toBe(true);
-    expect(thresholdTabContent.find(ThresholdOptions).props()).toMatchObject({
-      thresholdLine: mockProps.styleOptions.thresholdLine,
-    });
-  });
-
-  it('renders the GridOptionsPanel component in the fourth tab', () => {
-    const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const gridTab = wrapper.find(EuiTabbedContent).prop('tabs')[3];
-    const gridTabContent = shallow(<div>{gridTab.content}</div>);
-
-    expect(gridTabContent.find(GridOptionsPanel).exists()).toBe(true);
-    expect(gridTabContent.find(GridOptionsPanel).props()).toMatchObject({
-      grid: mockProps.styleOptions.grid,
-    });
-  });
-
-  it('renders the AxesOptions component in the fifth tab', () => {
-    const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const axesTab = wrapper.find(EuiTabbedContent).prop('tabs')[4];
-    const axesTabContent = shallow(<div>{axesTab.content}</div>);
-
-    expect(axesTabContent.find(AxesOptions).exists()).toBe(true);
-    expect(axesTabContent.find(AxesOptions).props()).toMatchObject({
-      categoryAxes: mockProps.styleOptions.categoryAxes,
-      valueAxes: mockProps.styleOptions.valueAxes,
-      numericalColumns: mockProps.numericalColumns,
-      categoricalColumns: mockProps.categoricalColumns,
-      dateColumns: mockProps.dateColumns,
     });
   });
 
   it('calls onStyleChange with the correct parameters when a style option changes', () => {
     const wrapper = shallow(<LineVisStyleControls {...mockProps} />);
-    const basicTab = wrapper.find(EuiTabbedContent).prop('tabs')[1];
-    const basicTabContent = shallow(<div>{basicTab.content}</div>);
+
+    // Expand the exclusive panel
+    wrapper.find('[data-test-subj="lineVisExclusiveButton"]').simulate('click');
 
     // Simulate changing the lineWidth option
-    basicTabContent.find(BasicVisOptions).prop('onLineWidthChange')(3);
+    wrapper.find(LineExclusiveVisOptions).prop('onLineWidthChange')(3);
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ lineWidth: 3 });
   });
 
@@ -226,11 +242,12 @@ describe('LineVisStyleControls', () => {
     const wrapper = shallow(<LineVisStyleControls {...propsWithEmptyColumns} />);
     expect(wrapper).toMatchSnapshot();
 
-    // Check that the AxesOptions component still renders with empty arrays
-    const axesTab = wrapper.find(EuiTabbedContent).prop('tabs')[4];
-    const axesTabContent = shallow(<div>{axesTab.content}</div>);
+    // Expand the axes panel
+    wrapper.find('[data-test-subj="lineVisAxesButton"]').simulate('click');
 
-    expect(axesTabContent.find(AxesOptions).props()).toMatchObject({
+    // Check that the AxesOptions component renders with empty arrays
+    const axesOptions = wrapper.find(AxesOptions);
+    expect(axesOptions.props()).toMatchObject({
       numericalColumns: [],
       categoricalColumns: [],
       dateColumns: [],

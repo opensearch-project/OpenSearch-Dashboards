@@ -5,7 +5,8 @@
 
 import { VEGASCHEMA, VisColumn } from '../types';
 import { BarChartStyleControls } from './bar_vis_config';
-import { getStrokeDash, applyAxisStyling } from '../line/line_chart_utils';
+import { applyAxisStyling } from '../line/line_chart_utils';
+import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/threshold_utils';
 
 export const createBarSpec = (
   transformedData: Array<Record<string, any>>,
@@ -80,20 +81,9 @@ export const createBarSpec = (
 
   layers.push(mainLayer);
 
-  // Add threshold line if enabled
-  if (styles.thresholdLine?.show) {
-    const thresholdLayer = {
-      mark: {
-        type: 'rule',
-        color: styles.thresholdLine.color || '#E7664C',
-        strokeWidth: styles.thresholdLine.width || 1,
-        strokeDash: getStrokeDash(styles.thresholdLine.style),
-        tooltip: false,
-      },
-      encoding: {
-        [valueAxis]: { value: styles.thresholdLine.value || 0 },
-      },
-    };
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles?.tooltipOptions?.mode);
+  if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
 
@@ -185,20 +175,9 @@ export const createTimeBarChart = (
 
   layers.push(mainLayer);
 
-  // Add threshold line if enabled
-  if (styles.thresholdLine?.show) {
-    const thresholdLayer = {
-      mark: {
-        type: 'rule',
-        color: styles.thresholdLine.color || '#E7664C',
-        strokeWidth: styles.thresholdLine.width || 1,
-        strokeDash: getStrokeDash(styles.thresholdLine.style),
-        tooltip: false,
-      },
-      encoding: {
-        y: { value: styles.thresholdLine.value || 0 },
-      },
-    };
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles?.tooltipOptions?.mode);
+  if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
 
@@ -310,23 +289,10 @@ export const createGroupedTimeBarChart = (
     },
   };
 
-  // Add threshold line if enabled
-  if (styles.thresholdLine?.show) {
-    spec.layer = [
-      { mark: barMark, encoding: spec.encoding },
-      {
-        mark: {
-          type: 'rule',
-          color: styles.thresholdLine.color || '#E7664C',
-          strokeWidth: styles.thresholdLine.width || 1,
-          strokeDash: getStrokeDash(styles.thresholdLine.style),
-          tooltip: false,
-        },
-        encoding: {
-          y: { value: styles.thresholdLine.value || 0 },
-        },
-      },
-    ];
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles?.tooltipOptions?.mode);
+  if (thresholdLayer) {
+    spec.layer = [{ mark: barMark, encoding: spec.encoding }, thresholdLayer];
     delete spec.mark;
     delete spec.encoding;
   }
@@ -442,22 +408,9 @@ export const createFacetedTimeBarChart = (
             },
           },
         },
-        // Add threshold line to each facet if enabled
-        ...(styles.thresholdLine?.show
-          ? [
-              {
-                mark: {
-                  type: 'rule',
-                  color: styles.thresholdLine.color || '#E7664C',
-                  strokeWidth: styles.thresholdLine.width || 1,
-                  strokeDash: getStrokeDash(styles.thresholdLine.style),
-                  tooltip: false,
-                },
-                encoding: {
-                  y: { value: styles.thresholdLine.value || 0 },
-                },
-              },
-            ]
+        // Add threshold layer to each facet if enabled
+        ...(styles.thresholdLines && styles.thresholdLines.length > 0
+          ? [createThresholdLayer(styles.thresholdLines, styles?.tooltipOptions?.mode)]
           : []),
       ],
     },
@@ -558,23 +511,10 @@ export const createStackedBarSpec = (
     },
   };
 
-  // Add threshold line if enabled
-  if (styles.thresholdLine?.show) {
-    spec.layer = [
-      { mark: barMark, encoding: spec.encoding },
-      {
-        mark: {
-          type: 'rule',
-          color: styles.thresholdLine.color || '#E7664C',
-          strokeWidth: styles.thresholdLine.width || 1,
-          strokeDash: getStrokeDash(styles.thresholdLine.style),
-          tooltip: false,
-        },
-        encoding: {
-          [valueAxis]: { value: styles.thresholdLine.value || 0 },
-        },
-      },
-    ];
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles?.tooltipOptions?.mode);
+  if (thresholdLayer) {
+    spec.layer = [{ mark: barMark, encoding: spec.encoding }, thresholdLayer];
     delete spec.mark;
     delete spec.encoding;
   }

@@ -17,32 +17,83 @@ export default {
 
 // Mock data for the component props
 const mockNumericalColumns: VisColumn[] = [
-  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
-  { id: 2, name: 'price', schema: VisFieldType.Numerical, column: 'price' },
-  { id: 3, name: 'revenue', schema: VisFieldType.Numerical, column: 'revenue' },
+  {
+    id: 1,
+    name: 'count',
+    schema: VisFieldType.Numerical,
+    column: 'count',
+    validValuesCount: 10,
+    uniqueValuesCount: 5,
+  },
+  {
+    id: 2,
+    name: 'price',
+    schema: VisFieldType.Numerical,
+    column: 'price',
+    validValuesCount: 10,
+    uniqueValuesCount: 8,
+  },
+  {
+    id: 3,
+    name: 'revenue',
+    schema: VisFieldType.Numerical,
+    column: 'revenue',
+    validValuesCount: 10,
+    uniqueValuesCount: 7,
+  },
 ];
 
 const mockCategoricalColumns: VisColumn[] = [
-  { id: 4, name: 'category', schema: VisFieldType.Categorical, column: 'category' },
-  { id: 5, name: 'product', schema: VisFieldType.Categorical, column: 'product' },
+  {
+    id: 4,
+    name: 'category',
+    schema: VisFieldType.Categorical,
+    column: 'category',
+    validValuesCount: 10,
+    uniqueValuesCount: 3,
+  },
+  {
+    id: 5,
+    name: 'product',
+    schema: VisFieldType.Categorical,
+    column: 'product',
+    validValuesCount: 10,
+    uniqueValuesCount: 5,
+  },
 ];
 
 const mockDateColumns: VisColumn[] = [
-  { id: 6, name: 'timestamp', schema: VisFieldType.Date, column: 'timestamp' },
+  {
+    id: 6,
+    name: 'timestamp',
+    schema: VisFieldType.Date,
+    column: 'timestamp',
+    validValuesCount: 10,
+    uniqueValuesCount: 10,
+  },
+];
+
+// Mock chart types for the ChartTypeSwitcher
+const mockAvailableChartTypes = [
+  { type: 'line', priority: 100, name: 'Line Chart' },
+  { type: 'bar', priority: 80, name: 'Bar Chart' },
+  { type: 'area', priority: 60, name: 'Area Chart' },
 ];
 
 // Default style options
 const defaultStyleOptions: LineChartStyleControls = {
   // Basic controls
-  addTooltip: true,
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
 
-  showLine: true,
+  // Line specific controls
+  lineStyle: 'both',
   lineMode: 'smooth',
   lineWidth: 2,
-  showDots: true,
+  tooltipOptions: {
+    mode: 'all',
+  },
 
   // Threshold and grid
   thresholdLine: {
@@ -126,6 +177,9 @@ Primary.args = {
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
   dateColumns: mockDateColumns,
+  availableChartTypes: mockAvailableChartTypes,
+  selectedChartType: 'line',
+  onChartTypeChange: action('onChartTypeChange'),
 };
 
 // Story with threshold line enabled
@@ -141,9 +195,12 @@ WithThreshold.args = {
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
   dateColumns: mockDateColumns,
+  availableChartTypes: mockAvailableChartTypes,
+  selectedChartType: 'line',
+  onChartTypeChange: action('onChartTypeChange'),
 };
 
-// Story with multiple value axes
+// multiple value axes
 export const MultipleValueAxes = Template.bind({});
 MultipleValueAxes.args = {
   styleOptions: {
@@ -171,9 +228,12 @@ MultipleValueAxes.args = {
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
   dateColumns: mockDateColumns,
+  availableChartTypes: mockAvailableChartTypes,
+  selectedChartType: 'line',
+  onChartTypeChange: action('onChartTypeChange'),
 };
 
-// Story with no grid lines
+// no grid lines
 export const NoGridLines = Template.bind({});
 NoGridLines.args = {
   styleOptions: {
@@ -186,4 +246,19 @@ NoGridLines.args = {
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
   dateColumns: mockDateColumns,
+  availableChartTypes: mockAvailableChartTypes,
+  selectedChartType: 'line',
+  onChartTypeChange: action('onChartTypeChange'),
+};
+
+// different chart type selected
+export const BarChartSelected = Template.bind({});
+BarChartSelected.args = {
+  styleOptions: defaultStyleOptions,
+  numericalColumns: mockNumericalColumns,
+  categoricalColumns: mockCategoricalColumns,
+  dateColumns: mockDateColumns,
+  availableChartTypes: mockAvailableChartTypes,
+  selectedChartType: 'bar',
+  onChartTypeChange: action('onChartTypeChange'),
 };
