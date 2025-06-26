@@ -13,6 +13,7 @@ export const enum SuggestionItemDetailsTags {
   Operator = 'Operator',
   Table = 'Table',
   Command = 'Command',
+  Field = 'Field',
 }
 export const quotesRegex = /^'(.*)'$/;
 
