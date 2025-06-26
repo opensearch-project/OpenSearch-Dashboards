@@ -20,10 +20,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';
 import { ResultStatus } from '../../utils/state_management/types';
-import {
-  TopNav,
-  TopNavProps,
-} from '../../legacy/discover/application/view_components/canvas/top_nav';
+import { TopNav } from '../../legacy/discover/application/view_components/canvas/top_nav';
 import { DiscoverChartContainer } from '../../legacy/discover/application/view_components/canvas/discover_chart_container';
 import { QueryPanel } from '../../../components/query_panel';
 import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
@@ -89,20 +86,6 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   useUrlStateSync(services);
   useTimefilterSubscription(services);
   useHeaderVariants(services, HeaderVariant.APPLICATION);
-
-  // Create TopNav props - use portal approach for precise positioning
-  const topNavProps: TopNavProps = {
-    opts: {
-      setHeaderActionMenu: setHeaderActionMenu || (() => {}), // Use real global header mount point
-      onQuerySubmit: ({ dateRange, query }: any) => {
-        // Update time range
-        if (dateRange && services?.data?.query?.timefilter?.timefilter) {
-          services.data.query.timefilter.timefilter.setTime(dateRange);
-        }
-      },
-    },
-    showSaveQuery: true,
-  };
 
   // Function to refresh data (for uninitialized state)
   const onRefresh = () => {
@@ -208,7 +191,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             paddingSize="none"
           >
             <EuiPageBody className="explore-layout__canvas">
-              <TopNav {...topNavProps} />
+              <TopNav setHeaderActionMenu={setHeaderActionMenu} />
               {renderBottomRightPanel()}
             </EuiPageBody>
           </EuiResizablePanel>
