@@ -151,7 +151,7 @@ export interface ExploreServices {
   overlays: CoreStart['overlays'];
 
   // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
-  store?: ReduxStore; // Redux store
+  store: ReduxStore; // Redux store
   viewRegistry?: Record<string, unknown>; // ViewServiceStart - will be replaced with tabRegistry
   embeddable: EmbeddableStart; // EmbeddableStart
   scopedHistory?: ScopedHistory; // ScopedHistory
