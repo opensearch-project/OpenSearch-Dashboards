@@ -61,6 +61,7 @@ export const SaveAndAddButtonWithModal = ({
     history,
     toastNotifications,
     store,
+    chrome,
   } = services;
 
   const [showAddToDashboardModal, setShowAddToDashboardModal] = useState(false);
@@ -134,6 +135,9 @@ export const SaveAndAddButtonWithModal = ({
           'data-test-subj': 'savedExploreSuccess',
         });
         history().push(`/view/${encodeURIComponent(id)}`);
+        // Update browser title and breadcrumbs
+        chrome.docTitle.change(newTitle);
+        chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: newTitle }]);
       }
 
       store!.dispatch(setSavedSearch(id));
