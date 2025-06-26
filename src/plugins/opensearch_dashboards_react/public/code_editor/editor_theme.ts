@@ -39,7 +39,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 // please see this discuss issue: https://github.com/elastic/kibana/issues/43814
 const standardizeColor = (color: string) => new Color(color).hex().toLowerCase();
 
-export function createTheme(
+export function createDefaultTheme(
   euiTheme: typeof darkTheme | typeof lightTheme,
   selectionBackgroundColor: string
 ): monaco.editor.IStandaloneThemeData {
@@ -125,8 +125,63 @@ export function createTheme(
   };
 }
 
+export function createTheme(
+  euiTheme: typeof darkTheme | typeof lightTheme,
+  selectionBackgroundColor: string
+): monaco.editor.IStandaloneThemeData {
+  return {
+    base: 'vs',
+    inherit: true,
+    rules: [
+      {
+        token: '',
+        foreground: standardizeColor(euiTheme.euiColorDarkestShade),
+        background: standardizeColor(euiTheme.euiColorEmptyShade),
+      },
+      { token: 'invalid', foreground: standardizeColor(euiTheme.euiColorAccent) },
+      { token: 'emphasis', fontStyle: 'italic' },
+      { token: 'strong', fontStyle: 'bold' },
+
+      { token: 'variable', foreground: standardizeColor(euiTheme.euiCodeBlockNameColor) },
+      { token: 'constant', foreground: standardizeColor(euiTheme.euiColorAccent) },
+      { token: 'comment', foreground: standardizeColor(euiTheme.euiCodeBlockCommentColor) },
+      { token: 'number', foreground: standardizeColor(euiTheme.euiCodeBlockNumberColor) },
+
+      { token: 'delimiter', foreground: standardizeColor(euiTheme.euiColorDarkestShade) },
+
+      { token: 'tag', foreground: standardizeColor(euiTheme.euiCodeBlockTagColor) },
+
+      { token: 'type', foreground: standardizeColor(euiTheme.euiCodeBlockTypeColor) },
+
+      { token: 'string', foreground: standardizeColor(euiTheme.euiCodeBlockStringColor) },
+
+      { token: 'keyword', foreground: standardizeColor(euiTheme.euiCodeBlockKeywordColor) },
+
+      {
+        token: 'predefined.function',
+        foreground: standardizeColor(euiTheme.euiCodeBlockTitleColor),
+      },
+    ],
+    colors: {
+      'editor.foreground': standardizeColor(euiTheme.euiColorDarkestShade),
+      'editor.background': standardizeColor(euiTheme.euiColorEmptyShade),
+      'editorLineNumber.foreground': standardizeColor(euiTheme.euiColorDarkShade),
+      'editorLineNumber.activeForeground': standardizeColor(euiTheme.euiColorDarkShade),
+      'editorIndentGuide.background': standardizeColor(euiTheme.euiColorLightShade),
+      'editorWidget.border': standardizeColor(euiTheme.euiColorLightShade),
+      'editorWidget.background': standardizeColor(euiTheme.euiColorLightestShade),
+      'editorCursor.foreground': standardizeColor(euiTheme.euiColorDarkestShade),
+      'list.hoverBackground': standardizeColor(euiTheme.euiColorLightShade),
+      'list.highlightForeground': standardizeColor(euiTheme.euiColorPrimary),
+      'editor.lineHighlightBorder': standardizeColor(euiTheme.euiColorLightestShade),
+    },
+  };
+}
+
 // TODO: Refactor to use packages/osd-ui-shared-deps/theme.ts: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5661
+const DEFAULT_DARK_THEME = createDefaultTheme(darkTheme, '#343551');
+const DEAFULT_LIGHT_THEME = createDefaultTheme(lightTheme, '#E3E4ED');
 const DARK_THEME = createTheme(darkTheme, '#343551');
 const LIGHT_THEME = createTheme(lightTheme, '#E3E4ED');
 
-export { DARK_THEME, LIGHT_THEME };
+export { DEFAULT_DARK_THEME, DEAFULT_LIGHT_THEME, DARK_THEME, LIGHT_THEME };
