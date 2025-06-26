@@ -41,3 +41,4 @@ const resultsSlice = createSlice({
 
 export const { setResults, clearResults, clearResultsByKey } = resultsSlice.actions;
 export const resultsReducer = resultsSlice.reducer;
+export const resultsInitialState = resultsSlice.getInitialState();

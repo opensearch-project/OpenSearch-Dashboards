@@ -99,3 +99,4 @@ export const {
   setUiState,
 } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
+export const uiInitialState = uiSlice.getInitialState();

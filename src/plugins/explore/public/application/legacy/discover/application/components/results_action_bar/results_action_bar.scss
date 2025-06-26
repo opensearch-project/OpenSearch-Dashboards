@@ -1,7 +1,11 @@
-.dscResultsActionBar {
+.explore-results-action-bar {
   border-bottom: $ouiBorderThin;
   flex-grow: 0;
   padding: $euiSizeXS 0;
+
+  &__explore-download-csv-flex-item {
+    margin-left: auto;
+  }
 
   &__extensions-container {
     // each config instance of the extension will be wrapped by this container that will act as a flex item

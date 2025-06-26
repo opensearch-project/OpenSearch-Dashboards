@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiSmallButtonEmpty } from '@elastic/eui';
+import { EuiPopover, EuiSmallButton } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_content';
 import { useDiscoverDownloadCsv } from './use_download_csv';
@@ -39,25 +39,24 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
     await downloadCsvForOption(option);
   };
 
+  // Disable trap foucus, since it can break dismiss
   return (
     <EuiPopover
       button={
-        <EuiSmallButtonEmpty
+        <EuiSmallButton
           data-test-subj="dscDownloadCsvButton"
           disabled={isLoading}
-          iconType="download"
-          iconSide="left"
+          iconType="arrowDown"
+          iconSide="right"
           onClick={openPopover}
         >
-          <FormattedMessage
-            id="explore.discover.downloadCsvButtonText"
-            defaultMessage="Download as CSV"
-          />
-        </EuiSmallButtonEmpty>
+          <FormattedMessage id="explore.discover.downloadCsvButtonText" defaultMessage="Export" />
+        </EuiSmallButton>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
+      ownFocus={false}
     >
       <DiscoverDownloadCsvPopoverContent
         rowsCount={rows?.length || 0}
