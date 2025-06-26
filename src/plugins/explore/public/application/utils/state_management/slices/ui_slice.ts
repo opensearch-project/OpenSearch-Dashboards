@@ -44,6 +44,9 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
+    setUiState: (state, action: PayloadAction<UIState>) => {
+      return { ...state, ...action.payload };
+    },
     setActiveTab: (state, action: PayloadAction<string>) => {
       state.activeTabId = action.payload;
     },
@@ -98,5 +101,6 @@ export const {
   rollbackTransaction,
   setStyleOptions,
   setChartType,
+  setUiState,
 } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;

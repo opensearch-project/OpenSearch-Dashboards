@@ -28,6 +28,9 @@ export interface SavedExplore
   version?: number;
   visualization?: string; // Serialized visualization state
   type?: string;
+  kibanaSavedObjectMeta?: {
+    searchSourceJSON: string;
+  };
 }
 
 export interface SavedExploreAttributes {
