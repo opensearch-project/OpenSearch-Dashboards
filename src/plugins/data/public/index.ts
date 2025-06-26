@@ -561,3 +561,6 @@ export {
   DataSourceGroup,
   DataSourceOption,
 } from './data_sources/datasource_selector';
+
+export { SavedQueryManagementComponent } from './ui/saved_query_management';
+export { SaveQueryForm, SavedQueryMeta } from './ui/saved_query_form';

@@ -21,6 +21,7 @@ import {
   selectIsLoading,
   selectDataset,
   selectShowDataSetFields,
+  selectSavedQuery,
 } from '../../application/utils/state_management/selectors';
 import './index.scss';
 
@@ -63,6 +64,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   const isLoading = useSelector(selectIsLoading);
   const dataset = useSelector(selectDataset);
   const showDatasetFields = useSelector(selectShowDataSetFields);
+  const savedQueryId = useSelector(selectSavedQuery);
 
   // Determine if DatePicker should be shown
   const showDatePicker = Boolean(indexPattern?.timeFieldName);
@@ -266,7 +268,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   const onClickRecentQuery = (recentQuery: Query, timeRange?: TimeRange) => {
     setIsRecentQueryVisible(false);
     setLocalQuery(typeof recentQuery.query === 'string' ? recentQuery.query : '');
-    setLocalPrompt(recentQuery.prompt ?? '');
     setIsDualEditor(true);
     handleQueryRun();
   };
@@ -278,6 +279,16 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   const noInput = useMemo(() => {
     return !localQuery?.trim() && !localPrompt?.trim();
   }, [localQuery, localPrompt]);
+
+  const handleClearQuery = () => {
+    dispatch(setQuery({ query: '', language: query.language }));
+    setLocalQuery('');
+  };
+
+  const handleLoadSavedQuery = (savedQuery: Query) => {
+    dispatch(setQuery(savedQuery));
+    setLocalQuery(savedQuery.query);
+  };
 
   return (
     <EuiPanel paddingSize="s" className="queryPanel__container">
@@ -292,6 +303,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
             showDatasetFields={showDatasetFields}
             datePickerRef={datePickerRef}
             services={services}
+            query={query}
             timefilter={timefilter}
             onRunClick={handleRunClick}
             onRecentClick={handleRecentClick}
@@ -299,6 +311,8 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
             onRunQuery={handleRun}
             oneRefreshChange={handleRefreshChange}
             onShowFieldsToggle={handleShowFieldsToggle}
+            onClearQuery={handleClearQuery}
+            onLoadSavedQuery={handleLoadSavedQuery}
           />
         }
       >

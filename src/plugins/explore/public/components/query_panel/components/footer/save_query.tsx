@@ -2,62 +2,121 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
-// TODO: Integrate with saved queries service and update with real saved queries in list and  modify ui too.
-// This component will be fully functional once integrated with query services.
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { EuiPopover, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import {
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiText,
-  EuiIcon,
-  EuiPopoverTitle,
-  EuiPopoverFooter,
-  EuiButton,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeaderTitle,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSwitch,
-} from '@elastic/eui';
+  SavedQueryManagementComponent,
+  SaveQueryForm,
+  SavedQueryMeta,
+  SavedQuery,
+  SavedQueryService,
+  TimefilterContract,
+  // SavedQueryAttributes,
+} from '../../../../../../data/public';
+import { Query } from '../../types';
 
-export const SaveQueryButton: React.FC = () => {
+export const SaveQueryButton: React.FC<{
+  savedQueryService: SavedQueryService;
+  showDatePicker: boolean;
+  timeFilter: TimefilterContract;
+  query: Query;
+  onClearQuery: () => void;
+  onLoadSavedQuery: (savedQuery: Query) => void;
+}> = ({ savedQueryService, showDatePicker, timeFilter, query, onClearQuery, onLoadSavedQuery }) => {
+  // Saved Query UI state
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [queryName, setQueryName] = useState('');
-  const [description, setDescription] = useState('');
-  const [includeTimeFilter, setIncludeTimeFilter] = useState(false);
-  const [error, setError] = useState('');
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-    closePopover();
+  const [isSaveQueryFormOpen, setIsSaveQueryFormOpen] = React.useState(false);
+  const [saveAsNew, setSaveAsNew] = React.useState(false);
+  const [loadedSavedQuery, setLoadedSavedQuery] = React.useState<SavedQuery | undefined>(undefined);
+
+  // Handlers for Saved Query UI
+  const handleInitiateSave = () => {
+    setSaveAsNew(false);
+    setIsSaveQueryFormOpen(true);
+  };
+  const handleInitiateSaveAsNew = () => {
+    setSaveAsNew(true);
+    setIsSaveQueryFormOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setError(''); // Clear error on modal close
-  };
+  const handleLoadSavedQuery = useCallback(
+    (savedQuery) => {
+      setLoadedSavedQuery(savedQuery);
+      if (savedQuery?.attributes?.query) {
+        onLoadSavedQuery(savedQuery.attributes.query);
+      }
+      if (savedQuery?.attributes?.timefilter && timeFilter) {
+        timeFilter.setTime({
+          from: savedQuery.attributes.timefilter.from,
+          to: savedQuery.attributes.timefilter.to,
+        });
+        if (typeof timeFilter.setRefreshInterval === 'function') {
+          timeFilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+        }
+      }
+    },
+    [onLoadSavedQuery, timeFilter]
+  );
 
-  const handleSave = () => {
-    if (!queryName.trim()) {
-      setError(
-        i18n.translate('explore.queryPanel.saveQueryButton.nameRequiredError', {
-          defaultMessage:
-            'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.',
-        })
-      );
-      return;
+  const handleClearSavedQuery = useCallback(() => {
+    setLoadedSavedQuery(undefined);
+    onClearQuery();
+    if (timeFilter) {
+      timeFilter.setTime({ from: 'now-15m', to: 'now' });
+      if (typeof timeFilter.setRefreshInterval === 'function') {
+        timeFilter.setRefreshInterval({ value: 0, pause: true });
+      }
     }
-    closeModal();
+  }, [onClearQuery, timeFilter]);
+
+  const handleSaveQuery = async (meta: SavedQueryMeta, saveAsNewParam?: boolean) => {
+    try {
+      // Compose the SavedQueryAttributes object
+      const attributes: any = {
+        title: meta.title,
+        description: meta.description,
+        query: { ...query },
+      };
+
+      if (meta.shouldIncludeTimeFilter && timeFilter && typeof timeFilter.getTime === 'function') {
+        const tf = timeFilter.getTime();
+        if (
+          tf &&
+          tf.from !== undefined &&
+          tf.to !== undefined &&
+          typeof timeFilter.getRefreshInterval === 'function'
+        ) {
+          const refresh = timeFilter.getRefreshInterval();
+          attributes.timefilter = {
+            from: tf.from,
+            to: tf.to,
+            refreshInterval: refresh,
+          };
+        }
+      }
+
+      // Overwrite if editing, not if saving as new
+      const overwrite = !(saveAsNewParam ?? saveAsNew);
+      const savedQuery = await savedQueryService.saveQuery(attributes, { overwrite });
+      setLoadedSavedQuery(savedQuery);
+      setIsSaveQueryFormOpen(false);
+      // Optionally show a success notification
+    } catch (error) {
+      // Optionally show an error notification
+    }
+  };
+
+  /*
+   * This Function is here to show the toggle in saved query form
+   * in case you the date range (from/to)
+   */
+  const shouldRenderTimeFilterInSavedQueryForm = () => {
+    return showDatePicker || (!showDatePicker && timeFilter.getTime() !== undefined);
   };
 
   return (
@@ -80,119 +139,31 @@ export const SaveQueryButton: React.FC = () => {
         closePopover={closePopover}
         anchorPosition="downCenter"
       >
-        <EuiPopoverTitle>
-          {i18n.translate('explore.queryPanel.saveQueryButton.popoverTitle', {
-            defaultMessage: 'SAVED QUERIES',
-          })}
-        </EuiPopoverTitle>
-        <div className="queryPanel__footer__popoverBody" data-test-subj="saveQueryPopoverBody">
-          <EuiText size="s" className="queryPanel__footer__popoverText">
-            <p>
-              {i18n.translate('explore.queryPanel.saveQueryButton.popoverBody', {
-                defaultMessage:
-                  'There are no saved queries. Save query text and filters that you want to use again.',
-              })}
-            </p>
-          </EuiText>
-        </div>
-        <EuiPopoverFooter>
-          <div className="queryPanel__footer__popoverFooter">
-            <EuiButton size="s" onClick={openModal} fill>
-              {i18n.translate('explore.queryPanel.saveQueryButton.saveCurrentQuery', {
-                defaultMessage: 'Save current query',
-              })}
-            </EuiButton>
-          </div>
-        </EuiPopoverFooter>
+        <SavedQueryManagementComponent
+          savedQueryService={savedQueryService}
+          loadedSavedQuery={loadedSavedQuery}
+          onInitiateSave={handleInitiateSave}
+          onInitiateSaveAsNew={handleInitiateSaveAsNew}
+          onLoad={handleLoadSavedQuery}
+          onClearSavedQuery={handleClearSavedQuery}
+          closeMenuPopover={() => {}}
+          showSaveQuery={true}
+          saveQuery={handleSaveQuery}
+          useNewSavedQueryUI={false}
+        />
       </EuiPopover>
-
-      {isModalOpen && (
-        <EuiModal onClose={closeModal} className="queryPanel__footer__modal">
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              {i18n.translate('explore.queryPanel.saveQueryButton.modalTitle', {
-                defaultMessage: 'Save query',
-              })}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText size="s" className="queryPanel__footer__modalText">
-              <p>
-                {i18n.translate('explore.queryPanel.saveQueryButton.modalBody', {
-                  defaultMessage:
-                    'There are no saved queries. Save query text and filters that you want to use again.',
-                })}
-              </p>
-            </EuiText>
-            <EuiForm>
-              <EuiFormRow
-                label={i18n.translate('explore.queryPanel.saveQueryButton.nameLabel', {
-                  defaultMessage: 'Name',
-                })}
-                isInvalid={!!error}
-                error={error}
-              >
-                <EuiFieldText
-                  placeholder={i18n.translate(
-                    'explore.queryPanel.saveQueryButton.namePlaceholder',
-                    {
-                      defaultMessage: 'Enter query name',
-                    }
-                  )}
-                  value={queryName}
-                  onChange={(e) => setQueryName(e.target.value)}
-                  isInvalid={!!error}
-                />
-              </EuiFormRow>
-              <EuiText size="s" className="queryPanel__footer__modalTextSecondary">
-                <p>
-                  {i18n.translate('explore.queryPanel.saveQueryButton.modalBodyNameRequired', {
-                    defaultMessage:
-                      'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.',
-                  })}
-                </p>
-              </EuiText>
-
-              <EuiFormRow
-                label={i18n.translate('explore.queryPanel.saveQueryButton.descriptionLabel', {
-                  defaultMessage: 'Description',
-                })}
-              >
-                <EuiFieldText
-                  placeholder={i18n.translate(
-                    'explore.queryPanel.saveQueryButton.descriptionPlaceholder',
-                    { defaultMessage: 'Enter query description' }
-                  )}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </EuiFormRow>
-
-              <EuiFormRow>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'explore.queryPanel.saveQueryButton.includeTimeFilterLabel',
-                    { defaultMessage: 'Include time filter' }
-                  )}
-                  checked={includeTimeFilter}
-                  onChange={(e) => setIncludeTimeFilter(e.target.checked)}
-                />
-              </EuiFormRow>
-            </EuiForm>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButton onClick={closeModal} color="text">
-              {i18n.translate('explore.queryPanel.saveQueryButton.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-            <EuiButton onClick={handleSave} fill>
-              {i18n.translate('explore.queryPanel.saveQueryButton.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
+      {isSaveQueryFormOpen && (
+        <SaveQueryForm
+          formUiType="Modal"
+          savedQuery={saveAsNew ? undefined : loadedSavedQuery?.attributes}
+          savedQueryService={savedQueryService}
+          onSave={handleSaveQuery}
+          onClose={() => setIsSaveQueryFormOpen(false)}
+          saveAsNew={saveAsNew}
+          setSaveAsNew={setSaveAsNew}
+          showFilterOption={false}
+          showTimeFilterOption={shouldRenderTimeFilterInSavedQueryForm()}
+        />
       )}
     </>
   );

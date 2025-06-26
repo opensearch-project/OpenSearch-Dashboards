@@ -5,14 +5,16 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
+
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { ShowFieldToggle } from './show_field';
 import { SaveQueryButton } from './save_query';
 import { Actions } from './actions';
 import { DateTimeRangePicker } from './date_time_selector';
 import { RunQueryButton } from './run_query';
 import { ShowInputType } from './show_input_type';
-import { LanguageType } from '../../types';
+import { LanguageType, Query } from '../../types';
 import { QueryError } from './query_error';
 import { ResultStatus } from '../../types';
 import { ExploreServices } from '../../../../types';
@@ -30,6 +32,7 @@ interface QueryPanelFooterProps {
   isDualEditor: boolean;
   isLoading: boolean;
   noInput: boolean;
+  query: Query;
   showDatasetFields: boolean;
   showDatePicker: boolean;
   datePickerRef?: React.RefObject<HTMLDivElement>;
@@ -37,6 +40,8 @@ interface QueryPanelFooterProps {
   timefilter: any;
   onTimeChange: (time: { start: string; end: string }) => void;
   onRunQuery: () => void;
+  onClearQuery: () => void;
+  onLoadSavedQuery: (savedQuery: Query) => void;
   oneRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
   onShowFieldsToggle: (enabled: boolean) => void;
 }
@@ -50,9 +55,12 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   showDatasetFields,
   showDatePicker,
   noInput,
+  query,
   datePickerRef,
   services,
   timefilter,
+  onClearQuery,
+  onLoadSavedQuery,
   onTimeChange,
   onRunQuery,
   oneRefreshChange,
@@ -90,7 +98,14 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
               <div className="queryPanel__footer__verticalSeparator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SaveQueryButton />
+              <SaveQueryButton
+                savedQueryService={services.data.query.savedQueries}
+                showDatePicker={showDatePicker}
+                timeFilter={timefilter}
+                query={query}
+                onClearQuery={onClearQuery}
+                onLoadSavedQuery={onLoadSavedQuery}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div className="queryPanel__footer__verticalSeparator" />
