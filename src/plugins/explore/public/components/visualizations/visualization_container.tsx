@@ -65,6 +65,9 @@ export const VisualizationContainer = () => {
     return [];
   });
 
+  console.log('VisualizationContainer fieldSchema:', fieldSchema);
+  console.log('VisualizationContainer rows:', rows);
+
   const visualizationData = useMemo(() => {
     if (fieldSchema.length === 0 || rows.length === 0) {
       return null;

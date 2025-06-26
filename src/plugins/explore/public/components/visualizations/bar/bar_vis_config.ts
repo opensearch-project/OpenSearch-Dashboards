@@ -13,14 +13,15 @@ import {
   ThresholdLine,
   ThresholdLineStyle,
   ValueAxis,
+  TooltipOptions,
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 
 export interface BarChartStyleControls {
   // Basic controls
-  addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Positions;
+  tooltipOptions: TooltipOptions;
 
   // Bar specific controls
   barWidth: number;
@@ -40,9 +41,13 @@ export interface BarChartStyleControls {
 
 export const defaultBarChartStyles: BarChartStyleControls = {
   // Basic controls
-  addTooltip: true,
   addLegend: true,
   legendPosition: Positions.RIGHT,
+
+  // Tooltip configuration
+  tooltipOptions: {
+    mode: 'all',
+  },
 
   // Bar specific controls
   barWidth: 0.7,
@@ -104,13 +109,13 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   ],
 };
 
-export const createBarConfig = (): VisualizationType => ({
+export const createBarConfig = (): VisualizationType<'bar'> => ({
   name: 'bar',
   type: 'bar',
   ui: {
     style: {
       defaults: defaultBarChartStyles,
-      render: (props) =>
+      render: (props: any) =>
         React.createElement(BarVisStyleControls, props as BarVisStyleControlsProps),
     },
   },

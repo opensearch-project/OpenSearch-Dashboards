@@ -12,6 +12,7 @@ import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { AxesOptions } from '../style_panel/axes_options';
+import { TooltipOptionsPanel } from '../style_panel/tooltip_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
 
@@ -32,6 +33,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
     general: false,
     basic: false,
     exclusive: false,
+    tooltip: false,
     threshold: false,
     grid: false,
     axes: false,
@@ -95,10 +97,8 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
         {expandedPanels.basic && (
           <GeneralVisOptions
             shouldShowLegend={!notShowLegend}
-            addTooltip={styleOptions.addTooltip}
             addLegend={styleOptions.addLegend}
             legendPosition={styleOptions.legendPosition}
-            onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
             onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
             onLegendPositionChange={(legendPosition) =>
               updateStyleOption('legendPosition', legendPosition)
@@ -137,6 +137,32 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
             }
             onBarBorderColorChange={(barBorderColor) =>
               updateStyleOption('barBorderColor', barBorderColor)
+            }
+          />
+        )}
+      </EuiSplitPanel.Inner>
+
+      <EuiSplitPanel.Inner paddingSize="s">
+        <EuiButtonEmpty
+          iconSide="left"
+          color="text"
+          iconType={expandedPanels.tooltip ? 'arrowDown' : 'arrowRight'}
+          onClick={() => togglePanel('tooltip')}
+          size="xs"
+          data-test-subj="barVisTooltipButton"
+        >
+          {i18n.translate('explore.vis.barChart.tabs.tooltip', {
+            defaultMessage: 'Tooltip',
+          })}
+        </EuiButtonEmpty>
+        {expandedPanels.tooltip && (
+          <TooltipOptionsPanel
+            tooltipOptions={styleOptions.tooltipOptions}
+            onTooltipOptionsChange={(tooltipOptions) =>
+              updateStyleOption('tooltipOptions', {
+                ...styleOptions.tooltipOptions,
+                ...tooltipOptions,
+              })
             }
           />
         )}

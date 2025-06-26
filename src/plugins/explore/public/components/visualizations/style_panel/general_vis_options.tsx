@@ -17,21 +17,17 @@ import {
 import { getPositions } from '../utils/collections';
 import { Positions } from '../types';
 export interface GeneralVisOptionsProps {
-  addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Positions;
 
-  onAddTooltipChange: (addTooltip: boolean) => void;
   onAddLegendChange: (addLegend: boolean) => void;
   onLegendPositionChange: (legendPosition: Positions) => void;
   shouldShowLegend?: boolean;
 }
 
 export const GeneralVisOptions = ({
-  addTooltip,
   addLegend,
   legendPosition,
-  onAddTooltipChange,
   onAddLegendChange,
   onLegendPositionChange,
   shouldShowLegend = true,
@@ -70,16 +66,6 @@ export const GeneralVisOptions = ({
               </EuiFormRow>
             </EuiFlexItem>
           )}
-          <EuiFlexItem>
-            <EuiSwitch
-              label={i18n.translate('explore.stylePanel.general.showTooltip', {
-                defaultMessage: 'Show tooltip',
-              })}
-              checked={addTooltip}
-              onChange={(e) => onAddTooltipChange(e.target.checked)}
-              data-test-subj="showTooltipSwitch"
-            />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiPanel>

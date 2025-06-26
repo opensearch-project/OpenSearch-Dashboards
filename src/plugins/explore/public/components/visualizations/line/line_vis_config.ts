@@ -13,20 +13,24 @@ import {
   ThresholdLineStyle,
   ValueAxis,
   Positions,
+  TooltipOptions,
 } from '../types';
+
+// Line style options
+export type LineStyle = 'both' | 'line' | 'dots';
 
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
   // Basic controls
-  addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Positions;
   addTimeMarker: boolean;
 
-  showLine: boolean;
+  // Line specific controls
+  lineStyle: LineStyle;
   lineMode: string;
   lineWidth: number;
-  showDots: boolean;
+  tooltipOptions: TooltipOptions;
 
   // Threshold and grid
   thresholdLine: ThresholdLine;
@@ -39,15 +43,19 @@ export interface LineChartStyleControls {
 
 const defaultLineChartStyles: LineChartStyleControls = {
   // Basic controls
-  addTooltip: true,
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
 
-  showLine: true,
+  // Line specific controls
+  lineStyle: 'both',
   lineMode: 'smooth',
   lineWidth: 2,
-  showDots: true,
+
+  // Tooltip configuration
+  tooltipOptions: {
+    mode: 'all',
+  },
 
   // Threshold and grid
   thresholdLine: {

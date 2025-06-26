@@ -72,51 +72,55 @@ export const buildMarkConfig = (
   markType: 'line' | 'bar' = 'line'
 ): VegaLiteMarkConfig => {
   // Default values - handle undefined styles object
-  const showLine = styles?.showLine !== false;
-  const showDots = styles?.showDots !== false;
+  const lineStyle = styles?.lineStyle ?? 'both';
   const lineWidth = styles?.lineWidth ?? 2;
   const lineMode = styles?.lineMode ?? 'smooth';
-  const addTooltip = styles?.addTooltip !== false;
+  const tooltipMode = styles?.tooltipOptions?.mode ?? 'all';
+
+  // Create tooltip configuration based on options
+  const tooltipConfig: any = {
+    content: { signal: '' },
+    shared: true,
+  };
 
   if (markType === 'bar') {
     return {
       type: 'bar',
       opacity: 0.7,
-      tooltip: addTooltip,
+      tooltip: tooltipMode !== 'hidden' ? tooltipConfig : false,
     };
   }
 
   // For line charts
-  if (!showLine && showDots) {
+  if (lineStyle === 'dots') {
     // Only show points
     return {
       type: 'point',
-      tooltip: addTooltip,
+      tooltip: tooltipMode !== 'hidden' ? tooltipConfig : false,
       size: 100,
     };
-  } else if (showLine && !showDots) {
+  } else if (lineStyle === 'line') {
     // Only show line
     return {
       type: 'line',
-      tooltip: addTooltip,
+      tooltip: tooltipMode !== 'hidden' ? tooltipConfig : false,
       strokeWidth: lineWidth,
       interpolate: getVegaInterpolation(lineMode),
     };
-  } else if (showLine && showDots) {
+  } else if (lineStyle === 'both') {
     // Show both line and points
     return {
       type: 'line',
       point: true,
-      tooltip: addTooltip,
+      tooltip: tooltipMode !== 'hidden' ? tooltipConfig : false,
       strokeWidth: lineWidth,
       interpolate: getVegaInterpolation(lineMode),
     };
   } else {
-    // Toggle off both line and dots - show empty
     return {
       type: 'point',
-      tooltip: addTooltip,
-      size: 0, // Make points invisible
+      tooltip: tooltipMode !== 'hidden' ? tooltipConfig : false,
+      size: 0,
     };
   }
 };
@@ -137,7 +141,13 @@ export const createThresholdLayer = (styles: Partial<LineChartStyleControls> | u
       color: styles.thresholdLine.color,
       strokeWidth: styles.thresholdLine.width,
       strokeDash: getStrokeDash(styles.thresholdLine.style),
-      tooltip: styles.addTooltip !== false,
+      tooltip:
+        styles?.tooltipOptions?.mode !== 'hidden'
+          ? {
+              content: { signal: '' },
+              shared: true,
+            }
+          : false,
     },
     encoding: {
       y: {
@@ -148,7 +158,7 @@ export const createThresholdLayer = (styles: Partial<LineChartStyleControls> | u
   };
 
   // Add tooltip content if enabled
-  if (styles.addTooltip !== false) {
+  if (styles?.tooltipOptions?.mode !== 'hidden') {
     thresholdLayer.encoding.tooltip = {
       value:
         i18n.translate('explore.vis.thresholdValue', {
@@ -176,14 +186,20 @@ export const createTimeMarkerLayer = (styles: Partial<LineChartStyleControls> | 
       color: '#FF6B6B',
       strokeWidth: 2,
       strokeDash: [3, 3],
-      tooltip: styles.addTooltip !== false,
+      tooltip:
+        styles?.tooltipOptions?.mode !== 'hidden'
+          ? {
+              content: { signal: '' },
+              shared: true,
+            }
+          : false,
     },
     encoding: {
       x: {
         datum: { expr: 'now()' },
         type: 'temporal',
       },
-      ...(styles.addTooltip !== false && {
+      ...(styles?.tooltipOptions?.mode !== 'hidden' && {
         tooltip: {
           value: 'Current Time',
         },

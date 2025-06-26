@@ -7,11 +7,12 @@ import React, { useState } from 'react';
 import { EuiSplitPanel, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
-import { BasicVisOptions } from '../style_panel/basic_vis_options';
+import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { AxesOptions } from '../style_panel/axes_options';
+import { TooltipOptionsPanel } from '../style_panel/tooltip_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
 
@@ -32,6 +33,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
     general: false,
     basic: false,
     exclusive: false,
+    tooltip: false,
     threshold: false,
     grid: false,
     axes: false,
@@ -95,10 +97,8 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
         {expandedPanels.basic && (
           <GeneralVisOptions
             shouldShowLegend={!notShowLegend}
-            addTooltip={styleOptions.addTooltip}
             addLegend={styleOptions.addLegend}
             legendPosition={styleOptions.legendPosition}
-            onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
             onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
             onLegendPositionChange={(legendPosition) =>
               updateStyleOption('legendPosition', legendPosition)
@@ -117,23 +117,47 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
           data-test-subj="lineVisExclusiveButton"
         >
           {i18n.translate('explore.vis.lineChart.tabs.exclusive', {
-            defaultMessage: 'Exclusive',
+            defaultMessage: 'Graph style',
           })}
         </EuiButtonEmpty>
         {expandedPanels.exclusive && (
-          <BasicVisOptions
+          <LineExclusiveVisOptions
             addTimeMarker={styleOptions.addTimeMarker}
-            showLine={styleOptions.showLine}
+            lineStyle={styleOptions.lineStyle}
             lineMode={styleOptions.lineMode}
             lineWidth={styleOptions.lineWidth}
-            showDots={styleOptions.showDots}
             onAddTimeMarkerChange={(addTimeMarker) =>
               updateStyleOption('addTimeMarker', addTimeMarker)
             }
-            onShowLineChange={(showLine) => updateStyleOption('showLine', showLine)}
             onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
             onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
-            onShowDotsChange={(showDots) => updateStyleOption('showDots', showDots)}
+            onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
+          />
+        )}
+      </EuiSplitPanel.Inner>
+
+      <EuiSplitPanel.Inner paddingSize="s">
+        <EuiButtonEmpty
+          iconSide="left"
+          color="text"
+          iconType={expandedPanels.tooltip ? 'arrowDown' : 'arrowRight'}
+          onClick={() => togglePanel('tooltip')}
+          size="xs"
+          data-test-subj="lineVisTooltipButton"
+        >
+          {i18n.translate('explore.vis.lineChart.tabs.tooltip', {
+            defaultMessage: 'Tooltip',
+          })}
+        </EuiButtonEmpty>
+        {expandedPanels.tooltip && (
+          <TooltipOptionsPanel
+            tooltipOptions={styleOptions.tooltipOptions}
+            onTooltipOptionsChange={(tooltipOptions) =>
+              updateStyleOption('tooltipOptions', {
+                ...styleOptions.tooltipOptions,
+                ...tooltipOptions,
+              })
+            }
           />
         )}
       </EuiSplitPanel.Inner>

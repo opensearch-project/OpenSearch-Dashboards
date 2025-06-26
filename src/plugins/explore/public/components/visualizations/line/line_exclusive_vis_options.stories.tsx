@@ -6,11 +6,12 @@
 import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
-import { BasicVisOptions } from './basic_vis_options';
+import { BasicVisOptions } from './line_exclusive_vis_options';
 
 export default {
   component: BasicVisOptions,
-  title: 'src/plugins/explore/public/components/visualizations/style_panel/basic_vis_options',
+  title:
+    'src/plugins/explore/public/components/visualizations/style_panel/line_exclusive_vis_options',
 } as ComponentMeta<typeof BasicVisOptions>;
 
 // Template for the story

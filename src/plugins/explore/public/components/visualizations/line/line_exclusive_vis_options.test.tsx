@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BasicVisOptions } from './basic_vis_options';
+import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 
 // Mock the debounced value hooks
 jest.mock('../utils/use_debounced_value', () => {
@@ -29,7 +29,7 @@ jest.mock('../utils/use_debounced_value', () => {
   };
 });
 
-describe('BasicVisOptions', () => {
+describe('LineExclusiveVisOptions', () => {
   const defaultProps = {
     addTimeMarker: false,
     showLine: true,
@@ -48,12 +48,12 @@ describe('BasicVisOptions', () => {
   });
 
   it('renders without crashing', () => {
-    const { container } = render(<BasicVisOptions {...defaultProps} />);
+    const { container } = render(<LineExclusiveVisOptions {...defaultProps} />);
     expect(container).toBeInTheDocument();
   });
 
   it('renders basic settings title', () => {
-    render(<BasicVisOptions {...defaultProps} />);
+    render(<LineExclusiveVisOptions {...defaultProps} />);
     expect(screen.getByText('Exclusive Settings')).toBeInTheDocument();
   });
 

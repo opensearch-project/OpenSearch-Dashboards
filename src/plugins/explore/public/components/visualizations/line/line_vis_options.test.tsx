@@ -16,7 +16,7 @@ import {
   Positions,
   VisFieldType,
 } from '../types';
-import { BasicVisOptions } from '../style_panel/basic_vis_options';
+import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
 import { AxesOptions } from '../style_panel/axes_options';

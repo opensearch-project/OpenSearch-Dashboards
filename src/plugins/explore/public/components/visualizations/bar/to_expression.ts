@@ -32,7 +32,7 @@ export const createBarSpec = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
@@ -139,7 +139,7 @@ export const createTimeBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
@@ -247,7 +247,7 @@ export const createGroupedTimeBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
@@ -369,7 +369,7 @@ export const createFacetedTimeBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
@@ -493,7 +493,7 @@ export const createStackedBarSpec = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };

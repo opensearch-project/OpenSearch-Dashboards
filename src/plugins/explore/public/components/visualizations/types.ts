@@ -170,4 +170,8 @@ export enum LabelAggregationType {
   NONE = 'none',
 }
 
+export interface TooltipOptions {
+  mode: 'all' | 'hidden';
+}
+
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
