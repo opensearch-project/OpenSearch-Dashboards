@@ -23,10 +23,7 @@ import { useIndexPatternContext } from '../../../../../components/index_pattern_
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
 import { ResultStatus } from '../utils';
-import {
-  selectSavedQuery,
-  selectSavedSearch,
-} from '../../../../../utils/state_management/selectors';
+import { selectSavedQuery } from '../../../../../utils/state_management/selectors';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
 import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
 import { selectUIState } from '../../../../../utils/state_management/selectors';
@@ -41,10 +38,9 @@ export interface TopNavProps {
     optionalRef?: Record<string, React.RefObject<HTMLDivElement>>;
   };
   showSaveQuery: boolean;
-  isEnhancementsEnabled?: boolean;
 }
 
-export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
+export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const flavorId = useFlavorId();
   const {
@@ -169,9 +165,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     );
   }, [flavorId, savedExplore?.title]);
 
-  const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
-    indexPattern,
-  ]);
+  const showDatePicker = useMemo(() => indexPattern?.isTimeBased() ?? false, [indexPattern]);
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     dispatch(setSavedQuery(newSavedQueryId));
