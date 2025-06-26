@@ -242,6 +242,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
           options={editorConfig.options}
           languageConfiguration={editorConfig.languageConfiguration}
           triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
+          useLatestTheme={true}
           suggestionProvider={{
             triggerCharacters: [' '],
             provideCompletionItems: async (model, position, context, token) => {

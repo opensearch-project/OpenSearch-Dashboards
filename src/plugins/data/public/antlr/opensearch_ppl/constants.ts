@@ -24,4 +24,5 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<number, string>([
   [OpenSearchPPLParser.PLUS, '2'],
   [OpenSearchPPLParser.MINUS, '2'],
   [OpenSearchPPLParser.SOURCE, '2'],
+  [OpenSearchPPLParser.RT_PRTHS, '2'],
 ]);
