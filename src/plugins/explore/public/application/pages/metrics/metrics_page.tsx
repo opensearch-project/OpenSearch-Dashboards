@@ -43,6 +43,7 @@ import {
   defaultPrepareQuery,
 } from '../../utils/state_management/actions/query_actions';
 import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
+import { selectShowDataSetFields } from '../../utils/state_management/selectors';
 
 /**
  * Main application component for the Explore plugin
@@ -79,6 +80,8 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
 
     return [];
   });
+
+  const showDataSetFields = useSelector(selectShowDataSetFields);
 
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
@@ -202,15 +205,19 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
             minSize="260px"
             mode={['collapsible', { position: 'top' }]}
             paddingSize="none"
+            style={{ display: showDataSetFields ? 'block' : 'none' }}
           >
             <CanvasPanel testId="dscBottomLeftCanvas">
               <DiscoverPanel />
             </CanvasPanel>
           </EuiResizablePanel>
-
-          <EuiResizableButton />
-
-          <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
+          <EuiResizableButton style={{ display: showDataSetFields ? 'block' : 'none' }} />
+          <EuiResizablePanel
+            initialSize={showDataSetFields ? 80 : 100}
+            minSize="65%"
+            mode="main"
+            paddingSize="none"
+          >
             <EuiPageBody className="deLayout__canvas">
               <TopNav {...topNavProps} />
               {renderBottomRightPanel()}

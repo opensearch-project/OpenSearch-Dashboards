@@ -52,9 +52,19 @@ export interface HitsCounterProps {
    * the row data of the table
    */
   rows?: OpenSearchSearchHit[];
+  /**
+   * query ran time in ms
+   */
+  elapsedMs?: number;
 }
 
-export function HitsCounter({ hits, showResetButton, onResetQuery, rows }: HitsCounterProps) {
+export function HitsCounter({
+  hits,
+  showResetButton,
+  onResetQuery,
+  rows,
+  elapsedMs,
+}: HitsCounterProps) {
   const rowsCount = rows?.length || 0;
 
   return (
@@ -69,38 +79,25 @@ export function HitsCounter({ hits, showResetButton, onResetQuery, rows }: HitsC
       >
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <strong>
+            {hits && (
               <FormattedMessage
                 id="explore.discover.hitsResultTitle"
-                defaultMessage="{rowsCount, plural, one {Result} other {Results}}"
-                values={{ rowsCount }}
-              />{' '}
-              (
-              <span
-                data-test-subj="discoverQueryRowsCount"
-                aria-label={i18n.translate('explore.discover.hitsCounterRowsCount', {
-                  defaultMessage: '{rowsCount} {rowsCount, plural, one {row} other {rows}} shown',
-                  values: { rowsCount },
-                })}
-              >
-                {rowsCount.toLocaleString()}
-              </span>
-              {hits ? (
-                <>
-                  /
-                  <span
-                    data-test-subj="discoverQueryHits"
-                    aria-label={i18n.translate('explore.discover.hitsCounterHitsCount', {
-                      defaultMessage: '{hits} {hits, plural, one {hit} other {hits}}',
-                      values: { hits },
-                    })}
-                  >
-                    {hits.toLocaleString()}
-                  </span>
-                </>
-              ) : null}
-              )
-            </strong>
+                defaultMessage="{rowsCount} of {hits} results in {elapsedMs} ms"
+                values={{
+                  rowsCount: (
+                    <strong data-test-subj="discoverQueryRowsCount">
+                      {rowsCount.toLocaleString()}
+                    </strong>
+                  ),
+                  hits: <strong data-test-subj="discoverQueryHits">{hits.toLocaleString()}</strong>,
+                  elapsedMs: (
+                    <strong data-test-subj="discoverQueryElapsedMs">
+                      {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}
+                    </strong>
+                  ),
+                }}
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
         {showResetButton && (
