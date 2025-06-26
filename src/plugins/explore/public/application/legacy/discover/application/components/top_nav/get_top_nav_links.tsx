@@ -8,7 +8,6 @@ import React from 'react';
 import { ExploreFlavor } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { SavedExplore } from '../../../../../../saved_explore';
-import { Adapters } from '../../../../../../../../inspector/public';
 import { TopNavMenuData, TopNavMenuIconData } from '../../../../../../../../navigation/public';
 import { ISearchSource, unhashUrl } from '../../../opensearch_dashboards_services';
 import {
@@ -38,7 +37,6 @@ import { Query } from '../../../../../../../../data/public';
 
 export const getTopNavLinks = (
   services: ExploreServices,
-  inspectorAdapters: Adapters,
   startSyncingQueryStateWithUrl: () => void,
   searchContext: ExecutionContextSearch,
   indexPattern: IndexPattern | undefined,
@@ -46,7 +44,6 @@ export const getTopNavLinks = (
 ) => {
   const {
     history,
-    inspector,
     core,
     capabilities,
     share,
@@ -265,26 +262,8 @@ export const getTopNavLinks = (
     topNavLinksMap.set('share', shareSearch);
   }
 
-  const inspectSearch: TopNavMenuIconData = {
-    tooltip: i18n.translate('explore.explore.discover.localMenu.inspectTitle', {
-      defaultMessage: 'Inspect',
-    }),
-    testId: 'openInspectorButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverInspectorButtonLabel', {
-      defaultMessage: `Open Inspector for search`,
-    }),
-    run() {
-      inspector.open(inspectorAdapters, {
-        title: savedExplore?.title || undefined,
-      });
-    },
-    iconType: 'inspect',
-    controlType: 'icon',
-  };
-  topNavLinksMap.set('inspect', inspectSearch);
-
   // Order their appearance
-  return ['save', 'open', 'new', 'inspect', 'share'].reduce((acc, item) => {
+  return ['save', 'open', 'new', 'share'].reduce((acc, item) => {
     const itemDef = topNavLinksMap.get(item);
     if (itemDef) {
       acc.push(itemDef);
