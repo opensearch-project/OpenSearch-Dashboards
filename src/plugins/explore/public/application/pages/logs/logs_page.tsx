@@ -42,15 +42,14 @@ import {
 } from '../../utils/state_management/actions/query_actions';
 import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
 import { selectShowDataSetFields } from '../../utils/state_management/selectors';
-import { DataPublicPluginSetup } from '../../../../../../plugins/data/public';
 import { ResultsSummaryPanel } from '../../../components/results_summary/results_summary_panel';
 
 /**
  * Main application component for the Explore plugin
  */
-export const LogsPage: React.FC<
-  Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>> & { dataSetup: DataPublicPluginSetup }
-> = ({ setHeaderActionMenu, dataSetup }) => {
+export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>> = ({
+  setHeaderActionMenu,
+}) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const {
@@ -152,7 +151,7 @@ export const LogsPage: React.FC<
     ) {
       return (
         <>
-          <ResultsSummaryPanel data={dataSetup} />
+          <ResultsSummaryPanel />
           <CanvasPanel className="explore-chart-panel">
             <div className="dscCanvas__chart">
               <DiscoverChartContainer />

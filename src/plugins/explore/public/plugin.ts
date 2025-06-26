@@ -314,7 +314,7 @@ export class ExplorePlugin
         appMounted();
 
         // Call renderApp with params, services, and store
-        const unmount = renderApp(params, services, store, flavor, setupDeps);
+        const unmount = renderApp(params, services, store, flavor);
 
         return () => {
           appUnMounted();
@@ -492,7 +492,7 @@ export class ExplorePlugin
       title: i18n.translate('explore.visualization.title', {
         defaultMessage: 'Visualize with Discover',
       }),
-      description: i18n.translate('explore.visualization.title', {
+      description: i18n.translate('explore.visualization.description', {
         defaultMessage: 'Create visualization with Discover',
       }),
       icon: 'visualizeApp',

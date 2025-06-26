@@ -14,7 +14,7 @@ import { of } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataPublicPluginSetup, ResultStatus } from '../../../../data/public';
+import { ResultStatus } from '../../../../data/public';
 import { ExploreServices } from '../../types';
 import { ResultsSummary, FeedbackStatus } from './results_summary';
 import { RootState } from '../../application/utils/state_management/store';
@@ -28,7 +28,6 @@ export interface QueryContext {
 }
 
 interface ResultsSummaryPanelProps {
-  data: DataPublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
   brandingLabel?: string;
 }
@@ -59,8 +58,8 @@ export const convertResult = (body: IDataFrame) => {
 
 export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { core, http, isSummaryAgentAvailable$ } = services;
-  const { query, search } = props.data;
+  const { core, http, isSummaryAgentAvailable$, data } = services;
+  const { query, search } = data;
 
   const isSummaryAgentAvailable = useObservable(isSummaryAgentAvailable$ ?? of(false), false);
 
@@ -76,7 +75,7 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
   const updateQueryState = useCallback((x: any) => {}, []); // FIXME
 
   const isQueryDirty =
-    queryState.query && queryState.query !== props.data.query.queryString.getQuery().query;
+    queryState.query && queryState.query !== data.query.queryString.getQuery().query;
 
   const canGenerateSummary =
     Boolean(results.length) &&
