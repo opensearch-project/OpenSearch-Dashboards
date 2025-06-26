@@ -75,7 +75,6 @@ export const addToDashboard = async (
     }
   }
 
-  //   for (const obj of objects) {
   const panelIndex = uuid.v4();
   panels.push({
     version,
