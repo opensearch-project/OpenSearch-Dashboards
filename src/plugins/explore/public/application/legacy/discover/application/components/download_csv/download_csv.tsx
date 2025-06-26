@@ -39,6 +39,7 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
     await downloadCsvForOption(option);
   };
 
+  // Disable trap foucus, since it can break dismiss
   return (
     <EuiPopover
       button={
@@ -55,6 +56,7 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
+      ownFocus={false}
     >
       <DiscoverDownloadCsvPopoverContent
         rowsCount={rows?.length || 0}
