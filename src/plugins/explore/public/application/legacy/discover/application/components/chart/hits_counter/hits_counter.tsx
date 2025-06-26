@@ -66,6 +66,9 @@ export function HitsCounter({
   elapsedMs,
 }: HitsCounterProps) {
   const rowsCount = rows?.length || 0;
+  const defaultMessage: string = hits
+    ? '{rowsCount} of {hits} results in {elapsedMs} ms'
+    : '{rowsCount} results in {elapsedMs} ms';
 
   return (
     <I18nProvider>
@@ -79,7 +82,7 @@ export function HitsCounter({
       >
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            {hits && (
+            {hits ? (
               <FormattedMessage
                 id="explore.discover.hitsResultTitle"
                 defaultMessage="{rowsCount} of {hits} results in {elapsedMs} ms"
@@ -90,6 +93,23 @@ export function HitsCounter({
                     </strong>
                   ),
                   hits: <strong data-test-subj="discoverQueryHits">{hits.toLocaleString()}</strong>,
+                  elapsedMs: (
+                    <strong data-test-subj="discoverQueryElapsedMs">
+                      {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}
+                    </strong>
+                  ),
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="explore.discover.noHitsResultTitle"
+                defaultMessage="{rowsCount} results in {elapsedMs} ms"
+                values={{
+                  rowsCount: (
+                    <strong data-test-subj="discoverQueryRowsCount">
+                      {rowsCount.toLocaleString()}
+                    </strong>
+                  ),
                   elapsedMs: (
                     <strong data-test-subj="discoverQueryElapsedMs">
                       {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}

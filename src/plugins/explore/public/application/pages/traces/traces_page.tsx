@@ -196,7 +196,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
   const BottomPanel = (
     <EuiResizableContainer
       direction={isMobile ? 'vertical' : 'horizontal'}
-      style={{ flex: 1, minHeight: 0 }}
+      className="explore-layout__bottom-panel"
     >
       {(EuiResizablePanel, EuiResizableButton) => (
         <>
@@ -218,7 +218,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
             mode="main"
             paddingSize="none"
           >
-            <EuiPageBody className="deLayout__canvas">
+            <EuiPageBody className="explore-layout__canvas">
               <TopNav {...topNavProps} />
               {renderBottomRightPanel()}
             </EuiPageBody>
@@ -256,16 +256,14 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiPage className="deLayout" paddingSize="none" grow={false}>
-          <EuiPageBody>
+        <EuiPage className="explore-layout" paddingSize="none" grow={false}>
+          <EuiPageBody className="explore-layout__page-body">
             {/* TopNav component - configured like discover */}
 
             {/* HeaderDatasetSelector component - renders dataset selector in portal */}
             <HeaderDatasetSelector datasetSelectorRef={datasetSelectorRef} />
 
-            <div className="dscCanvas__experienceBannerWrapper">
-              <NewExperienceBanner />
-            </div>
+            <NewExperienceBanner />
 
             {/* QueryPanel component - only render when IndexPattern is loaded */}
             <div className="dscCanvas__queryPanel">
