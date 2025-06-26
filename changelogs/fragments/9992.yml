@@ -1,0 +1,2 @@
+fix:
+- Popover not close if double click ([#9992](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9992))
