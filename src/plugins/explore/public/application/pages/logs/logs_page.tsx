@@ -43,6 +43,7 @@ import {
   defaultPrepareQuery,
 } from '../../utils/state_management/actions/query_actions';
 import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
+import { selectShowDataSetFields } from '../../utils/state_management/selectors';
 
 /**
  * Main application component for the Explore plugin
@@ -79,6 +80,8 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
 
     return [];
   });
+
+  const showDataSetFields = useSelector(selectShowDataSetFields);
 
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
@@ -193,7 +196,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   const BottomPanel = (
     <EuiResizableContainer
       direction={isMobile ? 'vertical' : 'horizontal'}
-      style={{ flex: 1, minHeight: 0 }}
+      className="explore-layout__bottom-panel"
     >
       {(EuiResizablePanel, EuiResizableButton) => (
         <>
@@ -202,16 +205,20 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             minSize="260px"
             mode={['collapsible', { position: 'top' }]}
             paddingSize="none"
+            style={{ display: showDataSetFields ? 'block' : 'none' }}
           >
             <CanvasPanel testId="dscBottomLeftCanvas">
               <DiscoverPanel />
             </CanvasPanel>
           </EuiResizablePanel>
-
-          <EuiResizableButton />
-
-          <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
-            <EuiPageBody className="deLayout__canvas">
+          <EuiResizableButton style={{ display: showDataSetFields ? 'block' : 'none' }} />
+          <EuiResizablePanel
+            initialSize={showDataSetFields ? 80 : 100}
+            minSize="65%"
+            mode="main"
+            paddingSize="none"
+          >
+            <EuiPageBody className="explore-layout__canvas">
               <TopNav {...topNavProps} />
               {renderBottomRightPanel()}
             </EuiPageBody>
@@ -249,14 +256,12 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiPage className="deLayout" paddingSize="none" grow={false}>
-          <EuiPageBody>
+        <EuiPage className="explore-layout" paddingSize="none" grow={false}>
+          <EuiPageBody className="explore-layout__page-body">
             {/* HeaderDatasetSelector component - renders dataset selector in portal */}
             <HeaderDatasetSelector datasetSelectorRef={datasetSelectorRef} />
 
-            <div className="dscCanvas__experienceBannerWrapper">
-              <NewExperienceBanner />
-            </div>
+            <NewExperienceBanner />
 
             {/* QueryPanel component - only render when IndexPattern is loaded */}
             <div className="dscCanvas__queryPanel">

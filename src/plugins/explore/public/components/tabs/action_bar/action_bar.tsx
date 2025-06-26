@@ -37,6 +37,7 @@ const ActionBarComponent = () => {
 
   const rows = rawResults?.hits?.hits || [];
   const totalHits = (rawResults?.hits?.total as any)?.value || rawResults?.hits?.total || 0;
+  const elapsedMs = rawResults?.elapsedMs;
 
   return (
     <DiscoverResultsActionBar
@@ -48,6 +49,7 @@ const ActionBarComponent = () => {
         });
       }}
       rows={rows}
+      elapsedMs={elapsedMs}
       indexPattern={indexPattern}
     />
   );

@@ -65,6 +65,7 @@ describe('hits counter', () => {
       showResetButton: true,
       hits: 10,
       rows: mockRows,
+      elapsedMs: 200,
     };
   });
 
@@ -88,6 +89,12 @@ describe('hits counter', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     const hits = findTestSubject(component, 'discoverQueryHits');
     expect(hits.text()).toBe(props.hits?.toString());
+  });
+
+  it('expect to render the number of elapsedMs', () => {
+    component = mountWithIntl(<HitsCounter {...props} />);
+    const elapsedMs = findTestSubject(component, 'discoverQueryElapsedMs');
+    expect(elapsedMs.text()).toBe(props.elapsedMs?.toString());
   });
 
   it('expect to render 1,899 hits if 1899 hits given', () => {
