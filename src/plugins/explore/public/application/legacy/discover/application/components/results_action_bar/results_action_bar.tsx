@@ -18,6 +18,7 @@ export interface DiscoverResultsActionBarProps {
   showResetButton?: boolean;
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
+  elapsedMs?: number;
   indexPattern?: IndexPattern;
 }
 
@@ -26,6 +27,7 @@ export const DiscoverResultsActionBar = ({
   showResetButton = false,
   resetQuery,
   rows,
+  elapsedMs,
   indexPattern,
 }: DiscoverResultsActionBarProps) => {
   return (
@@ -33,7 +35,7 @@ export const DiscoverResultsActionBar = ({
       direction="row"
       gutterSize="none"
       justifyContent="spaceBetween"
-      className="dscResultsActionBar"
+      className="explore-results-action-bar"
       data-test-subj="dscResultsActionBar"
     >
       <EuiFlexItem>
@@ -49,10 +51,14 @@ export const DiscoverResultsActionBar = ({
               showResetButton={showResetButton}
               onResetQuery={resetQuery}
               rows={rows}
+              elapsedMs={elapsedMs}
             />
           </EuiFlexItem>
           {indexPattern && rows?.length ? (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              className="explore-results-action-bar__explore-download-csv-flex-item"
+            >
               <DiscoverDownloadCsv indexPattern={indexPattern} rows={rows} hits={hits} />
             </EuiFlexItem>
           ) : null}
@@ -61,7 +67,7 @@ export const DiscoverResultsActionBar = ({
       <EuiFlexItem grow={false}>
         {/* Where Data Plugin's QueryEditorExtension action buttons will go */}
         <EuiFlexGroup
-          className="dscResultsActionBar__extensions-container"
+          className="explore-results-action-bar__extensions-container"
           direction="row"
           gutterSize="none"
           justifyContent="flexStart"
