@@ -60,6 +60,7 @@ import {
 } from './types';
 import { DocViewsRegistry } from './types/doc_views_types';
 import { ExploreEmbeddableFactory } from './embeddable';
+import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
 
 export class ExplorePlugin
   implements
@@ -98,6 +99,7 @@ export class ExplorePlugin
   ): ExplorePluginSetup {
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
+    this.registerExploreVisualization(setupDeps);
     const visualizationRegistryService = this.visualizationRegistryService.setup();
 
     this.docViewsRegistry = new DocViewsRegistry();
@@ -468,7 +470,63 @@ export class ExplorePlugin
       };
     };
 
-    const factory = new ExploreEmbeddableFactory(getStartServices);
+    const factory = new ExploreEmbeddableFactory(
+      getStartServices,
+      this.visualizationRegistryService
+    );
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+  }
+
+  private registerExploreVisualization(setupDeps: ExploreSetupDependencies) {
+    const DISCOVER_VISUALIZATION_NAME = 'DiscoverVisualization';
+    setupDeps.visualizations.registerAlias({
+      name: DISCOVER_VISUALIZATION_NAME,
+      aliasPath: '#/',
+      aliasApp: PLUGIN_ID,
+      title: i18n.translate('explore.visualization.title', {
+        defaultMessage: 'Visualize with Discover',
+      }),
+      description: i18n.translate('explore.visualization.title', {
+        defaultMessage: 'Create visualization with Discover',
+      }),
+      icon: 'visualizeApp',
+      stage: 'production',
+      hidden: true,
+      appExtensions: {
+        visualizations: {
+          docTypes: [SAVED_OBJECT_TYPE],
+          toListItem: ({ id, attributes, updated_at: updatedAt }) => {
+            let iconType = '';
+            let chartName = '';
+            try {
+              const vis = JSON.parse(attributes.visualization as string);
+              const chart = this.visualizationRegistryService
+                .getRegistry()
+                .getAvailableChartTypes()
+                .find((t) => t.type === vis.chartType);
+              if (chart) {
+                iconType = chart.icon;
+                chartName = chart.name;
+              }
+            } catch (e) {
+              iconType = '';
+            }
+            return {
+              description: `${attributes?.description || ''}`,
+              // TODO: it should navigate to different explore flavor based on the `attributes.type`
+              editApp: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
+              editUrl: `/view/${encodeURIComponent(id)}`,
+              icon: iconType,
+              id,
+              savedObjectType: SAVED_OBJECT_TYPE,
+              title: `${attributes?.title || ''}`,
+              typeTitle: chartName,
+              updated_at: updatedAt,
+              stage: 'production',
+            };
+          },
+        },
+      },
+    });
   }
 }
