@@ -86,7 +86,6 @@ export const SaveAndAddButtonWithModal = ({
     loadSavedExplore();
   }, [savedExploreId, getSavedExploreById, savedExploreName]);
 
-  // Promise<SaveResult | undefined>
   const handleSave = async ({
     // eslint-disable-next-line no-shadow
     savedExplore,
@@ -211,7 +210,7 @@ export const SaveAndAddButtonWithModal = ({
     } catch (error) {
       toastNotifications.add({
         title: i18n.translate('explore.addToDashboard.notification.fail', {
-          defaultMessage: 'Dashboard Generation',
+          defaultMessage: 'Fail to add to dashboard',
         }),
         color: 'danger',
         iconType: 'alert',
