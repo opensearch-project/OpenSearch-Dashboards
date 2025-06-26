@@ -17,20 +17,16 @@ import {
   moveColumn,
   setColumns,
 } from '../../../../../utils/state_management/slices/legacy_slice';
-import {
-  selectColumns,
-  selectFieldCounts,
-  selectRows,
-  selectIndexPattern,
-  selectQuery,
-  selectResults,
-} from '../../../../../utils/state_management/selectors';
+import { selectColumns, selectQuery } from '../../../../../utils/state_management/selectors';
 import { DiscoverSidebar } from '../../components/sidebar';
 import { ExploreServices } from '../../../../../../types';
 import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
-import { defaultResultsProcessor } from '../../../../../utils/state_management/actions/query_actions';
+import {
+  defaultResultsProcessor,
+  defaultPrepareQuery,
+} from '../../../../../utils/state_management/actions/query_actions';
 
 export function DiscoverPanel() {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -43,17 +39,14 @@ export function DiscoverPanel() {
     uiSettings,
   } = services;
 
-  // Get data from Redux store
   const columns = useSelector(selectColumns);
-  const dataset = useSelector(selectIndexPattern); // This is actually a Dataset, not IndexPattern
-  const queryState = useSelector(selectQuery);
-  const executionCacheKeys = useSelector((state: any) => state.ui?.executionCacheKeys || []);
-
-  // Get raw results from Redux
-  const cacheKey = executionCacheKeys.length > 0 ? executionCacheKeys[0] : '';
-  const rawResults = useSelector((state: any) => (cacheKey ? state.results[cacheKey] : null));
-
-  // Get IndexPattern from centralized context
+  const query = useSelector(selectQuery);
+  const results = useSelector((state: any) => state.results);
+  const cacheKey = useMemo(() => {
+    const queryString = typeof query.query === 'string' ? query.query : '';
+    return defaultPrepareQuery(queryString);
+  }, [query]);
+  const rawResults = cacheKey ? results[cacheKey] : null;
   const { indexPattern } = useIndexPatternContext();
 
   // Process raw results to get field counts and rows
@@ -70,13 +63,6 @@ export function DiscoverPanel() {
   // Get fieldCounts and rows from processed results
   const fieldCounts = processedResults?.fieldCounts || {};
   const rows = (processedResults as any)?.hits?.hits || [];
-
-  // Add debug for services.data.query.queryString
-  const queryStringManager = services.data?.query?.queryString;
-  if (queryStringManager) {
-    const currentQuery = queryStringManager.getQuery();
-  }
-
   const prevColumns = useRef(columns);
   const dispatch = useDispatch();
 
@@ -124,27 +110,6 @@ export function DiscoverPanel() {
   }, [application, indexPattern?.title]);
 
   const isEnhancementsEnabledOverride = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
-
-  // Debug render while IndexPattern is loading
-  if (!indexPattern) {
-    return (
-      <div style={{ padding: '16px' }}>
-        <h4>Debug: Loading IndexPattern...</h4>
-        <p>Converting dataset to IndexPattern...</p>
-        <p>
-          <strong>Dataset:</strong> {dataset ? `${dataset.title} (${dataset.type})` : 'undefined'}
-        </p>
-        <p>
-          <strong>QueryState Dataset:</strong>{' '}
-          {queryState?.dataset
-            ? `${queryState.dataset.title} (${queryState.dataset.type})`
-            : 'undefined'}
-        </p>
-      </div>
-    );
-  }
-
-  // Now we have a proper IndexPattern, render the actual DiscoverSidebar
 
   return (
     <DiscoverSidebar

@@ -8,7 +8,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
-
 import { Visualization } from './visualization';
 import {
   getVisualizationType,
@@ -19,13 +18,12 @@ import {
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
-import { VisColumn, VisualizationRule } from './types';
+import { VisColumn } from './types';
 import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
 import { RootState } from '../../application/utils/state_management/store';
 import {
-  selectRows,
   selectStyleOptions,
   selectChartType,
 } from '../../application/utils/state_management/selectors';
@@ -33,6 +31,7 @@ import {
   setStyleOptions,
   setChartType as setSelectedChartType,
 } from '../../application/utils/state_management/slices/ui_slice';
+import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -45,25 +44,26 @@ export const VisualizationContainer = () => {
   } = services;
   const { indexPattern } = useIndexPatternContext();
 
-  const rows = useSelector(selectRows);
+  const query = useSelector((state: RootState) => state.query);
+  const activeTabId = useSelector((state: RootState) => state.ui.activeTabId);
+  const results = useSelector((state: RootState) => state.results);
+  const cacheKey = useMemo(() => {
+    const activeTab = services.tabRegistry?.getTab(activeTabId);
+    const prepareQuery = activeTab?.prepareQuery || defaultPrepareQuery;
+    const queryInput = typeof query.query === 'string' ? query.query : '';
+    return prepareQuery(queryInput);
+  }, [query, activeTabId, services]);
+
+  const rawResults = cacheKey ? results[cacheKey] : null;
+
+  // TODO: Register custom processor for visualization tab
+  // const tabDefinition = services.tabRegistry?.getTab?.('explore_visualization_tab');
+  // const processor = tabDefinition?.resultsProcessor || defaultResultsProcessor;
+
+  const rows = useMemo(() => rawResults?.hits?.hits || [], [rawResults]);
   const styleOptions = useSelector(selectStyleOptions);
   const selectedChartType = useSelector(selectChartType);
-
-  const fieldSchema = useSelector((state: RootState) => {
-    const executionCacheKeys = state.ui?.executionCacheKeys || [];
-    if (executionCacheKeys.length === 0) {
-      return [];
-    }
-
-    // Use tab specific cacheKey
-    const cacheKey = executionCacheKeys[1];
-    const results = state.results[cacheKey];
-    if (results && results.fieldSchema) {
-      return results.fieldSchema;
-    }
-
-    return [];
-  });
+  const fieldSchema = useMemo(() => rawResults?.fieldSchema || [], [rawResults]);
 
   const visualizationData = useMemo(() => {
     if (fieldSchema.length === 0 || rows.length === 0) {

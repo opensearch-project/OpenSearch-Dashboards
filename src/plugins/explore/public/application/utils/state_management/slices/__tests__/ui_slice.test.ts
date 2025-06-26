@@ -8,7 +8,6 @@ import {
   setActiveTab,
   setFlavor,
   setStatus,
-  setExecutionCacheKeys,
   startTransaction,
   commitTransaction,
   rollbackTransaction,
@@ -22,11 +21,11 @@ describe('UI Slice', () => {
     activeTabId: 'logs',
     flavor: 'log',
     status: ResultStatus.UNINITIALIZED,
-    executionCacheKeys: [],
     transaction: {
       inProgress: false,
       pendingActions: [],
     },
+    prompt: '',
   };
 
   it('should return the initial state', () => {
@@ -48,7 +47,6 @@ describe('UI Slice', () => {
       // Other state properties should remain unchanged
       expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.status).toBe(initialState.status);
-      expect(newState.executionCacheKeys).toEqual(initialState.executionCacheKeys);
       expect(newState.transaction).toEqual(initialState.transaction);
     });
   });
@@ -67,7 +65,6 @@ describe('UI Slice', () => {
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.status).toBe(initialState.status);
-      expect(newState.executionCacheKeys).toEqual(initialState.executionCacheKeys);
       expect(newState.transaction).toEqual(initialState.transaction);
     });
   });
@@ -86,26 +83,6 @@ describe('UI Slice', () => {
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.flavor).toBe(initialState.flavor);
-      expect(newState.executionCacheKeys).toEqual(initialState.executionCacheKeys);
-      expect(newState.transaction).toEqual(initialState.transaction);
-    });
-  });
-
-  describe('setExecutionCacheKeys', () => {
-    it('should handle setExecutionCacheKeys action', () => {
-      const cacheKeys = ['key1', 'key2', 'key3'];
-      const action = setExecutionCacheKeys(cacheKeys);
-
-      expect(action.type).toBe('ui/setExecutionCacheKeys');
-      expect(action.payload).toEqual(cacheKeys);
-
-      const newState = uiReducer(initialState, action);
-      expect(newState.executionCacheKeys).toEqual(cacheKeys);
-
-      // Other state properties should remain unchanged
-      expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.flavor).toBe(initialState.flavor);
-      expect(newState.status).toBe(initialState.status);
       expect(newState.transaction).toEqual(initialState.transaction);
     });
   });
@@ -126,7 +103,6 @@ describe('UI Slice', () => {
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.status).toBe(initialState.status);
-      expect(newState.executionCacheKeys).toEqual(initialState.executionCacheKeys);
     });
 
     it('should handle commitTransaction action', () => {
@@ -150,7 +126,6 @@ describe('UI Slice', () => {
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.status).toBe(initialState.status);
-      expect(newState.executionCacheKeys).toEqual(initialState.executionCacheKeys);
     });
 
     it('should handle rollbackTransaction action', () => {
@@ -176,7 +151,6 @@ describe('UI Slice', () => {
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.status).toBe(initialState.status);
-      expect(newState.executionCacheKeys).toEqual(initialState.executionCacheKeys);
     });
   });
 
@@ -196,17 +170,12 @@ describe('UI Slice', () => {
       state = uiReducer(state, setFlavor('metric'));
       expect(state.flavor).toBe('metric');
 
-      // Fourth action: set cache keys
-      const cacheKeys = ['key1', 'key2'];
-      state = uiReducer(state, setExecutionCacheKeys(cacheKeys));
-      expect(state.executionCacheKeys).toEqual(cacheKeys);
-
       // Final state should have all changes
       expect(state).toEqual({
         activeTabId: 'visualizations',
         flavor: 'metric',
         status: ResultStatus.LOADING,
-        executionCacheKeys: cacheKeys,
+        prompt: '',
         transaction: {
           inProgress: false,
           pendingActions: [],

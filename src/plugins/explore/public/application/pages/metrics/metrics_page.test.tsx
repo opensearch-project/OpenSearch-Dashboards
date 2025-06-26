@@ -115,7 +115,6 @@ describe('MetricsPage', () => {
       reducer: {
         ui: () => ({
           status,
-          executionCacheKeys: ['test-cache-key'],
         }),
         results: () => ({
           'test-cache-key': {
