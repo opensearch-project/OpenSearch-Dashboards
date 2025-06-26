@@ -42,7 +42,7 @@ interface QueryPanelFooterProps {
   onRunQuery: () => void;
   onClearQuery: () => void;
   onLoadSavedQuery: (savedQuery: Query) => void;
-  oneRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
+  onRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
   onShowFieldsToggle: (enabled: boolean) => void;
 }
 
@@ -63,7 +63,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   onLoadSavedQuery,
   onTimeChange,
   onRunQuery,
-  oneRefreshChange,
+  onRefreshChange,
   onShowFieldsToggle,
 }) => {
   return (
@@ -130,7 +130,6 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                 noInput={noInput}
               />
             </EuiFlexItem>
-            {/* Removed line count feature */}
           </EuiFlexGroup>
         </EuiFlexItem>
 
@@ -148,7 +147,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                   timefilter={timefilter}
                   onTimeChange={onTimeChange}
                   onRunQuery={onRunQuery}
-                  oneRefreshChange={oneRefreshChange}
+                  onRefreshChange={onRefreshChange}
                 />
               </EuiFlexItem>
             )}

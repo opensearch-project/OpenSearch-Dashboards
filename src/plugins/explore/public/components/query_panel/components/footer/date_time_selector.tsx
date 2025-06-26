@@ -17,7 +17,7 @@ export interface DatePickerProps {
   timefilter: any;
   onTimeChange: (time: { start: string; end: string }) => void;
   onRunQuery: () => void;
-  oneRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
+  onRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
@@ -26,7 +26,7 @@ export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
   timefilter,
   onTimeChange,
   onRunQuery,
-  oneRefreshChange,
+  onRefreshChange,
 }) => {
   return (
     <div ref={datePickerRef} key="datePicker">
@@ -38,7 +38,7 @@ export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
         refreshInterval={timefilter?.getRefreshInterval().value}
         onTimeChange={onTimeChange}
         onRefresh={onRunQuery}
-        onRefreshChange={oneRefreshChange}
+        onRefreshChange={onRefreshChange}
         showUpdateButton={false}
         commonlyUsedRanges={services?.uiSettings
           ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
