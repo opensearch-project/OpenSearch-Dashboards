@@ -22,7 +22,10 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';
 import { ResultStatus } from '../../utils/state_management/types';
-import { TopNav } from '../../legacy/discover/application/view_components/canvas/top_nav';
+import {
+  TopNav,
+  TopNavProps,
+} from '../../legacy/discover/application/view_components/canvas/top_nav';
 import { DiscoverChartContainer } from '../../legacy/discover/application/view_components/canvas/discover_chart_container';
 import { QueryPanel } from '../../../components/query_panel';
 import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
@@ -96,8 +99,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   const datePickerRef = useRef<HTMLDivElement>(null);
 
   // Create TopNav props - use portal approach for precise positioning
-  const topNavProps = {
-    isEnhancementsEnabled: true,
+  const topNavProps: TopNavProps = {
     opts: {
       setHeaderActionMenu: setHeaderActionMenu || (() => {}), // Use real global header mount point
       onQuerySubmit: ({ dateRange, query }: any) => {
