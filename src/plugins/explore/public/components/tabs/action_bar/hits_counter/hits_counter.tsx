@@ -33,7 +33,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { OpenSearchSearchHit } from '../../../../../../../types/doc_views_types';
+import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 
 export interface HitsCounterProps {
   /**
@@ -66,9 +66,6 @@ export function HitsCounter({
   elapsedMs,
 }: HitsCounterProps) {
   const rowsCount = rows?.length || 0;
-  const defaultMessage: string = hits
-    ? '{rowsCount} of {hits} results in {elapsedMs} ms'
-    : '{rowsCount} results in {elapsedMs} ms';
 
   return (
     <I18nProvider>

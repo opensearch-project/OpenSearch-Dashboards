@@ -22,7 +22,6 @@ import { VisColumn } from './types';
 import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
-import { RootState } from '../../application/utils/state_management/store';
 import {
   selectStyleOptions,
   selectChartType,
@@ -31,7 +30,7 @@ import {
   setStyleOptions,
   setChartType as setSelectedChartType,
 } from '../../application/utils/state_management/slices';
-import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
+import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -43,27 +42,16 @@ export const VisualizationContainer = () => {
     expressions: { ReactExpressionRenderer },
   } = services;
   const { indexPattern } = useIndexPatternContext();
-
-  const query = useSelector((state: RootState) => state.query);
-  const activeTabId = useSelector((state: RootState) => state.ui.activeTabId);
-  const results = useSelector((state: RootState) => state.results);
-  const cacheKey = useMemo(() => {
-    const activeTab = services.tabRegistry?.getTab(activeTabId);
-    const prepareQuery = activeTab?.prepareQuery || defaultPrepareQuery;
-    const queryInput = typeof query.query === 'string' ? query.query : '';
-    return prepareQuery(queryInput);
-  }, [query, activeTabId, services]);
-
-  const rawResults = cacheKey ? results[cacheKey] : null;
+  const { results } = useTabResults();
 
   // TODO: Register custom processor for visualization tab
   // const tabDefinition = services.tabRegistry?.getTab?.('explore_visualization_tab');
   // const processor = tabDefinition?.resultsProcessor || defaultResultsProcessor;
 
-  const rows = useMemo(() => rawResults?.hits?.hits || [], [rawResults]);
+  const rows = useMemo(() => results?.hits?.hits || [], [results]);
   const styleOptions = useSelector(selectStyleOptions);
   const selectedChartType = useSelector(selectChartType);
-  const fieldSchema = useMemo(() => rawResults?.fieldSchema || [], [rawResults]);
+  const fieldSchema = useMemo(() => results?.fieldSchema || [], [results]);
 
   const [visualizationData, setVisualizationData] = useState<
     VisualizationTypeResult<ChartType> | undefined

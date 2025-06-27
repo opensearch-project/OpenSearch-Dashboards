@@ -23,6 +23,7 @@ import {
 import { IBucketDateHistogramAggConfig } from '../../../../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
+import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 
 /**
  * Default query preparation for tabs (removes stats pipe for histogram compatibility)
@@ -179,10 +180,8 @@ const executeQueryBase = async (
     // Create abort controller
     const abortController = new AbortController();
 
-    // Reset inspector adapter (with safety check)
-    if (services.inspectorAdapters?.requests) {
-      (services.inspectorAdapters.requests as any).reset();
-    }
+    // Reset inspector adapter
+    services.inspectorAdapters.requests.reset();
 
     // Create inspector request
     const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
@@ -191,9 +190,8 @@ const executeQueryBase = async (
     const description = i18n.translate('explore.discover.inspectorRequestDescription', {
       defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
     });
-    const inspectorRequest = (services.inspectorAdapters?.requests as any)?.start(title, {
-      description,
-    });
+
+    const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
     // Get IndexPattern
     let indexPattern;
@@ -257,15 +255,9 @@ const executeQueryBase = async (
     });
 
     // Add response stats to inspector
-    if (inspectorRequest) {
-      if ((services as any).getResponseInspectorStats) {
-        inspectorRequest
-          .stats((services as any).getResponseInspectorStats(rawResults, searchSource))
-          .ok({ json: rawResults });
-      } else {
-        inspectorRequest.ok({ json: rawResults });
-      }
-    }
+    inspectorRequest
+      .stats(getResponseInspectorStats(rawResults, searchSource))
+      .ok({ json: rawResults });
 
     // Store RAW results in cache
     const rawResultsWithMeta = {
