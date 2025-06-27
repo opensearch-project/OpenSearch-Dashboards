@@ -15,8 +15,8 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { StandardAxes, Positions, AxisRole } from '../types';
-import { DebouncedTruncateField, DebouncedText } from './utils';
+import { StandardAxes, Positions, AxisRole } from '../../types';
+import { DebouncedTruncateField, DebouncedText } from '../utils';
 
 interface AllAxesOptionsProps {
   standardAxes: StandardAxes[];

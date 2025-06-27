@@ -87,9 +87,9 @@ export const VisualizationContainer = () => {
   useEffect(() => {
     if (visualizationData) {
       // TODO: everytime the fields change, do we reset the chart type and its style options? P1: we will implement chart type selection persistence
-      dispatch(setStyleOptions(visualizationData.visualizationType?.ui.style.defaults));
+      setStyleOptions(visualizationData.visualizationType?.ui.style.defaults);
     }
-  }, [visualizationData, dispatch]);
+  }, [visualizationData]);
 
   const visualizationRegistry = useVisualizationRegistry();
 

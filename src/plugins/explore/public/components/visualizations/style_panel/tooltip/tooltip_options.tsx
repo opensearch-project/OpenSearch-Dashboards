@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import { EuiPanel, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
-import { TooltipOptions } from '../types';
+import { TooltipOptions } from '../../types';
 
 export interface TooltipOptionsProps {
   tooltipOptions: TooltipOptions;

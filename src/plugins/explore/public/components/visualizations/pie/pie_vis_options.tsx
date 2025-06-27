@@ -6,11 +6,11 @@
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
-import { GeneralVisOptions } from '../style_panel/general_vis_options';
+import { LegendOptionsPanel } from '../style_panel/legend/legend_options';
 import { PieChartStyleControls } from './pie_vis_config';
 import { PieExclusiveVisOptions } from './pie_exclusive_vis_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
+import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher/chart_type_switcher';
 
 export type PieVisStyleControlsProps = StyleControlsProps<PieChartStyleControls>;
 
@@ -83,15 +83,19 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
           })}
         </EuiButtonEmpty>
         {expandedPanels.basic && (
-          <GeneralVisOptions
-            addTooltip={styleOptions.addTooltip}
-            addLegend={styleOptions.addLegend}
-            legendPosition={styleOptions.legendPosition}
-            onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
-            onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
-            onLegendPositionChange={(legendPosition) =>
-              updateStyleOption('legendPosition', legendPosition)
-            }
+          <LegendOptionsPanel
+            legendOptions={{
+              show: styleOptions.addLegend,
+              position: styleOptions.legendPosition,
+            }}
+            onLegendOptionsChange={(legendOptions) => {
+              if (legendOptions.show !== undefined) {
+                updateStyleOption('addLegend', legendOptions.show);
+              }
+              if (legendOptions.position !== undefined) {
+                updateStyleOption('legendPosition', legendOptions.position);
+              }
+            }}
           />
         )}
       </EuiSplitPanel.Inner>

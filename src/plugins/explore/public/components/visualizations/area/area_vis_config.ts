@@ -19,7 +19,6 @@ import {
 // Complete area chart style controls interface
 export interface AreaChartStyleControls {
   // Basic controls
-  addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Positions;
   addTimeMarker: boolean;
@@ -37,7 +36,6 @@ export interface AreaChartStyleControls {
 
 const defaultAreaChartStyles: AreaChartStyleControls = {
   // Basic controls
-  addTooltip: true,
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,

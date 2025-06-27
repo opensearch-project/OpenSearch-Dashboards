@@ -154,7 +154,7 @@ export const createMultiAreaChart = (
         field: categoryField,
         type: 'nominal',
         legend:
-          styles?.addLegend !== false
+          styles?.addLegend === true
             ? {
                 title: categoryName,
                 orient: styles?.legendPosition || Positions.RIGHT,

@@ -6,15 +6,15 @@
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
-import { GeneralVisOptions } from '../style_panel/general_vis_options';
+import { LegendOptionsPanel } from '../style_panel/legend/legend_options';
 import { BarChartStyleControls } from './bar_vis_config';
 import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
-import { AxesOptions } from '../style_panel/axes_options';
-import { TooltipOptionsPanel } from '../style_panel/tooltip_options';
+import { AxesOptions } from '../style_panel/axes/axes_options';
+import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
+import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher/chart_type_switcher';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
 
@@ -31,7 +31,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   // State to track expanded/collapsed state of each panel
   const [expandedPanels, setExpandedPanels] = useState({
     general: true,
-    basic: false,
+    legend: false,
     exclusive: false,
     tooltip: false,
     threshold: false,
@@ -85,32 +85,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
         <EuiButtonEmpty
           iconSide="left"
           color="text"
-          iconType={expandedPanels.basic ? 'arrowDown' : 'arrowRight'}
-          onClick={() => togglePanel('basic')}
-          size="xs"
-          data-test-subj="barVisBasicButton"
-        >
-          {i18n.translate('explore.vis.barChart.tabs.basic', {
-            defaultMessage: 'Basic',
-          })}
-        </EuiButtonEmpty>
-        {expandedPanels.basic && (
-          <GeneralVisOptions
-            shouldShowLegend={!notShowLegend}
-            addLegend={styleOptions.addLegend}
-            legendPosition={styleOptions.legendPosition}
-            onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
-            onLegendPositionChange={(legendPosition) =>
-              updateStyleOption('legendPosition', legendPosition)
-            }
-          />
-        )}
-      </EuiSplitPanel.Inner>
-
-      <EuiSplitPanel.Inner paddingSize="s">
-        <EuiButtonEmpty
-          iconSide="left"
-          color="text"
           iconType={expandedPanels.exclusive ? 'arrowDown' : 'arrowRight'}
           onClick={() => togglePanel('exclusive')}
           size="xs"
@@ -138,6 +112,38 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
             onBarBorderColorChange={(barBorderColor) =>
               updateStyleOption('barBorderColor', barBorderColor)
             }
+          />
+        )}
+      </EuiSplitPanel.Inner>
+
+      <EuiSplitPanel.Inner paddingSize="s">
+        <EuiButtonEmpty
+          iconSide="left"
+          color="text"
+          iconType={expandedPanels.legend ? 'arrowDown' : 'arrowRight'}
+          onClick={() => togglePanel('legend')}
+          size="xs"
+          data-test-subj="barVisLegendButton"
+        >
+          {i18n.translate('explore.vis.barChart.tabs.legend', {
+            defaultMessage: 'Legend',
+          })}
+        </EuiButtonEmpty>
+        {expandedPanels.legend && (
+          <LegendOptionsPanel
+            shouldShowLegend={!notShowLegend}
+            legendOptions={{
+              show: styleOptions.addLegend,
+              position: styleOptions.legendPosition,
+            }}
+            onLegendOptionsChange={(legendOptions) => {
+              if (legendOptions.show !== undefined) {
+                updateStyleOption('addLegend', legendOptions.show);
+              }
+              if (legendOptions.position !== undefined) {
+                updateStyleOption('legendPosition', legendOptions.position);
+              }
+            }}
           />
         )}
       </EuiSplitPanel.Inner>

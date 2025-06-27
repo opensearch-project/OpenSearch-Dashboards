@@ -20,10 +20,10 @@ import {
 import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';
-import { AxesOptions } from '../style_panel/axes_options';
+import { AxesOptions } from '../style_panel/axes/axes_options';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
-import { TooltipOptionsPanel } from '../style_panel/tooltip_options';
+import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher/chart_type_switcher';
+import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip_options';
 import { LineStyle } from './line_vis_config';
 
 // Mock the i18n module

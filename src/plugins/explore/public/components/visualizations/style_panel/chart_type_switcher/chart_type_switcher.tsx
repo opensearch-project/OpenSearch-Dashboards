@@ -6,8 +6,8 @@
 import { i18n } from '@osd/i18n';
 import React, { useState, useEffect } from 'react';
 import { EuiFormRow, EuiPanel, EuiSelect, EuiSuperSelect, EuiIcon, EuiSpacer } from '@elastic/eui';
-import { ChartTypeMapping } from '../types';
-import { ChartType } from '../utils/use_visualization_types';
+import { ChartTypeMapping } from '../../types';
+import { ChartType } from '../../utils/use_visualization_types';
 
 export interface ChartTypeSwitcherProps {
   availableChartTypes: ChartTypeMapping[];

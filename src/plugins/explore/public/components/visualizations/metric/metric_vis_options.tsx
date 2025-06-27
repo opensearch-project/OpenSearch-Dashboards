@@ -24,7 +24,7 @@ import { DebouncedText } from '../style_panel/utils';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { getColorSchemas } from '../utils/collections';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
+import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher/chart_type_switcher';
 
 export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
 

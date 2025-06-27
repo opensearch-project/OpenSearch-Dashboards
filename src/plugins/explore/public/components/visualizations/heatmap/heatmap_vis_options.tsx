@@ -7,17 +7,17 @@ import React, { useEffect, useState } from 'react';
 import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { GeneralVisOptions } from '../style_panel/general_vis_options';
+import { LegendOptionsPanel } from '../style_panel/legend/legend_options';
 import { StandardAxes, AxisRole } from '../types';
 import {
   HeatmapLabelVisOptions,
   HeatmapExclusiveVisOptions,
 } from './heatmap_exclusive_vis_options';
 import { inferAxesFromColumns } from './heatmap_chart_utils';
-import { AllAxesOptions } from '../style_panel/standard_axes_options';
+import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { swapAxes } from '../utils/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
+import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher/chart_type_switcher';
 
 export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyleControls>;
 
@@ -114,15 +114,19 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
           })}
         </EuiButtonEmpty>
         {expandedPanels.basic && (
-          <GeneralVisOptions
-            addTooltip={styleOptions.addTooltip}
-            addLegend={styleOptions.addLegend}
-            legendPosition={styleOptions.legendPosition}
-            onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
-            onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
-            onLegendPositionChange={(legendPosition) =>
-              updateStyleOption('legendPosition', legendPosition)
-            }
+          <LegendOptionsPanel
+            legendOptions={{
+              show: styleOptions.addLegend,
+              position: styleOptions.legendPosition,
+            }}
+            onLegendOptionsChange={(legendOptions) => {
+              if (legendOptions.show !== undefined) {
+                updateStyleOption('addLegend', legendOptions.show);
+              }
+              if (legendOptions.position !== undefined) {
+                updateStyleOption('legendPosition', legendOptions.position);
+              }
+            }}
           />
         )}
       </EuiSplitPanel.Inner>

@@ -21,8 +21,8 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { CategoryAxis, VisColumn, ValueAxis, Positions } from '../types';
-import { useDebouncedValue, useDebouncedNumericValue } from '../utils/use_debounced_value';
+import { CategoryAxis, VisColumn, ValueAxis, Positions } from '../../types';
+import { useDebouncedValue, useDebouncedNumericValue } from '../../utils/use_debounced_value';
 
 interface AxesOptionsProps {
   categoryAxes: CategoryAxis[];
