@@ -177,6 +177,12 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
           range: defaultRange,
           detail: s.detail,
           sortText: s.sortText,
+          documentation: s.documentation
+            ? {
+                value: s.documentation,
+                isTrusted: true,
+              }
+            : '',
         }));
 
         const result = {
