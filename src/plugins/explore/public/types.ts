@@ -12,6 +12,7 @@ import {
   ToastsStart,
   IUiSettingsClient,
 } from 'opensearch-dashboards/public';
+import { BehaviorSubject } from 'rxjs';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import {
   DataPublicPluginSetup,
@@ -59,6 +60,7 @@ export interface ExplorePluginSetup {
   docViewsLinks: {
     addDocViewLink: (docViewLinkSpec: unknown) => void;
   };
+  isSummaryAgentAvailable$: BehaviorSubject<boolean>;
 }
 
 export interface ExplorePluginStart {
@@ -161,4 +163,7 @@ export interface ExploreServices {
   tabRegistry: TabRegistryService;
   visualizationRegistry: VisualizationRegistryService;
   expressions: ExpressionsStart;
+
+  // For results summary
+  isSummaryAgentAvailable$: BehaviorSubject<boolean>;
 }
