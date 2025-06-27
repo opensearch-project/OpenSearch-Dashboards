@@ -109,7 +109,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
       try {
         dispatch(setQuery(nextQuery));
         dispatch(clearResults());
-        await dispatch(executeQueries({ services }));
+        dispatch(executeQueries({ services }));
 
         // Use nextQuery here, not query!
         services.data.query.queryString.addToQueryHistory(nextQuery, timefilter.getTime());
@@ -268,9 +268,11 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   };
 
   const onClickRecentQuery = (currentQuery: Query, timeRange?: TimeRange) => {
+    const updatedQuery = typeof currentQuery.query === 'string' ? currentQuery.query : '';
     setIsRecentQueryVisible(false);
-    handlePromptChange(typeof currentQuery.query === 'string' ? currentQuery.query : '');
-    handleRun();
+    handlePromptChange(updatedQuery);
+    handleRun(updatedQuery);
+    if (timeRange) handleTimeChange({ start: timeRange.from, end: timeRange.to });
   };
 
   const handleShowFieldsToggle = (showField: boolean) => {
