@@ -57,7 +57,15 @@ export class VisualizationRegistry {
 
     // TODO: Handle the case where no rule matches, render empty state or default table visualization
     // No matching visualization type found
-    return;
+    return {
+      visualizationType: undefined,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      ruleId: undefined,
+      availableChartTypes: [],
+      toExpression: undefined,
+    };
   }
 
   /**

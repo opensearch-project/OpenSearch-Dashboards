@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiAccordion, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import {
@@ -11,11 +11,12 @@ import {
   ChartType,
   ChartStyleControlMap,
 } from './utils/use_visualization_types';
+import { VisualizationEmptyState } from './visualization_empty_state';
 
 export interface VisualizationProps<T extends ChartType> {
   expression: string;
   searchContext: IExpressionLoaderParams['searchContext'];
-  styleOptions: ChartStyleControlMap[T];
+  styleOptions: ChartStyleControlMap[T] | undefined;
   visualizationData: VisualizationTypeResult<T>;
   onStyleChange: (newOptions: Partial<ChartStyleControlMap[T]>) => void;
   selectedChartType?: string;
@@ -24,6 +25,7 @@ export interface VisualizationProps<T extends ChartType> {
     expression: string;
     searchContext: IExpressionLoaderParams['searchContext'];
   }>;
+  setVisualizationData?: (data: VisualizationTypeResult<ChartType> | undefined) => void;
 }
 
 export const Visualization = <T extends ChartType>({
@@ -35,6 +37,7 @@ export const Visualization = <T extends ChartType>({
   selectedChartType,
   onChartTypeChange,
   ReactExpressionRenderer,
+  setVisualizationData,
 }: VisualizationProps<T>) => {
   const availableChartTypes = visualizationData.availableChartTypes;
   return (
@@ -42,15 +45,27 @@ export const Visualization = <T extends ChartType>({
       <EuiFlexItem>
         <EuiPanel data-test-subj="exploreVisualizationLoader" className="exploreVisPanel">
           <div className="exploreVisPanel__inner">
-            <ReactExpressionRenderer
-              key={JSON.stringify(searchContext) + expression}
-              expression={expression}
-              searchContext={searchContext}
-            />
+            {visualizationData.visualizationType ? (
+              <ReactExpressionRenderer
+                key={JSON.stringify(searchContext) + expression}
+                expression={expression}
+                searchContext={searchContext}
+              />
+            ) : (
+              <EuiEmptyPrompt
+                iconType="visualizeApp"
+                title={<h2>Select a chart type, and x and y axes fields to get started</h2>}
+                body={<p>Try writing an aggregated query like this one:</p>}
+              />
+            )}
           </div>
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        <VisualizationEmptyState
+          visualizationData={visualizationData as any}
+          setVisualizationData={setVisualizationData}
+        />
         <div data-test-subj="exploreStylePanel" className="exploreVisStylePanel">
           {visualizationData.visualizationType?.ui.style.render({
             styleOptions,
