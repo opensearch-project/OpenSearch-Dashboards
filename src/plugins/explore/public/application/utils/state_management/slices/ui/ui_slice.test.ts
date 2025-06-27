@@ -7,28 +7,19 @@ import {
   uiReducer,
   setActiveTab,
   setFlavor,
-  setStatus,
-  startTransaction,
-  commitTransaction,
-  rollbackTransaction,
+  setShowDatasetFields,
+  setQueryPrompt,
+  setUiState,
   UIState,
 } from './ui_slice';
-import { ResultStatus } from '../../../../legacy/discover/application/view_components/utils/use_search';
 
 describe('UI Slice', () => {
   // Define the initial state for testing
   const initialState: UIState = {
     activeTabId: 'logs',
-    chartType: 'line',
     flavor: 'log',
-    status: ResultStatus.UNINITIALIZED,
-    transaction: {
-      inProgress: false,
-      pendingActions: [],
-    },
-    prompt: '',
     showDatasetFields: true,
-    styleOptions: undefined,
+    prompt: '',
   };
 
   it('should return the initial state', () => {
@@ -49,8 +40,8 @@ describe('UI Slice', () => {
 
       // Other state properties should remain unchanged
       expect(newState.flavor).toBe(initialState.flavor);
-      expect(newState.status).toBe(initialState.status);
-      expect(newState.transaction).toEqual(initialState.transaction);
+      expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
+      expect(newState.prompt).toBe(initialState.prompt);
     });
   });
 
@@ -67,93 +58,62 @@ describe('UI Slice', () => {
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.status).toBe(initialState.status);
-      expect(newState.transaction).toEqual(initialState.transaction);
+      expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
+      expect(newState.prompt).toBe(initialState.prompt);
     });
   });
 
-  describe('setStatus', () => {
-    it('should handle setStatus action', () => {
-      const newStatus = ResultStatus.LOADING;
-      const action = setStatus(newStatus);
+  describe('setShowDatasetFields', () => {
+    it('should handle setShowDatasetFields action', () => {
+      const newValue = false;
+      const action = setShowDatasetFields(newValue);
 
-      expect(action.type).toBe('ui/setStatus');
-      expect(action.payload).toBe(newStatus);
+      expect(action.type).toBe('ui/setShowDatasetFields');
+      expect(action.payload).toBe(newValue);
 
       const newState = uiReducer(initialState, action);
-      expect(newState.status).toBe(newStatus);
+      expect(newState.showDatasetFields).toBe(newValue);
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.flavor).toBe(initialState.flavor);
-      expect(newState.transaction).toEqual(initialState.transaction);
+      expect(newState.prompt).toBe(initialState.prompt);
     });
   });
 
-  describe('transaction actions', () => {
-    it('should handle startTransaction action', () => {
-      const previousState = { someKey: 'someValue' };
-      const action = startTransaction({ previousState });
+  describe('setQueryPrompt', () => {
+    it('should handle setQueryPrompt action', () => {
+      const newPrompt = 'SELECT * FROM logs';
+      const action = setQueryPrompt(newPrompt);
 
-      expect(action.type).toBe('ui/startTransaction');
-      expect(action.payload).toEqual({ previousState });
+      expect(action.type).toBe('ui/setQueryPrompt');
+      expect(action.payload).toBe(newPrompt);
 
       const newState = uiReducer(initialState, action);
-      expect(newState.transaction.inProgress).toBe(true);
-      expect(newState.transaction.pendingActions).toEqual([]);
+      expect(newState.prompt).toBe(newPrompt);
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.flavor).toBe(initialState.flavor);
-      expect(newState.status).toBe(initialState.status);
+      expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
     });
+  });
 
-    it('should handle commitTransaction action', () => {
-      const transactionState = {
-        ...initialState,
-        transaction: {
-          inProgress: true,
-          pendingActions: ['action1', 'action2'],
-        },
+  describe('setUiState', () => {
+    it('should handle setUiState action', () => {
+      const newState = {
+        activeTabId: 'visualizations',
+        flavor: 'metric',
+        showDatasetFields: false,
+        prompt: 'test query',
       };
+      const action = setUiState(newState);
 
-      const action = commitTransaction();
+      expect(action.type).toBe('ui/setUiState');
+      expect(action.payload).toEqual(newState);
 
-      expect(action.type).toBe('ui/commitTransaction');
-
-      const newState = uiReducer(transactionState, action);
-      expect(newState.transaction.inProgress).toBe(false);
-      expect(newState.transaction.pendingActions).toEqual([]);
-
-      // Other state properties should remain unchanged
-      expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.flavor).toBe(initialState.flavor);
-      expect(newState.status).toBe(initialState.status);
-    });
-
-    it('should handle rollbackTransaction action', () => {
-      const transactionState = {
-        ...initialState,
-        transaction: {
-          inProgress: true,
-          pendingActions: ['action1', 'action2'],
-        },
-      };
-
-      const errorMessage = 'Transaction failed';
-      const action = rollbackTransaction(errorMessage);
-
-      expect(action.type).toBe('ui/rollbackTransaction');
-      expect(action.payload).toBe(errorMessage);
-
-      const newState = uiReducer(transactionState, action);
-      expect(newState.transaction.inProgress).toBe(false);
-      expect(newState.transaction.pendingActions).toEqual([]);
-
-      // Other state properties should remain unchanged
-      expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.flavor).toBe(initialState.flavor);
-      expect(newState.status).toBe(initialState.status);
+      const resultState = uiReducer(initialState, action);
+      expect(resultState).toEqual({ ...initialState, ...newState });
     });
   });
 
@@ -165,25 +125,25 @@ describe('UI Slice', () => {
       state = uiReducer(state, setActiveTab('visualizations'));
       expect(state.activeTabId).toBe('visualizations');
 
-      // Second action: set status
-      state = uiReducer(state, setStatus(ResultStatus.LOADING));
-      expect(state.status).toBe(ResultStatus.LOADING);
-
-      // Third action: set flavor
+      // Second action: set flavor
       state = uiReducer(state, setFlavor('metric'));
       expect(state.flavor).toBe('metric');
+
+      // Third action: set show dataset fields
+      state = uiReducer(state, setShowDatasetFields(false));
+      expect(state.showDatasetFields).toBe(false);
+
+      // Fourth action: set query prompt
+      state = uiReducer(state, setQueryPrompt('test query'));
+      expect(state.prompt).toBe('test query');
 
       // Final state should have all changes
       expect(state).toEqual({
         ...initialState,
         activeTabId: 'visualizations',
         flavor: 'metric',
-        status: ResultStatus.LOADING,
-        prompt: '',
-        transaction: {
-          inProgress: false,
-          pendingActions: [],
-        },
+        showDatasetFields: false,
+        prompt: 'test query',
       });
     });
   });
