@@ -28,6 +28,7 @@ export interface VisualizationRule {
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
   ) => boolean;
+  matchIndex: number[];
   chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
   toExpression?: (
     transformedData: Array<Record<string, any>>,
