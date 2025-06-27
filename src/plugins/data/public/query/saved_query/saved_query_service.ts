@@ -38,6 +38,8 @@ import { UI_SETTINGS } from '../../../common';
 
 type SerializedSavedQueryAttributes = SavedObjectAttributes & SavedQueryAttributes;
 
+const unregisteredLangServiceApps = ['explore'];
+
 export const createSavedQueryService = (
   savedObjectsClient: SavedObjectsClientContract,
   coreStartServices: { application: CoreStart['application']; uiSettings: CoreStart['uiSettings'] },
@@ -137,7 +139,8 @@ export const createSavedQueryService = (
     const languageService = queryStringManager?.getLanguageService();
 
     // Filtering saved queries based on language supported by current application
-    if (currentAppId && languageService && !currentAppId.includes('explore')) {
+    // Skip filtering for apps not using lang service eg. explore new editor
+    if (currentAppId && languageService && !unregisteredLangServiceApps.includes(currentAppId)) {
       queries = queries.filter((query) => {
         const languageId = query.attributes.query.language;
         return (

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useCallback, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
 import { EuiPopover, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
@@ -11,9 +12,11 @@ import {
   SaveQueryForm,
   SavedQueryMeta,
   SavedQuery,
+  useSavedQuery,
   TimefilterContract,
-  // SavedQueryAttributes,
 } from '../../../../../../data/public';
+import { selectSavedQuery } from '../../../../application/utils/state_management/selectors';
+
 import { ExploreServices } from '../../../../types';
 import { Query } from '../../types';
 
@@ -34,8 +37,9 @@ export const SaveQueryButton: React.FC<{
   onSavedQuery,
   onLoadSavedQuery,
 }) => {
-  // Saved Query UI state
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const savedQueryId = useSelector(selectSavedQuery);
 
   const savedQueryService = services.data.query.savedQueries;
 
@@ -44,7 +48,12 @@ export const SaveQueryButton: React.FC<{
 
   const [isSaveQueryFormOpen, setIsSaveQueryFormOpen] = React.useState(false);
   const [saveAsNew, setSaveAsNew] = React.useState(false);
-  const [loadedSavedQuery, setLoadedSavedQuery] = React.useState<SavedQuery | undefined>(undefined);
+
+  const { savedQuery: loadedSavedQuery, setSavedQuery, clearSavedQuery } = useSavedQuery({
+    queryService: services.data.query,
+    savedQueryId,
+    notifications: services.notifications,
+  });
 
   // Handlers for Saved Query UI
   const handleInitiateSave = () => {
@@ -58,7 +67,7 @@ export const SaveQueryButton: React.FC<{
 
   const handleLoadSavedQuery = useCallback(
     (savedQuery) => {
-      setLoadedSavedQuery(savedQuery);
+      setSavedQuery(savedQuery);
       if (savedQuery?.attributes?.query) {
         onLoadSavedQuery(savedQuery);
       }
@@ -72,11 +81,11 @@ export const SaveQueryButton: React.FC<{
         }
       }
     },
-    [onLoadSavedQuery, timeFilter]
+    [onLoadSavedQuery, setSavedQuery, timeFilter]
   );
 
   const handleClearSavedQuery = useCallback(() => {
-    setLoadedSavedQuery(undefined);
+    clearSavedQuery();
     onClearQuery();
     if (timeFilter) {
       timeFilter.setTime({ from: 'now-15m', to: 'now' });
@@ -84,7 +93,7 @@ export const SaveQueryButton: React.FC<{
         timeFilter.setRefreshInterval({ value: 0, pause: true });
       }
     }
-  }, [onClearQuery, timeFilter]);
+  }, [clearSavedQuery, onClearQuery, timeFilter]);
 
   const handleSaveQuery = async (meta: SavedQueryMeta, saveAsNewParam?: boolean) => {
     try {
@@ -123,8 +132,8 @@ export const SaveQueryButton: React.FC<{
         `Your query "${savedQuery.attributes.title}" was saved`
       );
 
-      setLoadedSavedQuery(savedQuery);
       setIsSaveQueryFormOpen(false);
+      setSavedQuery(savedQuery);
       onSavedQuery(savedQuery.id);
     } catch (error) {
       services.notifications.toasts.addDanger(
@@ -144,9 +153,6 @@ export const SaveQueryButton: React.FC<{
   const shouldRenderTimeFilterInSavedQueryForm = () => {
     return showDatePicker || (!showDatePicker && timeFilter.getTime() !== undefined);
   };
-
-  // eslint-disable-next-line no-console
-  console.log(loadedSavedQuery, 'loadedSavedQuery');
 
   return (
     <>

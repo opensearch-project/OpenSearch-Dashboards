@@ -501,6 +501,8 @@ export {
   DatasetIndexedViewsService,
 } from './query';
 
+export { useSavedQuery } from './ui/search_bar';
+
 export { AggsStart } from './search/aggs';
 
 export {

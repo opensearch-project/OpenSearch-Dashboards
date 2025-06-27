@@ -25,8 +25,8 @@ import {
 import './index.scss';
 
 import { getEffectiveLanguageForAutoComplete, SavedQuery } from '../../../../data/public';
+
 import { setQuery } from '../../application/utils/state_management/slices/query_slice';
-import { setSavedQuery } from '../../application/utils/state_management/slices/legacy_slice';
 import { setShowDatasetFields } from '../../application/utils/state_management/slices/ui_slice';
 import { clearResults } from '../../application/utils/state_management/slices/results_slice';
 import {
@@ -35,6 +35,7 @@ import {
 } from '../../application/utils/state_management/actions/transaction_actions';
 import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
+import { setSavedQuery } from '../../application/utils/state_management/slices/legacy_slice';
 
 export interface QueryPanelProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
@@ -280,8 +281,8 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   }, [localQuery, localPrompt]);
 
   const handleClearQuery = () => {
-    dispatch(setQuery({ ...query, query: '' }));
     dispatch(setSavedQuery(undefined));
+    dispatch(setQuery({ ...query, query: '' }));
     setLocalQuery('');
   };
 
