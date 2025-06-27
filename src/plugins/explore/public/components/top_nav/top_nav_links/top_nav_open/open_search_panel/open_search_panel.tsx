@@ -1,31 +1,13 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+TODO: This file needs to be updated.
+-  loading saved explore breaks the top nav. I don't think we should use URL to update it
+- classic saved searches do not show up in the panel
+- this file needs unit tests once above has been resolved.
  */
 
 import React from 'react';
@@ -42,18 +24,36 @@ import {
   EuiFlyoutBody,
   EuiText,
 } from '@elastic/eui';
-import { ExploreFlavor } from '../../../../../../../common';
-import { SavedObjectFinderUi } from '../../../../../../../../saved_objects/public';
-import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { ExploreServices } from '../../../../../../types';
-import { SAVED_OBJECT_TYPE } from '../../../../../../saved_explore/_saved_explore';
+import { ExploreFlavor } from '../../../../../../common';
+import { SavedObjectFinderUi } from '../../../../../../../saved_objects/public';
+import { SAVED_OBJECT_TYPE } from '../../../../../saved_explore/_saved_explore';
+import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../../../../types';
 
-interface Props {
+export interface OpenSearchPanelProps {
   onClose: () => void;
-  makeUrl: (id: string) => string;
 }
 
-export function OpenSearchPanel({ onClose, makeUrl }: Props) {
+const savedObjectMetadata = [
+  {
+    type: 'search',
+    getIconForSavedObject: () => 'search',
+    name: i18n.translate('explore.savedSearch.savedObjectName', {
+      defaultMessage: 'Saved search',
+    }),
+    includeFields: ['kibanaSavedObjectMeta'],
+  },
+  {
+    type: SAVED_OBJECT_TYPE,
+    getIconForSavedObject: () => 'integrationSearch',
+    name: i18n.translate('explore.savedExplore.savedObjectName', {
+      defaultMessage: 'Saved explore',
+    }),
+    includeFields: ['kibanaSavedObjectMeta'],
+  },
+];
+
+export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
   const {
     services: {
       core: { uiSettings, savedObjects, application },
@@ -80,28 +80,11 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
         <SavedObjectFinderUi
           noItemsMessage={
             <FormattedMessage
-              id="explore.discover.topNav.openSearchPanel.noSearchesFoundDescription"
+              id="explore.topNav.openSearchPanel.noSearchesFoundDescription"
               defaultMessage="No matching searches found."
             />
           }
-          savedObjectMetaData={[
-            {
-              type: 'search',
-              getIconForSavedObject: () => 'search',
-              name: i18n.translate('explore.discover.savedSearch.savedObjectName', {
-                defaultMessage: 'Saved search',
-              }),
-              includeFields: ['kibanaSavedObjectMeta'],
-            },
-            {
-              type: SAVED_OBJECT_TYPE,
-              getIconForSavedObject: () => 'integrationSearch',
-              name: i18n.translate('explore.discover.savedExplore.savedObjectName', {
-                defaultMessage: 'Saved explore',
-              }),
-              includeFields: ['kibanaSavedObjectMeta'],
-            },
-          ]}
+          savedObjectMetaData={savedObjectMetadata}
           onChoose={(id, type) => {
             // Reset query app filters before loading saved search
             filterManager.setAppFilters([]);
@@ -144,7 +127,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
               )}
             >
               <FormattedMessage
-                id="explore.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+                id="explore.topNav.openSearchPanel.manageSearchesButtonLabel"
                 defaultMessage="Manage searches"
               />
             </EuiSmallButtonEmpty>
@@ -153,4 +136,4 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
-}
+};
