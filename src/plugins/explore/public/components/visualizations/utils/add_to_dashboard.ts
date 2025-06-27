@@ -54,24 +54,15 @@ export const addToDashboard = async (
   let x = 0;
   let y = 0;
   if (panels.length > 0) {
-    // track the rightmost and lowest x and Y
-    const lastPanel = panels.reduce(
-      (acc, p) => {
-        const panelRight = (p.gridData.x || 0) + (p.gridData.w || PANEL_WIDTH);
-        const panelBottom = (p.gridData.y || 0) + (p.gridData.h || PANEL_HEIGHT);
-        acc.maxX = Math.max(acc.maxX, panelRight);
-        acc.maxY = Math.max(acc.maxY, panelBottom);
-        return acc;
-      },
-      { maxX: 0, maxY: 0 }
-    );
+    // get the last panel
+    const lastPanel = panels[panels.length - 1];
 
-    if (lastPanel.maxX + PANEL_WIDTH <= 48) {
-      x = lastPanel.maxX;
-      y = lastPanel.maxY - PANEL_HEIGHT; // stay in same line
+    if (lastPanel.gridData.x + lastPanel.gridData.w + PANEL_WIDTH <= 48) {
+      x = lastPanel.gridData.x + lastPanel.gridData.w;
+      y = lastPanel.gridData.y; // stay in same line
     } else {
       x = 0;
-      y = lastPanel.maxY; // new line
+      y = lastPanel.gridData.y + lastPanel.gridData.h; // new line
     }
   }
 

@@ -8,12 +8,17 @@ import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../types/saved_explore_types';
+<<<<<<< HEAD
 import {
   setSavedSearch,
   setQuery,
   setChartType,
   setStyleOptions,
 } from '../state_management/slices';
+=======
+import { setSavedSearch, setSavedSearchName } from '../state_management/slices/legacy_slice';
+import { setQuery } from '../state_management/slices/query_slice';
+>>>>>>> 952b6a48eb (drop selectstate)
 import { Query } from '../../../../../data/common';
 /**
  * Hook for loading saved explore objects (following vis_builder pattern)
@@ -36,6 +41,9 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
       // Load saved explore object
       const savedExploreObject = await getSavedExploreById(exploreIdFromUrl);
 
+      // store the id(if it is undefined, then new save explore)
+      dispatch(setSavedSearch(exploreIdFromUrl));
+
       if (savedExploreObject?.id) {
         // Deserialize state from saved object
         const { title } = savedExploreObject;
@@ -56,6 +64,7 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
           }
         }
 
+<<<<<<< HEAD
         // Update savedSearch to store just the ID (like discover)
         // TODO: remove this once legacy state is not consumed any more
 <<<<<<< HEAD
@@ -67,6 +76,10 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
         };
         dispatch(setState(legacyStateWithId));
 >>>>>>> 11db39f0ec (fix)
+=======
+        // Store the name to ensure state consistency for both top nav and add to dashboard button
+        dispatch(setSavedSearchName(title));
+>>>>>>> 952b6a48eb (drop selectstate)
 
         // Set style options
         const visualization = savedExploreObject.visualization;

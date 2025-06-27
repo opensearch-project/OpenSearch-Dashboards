@@ -40,13 +40,26 @@ export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const {
-    data: { query },
+    data,
     expressions: { ReactExpressionRenderer },
     uiSettings,
     history,
   } = services;
   const { indexPattern } = useIndexPatternContext();
   const { results } = useTabResults();
+
+  // Create osdUrlStateStorage from storage
+  const osdUrlStateStorage = useMemo(() => {
+    return createOsdUrlStateStorage({
+      useHash: uiSettings.get('state:storeInSessionStorage', false),
+      history: history(),
+    });
+  }, [uiSettings, history]);
+
+  const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
+    data.query,
+    osdUrlStateStorage
+  );
 
   // TODO: Register custom processor for visualization tab
   // const tabDefinition = services.tabRegistry?.getTab?.('explore_visualization_tab');
@@ -69,9 +82,9 @@ export const VisualizationContainer = () => {
   }, [fieldSchema, rows]);
 
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
-    query: query.queryString.getQuery(),
-    filters: query.filterManager.getFilters(),
-    timeRange: query.timefilter.timefilter.getTime(),
+    query: data.query.queryString.getQuery(),
+    filters: data.query.filterManager.getFilters(),
+    timeRange: data.query.timefilter.timefilter.getTime(),
   });
 
   const visualizationRegistry = useVisualizationRegistry();
@@ -150,7 +163,7 @@ export const VisualizationContainer = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [query.queryString, services.data.query.state$]);
+  }, [data.query.queryString, services.data.query.state$]);
 
   const handleStyleChange = (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {
     if (styleOptions) {

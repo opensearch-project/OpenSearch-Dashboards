@@ -59,6 +59,12 @@ export const getTopNavLinks = (
     }),
     run() {
       store.dispatch(resetExploreStateActionCreator(services));
+      // core.application.navigateToApp('explore', {
+      //   path: `${ExploreFlavor.Logs}#/`,
+      // });
+      // // TODO this behavior is different from Discover. Clicking New in Explore
+      // // only closes the saved search and does not change the query.
+      store!.dispatch(setSavedSearch(undefined));
     },
     testId: 'discoverNewButton',
     ariaLabel: i18n.translate('explore.discover.topNav.discoverNewButtonLabel', {
@@ -167,9 +173,10 @@ export const getTopNavLinks = (
               }
 
               // set App state to clean
-              // dispatch setSavedSearchId and setSavedSearchName,
+              // dispatch SavedSearchId and SavedSearchName,
               // this ensures that state consistency for top nav and add to dashboard button
-              store!.dispatch(setState({ savedSearch: id, savedSearchName: savedExplore.title }));
+              store.dispatch(setSavedSearch(id));
+              store.dispatch(setSavedSearchName(savedExplore.title));
 
               // starts syncing `_g` portion of url with query services
               startSyncingQueryStateWithUrl();
