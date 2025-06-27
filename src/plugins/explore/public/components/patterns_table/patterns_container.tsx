@@ -3,30 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import { PatternItem, PatternsTable } from './patterns_table';
 import { COUNT_FIELD, PATTERNS_FIELD } from './utils/constants';
-import { RootState } from '../../application/utils/state_management/store';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { ExploreServices } from '../../types';
-import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
+import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 
 export const PatternsContainer = () => {
-  const query = useSelector((state: RootState) => state.query);
-  const activeTabId = useSelector((state: RootState) => state.ui.activeTabId);
-  const results = useSelector((state: RootState) => state.results);
-  const services = useOpenSearchDashboards<ExploreServices>().services;
-
-  // Use tab-specific cache key computation
-  const cacheKey = useMemo(() => {
-    const activeTab = services.tabRegistry?.getTab(activeTabId);
-    const prepareQuery = activeTab?.prepareQuery || defaultPrepareQuery;
-    const queryString = typeof query.query === 'string' ? query.query : '';
-    return prepareQuery(queryString);
-  }, [query, activeTabId, services]);
-
-  const rawResults = cacheKey ? results[cacheKey] : null;
+  const { results } = useTabResults();
 
   // TODO: Register custom processor for patterns tab if needed
   //       If no need, feel free to remove this comment
@@ -34,7 +17,7 @@ export const PatternsContainer = () => {
   // const processor = tabDefinition?.resultsProcessor || defaultResultsProcessor;
   // const processedResults = processor(rawResults, indexPattern);
 
-  const rows = rawResults?.hits?.hits || [];
+  const rows = results?.hits?.hits || [];
 
   // Convert rows to pattern items or use default if rows is undefined
   const items: PatternItem[] = rows?.map((row) => ({

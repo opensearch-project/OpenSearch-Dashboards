@@ -33,7 +33,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { HitsCounter, HitsCounterProps } from './hits_counter';
 import { findTestSubject } from 'test_utils/helpers';
-import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../../../application/legacy/discover/application/doc_views/doc_views_types';
 
 const mockRow1: OpenSearchSearchHit = {
   fields: {},

@@ -8,11 +8,11 @@ import { saveAs } from 'file-saver';
 import moment from 'moment';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useDiscoverContext } from '../../view_components/context';
-import { useSelector } from '../../utils/state_management';
-import { AbortError, IndexPattern } from '../../../../../../../../data/common';
-import { setServices } from '../../../opensearch_dashboards_services';
-import { discoverPluginMock } from '../../../mocks';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { useSelector } from '../../../../application/legacy/discover/application/utils/state_management';
+import { AbortError, IndexPattern } from '../../../../../../data/common';
+import { setServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
+import { discoverPluginMock } from '../../../../application/legacy/discover/mocks';
+import { OpenSearchSearchHit } from '../../../../application/legacy/discover/application/doc_views/doc_views_types';
 import {
   formatRowsForCsv,
   saveDataAsCsv,

@@ -4,7 +4,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { getServices } from '../../../opensearch_dashboards_services';
+import { getServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { useDiscoverContext } from '../../view_components/context';
 import {
   useDiscoverDownloadCsvToasts,
