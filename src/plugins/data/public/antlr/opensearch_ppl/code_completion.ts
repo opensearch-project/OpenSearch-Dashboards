@@ -146,7 +146,13 @@ export const getSimplifiedPPLSuggestions = async ({
       );
 
       finalSuggestions.push(
-        ...formatAvailableFieldsToSuggestions(availableFields, (f: string) => `${f} `, '3')
+        ...formatAvailableFieldsToSuggestions(
+          availableFields,
+          (f: string) => `${f} `,
+          (f: string) => {
+            return f.startsWith('_') ? `9` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
+          }
+        )
       );
     }
 
