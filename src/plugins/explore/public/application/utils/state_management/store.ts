@@ -5,11 +5,7 @@
 
 import { configureStore, combineReducers, PreloadedState } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { queryReducer } from './slices/query_slice';
-import { uiReducer } from './slices/ui_slice';
-import { resultsReducer } from './slices/results_slice';
-import { tabReducer } from './slices/tab_slice';
-import { legacyReducer } from './slices/legacy_slice';
+import { queryReducer, uiReducer, resultsReducer, tabReducer, legacyReducer } from './slices';
 import { persistReduxState, loadReduxState } from './utils/redux_persistence';
 import { createQuerySyncMiddleware } from './middleware/query_sync_middleware';
 import { ExploreServices } from '../../../types';

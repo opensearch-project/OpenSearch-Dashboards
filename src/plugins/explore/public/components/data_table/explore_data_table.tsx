@@ -30,10 +30,7 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
-import {
-  addColumn,
-  removeColumn,
-} from '../../application/utils/state_management/slices/legacy_slice';
+import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
 import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
 
 const ExploreDataTableComponent = () => {

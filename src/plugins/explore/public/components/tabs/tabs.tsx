@@ -11,7 +11,7 @@ import {
   beginTransaction,
   finishTransaction,
 } from '../../application/utils/state_management/actions/transaction_actions';
-import { setActiveTab } from '../../application/utils/state_management/slices/ui_slice';
+import { setActiveTab } from '../../application/utils/state_management/slices';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 import { selectActiveTab } from '../../application/utils/state_management/selectors';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';

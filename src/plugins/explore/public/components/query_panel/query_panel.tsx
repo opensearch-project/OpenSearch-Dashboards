@@ -24,9 +24,11 @@ import {
 import './index.scss';
 
 import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
-import { setQuery } from '../../application/utils/state_management/slices/query_slice';
-import { setShowDatasetFields } from '../../application/utils/state_management/slices/ui_slice';
-import { clearResults } from '../../application/utils/state_management/slices/results_slice';
+import {
+  setQuery,
+  setShowDatasetFields,
+  clearResults,
+} from '../../application/utils/state_management/slices';
 import {
   beginTransaction,
   finishTransaction,
