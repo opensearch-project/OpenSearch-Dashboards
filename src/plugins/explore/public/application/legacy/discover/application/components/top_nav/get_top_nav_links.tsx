@@ -122,8 +122,11 @@ export const getTopNavLinks = (
             onTitleDuplicate,
           };
 
+          // TODO: remove legacy state once data flow is migrated
           // @ts-expect-error TODO: Fix me
-          const state: LegacyState = store.getState().legacy; // store is defined before the view is loaded
+          const state: LegacyState = store!.getState().legacy; // store is defined before the view is loaded
+          savedExplore.columns = state.columns;
+          savedExplore.sort = state.sort;
 
           // Use transform approach similar to vis_builder - serialize state into saved object
           const { updateLegacyPropertiesInSavedObject } = await import(
