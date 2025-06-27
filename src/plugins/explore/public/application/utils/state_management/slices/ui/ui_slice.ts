@@ -4,11 +4,11 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ResultStatus } from '../../../legacy/discover/application/view_components/utils/use_search';
+import { ResultStatus } from '../../../../legacy/discover/application/view_components/utils/use_search';
 import {
   ChartStyleControlMap,
   ChartType,
-} from '../../../../components/visualizations/utils/use_visualization_types';
+} from '../../../../../components/visualizations/utils/use_visualization_types';
 
 export interface UIState {
   activeTabId: string;
@@ -42,8 +42,8 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setUiState: (state, action: PayloadAction<UIState>) => {
-      return { ...state, ...action.payload };
+    setUiState: (_, action: PayloadAction<UIState>) => {
+      return { ...action.payload };
     },
     setActiveTab: (state, action: PayloadAction<string>) => {
       state.activeTabId = action.payload;

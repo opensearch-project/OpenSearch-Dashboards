@@ -30,7 +30,7 @@ import {
 import {
   setStyleOptions,
   setChartType as setSelectedChartType,
-} from '../../application/utils/state_management/slices/ui_slice';
+} from '../../application/utils/state_management/slices';
 import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
 
 export const VisualizationContainer = () => {
