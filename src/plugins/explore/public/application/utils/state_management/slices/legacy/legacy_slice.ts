@@ -4,7 +4,7 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SortOrder } from '../../../../types/saved_explore_types';
+import { SortOrder } from '../../../../../types/saved_explore_types';
 
 /**
  * Legacy state interface
@@ -47,6 +47,9 @@ const legacySlice = createSlice({
   name: 'legacy',
   initialState,
   reducers: {
+    setLegacyState: (_, action: PayloadAction<LegacyState>) => {
+      return { ...action.payload };
+    },
     setSavedSearch: (state, action: PayloadAction<string | undefined>) => {
       state.savedSearch = action.payload;
     },
@@ -84,13 +87,11 @@ const legacySlice = createSlice({
     setLineCount: (state, action: PayloadAction<number | undefined>) => {
       state.lineCount = action.payload;
     },
-    setState: (state, action: PayloadAction<Partial<LegacyState>>) => {
-      return { ...state, ...action.payload };
-    },
   },
 });
 
 export const {
+  setLegacyState,
   setSavedSearch,
   setColumns,
   addColumn,
@@ -101,7 +102,6 @@ export const {
   setSavedQuery,
   setIsDirty,
   setLineCount,
-  setState,
 } = legacySlice.actions;
 
 export const legacyReducer = legacySlice.reducer;

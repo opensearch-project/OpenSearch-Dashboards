@@ -24,12 +24,8 @@ const tabSlice = createSlice({
   name: 'tab',
   initialState,
   reducers: {
-    setTabState: (
-      state,
-      action: PayloadAction<{ tabId: string; state: { skipInitialFetch?: boolean } }>
-    ) => {
-      const { tabId, state: tabState } = action.payload;
-      state[tabId] = { ...state[tabId], ...tabState };
+    setTabState: (_, action: PayloadAction<TabState>) => {
+      return { ...action.payload };
     },
     setSkipInitialFetch: (state, action: PayloadAction<{ tabId: string; skip: boolean }>) => {
       const { tabId, skip } = action.payload;

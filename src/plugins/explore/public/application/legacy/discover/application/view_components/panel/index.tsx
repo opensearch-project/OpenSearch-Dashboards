@@ -16,7 +16,7 @@ import {
   removeColumn,
   moveColumn,
   setColumns,
-} from '../../../../../utils/state_management/slices/legacy_slice';
+} from '../../../../../utils/state_management/slices';
 import { selectColumns, selectQuery } from '../../../../../utils/state_management/selectors';
 import { DiscoverSidebar } from '../../components/sidebar';
 import { ExploreServices } from '../../../../../../types';

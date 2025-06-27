@@ -12,7 +12,7 @@ import {
   removeColumn,
   moveColumn,
   setSort,
-} from '../../../../../utils/state_management/slices/legacy_slice';
+} from '../../../../../utils/state_management/slices';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../../../../types/saved_explore_types';
 import {

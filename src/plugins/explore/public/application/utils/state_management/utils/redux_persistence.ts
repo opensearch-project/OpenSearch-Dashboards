@@ -6,7 +6,7 @@
 import { RootState } from '../store';
 import { ResultStatus, AppState } from '../types';
 import { ExploreServices } from '../../../../types';
-import { QueryState } from '../slices/query_slice';
+import { QueryState } from '../slices';
 import { Dataset, DataStructure } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';

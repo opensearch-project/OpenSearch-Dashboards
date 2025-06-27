@@ -18,9 +18,8 @@ import { DiscoverHistogram } from './histogram/histogram';
 import { ExploreServices } from '../../../../../../types';
 import { Chart } from './utils';
 import { useDispatch, useSelector } from '../../utils/state_management';
-import { setInterval } from '../../../../../utils/state_management/slices/legacy_slice';
+import { setInterval, clearResults } from '../../../../../utils/state_management/slices';
 import { executeQueries } from '../../../../../utils/state_management/actions/query_actions';
-import { clearResults } from '../../../../../utils/state_management/slices/results_slice';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;

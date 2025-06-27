@@ -5,7 +5,6 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { ExploreFlavor } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { SavedExplore } from '../../../../../../saved_explore';
 import { TopNavMenuData, TopNavMenuIconData } from '../../../../../../../../navigation/public';
@@ -20,10 +19,7 @@ import {
   OpenSearchDashboardsContextProvider,
   toMountPoint,
 } from '../../../../../../../../opensearch_dashboards_react/public';
-import {
-  LegacyState,
-  setSavedSearch,
-} from '../../../../../utils/state_management/slices/legacy_slice';
+import { LegacyState, setSavedSearch } from '../../../../../utils/state_management/slices';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -31,9 +27,10 @@ import {
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { OpenSearchPanel } from './open_search_panel';
-import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
+import { ExecutionContextSearch } from '../../../../../../../../expressions';
 import { IndexPattern } from '../../../../../../../../data/public';
 import { Query } from '../../../../../../../../data/public';
+import { resetExploreStateActionCreator } from '../../../../../utils/state_management/actions/reset_explore_state';
 
 export const getTopNavLinks = (
   services: ExploreServices,
@@ -61,12 +58,7 @@ export const getTopNavLinks = (
       defaultMessage: 'New',
     }),
     run() {
-      core.application.navigateToApp('explore', {
-        path: `${ExploreFlavor.Logs}#/`,
-      });
-      // TODO this behavior is different from Discover. Clicking New in Explore
-      // only closes the saved search and does not change the query.
-      store.dispatch(setSavedSearch(undefined));
+      store.dispatch(resetExploreStateActionCreator(services));
     },
     testId: 'discoverNewButton',
     ariaLabel: i18n.translate('explore.discover.topNav.discoverNewButtonLabel', {
