@@ -190,7 +190,7 @@ export const formatFieldsToSuggestions = (
 export const formatAvailableFieldsToSuggestions = (
   availableFields: IFieldType[],
   modifyInsertText?: (input: string) => string,
-  sortTextImportance?: string
+  sortTextImportanceFunction?: (input: string) => string
 ) => {
   return availableFields.map((field) => {
     return {
@@ -198,7 +198,7 @@ export const formatAvailableFieldsToSuggestions = (
       type: monaco.languages.CompletionItemKind.Field,
       detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
       ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
-      ...(sortTextImportance && { sortText: sortTextImportance }),
+      ...(sortTextImportanceFunction && { sortText: sortTextImportanceFunction(field.name) }),
     };
   });
 };

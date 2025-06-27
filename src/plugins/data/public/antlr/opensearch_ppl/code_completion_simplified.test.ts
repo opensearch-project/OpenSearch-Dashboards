@@ -15,6 +15,7 @@ describe('ppl code_completion', () => {
   const mockIndexPattern = {
     title: 'test-index',
     fields: [
+      { name: '_field5', type: 'string' },
       { name: 'field1', type: 'string' },
       { name: 'field2', type: 'number' },
       { name: 'field3', type: 'boolean' },
@@ -322,6 +323,13 @@ describe('ppl code_completion', () => {
         text: 'counter',
         type: monaco.languages.CompletionItemKind.Field,
       });
+    });
+
+    it('should devalue the fieldNames starting _', async () => {
+      const results = await getSimpleSuggestions('source = test-index | where ');
+
+      const resultField = results.find((result) => result.text === '_field5');
+      expect(resultField?.sortText).toBe('9');
     });
   });
 });
