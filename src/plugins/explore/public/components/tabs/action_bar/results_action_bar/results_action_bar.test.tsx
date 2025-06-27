@@ -6,7 +6,8 @@
 import React from 'react';
 import { DiscoverResultsActionBar, DiscoverResultsActionBarProps } from './results_action_bar';
 import { render, screen } from '@testing-library/react';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../../../application/legacy/discover/application/doc_views/doc_views_types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../download_csv', () => ({
   DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
@@ -29,14 +30,14 @@ const mockRow1: OpenSearchSearchHit<Record<string, number | string>> = {
   _score: 1,
 };
 
+const mockInspectionHanlder = jest.fn();
 const props: DiscoverResultsActionBarProps = {
   hits: 5,
   showResetButton: false,
   resetQuery: jest.fn(),
   rows: [mockRow1],
-  // @ts-expect-error TS2322 TODO(ts-error): fixme
-  isEnhancementsEnabled: true,
   indexPattern: {} as any,
+  inspectionHanlder: mockInspectionHanlder,
 };
 
 describe('ResultsActionBar', () => {
@@ -53,6 +54,17 @@ describe('ResultsActionBar', () => {
   test('renders the DownloadCsv component when !!indexPattern and !!rows.length', () => {
     render(<DiscoverResultsActionBar {...props} />);
     expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
+  });
+
+  test('render open inspector button', async () => {
+    const user = userEvent.setup();
+    render(<DiscoverResultsActionBar {...props} rows={[]} />);
+
+    const openInspectorButton = screen.queryByTestId('openInspectorButton');
+    expect(openInspectorButton).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('openInspectorButton'));
+    expect(mockInspectionHanlder).toHaveBeenCalled();
   });
 
   test('hides the DownloadCsv component when !indexPattern', () => {

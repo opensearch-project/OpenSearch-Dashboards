@@ -8,13 +8,16 @@ import { unparse } from 'papaparse';
 import moment from 'moment';
 import { saveAs } from 'file-saver';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
-import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
-import { useSelector, useDispatch } from '../../utils/state_management';
-import { exportMaxSizeCsv } from '../../../../../utils/state_management/actions/export_actions';
-import { getLegacyDisplayedColumns } from '../default_discover_table/helper';
-import { IndexPattern, UI_SETTINGS } from '../../../../../../../../data/common';
-import { getServices } from '../../../opensearch_dashboards_services';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../../../common/legacy/discover';
+import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
+import {
+  useSelector,
+  useDispatch,
+} from '../../../../application/legacy/discover/application/utils/state_management';
+import { exportMaxSizeCsv } from '../../../../application/utils/state_management/actions/export_actions';
+import { getLegacyDisplayedColumns } from '../../../../application/legacy/discover/application/components/default_discover_table/helper';
+import { IndexPattern, UI_SETTINGS } from '../../../../../../data/common';
+import { getServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common/legacy/discover';
 
 export interface UseDiscoverDownloadCsvProps {
   hits?: number;

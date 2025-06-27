@@ -6,7 +6,7 @@
 import React, { useCallback, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSmallButtonEmpty } from '@elastic/eui';
-import { getServices } from '../../../opensearch_dashboards_services';
+import { getServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 
 export enum DiscoverDownloadCsvToastId {
   Cancelled = 'csvDownloadCancelled',
