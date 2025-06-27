@@ -12,13 +12,14 @@ import {
   commitTransaction,
   rollbackTransaction,
   UIState,
-} from '../ui_slice';
+} from './ui_slice';
 import { ResultStatus } from '../../../../legacy/discover/application/view_components/utils/use_search';
 
 describe('UI Slice', () => {
   // Define the initial state for testing
   const initialState: UIState = {
     activeTabId: 'logs',
+    chartType: 'line',
     flavor: 'log',
     status: ResultStatus.UNINITIALIZED,
     transaction: {
@@ -26,6 +27,8 @@ describe('UI Slice', () => {
       pendingActions: [],
     },
     prompt: '',
+    showDatasetFields: true,
+    styleOptions: undefined,
   };
 
   it('should return the initial state', () => {
@@ -172,6 +175,7 @@ describe('UI Slice', () => {
 
       // Final state should have all changes
       expect(state).toEqual({
+        ...initialState,
         activeTabId: 'visualizations',
         flavor: 'metric',
         status: ResultStatus.LOADING,

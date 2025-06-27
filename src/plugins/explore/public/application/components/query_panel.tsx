@@ -14,14 +14,13 @@ import {
   getEffectiveLanguageForAutoComplete,
 } from '../../../../data/public';
 import { IndexPattern } from '../../../../data/common/index_patterns';
-import { setQuery } from '../utils/state_management/slices/query_slice';
+import { setQuery, clearResults } from '../utils/state_management/slices';
 
 import { RecentQuerySelector } from './recent_query_selector';
 import {
   beginTransaction,
   finishTransaction,
 } from '../utils/state_management/actions/transaction_actions';
-import { clearResults } from '../utils/state_management/slices/results_slice';
 import { selectIsLoading, selectDataset, selectQuery } from '../utils/state_management/selectors';
 import { ResultStatus, QueryStatus } from '../utils/state_management/types';
 import { executeQueries } from '../utils/state_management/actions/query_actions';

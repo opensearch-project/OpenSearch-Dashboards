@@ -6,7 +6,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { SearchResponse } from 'elasticsearch';
 
-import { IFieldType } from '../../../../../../../../src/plugins/data/common';
+import { IFieldType } from '../../../../../../../../../src/plugins/data/common';
 
 export interface ISearchResult extends SearchResponse<any> {
   elapsedMs: number;
@@ -23,12 +23,14 @@ const resultsSlice = createSlice({
   name: 'results',
   initialState,
   reducers: {
+    setResultsState: (_, action: PayloadAction<ResultsState>) => {
+      return { ...action.payload };
+    },
     setResults: (state, action: PayloadAction<{ cacheKey: string; results: ISearchResult }>) => {
       const { cacheKey, results } = action.payload;
       state[cacheKey] = results;
     },
-    clearResults: (state) => {
-      // Clear all results
+    clearResults: () => {
       return {};
     },
     clearResultsByKey: (state, action: PayloadAction<string>) => {
@@ -39,6 +41,11 @@ const resultsSlice = createSlice({
   },
 });
 
-export const { setResults, clearResults, clearResultsByKey } = resultsSlice.actions;
+export const {
+  setResultsState,
+  setResults,
+  clearResults,
+  clearResultsByKey,
+} = resultsSlice.actions;
 export const resultsReducer = resultsSlice.reducer;
 export const resultsInitialState = resultsSlice.getInitialState();

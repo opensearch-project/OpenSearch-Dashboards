@@ -14,12 +14,10 @@ import {
   resultsInitialState,
   ISearchResult,
   resultsReducer,
-} from '../../utils/state_management/slices/results_slice';
-import {
   setShowDatasetFields,
   uiInitialState,
   uiReducer,
-} from '../../utils/state_management/slices/ui_slice';
+} from '../../utils/state_management/slices';
 import { ResultStatus } from '../../utils/state_management/types';
 import { TracesPage } from './traces_page';
 

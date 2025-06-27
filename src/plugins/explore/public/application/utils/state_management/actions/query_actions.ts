@@ -6,9 +6,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { setStatus } from '../slices/ui_slice';
 import { ResultStatus } from '../types';
-import { setResults, ISearchResult } from '../slices/results_slice';
+import { setResults, ISearchResult, setStatus } from '../slices';
 import { ExploreServices } from '../../../../types';
 import { IndexPattern } from '../../../legacy/discover/opensearch_dashboards_services';
 import {
