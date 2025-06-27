@@ -23,8 +23,17 @@ export const SaveQueryButton: React.FC<{
   timeFilter: TimefilterContract;
   query: Query;
   onClearQuery: () => void;
-  onLoadSavedQuery: (savedQuery: Query) => void;
-}> = ({ services, showDatePicker, timeFilter, query, onClearQuery, onLoadSavedQuery }) => {
+  onSavedQuery: (newSavedQueryId: string | undefined) => void;
+  onLoadSavedQuery: (savedQuery: SavedQuery) => void;
+}> = ({
+  services,
+  showDatePicker,
+  timeFilter,
+  query,
+  onClearQuery,
+  onSavedQuery,
+  onLoadSavedQuery,
+}) => {
   // Saved Query UI state
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -51,7 +60,7 @@ export const SaveQueryButton: React.FC<{
     (savedQuery) => {
       setLoadedSavedQuery(savedQuery);
       if (savedQuery?.attributes?.query) {
-        onLoadSavedQuery(savedQuery.attributes.query);
+        onLoadSavedQuery(savedQuery);
       }
       if (savedQuery?.attributes?.timefilter && timeFilter) {
         timeFilter.setTime({
@@ -116,7 +125,7 @@ export const SaveQueryButton: React.FC<{
 
       setLoadedSavedQuery(savedQuery);
       setIsSaveQueryFormOpen(false);
-      // Optionally show a success notification
+      onSavedQuery(savedQuery.id);
     } catch (error) {
       services.notifications.toasts.addDanger(
         i18n.translate('data.search_bar.save_query.failedToSaveQuery', {

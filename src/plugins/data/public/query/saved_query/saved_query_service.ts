@@ -136,8 +136,8 @@ export const createSavedQueryService = (
     const currentAppId = (await application?.currentAppId$?.pipe(first()).toPromise()) ?? undefined;
     const languageService = queryStringManager?.getLanguageService();
 
-    // Filtering saved queries based on language supported by cirrent application
-    if (currentAppId && languageService) {
+    // Filtering saved queries based on language supported by current application
+    if (currentAppId && languageService && !currentAppId.includes('explore')) {
       queries = queries.filter((query) => {
         const languageId = query.attributes.query.language;
         return (

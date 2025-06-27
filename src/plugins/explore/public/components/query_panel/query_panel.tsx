@@ -21,12 +21,12 @@ import {
   selectIsLoading,
   selectDataset,
   selectShowDataSetFields,
-  selectSavedQuery,
 } from '../../application/utils/state_management/selectors';
 import './index.scss';
 
-import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
+import { getEffectiveLanguageForAutoComplete, SavedQuery } from '../../../../data/public';
 import { setQuery } from '../../application/utils/state_management/slices/query_slice';
+import { setSavedQuery } from '../../application/utils/state_management/slices/legacy_slice';
 import { setShowDatasetFields } from '../../application/utils/state_management/slices/ui_slice';
 import { clearResults } from '../../application/utils/state_management/slices/results_slice';
 import {
@@ -64,7 +64,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   const isLoading = useSelector(selectIsLoading);
   const dataset = useSelector(selectDataset);
   const showDatasetFields = useSelector(selectShowDataSetFields);
-  const savedQueryId = useSelector(selectSavedQuery);
 
   // Determine if DatePicker should be shown
   const showDatePicker = Boolean(indexPattern?.timeFieldName);
@@ -281,13 +280,23 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
   }, [localQuery, localPrompt]);
 
   const handleClearQuery = () => {
-    dispatch(setQuery({ query: '', language: query.language }));
+    dispatch(setQuery({ ...query, query: '' }));
+    dispatch(setSavedQuery(undefined));
     setLocalQuery('');
   };
 
-  const handleLoadSavedQuery = (savedQuery: Query) => {
-    dispatch(setQuery(savedQuery));
-    setLocalQuery(savedQuery.query);
+  const handleLoadSavedQuery = (savedQuery: SavedQuery) => {
+    if (!savedQuery || typeof savedQuery === 'string') {
+      return;
+    }
+    const savedQueryAttributes = savedQuery.attributes.query;
+    dispatch(setQuery({ ...savedQueryAttributes, dataset: query.dataset }));
+    setLocalQuery(savedQueryAttributes.query);
+    updateSavedQueryId(savedQuery.id);
+  };
+
+  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
+    dispatch(setSavedQuery(newSavedQueryId));
   };
 
   return (
@@ -313,6 +322,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
             onShowFieldsToggle={handleShowFieldsToggle}
             onClearQuery={handleClearQuery}
             onLoadSavedQuery={handleLoadSavedQuery}
+            onSavedQuery={updateSavedQueryId}
           />
         }
       >

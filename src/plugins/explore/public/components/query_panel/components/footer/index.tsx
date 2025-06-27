@@ -7,7 +7,7 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
+import { SavedQuery } from 'src/plugins/data/public';
 import { ShowFieldToggle } from './show_field';
 import { SaveQueryButton } from './save_query';
 import { Actions } from './actions';
@@ -41,9 +41,10 @@ interface QueryPanelFooterProps {
   onTimeChange: (time: { start: string; end: string }) => void;
   onRunQuery: () => void;
   onClearQuery: () => void;
-  onLoadSavedQuery: (savedQuery: Query) => void;
+  onLoadSavedQuery: (savedQuery: SavedQuery) => void;
   onRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
   onShowFieldsToggle: (enabled: boolean) => void;
+  onSavedQuery: (newSavedQueryId: string | undefined) => void;
 }
 
 export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
@@ -61,6 +62,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   timefilter,
   onClearQuery,
   onLoadSavedQuery,
+  onSavedQuery,
   onTimeChange,
   onRunQuery,
   onRefreshChange,
@@ -105,6 +107,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                 query={query}
                 onClearQuery={onClearQuery}
                 onLoadSavedQuery={onLoadSavedQuery}
+                onSavedQuery={onSavedQuery}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
