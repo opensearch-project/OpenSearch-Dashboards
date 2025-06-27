@@ -65,12 +65,15 @@ export const VisualizationContainer = () => {
   const selectedChartType = useSelector(selectChartType);
   const fieldSchema = useMemo(() => rawResults?.fieldSchema || [], [rawResults]);
 
-  const visualizationData = useMemo(() => {
-    if (fieldSchema.length === 0 || rows.length === 0) {
-      return null;
-    }
+  const [visualizationData, setVisualizationData] = useState<
+    VisualizationTypeResult<ChartType> | undefined
+  >(undefined);
 
-    return getVisualizationType(rows, fieldSchema);
+  useEffect(() => {
+    if (fieldSchema.length === 0 || rows.length === 0) {
+      return;
+    }
+    setVisualizationData(getVisualizationType(rows, fieldSchema));
   }, [fieldSchema, rows]);
 
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
@@ -78,15 +81,6 @@ export const VisualizationContainer = () => {
     filters: filterManager.getFilters(),
     timeRange: timefilter.timefilter.getTime(),
   });
-
-  // Hook to get the visualization type based on the rows and field schema
-  // This will be called every time the rows or fieldSchema changes
-  useEffect(() => {
-    if (visualizationData) {
-      // TODO: everytime the fields change, do we reset the chart type and its style options? P1: we will implement chart type selection persistence
-      dispatch(setStyleOptions(visualizationData.visualizationType?.ui.style.defaults));
-    }
-  }, [visualizationData, dispatch]);
 
   const visualizationRegistry = useVisualizationRegistry();
 
@@ -142,7 +136,7 @@ export const VisualizationContainer = () => {
       visualizationData.numericalColumns,
       visualizationData.categoricalColumns,
       visualizationData.dateColumns,
-      styleOptions
+      styleOptions ?? {}
     );
   }, [
     searchContext,
@@ -197,21 +191,22 @@ export const VisualizationContainer = () => {
   };
 
   // Don't render if visualization is not enabled or data is not ready
-  if (!expression || !visualizationData || !styleOptions) {
+  if (!visualizationData) {
     return null;
   }
 
   return (
     <div className="exploreVisContainer">
       <Visualization<ChartType>
-        expression={expression}
+        expression={expression!}
         searchContext={searchContext}
         styleOptions={styleOptions}
-        visualizationData={visualizationData as VisualizationTypeResult<ChartType>}
+        visualizationData={visualizationData}
         onStyleChange={handleStyleChange}
         selectedChartType={selectedChartType}
         onChartTypeChange={handleChartTypeChange}
         ReactExpressionRenderer={ReactExpressionRenderer}
+        setVisualizationData={setVisualizationData}
       />
     </div>
   );
