@@ -19,7 +19,6 @@ import { Query, TimeRange, LanguageType } from './types';
 
 import {
   selectIsLoading,
-  selectDataset,
   selectShowDataSetFields,
 } from '../../application/utils/state_management/selectors';
 import './index.scss';
@@ -61,7 +60,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
 
   // Use selectors to get state from Redux
   const isLoading = useSelector(selectIsLoading);
-  const dataset = useSelector(selectDataset);
   const showDatasetFields = useSelector(selectShowDataSetFields);
 
   // Determine if DatePicker should be shown
@@ -131,14 +129,31 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
         // Get the effective language for autocomplete (PPL -> PPL_Simplified for explore app)
         const effectiveLanguage = getEffectiveLanguageForAutoComplete(query.language, 'explore');
 
-        // Use centralized IndexPattern from context
+        // Get the current dataset from Query Service to avoid stale closure values
+        const currentDataset = services?.data?.query?.queryString?.getQuery().dataset;
+
+        // Get the current indexPattern from services to avoid stale closure values
+        let currentIndexPattern = indexPattern;
+        if (currentDataset) {
+          try {
+            currentIndexPattern = await services?.indexPatterns?.get(
+              currentDataset.id,
+              currentDataset.type !== 'INDEX_PATTERN'
+            );
+          } catch (error) {
+            // Fallback to the prop indexPattern if fetching fails
+            currentIndexPattern = indexPattern;
+          }
+        }
+
+        // Use the current IndexPattern to avoid stale data
         const suggestions = await services?.data?.autocomplete?.getQuerySuggestions({
           query: model.getValue(), // Use the current editor content, using the local query results in a race condition where we can get stale query data
           selectionStart: model.getOffsetAt(position),
           selectionEnd: model.getOffsetAt(position),
           language: effectiveLanguage,
-          indexPattern: indexPattern as any,
-          datasetType: dataset?.type,
+          indexPattern: currentIndexPattern as any,
+          datasetType: currentDataset?.type,
           position,
           services: services as any, // ExploreServices storage type incompatible with IDataPluginServices.DataStorage
         });
@@ -175,7 +190,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ datePickerRef, services, indexP
         return { suggestions: [], incomplete: false };
       }
     },
-    [query, services, indexPattern, dataset]
+    [query, services, indexPattern]
   );
 
   // TODO: Create query status overlay for progress indicator
