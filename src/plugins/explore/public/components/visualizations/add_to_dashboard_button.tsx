@@ -12,7 +12,7 @@ import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
 import { ExploreServices } from '../../types';
-import { setSavedSearch } from '../../application/utils/state_management/slices/legacy_slice';
+import { setState } from '../../application/utils/state_management/slices/legacy_slice';
 import {
   selectUIState,
   selectSavedSearchName,
@@ -75,7 +75,7 @@ export const SaveAndAddButtonWithModal = ({
   useEffect(() => {
     /**
      * Load the savedExplore object when:
-     * - The component mounts
+     * - The component mounts,and the saved explore ID is already retrieved from the URL.
      * - savedExploreId changes
      * - savedExploreName changes externally (e.g., renamed via top nav)
      */
@@ -139,7 +139,7 @@ export const SaveAndAddButtonWithModal = ({
         chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: newTitle }]);
       }
 
-      store!.dispatch(setSavedSearch(id));
+      store!.dispatch(setState({ savedSearch: id }));
 
       // starts syncing `_g` portion of url with query services
       startSyncingQueryStateWithUrl();

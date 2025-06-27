@@ -58,7 +58,15 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
 
         // Update savedSearch to store just the ID (like discover)
         // TODO: remove this once legacy state is not consumed any more
+<<<<<<< HEAD
         dispatch(setSavedSearch(exploreIdFromUrl));
+=======
+        const legacyStateWithId = {
+          savedSearch: exploreIdFromUrl, // Store the ID, not the object
+          savedSearchName: title,
+        };
+        dispatch(setState(legacyStateWithId));
+>>>>>>> 11db39f0ec (fix)
 
         // Set style options
         const visualization = savedExploreObject.visualization;
