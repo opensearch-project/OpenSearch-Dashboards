@@ -70,6 +70,7 @@ export const SaveAndAddButtonWithModal = ({
 
   const savedExploreId = useSelector(selectSavedSearch);
   const savedExploreName = useSelector(selectSavedSearchName);
+
   const uiState = useSelector(selectUIState);
 
   useEffect(() => {
@@ -146,16 +147,18 @@ export const SaveAndAddButtonWithModal = ({
 
       let dashboardId;
       if (id) {
+        let props;
         if (mode === 'new') {
-          dashboardId = await addToDashboard(dashboard, { id, type: 'explore' }, mode, {
+          props = {
             newDashboardName,
             createDashboardOptions,
-          });
+          };
         } else {
-          dashboardId = await addToDashboard(dashboard, { id, type: 'explore' }, mode, {
+          props = {
             existingDashboardId: selectDashboard!.id,
-          });
+          };
         }
+        dashboardId = await addToDashboard(dashboard, { id, type: 'explore' }, mode, props);
       }
 
       if (dashboardId) {
@@ -235,9 +238,7 @@ export const SaveAndAddButtonWithModal = ({
       </EuiButton>
       {showAddToDashboardModal && savedExplore && (
         <AddToDashboardModal
-          savedExplore={
-            savedExplore ? saveStateToSavedObject(savedExplore, uiState, indexPattern) : undefined
-          }
+          savedExplore={saveStateToSavedObject(savedExplore, uiState, indexPattern)}
           savedObjectsClient={saveObjectsClient}
           onCancel={() => setShowAddToDashboardModal(false)}
           onConfirm={handleSave}

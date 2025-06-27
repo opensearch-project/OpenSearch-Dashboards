@@ -23,7 +23,10 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setUiState: (state, action: PayloadAction<Partial<UIState>>) => {
+    setSavedSearchName: (state, action: PayloadAction<string | undefined>) => {
+      state.savedSearchName = action.payload;
+    },
+    setUiState: (state, action: PayloadAction<UIState>) => {
       return { ...state, ...action.payload };
     },
     setActiveTab: (state, action: PayloadAction<string>) => {
@@ -47,6 +50,7 @@ export const {
   setShowDatasetFields,
   setQueryPrompt,
   setUiState,
+  setSavedSearchName,
 } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
 export const uiInitialState = uiSlice.getInitialState();

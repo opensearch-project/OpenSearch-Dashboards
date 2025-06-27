@@ -63,9 +63,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
       });
       const dashboards = res.savedObjects;
       setExistingDashboard(dashboards as DashboardInterface[]);
-      setSelectDashboard(
-        dashboards.length > 0 ? (res.savedObjects[0] as DashboardInterface) : null
-      );
+      setSelectDashboard(dashboards.length > 0 ? (dashboards[0] as DashboardInterface) : null);
     };
     if (selectedOption === 'existing') {
       loadAllDashboards();

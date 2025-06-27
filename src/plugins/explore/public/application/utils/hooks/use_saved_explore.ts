@@ -9,6 +9,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../types/saved_explore_types';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {
   setSavedSearch,
   setQuery,
@@ -17,9 +18,16 @@ import {
 } from '../state_management/slices';
 =======
 import { setSavedSearch, setSavedSearchName } from '../state_management/slices/legacy_slice';
+=======
+import { setSavedSearch } from '../state_management/slices/legacy_slice';
+>>>>>>> e3636e49e9 (fix comments)
 import { setQuery } from '../state_management/slices/query_slice';
 >>>>>>> 952b6a48eb (drop selectstate)
 import { Query } from '../../../../../data/common';
+<<<<<<< HEAD
+=======
+import { setUiState, setSavedSearchName } from '../state_management/slices/ui_slice';
+>>>>>>> e3636e49e9 (fix comments)
 /**
  * Hook for loading saved explore objects (following vis_builder pattern)
  * This handles saved object loading AFTER store creation, not during getPreloadedState

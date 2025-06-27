@@ -34,8 +34,6 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 
-export type SaveResult = { id?: string } | { error: Error };
-
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
