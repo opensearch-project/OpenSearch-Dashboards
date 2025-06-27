@@ -42,8 +42,8 @@ const PanelPopover = ({
   uiActions: UiActionsStart;
 }) => {
   const actions = uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER).sort((a, b) => {
-    const aOrder = a.order ?? -Infinity; // Missing values appear first
-    const bOrder = b.order ?? -Infinity;
+    const aOrder = a.order ?? Infinity; // Missing values appear last
+    const bOrder = b.order ?? Infinity;
     return aOrder - bOrder;
   });
 
