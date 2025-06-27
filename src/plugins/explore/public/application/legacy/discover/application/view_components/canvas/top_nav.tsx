@@ -7,7 +7,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector } from 'react-redux';
-import { Query, TimeRange } from '../../../../../../../../data/common';
 import { QueryStatus, useSyncQueryStateWithUrl } from '../../../../../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
@@ -29,16 +28,13 @@ import { selectUIState } from '../../../../../utils/state_management/selectors';
 import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
 import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
 import { getSavedExploreIdFromUrl } from '../../../../../utils/state_management/utils/url';
+import { RootState } from '../../../../../utils/state_management/store';
 
 export interface TopNavProps {
-  opts: {
-    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-    onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-  };
-  showSaveQuery: boolean;
+  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }
 
-export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
+export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const flavorId = useFlavorId();
   const {
@@ -58,7 +54,7 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
   const uiState = useNewStateSelector(selectUIState);
 
   const savedQueryId = useSelector(selectSavedQuery);
-  const isLoading = useSelector((state: any) => state.ui.status === ResultStatus.LOADING);
+  const isLoading = useSelector((state: RootState) => state.ui.status === ResultStatus.LOADING);
   const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
@@ -103,8 +99,6 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
     data.query,
     osdUrlStateStorage
   );
-  const showActionsInGroup = uiSettings.get('home:useNewHomePage');
-  // const showActionsInGroup = false; // Use portal approach to display actions in nav bar
 
   const topNavLinks = useMemo(() => {
     return getTopNavLinks(
@@ -164,14 +158,13 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
       data={data}
       showSearchBar={false}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
-      showSaveQuery={showSaveQuery}
+      showSaveQuery={true}
       useDefaultBehaviors
-      setMenuMountPoint={opts.setHeaderActionMenu}
+      setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
-      onQuerySubmit={opts.onQuerySubmit}
       savedQueryId={savedQueryId}
       onSavedQueryIdChange={updateSavedQueryId}
-      groupActions={showActionsInGroup}
+      groupActions={true}
       screenTitle={screenTitle}
       queryStatus={queryStatus}
       showQueryBar={false}
