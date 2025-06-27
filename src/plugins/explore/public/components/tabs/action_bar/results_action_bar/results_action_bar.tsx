@@ -6,12 +6,13 @@
 import './results_action_bar.scss';
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { HitsCounter } from '../chart/hits_counter';
-import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { HitsCounter } from '../hits_counter';
+import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
-import { IndexPattern } from '../../../../../../../../data/common';
-import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../../../data/public';
+import { IndexPattern } from '../../../../../../data/common';
+import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
@@ -20,6 +21,7 @@ export interface DiscoverResultsActionBarProps {
   rows?: OpenSearchSearchHit[];
   elapsedMs?: number;
   indexPattern?: IndexPattern;
+  inspectionHanlder?: () => void;
 }
 
 export const DiscoverResultsActionBar = ({
@@ -29,6 +31,7 @@ export const DiscoverResultsActionBar = ({
   rows,
   elapsedMs,
   indexPattern,
+  inspectionHanlder,
 }: DiscoverResultsActionBarProps) => {
   return (
     <EuiFlexGroup
@@ -53,6 +56,17 @@ export const DiscoverResultsActionBar = ({
               rows={rows}
               elapsedMs={elapsedMs}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              onClick={inspectionHanlder}
+              data-test-subj="openInspectorButton"
+            >
+              {i18n.translate('explore.explore.discover.topNav.discoverInspectorButtonLabel', {
+                defaultMessage: 'Explain',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           {indexPattern && rows?.length ? (
             <EuiFlexItem
