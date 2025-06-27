@@ -8,10 +8,13 @@ import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../types/saved_explore_types';
-import { setState } from '../state_management/slices/legacy_slice';
-import { setQuery } from '../state_management/slices/query_slice';
+import {
+  setSavedSearch,
+  setQuery,
+  setChartType,
+  setStyleOptions,
+} from '../state_management/slices';
 import { Query } from '../../../../../data/common';
-import { setUiState } from '../state_management/slices/ui_slice';
 /**
  * Hook for loading saved explore objects (following vis_builder pattern)
  * This handles saved object loading AFTER store creation, not during getPreloadedState
@@ -55,16 +58,14 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
 
         // Update savedSearch to store just the ID (like discover)
         // TODO: remove this once legacy state is not consumed any more
-        const legacyStateWithId = {
-          savedSearch: exploreIdFromUrl, // Store the ID, not the object
-        };
-        dispatch(setState(legacyStateWithId));
+        dispatch(setSavedSearch(exploreIdFromUrl));
 
         // Set style options
         const visualization = savedExploreObject.visualization;
         if (visualization) {
           const { chartType, styleOptions } = JSON.parse(visualization);
-          dispatch(setUiState({ chartType, styleOptions }));
+          dispatch(setChartType(chartType));
+          dispatch(setStyleOptions(styleOptions));
         }
 
         // Add to recently accessed
