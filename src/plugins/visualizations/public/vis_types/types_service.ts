@@ -33,6 +33,12 @@ import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
 import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
 import { VisType } from './types';
 
+export interface TypesServiceStart {
+  all: () => VisType[];
+  get: (key: string) => VisType<any>;
+  getAliases: () => VisTypeAlias[];
+}
+
 /**
  * Vis Types Service
  *
@@ -93,7 +99,7 @@ export class TypesService {
     };
   }
 
-  public start() {
+  public start(): TypesServiceStart {
     return {
       /**
        * returns specific visualization or undefined if not found
