@@ -6,7 +6,7 @@
 .queryPanel__footer {
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .euiFlexGroup--gutterExtraSmall > .euiFlexItem {
+  .euiFlexGroup--gutterExtraSmall>.euiFlexItem {
     margin: 0;
   }
 
@@ -15,9 +15,16 @@
   }
 
   &__showInputType {
-    color: $euiColorDarkShade; // Use closest match from OUI
+    color: $euiColorDarkShade;
     font-size: $euiFontSizeXS;
-    line-height: 21px;
+    line-height: 32px;
+    display: inline-flex;
+    align-items: center;
+
+
+    .euiButtonIcon.euiButtonIcon--empty {
+      color: $euiColorDarkShade;
+    }
   }
 
   &__showInputTypeWrapper {
