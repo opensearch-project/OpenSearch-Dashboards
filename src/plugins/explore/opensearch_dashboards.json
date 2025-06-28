@@ -19,7 +19,7 @@
     "visualizations",
     "expressions"
   ],
-  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils"],
+  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "dashboard"],
   "optionalPlugins": ["home", "share"],
   "configPath": ["explore"]
 }
