@@ -99,6 +99,7 @@ import { createSavedSearchesLoader } from '../../discover/public';
 import { DashboardStart } from '../../dashboard/public';
 import { createSavedAugmentVisLoader } from '../../vis_augmenter/public';
 import { DocLinksStart } from '../../../core/public';
+import { createNewVisActions } from './wizard/new_vis_actions';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -193,6 +194,17 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
+
+    createNewVisActions({
+      types,
+      uiActions,
+      data,
+      uiSettings: core.uiSettings,
+      overlays: core.overlays,
+      application: core.application,
+      savedObjects: core.savedObjects,
+    });
+
     setDataStart(data);
     setSavedAugmentVisLoader(savedAugmentVisLoader);
     setI18n(core.i18n);
