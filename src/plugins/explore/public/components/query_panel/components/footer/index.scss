@@ -15,9 +15,16 @@
   }
 
   &__showInputType {
-    color: $euiColorDarkShade; // Use closest match from OUI
+    color: $euiColorDarkShade;
     font-size: $euiFontSizeXS;
-    line-height: 21px;
+    line-height: 32px;
+    display: inline-flex;
+    align-items: center;
+
+
+    .euiButtonIcon.euiButtonIcon--empty {
+      color: $euiColorDarkShade;
+    }
   }
 
   &__showInputTypeWrapper {

@@ -25,7 +25,7 @@ import {
   useVisualizationRegistry,
   VisualizationTypeResult,
 } from './utils/use_visualization_types';
-import { setStyleOptions } from '../../application/utils/state_management/slices/ui_slice';
+import { setStyleOptions } from '../../application/utils/state_management/slices';
 
 interface VisualizationEmptyStateProps {
   visualizationData: VisualizationTypeResult<ChartType>;

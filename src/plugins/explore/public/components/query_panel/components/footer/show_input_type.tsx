@@ -7,6 +7,8 @@ import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { LanguageType } from '../../types';
 
+import { pplLanguageReference } from './language_reference/ppl_language';
+
 interface ShowInputTypeProps {
   languageType: LanguageType;
   isDualEditor: boolean;
@@ -41,7 +43,8 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
       className="queryPanel__footer__showInputType"
       data-test-subj="queryPanelFooterShowInputType"
     >
-      {getDisplayText}{' '}
+      {getDisplayText}
+      {getDisplayText.includes(LanguageType.PPL) && pplLanguageReference(LanguageType.PPL)}
     </span>
   ) : null;
 };
