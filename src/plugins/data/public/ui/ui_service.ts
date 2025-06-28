@@ -6,6 +6,7 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
+import { createDatasetSelect } from './dataset_select';
 import { createIndexPatternSelect } from './index_pattern_select';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { SuggestionsComponent } from './typeahead';
@@ -43,6 +44,11 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     });
 
     return {
+      DatasetSelect: createDatasetSelect({
+        core,
+        data: dataServices,
+        storage,
+      }),
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       SearchBar,
       SuggestionsComponent,
