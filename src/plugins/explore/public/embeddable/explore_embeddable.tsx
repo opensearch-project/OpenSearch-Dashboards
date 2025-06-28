@@ -4,8 +4,7 @@
  */
 
 import { isEqual } from 'lodash';
-import * as Rx from 'rxjs';
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@osd/i18n';
@@ -109,7 +108,7 @@ export class ExploreEmbeddable
     };
     this.initializeSearchProps();
 
-    this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+    this.subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.updateHandler();
     });
     this.autoRefreshFetchSubscription = getServices()
@@ -139,12 +138,6 @@ export class ExploreEmbeddable
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);
     searchSource.setParent(this.filtersSearchSource);
-    // NOTE: src/plugins/data/public/search/search_service.ts#start#search, search only honors global language
-    // Use this way for PPL search
-    // TODO: confirm to update search source language strategy
-    this.services.data.query.queryString.setQuery(
-      this.savedExplore.searchSource.getField('query')!
-    );
     searchSource.setFields({
       index: indexPattern,
       query: this.savedExplore.searchSource.getField('query'),
