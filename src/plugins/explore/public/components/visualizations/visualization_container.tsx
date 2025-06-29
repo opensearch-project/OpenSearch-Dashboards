@@ -61,8 +61,17 @@ export const VisualizationContainer = () => {
     if (fieldSchema.length === 0 || rows.length === 0) {
       return;
     }
-    setVisualizationData(getVisualizationType(rows, fieldSchema));
-  }, [fieldSchema, rows]);
+    const currentVisualizationData = getVisualizationType(rows, fieldSchema);
+
+    if (currentVisualizationData) {
+      setVisualizationData(currentVisualizationData);
+
+      if (currentVisualizationData.visualizationType) {
+        dispatch(setStyleOptions(currentVisualizationData.visualizationType.ui.style.defaults));
+        dispatch(setSelectedChartType(currentVisualizationData.visualizationType.type));
+      }
+    }
+  }, [fieldSchema, rows, dispatch]);
 
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),
@@ -71,13 +80,6 @@ export const VisualizationContainer = () => {
   });
 
   const visualizationRegistry = useVisualizationRegistry();
-
-  // Initialize selectedChartType when visualizationData changes
-  useEffect(() => {
-    if (visualizationData && visualizationData.visualizationType) {
-      dispatch(setSelectedChartType(visualizationData.visualizationType.type));
-    }
-  }, [visualizationData, dispatch]);
 
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
