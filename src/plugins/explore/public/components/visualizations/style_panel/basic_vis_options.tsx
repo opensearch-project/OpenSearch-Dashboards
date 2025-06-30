@@ -14,7 +14,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
-  EuiTitle,
 } from '@elastic/eui';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 

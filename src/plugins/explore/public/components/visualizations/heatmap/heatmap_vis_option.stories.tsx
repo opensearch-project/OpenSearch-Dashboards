@@ -16,12 +16,33 @@ export default {
 
 // Mock data for the component props
 const mockNumericalColumns: VisColumn[] = [
-  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
+  {
+    id: 1,
+    name: 'count',
+    schema: VisFieldType.Numerical,
+    column: 'count',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
 ];
 
 const mockCategoricalColumns: VisColumn[] = [
-  { id: 2, name: 'category', schema: VisFieldType.Categorical, column: 'category' },
-  { id: 3, name: 'product', schema: VisFieldType.Categorical, column: 'product' },
+  {
+    id: 2,
+    name: 'category',
+    schema: VisFieldType.Categorical,
+    column: 'category',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+  {
+    id: 3,
+    name: 'product',
+    schema: VisFieldType.Categorical,
+    column: 'product',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
 ];
 const mockDateColumns: VisColumn[] = [];
 
@@ -88,9 +109,30 @@ ExclusiveHeatmap.args = {
 };
 
 const mockThreeNumericalColumns: VisColumn[] = [
-  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
-  { id: 2, name: 'avarage', schema: VisFieldType.Numerical, column: 'avarage' },
-  { id: 3, name: 'min', schema: VisFieldType.Numerical, column: 'min' },
+  {
+    id: 1,
+    name: 'count',
+    schema: VisFieldType.Numerical,
+    column: 'count',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+  {
+    id: 2,
+    name: 'avarage',
+    schema: VisFieldType.Numerical,
+    column: 'avarage',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+  {
+    id: 3,
+    name: 'min',
+    schema: VisFieldType.Numerical,
+    column: 'min',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
 ];
 
 export const HeatmapWithThreeNumericalColumns = Template.bind({});

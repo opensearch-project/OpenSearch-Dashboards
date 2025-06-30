@@ -87,7 +87,7 @@ export class VisualizationRegistry {
   }
 
   /**
-   * Find the best matching rule and visualization type based on prorities.
+   * Find the best matching rule and visualization type based on priorities.
    */
   private findBestMatch(
     numericalColumns: VisColumn[],

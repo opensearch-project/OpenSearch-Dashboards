@@ -7,11 +7,13 @@ import { i18n } from '@osd/i18n';
 import React, { useState, useEffect } from 'react';
 import { EuiPanel, EuiSelect } from '@elastic/eui';
 import { ChartTypeMapping } from '../types';
+import { ChartType } from '../utils/use_visualization_types';
+import { isChartType } from '../utils/is_chart_type';
 
 export interface ChartTypeSwitcherProps {
   availableChartTypes: ChartTypeMapping[];
   selectedChartType?: string;
-  onChartTypeChange?: (chartType: string) => void;
+  onChartTypeChange?: (chartType: ChartType) => void;
 }
 
 export const ChartTypeSwitcher = ({
@@ -47,7 +49,7 @@ export const ChartTypeSwitcher = ({
   const handleChartTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newChartType = e.target.value;
     setCurrentChartType(newChartType);
-    if (onChartTypeChange) {
+    if (onChartTypeChange && isChartType(newChartType)) {
       onChartTypeChange(newChartType);
     }
   };

@@ -60,7 +60,7 @@ export interface SearchProps {
     filters: Filter[] | undefined;
     timeRange: TimeRange | undefined;
   };
-  chartType?: ChartType;
+  chartType?: ChartType | 'logs';
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -333,7 +333,7 @@ export class ExploreEmbeddable
         dateColumns: VisColumn[],
         styleOpts: any
       ) => {
-        return rule.toExpression!(
+        return rule?.toExpression?.(
           transformedData,
           numericalColumns,
           categoricalColumns,
