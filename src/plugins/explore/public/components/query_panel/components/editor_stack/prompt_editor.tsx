@@ -15,6 +15,7 @@ export interface PromptEditorProps {
   languageType: LanguageType;
   prompt: string;
   queryString?: string; // Optional for prompt editor
+  isPromptLoading: boolean;
   isPromptReadOnly: boolean;
   onChange: (value: string) => void;
   onPromptRun: (queryString?: string) => void;
@@ -28,6 +29,7 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
   prompt,
   queryString,
   isPromptReadOnly,
+  isPromptLoading,
   onChange,
   onPromptRun,
   onPromptEdit,
@@ -44,14 +46,13 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
     defaultMessage: 'Ask a question or search using PPL',
   });
 
-  // console.log('prompt queryString editortyep', prompt, queryString, editorType);
-
   return (
     <ReusableEditor
       value={value || ''}
       onChange={onChange}
       onRun={onPromptRun}
       isReadOnly={isPromptReadOnly}
+      isLoading={isPromptLoading}
       onEdit={onPromptEdit}
       onClear={onClearEditor}
       editorConfig={editorConfig}

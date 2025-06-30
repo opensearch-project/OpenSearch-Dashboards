@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Moment } from 'moment';
+import { Dataset } from 'src/plugins/data/common';
 
 export interface RefreshInterval {
   pause: boolean;
@@ -29,11 +30,9 @@ export enum LanguageType {
 // eslint-disable-next-line
 export type Query = {
   query: string | { [key: string]: any };
-  language: LanguageType;
-  prompt?: string;
-  dataset?: string;
+  language: string;
+  dataset?: Dataset;
 };
-
 export interface RecentQueryItem {
   id: number;
   query: Query;
