@@ -55,8 +55,7 @@ export class VisualizationRegistry {
       };
     }
 
-    // TODO: Handle the case where no rule matches, render empty state or default table visualization
-    // No matching visualization type found
+    // Render empty state for the user to manually select the columns
     return {
       visualizationType: undefined,
       numericalColumns,
