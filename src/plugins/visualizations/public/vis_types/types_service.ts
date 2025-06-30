@@ -35,7 +35,7 @@ import { VisType } from './types';
 
 export interface TypesServiceStart {
   all: () => VisType[];
-  get: (key: string) => VisType<any>;
+  get: <TVisParam>(key: string) => VisType<TVisParam>;
   getAliases: () => VisTypeAlias[];
 }
 

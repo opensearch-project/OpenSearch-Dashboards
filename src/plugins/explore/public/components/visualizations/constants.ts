@@ -13,5 +13,5 @@ export const CHART_METADATA: Record<ChartType, ChartMetadata> = {
   pie: { type: 'pie', name: 'Pie', icon: 'visPie' },
   heatmap: { type: 'heatmap', name: 'Heatmap', icon: 'heatmap' },
   metric: { type: 'metric', name: 'Metric', icon: 'visMetric' },
-  scatter: { type: 'scatter', name: 'scatter', icon: '' },
+  scatter: { type: 'scatter', name: 'Scatter', icon: '' },
 };

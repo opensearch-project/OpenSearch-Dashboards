@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSplitPanel, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
+import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
 import { BasicVisOptions } from '../style_panel/basic_vis_options';

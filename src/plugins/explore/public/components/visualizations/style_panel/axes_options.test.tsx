@@ -32,16 +32,44 @@ jest.mock('../utils/use_debounced_value', () => {
 
 describe('AxesOptions', () => {
   const mockNumericalColumns: VisColumn[] = [
-    { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
-    { id: 2, name: 'price', schema: VisFieldType.Numerical, column: 'price' },
+    {
+      id: 1,
+      name: 'count',
+      schema: VisFieldType.Numerical,
+      column: 'count',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
+    {
+      id: 2,
+      name: 'price',
+      schema: VisFieldType.Numerical,
+      column: 'price',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
   ];
 
   const mockCategoricalColumns: VisColumn[] = [
-    { id: 3, name: 'category', schema: VisFieldType.Categorical, column: 'category' },
+    {
+      id: 3,
+      name: 'category',
+      schema: VisFieldType.Categorical,
+      column: 'category',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
   ];
 
   const mockDateColumns: VisColumn[] = [
-    { id: 4, name: 'timestamp', schema: VisFieldType.Date, column: 'timestamp' },
+    {
+      id: 4,
+      name: 'timestamp',
+      schema: VisFieldType.Date,
+      column: 'timestamp',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
   ];
 
   const mockCategoryAxes: CategoryAxis[] = [
@@ -211,8 +239,22 @@ describe('AxesOptions', () => {
       ...defaultProps,
       categoricalColumns: [],
       numericalColumns: [
-        { id: 1, name: 'Bar Chart Metric', schema: VisFieldType.Numerical, column: 'count' },
-        { id: 2, name: 'Line Chart Metric', schema: VisFieldType.Numerical, column: 'price' },
+        {
+          id: 1,
+          name: 'Bar Chart Metric',
+          schema: VisFieldType.Numerical,
+          column: 'count',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 2,
+          name: 'Line Chart Metric',
+          schema: VisFieldType.Numerical,
+          column: 'price',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
       ],
       valueAxes: [
         {

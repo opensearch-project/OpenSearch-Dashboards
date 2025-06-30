@@ -10,9 +10,9 @@ import { ChartTypeMapping } from '../types';
 
 describe('ChartTypeSwitcher', () => {
   const mockChartTypes: ChartTypeMapping[] = [
-    { type: 'bar', priority: 80, name: 'Bar Chart' },
-    { type: 'line', priority: 100, name: 'Line Chart' },
-    { type: 'pie', priority: 60, name: 'Pie Chart' },
+    { type: 'bar', priority: 80, name: 'Bar Chart', icon: '' },
+    { type: 'line', priority: 100, name: 'Line Chart', icon: '' },
+    { type: 'pie', priority: 60, name: 'Pie Chart', icon: '' },
   ];
 
   const defaultProps = {

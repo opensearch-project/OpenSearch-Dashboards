@@ -36,6 +36,8 @@ describe('rule_repository', () => {
       name: `value${i + 1}`,
       schema: VisFieldType.Numerical,
       column: `field-${i}`,
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
     }));
 
     const categoricalColumns: VisColumn[] = Array.from({ length: numCategorical }, (_, i) => ({
@@ -43,6 +45,8 @@ describe('rule_repository', () => {
       name: `category${i + 1}`,
       schema: VisFieldType.Categorical,
       column: `field-${numNumerical + i}`,
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
     }));
 
     const dateColumns: VisColumn[] = Array.from({ length: numDate }, (_, i) => ({
@@ -50,6 +54,8 @@ describe('rule_repository', () => {
       name: `date${i + 1}`,
       schema: VisFieldType.Date,
       column: `field-${numNumerical + numCategorical + i}`,
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
     }));
 
     return { numericalColumns, categoricalColumns, dateColumns };
