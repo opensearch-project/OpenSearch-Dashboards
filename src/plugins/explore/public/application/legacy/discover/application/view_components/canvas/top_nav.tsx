@@ -13,7 +13,6 @@ import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dash
 import { PLUGIN_ID } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDispatch, useSelector } from '../../utils/state_management';
 import { setSavedQuery } from '../../../../../utils/state_management/slices';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
@@ -28,6 +27,7 @@ import { selectUIState } from '../../../../../utils/state_management/selectors';
 import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
 import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
 import { RootState } from '../../../../../utils/state_management/store';
+import { getTopNavLinks } from '../../../../../../components/top_nav/top_nav_links';
 import { useCurrentExploreId } from '../../../../../utils/hooks/use_current_explore_id';
 
 export interface TopNavProps {
