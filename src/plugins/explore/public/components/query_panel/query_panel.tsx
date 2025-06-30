@@ -258,6 +258,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
       );
       return;
     }
+
     if (!dataset) {
       services.notifications.toasts.addWarning('Select a data source or index to ask a question');
       return;
