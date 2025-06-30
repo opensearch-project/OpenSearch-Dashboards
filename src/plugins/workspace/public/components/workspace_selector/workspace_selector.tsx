@@ -41,9 +41,10 @@ const getValidWorkspaceColor = (color?: string) =>
 interface Props {
   coreStart: CoreStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
+  isNavOpen: boolean;
 }
 
-export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => {
+export const WorkspaceSelector = ({ coreStart, registeredUseCases$, isNavOpen }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const availableUseCases = useObservable(registeredUseCases$, []);
@@ -65,7 +66,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
     setPopover(false);
   };
 
-  const button = currentWorkspace ? (
+  let button = currentWorkspace ? (
     <div className="workspaceSelectorPopoverButtonContainer" data-label="Workspace">
       <EuiPanel
         className="workspaceSelectorPopoverButton"
@@ -115,6 +116,22 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
   ) : (
     <EuiButton onClick={onButtonClick}>Select a Workspace</EuiButton>
   );
+
+  if (!isNavOpen && currentWorkspace) {
+    button = (
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem>
+          <EuiButtonEmpty onClick={onButtonClick} flush="both">
+            <EuiIcon
+              size="l"
+              type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
+              color={getValidWorkspaceColor(currentWorkspace.color)}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <EuiPopover

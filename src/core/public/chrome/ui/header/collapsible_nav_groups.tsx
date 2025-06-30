@@ -4,8 +4,17 @@
  */
 
 import './collapsible_nav_group_enabled.scss';
-import { EuiFlexItem, EuiSideNavItemType, EuiSideNav, EuiText } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
+import {
+  EuiFlexItem,
+  EuiSideNavItemType,
+  EuiSideNav,
+  EuiText,
+  EuiIcon,
+  EuiPopoverTitle,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiTitle,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import { ChromeNavLink } from '../..';
@@ -13,36 +22,28 @@ import { InternalApplicationStart } from '../../../application/types';
 import { createEuiListItem } from './nav_link';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
 import { CollapsibleNavGroupsLabel, getIsCategoryOpen } from './collapsible_nav_groups_label';
+import { SimplePopover } from './hover_popover';
 
 export interface NavGroupsProps {
   navLinks: ChromeNavLink[];
-  suffix?: React.ReactElement;
   style?: React.CSSProperties;
   appId?: string;
   navigateToApp: InternalApplicationStart['navigateToApp'];
-  onNavItemClick: (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    navItem: ChromeNavLink
-  ) => void;
   categoryCollapsible?: boolean;
   currentWorkspaceId?: string;
+  isNavOpen: boolean;
 }
-
-const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
-  defaultMessage: 'See all...',
-});
 
 const LEVEL_FOR_ROOT_ITEMS = 1;
 
 export function NavGroups({
   navLinks,
-  suffix,
   style,
   appId,
   navigateToApp,
-  onNavItemClick,
   categoryCollapsible,
   currentWorkspaceId,
+  isNavOpen,
 }: NavGroupsProps) {
   const [, setRenderKey] = useState(Date.now());
   const createNavItem = ({
@@ -57,9 +58,6 @@ export function NavGroups({
       appId,
       dataTestSubj: `collapsibleNavAppLink-${link.id}`,
       navigateToApp,
-      onClick: (event) => {
-        onNavItemClick(event, link);
-      },
     });
 
     return {
@@ -68,34 +66,33 @@ export function NavGroups({
       onClick: euiListItem.onClick,
       href: euiListItem.href,
       emphasize: euiListItem.isActive,
-      className: `nav-link-item ${className || ''}`,
+      className: `nav-link-item nav-link-item-active-${!!euiListItem.isActive} ${className || ''}`,
       buttonClassName: 'nav-link-item-btn',
       'data-test-subj': euiListItem['data-test-subj'],
       'aria-label': link.title,
+      ...(link.euiIconType
+        ? {
+            icon: <EuiIcon className="leftNavMenuIcon" type={link.euiIconType} />,
+          }
+        : {}),
     };
   };
   const createSideNavItem = (
     navLink: LinkItem,
     level: number,
-    className?: string
-  ): EuiSideNavItemType<{}> => {
+    className?: string,
+    navOpen?: boolean
+  ): EuiSideNavItemType<{}> & { hidden?: boolean } => {
     if (navLink.itemType === LinkItemType.LINK) {
-      if (navLink.link.title === titleForSeeAll) {
-        const navItem = createNavItem({
-          link: navLink.link,
-        });
-
-        return {
-          ...navItem,
-          name: <EuiText color="success">{navItem.name}</EuiText>,
-          emphasize: false,
-        };
-      }
-
-      return createNavItem({
+      const result = createNavItem({
         link: navLink.link,
         className,
       });
+      return {
+        ...result,
+        name: navOpen ? result.name : '',
+        hidden: !navOpen && !navLink.link.euiIconType,
+      };
     }
 
     if (navLink.itemType === LinkItemType.PARENT_LINK && navLink.link) {
@@ -103,6 +100,15 @@ export function NavGroups({
       const parentOpenKey = `${currentWorkspaceId ? `${currentWorkspaceId}-` : ''}${
         navLink.link.id
       }`;
+      const content = (
+        <CollapsibleNavGroupsLabel
+          label={props.name}
+          storageKey={parentOpenKey}
+          collapsible
+          onToggle={() => setRenderKey(Date.now())}
+          data-test-subj={props['data-test-subj']}
+        />
+      );
       const parentItem = {
         ...props,
         forceOpen: true,
@@ -121,17 +127,41 @@ export function NavGroups({
          */
         'data-test-subj': undefined,
         className: classNames(props.className, 'nav-link-parent-item'),
-        name: (
-          <CollapsibleNavGroupsLabel
-            label={props.name}
-            storageKey={parentOpenKey}
-            collapsible={!categoryCollapsible}
-            onToggle={() => setRenderKey(Date.now())}
-            data-test-subj={props['data-test-subj']}
-          />
-        ),
-        items: (getIsCategoryOpen(parentOpenKey) ? navLink.links : []).map((subNavLink) =>
-          createSideNavItem(subNavLink, level + 1, 'nav-nested-item')
+        name: content,
+        items: (getIsCategoryOpen(parentOpenKey) && navOpen
+          ? navLink.links
+          : []
+        ).map((subNavLink) => createSideNavItem(subNavLink, level + 1, 'nav-nested-item', navOpen)),
+        hidden: !navOpen && !navLink.link.euiIconType,
+        icon: navOpen ? (
+          props.icon
+        ) : (
+          <SimplePopover
+            anchorPosition="upLeft"
+            panelPaddingSize="none"
+            button={props.icon || <></>}
+            triggerType="hover"
+          >
+            <EuiPopoverTitle>
+              <EuiTitle size="s">
+                <span>{navLink.link?.title}</span>
+              </EuiTitle>
+            </EuiPopoverTitle>
+            <EuiContextMenuPanel
+              hasFocus={false}
+              size="s"
+              items={navLink.links.map((link) => {
+                const subNavLink = createSideNavItem(link, level + 1, undefined, true);
+                return (
+                  <EuiContextMenuItem
+                    onClick={subNavLink.onClick as (event: React.MouseEvent) => void}
+                  >
+                    {subNavLink.name}
+                  </EuiContextMenuItem>
+                );
+              })}
+            />
+          </SimplePopover>
         ),
       };
       /**
@@ -155,9 +185,15 @@ export function NavGroups({
       const categoryOpenKey = `${currentWorkspaceId ? `${currentWorkspaceId}-` : ''}${
         navLink.category?.id
       }`;
+      const items = (!categoryCollapsible || getIsCategoryOpen(categoryOpenKey)
+        ? navLink.links
+        : []
+      )
+        ?.map((link) => createSideNavItem(link, level + 1, undefined, navOpen))
+        .filter((link) => !link.hidden);
       return {
         id: navLink.category?.id ?? '',
-        name: (
+        name: navOpen ? (
           <CollapsibleNavGroupsLabel
             label={
               <EuiText size="s">
@@ -170,14 +206,14 @@ export function NavGroups({
             storageKey={categoryOpenKey}
             onToggle={() => setRenderKey(Date.now())}
           />
+        ) : (
+          <></>
         ),
-        items: (!categoryCollapsible || getIsCategoryOpen(categoryOpenKey)
-          ? navLink.links
-          : []
-        )?.map((link) => createSideNavItem(link, level + 1)),
+        items,
         'aria-label': navLink.category?.label,
         className: 'nav-link-item-category-item',
         buttonClassName: 'nav-link-item-category-button',
+        hidden: !navOpen && !items?.length,
       };
     }
 
@@ -185,13 +221,17 @@ export function NavGroups({
   };
   const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
   const sideNavItems = orderedLinksOrCategories
-    .map((navLink) => createSideNavItem(navLink, LEVEL_FOR_ROOT_ITEMS))
-    .filter((navItem) => !!navItem.id);
+    .map((navLink) => createSideNavItem(navLink, LEVEL_FOR_ROOT_ITEMS, undefined, isNavOpen))
+    .filter((navItem) => !!navItem.id && !navItem.hidden);
 
   return (
     <EuiFlexItem style={style}>
-      <EuiSideNav items={sideNavItems} isOpenOnMobile mobileBreakpoints={[]} />
-      {suffix}
+      <EuiSideNav
+        items={sideNavItems}
+        isOpenOnMobile
+        mobileBreakpoints={[]}
+        className="leftNavSideNavWrapper"
+      />
     </EuiFlexItem>
   );
 }

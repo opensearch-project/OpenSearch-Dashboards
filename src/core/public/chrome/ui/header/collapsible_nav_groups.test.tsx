@@ -21,7 +21,6 @@ describe('<NavGroups />', () => {
   });
   it('should render correctly', () => {
     const navigateToApp = jest.fn();
-    const onNavItemClick = jest.fn();
     const { container, getByTestId, queryByTestId } = render(
       <NavGroups
         navLinks={[
@@ -61,7 +60,7 @@ describe('<NavGroups />', () => {
           }),
         ]}
         navigateToApp={navigateToApp}
-        onNavItemClick={onNavItemClick}
+        isNavOpen
       />
     );
     expect(container).toMatchSnapshot();
