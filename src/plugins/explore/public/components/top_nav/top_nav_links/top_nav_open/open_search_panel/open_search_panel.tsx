@@ -102,10 +102,13 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
               // appId change and no new store created, so we need to dispatch
               // the state change.
               store.dispatch({ type: 'logs/incrementSaveExploreLoadCount' });
-              application.navigateToApp('explore', {
-                // TODO:finalize this until flavor and view route are finalized
-                path: `${ExploreFlavor.Logs}#/${id}`,
-              });
+              // TODO: Nav link is generated in runtime. Different from discover, if using navigateToApp, top nav would disappear.
+              // Address once flavor and view route are finalized.
+              // application.navigateToApp('explore', {
+              //   // TODO:finalize this until flavor and view route are finalized
+              //   path: `${ExploreFlavor.Logs}#/${id}`,
+              // });
+              application.navigateToUrl(`app/explore/logs/#/${id}`);
             }
             onClose();
           }}
