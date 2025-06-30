@@ -4,17 +4,9 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiSplitPanel,
-  EuiButtonEmpty,
-  EuiTitle,
-  EuiPanel,
-  EuiFormRow,
-  EuiRange,
-} from '@elastic/eui';
+import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { AreaChartStyleControls } from './area_vis_config';
-import { BasicVisOptions } from '../style_panel/basic_vis_options';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
 import { ThresholdOptions } from '../style_panel/threshold_options';
 import { GridOptionsPanel } from '../style_panel/grid_options';

@@ -16,9 +16,30 @@ export default {
 
 // Mock data for the component props
 const mockNumericalColumns: VisColumn[] = [
-  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
-  { id: 2, name: 'price', schema: VisFieldType.Numerical, column: 'price' },
-  { id: 3, name: 'revenue', schema: VisFieldType.Numerical, column: 'revenue' },
+  {
+    id: 1,
+    name: 'count',
+    schema: VisFieldType.Numerical,
+    column: 'count',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+  {
+    id: 2,
+    name: 'price',
+    schema: VisFieldType.Numerical,
+    column: 'price',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+  {
+    id: 3,
+    name: 'revenue',
+    schema: VisFieldType.Numerical,
+    column: 'revenue',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
 ];
 
 const mockStandardAxes: StandardAxes[] = [
