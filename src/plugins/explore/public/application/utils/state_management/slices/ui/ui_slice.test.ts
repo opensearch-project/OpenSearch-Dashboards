@@ -6,7 +6,6 @@
 import {
   uiReducer,
   setActiveTab,
-  setFlavor,
   setStatus,
   startTransaction,
   commitTransaction,
@@ -20,7 +19,6 @@ describe('UI Slice', () => {
   const initialState: UIState = {
     activeTabId: 'logs',
     chartType: 'line',
-    flavor: 'log',
     status: ResultStatus.UNINITIALIZED,
     transaction: {
       inProgress: false,
@@ -48,25 +46,6 @@ describe('UI Slice', () => {
       expect(newState.activeTabId).toBe(newTabId);
 
       // Other state properties should remain unchanged
-      expect(newState.flavor).toBe(initialState.flavor);
-      expect(newState.status).toBe(initialState.status);
-      expect(newState.transaction).toEqual(initialState.transaction);
-    });
-  });
-
-  describe('setFlavor', () => {
-    it('should handle setFlavor action', () => {
-      const newFlavor = 'metric';
-      const action = setFlavor(newFlavor);
-
-      expect(action.type).toBe('ui/setFlavor');
-      expect(action.payload).toBe(newFlavor);
-
-      const newState = uiReducer(initialState, action);
-      expect(newState.flavor).toBe(newFlavor);
-
-      // Other state properties should remain unchanged
-      expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.status).toBe(initialState.status);
       expect(newState.transaction).toEqual(initialState.transaction);
     });
@@ -85,7 +64,6 @@ describe('UI Slice', () => {
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.transaction).toEqual(initialState.transaction);
     });
   });
@@ -104,7 +82,6 @@ describe('UI Slice', () => {
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.status).toBe(initialState.status);
     });
 
@@ -127,7 +104,6 @@ describe('UI Slice', () => {
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.status).toBe(initialState.status);
     });
 
@@ -152,7 +128,6 @@ describe('UI Slice', () => {
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.status).toBe(initialState.status);
     });
   });
@@ -169,15 +144,10 @@ describe('UI Slice', () => {
       state = uiReducer(state, setStatus(ResultStatus.LOADING));
       expect(state.status).toBe(ResultStatus.LOADING);
 
-      // Third action: set flavor
-      state = uiReducer(state, setFlavor('metric'));
-      expect(state.flavor).toBe('metric');
-
       // Final state should have all changes
       expect(state).toEqual({
         ...initialState,
         activeTabId: 'visualizations',
-        flavor: 'metric',
         status: ResultStatus.LOADING,
         prompt: '',
         transaction: {

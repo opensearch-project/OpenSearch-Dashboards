@@ -12,7 +12,6 @@ import {
 
 export interface UIState {
   activeTabId: string;
-  flavor: string;
   status: ResultStatus;
   showDatasetFields: boolean;
   transaction: {
@@ -26,7 +25,6 @@ export interface UIState {
 
 const initialState: UIState = {
   activeTabId: 'logs',
-  flavor: 'log',
   status: ResultStatus.UNINITIALIZED,
   showDatasetFields: true,
   transaction: {
@@ -47,9 +45,6 @@ const uiSlice = createSlice({
     },
     setActiveTab: (state, action: PayloadAction<string>) => {
       state.activeTabId = action.payload;
-    },
-    setFlavor: (state, action: PayloadAction<string>) => {
-      state.flavor = action.payload;
     },
     setStatus: (state, action: PayloadAction<ResultStatus>) => {
       state.status = action.payload;
@@ -87,7 +82,6 @@ const uiSlice = createSlice({
 
 export const {
   setActiveTab,
-  setFlavor,
   setStatus,
   setShowDatasetFields,
   setQueryPrompt,

@@ -60,8 +60,6 @@ export const selectIsLoading = createSelector(
 
 // Error handling moved to toast notifications and search service
 
-export const selectFlavor = createSelector([selectUIState], (uiState) => uiState.flavor);
-
 // TODO: Fix this selector - queryPanel doesn't exist in UIState
 // export const selectPromptQuery = createSelector(
 //   [selectUIState],

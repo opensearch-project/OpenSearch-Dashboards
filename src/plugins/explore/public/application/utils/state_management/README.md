@@ -34,7 +34,6 @@ interface QueryState {
 ```typescript
 interface UIState {
   activeTabId: string;           // Currently active tab
-  flavor: string;                // Current flavor setting
   status: ResultStatus;          // Loading/ready/error status
   transaction: {                 // Transaction management
     inProgress: boolean;
