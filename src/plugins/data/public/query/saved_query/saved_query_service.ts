@@ -140,7 +140,13 @@ export const createSavedQueryService = (
 
     // Filtering saved queries based on language supported by current application
     // Skip filtering for apps not using lang service eg. explore new editor
-    if (currentAppId && languageService && !unregisteredLangServiceApps.includes(currentAppId)) {
+    if (
+      currentAppId &&
+      languageService &&
+      !unregisteredLangServiceApps.some((unregisteredApp) =>
+        currentAppId.startsWith(unregisteredApp)
+      )
+    ) {
       queries = queries.filter((query) => {
         const languageId = query.attributes.query.language;
         return (

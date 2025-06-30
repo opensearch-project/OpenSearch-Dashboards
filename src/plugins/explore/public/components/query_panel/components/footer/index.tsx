@@ -112,7 +112,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
             <EuiFlexItem grow={false}>
               <div className="queryPanel__footer__verticalSeparator" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            {/* <EuiFlexItem grow={false}>
               <QueryError
                 // TODO: Update query error with query slice object and remove below mocked string
                 queryStatus={{
@@ -124,7 +124,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                   },
                 }}
               />
-            </EuiFlexItem>
+            </EuiFlexItem> */}
             <EuiFlexItem grow={false} className="queryPanel__footer__showInputTypeWrapper">
               <ShowInputType
                 languageType={languageType}

@@ -4,6 +4,7 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
+export { useGenerateQuery } from './query_assist/hooks/use_generate';
 import './index.scss';
 import { QueryEnhancementsPlugin } from './plugin';
 
