@@ -1,9 +1,48 @@
+$paddingForNavWrapper: $euiSizeM + $euiSizeM;
+$sizeForSelectedSubMenu: 5px;
+
 .context-nav-wrapper {
   border: none !important;
   border-top-right-radius: $euiSizeL;
   background-color: $euiSideNavBackgroundColor;
   overflow: hidden;
   box-shadow: 1px 0 0 $euiBorderColor !important;
+
+  &.leftNavIsOpen-false {
+    .nav-link-item {
+      .nav-link-item-btn {
+        margin-left: 0;
+      }
+    }
+
+    .nav-link-item-category-item {
+      border-top: $euiBorderThin;
+      border-color: $euiColorMediumShade;
+      margin-top: $euiSizeS;
+    }
+
+    .leftNavSideNavWrapper {
+      border-top: $euiBorderThin;
+      border-bottom: $euiBorderThin;
+      border-color: $euiColorMediumShade;
+      padding-top: $euiSizeS;
+    }
+
+    .nav-link-item-category-button {
+      margin-bottom: $euiSizeS;
+    }
+
+    .navGroupEnabledNavTopWrapper {
+      // menu icon occupies some space and does not occupy document flow,
+      // we need a margin here to leave space.
+      margin-top: 32px;
+      padding: 0;
+    }
+
+    .navGroupEnabledHomeIcon {
+      margin-left: 0;
+    }
+  }
 
   .nav-link-item {
     padding: $euiSizeS;
@@ -16,6 +55,12 @@
       margin-bottom: 0;
       padding-top: 0;
       padding-bottom: 0;
+      margin-left: $euiSizeM;
+      margin-right: $euiSizeM;
+
+      &:hover {
+        color: $euiColorPrimary;
+      }
     }
   }
 
@@ -27,11 +72,17 @@
     > .nav-link-item-btn {
       padding: $euiSizeS;
       margin-bottom: $euiSizeXS;
+      width: calc(100% - $paddingForNavWrapper);
+      padding-right: 0;
     }
 
     // Hide the expand / collapse button as we will use + / -
     svg {
       display: none;
+    }
+
+    .leftNavMenuIcon {
+      display: inline-block;
     }
 
     // Show the customized icon
@@ -42,6 +93,9 @@
 
   .nav-link-item-category-button {
     margin-bottom: $euiSizeXS;
+    margin-left: $euiSizeM;
+    margin-right: $euiSizeM;
+    width: calc(100% - $paddingForNavWrapper);
 
     // Use a smaller vertical padding so that category title looks more grouped to the items
     .nav-link-item {
@@ -63,6 +117,7 @@
 
   .nav-nested-item {
     padding: $euiSizeS 0;
+    margin-left: $euiSizeS * 2;
 
     &::after,
     .nav-link-item-btn::after {
@@ -72,6 +127,11 @@
     // The height is used to comply with the extra padding
     &:last-of-type::after {
       height: 20px;
+    }
+
+    .nav-link-item-btn {
+      margin-left: 0;
+      margin-right: 0;
     }
   }
 
@@ -113,10 +173,10 @@
   .navGroupEnabledNavTopWrapper {
     padding: 0 $euiSizeS;
     padding-left: $euiSizeS;
+  }
 
-    .navGroupEnabledHomeIcon {
-      margin-left: $euiSizeS;
-    }
+  .navGroupEnabledHomeIcon {
+    margin-left: $euiSizeS;
   }
 
   .searchBar-wrapper {
@@ -136,7 +196,39 @@
 
   .searchBarIcon {
     position: relative;
-    top: $ouiHeaderChildSize;
     left: 0;
+    text-align: center;
+    margin-bottom: $euiSizeS;
+  }
+
+  .nav-link-item-active-true {
+    background: none;
+    border-radius: 0;
+    color: $euiColorPrimary;
+    position: relative;
+
+    &::before {
+      content: "";
+      display: block;
+      position: absolute;
+      left: 0;
+      background-color: $euiColorPrimary;
+      width: 3px; // Thick border's width is 2px, use 3px here to override.
+      height: 100%;
+      top: 0;
+    }
+
+    &.nav-nested-item::before {
+      height: $sizeForSelectedSubMenu;
+      width: $sizeForSelectedSubMenu;
+      top: 50%;
+      margin-left: -0.5 * $sizeForSelectedSubMenu;
+      margin-top: -0.5 * $sizeForSelectedSubMenu;
+      z-index: 100;
+    }
+
+    .nav-link-item-btn::after {
+      display: none;
+    }
   }
 }
