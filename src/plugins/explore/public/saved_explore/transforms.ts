@@ -29,7 +29,7 @@ export const saveStateToSavedObject = (
     // TODO: Add title to saved object
     // Visualization has an independent title?
     title: '',
-    // If tab is logs, render table in embedded, otherwise render visualization
+    // If tab is logs, render table in embeddable, otherwise render visualization
     chartType: tabDefinition.id === 'logs' ? 'logs' : uiState?.chartType ?? 'line',
     params: uiState?.styleOptions ?? {},
   });

@@ -42,7 +42,10 @@ import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
-import { ChartType } from '../components/visualizations/utils/use_visualization_types';
+import {
+  ChartType,
+  StyleOptions,
+} from '../components/visualizations/utils/use_visualization_types';
 
 export interface SearchProps {
   description?: string;
@@ -311,9 +314,6 @@ export class ExploreEmbeddable
         }),
     });
     const rows = resp.hits.hits;
-    this.searchProps.rows = rows;
-    // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
-    this.searchProps.hits = resp.hits.hits.length;
     const fieldSchema = searchSource.getDataFrame()?.schema;
     const visualizationData = getVisualizationType(rows, fieldSchema);
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
@@ -331,9 +331,9 @@ export class ExploreEmbeddable
         numericalColumns: VisColumn[],
         categoricalColumns: VisColumn[],
         dateColumns: VisColumn[],
-        styleOpts: any
+        styleOpts: StyleOptions
       ) => {
-        return rule.toExpression!(
+        return rule?.toExpression?.(
           transformedData,
           numericalColumns,
           categoricalColumns,
@@ -350,7 +350,7 @@ export class ExploreEmbeddable
       this.searchProps.searchContext = searchContext;
       const indexPattern = this.savedExplore.searchSource.getField('index');
       const styleOptions = JSON.parse(this.savedExplore.visualization || '{}').params;
-      const exp = await toExpression(
+      const exp = toExpression(
         searchContext,
         indexPattern!,
         ruleBasedToExpressionFn,
@@ -365,6 +365,7 @@ export class ExploreEmbeddable
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
     this.searchProps.rows = rows;
+    // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = resp.hits.hits.length;
     this.searchProps.isLoading = false;
   };

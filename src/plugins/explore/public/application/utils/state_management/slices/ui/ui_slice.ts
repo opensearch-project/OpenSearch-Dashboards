@@ -8,6 +8,7 @@ import { ResultStatus } from '../../../../legacy/discover/application/view_compo
 import {
   ChartStyleControlMap,
   ChartType,
+  StyleOptions,
 } from '../../../../../components/visualizations/utils/use_visualization_types';
 
 export interface UIState {
@@ -20,7 +21,7 @@ export interface UIState {
     pendingActions: string[];
   };
   prompt?: string; // Optional prompt for query panel
-  styleOptions: ChartStyleControlMap[ChartType] | undefined;
+  styleOptions: StyleOptions | undefined;
   chartType: ChartType;
 }
 
