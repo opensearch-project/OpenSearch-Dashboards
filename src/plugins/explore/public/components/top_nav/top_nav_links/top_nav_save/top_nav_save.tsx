@@ -62,7 +62,10 @@ export const getSaveButtonRun = (
       store,
       toastNotifications,
     } = services;
-    const legacyState = store.getState().legacy;
+    // TODO: remove legacy state once data flow is migrated
+    const legacyState = store.getState().legacy; // store is defined before the view is loaded
+    savedExplore.columns = legacyState.columns;
+    savedExplore.sort = legacyState.sort;
 
     const currentTitle = savedExplore.title;
     savedExplore.title = newTitle;

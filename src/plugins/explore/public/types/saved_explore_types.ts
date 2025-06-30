@@ -31,6 +31,8 @@ export interface SavedExplore
   kibanaSavedObjectMeta?: {
     searchSourceJSON: string;
   };
+  sort?: SortOrder[];
+  columns?: string[];
 }
 
 export interface SavedExploreAttributes {

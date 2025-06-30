@@ -15,6 +15,7 @@ import {
   ChartType,
   ChartStyleControlMap,
   VisualizationTypeResult,
+  VisualizationType,
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
@@ -173,7 +174,7 @@ export const VisualizationContainer = () => {
 
       // Update the visualizationData with the new visualization type
       if (visualizationData) {
-        visualizationData.visualizationType = chartConfig;
+        visualizationData.visualizationType = chartConfig as VisualizationType<ChartType>;
       }
     }
   };

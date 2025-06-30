@@ -104,7 +104,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   ],
 };
 
-export const createBarConfig = (): VisualizationType => ({
+export const createBarConfig = (): VisualizationType<'bar'> => ({
   name: 'bar',
   type: 'bar',
   ui: {

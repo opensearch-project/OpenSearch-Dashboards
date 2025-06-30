@@ -22,6 +22,7 @@ export interface AreaChartStyleControls {
   addLegend: boolean;
   legendPosition: Positions;
   addTimeMarker: boolean;
+  areaOpacity?: number;
 
   // Threshold and grid
   thresholdLine: ThresholdLine;

@@ -26,9 +26,9 @@ import { saveStateToSavedObject } from '../../../../../../saved_explore/transfor
 import { selectUIState } from '../../../../../utils/state_management/selectors';
 import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
 import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
-import { getSavedExploreIdFromUrl } from '../../../../../utils/state_management/utils/url';
 import { RootState } from '../../../../../utils/state_management/store';
 import { getTopNavLinks } from '../../../../../../components/top_nav/top_nav_links';
+import { useCurrentExploreId } from '../../../../../utils/hooks/use_current_explore_id';
 
 export interface TopNavProps {
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
@@ -49,23 +49,19 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
     history,
   } = services;
   const dispatch = useDispatch();
-  const savedExploreIdFromUrl = getSavedExploreIdFromUrl();
+  const savedExploreId = useCurrentExploreId();
 
   const uiState = useNewStateSelector(selectUIState);
+  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
   const savedQueryId = useSelector(selectSavedQuery);
   const isLoading = useSelector((state: RootState) => state.ui.status === ResultStatus.LOADING);
-  const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
+  const { savedExplore } = useSavedExplore(savedExploreId);
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
     timeRange: timefilter.timefilter.getTime(),
   });
-
-  // Replace savedSearch - use legacy state
-  // const savedSearch = useMemo(() => {
-  //   return legacyState?.savedSearch;
-  // }, [legacyState?.savedSearch]);
 
   // Get IndexPattern from centralized context
   const { indexPattern } = useIndexPatternContext();
@@ -106,9 +102,26 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
       startSyncingQueryStateWithUrl,
       searchContext,
       indexPattern,
-      savedExplore ? saveStateToSavedObject(savedExplore, uiState, indexPattern) : undefined
+      savedExplore
+        ? saveStateToSavedObject(
+            savedExplore,
+            flavorId ?? 'logs',
+            tabDefinition!,
+            uiState,
+            indexPattern
+          )
+        : undefined
     );
-  }, [savedExplore, indexPattern, searchContext, uiState, services, startSyncingQueryStateWithUrl]);
+  }, [
+    savedExplore,
+    indexPattern,
+    searchContext,
+    uiState,
+    services,
+    startSyncingQueryStateWithUrl,
+    flavorId,
+    tabDefinition,
+  ]);
 
   // Replace data$ subscription with Redux state-based queryStatus
   useEffect(() => {
