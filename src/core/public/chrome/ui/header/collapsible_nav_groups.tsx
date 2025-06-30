@@ -23,6 +23,7 @@ import { createEuiListItem } from './nav_link';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
 import { CollapsibleNavGroupsLabel, getIsCategoryOpen } from './collapsible_nav_groups_label';
 import { SimplePopover } from './hover_popover';
+import { HttpStart } from '../../../http';
 
 export interface NavGroupsProps {
   navLinks: ChromeNavLink[];
@@ -32,6 +33,7 @@ export interface NavGroupsProps {
   categoryCollapsible?: boolean;
   currentWorkspaceId?: string;
   isNavOpen: boolean;
+  basePath: HttpStart['basePath'];
 }
 
 const LEVEL_FOR_ROOT_ITEMS = 1;
@@ -44,6 +46,7 @@ export function NavGroups({
   categoryCollapsible,
   currentWorkspaceId,
   isNavOpen,
+  basePath,
 }: NavGroupsProps) {
   const [, setRenderKey] = useState(Date.now());
   const createNavItem = ({
@@ -58,7 +61,14 @@ export function NavGroups({
       appId,
       dataTestSubj: `collapsibleNavAppLink-${link.id}`,
       navigateToApp,
+      basePath,
     });
+
+    let icon = euiListItem.icon;
+
+    if (euiListItem.iconType) {
+      icon = <EuiIcon type={euiListItem.iconType} />;
+    }
 
     return {
       id: `${link.id}-${link.title}`,
@@ -70,11 +80,7 @@ export function NavGroups({
       buttonClassName: 'nav-link-item-btn',
       'data-test-subj': euiListItem['data-test-subj'],
       'aria-label': link.title,
-      ...(link.euiIconType
-        ? {
-            icon: <EuiIcon className="leftNavMenuIcon" type={link.euiIconType} />,
-          }
-        : {}),
+      icon,
     };
   };
   const createSideNavItem = (
@@ -91,7 +97,7 @@ export function NavGroups({
       return {
         ...result,
         name: navOpen ? result.name : '',
-        hidden: !navOpen && !navLink.link.euiIconType,
+        hidden: !navOpen && !result.icon,
       };
     }
 
@@ -132,7 +138,7 @@ export function NavGroups({
           ? navLink.links
           : []
         ).map((subNavLink) => createSideNavItem(subNavLink, level + 1, 'nav-nested-item', navOpen)),
-        hidden: !navOpen && !navLink.link.euiIconType,
+        hidden: !navOpen && !props.icon,
         icon: navOpen ? (
           props.icon
         ) : (
