@@ -33,7 +33,6 @@ export type Query = {
   language: string;
   dataset?: Dataset;
 };
-
 export interface RecentQueryItem {
   id: number;
   query: Query;
