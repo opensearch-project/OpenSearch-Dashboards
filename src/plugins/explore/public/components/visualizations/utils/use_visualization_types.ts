@@ -29,6 +29,9 @@ export interface ChartStyleControlMap {
   scatter: ScatterChartStyleControls;
   bar: BarChartStyleControls;
   area: AreaChartStyleControls;
+  // NOTE: Log table does not have style controls.
+  // log is one of chart types?
+  logs: {};
 }
 
 export type AllChartStyleControls =
