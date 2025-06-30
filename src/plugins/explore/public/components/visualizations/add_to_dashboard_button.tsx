@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiText, EuiButton, EuiLink } from '@elastic/eui';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject, CoreStart } from 'src/core/public';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
@@ -13,18 +13,14 @@ import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_util
 import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
 import { ExploreServices } from '../../types';
-import {
-  selectColumns,
-  selectUIState,
-  selectSort,
-} from '../../application/utils/state_management/selectors';
+import { selectUIState } from '../../application/utils/state_management/selectors';
 import { ExecutionContextSearch } from '../../../../expressions/common';
 import { IndexPattern, useSyncQueryStateWithUrl } from '../../../../data/public';
 import { saveStateToSavedObject } from '../../saved_explore/transforms';
 import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from './utils/save_explore';
 import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
-import { getSavedExploreIdFromUrl } from '../../application/utils/state_management/utils/url';
+import { useCurrentExploreId } from '../../application/utils/hooks/use_current_explore_id';
 import { useFlavorId } from '../../../public/helpers/use_flavor_id';
 
 interface DashboardAttributes {
@@ -72,7 +68,7 @@ export const SaveAndAddButtonWithModal = ({
 
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
-  const savedExploreIdFromUrl = getSavedExploreIdFromUrl();
+  const savedExploreIdFromUrl = useCurrentExploreId();
   const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
   const flavorId = useFlavorId();
 
