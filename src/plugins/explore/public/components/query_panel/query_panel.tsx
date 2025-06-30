@@ -22,7 +22,6 @@ import {
   selectShowDataSetFields,
 } from '../../application/utils/state_management/selectors';
 import './index.scss';
-
 import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
 import {
   setQuery,
@@ -35,6 +34,7 @@ import {
 } from '../../application/utils/state_management/actions/transaction_actions';
 import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
+import { setSavedQuery } from '../../application/utils/state_management/slices/legacy_slice';
 
 export interface QueryPanelProps {
   services: ExploreServices;
@@ -299,6 +299,26 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     return !localQuery?.trim() && !localPrompt?.trim();
   }, [localQuery, localPrompt]);
 
+  const handleClearQuery = () => {
+    dispatch(setSavedQuery(undefined));
+    dispatch(setQuery({ ...query, query: '' }));
+    setLocalQuery('');
+  };
+
+  const handleLoadSavedQuery = (savedQuery: SavedQuery) => {
+    if (!savedQuery || typeof savedQuery === 'string') {
+      return;
+    }
+    const savedQueryAttributes = savedQuery.attributes.query;
+    dispatch(setQuery({ ...savedQueryAttributes, dataset: query.dataset }));
+    setLocalQuery(savedQueryAttributes.query);
+    updateSavedQueryId(savedQuery.id);
+  };
+
+  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
+    dispatch(setSavedQuery(newSavedQueryId));
+  };
+
   return (
     <EuiPanel paddingSize="s" className="queryPanel__container">
       <QueryPanelLayout
@@ -311,13 +331,17 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
             noInput={noInput}
             showDatasetFields={showDatasetFields}
             services={services}
+            query={query}
             timefilter={timefilter}
             onRunClick={handleRunClick}
             onRecentClick={handleRecentClick}
             onTimeChange={handleTimeChange}
             onRunQuery={handleRun}
-            oneRefreshChange={handleRefreshChange}
+            onRefreshChange={handleRefreshChange}
             onShowFieldsToggle={handleShowFieldsToggle}
+            onClearQuery={handleClearQuery}
+            onLoadSavedQuery={handleLoadSavedQuery}
+            onSavedQuery={updateSavedQueryId}
           />
         }
       >
