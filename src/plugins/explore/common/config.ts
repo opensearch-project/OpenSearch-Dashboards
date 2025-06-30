@@ -6,7 +6,21 @@
 import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
+  queryPanel: schema.object({
+    supportedLanguages: schema.arrayOf(
+      schema.object({
+        language: schema.string(),
+        agentConfig: schema.string(),
+      }),
+      {
+        defaultValue: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
+      }
+    ),
+    summary: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
