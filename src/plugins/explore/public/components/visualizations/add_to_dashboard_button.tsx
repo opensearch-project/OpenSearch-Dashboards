@@ -2,27 +2,30 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import './visualization_container.scss';
+
 import { i18n } from '@osd/i18n';
 import { EuiText, EuiButton, EuiLink } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject, CoreStart } from 'src/core/public';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
+import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
 import { ExploreServices } from '../../types';
-import { setState } from '../../application/utils/state_management/slices/legacy_slice';
 import {
+  selectColumns,
   selectUIState,
-  selectSavedSearchName,
-  selectSavedSearch,
+  selectSort,
 } from '../../application/utils/state_management/selectors';
 import { ExecutionContextSearch } from '../../../../expressions/common';
-import { IndexPattern } from '../../../../data/public';
-import { Query } from '../../../../data/common';
+import { IndexPattern, useSyncQueryStateWithUrl } from '../../../../data/public';
 import { saveStateToSavedObject } from '../../saved_explore/transforms';
 import { addToDashboard } from './utils/add_to_dashboard';
+import { saveSavedExplore } from './utils/save_explore';
+import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
+import { getSavedExploreIdFromUrl } from '../../application/utils/state_management/utils/url';
+import { useFlavorId } from '../../../public/helpers/use_flavor_id';
 
 interface DashboardAttributes {
   title?: string;
@@ -30,62 +33,60 @@ interface DashboardAttributes {
 export type DashboardInterface = SimpleSavedObject<DashboardAttributes>;
 
 export interface OnSaveProps {
-  savedExplore?: SavedExplore;
+  savedExplore: SavedExplore;
   newTitle: string;
   isTitleDuplicateConfirmed: boolean;
   onTitleDuplicate: () => void;
   mode: 'existing' | 'new';
   selectDashboard: DashboardInterface | null;
   newDashboardName: string;
-  isDashboardDuplicateConfirmed: boolean;
-  onDashboardDuplicate: () => void;
 }
 
 export const SaveAndAddButtonWithModal = ({
-  startSyncingQueryStateWithUrl,
   services,
   searchContext,
   indexPattern,
 }: {
-  startSyncingQueryStateWithUrl: () => void;
   services: Partial<CoreStart> & ExploreServices;
-  searchContext: ExecutionContextSearch;
+  searchContext?: ExecutionContextSearch;
   indexPattern?: IndexPattern;
 }) => {
-  const {
-    core,
-    data: { search },
-    dashboard,
-    getSavedExploreById,
-    savedObjects,
-    history,
-    toastNotifications,
-    store,
-    chrome,
-  } = services;
+  const { core, dashboard, savedObjects, toastNotifications, uiSettings, history, data } = services;
+
+  // Create osdUrlStateStorage from storage
+  const osdUrlStateStorage = useMemo(() => {
+    return createOsdUrlStateStorage({
+      useHash: uiSettings.get('state:storeInSessionStorage', false),
+      history: history(),
+    });
+  }, [uiSettings, history]);
+
+  const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
+    data.query,
+    osdUrlStateStorage
+  );
 
   const [showAddToDashboardModal, setShowAddToDashboardModal] = useState(false);
-  const [savedExplore, setSavedExplore] = useState<SavedExplore>();
-  const saveObjectsClient = savedObjects.client;
-
-  const savedExploreId = useSelector(selectSavedSearch);
-  const savedExploreName = useSelector(selectSavedSearchName);
 
   const uiState = useSelector(selectUIState);
 
-  useEffect(() => {
-    /**
-     * Load the savedExplore object when:
-     * - The component mounts,and the saved explore ID is already retrieved from the URL.
-     * - savedExploreId changes
-     * - savedExploreName changes externally (e.g., renamed via top nav)
-     */
-    const loadSavedExplore = async () => {
-      const savedObject = await getSavedExploreById(savedExploreId);
-      setSavedExplore(savedObject);
-    };
-    loadSavedExplore();
-  }, [savedExploreId, getSavedExploreById, savedExploreName]);
+  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
+
+  const savedExploreIdFromUrl = getSavedExploreIdFromUrl();
+  const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
+  const flavorId = useFlavorId();
+
+  const savedExploreWithState = savedExplore
+    ? saveStateToSavedObject(
+        savedExplore,
+        flavorId ?? 'logs',
+        tabDefinition!,
+        uiState,
+        indexPattern
+      )
+    : undefined;
+
+  const saveObjectsClient = savedObjects.client;
 
   const handleSave = async ({
     // eslint-disable-next-line no-shadow
@@ -96,62 +97,31 @@ export const SaveAndAddButtonWithModal = ({
     mode,
     selectDashboard,
     newDashboardName,
-    isDashboardDuplicateConfirmed,
-    onDashboardDuplicate,
   }: OnSaveProps) => {
-    const currentTitle = savedExplore?.title;
-    savedExplore!.title = newTitle;
     const saveOptions = {
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     };
-
-    const createDashboardOptions = {
-      isTitleDuplicateConfirmed: isDashboardDuplicateConfirmed,
-      onTitleDuplicate: onDashboardDuplicate,
-    };
-
-    if (savedExplore) {
-      const searchSource = search.searchSource.createEmpty();
-      searchSource.setField('query', searchContext.query as Query);
-      searchSource.setField('filter', searchContext.filters);
-      searchSource.setField('index', indexPattern);
-      savedExplore.searchSource = searchSource;
-    }
-
     try {
-      // update or creating existing save explore
-      const id = await savedExplore?.save(saveOptions);
-
-      // toast only display when creating new savedExplore objects, not updating existing ones.
-      if (id && id !== savedExploreId) {
-        toastNotifications.addSuccess({
-          title: i18n.translate('explore.notifications.savedQueryTitle', {
-            defaultMessage: `Search '{savedQueryTitle}' was saved`,
-            values: {
-              savedQueryTitle: savedExplore?.title,
-            },
-          }),
-          'data-test-subj': 'savedExploreSuccess',
-        });
-        history().push(`/view/${encodeURIComponent(id)}`);
-        // Update browser title and breadcrumbs
-        chrome.docTitle.change(newTitle);
-        chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: newTitle }]);
-      }
-
-      store!.dispatch(setState({ savedSearch: id }));
-
-      // starts syncing `_g` portion of url with query services
-      startSyncingQueryStateWithUrl();
+      const result = await saveSavedExplore({
+        savedExplore,
+        newTitle,
+        saveOptions,
+        searchContext,
+        indexPattern,
+        services,
+        startSyncingQueryStateWithUrl,
+      });
 
       let dashboardId;
-      if (id) {
+
+      if (result && 'id' in result && result?.id) {
+        const id = result?.id;
         let props;
         if (mode === 'new') {
           props = {
             newDashboardName,
-            createDashboardOptions,
+            createDashboardOptions: saveOptions,
           };
         } else {
           props = {
@@ -221,10 +191,6 @@ export const SaveAndAddButtonWithModal = ({
         'data-test-subj': 'addToNewDashboarddFailToast',
       });
 
-      // Reset the original title
-      if (savedExplore && currentTitle) {
-        savedExplore.title = currentTitle;
-      }
       setShowAddToDashboardModal(false);
     }
   };
@@ -236,9 +202,9 @@ export const SaveAndAddButtonWithModal = ({
           defaultMessage: 'Add to dashboard',
         })}
       </EuiButton>
-      {showAddToDashboardModal && savedExplore && (
+      {showAddToDashboardModal && savedExploreWithState && (
         <AddToDashboardModal
-          savedExplore={saveStateToSavedObject(savedExplore, uiState, indexPattern)}
+          savedExplore={savedExploreWithState}
           savedObjectsClient={saveObjectsClient}
           onCancel={() => setShowAddToDashboardModal(false)}
           onConfirm={handleSave}

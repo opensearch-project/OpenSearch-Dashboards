@@ -3,31 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../types/saved_explore_types';
-<<<<<<< HEAD
-<<<<<<< HEAD
 import {
   setSavedSearch,
   setQuery,
-  setChartType,
   setStyleOptions,
+  setChartType,
 } from '../state_management/slices';
-=======
-import { setSavedSearch, setSavedSearchName } from '../state_management/slices/legacy_slice';
-=======
-import { setSavedSearch } from '../state_management/slices/legacy_slice';
->>>>>>> e3636e49e9 (fix comments)
-import { setQuery } from '../state_management/slices/query_slice';
->>>>>>> 952b6a48eb (drop selectstate)
 import { Query } from '../../../../../data/common';
-<<<<<<< HEAD
-=======
-import { setUiState, setSavedSearchName } from '../state_management/slices/ui_slice';
->>>>>>> e3636e49e9 (fix comments)
+import { selectActiveTabId, selectSavedSearchName } from '../state_management/selectors';
 /**
  * Hook for loading saved explore objects (following vis_builder pattern)
  * This handles saved object loading AFTER store creation, not during getPreloadedState
@@ -38,6 +26,8 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dispatch = useDispatch();
+  const savedSearchName = useSelector(selectSavedSearchName);
+  const currentTab = useSelector(selectActiveTabId);
 
   const { chrome, data, toastNotifications, getSavedExploreById } = services;
 
@@ -49,7 +39,6 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
       // Load saved explore object
       const savedExploreObject = await getSavedExploreById(exploreIdFromUrl);
 
-      // store the id(if it is undefined, then new save explore)
       dispatch(setSavedSearch(exploreIdFromUrl));
 
       if (savedExploreObject?.id) {
@@ -72,27 +61,14 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
           }
         }
 
-<<<<<<< HEAD
         // Update savedSearch to store just the ID (like discover)
         // TODO: remove this once legacy state is not consumed any more
-<<<<<<< HEAD
-        dispatch(setSavedSearch(exploreIdFromUrl));
-=======
-        const legacyStateWithId = {
-          savedSearch: exploreIdFromUrl, // Store the ID, not the object
-          savedSearchName: title,
-        };
-        dispatch(setState(legacyStateWithId));
->>>>>>> 11db39f0ec (fix)
-=======
-        // Store the name to ensure state consistency for both top nav and add to dashboard button
-        dispatch(setSavedSearchName(title));
->>>>>>> 952b6a48eb (drop selectstate)
+        // dispatch(setSavedSearch(exploreIdFromUrl));
 
         // Set style options
         const visualization = savedExploreObject.visualization;
         if (visualization) {
-          const { chartType, styleOptions } = JSON.parse(visualization);
+          const { chartType, params: styleOptions } = JSON.parse(visualization);
           dispatch(setChartType(chartType));
           dispatch(setStyleOptions(styleOptions));
         }
@@ -125,8 +101,15 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
   }, [exploreIdFromUrl, getSavedExploreById, dispatch, chrome, data, toastNotifications]);
 
   useEffect(() => {
+    /**
+     * Load the savedExplore object when:
+     * - The component mounts,and the saved explore ID is already retrieved from the URL.
+     * - savedExploreId changes
+     * - savedExploreName changes externally (e.g., renamed via top nav)
+     * - switchTab
+     */
     loadSavedExplore();
-  }, [loadSavedExplore]);
+  }, [loadSavedExplore, savedSearchName, currentTab]);
 
   return {
     savedExplore: savedExploreState,

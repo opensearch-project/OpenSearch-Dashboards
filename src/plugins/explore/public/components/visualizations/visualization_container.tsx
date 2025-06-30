@@ -40,24 +40,9 @@ export const VisualizationContainer = () => {
   const {
     data,
     expressions: { ReactExpressionRenderer },
-    uiSettings,
-    history,
   } = services;
   const { indexPattern } = useIndexPatternContext();
   const { results } = useTabResults();
-
-  // Create osdUrlStateStorage from storage
-  const osdUrlStateStorage = useMemo(() => {
-    return createOsdUrlStateStorage({
-      useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: history(),
-    });
-  }, [uiSettings, history]);
-
-  const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
-    data.query,
-    osdUrlStateStorage
-  );
 
   // TODO: Register custom processor for visualization tab
   // const tabDefinition = services.tabRegistry?.getTab?.('explore_visualization_tab');
@@ -204,7 +189,6 @@ export const VisualizationContainer = () => {
       <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
         <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
           <SaveAndAddButtonWithModal
-            startSyncingQueryStateWithUrl={startSyncingQueryStateWithUrl}
             searchContext={searchContext}
             indexPattern={indexPattern}
             services={services}

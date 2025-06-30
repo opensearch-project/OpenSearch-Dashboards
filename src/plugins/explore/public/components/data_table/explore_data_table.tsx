@@ -4,6 +4,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -32,6 +33,8 @@ import { RootState } from '../../application/utils/state_management/store';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
 import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
+import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
+import { ExecutionContextSearch } from '../../../../expressions/common/';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -148,18 +151,25 @@ const ExploreDataTableComponent = () => {
       style={{ height: '100%' }}
       ref={containerRef}
     >
-      <DataTable
-        columns={tableColumns}
-        indexPattern={indexPattern}
-        rows={rows}
-        docViewsRegistry={docViewsRegistry}
-        sampleSize={uiSettings.get(SAMPLE_SIZE_SETTING)}
-        isShortDots={uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE)}
-        onAddColumn={onAddColumn}
-        onFilter={onAddFilter as DocViewFilterFn}
-        onRemoveColumn={onRemoveColumn}
-        scrollToTop={scrollToTop}
-      />
+      <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
+        <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
+          <SaveAndAddButtonWithModal indexPattern={indexPattern} services={services} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <DataTable
+            columns={tableColumns}
+            indexPattern={indexPattern}
+            rows={rows}
+            docViewsRegistry={docViewsRegistry}
+            sampleSize={uiSettings.get(SAMPLE_SIZE_SETTING)}
+            isShortDots={uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE)}
+            onAddColumn={onAddColumn}
+            onFilter={onAddFilter as DocViewFilterFn}
+            onRemoveColumn={onRemoveColumn}
+            scrollToTop={scrollToTop}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

@@ -31,7 +31,7 @@ interface AddToDashboardModalProps {
   savedObjectsClient: SavedObjectsClientContract;
   onConfirm: (props: OnSaveProps) => void;
   onCancel: () => void;
-  savedExplore?: SavedExplore;
+  savedExplore: SavedExplore;
 }
 
 export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
@@ -47,8 +47,9 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const [newDashboardName, setNewDashboardName] = useState<string>('');
   const [isLoading, setisLoading] = useState<boolean>(false);
 
-  const [isTitleDupilcate, setIsTitleDuplicate] = useState<boolean>(false);
-  const [isDashboardDuplicate, setIsDashboardDuplicate] = useState<boolean>(false);
+  const [isTitleOrDashboardTitleDupilcate, setIsTitleOrDashboardTitleDupilcate] = useState<boolean>(
+    false
+  );
   const [title, setTitle] = useState<string>(savedExplore?.title || '');
 
   const enableButton =
@@ -76,28 +77,21 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
     await onConfirm({
       savedExplore,
       newTitle: title,
-      isTitleDuplicateConfirmed: isTitleDupilcate,
+      isTitleDuplicateConfirmed: isTitleOrDashboardTitleDupilcate,
       onTitleDuplicate: handleTitleDuplicate,
       mode: selectedOption,
       selectDashboard,
       newDashboardName,
-      isDashboardDuplicateConfirmed: isDashboardDuplicate,
-      onDashboardDuplicate: handleDashboardDuplicate,
     });
   };
 
   const handleTitleDuplicate = () => {
     setisLoading(false);
-    setIsTitleDuplicate(true);
-  };
-
-  const handleDashboardDuplicate = () => {
-    setisLoading(false);
-    setIsDashboardDuplicate(true);
+    setIsTitleOrDashboardTitleDupilcate(true);
   };
 
   const renderDuplicateTitleCallout = () => {
-    if (!isTitleDupilcate) {
+    if (!isTitleOrDashboardTitleDupilcate) {
       return null;
     }
 
@@ -107,8 +101,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           title={
             <FormattedMessage
               id="explore.addtoDashboardModal.duplicateTitleLabel"
-              defaultMessage="This {objectType} already exists"
-              values={{ objectType: savedExplore?.getOpenSearchType() }}
+              defaultMessage="This object already exists"
             />
           }
           color="warning"
@@ -120,36 +113,6 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
               defaultMessage="Saving '{title}' creates a duplicate title."
               values={{
                 title,
-              }}
-            />
-          </p>
-        </EuiCallOut>
-      </EuiFlexItem>
-    );
-  };
-
-  const renderDuplicateDashboardCallout = () => {
-    if (!isDashboardDuplicate) {
-      return null;
-    }
-    return (
-      <EuiFlexItem style={{ width: '100%' }}>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="explore.addtoDashboardModal.duplicateDashboardTitleLabel"
-              defaultMessage="This dashboard already exists"
-            />
-          }
-          color="warning"
-          data-test-subj="dashboardTitleDupicateWarnMsg"
-        >
-          <p>
-            <FormattedMessage
-              id="explore.addtoDashboardModal.duplicateDashboardTitleDescription"
-              defaultMessage="Saving '{newDashboardName}' creates a duplicate title."
-              values={{
-                newDashboardName,
               }}
             />
           </p>
@@ -240,7 +203,6 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
             </EuiFlexItem>
           )}
           {renderDuplicateTitleCallout()}
-          {renderDuplicateDashboardCallout()}
 
           {!isSaveExploreExisting && (
             <EuiFlexItem grow={true} style={{ width: '100%' }}>
@@ -248,7 +210,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
                 value={title}
                 placeholder="Save Explore name"
                 onChange={(text) => {
-                  setIsTitleDuplicate(false);
+                  setIsTitleOrDashboardTitleDupilcate(false);
                   setTitle(text);
                 }}
                 label={i18n.translate('explore.addtoDashboardModal.saveExploreName', {

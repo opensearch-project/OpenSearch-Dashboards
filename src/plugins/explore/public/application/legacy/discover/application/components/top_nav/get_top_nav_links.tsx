@@ -19,7 +19,12 @@ import {
   OpenSearchDashboardsContextProvider,
   toMountPoint,
 } from '../../../../../../../../opensearch_dashboards_react/public';
+<<<<<<< HEAD
 import { LegacyState, setSavedSearch } from '../../../../../utils/state_management/slices';
+=======
+import { LegacyState, setSavedSearch } from '../../../../../utils/state_management/slices/legacy';
+import { setSavedSearchName } from '../../../../../utils/state_management/slices/ui';
+>>>>>>> 4a45cc4a64 (add table to dashboard)
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
