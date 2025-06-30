@@ -39,13 +39,13 @@ import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/
 import { ScopedHistory } from '../../../core/public';
 import { SavedExploreLoader, SavedExplore } from './saved_explore';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
-import { ReduxStore } from './application/utils/interfaces';
 
 import {
   VisualizationRegistryService,
   VisualizationRegistryServiceSetup,
   VisualizationRegistryServiceStart,
 } from './services/visualization_registry_service';
+import { AppStore } from './application/utils/state_management/store';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -154,7 +154,7 @@ export interface ExploreServices {
   overlays: CoreStart['overlays'];
 
   // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
-  store: ReduxStore; // Redux store
+  store: AppStore; // Redux store
   viewRegistry?: Record<string, unknown>; // ViewServiceStart - will be replaced with tabRegistry
   embeddable: EmbeddableStart; // EmbeddableStart
   scopedHistory?: ScopedHistory; // ScopedHistory
