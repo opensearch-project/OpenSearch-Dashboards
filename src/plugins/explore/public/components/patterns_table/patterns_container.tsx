@@ -4,14 +4,20 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { selectRows, selectTotalHits } from '../../application/utils/state_management/selectors';
 import { PatternItem, PatternsTable } from './patterns_table';
 import { COUNT_FIELD, PATTERNS_FIELD } from './utils/constants';
+import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 
 export const PatternsContainer = () => {
-  const rows = useSelector(selectRows); // TODO: use rows from patterns-appended query
-  const totalHits = useSelector(selectTotalHits);
+  const { results } = useTabResults();
+
+  // TODO: Register custom processor for patterns tab if needed
+  //       If no need, feel free to remove this comment
+  // const tabDefinition = services.tabRegistry?.getTab?.('patterns');
+  // const processor = tabDefinition?.resultsProcessor || defaultResultsProcessor;
+  // const processedResults = processor(rawResults, indexPattern);
+
+  const rows = results?.hits?.hits || [];
 
   // Convert rows to pattern items or use default if rows is undefined
   const items: PatternItem[] = rows?.map((row) => ({

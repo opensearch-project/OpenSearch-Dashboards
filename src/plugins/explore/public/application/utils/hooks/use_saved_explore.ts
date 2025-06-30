@@ -5,16 +5,16 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
-import { getStateFromSavedObject } from '../../../saved_explore/transforms';
-import { SavedExplore, SavedExploreAttributes } from '../../../types/saved_explore_types';
-import { setState } from '../state_management/slices/legacy_slice';
-import { setQuery } from '../state_management/slices/query_slice';
+import { SavedExplore } from '../../../types/saved_explore_types';
+import {
+  setSavedSearch,
+  setQuery,
+  setChartType,
+  setStyleOptions,
+} from '../state_management/slices';
 import { Query } from '../../../../../data/common';
-import { ISearchSource } from '../../../../../data/public';
-import { SavedObjectLoader } from '../../../../../saved_objects/public';
 /**
  * Hook for loading saved explore objects (following vis_builder pattern)
  * This handles saved object loading AFTER store creation, not during getPreloadedState
@@ -26,89 +26,57 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
   const [error, setError] = useState<string | null>(null);
   const dispatch = useDispatch();
 
-  const { chrome, data, toastNotifications, savedObjects } = services;
+  const { chrome, data, toastNotifications, getSavedExploreById } = services;
 
   const loadSavedExplore = useCallback(async () => {
-    if (!exploreIdFromUrl) {
-      setSavedExploreState(undefined);
-      return;
-    }
-
     try {
       setIsLoading(true);
       setError(null);
 
       // Load saved explore object
-      const savedExploreObject = await savedObjects.client.get<SavedExploreAttributes>(
-        'explore',
-        exploreIdFromUrl
-      );
+      const savedExploreObject = await getSavedExploreById(exploreIdFromUrl);
 
-      if (savedExploreObject.id) {
+      if (savedExploreObject?.id) {
         // Deserialize state from saved object
-        const { title, description, state } = getStateFromSavedObject(
-          savedExploreObject.attributes
-        );
+        const { title } = savedExploreObject;
 
         // Update browser title and breadcrumbs
         chrome.docTitle.change(title);
         chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: title }]);
 
         // Sync query from saved object to data plugin (explore doesn't use filters)
-        const searchSourceFields = savedExploreObject.attributes.kibanaSavedObjectMeta;
+        const searchSourceFields = savedExploreObject.kibanaSavedObjectMeta;
         if (searchSourceFields?.searchSourceJSON) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
-
+          const query = searchSource.query;
           // Set query in query string manager
-          if (searchSource.query) {
-            data.query.queryString.setQuery(searchSource.query);
+          if (query) {
+            data.query.queryString.setQuery(query);
+            dispatch(setQuery(query as Query));
           }
         }
 
-        // Update Redux state with loaded state
-        if (state.legacy) {
-          // Update savedSearch to store just the ID (like discover)
-          const legacyStateWithId = {
-            ...state.legacy,
-            savedSearch: exploreIdFromUrl, // Store the ID, not the object
-          };
-          dispatch(setState(legacyStateWithId));
+        // Update savedSearch to store just the ID (like discover)
+        // TODO: remove this once legacy state is not consumed any more
+        dispatch(setSavedSearch(exploreIdFromUrl));
+
+        // Set style options
+        const visualization = savedExploreObject.visualization;
+        if (visualization) {
+          const { chartType, styleOptions } = JSON.parse(visualization);
+          dispatch(setChartType(chartType));
+          dispatch(setStyleOptions(styleOptions));
         }
-        if (state.query) {
-          dispatch(setQuery(state.query as Query));
-        }
-        // Note: UI state would be handled by UI slice when implemented
-        // For now, we skip UI state updates
 
         // Add to recently accessed
         chrome.recentlyAccessed.add(
-          `/app/explore#/view/${exploreIdFromUrl}`,
+          `/app/explore#/view/${savedExploreObject.id}`,
           title,
-          exploreIdFromUrl,
+          savedExploreObject.id,
           { type: 'explore' }
         );
-
-        // Create SavedExplore object for compatibility
-        const savedExplore: SavedExplore = {
-          id: savedExploreObject.id,
-          title,
-          description,
-          searchSource: {} as ISearchSource, // Will be populated from searchSourceFields
-          legacyState: savedExploreObject.attributes.legacyState,
-          uiState: savedExploreObject.attributes.uiState,
-          queryState: savedExploreObject.attributes.queryState,
-          version: savedExploreObject.attributes.version,
-          // Add other SavedObject methods
-          copyOnSave: false,
-          destroy: () => {},
-          lastSavedTitle: title,
-          save: async () => exploreIdFromUrl,
-          getFullPath: () => `/app/explore#/view/${exploreIdFromUrl}`,
-          getOpenSearchType: () => 'explore',
-        };
-
-        setSavedExploreState(savedExplore);
       }
+      setSavedExploreState(savedExploreObject);
     } catch (loadError) {
       const errorMessage = `Failed to load saved explore: ${(loadError as Error).message}`;
       setError(errorMessage);
@@ -125,7 +93,7 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [exploreIdFromUrl, chrome, data, dispatch, savedObjects, toastNotifications]);
+  }, [exploreIdFromUrl, getSavedExploreById, dispatch, chrome, data, toastNotifications]);
 
   useEffect(() => {
     loadSavedExplore();
@@ -137,41 +105,4 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
     error,
     reload: loadSavedExplore,
   };
-};
-
-/**
- * Helper function to get saved explore by ID (similar to vis_builder)
- */
-export const getSavedExploreById = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  savedObjectService: SavedObjectLoader,
-  exploreId?: string
-): Promise<SavedExplore | undefined> => {
-  if (!exploreId) return undefined;
-
-  try {
-    const savedObject = await savedObjectsClient.get<SavedExploreAttributes>('explore', exploreId);
-    const { searchSource }: SavedExplore = await savedObjectService.get(exploreId);
-    const { title, description } = getStateFromSavedObject(savedObject.attributes);
-
-    return {
-      id: savedObject.id,
-      title,
-      description,
-      searchSource,
-      legacyState: savedObject.attributes.legacyState,
-      uiState: savedObject.attributes.uiState,
-      queryState: savedObject.attributes.queryState,
-      version: savedObject.attributes.version,
-      copyOnSave: false,
-      destroy: () => {},
-      lastSavedTitle: title,
-      save: async () => exploreId,
-      getFullPath: () => `/app/explore#/view/${exploreId}`,
-      getOpenSearchType: () => 'explore',
-    };
-  } catch (error) {
-    // Error loading saved explore - silently ignore
-    return undefined;
-  }
 };

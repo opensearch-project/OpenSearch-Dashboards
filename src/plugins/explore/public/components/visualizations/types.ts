@@ -9,10 +9,14 @@ export enum Positions {
   TOP = 'top',
   BOTTOM = 'bottom',
 }
-export interface ChartTypeMapping {
+export interface ChartMetadata {
   type: string;
-  priority: number; // Higher number means higher priority for rule matching
   name: string;
+  icon: string;
+}
+
+export interface ChartTypeMapping extends ChartMetadata {
+  priority: number; // Higher number means higher priority for rule matching
 }
 
 export interface VisualizationRule {
@@ -24,6 +28,7 @@ export interface VisualizationRule {
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
   ) => boolean;
+  matchIndex: number[];
   chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
   toExpression?: (
     transformedData: Array<Record<string, any>>,

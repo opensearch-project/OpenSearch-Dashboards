@@ -118,9 +118,10 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
               // app/explore/logs#/ -> app/explore/logs#/view/uuid. There is no
               // appId change and no new store created, so we need to dispatch
               // the state change.
-              store!.dispatch({ type: 'logs/incrementSaveExploreLoadCount' });
+              store.dispatch({ type: 'logs/incrementSaveExploreLoadCount' });
               application.navigateToApp('explore', {
-                path: `${ExploreFlavor.Logs}#/view/${id}`,
+                // TODO:finalize this until flavor and view route are finalized
+                path: `${ExploreFlavor.Logs}#/${id}`,
               });
             }
             onClose();

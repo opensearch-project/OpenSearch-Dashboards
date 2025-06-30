@@ -4,7 +4,7 @@
  */
 
 import { Dispatch } from 'redux';
-import { startTransaction, commitTransaction, rollbackTransaction } from '../slices/ui_slice';
+import { startTransaction, commitTransaction, rollbackTransaction } from '../slices';
 
 /**
  * Action type for committing a transaction

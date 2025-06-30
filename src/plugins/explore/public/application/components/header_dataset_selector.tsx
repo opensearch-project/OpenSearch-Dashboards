@@ -9,24 +9,17 @@ import { DatasetSelector, DatasetSelectorAppearance, Query } from '../../../../d
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
 import { executeQueries } from '../utils/state_management/actions/query_actions';
-import { clearResults } from '../utils/state_management/slices/results_slice';
+import { clearResults, setQuery } from '../utils/state_management/slices';
 import {
   beginTransaction,
   finishTransaction,
 } from '../utils/state_management/actions/transaction_actions';
-import { setQuery } from '../utils/state_management/slices/query_slice';
-
-export interface HeaderDatasetSelectorProps {
-  datasetSelectorRef: React.RefObject<HTMLDivElement>;
-}
 
 /**
  * Header dataset selector component for Explore
  * Uses the Data plugin's ConnectedDatasetSelector and syncs with Explore's Redux store
  */
-export const HeaderDatasetSelector: React.FC<HeaderDatasetSelectorProps> = ({
-  datasetSelectorRef,
-}) => {
+export const HeaderDatasetSelector: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const isMounted = useRef(false);

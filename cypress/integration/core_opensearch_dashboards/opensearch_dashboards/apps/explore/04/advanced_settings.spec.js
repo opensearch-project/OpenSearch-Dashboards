@@ -12,10 +12,10 @@ import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateBaseConfiguration,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 import { generateQueryTestConfigurations } from '../../../../../../utils/apps/explore/queries';
-import { getDatasetName } from '../../../../../../utils/apps/query_enhancements/autocomplete';
+import { getDatasetName } from '../../../../../../utils/apps/explore/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -70,7 +70,6 @@ export const runAdvancedSettingsTests = () => {
           const firstDataset = getDatasetName(INDEX_WITH_TIME_1, config.datasetType);
           const secondDataset = getDatasetName(INDEX_WITH_TIME_2, config.datasetType);
           cy.setDataset(firstDataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
           // courier:ignoreFilterIfFieldNotInIndex is off
@@ -100,7 +99,6 @@ export const runAdvancedSettingsTests = () => {
           });
           // Setup
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
           // default discover:sampleSize is 500

@@ -8,7 +8,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
-
 import { Visualization } from './visualization';
 import {
   getVisualizationType,
@@ -16,23 +15,23 @@ import {
   ChartType,
   ChartStyleControlMap,
   VisualizationTypeResult,
+  VisualizationType,
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
-import { VisColumn, VisualizationRule } from './types';
+import { VisColumn } from './types';
 import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
-import { RootState } from '../../application/utils/state_management/store';
 import {
-  selectRows,
   selectStyleOptions,
   selectChartType,
 } from '../../application/utils/state_management/selectors';
 import {
   setStyleOptions,
   setChartType as setSelectedChartType,
-} from '../../application/utils/state_management/slices/ui_slice';
+} from '../../application/utils/state_management/slices';
+import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -44,33 +43,26 @@ export const VisualizationContainer = () => {
     expressions: { ReactExpressionRenderer },
   } = services;
   const { indexPattern } = useIndexPatternContext();
+  const { results } = useTabResults();
 
-  const rows = useSelector(selectRows);
+  // TODO: Register custom processor for visualization tab
+  // const tabDefinition = services.tabRegistry?.getTab?.('explore_visualization_tab');
+  // const processor = tabDefinition?.resultsProcessor || defaultResultsProcessor;
+
+  const rows = useMemo(() => results?.hits?.hits || [], [results]);
   const styleOptions = useSelector(selectStyleOptions);
   const selectedChartType = useSelector(selectChartType);
+  const fieldSchema = useMemo(() => results?.fieldSchema || [], [results]);
 
-  const fieldSchema = useSelector((state: RootState) => {
-    const executionCacheKeys = state.ui?.executionCacheKeys || [];
-    if (executionCacheKeys.length === 0) {
-      return [];
-    }
+  const [visualizationData, setVisualizationData] = useState<
+    VisualizationTypeResult<ChartType> | undefined
+  >(undefined);
 
-    // Use tab specific cacheKey
-    const cacheKey = executionCacheKeys[1];
-    const results = state.results[cacheKey];
-    if (results && results.fieldSchema) {
-      return results.fieldSchema;
-    }
-
-    return [];
-  });
-
-  const visualizationData = useMemo(() => {
+  useEffect(() => {
     if (fieldSchema.length === 0 || rows.length === 0) {
-      return null;
+      return;
     }
-
-    return getVisualizationType(rows, fieldSchema);
+    setVisualizationData(getVisualizationType(rows, fieldSchema));
   }, [fieldSchema, rows]);
 
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
@@ -78,15 +70,6 @@ export const VisualizationContainer = () => {
     filters: filterManager.getFilters(),
     timeRange: timefilter.timefilter.getTime(),
   });
-
-  // Hook to get the visualization type based on the rows and field schema
-  // This will be called every time the rows or fieldSchema changes
-  useEffect(() => {
-    if (visualizationData) {
-      // TODO: everytime the fields change, do we reset the chart type and its style options? P1: we will implement chart type selection persistence
-      dispatch(setStyleOptions(visualizationData.visualizationType?.ui.style.defaults));
-    }
-  }, [visualizationData, dispatch]);
 
   const visualizationRegistry = useVisualizationRegistry();
 
@@ -142,7 +125,7 @@ export const VisualizationContainer = () => {
       visualizationData.numericalColumns,
       visualizationData.categoricalColumns,
       visualizationData.dateColumns,
-      styleOptions
+      styleOptions ?? {}
     );
   }, [
     searchContext,
@@ -191,27 +174,28 @@ export const VisualizationContainer = () => {
 
       // Update the visualizationData with the new visualization type
       if (visualizationData) {
-        visualizationData.visualizationType = chartConfig;
+        visualizationData.visualizationType = chartConfig as VisualizationType<ChartType>;
       }
     }
   };
 
   // Don't render if visualization is not enabled or data is not ready
-  if (!expression || !visualizationData || !styleOptions) {
+  if (!visualizationData) {
     return null;
   }
 
   return (
     <div className="exploreVisContainer">
       <Visualization<ChartType>
-        expression={expression}
+        expression={expression!}
         searchContext={searchContext}
         styleOptions={styleOptions}
-        visualizationData={visualizationData as VisualizationTypeResult<ChartType>}
+        visualizationData={visualizationData}
         onStyleChange={handleStyleChange}
         selectedChartType={selectedChartType}
         onChartTypeChange={handleChartTypeChange}
         ReactExpressionRenderer={ReactExpressionRenderer}
+        setVisualizationData={setVisualizationData}
       />
     </div>
   );

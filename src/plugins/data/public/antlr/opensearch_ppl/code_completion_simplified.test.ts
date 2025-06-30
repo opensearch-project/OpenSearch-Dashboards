@@ -12,68 +12,70 @@ import * as utils from '../shared/utils';
 import { PPL_AGGREGATE_FUNCTIONS } from './constants';
 
 describe('ppl code_completion', () => {
-  describe('getSuggestions', () => {
-    const mockIndexPattern = {
-      title: 'test-index',
-      fields: [
-        { name: 'field1', type: 'string' },
-        { name: 'field2', type: 'number' },
-        { name: 'field3', type: 'boolean' },
-      ],
-    } as IndexPattern;
+  const mockIndexPattern = {
+    title: 'test-index',
+    fields: [
+      { name: '_field5', type: 'string' },
+      { name: 'field1', type: 'string' },
+      { name: 'field2', type: 'number' },
+      { name: 'field3', type: 'boolean' },
+      { name: 'field4', type: 'string' },
+    ],
+  } as IndexPattern;
 
-    const mockServices = {
-      appName: 'test-app',
-    } as IDataPluginServices;
+  const mockServices = {
+    appName: 'test-app',
+  } as IDataPluginServices;
 
-    const mockPosition = {
-      lineNumber: 1,
-      column: 1,
-    } as monaco.Position;
+  const mockPosition = {
+    lineNumber: 1,
+    column: 1,
+  } as monaco.Position;
 
-    const getSimpleSuggestions = async (
-      query: string,
-      position: monaco.Position = new monaco.Position(1, query.length + 1)
-    ) => {
-      return getSimplifiedPPLSuggestions({
-        query,
-        indexPattern: mockIndexPattern,
-        position,
-        language: 'PPL',
-        selectionStart: 0,
-        selectionEnd: 0,
-        services: mockServices,
-      });
-    };
+  const getSimpleSuggestions = async (
+    query: string,
+    position: monaco.Position = new monaco.Position(1, query.length + 1)
+  ) => {
+    return getSimplifiedPPLSuggestions({
+      query,
+      indexPattern: mockIndexPattern,
+      position,
+      language: 'PPL',
+      selectionStart: 0,
+      selectionEnd: 0,
+      services: mockServices,
+    });
+  };
 
-    const checkSuggestionsContain = (
-      result: QuerySuggestion[],
-      expected: Partial<QuerySuggestion>
-    ) => {
+  const checkSuggestionsContain = (
+    result: QuerySuggestion[],
+    expected: Partial<QuerySuggestion>
+  ) => {
+    expect(
+      result.some(
+        (suggestion) => suggestion.text === expected.text && suggestion.type === expected.type
+      )
+    ).toBeTruthy();
+  };
+
+  const checkSuggestionsShouldNotContain = (
+    result: QuerySuggestion[],
+    expected: Partial<QuerySuggestion>
+  ) => {
+    if (expected.text && expected.type) {
       expect(
         result.some(
           (suggestion) => suggestion.text === expected.text && suggestion.type === expected.type
         )
-      ).toBeTruthy();
-    };
+      ).toBeFalsy();
+    } else if (expected.text) {
+      expect(result.some((suggestion) => suggestion.text === expected.text)).toBeFalsy();
+    } else if (expected.type) {
+      expect(result.some((suggestion) => suggestion.type === expected.type)).toBeFalsy();
+    }
+  };
 
-    const checkSuggestionsShouldNotContain = (
-      result: QuerySuggestion[],
-      expected: Partial<QuerySuggestion>
-    ) => {
-      if (expected.text && expected.type) {
-        expect(
-          result.some(
-            (suggestion) => suggestion.text === expected.text && suggestion.type === expected.type
-          )
-        ).toBeFalsy();
-      } else if (expected.text) {
-        expect(result.some((suggestion) => suggestion.text === expected.text)).toBeFalsy();
-      } else if (expected.type) {
-        expect(result.some((suggestion) => suggestion.type === expected.type)).toBeFalsy();
-      }
-    };
-
+  describe('getSuggestions', () => {
     it('should return empty array when services are missing', async () => {
       const result = await getSimplifiedPPLSuggestions({
         query: '',
@@ -247,6 +249,87 @@ describe('ppl code_completion', () => {
         text: 'field1',
         type: monaco.languages.CompletionItemKind.Field,
       });
+    });
+
+    it('should only show up fields selcted in fields commands for subsequent commands', async () => {
+      const result = await getSimpleSuggestions(
+        'source = test-index | fields field1, field2 | where '
+      );
+
+      checkSuggestionsContain(result, {
+        text: 'field1',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+
+      checkSuggestionsContain(result, {
+        text: 'field2',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+    });
+
+    it('should remove fields selcted in fields commands with - for subsequent commands', async () => {
+      const result = await getSimpleSuggestions(
+        'source = test-index | fields - field1, field2 | where '
+      );
+
+      checkSuggestionsContain(result, {
+        text: 'field3',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+
+      checkSuggestionsContain(result, {
+        text: 'field4',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+
+      checkSuggestionsShouldNotContain(result, {
+        text: 'field2',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+
+      checkSuggestionsShouldNotContain(result, {
+        text: 'field1',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+    });
+
+    it('rename a field should remove original fieldName and suggest new field name in subsequent commands', async () => {
+      const result = await getSimpleSuggestions(
+        'source = test-index | rename field1 as newField1 | where '
+      );
+
+      checkSuggestionsContain(result, {
+        text: 'newField1',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+
+      checkSuggestionsShouldNotContain(result, {
+        text: 'field1',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+    });
+
+    it('stats command should only show the fieldName that are referenced by as and by', async () => {
+      const result = await getSimpleSuggestions(
+        'source = test-index | stats count() as counter by field1 | where '
+      );
+
+      checkSuggestionsContain(result, {
+        text: 'field1',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+
+      checkSuggestionsContain(result, {
+        text: 'counter',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+    });
+
+    it('should devalue the fieldNames starting _', async () => {
+      const results = await getSimpleSuggestions('source = test-index | where ');
+
+      const resultField = results.find((result) => result.text === '_field5');
+      expect(resultField?.sortText).toBe('9');
     });
   });
 });

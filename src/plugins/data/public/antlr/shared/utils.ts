@@ -18,7 +18,7 @@ import { ParsingSubject } from './types';
 import { quotesRegex, SuggestionItemDetailsTags } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
-import { DEFAULT_DATA, UI_SETTINGS } from '../../../common';
+import { DEFAULT_DATA, IFieldType, UI_SETTINGS } from '../../../common';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export interface IDataSourceRequestHandlerParams {
@@ -185,6 +185,22 @@ export const formatFieldsToSuggestions = (
   });
 
   return fieldSuggestions;
+};
+
+export const formatAvailableFieldsToSuggestions = (
+  availableFields: IFieldType[],
+  modifyInsertText?: (input: string) => string,
+  sortTextImportanceFunction?: (input: string) => string
+) => {
+  return availableFields.map((field) => {
+    return {
+      text: field.name,
+      type: monaco.languages.CompletionItemKind.Field,
+      detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
+      ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+      ...(sortTextImportanceFunction && { sortText: sortTextImportanceFunction(field.name) }),
+    };
+  });
 };
 
 const singleParseQuery = <

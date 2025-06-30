@@ -7,43 +7,36 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector } from 'react-redux';
-import { Query, TimeRange } from '../../../../../../../../data/common';
 import { QueryStatus, useSyncQueryStateWithUrl } from '../../../../../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { RequestAdapter } from '../../../../../../../../inspector/public';
 import { PLUGIN_ID } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDispatch, useSelector } from '../../utils/state_management';
-import { setSavedQuery } from '../../../../../utils/state_management/slices/legacy_slice';
+import { setSavedQuery } from '../../../../../utils/state_management/slices';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
 
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
 import { ResultStatus } from '../utils';
-import {
-  selectSavedQuery,
-  selectSavedSearch,
-} from '../../../../../utils/state_management/selectors';
-import { SavedExplore } from '../../../../../../saved_explore';
+import { selectSavedQuery } from '../../../../../utils/state_management/selectors';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
 import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
 import { selectUIState } from '../../../../../utils/state_management/selectors';
+import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
+import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
+import { RootState } from '../../../../../utils/state_management/store';
+import { useCurrentExploreId } from '../../../../../utils/hooks/use_current_explore_id';
 
 export interface TopNavProps {
-  opts: {
-    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-    onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-    optionalRef?: Record<string, React.RefObject<HTMLDivElement>>;
-  };
-  showSaveQuery: boolean;
-  isEnhancementsEnabled?: boolean;
+  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }
 
-export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
+export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const flavorId = useFlavorId();
   const {
     data: {
       query: { filterManager, queryString, timefilter },
@@ -54,36 +47,27 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     data,
     uiSettings,
     history,
-    getSavedExploreById,
   } = services;
   const dispatch = useDispatch();
+  const savedExploreId = useCurrentExploreId();
 
   const uiState = useNewStateSelector(selectUIState);
+  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
-  const savedExploreId = useSelector(selectSavedSearch);
   const savedQueryId = useSelector(selectSavedQuery);
-  const isLoading = useSelector((state: any) => state.ui.status === ResultStatus.LOADING);
-
+  const isLoading = useSelector((state: RootState) => state.ui.status === ResultStatus.LOADING);
+  const { savedExplore } = useSavedExplore(savedExploreId);
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
     timeRange: timefilter.timefilter.getTime(),
   });
 
-  // Replace inspectorAdapters
-  const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
-
-  // Replace savedSearch - use legacy state
-  // const savedSearch = useMemo(() => {
-  //   return legacyState?.savedSearch;
-  // }, [legacyState?.savedSearch]);
-
   // Get IndexPattern from centralized context
   const { indexPattern } = useIndexPatternContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
   const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
-  const [savedExplore, setSavedExplore] = useState<SavedExplore>();
 
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
@@ -99,14 +83,6 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     };
   }, [services.data.query.state$]);
 
-  useEffect(() => {
-    const loadSavedExplore = async () => {
-      const savedObject = await getSavedExploreById(savedExploreId);
-      setSavedExplore(savedObject);
-    };
-    loadSavedExplore();
-  }, [savedExploreId, getSavedExploreById]);
-
   // Create osdUrlStateStorage from storage
   const osdUrlStateStorage = useMemo(() => {
     return createOsdUrlStateStorage({
@@ -119,26 +95,32 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     data.query,
     osdUrlStateStorage
   );
-  const showActionsInGroup = uiSettings.get('home:useNewHomePage');
-  // const showActionsInGroup = false; // Use portal approach to display actions in nav bar
 
   const topNavLinks = useMemo(() => {
     return getTopNavLinks(
       services,
-      inspectorAdapters,
       startSyncingQueryStateWithUrl,
       searchContext,
       indexPattern,
-      savedExplore ? saveStateToSavedObject(savedExplore, uiState, indexPattern) : undefined
+      savedExplore
+        ? saveStateToSavedObject(
+            savedExplore,
+            flavorId ?? 'logs',
+            tabDefinition!,
+            uiState,
+            indexPattern
+          )
+        : undefined
     );
   }, [
     savedExplore,
     indexPattern,
     searchContext,
     uiState,
-    inspectorAdapters,
     services,
     startSyncingQueryStateWithUrl,
+    flavorId,
+    tabDefinition,
   ]);
 
   // Replace data$ subscription with Redux state-based queryStatus
@@ -165,17 +147,18 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   }, [data.indexPatterns, data.query]);
 
   useEffect(() => {
+    // capitalize first letter
+    const flavorPrefix = flavorId ? `${flavorId[0].toUpperCase()}${flavorId.slice(1)}/ ` : '';
     setScreenTitle(
-      savedExplore?.title ||
-        i18n.translate('explore.discover.savedSearch.newTitle', {
-          defaultMessage: 'New search',
-        })
+      flavorPrefix +
+        (savedExplore?.title ||
+          i18n.translate('explore.discover.savedSearch.newTitle', {
+            defaultMessage: 'New search',
+          }))
     );
-  }, [savedExplore?.title]);
+  }, [flavorId, savedExplore?.title]);
 
-  const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
-    indexPattern,
-  ]);
+  const showDatePicker = useMemo(() => indexPattern?.isTimeBased() ?? false, [indexPattern]);
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     dispatch(setSavedQuery(newSavedQueryId));
@@ -188,16 +171,13 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
       data={data}
       showSearchBar={false}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
-      showSaveQuery={showSaveQuery}
+      showSaveQuery={true}
       useDefaultBehaviors
-      setMenuMountPoint={opts.setHeaderActionMenu}
+      setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
-      onQuerySubmit={opts.onQuerySubmit}
       savedQueryId={savedQueryId}
       onSavedQueryIdChange={updateSavedQueryId}
-      datasetSelectorRef={opts?.optionalRef?.datasetSelectorRef}
-      datePickerRef={opts?.optionalRef?.datePickerRef}
-      groupActions={showActionsInGroup}
+      groupActions={true}
       screenTitle={screenTitle}
       queryStatus={queryStatus}
       showQueryBar={false}

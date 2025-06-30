@@ -110,6 +110,8 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1.5,
         run: () => {
+          // Close autocomplete if open
+          editor.trigger('keyboard', 'hideSuggestWidget', {});
           const val = editor.getValue();
           onRun(val);
           onEdit();
@@ -218,10 +220,9 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         className={`${editorClassPrefix} ${isReadOnly ? `${editorClassPrefix}--readonly` : ''} ${
           editorIsFocused && !isReadOnly ? `${editorClassPrefix}--focused` : ''
         }`}
-        data-test-subj={`explore${editorClassPrefix}__multiLine`}
+        data-test-subj="exploreReusableEditor"
       >
         <CodeEditor
-          key={editorType}
           height={editorHeight}
           languageId={editorConfig.languageId}
           value={value}
@@ -230,6 +231,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
           options={editorConfig.options}
           languageConfiguration={editorConfig.languageConfiguration}
           triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
+          useLatestTheme={true}
           suggestionProvider={{
             triggerCharacters: [' '],
             provideCompletionItems: async (model, position, context, token) => {

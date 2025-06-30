@@ -5,10 +5,8 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { ExploreFlavor } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { SavedExplore } from '../../../../../../saved_explore';
-import { Adapters } from '../../../../../../../../inspector/public';
 import { TopNavMenuData, TopNavMenuIconData } from '../../../../../../../../navigation/public';
 import { ISearchSource, unhashUrl } from '../../../opensearch_dashboards_services';
 import {
@@ -21,10 +19,7 @@ import {
   OpenSearchDashboardsContextProvider,
   toMountPoint,
 } from '../../../../../../../../opensearch_dashboards_react/public';
-import {
-  LegacyState,
-  setSavedSearch,
-} from '../../../../../utils/state_management/slices/legacy_slice';
+import { LegacyState, setSavedSearch } from '../../../../../utils/state_management/slices';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -32,13 +27,13 @@ import {
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { OpenSearchPanel } from './open_search_panel';
-import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
+import { ExecutionContextSearch } from '../../../../../../../../expressions';
 import { IndexPattern } from '../../../../../../../../data/public';
 import { Query } from '../../../../../../../../data/public';
+import { resetExploreStateActionCreator } from '../../../../../utils/state_management/actions/reset_explore_state';
 
 export const getTopNavLinks = (
   services: ExploreServices,
-  inspectorAdapters: Adapters,
   startSyncingQueryStateWithUrl: () => void,
   searchContext: ExecutionContextSearch,
   indexPattern: IndexPattern | undefined,
@@ -46,7 +41,6 @@ export const getTopNavLinks = (
 ) => {
   const {
     history,
-    inspector,
     core,
     capabilities,
     share,
@@ -64,12 +58,7 @@ export const getTopNavLinks = (
       defaultMessage: 'New',
     }),
     run() {
-      core.application.navigateToApp('explore', {
-        path: `${ExploreFlavor.Logs}#/`,
-      });
-      // TODO this behavior is different from Discover. Clicking New in Explore
-      // only closes the saved search and does not change the query.
-      store!.dispatch(setSavedSearch(undefined));
+      store.dispatch(resetExploreStateActionCreator(services));
     },
     testId: 'discoverNewButton',
     ariaLabel: i18n.translate('explore.discover.topNav.discoverNewButtonLabel', {
@@ -133,8 +122,11 @@ export const getTopNavLinks = (
             onTitleDuplicate,
           };
 
+          // TODO: remove legacy state once data flow is migrated
           // @ts-expect-error TODO: Fix me
-          const state: LegacyState = store!.getState().legacy; // store is defined before the view is loaded
+          const state: LegacyState = store.getState().legacy; // store is defined before the view is loaded
+          savedExplore.columns = state.columns;
+          savedExplore.sort = state.sort;
 
           // Use transform approach similar to vis_builder - serialize state into saved object
           const { updateLegacyPropertiesInSavedObject } = await import(
@@ -176,7 +168,7 @@ export const getTopNavLinks = (
               }
 
               // set App state to clean
-              store!.dispatch(setSavedSearch(id));
+              store.dispatch(setSavedSearch(id));
 
               // starts syncing `_g` portion of url with query services
               startSyncingQueryStateWithUrl();
@@ -239,7 +231,7 @@ export const getTopNavLinks = (
       run: async (anchorElement) => {
         if (!savedExplore) return;
         // @ts-expect-error TODO: Fix me
-        const state: LegacyState = store!.getState().legacy; // store is defined before the view is loaded
+        const state: LegacyState = store.getState().legacy; // store is defined before the view is loaded
         const sharingData = await getSharingData({
           searchSource: savedExplore.searchSource,
           state,
@@ -265,26 +257,8 @@ export const getTopNavLinks = (
     topNavLinksMap.set('share', shareSearch);
   }
 
-  const inspectSearch: TopNavMenuIconData = {
-    tooltip: i18n.translate('explore.explore.discover.localMenu.inspectTitle', {
-      defaultMessage: 'Inspect',
-    }),
-    testId: 'openInspectorButton',
-    ariaLabel: i18n.translate('explore.explore.discover.topNav.discoverInspectorButtonLabel', {
-      defaultMessage: `Open Inspector for search`,
-    }),
-    run() {
-      inspector.open(inspectorAdapters, {
-        title: savedExplore?.title || undefined,
-      });
-    },
-    iconType: 'inspect',
-    controlType: 'icon',
-  };
-  topNavLinksMap.set('inspect', inspectSearch);
-
   // Order their appearance
-  return ['save', 'open', 'new', 'inspect', 'share'].reduce((acc, item) => {
+  return ['save', 'open', 'new', 'share'].reduce((acc, item) => {
     const itemDef = topNavLinksMap.get(item);
     if (itemDef) {
       acc.push(itemDef);

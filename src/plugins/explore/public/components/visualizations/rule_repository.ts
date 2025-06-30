@@ -35,6 +35,7 @@ import {
   createGroupedTimeBarChart,
   createFacetedTimeBarChart,
 } from './bar/to_expression';
+import { CHART_METADATA } from './constants';
 
 // The file contains visualization rules for different scenarios solely based on the number of metrics, categories, and dates fields.
 // Each rule can be mapped to multiple chart types with different priorities.
@@ -47,10 +48,11 @@ const oneMetricOneDateRule: VisualizationRule = {
   description: 'Time series visualization for single metric',
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && date.length === 1 && categorical.length === 0,
+  matchIndex: [1, 0, 1],
   chartTypes: [
-    { type: 'line', priority: 100, name: 'Line Chart' },
-    { type: 'area', priority: 80, name: 'Area Chart' },
-    { type: 'bar', priority: 60, name: 'Bar Chart' },
+    { ...CHART_METADATA.line, priority: 100 },
+    { ...CHART_METADATA.area, priority: 80 },
+    { ...CHART_METADATA.bar, priority: 60 },
   ],
   toExpression: (
     transformedData,
@@ -81,7 +83,8 @@ const twoMetricOneDateRule: VisualizationRule = {
   description: 'Time series visualization for double metrics',
   matches: (numerical, categorical, date) =>
     numerical.length === 2 && categorical.length === 0 && date.length === 1,
-  chartTypes: [{ type: 'line', priority: 100, name: 'Line Chart' }],
+  chartTypes: [{ ...CHART_METADATA.line, priority: 100 }],
+  matchIndex: [2, 0, 1],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -107,10 +110,11 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
   description: 'Time series visualization with one metric and one category',
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && categorical.length === 1 && date.length === 1,
+  matchIndex: [1, 1, 1],
   chartTypes: [
-    { type: 'line', priority: 100, name: 'Line Chart' },
-    { type: 'area', priority: 80, name: 'Area Chart' },
-    { type: 'bar', priority: 60, name: 'Bar Chart' },
+    { ...CHART_METADATA.line, priority: 100 },
+    { ...CHART_METADATA.area, priority: 80 },
+    { ...CHART_METADATA.bar, priority: 60 },
   ],
   toExpression: (
     transformedData,
@@ -165,10 +169,11 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
   description: 'Multiple time series visualizations',
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && categorical.length === 2 && date.length === 1,
+  matchIndex: [1, 2, 1],
   chartTypes: [
-    { type: 'line', priority: 100, name: 'Line Chart' },
-    { type: 'area', priority: 80, name: 'Area Chart' },
-    { type: 'bar', priority: 60, name: 'Bar Chart' },
+    { ...CHART_METADATA.line, priority: 100 },
+    { ...CHART_METADATA.area, priority: 80 },
+    { ...CHART_METADATA.bar, priority: 60 },
   ],
   toExpression: (
     transformedData,
@@ -222,7 +227,8 @@ const threeMetricsRule: VisualizationRule = {
   description: 'Heatmap with bin for three metric',
   matches: (numerical, categorical, date) =>
     numerical.length === 3 && date.length === 0 && categorical.length === 0,
-  chartTypes: [{ type: 'heatmap', priority: 100, name: 'Heatmap' }],
+  chartTypes: [{ ...CHART_METADATA.heatmap, priority: 100 }],
+  matchIndex: [3, 0, 0],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -246,10 +252,11 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
     (numerical[0].uniqueValuesCount >= 7 ||
       categorical[0].uniqueValuesCount >= 7 ||
       categorical[1].uniqueValuesCount >= 7),
+  matchIndex: [1, 2, 0],
   chartTypes: [
-    { type: 'heatmap', priority: 100, name: 'Heatmap' },
-    { type: 'bar', priority: 80, name: 'Bar Chart' },
-    { type: 'area', priority: 60, name: 'Area Chart' },
+    { ...CHART_METADATA.heatmap, priority: 100 },
+    { ...CHART_METADATA.bar, priority: 80 },
+    { ...CHART_METADATA.area, priority: 60 },
   ],
   toExpression: (
     transformedData,
@@ -295,10 +302,11 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
     numerical[0].uniqueValuesCount < 7 &&
     categorical[0].uniqueValuesCount < 7 &&
     categorical[1].uniqueValuesCount < 7,
+  matchIndex: [1, 2, 0],
   chartTypes: [
-    { type: 'bar', priority: 100, name: 'Bar Chart' },
-    { type: 'heatmap', priority: 80, name: 'Heatmap' },
-    { type: 'area', priority: 60, name: 'Area Chart' },
+    { ...CHART_METADATA.bar, priority: 100 },
+    { ...CHART_METADATA.heatmap, priority: 80 },
+    { ...CHART_METADATA.area, priority: 60 },
   ],
   toExpression: (
     transformedData,
@@ -339,11 +347,12 @@ const oneMetricOneCateRule: VisualizationRule = {
   description: 'Multiple visualizations for one metric and one category',
   matches: (numerical, categorical, date) =>
     numerical.length === 1 && date.length === 0 && categorical.length === 1,
+  matchIndex: [1, 1, 0],
   chartTypes: [
-    { type: 'bar', priority: 100, name: 'Bar Chart' },
-    { type: 'pie', priority: 80, name: 'Pie Chart' },
-    { type: 'line', priority: 60, name: 'Line Chart' },
-    { type: 'area', priority: 40, name: 'Area Chart' },
+    { ...CHART_METADATA.bar, priority: 100 },
+    { ...CHART_METADATA.pie, priority: 80 },
+    { ...CHART_METADATA.line, priority: 60 },
+    { ...CHART_METADATA.area, priority: 40 },
   ],
   toExpression: (
     transformedData,
@@ -407,7 +416,8 @@ const oneMetricRule: VisualizationRule = {
     date.length === 0 &&
     categorical.length === 0 &&
     numerical[0].validValuesCount === 1,
-  chartTypes: [{ type: 'metric', priority: 100, name: 'metric' }],
+  chartTypes: [{ ...CHART_METADATA.metric, priority: 100 }],
+  matchIndex: [1, 0, 0],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -432,7 +442,8 @@ const twoMetricRule: VisualizationRule = {
   description: 'Scatter for two metric',
   matches: (numerical, categorical, date) =>
     numerical.length === 2 && date.length === 0 && categorical.length === 0,
-  chartTypes: [{ type: 'scatter', priority: 100, name: 'scatter' }],
+  chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
+  matchIndex: [2, 0, 0],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -457,7 +468,8 @@ const twoMetricOneCateRule: VisualizationRule = {
   description: 'Scatter for two metric and one category',
   matches: (numerical, categorical, date) =>
     numerical.length === 2 && date.length === 0 && categorical.length === 1,
-  chartTypes: [{ type: 'scatter', priority: 100, name: 'scatter' }],
+  chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
+  matchIndex: [2, 1, 0],
   toExpression: (
     transformedData,
     numericalColumns,
@@ -482,7 +494,8 @@ const threeMetricOneCateRule: VisualizationRule = {
   description: 'Scatter for three metric and one category',
   matches: (numerical, categorical, date) =>
     numerical.length === 3 && date.length === 0 && categorical.length === 1,
-  chartTypes: [{ type: 'scatter', priority: 100, name: 'scatter' }],
+  chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
+  matchIndex: [3, 1, 0],
   toExpression: (
     transformedData,
     numericalColumns,

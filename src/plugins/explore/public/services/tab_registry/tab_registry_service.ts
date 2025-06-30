@@ -29,8 +29,8 @@ export interface TabDefinition {
   // Language-aware query handling
   supportedLanguages: string[];
 
-  // Transform complete query object instead of just string (now optional)
-  prepareQuery?: (query: Query) => Query;
+  // Transform query string for cache key generation
+  prepareQuery?: (queryString: string) => string;
 
   // Optional results processor for raw results
   resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;

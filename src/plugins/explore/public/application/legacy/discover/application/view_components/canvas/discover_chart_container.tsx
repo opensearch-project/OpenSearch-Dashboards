@@ -10,7 +10,10 @@ import { ExploreServices } from '../../../../../../types';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DiscoverChart } from '../../components/chart/chart';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
-import { histogramResultsProcessor } from '../../../../../utils/state_management/actions/query_actions';
+import {
+  histogramResultsProcessor,
+  defaultPrepareQuery,
+} from '../../../../../utils/state_management/actions/query_actions';
 import { RootState } from '../../../../../utils/state_management/store';
 
 export const DiscoverChartContainer = () => {
@@ -18,11 +21,16 @@ export const DiscoverChartContainer = () => {
   const { uiSettings, data } = services;
 
   const { interval } = useSelector((state: RootState) => state.legacy);
-  const executionCacheKeys = useSelector((state: RootState) => state.ui?.executionCacheKeys || []);
+  const query = useSelector((state: RootState) => state.query);
+  const results = useSelector((state: RootState) => state.results);
 
-  // Get the first cache key for histogram data (or could be made configurable)
-  const cacheKey = executionCacheKeys.length > 0 ? executionCacheKeys[0] : '';
-  const rawResults = useSelector((state: RootState) => (cacheKey ? state.results[cacheKey] : null));
+  // Use default cache key computation for histogram data
+  const cacheKey = useMemo(() => {
+    const queryString = typeof query.query === 'string' ? query.query : '';
+    return defaultPrepareQuery(queryString);
+  }, [query]);
+
+  const rawResults = cacheKey ? results[cacheKey] : null;
 
   // Get IndexPattern from centralized context
   const { indexPattern } = useIndexPatternContext();

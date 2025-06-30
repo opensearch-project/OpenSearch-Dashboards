@@ -4,12 +4,20 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { discoverPluginMock } from '../../legacy/discover/mocks';
+import {
+  resultsInitialState,
+  ISearchResult,
+  resultsReducer,
+  setShowDatasetFields,
+  uiInitialState,
+  uiReducer,
+} from '../../utils/state_management/slices';
 import { ResultStatus } from '../../utils/state_management/types';
 import { TracesPage } from './traces_page';
 
@@ -111,21 +119,28 @@ describe('TracesPage', () => {
     rows: OpenSearchSearchHit[] = [],
     fieldSchema: any[] = []
   ) => {
+    const preloadedState = {
+      ui: {
+        ...uiInitialState,
+        status,
+        executionCacheKeys: ['test-cache-key'],
+        showDatasetFields: true,
+      },
+      results: {
+        ...resultsInitialState,
+        'test-cache-key': {
+          hits: { hits: rows },
+          fieldSchema,
+        } as ISearchResult,
+      },
+    };
+
     return configureStore({
       reducer: {
-        ui: () => ({
-          status,
-          executionCacheKeys: ['test-cache-key'],
-        }),
-        results: () => ({
-          'test-cache-key': {
-            hits: {
-              hits: rows,
-            },
-            fieldSchema,
-          },
-        }),
+        ui: uiReducer,
+        results: resultsReducer,
       },
+      preloadedState,
     });
   };
 
@@ -266,5 +281,21 @@ describe('TracesPage', () => {
     );
 
     expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
+  });
+
+  it('hide/show fields selector panel correctly', async () => {
+    const store = createTestStore();
+    render(
+      <Provider store={store}>
+        <TracesPage />
+      </Provider>
+    );
+
+    expect(screen.getByTestId('dscBottomLeftCanvas')).toBeVisible();
+
+    store.dispatch(setShowDatasetFields(false));
+    await waitFor(() => {
+      expect(screen.getByTestId('dscBottomLeftCanvas')).not.toBeVisible();
+    });
   });
 });

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { monaco } from '@osd/monaco';
 import { getEditorConfig } from './shared';
@@ -31,7 +31,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   onClearEditor,
   provideCompletionItems,
 }) => {
-  const editorConfig = getEditorConfig(languageType);
+  const editorConfig = useMemo(() => getEditorConfig(languageType), [languageType]);
 
   const onEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     // Optionally, you can add more editor setup logic here

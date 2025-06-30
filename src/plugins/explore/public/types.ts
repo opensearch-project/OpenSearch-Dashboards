@@ -12,6 +12,7 @@ import {
   ToastsStart,
   IUiSettingsClient,
 } from 'opensearch-dashboards/public';
+import { BehaviorSubject } from 'rxjs';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import {
   DataPublicPluginSetup,
@@ -22,7 +23,7 @@ import {
 } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
+import { RequestAdapter, Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import {
   OpenSearchDashboardsLegacySetup,
   OpenSearchDashboardsLegacyStart,
@@ -39,7 +40,6 @@ import { ScopedHistory } from '../../../core/public';
 import { SavedExploreLoader, SavedExplore } from './saved_explore';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { ReduxStore } from './application/utils/interfaces';
-import { Adapters } from '../../inspector/public';
 
 import {
   VisualizationRegistryService,
@@ -59,6 +59,7 @@ export interface ExplorePluginSetup {
   docViewsLinks: {
     addDocViewLink: (docViewLinkSpec: unknown) => void;
   };
+  isSummaryAgentAvailable$: BehaviorSubject<boolean>;
 }
 
 export interface ExplorePluginStart {
@@ -128,7 +129,9 @@ export interface ExploreServices {
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract; // Direct access for convenience (same as data.indexPatterns)
   inspector: InspectorPublicPluginStart;
-  inspectorAdapters: Adapters;
+  inspectorAdapters: {
+    requests: RequestAdapter;
+  };
   metadata: { branch: string };
   navigation: NavigationStart;
   share?: SharePluginStart;
@@ -136,7 +139,7 @@ export interface ExploreServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedExploreById: (id?: string) => Promise<SavedExplore | undefined>;
+  getSavedExploreById: (id?: string) => Promise<SavedExplore>;
   getSavedExploreUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
@@ -151,7 +154,7 @@ export interface ExploreServices {
   overlays: CoreStart['overlays'];
 
   // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
-  store?: ReduxStore; // Redux store
+  store: ReduxStore; // Redux store
   viewRegistry?: Record<string, unknown>; // ViewServiceStart - will be replaced with tabRegistry
   embeddable: EmbeddableStart; // EmbeddableStart
   scopedHistory?: ScopedHistory; // ScopedHistory
@@ -161,4 +164,7 @@ export interface ExploreServices {
   tabRegistry: TabRegistryService;
   visualizationRegistry: VisualizationRegistryService;
   expressions: ExpressionsStart;
+
+  // For results summary
+  isSummaryAgentAvailable$: BehaviorSubject<boolean>;
 }

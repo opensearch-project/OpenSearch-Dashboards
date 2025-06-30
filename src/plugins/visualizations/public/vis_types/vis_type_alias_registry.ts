@@ -72,6 +72,7 @@ export interface VisTypeAlias {
   description: string;
   getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   stage: 'experimental' | 'beta' | 'production';
+  hidden?: boolean;
 
   appExtensions?: {
     visualizations: VisualizationsAppExtension;
@@ -84,6 +85,7 @@ const registry: VisTypeAlias[] = [];
 interface VisTypeAliasRegistry {
   get: () => VisTypeAlias[];
   add: (newVisTypeAlias: VisTypeAlias) => void;
+  hideTypes: (types: string[]) => void;
 }
 
 export const visTypeAliasRegistry: VisTypeAliasRegistry = {
@@ -93,5 +95,12 @@ export const visTypeAliasRegistry: VisTypeAliasRegistry = {
       throw new Error(`${newVisTypeAlias.name} already registered`);
     }
     registry.push(newVisTypeAlias);
+  },
+  hideTypes: (types: string[]) => {
+    for (const typeAlia of registry) {
+      if (types.includes(typeAlia.name)) {
+        typeAlia.hidden = true;
+      }
+    }
   },
 };
