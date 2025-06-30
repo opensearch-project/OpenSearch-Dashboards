@@ -14,8 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiTitle,
-  EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
 import { ThresholdLine, ThresholdLineStyle } from '../types';

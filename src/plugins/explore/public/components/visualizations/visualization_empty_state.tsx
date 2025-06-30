@@ -23,6 +23,7 @@ import { VisColumn, VisFieldType, VisualizationRule } from './types';
 import {
   ChartType,
   useVisualizationRegistry,
+  VisualizationType,
   VisualizationTypeResult,
 } from './utils/use_visualization_types';
 import { setChartType, setStyleOptions } from '../../application/utils/state_management/slices';
@@ -69,7 +70,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
   const visualizationRegistry = useVisualizationRegistry();
 
   // Keep the original columns that get form the search because generated new visualization will
-  // modifiy the columns in visualization data
+  // modify the columns in visualization data
   const originalVisualizationData = useRef(visualizationData);
 
   // Indicates no rule is matched and the user should manually generate the visualization
@@ -212,18 +213,20 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
         const visualizationType = visualizationRegistry.getVisualizationConfig(
           currChartTypeOption?.value!
         );
-        dispatch(setStyleOptions(visualizationType.ui.style.defaults));
-        dispatch(setChartType(visualizationType.type));
+        if (visualizationType) {
+          dispatch(setStyleOptions(visualizationType.ui.style.defaults));
+          dispatch(setChartType(visualizationType.type));
 
-        setVisualizationData({
-          ...originalVisualizationData.current,
-          numericalColumns: fieldsSelection.numerical,
-          categoricalColumns: fieldsSelection.categorical,
-          dateColumns: fieldsSelection.date,
-          ruleId: ruleToUse.id,
-          visualizationType,
-          toExpression: ruleToUse.toExpression,
-        });
+          setVisualizationData({
+            ...originalVisualizationData.current,
+            numericalColumns: fieldsSelection.numerical,
+            categoricalColumns: fieldsSelection.categorical,
+            dateColumns: fieldsSelection.date,
+            ruleId: ruleToUse.id,
+            visualizationType: visualizationType as VisualizationType<ChartType>,
+            toExpression: ruleToUse.toExpression,
+          });
+        }
       }
     }
   }, [
@@ -259,7 +262,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     );
   }, [availableRules]);
 
-  // Max number of the remainig possible selection for each field types base on current fields selection
+  // Max number of the remaining possible selection for each field types base on current fields selection
   const matchIndexDifference = useMemo(() => {
     const [maxNum, maxCat, maxDate] = maxMatchIndex;
     const [currNum, currCat, currDate] = currFieldsCountByType;
@@ -278,10 +281,10 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
   };
 
   useEffect(() => {
-    // Listern to the change of chart type, which will triggers maxMatchIndex chagnes
+    // Listen to the change of chart type, which will triggers maxMatchIndex changes
     maxMatchIndex.forEach((max, index) => {
       if (max < currFieldsCountByType[index]) {
-        // Reset the fields selection when current selected fields are not suport with the
+        // Reset the fields selection when current selected fields are not support with the
         // chart type that the user just changed
         setFieldsSelection({
           numerical: [],
@@ -401,7 +404,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                                   <EuiSelect
                                     value={selectedColumn.name}
                                     options={allColumnOptions[index].filter(
-                                      // Filter out the fields already selected but keet the current one
+                                      // Filter out the fields already selected but keep the current one
                                       (col) => {
                                         const isCurrentColumn =
                                           col.column.name === selectedColumn.name;

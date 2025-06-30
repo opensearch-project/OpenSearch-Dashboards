@@ -19,7 +19,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
 
-export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar' | 'area' | 'logs';
+export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar' | 'area';
 
 export interface ChartStyleControlMap {
   line: LineChartStyleControls;
@@ -31,7 +31,7 @@ export interface ChartStyleControlMap {
   area: AreaChartStyleControls;
   // NOTE: Log table does not have style controls.
   // log is one of chart types?
-  logs: {};
+  // logs: {};
 }
 
 export type AllChartStyleControls =
@@ -120,7 +120,7 @@ export const getVisualizationType = <T = unknown>(
   rows?: Array<OpenSearchSearchHit<T>>,
   fieldSchema?: Array<Partial<IFieldType>>,
   registry = visualizationRegistry
-) => {
+): VisualizationTypeResult<ChartType> | undefined => {
   if (!fieldSchema || !rows) {
     return;
   }
@@ -160,7 +160,7 @@ export const getVisualizationType = <T = unknown>(
   return {
     ...registry.getVisualizationType(fieldStats),
     transformedData,
-  };
+  } as VisualizationTypeResult<ChartType>;
 };
 
 /**
