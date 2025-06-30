@@ -78,8 +78,14 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
       if (timefilter) {
         timefilter.setTime(newTimeRange);
       }
+
+      // EXPLICIT cache clear - same pattern as other triggers
+      dispatch(clearResults());
+
+      // Execute queries - interval will be picked up from Redux state
+      dispatch(executeQueries({ services }));
     },
-    [timefilter]
+    [timefilter, dispatch, services]
   );
 
   const handleRefreshChange = useCallback(

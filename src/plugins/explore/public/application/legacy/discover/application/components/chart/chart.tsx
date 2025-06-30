@@ -61,8 +61,14 @@ export const DiscoverChart = ({
         to: moment(ranges.to).toISOString(),
         mode: 'absolute',
       });
+
+      // EXPLICIT cache clear - same pattern as other triggers
+      dispatch(clearResults());
+
+      // Execute queries - interval will be picked up from Redux state
+      dispatch(executeQueries({ services }));
     },
-    [data]
+    [data, dispatch, services]
   );
   const [isCollapsed, setIsCollapsed] = useState(false);
 
