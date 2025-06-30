@@ -4,7 +4,7 @@
  */
 import './visualization_container.scss';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { Visualization } from './visualization';
@@ -15,6 +15,7 @@ import {
   ChartStyleControlMap,
   VisualizationTypeResult,
   VisualizationType,
+  AllChartStyleControls,
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
@@ -25,14 +26,28 @@ import { ExploreServices } from '../../types';
 import {
   setStyleOptions,
   setChartType as setSelectedChartType,
+  setFieldNames,
 } from '../../application/utils/state_management/slices';
 import {
   selectStyleOptions,
   selectChartType,
+  selectFieldNames,
 } from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
+
+interface SelectedFieldNames {
+  categorical: string[];
+  date: string[];
+  numerical: string[];
+}
+
+export interface UpdateVisualizationProps {
+  styleDefaults: AllChartStyleControls;
+  rule: string;
+  fields: SelectedFieldNames;
+}
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -51,7 +66,21 @@ export const VisualizationContainer = () => {
   const rows = useMemo(() => results?.hits?.hits || [], [results]);
   const styleOptions = useSelector(selectStyleOptions);
   const selectedChartType = useSelector(selectChartType);
+  const selectedFields = useSelector(selectFieldNames);
   const fieldSchema = useMemo(() => results?.fieldSchema || [], [results]);
+
+  const visualizationRegistry = useVisualizationRegistry();
+
+  const [currentRuleId, setCurrentRuleId] = useState<string | undefined>(undefined);
+
+  const updateVisualization = useCallback(
+    ({ styleDefaults, rule, fields }: UpdateVisualizationProps) => {
+      dispatch(setStyleOptions(styleDefaults));
+      dispatch(setFieldNames(fields));
+      setCurrentRuleId(rule);
+    },
+    [dispatch]
+  );
 
   const [visualizationData, setVisualizationData] = useState<
     VisualizationTypeResult<ChartType> | undefined
@@ -61,16 +90,84 @@ export const VisualizationContainer = () => {
     if (fieldSchema.length === 0 || rows.length === 0) {
       return;
     }
-    setVisualizationData(getVisualizationType(rows, fieldSchema));
-  }, [fieldSchema, rows]);
+    const currentVisData = getVisualizationType(rows, fieldSchema, visualizationRegistry);
+
+    if (currentVisData) {
+      setVisualizationData(currentVisData);
+
+      const fields = {
+        numerical: currentVisData.numericalColumns?.map((col) => col.name) || [],
+        categorical: currentVisData.categoricalColumns?.map((col) => col.name) || [],
+        date: currentVisData.dateColumns?.map((col) => col.name) || [],
+      };
+
+      if (currentVisData.visualizationType) {
+        // Has rule matched by runing the query - highest priority
+        dispatch(setSelectedChartType(currentVisData.visualizationType.type));
+        updateVisualization({
+          styleDefaults: currentVisData.visualizationType.ui.style.defaults,
+          rule: currentVisData.ruleId!,
+          fields,
+        });
+      } else if (selectedChartType) {
+        // trigger render visualization with user-selected chart type and current fields
+        const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
+        if (chartConfig) {
+          const columns = {
+            numerical: currentVisData.numericalColumns
+              ? currentVisData.numericalColumns.filter((col) =>
+                  selectedFields?.numerical?.includes(col.name)
+                )
+              : [],
+            categorical: currentVisData.categoricalColumns
+              ? currentVisData.categoricalColumns.filter((col) =>
+                  selectedFields?.categorical?.includes(col.name)
+                )
+              : [],
+            date: currentVisData.dateColumns
+              ? currentVisData.dateColumns.filter((col) => selectedFields?.date?.includes(col.name))
+              : [],
+          };
+          const matchedRule = visualizationRegistry.findBestMatch(
+            columns.numerical,
+            columns.categorical,
+            columns.date
+          );
+          if (matchedRule && selectedFields) {
+            updateVisualization({
+              styleDefaults: chartConfig.ui.style.defaults,
+              rule: matchedRule.rule.id,
+              fields: selectedFields,
+            });
+          } else {
+            dispatch(
+              setFieldNames({
+                numerical: [],
+                categorical: [],
+                date: [],
+              })
+            );
+          }
+        }
+      } else {
+        dispatch(
+          setFieldNames({
+            numerical: [],
+            categorical: [],
+            date: [],
+          })
+        );
+      }
+    }
+    // TODO figure out why putting updateVisualization in the deps array cause infinite rerender
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fieldSchema, rows, selectedChartType, visualizationRegistry, dispatch]);
 
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: data.query.queryString.getQuery(),
     filters: data.query.filterManager.getFilters(),
     timeRange: data.query.timefilter.timefilter.getTime(),
   });
-
-  const visualizationRegistry = useVisualizationRegistry();
 
   // Initialize selectedChartType and its default styles when visualizationData changes
   useEffect(() => {
@@ -82,13 +179,40 @@ export const VisualizationContainer = () => {
 
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
-    if (!rows || !indexPattern || !visualizationData || !visualizationData.ruleId) {
+    if (
+      !rows ||
+      !indexPattern ||
+      !visualizationData ||
+      !currentRuleId ||
+      !styleOptions ||
+      !selectedFields ||
+      !visualizationData.transformedData
+    ) {
       return null;
     }
 
-    const rule = visualizationRegistry.getRules().find((r) => r.id === visualizationData.ruleId);
+    const rule = visualizationRegistry.getRules().find((r) => r.id === currentRuleId);
 
     if (!rule || !rule.toExpression) {
+      return null;
+    }
+
+    const filteredNumerical = (visualizationData.numericalColumns || []).filter((col) =>
+      selectedFields?.numerical?.includes(col.name)
+    );
+    const filteredCategorical = (visualizationData.categoricalColumns || []).filter((col) =>
+      selectedFields?.categorical?.includes(col.name)
+    );
+    const filteredDate = (visualizationData.dateColumns || []).filter((col) =>
+      selectedFields?.date?.includes(col.name)
+    );
+
+    // Don't generate expression if no fields are selected
+    if (
+      filteredNumerical.length === 0 &&
+      filteredCategorical.length === 0 &&
+      filteredDate.length === 0
+    ) {
       return null;
     }
 
@@ -116,12 +240,13 @@ export const VisualizationContainer = () => {
       indexPattern,
       ruleBasedToExpressionFn,
       visualizationData.transformedData,
-      visualizationData.numericalColumns,
-      visualizationData.categoricalColumns,
-      visualizationData.dateColumns,
+      filteredNumerical,
+      filteredCategorical,
+      filteredDate,
       styleOptions ?? {}
     );
   }, [
+    selectedFields,
     searchContext,
     rows,
     indexPattern,
@@ -129,6 +254,7 @@ export const VisualizationContainer = () => {
     visualizationData,
     visualizationRegistry,
     selectedChartType,
+    currentRuleId,
   ]);
 
   // Hook to update the search context whenever the query state changes
@@ -218,7 +344,7 @@ export const VisualizationContainer = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <Visualization<ChartType>
-            expression={expression}
+            expression={expression!}
             searchContext={searchContext}
             styleOptions={styleOptions}
             visualizationData={visualizationData as VisualizationTypeResult<ChartType>}

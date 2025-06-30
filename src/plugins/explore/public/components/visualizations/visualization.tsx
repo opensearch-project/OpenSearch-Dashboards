@@ -12,6 +12,8 @@ import {
   ChartStyleControlMap,
 } from './utils/use_visualization_types';
 import { VisualizationEmptyState } from './visualization_empty_state';
+import { VisColumn } from './types';
+import { UpdateVisualizationProps } from './visualization_container';
 
 export interface VisualizationProps<T extends ChartType> {
   expression: string;
@@ -21,11 +23,16 @@ export interface VisualizationProps<T extends ChartType> {
   onStyleChange: (newOptions: Partial<ChartStyleControlMap[T]>) => void;
   selectedChartType?: string;
   onChartTypeChange?: (chartType: ChartType) => void;
+  selectedFields: {
+    numerical: VisColumn[];
+    categorical: VisColumn[];
+    date: VisColumn[];
+  };
   ReactExpressionRenderer: React.ComponentType<{
     expression: string;
     searchContext: IExpressionLoaderParams['searchContext'];
   }>;
-  setVisualizationData?: (data: VisualizationTypeResult<ChartType> | undefined) => void;
+  updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
 export const Visualization = <T extends ChartType>({
@@ -36,8 +43,9 @@ export const Visualization = <T extends ChartType>({
   onStyleChange,
   selectedChartType,
   onChartTypeChange,
+  selectedFields,
   ReactExpressionRenderer,
-  setVisualizationData,
+  updateVisualization,
 }: VisualizationProps<T>) => {
   if (!visualizationData || !styleOptions || Object.keys(styleOptions).length === 0) {
     return null;
@@ -53,7 +61,7 @@ export const Visualization = <T extends ChartType>({
           className="exploreVisPanel"
         >
           <div className="exploreVisPanel__inner">
-            {visualizationData.visualizationType ? (
+            {expression ? (
               <ReactExpressionRenderer
                 key={JSON.stringify(searchContext) + expression}
                 expression={expression}
@@ -75,7 +83,7 @@ export const Visualization = <T extends ChartType>({
             <EuiFlexGroup direction="column" gutterSize="none">
               <VisualizationEmptyState
                 visualizationData={visualizationData as any}
-                setVisualizationData={setVisualizationData}
+                updateVisualization={updateVisualization}
               />
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -98,9 +106,9 @@ export const Visualization = <T extends ChartType>({
           {visualizationData.visualizationType?.ui.style.render({
             styleOptions,
             onStyleChange,
-            numericalColumns: visualizationData.numericalColumns,
-            categoricalColumns: visualizationData.categoricalColumns,
-            dateColumns: visualizationData.dateColumns,
+            numericalColumns: selectedFields.numerical,
+            categoricalColumns: selectedFields.categorical,
+            dateColumns: selectedFields.date,
             availableChartTypes,
             selectedChartType,
             onChartTypeChange,

@@ -32,6 +32,8 @@ export const saveStateToSavedObject = (
     activeTab: tabDefinition.id,
     chartType: tabState?.visualizations?.chartType ?? 'line',
     params: tabState?.visualizations?.styleOptions ?? {},
+    // If tab is logs, render table in embedded, otherwise render visualization
+    fields: tabState?.visualizations?.fieldNames,
   });
   obj.searchSourceFields = { index: indexPattern };
 

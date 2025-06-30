@@ -89,7 +89,7 @@ export class VisualizationRegistry {
   /**
    * Find the best matching rule and visualization type based on priorities.
    */
-  private findBestMatch(
+  public findBestMatch(
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]

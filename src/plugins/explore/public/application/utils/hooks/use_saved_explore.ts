@@ -7,7 +7,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../types/saved_explore_types';
-
 /**
  * Hook for loading saved explore objects
  */
