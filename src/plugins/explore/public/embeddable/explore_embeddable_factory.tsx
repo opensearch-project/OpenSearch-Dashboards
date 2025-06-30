@@ -78,6 +78,7 @@ export class ExploreEmbeddableFactory
     const services = getServices();
     const filterManager = services.filterManager;
     const url = await services.getSavedExploreUrlById(savedObjectId);
+    // TODO: Finalize this once flavor and view route are implemented
     const editUrl = services.addBasePath(`/app/explorer/discover${url}`);
 
     try {
@@ -86,6 +87,7 @@ export class ExploreEmbeddableFactory
         throw new Error('Saved object not found');
       }
       const indexPattern = savedObject.searchSource.getField('index');
+      const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
       return new ExploreEmbeddableClass(
         {
@@ -98,6 +100,7 @@ export class ExploreEmbeddableFactory
           services,
         },
         input,
+        executeTriggerActions,
         parent
       );
     } catch (e) {

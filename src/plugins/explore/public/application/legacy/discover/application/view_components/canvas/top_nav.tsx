@@ -52,6 +52,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
   const savedExploreIdFromUrl = getSavedExploreIdFromUrl();
 
   const uiState = useNewStateSelector(selectUIState);
+  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
   const savedQueryId = useSelector(selectSavedQuery);
   const isLoading = useSelector((state: RootState) => state.ui.status === ResultStatus.LOADING);
@@ -61,11 +62,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
     filters: filterManager.getFilters(),
     timeRange: timefilter.timefilter.getTime(),
   });
-
-  // Replace savedSearch - use legacy state
-  // const savedSearch = useMemo(() => {
-  //   return legacyState?.savedSearch;
-  // }, [legacyState?.savedSearch]);
 
   // Get IndexPattern from centralized context
   const { indexPattern } = useIndexPatternContext();
@@ -106,9 +102,26 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
       startSyncingQueryStateWithUrl,
       searchContext,
       indexPattern,
-      savedExplore ? saveStateToSavedObject(savedExplore, uiState, indexPattern) : undefined
+      savedExplore
+        ? saveStateToSavedObject(
+            savedExplore,
+            flavorId ?? 'logs',
+            tabDefinition!,
+            uiState,
+            indexPattern
+          )
+        : undefined
     );
-  }, [savedExplore, indexPattern, searchContext, uiState, services, startSyncingQueryStateWithUrl]);
+  }, [
+    savedExplore,
+    indexPattern,
+    searchContext,
+    uiState,
+    services,
+    startSyncingQueryStateWithUrl,
+    flavorId,
+    tabDefinition,
+  ]);
 
   // Replace data$ subscription with Redux state-based queryStatus
   useEffect(() => {
